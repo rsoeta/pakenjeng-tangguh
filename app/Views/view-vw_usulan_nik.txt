@@ -1,0 +1,1 @@
+CREATE VIEW dtks_usulan_view AS SELECT dtks_usulan22.du_id, dtks_usulan22.du_nik FROM dtks_usulan22 WHERE dtks_usulan22.created_at_year = YEAR(NOW()) AND dtks_usulan22.created_at_month = MONTH(NOW());
