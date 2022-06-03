@@ -32,6 +32,8 @@ $routes->setAutoRoute(true);
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
 // $routes->get('/', 'Pages::home');
+
+// AUTH
 // $routes->match(['get', 'post'], 'lockscreen', 'Lockscreen::index', ["filter" => "authfilterdtks"]);
 $routes->match(['get', 'post'], 'login', 'Dtks\Auth::login', ["filter" => "noauthfilterdtks"]);
 // $routes->match(['get', 'post'], 'register', 'Dtks\Auth::register', ["filter" => "noauthfilterdtks"]);
@@ -40,12 +42,13 @@ $routes->get('/', 'Dtks\Pages::home', ["filter" => "noauthfilterdtks"]);
 $routes->get('dashboard', 'Dtks\Pages::home', ["filter" => "noauthfilterdtks"]);
 $routes->get('pages', 'Dtks\Pages::index', ["filter" => "authfilterdtks"]);
 
+// BNBA
 $routes->get('bnba', 'Dtks\Bnba::index', ['filter' => 'authfilterdtks']);
-
 $routes->post('tabel_bnba', 'Dtks\Bnba::tabel_data', ['filter' => 'authfilterdtks']);
 $routes->post('editBnba', 'Dtks\Bnba::formedit', ['filter' => 'authfilterdtks']);
 $routes->post('updatebnba', 'Dtks\Bnba::ajax_update', ['filter' => 'authfilterdtks']);
 
+// VERVAL PBI
 $routes->get('verval', 'Dtks\VeriVali09::index', ["filter" => "authfilterdtks"]);
 $routes->get('verivalipbi', 'Dtks\VervalPbi::index', ["filter" => "authfilterdtks"]);
 $routes->post('tabel_pbi', 'Dtks\VervalPbi::tabel_data', ["filter" => "authfilterdtks"]);
@@ -64,6 +67,8 @@ $routes->post('addpbi', 'Dtks\VervalPbi::save', ["filter" => "authfilterdtks"]);
 // $routes->post('dltUsul', 'Lockscreen::maintenance', ["filter" => "authfilterdtks"]);
 // $routes->post('tabel_data', 'Lockscreen::maintenance', ["filter" => "authfilterdtks"]);
 // $routes->get('expUsulan', 'Lockscreen::maintenance', ["filter" => "authfilterdtks"]);
+
+// USULAN
 $routes->get('usulan', 'Dtks\Usulan22::index', ["filter" => "authfilterdtks"]);
 $routes->post('tmbUsul', 'Dtks\Usulan22::save', ["filter" => "authfilterdtks"]);
 $routes->get('tambah', 'Dtks\Usulan22::formtambah', ["filter" => "authfilterdtks"]);
@@ -73,8 +78,11 @@ $routes->post('dltUsul', 'Dtks\Usulan22::delete', ["filter" => "authfilterdtks"]
 $routes->post('tabel_data', 'Dtks\Usulan22::tabel_data', ["filter" => "authfilterdtks"]);
 $routes->get('expUsulan', 'Dtks\Usulan22::export', ["filter" => "authfilterdtks"]);
 
+
+// WILAYAH
 $routes->post('action', 'Dtks\Wil::action', ["filter" => "authfilterdtks"]);
 
+// KETERANGAN VERVAL PBI
 $routes->get('ketVervalPbi', 'Dtks\VervalPbi::ketVervalPbi', ["filter" => "authfilterdtks"]);
 $routes->post('formTambahKetVvPbi', 'Dtks\VervalPbi::formTambahKetVvPbi', ["filter" => "authfilterdtks"]);
 $routes->post('tmbKetVvPbi', 'Dtks\VervalPbi::tmbKetVvPbi', ["filter" => "authfilterdtks"]);

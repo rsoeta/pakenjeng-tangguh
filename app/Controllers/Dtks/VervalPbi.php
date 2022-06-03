@@ -499,6 +499,7 @@ class VervalPbi extends BaseController
     public function ketVervalPbi()
     {
         $data = [
+            'namaApp' => 'Opr NewDTKS',
             'title' => 'Keterangan Verval PBI',
             'verivali_pbi' => $this->GenModel->getDataVerivaliPbi(),
             'statusRole' => $this->GenModel->getStatusRole(),

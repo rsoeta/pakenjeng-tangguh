@@ -108,7 +108,7 @@
         'processing': true,
         'serverSide': true,
         "ajax": {
-            "url": "<?= site_url('wil/tabel_data'); ?>",
+            "url": "<?= site_url('dtks/wil/tabel_data'); ?>",
             "type": "POST",
             "data": {
                 "csrf_test_name": $('input[name=csrf_test_name]').val()

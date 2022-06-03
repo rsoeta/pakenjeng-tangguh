@@ -261,7 +261,7 @@
                                                 $persentase = 100;
                                             }
                                         }
-                                        echo $persentase <= 95 ? '#' : 'usulan';
+                                        // echo $persentase <= 95 ? '#' : 'usulan';
                                         ?>
                                         " class="small-box-footer">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a>
                                     </div>
@@ -289,7 +289,12 @@
                                                     <div class="inner mt-4">
                                                         <?php foreach ($jmlPerbaikan as $row) {
                                                         } ?>
-                                                        <?php $persentasePerbaikan = ($row['dataCapaianAll'] / $rekapPbi->jml * 100) ?>
+                                                        <?php
+                                                        if ($row['dataCapaianAll'] == 0) {
+                                                            $persentasePerbaikan = 0;
+                                                        } else {
+                                                            $persentasePerbaikan = ($row['dataCapaianAll'] / $rekapPbi->jml * 100);
+                                                        } ?>
                                                         <h6>Persentase</h6>
                                                         <h3><?php echo number_format($persentasePerbaikan, 2); ?>%</h3>
                                                     </div>

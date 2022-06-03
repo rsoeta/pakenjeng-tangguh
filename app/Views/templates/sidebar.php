@@ -51,14 +51,14 @@ $user = session()->get('role_id');
                                 <li class="nav-item">
                                     <a href="
                                 <?php
-                                foreach ($percentages as $row) {
-                                    if (session()->get('kode_desa') == $row['desa_kode']) {
-                                        $persentase = $row['percentage'];
-                                    } else {
-                                        $persentase = 100;
-                                    }
-                                }
-                                echo $persentase <= 50 ? '#' : 'bnba';
+                                // foreach ($percentages as $row) {
+                                //     if (session()->get('kode_desa') == $row['desa_kode']) {
+                                //         $persentase = $row['percentage'];
+                                //     } else {
+                                //         $persentase = 100;
+                                //     }
+                                // }
+                                echo 'bnba';
                                 ?>
                                 " class="nav-link">
                                         <i class="nav-icon fa-fw fa fa-clipboard-list"></i>
@@ -77,7 +77,7 @@ $user = session()->get('role_id');
                                     </a>
                                     <ul class="nav nav-treeview nav-third-level">
                                         <li class="nav-item">
-                                            <a href="/bpnt" class="nav-link">
+                                            <a href="#" class="nav-link">
                                                 <i class="nav-icon fa-fw fas fa-credit-card"></i>
                                                 <p>
                                                     BPNT/SEMBAKO
@@ -89,12 +89,12 @@ $user = session()->get('role_id');
                                 <li class="nav-item">
                                     <a href="
                                 <?php
-                                foreach ($percentages as $row) {
-                                    if (session()->get('kode_desa') == $row['desa_kode']) {
-                                        $persentase = $row['percentage'];
-                                    }
-                                }
-                                echo $persentase <= 50 ? '#' : 'usulan';
+                                // foreach ($percentages as $row) {
+                                //     if (session()->get('kode_desa') == $row['desa_kode']) {
+                                //         $persentase = $row['percentage'];
+                                //     }
+                                // }
+                                echo 'usulan';
                                 ?>
                                 " class="nav-link">
                                         <i class="nav-icon fa-fw fas fa-upload"></i>

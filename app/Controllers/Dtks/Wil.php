@@ -7,6 +7,8 @@ use App\Controllers\BaseController;
 use App\Models\WilayahModel;
 use App\Models\RwModel;
 use App\Models\RtModel;
+use App\Models\GenModel;
+
 use CodeIgniter\Config\Services;
 // use Config\Services;
 
@@ -17,15 +19,19 @@ class Wil extends BaseController
         $this->db = db_connect();
         $this->rw = new RwModel();
         $this->rt = new RtModel();
+        $this->GenModel = new GenModel();
     }
 
     public function index()
     {
         $wilayah = new WilayahModel();
         $data = [
+            'namaApp' => 'Opr NewDTKS',
             'title' => 'Data Wilayah',
             // 'wilayah' => $wilayah->findAll(),
-            'provinsi' => $wilayah->getProv(),
+            'provinsi' => $wilayah->getProv()->getResultArray(),
+            'statusRole' => $this->GenModel->getStatusRole(),
+
         ];
 
         return view('wil/index', $data);
