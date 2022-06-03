@@ -1,0 +1,46 @@
+
+HAL HAL YANG PERLU DIPERHATIKAN KETIKA PENGISIAN PENGAJUAN DTKS MENGGUNAKAN TEMPLATE EXCELL 2022 VER.4 
+
+1.Pastikan menggunakan data kependudukan terbaru dan sudah memiliki E - KTP dan KIA yang VALID (untuk anak usia 0 sampai 17 tahun);
+
+2.Aturan Pengusulan: - Untuk pengusulan baru (seluruh anggota keluarga belum sama sekali masuk dalam DTKS) didaftarkan seluruh anggota keluarganya, lalu dimasukan dalam template Excell yang program bansosnya di sesuaikan, contoh: IBU dengan Program BANSOS BPNT > Dimasukan pada file pengajuan BPNT, Anak dengan Program Bansos PBI atau NONBANSOS > Dimasukan pada file PBI atau NON BANSOS;
+  - Untuk penambahan anggota keluarga, yang diusulkan hanya anggota keluarga yang belum masuk DTKS saja;
+  - Untuk pengusulan Bansos yang sudah terdaftar DTKS hanya pengurus rumah tangga saja yang didaftarkan (BPNT / PKH) Karena Program Bansos Tersebut 1 Kartu Keluarga 1 Program BANSOS.- Untuk Program BANSOS PBI dapat diusulkannya perorangan dalam satu Kartu Keluarga (Terhitung perjiwa dalam satu Kartu Keluarga);
+  - Setiap pengusulan proragam BANSOS harap dipisahkan filenya dan diberi nama file sebagai berikut: Apabila pengiriman dari desa / kelurahan: 
+  ➢ TEMPLATE_PENGUSULAN_NAMA KECAMATAN – NAMA DESA - BPNT.xlsx 
+  ➢ TEMPLATE_PENGUSULAN_NAMA KECAMATAN – NAMA DESA - PKH.xlsx 
+  ➢ TEMPLATE_PENGUSULAN_NAMA KECAMATAN – NAMA DESA - PBI.xlsx 
+  ➢ TEMPLATE_PENGUSULAN_NAMA KECAMATAN – NAMA DESA - NONBANSOS.xlsx 
+  ➢ TEMPLATE_PENGUSULAN_NAMA KECAMATAN – NAMA DESA - DISABILITAS.xlsx 
+  Apabila Pengiriman dikumpulkan dan disatukan menjadi satu kecamatan: 
+  ➢ TEMPLATE_PENGUSULAN_NAMA KECAMATAN - BPNT.xlsx 
+  ➢ TEMPLATE_PENGUSULAN_NAMA KECAMATAN - PKH.xlsx 
+  ➢ TEMPLATE_PENGUSULAN_NAMA KECAMATAN - NONBANSOS.xlsx 
+  ➢ TEMPLATE_PENGUSULAN_NAMA KECAMATAN - DISABILITAS.xlsx #Keterangan : Huruf yang ditebalkan harap dihapus dan di ganti dengan nama daerah pengusul
+
+3.Untuk Kolom Disabilitas apabila Status Disabilitas “ YA ”, Maka Masukan Kode Jenis Disabilitas Sebagai Berikut: Kode Disabilitas Keterangan PDFSK Penyandang Disabilitas Fisik PDINT Penyandang Disabilitas Intelektual PDMTL Penyandang Disabilitas Mental PDSNS Penyandang Disabilitas Sensorik Apabila Disabilitas “ TIDAK ”, Maka Kode Disabilitas Dikosongkan (Tidak Diisi);
+
+4.Untuk Kolom Ibu Hamil apabila status Ibu Hamil “ YA ”, Masukan tanggal awal kehamilannya, apabila status Ibu Hamil “ TIDAK ”, Silakan Tanggalnya Dikosongkan (Tidak Diisi);
+
+5.Penulisan pada kolom NIK & KK wajib 16 digit, tidak kurang dan tidak lebih dan pastikan sesuai dengan data kependudukan yang bersangkutan;
+
+6.Penulisan tanggal sesuaikan dengan format (hari / bulan / tahun) contoh (21 / 12 / 1997);
+
+7.Penulisan nama tidak diperkenankan menggunakan karakter sebagai berikut: Kutip (“ ‘) koma (,) Titik (.) Garis Miring (/) dan tidak diperkenankan menggunakan gelar di bagian depan, terkecuali dalam penulisan KTP dan KK menggunakan karakter demikian;
+
+8.Setiap daerah hanya dapat mengirimkan 1 file usulan program BANSOS dalam satu periode (Satu Bulan),
+apabila dalam satu periode mengusulkan lebih dari satu usulan program BANSOS yang sama,
+secata otomatis usulan sebelumnya akan tertimpa dan dinyatakan tidak valid (tidak sah oleh sistem);
+
+9.Satu orang atau satu KK hanya dapat mendaftarkan 1 program Bansos pada satu Periode pengusulan (Satu Bulan), apabila orang tersebut didaftarkan lebih dari satu bansos dalam satu periode (meskipun berbeda template), secara otomatis usulan bansos sebelumnya akan tertimpa dan tidak valid (tidak sah oleh sistem);
+
+10.Apabila pengiriman lebih dari satu Desa / Kelurahan, file tersebut dapat digabungkan menjadi satu file usulan kecamatan untuk mempercepat proses usulan (  Penamaan file disesuaikan seperti pada nomor 2 point 5);
+
+11.Saat pengiriman data, dilampirkan juga berita acara Pengusulan data;
+
+12.Apabila pengumpulan data dan input data telah selesai, berkas dikirimkan melalui email: pengusulangarut@gmail.com dengan ketentuan sebagai berikut: 
+  - Setiap ajuan yang terkirim akan kami cek terlebih dahulu, apabila datanya telah sesuai akan kami ajukan langsung, namun bilamana data tersebut masih ada beberapa kekeliruan akan kami revisi terlebih dahulu, hasil revisi akan kami balas pada email yang masuk “ Harap cek secara berkala email untuk melihat hasil revisi atau balasan dari kami ”.- Pengiriman File paling lambat dikirimkan di minggu terakhir sebelum tanggal 15 setiap bulannya, apabila melebihi tanggal yang telah ditentukan, maka akan diproses pada periode / bulan selanjutnya.
+  
+13.Untuk mendapatkan template usulan versi terbaru (Template saat ini Versi 4) dan berita acara pengusulan, silahkan hubungi: Hamzah 0895365185390 (whatsapp).
+
+* Semua data yang dimasukan dan semua Program Bansos yang dipilih berupa usulan, tidak langsung otomatis menjadi penerima Bansos.

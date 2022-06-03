@@ -1,0 +1,45 @@
+<?php
+                $role_id = $this->session->userdata('role_id');
+                $queryMenu = "SELECT `dtks_menu`.`id`, `menu`, `menu_order`
+                                FROM `dtks_menu` 
+                                JOIN `dtks_access_menu` ON `dtks_menu`.`id` = `dtks_access_menu`.`menu_id`
+                                WHERE `dtks_access_menu`.`role_id` = $role_id
+                                ORDER BY `dtks_menu`.`menu_order` ASC
+                                ";
+
+                $menu = $this->db->query($queryMenu)->result_array();
+                // var_dump($menu);
+                // die;
+                ?>
+
+                <!-- Looping Menu -->
+                <?php foreach ($menu as $m) : ?>
+                    <div class="user-panel">
+                        <li class="nav-header"><?= $m['menu']; ?></li>
+
+                        <!-- Looping Sub-menu sesuai menu -->
+                        <?php
+                        $menu_id = $m['id'];
+                        $querySubMenu = "SELECT *
+                                FROM `dtks_sub_menu` 
+                                JOIN `dtks_menu` ON `dtks_sub_menu`.`menu_id` = `dtks_menu`.`id`
+                                WHERE `dtks_sub_menu`.`menu_id` = $menu_id
+                                AND `dtks_sub_menu`.`is_active` = 1
+                                -- ORDER BY `dtks_menu`.`menu_order` ASC
+                                ";
+
+                        $subMenu = $this->db->query($querySubMenu)->result_array();
+                        ?>
+
+                        <?php foreach ($subMenu as $sm) : ?>
+                            <li class="nav-item">
+                                <a href="<?= base_url($sm['url']); ?>" class="nav-link">
+                                    <i class="nav-icon <?= $sm['icon']; ?>"></i>
+                                    <p>
+                                        <?= $sm['title']; ?>
+                                    </p>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endforeach; ?>
