@@ -1,4 +1,4 @@
-## Tentang Aplikasi Pakenjeng-Tangguh
+# Aplikasi Pakenjeng-Tangguh
 
 Aplikasi ini di dedikasikan bagi masyarakat miskin untuk menjaga keberlangsungan jaminan sosialnya.
 
