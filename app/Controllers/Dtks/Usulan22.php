@@ -411,7 +411,7 @@ class Usulan22 extends BaseController
                 'title' => 'Access denied',
             ];
 
-            return redirect()->to('lockscreen', $data);
+            return redirect()->to('lockscreen');
         }
     }
 

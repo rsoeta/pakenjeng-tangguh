@@ -16,16 +16,16 @@ Aplikasi ini di dedikasikan bagi masyarakat miskin untuk menjaga keberlangsungan
   - Untuk pengusulan Bansos yang sudah terdaftar DTKS hanya pengurus rumah tangga saja yang didaftarkan (BPNT / PKH) Karena Program Bansos Tersebut 1 Kartu Keluarga 1 Program BANSOS;
   - Untuk Program BANSOS PBI dapat diusulkannya perorangan dalam satu Kartu Keluarga (Terhitung perjiwa dalam satu Kartu Keluarga);
   - Setiap pengusulan proragam BANSOS harap dipisahkan filenya dengan cara sebagai berikut:
-    ^ Pastikan kolom desa terisi oleh desa Anda
-    ^ Pilih Program yang ingin di export lalu export
+    - Pastikan kolom desa terisi oleh desa Anda
+    - Pilih Program yang ingin di export lalu export
 
 - Untuk Kolom Disabilitas apabila Status Disabilitas “ YA ”, Maka Masukan Kode Jenis Disabilitas Sebagai Berikut:
 
   - Kode Disabilitas Keterangan
-    ^ PDFSK = Penyandang Disabilitas Fisik
-    ^ PDINT Penyandang Disabilitas Intelektual
-    ^ PDMTL Penyandang Disabilitas Mental
-    ^ PDSNS Penyandang Disabilitas Sensorik
+    - PDFSK = Penyandang Disabilitas Fisik
+    - PDINT Penyandang Disabilitas Intelektual
+    - PDMTL Penyandang Disabilitas Mental
+    - PDSNS Penyandang Disabilitas Sensorik
   - Apabila Disabilitas “ TIDAK ”, Maka Kode Disabilitas Dikosongkan (Tidak Diisi);
 
 - Untuk Kolom Ibu Hamil apabila status Ibu Hamil “ YA ”, Masukan tanggal awal kehamilannya, apabila status Ibu Hamil “ TIDAK ”, Silakan Tanggalnya Dikosongkan (Tidak Diisi);
