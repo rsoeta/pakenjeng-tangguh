@@ -199,7 +199,7 @@ class Usulan22 extends BaseController
             $valid = $this->validate([
                 'nik' => [
                     'label' => 'NIK',
-                    'rules' => 'required|numeric|is_unique[dtks_usulan_nik.du_nik,du_id,{du_id}]|min_length[16]|max_length[16]',
+                    'rules' => 'required|numeric|is_unique[dtks_usulan_view.du_nik,du_id,{du_id}]|min_length[16]|max_length[16]',
                     'errors' => [
                         'required' => '{field} harus diisi.',
                         'numeric' => '{field} harus berisi angka.',
@@ -486,7 +486,7 @@ class Usulan22 extends BaseController
 
                 'nik' => [
                     'label' => 'NIK',
-                    'rules' => 'required|numeric|is_unique[dtks_usulan_nik.du_nik,du_id,{du_id}]|min_length[16]|max_length[16]',
+                    'rules' => 'required|numeric|is_unique[dtks_usulan_view.du_nik,du_id,{du_id}]|min_length[16]|max_length[16]',
                     'errors' => [
                         'required' => '{field} harus diisi.',
                         'numeric' => '{field} harus berisi angka.',

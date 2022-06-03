@@ -86,7 +86,7 @@ class Pages extends BaseController
             'Rw' => $jbt,
             // 'DataRekRw' => $this->vv06Model->getDataRekRw()->getResultArray(),
             // 'DataInvalid' => $this->vv06Model->getInvalid()->getResultArray(),
-            'yatims' => ($yatims),
+            // 'yatims' => ($yatims),
             // 'jandas' => ($jandas),
             // 'LisVv' => $this->vv06Model->getListVv(),
             // 'LisSisaPerb' => $this->vv06Model->getListSisaPerb(),
