@@ -14,4 +14,15 @@ class BansosModel extends Model
 	protected $primaryKey = 'dbj_id';
 
 	protected $allowedFields = ['dbj_nama_bansos', 'dbj_ket_bansos'];
+
+	public function getBansos($id = false)
+	{
+		if ($id == false) {
+			return $this->findAll();
+		}
+
+		return $this->asArray()
+			->where(['dbj_id' => $id])
+			->first();
+	}
 }

@@ -36,6 +36,7 @@ class Usulan22 extends BaseController
         $this->RwModel = new RwModel();
         $this->RtModel = new RtModel();
         $this->GenModel = new GenModel();
+        $this->WilayahModel = new WilayahModel();
     }
 
     public function index()
@@ -662,6 +663,7 @@ class Usulan22 extends BaseController
 
     function export()
     {
+        $wilayahModel = new WilayahModel();
         // $model = new Usulan22Model();
         // $tmbExpData = $this->request->getVar('btnExpData');
         // $tmbExpAll = $this->request->getVar('btnExpAll');
@@ -670,6 +672,8 @@ class Usulan22 extends BaseController
         $filter5 = $this->request->getVar('data_tahun');
         $filter6 = $this->request->getVar('data_bulan');
 
+        $desa = $wilayahModel->getVillage($filter1);
+        // dd($nama_desa);
         // if (isset($tmbExpData)) {
         // if ($filter4 == null || $filter5 == null || $filter6 == null) {
 
@@ -680,9 +684,9 @@ class Usulan22 extends BaseController
 
         $data = $this->usulan22Model->dataExport($filter1, $filter4, $filter5, $filter6)->getResultArray();
 
-        dd($data);
+        // dd($data);
 
-        $file_name = 'USULAN - PAKENJENG - ' . $filter1 . ' - ' . $filter4 . '.xlsx';
+        $file_name = 'TEMPLATE_PENGUSULAN_PAKENJENG - ' . $desa['name'] . ' - ' . $filter4 . '.xlsx';
 
         $spreadsheet = new Spreadsheet();
 

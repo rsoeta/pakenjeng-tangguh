@@ -3,6 +3,7 @@
 namespace App\Controllers\Dtks;
 
 use App\Controllers\BaseController;
+use App\Models\Dtks\BansosModel;
 use App\Models\Dtks\DtksModel;
 use App\Models\Dtks\Usulan22Model;
 use App\Models\Dtks\UsersModel;
@@ -22,15 +23,16 @@ class Pages extends BaseController
     public function __construct()
     {
         helper(['form']);
-        $this->UsersModel = new UsersModel();
-        $this->WilayahModel = new WilayahModel();
+        $this->BansosModel = new BansosModel();
+        $this->GenModel = new GenModel();
         $this->KipModel = new KipModel();
         $this->Rw = new RwModel();
-        $this->GenModel = new GenModel();
-        $this->verivali09 = new VeriVali09Model();
+        $this->UsersModel = new UsersModel();
         $this->usulan21 = new Usulan21Model();
         $this->Usulan22Model = new Usulan22Model();
+        $this->verivali09 = new VeriVali09Model();
         $this->VervalPbiModel = new VervalPbiModel();
+        $this->WilayahModel = new WilayahModel();
     }
 
     public function home()
@@ -46,6 +48,7 @@ class Pages extends BaseController
 
     public function index()
     {
+        $BansosModel = new BansosModel();
         $DesaModel = new WilayahModel();
 
         $YatimModel = new YatimModel();
@@ -83,6 +86,7 @@ class Pages extends BaseController
             'namaApp' => 'Opr NewDTKS',
             'title' => 'Dashboard',
             'desa' => $row['id'],
+            'bansos' => $BansosModel->getBansos(),
             'Rw' => $jbt,
             // 'DataRekRw' => $this->vv06Model->getDataRekRw()->getResultArray(),
             // 'DataInvalid' => $this->vv06Model->getInvalid()->getResultArray(),

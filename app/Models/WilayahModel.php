@@ -172,6 +172,15 @@ class WilayahModel extends Model
 		return $query->getResultArray();
 	}
 
+	public function getVillage($id)
+	{
+		$builder = $this->db->table('tb_villages');
+		$builder->select('id, name, district_id');
+		$builder->where('id', $id);
+		$query = $builder->get();
+
+		return $query->getRowArray();
+	}
 
 	public function getDataDesa()
 	{

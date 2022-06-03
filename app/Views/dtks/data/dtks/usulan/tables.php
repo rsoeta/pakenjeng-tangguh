@@ -48,11 +48,6 @@
                         <i class="fa fa-file-excel"></i> Export Data
                     </button>
                 </div>
-                <div class="col-12 col-sm-2 mb-2" <?= $user != 1 ?  'hidden' :  ''; ?>>
-                    <button type="submit" name="btnExpAll" class="btn btn-dark btn-block">
-                        <i class="fa fa-file-excel"></i> Export All
-                    </button>
-                </div>
 
             </div>
 

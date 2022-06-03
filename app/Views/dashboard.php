@@ -67,18 +67,80 @@
                                             <div class="icon">
                                                 <i class="ion ion-person"></i>
                                             </div>
-                                            <a href="/usulan" class="small-box-footer">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i>
-                                            </a>
+                                            <a href="/usulan" class="small-box-footer">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a>
                                         </div>
                                     </div>
                                 <?php } ?>
                             </div>
                         </div>
+                        <!-- /.col -->
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 col-md-3 mb-4">
+                                    <h4>PERSENTASE</h4>
+
+                                    <?php foreach ($rekapUsulan as $row) { ?>
+                                        <?php
+                                        $total = $row->Capaian;
+                                        ?>
+                                        <div class="progress-group">
+                                            <span class="progress-text"><?= $row->namaDesa; ?></span>
+
+
+
+
+                                            <span class="progress-number float-right"><b><?php echo number_format($row->Capaian); ?></b>/<?php echo number_format($total); ?></span>
+                                            <div class="progress progress-sm" style="height:20px;">
+                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: <?= number_format($total, 2); ?>%"></div>
+                                            </div>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <h4>RINCIAN</h4>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th rowspan="2">NO.</th>
+                                                    <th rowspan="2">NAMA DESA</th>
+                                                    <th colspan="5">KRITERIA</th>
+                                                    <th rowspan="2">JUMLAH TOTAL</th>
+
+                                                </tr>
+                                                <tr>
+                                                    <?php
+                                                    foreach ($bansos as $row) {
+                                                        echo '<th>' . $row['dbj_nama_bansos'] . '</th>';
+                                                    }
+                                                    ?>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php $no = 1 ?>
+                                                <?php
+                                                foreach ($rekapUsulan as $row) {
+                                                    echo '<tr>';
+                                                    echo '<td style="text-align:center">' . $no . '</td>';
+                                                    echo '<td>' . $row->namaDesa . '</td>';
+                                                    foreach ($bansos as $row2) {
+                                                        echo '<td style="text-align:right">' . number_format($row->{$row2['dbj_nama_bansos']}, 0) . '</td>';
+                                                    }
+                                                    echo '<td style="text-align:right">' . number_format($row->Capaian, 0) . '</td>';
+                                                    echo '</tr>';
+                                                    $no++;
+                                                }
+                                                ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="card-footer clearfix">
-                            <a href="usulan" class="btn btn-sm btn-primary float-right">Rincian</a>
+                            <a href="/usulan" class="btn btn-sm btn-primary float-right">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
-
                     <!-- <div class="card">
                         <div class="card-header">
                             <h3 class="card-title"><strong>Rekap VeriVali Bansos BPNT</strong></h3>
