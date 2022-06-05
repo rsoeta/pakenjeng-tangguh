@@ -24,7 +24,11 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <p class="m-0 mt-2">Selamat Datang <b>Bpk/Ibu. <?php echo  session()->get('fullname'); ?></b>!</p>
+                    <!-- make lower case -->
+
+
+
+                    <p class="m-0 mt-2">Selamat Datang <b>Bpk/Ibu. <?php echo ucfirst(session()->get('fullname')); ?></b>!</p>
                 </div><!-- /.col -->
             </div><!-- /.row -->
         </div><!-- /.container-fluid -->
@@ -78,23 +82,24 @@
                             <div class="row">
                                 <div class="col-12 col-md-3 mb-4">
                                     <h4>PERSENTASE</h4>
-
+                                    <?php
+                                    $total = 0;
+                                    ?>
                                     <?php foreach ($rekapUsulan as $row) { ?>
                                         <?php
-                                        $total = $row->Capaian;
+                                        $total += $row->Capaian;
+                                        $persentase = ($row->Capaian / $total) * 100;
                                         ?>
                                         <div class="progress-group">
                                             <span class="progress-text"><?= $row->namaDesa; ?></span>
-
-
-
-
-                                            <span class="progress-number float-right"><b><?php echo number_format($row->Capaian); ?></b>/<?php echo number_format($total); ?></span>
+                                            <span class="progress-number float-right"><b><?= $persentase; ?>%</b></span>
                                             <div class="progress progress-sm" style="height:20px;">
-                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: <?= number_format($total, 2); ?>%"></div>
+                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: <?= number_format($persentase, 2); ?>%"></div>
                                             </div>
                                         </div>
-                                    <?php } ?>
+                                    <?php }
+                                    ?>
+
                                 </div>
                                 <div class="col-12 col-md-9">
                                     <h4>RINCIAN</h4>

@@ -279,24 +279,13 @@ class Usulan22Model extends Model
         $month = date('n');
 
         $sql = 'SELECT tb_villages.name as namaDesa, kelurahan, created_at_year, created_at_month,
+                    SUM(IF(`program_bansos` >= 0,1,0)) DataTarget,
                     SUM(IF(`program_bansos` > 0,1,0)) Capaian,
                     SUM(IF(`program_bansos` = 1,1,0)) PKH,
                     SUM(IF(`program_bansos` = 2,1,0)) BPNT,
                     SUM(IF(`program_bansos` = 3,1,0)) BST,
                     SUM(IF(`program_bansos` = 4,1,0)) NONBANSOS,
                     SUM(IF(`program_bansos` = 5,1,0)) PBI,
-                    SUM(IF(`program_bansos` = 6,1,0)) DISFSIK,
-                    SUM(IF(`program_bansos` = 7,1,0)) DISNTRA,
-                    SUM(IF(`program_bansos` = 8,1,0)) DISRNGU,
-                    SUM(IF(`program_bansos` = 9,1,0)) DISWCRA,
-                    SUM(IF(`program_bansos` = 10,1,0)) DISRGWC,
-                    SUM(IF(`program_bansos` = 11,1,0)) DISNTFK,
-                    SUM(IF(`program_bansos` = 12,1,0)) DISNRWC,
-                    SUM(IF(`program_bansos` = 13,1,0)) DISRWFK,
-                    SUM(IF(`program_bansos` = 14,1,0)) DISRWNF,
-                    SUM(IF(`program_bansos` = 15,1,0)) DISINTL,
-                    SUM(IF(`program_bansos` = 16,1,0)) DISMOMD,
-                    SUM(IF(`program_bansos` = 17,1,0)) DISGDMT,
                     ROUND(( SUM(IF(`program_bansos` > 0,1,0))/SUM(IF(`program_bansos` >= 0,1,0)) * 100 ),2) AS percentage
                 FROM dtks_usulan22
                 JOIN tb_villages ON tb_villages.id = dtks_usulan22.kelurahan
@@ -311,6 +300,7 @@ class Usulan22Model extends Model
 
         return $query;
     }
+
 
     public function getBulan()
     {

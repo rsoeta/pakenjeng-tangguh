@@ -22,7 +22,7 @@
         <?php endif; ?>
         </p>
         <br>
-        <form action="login" method="post">
+        <form action="/login" method="post">
             <div class="input-group mb-3">
                 <input type="email" class="form-control" placeholder="Email" id="email" name="email" value="<?= set_value('email'); ?>">
                 <div class="input-group-append">
@@ -35,8 +35,14 @@
                 <input type="password" class="form-control" placeholder="Password" id="password" name="password" value="<?= set_value('password'); ?>">
                 <div class="input-group-append">
                     <div class="input-group-text">
-                        <span class="fas fa-lock"></span>
+                        <i class="fas fa-eye"></i>
                     </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="custom-control custom-checkbox small">
+                    <input type="checkbox" class="custom-control-input" id="checkbox">
+                    <label class="custom-control-label" for="checkbox"> Tampilkan kata sandi</label>
                 </div>
             </div>
             <div class="row mt-5">
@@ -81,6 +87,17 @@
             $(this).remove();
         });
     }, 3000);
+
+    // show hide password
+    $(document).ready(function() {
+        $('#checkbox').click(function() {
+            if ($(this).is(':checked')) {
+                $('#password').attr('type', 'text');
+            } else {
+                $('#password').attr('type', 'password');
+            }
+        });
+    });
 </script>
 
 <?= $this->endSection(); ?>

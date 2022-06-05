@@ -93,6 +93,7 @@
                         <th>NIK</th>
                         <th>Tempat Lahir</th>
                         <th>Tanggal Lahir</th>
+                        <th>Info</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -278,6 +279,28 @@
                 $('#btnSave').text('save'); //change button text
                 $('#btnSave').attr('disabled', false); //set button enable 
 
+            }
+        });
+    }
+
+    function detail_person(id) {
+        //Ajax Load data from ajax
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('detailBnba') ?>",
+            data: {
+                id: id
+            },
+            dataType: "JSON",
+            success: function(response) {
+                if (response.sukses) {
+                    $('.viewmodal').html(response.sukses).show();
+                    $('#modaledit').modal('show');
+                }
+
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
             }
         });
     }

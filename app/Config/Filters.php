@@ -10,6 +10,8 @@ use App\Filters\AuthFilterDtks;
 use App\Filters\NoauthFilterDtks;
 use App\Filters\AdminFilter;
 use App\Filters\SchFilterKip;
+use App\Filters\TimeFilter;
+use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Days;
 
 class Filters extends BaseConfig
 {
@@ -25,8 +27,9 @@ class Filters extends BaseConfig
 		'honeypot' => Honeypot::class,
 		"authfilterdtks" => AuthFilterDtks::class,
 		"noauthfilterdtks" => NoauthFilterDtks::class,
-		'admin-filter' => AdminFilter::class,
+		'adminFilter' => AdminFilter::class,
 		'schfilterkip' => SchFilterKip::class,
+		'timeFilter' => TimeFilter::class,
 	];
 
 	/**
@@ -66,28 +69,30 @@ class Filters extends BaseConfig
 	 *
 	 * @var array
 	 */
+
 	public $filters = [
-		'admin-filter' => [
+		'adminFilter' => [
 			'before' => [
 				// 'usulan', 'usulan/*',
 				// 'dtks', 'dtks/*',
 				// 'tmbUsul',
-				// 'tambah',
-				'verivali', 'verivali/*', 'verivalipbi', 'verivalipbi/*',
+				'tambah',
+				'verivali', 'verivali/*',
+				// 'verivalipbi', 'verivalipbi/*',
 				'users', 'users/*',
 				// 'expUsulan',
 				'exportExcel', 'tabexport', 'update_status/*', 'hapus', 'formview', 'updateDataUser', 'expKip'
 			]
 		],
-		'schfilterkip' => [
-			'before' => [
-				'usulan', 'usulan/*',
-				'dtks', 'dtks/*',
-				'verivali', 'verivali/*', 'verivalipbi', 'verivalipbi/*',
-				'users', 'users/*',
-				'expUsulan',
-				'exportExcel', 'tabexport', 'update_status/*', 'hapus', 'formview', 'updateDataUser', 'expKip'
-			]
-		]
+		// 'schfilterkip' => [
+		// 	'before' => [
+		// 		'usulan', 'usulan/*',
+		// 		'dtks', 'dtks/*',
+		// 		'verivali', 'verivali/*', 'verivalipbi', 'verivalipbi/*',
+		// 		'users', 'users/*',
+		// 		'expUsulan',
+		// 		'exportExcel', 'tabexport', 'update_status/*', 'hapus', 'formview', 'updateDataUser', 'expKip'
+		// 	]
+		// ],
 	];
 }

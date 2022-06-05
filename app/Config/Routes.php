@@ -20,7 +20,9 @@ $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultController('Home');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
-$routes->set404Override();
+$routes->set404Override(function () {
+	return view('maintenance2');
+});
 $routes->setAutoRoute(true);
 
 /*
@@ -38,13 +40,15 @@ $routes->setAutoRoute(true);
 $routes->match(['get', 'post'], 'login', 'Dtks\Auth::login', ["filter" => "noauthfilterdtks"]);
 // $routes->match(['get', 'post'], 'register', 'Dtks\Auth::register', ["filter" => "noauthfilterdtks"]);
 $routes->match(['get', 'post'], 'register', 'Dtks\Auth::regOpSek', ["filter" => "noauthfilterdtks"]);
-$routes->get('/', 'Dtks\Pages::home', ["filter" => "noauthfilterdtks"]);
+// $routes->get('/', 'Dtks\Pages::home', ["filter" => "noauthfilterdtks"]);
+$routes->get('/', 'Landing::index', ["filter" => "noauthfilterdtks"]);
 $routes->get('dashboard', 'Dtks\Pages::home', ["filter" => "noauthfilterdtks"]);
 $routes->get('pages', 'Dtks\Pages::index', ["filter" => "authfilterdtks"]);
 
 // BNBA
 $routes->get('bnba', 'Dtks\Bnba::index', ['filter' => 'authfilterdtks']);
 $routes->post('tabel_bnba', 'Dtks\Bnba::tabel_data', ['filter' => 'authfilterdtks']);
+$routes->post('detailBnba', 'Dtks\Bnba::formedit', ['filter' => 'authfilterdtks']);
 $routes->post('editBnba', 'Dtks\Bnba::formedit', ['filter' => 'authfilterdtks']);
 $routes->post('updatebnba', 'Dtks\Bnba::ajax_update', ['filter' => 'authfilterdtks']);
 
@@ -109,7 +113,7 @@ $routes->post('dltBpnt', 'Dtks\BpntGanti::delete', ["filter" => "authfilterdtks"
 $routes->post('editBpnt', 'Dtks\BpntGanti::formedit', ["filter" => "authfilterdtks"]);
 $routes->post('updateBpnt', 'Dtks\BpntGanti::update', ["filter" => "authfilterdtks"]);
 
-
+// Setting General
 $routes->get('chart_desa', 'Dtks\VeriVali09::chartDesa', ["filter" => "authfilterdtks"]);
 $routes->get('wilayah', 'Dtks\Wil::index', ["filter" => "authfilterdtks"]);
 $routes->post('wil/listData', 'Dtks\Wil::listData', ["filter" => "authfilterdtks"]);
@@ -122,7 +126,9 @@ $routes->post('ajax_update', 'Dtks\VeriVali09::ajax_update', ["filter" => "authf
 $routes->post('update_data', 'Dtks\VeriVali09::update_data', ["filter" => "authfilterdtks"]);
 $routes->get('/verivali09/redaktirovat/(:num)', 'Dtks\VeriVali09::redaktirovat/$1', ["filter" => "authfilterdtks"]);
 
+// Setting Users / Hak Akses
 $routes->get('users', 'Dtks\Users::index', ["filter" => "authfilterdtks"]);
+$routes->match(['get', 'post'], 'user_tambah', 'Dtks\Users::tambah', ["filter" => "authfilterdtks"]);
 $routes->match(['get', 'post'], 'update_status/(:num)/(:num)', 'Dtks\Users::update_status/$1/$2', ['filter' => 'authfilterdtks']);
 $routes->post('hapus', 'Dtks\Users::hapus', ['filter' => 'authfilterdtks']);
 $routes->post('formview', 'Dtks\Users::formview', ['filter' => 'authfilterdtks']);

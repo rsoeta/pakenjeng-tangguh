@@ -17,7 +17,7 @@ $user = session()->get('role_id');
                 <img src="/assets/dist/img/profile/default.png" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
-                <a href="#" class="d-block"><?= ucwords(strtolower(session()->get('fullname'))); ?></a>
+                <a href="/profil_user" class="d-block"><?= ucwords(strtolower(session()->get('fullname'))); ?></a>
             </div>
         </div>
 
@@ -31,7 +31,7 @@ $user = session()->get('role_id');
                         <a href="/dashboard" class="nav-link">
                             <i class="nav-icon fa-fw fas fa-home"></i>
                             <p>
-                                Dashboard
+                                Home
                             </p>
                         </a>
                     </li>
@@ -42,7 +42,7 @@ $user = session()->get('role_id');
                         <a href="#" class="nav-link">
                             <i class="nav-icon fa-fw fas fa-code-branch"></i>
                             <p>
-                                DTKS
+                                General
                                 <i class="fas fa-angle-left right"></i>
                             </p>
                         </a>
@@ -63,60 +63,33 @@ $user = session()->get('role_id');
                                 " class="nav-link">
                                         <i class="nav-icon fa-fw fa fa-clipboard-list"></i>
                                         <p>
-                                            BNBA
+                                            BNBA KESOS
                                         </p>
                                     </a>
                                 </li>
+
                                 <li class="nav-item">
                                     <a href="#" class="nav-link">
-                                        <i class="nav-icon fa-fw fa fa-edit"></i>
+                                        <i class="nav-icon fa-fw fas fa-box-open"></i>
                                         <p>
-                                            VERIVALI
+                                            BPNT / Sembako
                                             <i class="fas fa-angle-left right"></i>
                                         </p>
                                     </a>
                                     <ul class="nav nav-treeview nav-third-level">
                                         <li class="nav-item">
-                                            <a href="#" class="nav-link">
-                                                <i class="nav-icon fa-fw fas fa-credit-card"></i>
+                                            <a href="/bpnt_data" class="nav-link">
+                                                <i class="fas fa-caret-right"></i>
                                                 <p>
-                                                    BPNT/SEMBAKO
+                                                    Data
                                                 </p>
                                             </a>
                                         </li>
-                                    </ul>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="
-                                <?php
-                                // foreach ($percentages as $row) {
-                                //     if (session()->get('kode_desa') == $row['desa_kode']) {
-                                //         $persentase = $row['percentage'];
-                                //     }
-                                // }
-                                echo 'usulan';
-                                ?>
-                                " class="nav-link">
-                                        <i class="nav-icon fa-fw fas fa-upload"></i>
-                                        <p>
-                                            USULAN
-                                        </p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="nav-icon fa-fw fas fa-heartbeat"></i>
-                                        <p>
-                                            PBI-JKN
-                                            <i class="fas fa-angle-left right"></i>
-                                        </p>
-                                    </a>
-                                    <ul class="nav nav-treeview nav-third-level">
                                         <li class="nav-item">
-                                            <a href="/verivalipbi" class="nav-link">
-                                                <i class="nav-icon fa-fw fa fa-clipboard-list"></i>
+                                            <a href="/bpnt_data" class="nav-link">
+                                                <i class="fas fa-caret-right"></i>
                                                 <p>
-                                                    Verivali 2021
+                                                    Transaksi
                                                 </p>
                                             </a>
                                         </li>
@@ -124,84 +97,176 @@ $user = session()->get('role_id');
                                 </li>
                             <?php } ?>
                             <li class="nav-item">
-                                <a href="/datakip" class="nav-link">
-                                    <i class="nav-icon fa-fw fas fa-copy"></i>
+                                <a href="#" class="nav-link">
+                                    <i class="nav-icon fa-fw fa fa-credit-card"></i>
                                     <p>
-                                        KIP
+                                        PBI-JKN
+                                        <i class="fas fa-angle-left right"></i>
                                     </p>
                                 </a>
+                                <ul class="nav nav-treeview nav-third-level">
+                                    <li class="nav-item">
+                                        <a href="/pbi" class="nav-link">
+                                            <i class="fas fa-caret-right"></i>
+                                            <p>
+                                                Data
+                                            </p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="nav-icon fa-fw fas fa-address-card"></i>
+                                    <p>
+                                        KIP
+                                        <i class="fas fa-angle-left right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview nav-third-level">
+                                    <li class="nav-item">
+                                        <a href="/datakip" class="nav-link">
+                                            <i class="fas fa-caret-right"></i>
+                                            <p>
+                                                Data
+                                            </p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="nav-icon fa-fw fas fa-blind"></i>
+                                    <p>
+                                        Janda / Lansia
+                                        <i class="fas fa-angle-left right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview nav-third-level">
+                                    <li class="nav-item">
+                                        <a href="/janda_data" class="nav-link">
+                                            <i class="fas fa-caret-right"></i>
+                                            <p>
+                                                Data
+                                            </p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="nav-icon fa-fw fas fa-child"></i>
+                                    <p>
+                                        Yatim / Piatu
+                                        <i class="fas fa-angle-left right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview nav-third-level">
+                                    <li class="nav-item">
+                                        <a href="/yatim_data" class="nav-link">
+                                            <i class="fas fa-caret-right"></i>
+                                            <p>
+                                                Data
+                                            </p>
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         </ul>
                     </li>
-
-                </div>
-                <?php if (session()->get('role_id') == 1) { ?>
-                    <li class="nav-header">SETTINGS</li>
-                    <li class="nav-item">
-                        <a href="wilayah" class="nav-link">
-                            <i class="nav-icon fa-fw fa fa-globe"></i>
-                            <p>
-                                Data Wilayah
-                            </p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="chart_desa" class="nav-link">
-                            <i class="nav-icon fa-fw fa fa-chart-pie"></i>
-                            <p>
-                                Chart Desa
-                            </p>
-                        </a>
-                    </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            <i class="nav-icon fa-fw fa fa-cog"></i>
+                            <i class="nav-icon fa-fw fa fa-edit"></i>
                             <p>
-                                General
+                                Verivali
                                 <i class="fas fa-angle-left right"></i>
                             </p>
                         </a>
                         <ul class="nav nav-treeview nav-second-level">
                             <li class="nav-item">
-                                <a href="/ketVervalPbi" class="nav-link">
-                                    <i class="nav-icon fa-fw fa fa-check"></i>
+                                <a href="/verivalipbi" class="nav-link">
+                                    <i class="nav-icon fa-fw fa fa-credit-card"></i>
                                     <p>
-                                        Ket. Verivali PBI
+                                        PBI-JKN
                                     </p>
                                 </a>
                             </li>
                         </ul>
                     </li>
-                <?php } ?>
-
-                <li class="nav-header">USER</li>
-
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fa fa-user"></i>
-                        <p>
-                            Profil
-                        </p>
-                    </a>
-                </li>
-                <?php if (session()->get('role_id') == 1) { ?>
                     <li class="nav-item">
-                        <a href="/users" class="nav-link">
-                            <i class="nav-icon fa fa-users"></i>
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fa-fw fa fa-upload"></i>
                             <p>
-                                Users
+                                Usulan
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview nav-second-level">
+                            <li class="nav-item">
+                                <a href="/usulan" class="nav-link">
+                                    <i class="nav-icon fa-fw fas fa-code-branch"></i>
+                                    <p>
+                                        DTKS
+                                    </p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-header">SETTINGS</li>
+                    <li class="nav-item">
+                        <a href="/profil_user" class="nav-link">
+                            <i class="nav-icon fa-fw fa fa-user"></i>
+                            <p>
+                                Profil
                             </p>
                         </a>
                     </li>
-                <?php } ?>
-                <li class="nav-item" id="keluar">
-                    <a href="/logout" class="nav-link">
-                        <i class="nav-icon fa fa-sign-out-alt"></i>
-                        <p>
-                            Logout
-                        </p>
-                    </a>
-                </li>
+                    <?php if (session()->get('role_id') <= 2) { ?>
+                        <li class="nav-item">
+                            <a href="/users" class="nav-link">
+                                <i class="nav-icon fa fa-users"></i>
+                                <p>
+                                    Users
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fa-fw fa fa-cog"></i>
+                                <p>
+                                    Lanjutan
+                                    <i class="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview nav-second-level">
+                                <li class="nav-item">
+                                    <a href="wilayah" class="nav-link">
+                                        <i class="nav-icon fa-fw fa fa-globe"></i>
+                                        <p>
+                                            Data Wilayah
+                                        </p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="/ketVervalPbi" class="nav-link">
+                                        <i class="nav-icon fa-fw fa fa-check"></i>
+                                        <p>
+                                            Ket. Verivali PBI
+                                        </p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    <?php } ?>
+                    <li class="nav-item" id="keluar">
+                        <a href="/logout" class="nav-link">
+                            <i class="nav-icon fa fa-sign-out-alt"></i>
+                            <p>
+                                Logout
+                            </p>
+                        </a>
+                    </li>
+                </div>
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

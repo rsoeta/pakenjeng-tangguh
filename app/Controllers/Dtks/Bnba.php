@@ -87,6 +87,7 @@ class Bnba extends BaseController
             $row[] = $key->db_nik;
             $row[] = $key->db_tmp_lahir;
             $row[] = $key->db_tgl_lahir;
+            $row[] = '<a class="btn btn-info btn-xs" href="javascript:void(0)" title="Info" onclick="detail_person(' . "'" . $key->db_id_dtks . "'" . ')"><i class="fa fa-info-circle"></i> Info</a>';
             $data[] = $row;
         }
 
@@ -98,6 +99,47 @@ class Bnba extends BaseController
         );
         $output[$csrfName] = $csrfHash;
         echo json_encode($output);
+    }
+
+    // function show detail data by id from BnbaModel
+    public function detail($id)
+    {
+        if ($this->request->isAJAX()) {
+
+            $BnbaModel = new BnbaModel();
+
+            $id = $this->request->getVar('db_id_dtks');
+            dd($id);
+            $row = $BnbaModel->find($id);
+
+            $data = [
+                'title' => 'View User',
+                'modTtl' => 'Form. View User',
+                'id' => $row['id'],
+                'nik' => $row['nik'],
+                'kode_desa' => $row['kode_desa'],
+                'username' => $row['username'],
+                'fullname' => $row['fullname'],
+                'email' => $row['email'],
+                'status' => $row['status'],
+                'level' => $row['level'],
+                'role_id' => $row['role_id'],
+                'datarw' => $this->RwModel->noRw(),
+                'user_image' => $row['user_image'],
+                'roles' => $this->Role->getRole()->getResultArray(),
+                'desKels' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+
+            ];
+            dd($data);
+            $msg = [
+                'sukses' => view('dtks/users/formview', $data),
+            ];
+
+            echo json_encode($msg);
+        } else {
+            return redirect()->to('lockscreen');
+            exit;
+        }
     }
 
     public function formedit()

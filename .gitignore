@@ -12,8 +12,13 @@
 
 # Windows image file caches
 Thumbs.db
+Thumbs.db:encryptable
 ehthumbs.db
+ehthumbs_vista.db
 Desktop.ini
+
+# Dump file
+*.stackdump
 
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
@@ -21,6 +26,7 @@ $RECYCLE.BIN/
 # Windows Installer files
 *.cab
 *.msi
+*.msix
 *.msm
 *.msp
 
@@ -125,3 +131,27 @@ nb-configuration.xml
 /phpunit*.xml
 /.phpunit.*.cache
 
+# Created by https://www.toptal.com/developers/gitignore/api/windows,codeigniter
+# Edit at https://www.toptal.com/developers/gitignore?templates=windows,codeigniter
+
+### CodeIgniter ###
+*/config/development
+*/logs/log-*.php
+!*/logs/index.html
+*/cache/*
+!system/cache/*
+!*/cache/index.html
+!*/cache/.htaccess
+
+user_guide_src/build/*
+user_guide_src/cilexer/build/*
+user_guide_src/cilexer/dist/*
+user_guide_src/cilexer/pycilexer.egg-info/*
+
+#codeigniter 3
+application/logs/*
+!application/logs/index.html
+!application/logs/.htaccess
+/vendor/
+
+### CodeIgniter Patch ###

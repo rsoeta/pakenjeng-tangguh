@@ -73,16 +73,15 @@
                                         </select>
                                     </div>
                                     <div class="form-group my-1">
-                                        <input type="password" class="form-control form-control-sm form-control-user" name="password" placeholder="Password" value="<?= set_value('password'); ?>">
+                                        <input type="password" class="form-control form-control-sm form-control-user" name="password" placeholder="Password" id="password" value="<?= set_value('password'); ?>">
                                     </div>
                                     <div class="form-group my-1">
-                                        <input type="password" class="form-control form-control-sm form-control-user" name="password_confirm" placeholder="Password confirm" value="<?= set_value('password_confirm'); ?>">
+                                        <input type="password" class="form-control form-control-sm form-control-user" name="password_confirm" placeholder="Password confirm" id="password_confirm" value="<?= set_value('password_confirm'); ?>">
                                     </div>
                                     <div class="form-group my-1">
                                         <div class="custom-control custom-checkbox small">
-                                            <input type="checkbox" class="custom-control-input" id="customCheck">
-                                            <label class="custom-control-label" for="customCheck">Remember
-                                                Me</label>
+                                            <input type="checkbox" class="custom-control-input" id="checkbox">
+                                            <label class="custom-control-label" for="checkbox"> Tampilkan kata sandi</label>
                                         </div>
                                     </div>
                                     <button type="submit" class="btn btn-primary btn-block">
@@ -111,6 +110,22 @@
             $(this).remove();
         });
     }, 3000);
+
+    $('document').ready(function() {
+        var pwd1 = $("#password");
+        var pwd2 = $("#password_confirm");
+        $('#checkbox').click(function() {
+            if (pwd1.attr('type') === "password" && pwd2.attr('type') === "password") {
+                pwd1.attr('type', 'text') && pwd2.attr('type', 'text');
+            } else {
+                pwd1.attr('type', 'password') && pwd2.attr('type', 'password');
+            }
+        });
+
+        if ($('#countdown').length) {
+            start_countdown();
+        }
+    });
 </script>
 
 <?= $this->endSection(); ?>

@@ -10,9 +10,12 @@ class AdminFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
+        $sesi = session()->get('role_id');
+        $hari_ini = date('d');
+
         // Do something here
-        if (session()->get('role_id') !== '1') {
-            return redirect()->to('lockscreen');
+        if ($sesi > 2 && $hari_ini > '14') {
+            return redirect()->to(base_url('lockscreen'));
         }
     }
 

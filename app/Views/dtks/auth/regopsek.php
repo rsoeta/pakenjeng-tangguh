@@ -50,10 +50,14 @@
                                         <input type="text" class="form-control form-control-sm form-control-user" name="fullname" aria-describedby="emailHelp" placeholder="Masukan Nama Lengkap" value="<?= set_value('fullname'); ?>" autocomplete="off">
                                     </div>
                                     <div class="form-group my-1">
-                                        <input type="numeric" class="form-control form-control-sm form-control-user" name="nik" aria-describedby="emailHelp" placeholder="Masukan No. KTP/NIK" value="<?= set_value('nik'); ?>" autocomplete="off">
-                                    </div>
-                                    <div class="form-group my-1">
-                                        <input type="numeric" class="form-control form-control-sm form-control-user" name="nope" aria-describedby="emailHelp" placeholder="Masukan No. Handphone" value="<?= set_value('nope'); ?>" autocomplete="off">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <input type="numeric" class="form-control form-control-sm form-control-user" name="nik" aria-describedby="emailHelp" placeholder="Masukan No. KTP/NIK" value="<?= set_value('nik'); ?>" autocomplete="off">
+                                            </div>
+                                            <div class="col-6">
+                                                <input type="numeric" class="form-control form-control-sm form-control-user" name="nope" aria-describedby="emailHelp" placeholder="Masukan No. Handphone" value="<?= set_value('nope'); ?>" autocomplete="off">
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="form-group my-1">
                                         <input type="email" class="form-control form-control-sm form-control-user" name="email" aria-describedby="emailHelp" placeholder="Masukan Email" value="<?= set_value('email'); ?>" autocomplete="off">
@@ -70,27 +74,30 @@
                                         <input type="text" class="form-control form-control-sm form-control-user" name="opr_sch" aria-describedby="opr_sch" placeholder="Masukan Nama Sekolah" value="<?= set_value('opr_sch'); ?>" autocomplete="off">
                                     </div>
                                     <div class="form-group my-1">
-                                        <input type="password" class="form-control form-control-sm form-control-user" name="password" placeholder="Password" value="<?= set_value('password'); ?>">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <input type="password" class="form-control form-control-sm form-control-user" name="password" placeholder="Password" id="password1" value="<?= set_value('password'); ?>">
+                                            </div>
+                                            <div class="col-6">
+                                                <input type="password" class="form-control form-control-sm form-control-user" name="password_confirm" placeholder="Ulangi Password" id="password2" value="<?= set_value('password_confirm'); ?>">
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="form-group my-1">
-                                        <input type="password" class="form-control form-control-sm form-control-user" name="password_confirm" placeholder="Password confirm" value="<?= set_value('password_confirm'); ?>">
-                                    </div>
-                                    <div class="form-group my-3">
                                         <div class="custom-control custom-checkbox small">
-                                            <input type="checkbox" class="custom-control-input" id="customCheck">
-                                            <label class="custom-control-label" for="customCheck">Remember
-                                                Me</label>
+                                            <input type="checkbox" class="custom-control-input" id="checkbox">
+                                            <label class="custom-control-label" for="checkbox"> Tampilkan kata sandi</label>
                                         </div>
                                     </div>
                                     <div class="form-group">
-                                        <button type="submit" class="btn btn-outline-primary btn-sm btn-block">
-                                            Sign Up
+                                        <button type="submit" class="btn btn-success btn-sm btn-block" style="font-weight:bold">
+                                            Daftar
                                         </button>
                                     </div>
                                     <hr>
                                 </form>
                                 <div class="text-center">
-                                    <a class="small" href="/login" style="text-decoration: none;">Already have an Account!</a>
+                                    <a class="small" href="/login" style="color: black; font-weight:bold">Already have an Account!</a>
                                 </div>
                                 </d3v>
                             </div>
@@ -100,12 +107,25 @@
             </div>
         </div>
     </div>
-    <script>
-        window.setTimeout(function() {
-            $(".alert").fadeTo(500, 0).slideUp(500, function() {
-                $(this).remove();
-            });
-        }, 3000);
-    </script>
+</div>
 
-    <?= $this->endSection(); ?>
+<script>
+    window.setTimeout(function() {
+        $(".alert").fadeTo(500, 0).slideUp(500, function() {
+            $(this).remove();
+        });
+    }, 3000);
+
+    $(document).ready(function() {
+        $('#checkbox').click(function() {
+            if ($(this).is(':checked')) {
+                $('#password1').attr('type', 'text');
+                $('#password2').attr('type', 'text');
+            } else {
+                $('#password1').attr('type', 'password');
+                $('#password2').attr('type', 'password');
+            }
+        });
+    });
+</script>
+<?= $this->endSection(); ?>

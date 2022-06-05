@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= $title; ?></title>
+  <title>Lockscreen</title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -23,7 +23,7 @@
       <a href="<?= base_url(); ?>">Opr <b>NewDTKS</b></a>
     </div>
     <!-- User name -->
-    <div class="lockscreen-name"><?= $title; ?></div>
+    <div class="lockscreen-name">Lockscreen</div>
 
     <!-- START LOCK SCREEN ITEM -->
     <div class="lockscreen-item">

@@ -9,11 +9,12 @@ class Lockscreen extends BaseController
 		$data = [
 			'title' => 'Access denied',
 		];
-		return view('lockscreen', $data);
+		session()->setFlashdata("warning", "This is error message");
+		return view('lockscreen');
 	}
 
 	public function maintenance()
 	{
-		return view('maintenance');
+		return view('maintenance2');
 	}
 }

@@ -284,7 +284,8 @@
                     $('#modaltambah').modal('show');
                 },
                 error: function(xhr, ajaxOptions, thrownError) {
-                    alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
+                    // alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
+                    alert('Batas waktu untuk Tambah Data, Telah Habis!!');
                 }
             });
         });
