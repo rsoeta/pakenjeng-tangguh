@@ -26,9 +26,7 @@ $desa_id = session()->get('kode_desa');
                                 <div class="invalid-feedback errornokk"></div>
                             </div>
                         </div>
-                        <div class="form-group row nopadding" <?php if ($user != 1) {
-                                                                    echo 'hidden';
-                                                                } ?>>
+                        <div class="form-group row nopadding" <?php if ($user > 2) { ?> style="display: none;" <?php } ?>>
                             <label class="col-4 col-sm-4 col-form-label" for="kelurahan">Desa/Kelurahan</label>
                             <div class="col-8 col-sm-8">
 
@@ -43,9 +41,7 @@ $desa_id = session()->get('kode_desa');
                                 <div class="invalid-feedback errorkelurahan"></div>
                             </div>
                         </div>
-                        <div class="form-group row nopadding" <?php if ($user > 3) {
-                                                                    echo 'hidden';
-                                                                } ?>>
+                        <div class="form-group row nopadding" <?php if ($user > 3) { ?> style="display: none;" <?php } ?>>
                             <label class="col-4 col-sm-4 col-form-label" for="datarw">No. RW</label>
                             <div class="col-8 col-sm-8">
                                 <select id="datarw" name="datarw" class="form-select form-select-sm">

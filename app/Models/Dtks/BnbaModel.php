@@ -6,11 +6,11 @@ use CodeIgniter\Model;
 
 class BnbaModel extends Model
 {
-    protected $table      = 'vw_bnba_bansos';
+    protected $table      = 'dtks_bnba';
     protected $primaryKey = 'db_id';
 
     protected $allowedFields = [
-        "db_id", "db_id_dtks", "db_province", "db_regency", "db_district", "db_village", "db_alamat", "db_dusun", "db_rw", "db_rt", "db_nkk", "db_nik", "db_nama", "db_tgl_lahir", "db_tmp_lahir", "db_jenkel_id", "db_ibu_kandung", "db_shdk_id", "db_status", "db_pkh", "db_bpnt", "db_bst", "db_bpnt_ppkm", "db_pbi", "db_creator", "db_created", "db_modifier", "db_modified"
+        "db_id_dtks", "db_province", "db_regency", "db_district", "db_village", "db_alamat", "db_dusun", "db_rw", "db_rt", "db_nkk", "db_nik", "db_nama", "db_tgl_lahir", "db_tmp_lahir", "db_jenkel_id", "db_ibu_kandung", "db_shdk_id", "db_status", "db_pkh", "db_bpnt", "db_bst", "db_bpnt_ppkm", "db_pbi", "db_creator", "db_created", "db_modifier", "db_modified"
     ];
 
     protected $useTimestamps = true;

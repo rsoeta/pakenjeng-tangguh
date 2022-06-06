@@ -99,9 +99,7 @@ $desa_id = session()->get('kode_desa');
                         <div class="invalid-feedback errorstatus_kawin"></div>
                     </div>
                 </div>
-                <div class="form-group row nopadding" <?php if ($user != 1) {
-                                                            echo 'hidden';
-                                                        } ?>>
+                <div class="form-group row nopadding" <?php if ($user > 2) { ?> style="display: none;" <?php } ?>>
                     <label class="col-4 col-sm-4 col-form-label" for="kelurahan">Desa/Kelurahan</label>
                     <div class="col-8 col-sm-8">
 

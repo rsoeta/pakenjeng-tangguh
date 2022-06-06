@@ -1,5 +1,5 @@
 <footer class="main-footer">
-    <strong>&copy; 2021 - <?= date('Y'); ?> <a href="<?= base_url(); ?>/dashboard"><?= $namaApp; ?></a>.</strong>
+    <strong>&copy; <?= date('Y'); ?> <a href="<?= base_url(); ?>/dashboard"><?= $namaApp; ?></a>.</strong>
     Version <strong>2.4.0-<a href="https://twitter.com/riansutarsa" target="blank">rs</a></strong>
 </footer>
 

@@ -212,6 +212,8 @@ $user = session()->get('role_id');
                             </li>
                         </ul>
                     </li>
+                </div>
+                <div class="user-panel">
                     <li class="nav-header">SETTINGS</li>
                     <li class="nav-item">
                         <a href="/profil_user" class="nav-link">
@@ -260,7 +262,7 @@ $user = session()->get('role_id');
                     <?php } ?>
                     <li class="nav-item" id="keluar">
                         <a href="/logout" class="nav-link">
-                            <i class="nav-icon fa fa-sign-out-alt"></i>
+                            <i class="nav-icon fa-fw fa fa-sign-out-alt"></i>
                             <p>
                                 Logout
                             </p>

@@ -71,6 +71,14 @@
                                         </select>
                                     </div>
                                     <div class="form-group my-1">
+                                        <select id="no_rw" name="no_rw" class="form-control form-control-sm form-control-user">
+                                            <option value="">-- Pilih RW --</option>
+                                            <?php foreach ($datarw as $row) { ?>
+                                                <option value="<?= $row['no_rw'] ?>" <?= set_select('no_rw', $row['no_rw']); ?>> <?php echo $row['no_rw']; ?></option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                    <div class="form-group my-1">
                                         <input type="text" class="form-control form-control-sm form-control-user" name="opr_sch" aria-describedby="opr_sch" placeholder="Masukan Nama Sekolah" value="<?= set_value('opr_sch'); ?>" autocomplete="off">
                                     </div>
                                     <div class="form-group my-1">

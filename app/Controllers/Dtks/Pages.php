@@ -108,7 +108,7 @@ class Pages extends BaseController
             'statusRole' => $this->GenModel->getStatusRole(),
 
         ];
-        // dd($data['persenUsulan']);
+        // dd($data['rekapUsulan']);
         // dd($data['jml_persentase']);
         if (session()->get('status') == 1 && session()->get('role_id') <= 4) {
             return view('dashboard', $data);

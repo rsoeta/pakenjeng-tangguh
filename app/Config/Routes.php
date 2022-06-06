@@ -40,8 +40,8 @@ $routes->setAutoRoute(true);
 $routes->match(['get', 'post'], 'login', 'Dtks\Auth::login', ["filter" => "noauthfilterdtks"]);
 // $routes->match(['get', 'post'], 'register', 'Dtks\Auth::register', ["filter" => "noauthfilterdtks"]);
 $routes->match(['get', 'post'], 'register', 'Dtks\Auth::regOpSek', ["filter" => "noauthfilterdtks"]);
-// $routes->get('/', 'Dtks\Pages::home', ["filter" => "noauthfilterdtks"]);
-$routes->get('/', 'Landing::index', ["filter" => "noauthfilterdtks"]);
+$routes->get('/', 'Dtks\Pages::home', ["filter" => "noauthfilterdtks"]);
+// $routes->get('/', 'Landing::index', ["filter" => "noauthfilterdtks"]);
 $routes->get('dashboard', 'Dtks\Pages::home', ["filter" => "noauthfilterdtks"]);
 $routes->get('pages', 'Dtks\Pages::index', ["filter" => "authfilterdtks"]);
 
@@ -49,7 +49,7 @@ $routes->get('pages', 'Dtks\Pages::index', ["filter" => "authfilterdtks"]);
 $routes->get('bnba', 'Dtks\Bnba::index', ['filter' => 'authfilterdtks']);
 $routes->post('tabel_bnba', 'Dtks\Bnba::tabel_data', ['filter' => 'authfilterdtks']);
 $routes->post('detailBnba', 'Dtks\Bnba::formedit', ['filter' => 'authfilterdtks']);
-$routes->post('editBnba', 'Dtks\Bnba::formedit', ['filter' => 'authfilterdtks']);
+// $routes->post('editBnba', 'Dtks\Bnba::formedit', ['filter' => 'authfilterdtks']);
 $routes->post('updatebnba', 'Dtks\Bnba::ajax_update', ['filter' => 'authfilterdtks']);
 
 // VERVAL PBI

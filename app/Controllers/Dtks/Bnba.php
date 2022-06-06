@@ -50,7 +50,7 @@ class Bnba extends BaseController
 
 
         ];
-        // dd($data['masuk']);
+        // dd($data['datarw']);
         return view('dtks/data/dtks/clean/index', $data);
     }
 
@@ -87,7 +87,7 @@ class Bnba extends BaseController
             $row[] = $key->db_nik;
             $row[] = $key->db_tmp_lahir;
             $row[] = $key->db_tgl_lahir;
-            $row[] = '<a class="btn btn-info btn-xs" href="javascript:void(0)" title="Info" onclick="detail_person(' . "'" . $key->db_id_dtks . "'" . ')"><i class="fa fa-info-circle"></i> Info</a>';
+            $row[] = '<a class="btn btn-info btn-xs" href="javascript:void(0)" title="Info" onclick="detail_person(' . "'" . $key->db_id . "'" . ')"><i class="fa fa-info-circle"></i> Info</a>';
             $data[] = $row;
         }
 
@@ -148,7 +148,7 @@ class Bnba extends BaseController
 
             // var_dump($this->request->getPost());
 
-            $id_data = $this->request->getVar('id_data');
+            $id_data = $this->request->getVar('id');
 
             $model = new BnbaModel();
             $row = $model->find($id_data);
@@ -156,7 +156,7 @@ class Bnba extends BaseController
             // var_dump($row);
 
             $data = [
-                'title' => 'Form. Edit BNBA DTKS',
+                'title' => 'Detail Penerima Manfaat',
                 'dataprov' => $this->WilayahModel->getProv()->getResultArray(),
                 'datakab' => $this->WilayahModel->getKab()->getResultArray(),
                 'datakec' => $this->WilayahModel->getKec()->getResultArray(),
@@ -169,29 +169,30 @@ class Bnba extends BaseController
                 'jenisKelamin' => $this->BnbaModel->getDataJenkel(),
                 'datashdk' => $this->BnbaModel->getDataShdk(),
 
-                'id_dtks' => $row['id_dtks'],
-                'province_id' => $row['province_id'],
-                'regency_id' => $row['regency_id'],
-                'district_id' => $row['district_id'],
-                'village_id' => $row['village_id'],
-                'alamat' => $row['d_alamat'],
-                'dusun' => $row['d_dusun'],
-                'no_rw' => $row['d_rw'],
-                'no_rt' => $row['d_rt'],
-                'nomor_kk' => $row['d_nkk'],
-                'nomor_nik' => $row['d_nik'],
-                'nama' => $row['d_nama'],
-                'tempat_lahir' => $row['d_tmp_lahir'],
-                'tanggal_lahir' => $row['d_tgl_lahir'],
-                'jenis_kelamin' => $row['d_jenkel_id'],
-                'nama_ibu_kandung' => $row['d_ibu_kandung'],
-                'hubungan_keluarga' => $row['d_shdk_id'],
-                'created_by' => $row['created_by'],
-                'status' => $row['d_status'],
+                'db_id' => $row['db_id'],
+                'db_id_dtks' => $row['db_id_dtks'],
+                'province_id' => $row['db_province'],
+                'regency_id' => $row['db_regency'],
+                'district_id' => $row['db_district'],
+                'village_id' => $row['db_village'],
+                'alamat' => $row['db_alamat'],
+                'dusun' => $row['db_dusun'],
+                'no_rw' => $row['db_rw'],
+                'no_rt' => $row['db_rt'],
+                'nomor_kk' => $row['db_nkk'],
+                'nomor_nik' => $row['db_nik'],
+                'nama' => $row['db_nama'],
+                'tempat_lahir' => $row['db_tmp_lahir'],
+                'tanggal_lahir' => $row['db_tgl_lahir'],
+                'jenis_kelamin' => $row['db_jenkel_id'],
+                'nama_ibu_kandung' => $row['db_ibu_kandung'],
+                'hubungan_keluarga' => $row['db_shdk_id'],
+                'created_by' => $row['db_creator'],
+                'status' => $row['db_status'],
             ];
 
 
-            // var_dump($data['dusun']);
+            // dd($data);
             $msg = [
                 'sukses' => view('dtks/data/dtks/clean/modaledit', $data)
 

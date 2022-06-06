@@ -30,7 +30,7 @@ class VervalPbi extends BaseController
 
         $data = [
             'namaApp' => 'Opr NewDTKS',
-            'title' => 'Verifikasi dan ValiVasi data PBI JK NON-DTKS 2021',
+            'title' => 'Verifikasi dan Validasi data PBI JK NON-DTKS 2021',
             'desKels' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
             // 'operator' => $this->operator->orderBy('NamaLengkap', 'asc')->findAll(),
             'datarw' => $this->RwModel->noRw(),
