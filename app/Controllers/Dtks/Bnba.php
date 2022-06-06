@@ -79,6 +79,7 @@ class Bnba extends BaseController
             $no++;
             $row = array();
             $row[] = $no;
+            $row[] = '<img src=' . FOTO_DOKUMEN('KPM_BNT' . $key->db_nik . 'A.jpg', 'foto-kpm') . ' alt="' . $key->db_nama . '" style="width: 30px; height: 40px; border-radius: 2px;">';
             if (session()->get('role_id') <= 3) {
                 $row[] = $key->db_id_dtks;
             }
