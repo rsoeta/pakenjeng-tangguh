@@ -86,9 +86,6 @@
                     <tr>
                         <th>No</th>
                         <th>Foto</th>
-                        <?php if ($user <= 3) { ?>
-                            <th>ID DTKS</th>
-                        <?php } ?>
                         <th>Nama</th>
                         <th>No. KK</th>
                         <th>NIK</th>
