@@ -1,0 +1,9 @@
+
+
+## Catatan Penambahan fitur profil user -- 2022-06-10
+# Perbaharui Database
+    - tabel tb_roles ditambah kolom kategori_role setelah nm_role
+    - tabel dtks_users ditambah kolom user_alamat setelah user_image
+    - tabel dtks_users kolom password dipindah setelah kolom user_lembaga_id
+    - tabel lembaga_profil ditambahkan
+    - tabel lembaga_kategori ditambahkan
