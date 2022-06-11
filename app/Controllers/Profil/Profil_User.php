@@ -30,7 +30,7 @@ class Profil_User extends BaseController
             'lembaga' => $this->LembagaModel->findAll(),
 
         ];
-        // dd($data['lembaga']);
+        dd($data['user_login']);
         return view('profil/index', $data);
     }
 
