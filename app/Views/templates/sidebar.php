@@ -1,4 +1,5 @@
 <?php
+$user_image = session()->get('user_image');
 $user = session()->get('role_id');
 ?>
 
@@ -11,16 +12,6 @@ $user = session()->get('role_id');
 
     <!-- Sidebar -->
     <div class="sidebar">
-        <!-- Sidebar user panel (optional) -->
-        <div class="user-panel mt-1 pb-1 mb-1 d-flex">
-            <div class="image">
-                <img src="/assets/dist/img/profile/default.png" class="img-circle elevation-2" alt="User Image">
-            </div>
-            <div class="info">
-                <a href="/profil_user" class="d-block"><?= ucwords(strtolower(session()->get('fullname'))); ?></a>
-            </div>
-        </div>
-
         <!-- Sidebar Menu -->
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">

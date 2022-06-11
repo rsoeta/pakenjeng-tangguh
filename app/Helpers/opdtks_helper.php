@@ -13,3 +13,16 @@ function FOTO_DOKUMEN($fileName = '', $dir = '', $defFile = '')
     }
     # code...
 }
+
+function Foto_Profil($fileName = '', $dir = '', $defFile = '')
+{
+    if ($fileName !== '' && $fileName !== null && file_exists(FCPATH . 'data/' . $dir . '/' . $fileName)) {
+        return base_url('data/' . $dir . '/' . $fileName);
+    } else {
+        if ($defFile == '') {
+            return base_url('assets/dist/img/profile/default.png');
+        } else {
+            return base_url('assets/dist/img/profile/' . $defFile);
+        }
+    }
+}

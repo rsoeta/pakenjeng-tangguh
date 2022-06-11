@@ -134,6 +134,10 @@ $routes->post('hapus', 'Dtks\Users::hapus', ['filter' => 'authfilterdtks']);
 $routes->post('formview', 'Dtks\Users::formview', ['filter' => 'authfilterdtks']);
 $routes->post('updateDataUser', 'Dtks\Users::updatedata', ['filter' => 'authfilterdtks']);
 
+// profil
+$routes->match(['get', 'post'], 'profil_user', 'Profil\Profil_User::index', ['filter' => 'authfilterdtks']);
+$routes->post('update_user', 'Profil\Profil_User::update_user', ['filter' => 'authfilterdtks']);
+
 $routes->get('logout', 'Dtks\Auth::logout');
 /*
  * --------------------------------------------------------------------

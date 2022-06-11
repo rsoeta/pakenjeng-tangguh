@@ -5,6 +5,7 @@
 # file
 data/
 public/data/
+catatan.txt
 
 # OS X
 .DS_Store

@@ -56,4 +56,29 @@ class AuthModel extends Model
 
         return $data;
     }
+
+    public function getUserId()
+    {
+        $user_id = session()->get('id');
+
+        $builder = $this->db->table('dtks_users');
+        $builder->select('dtks_users.id as id_user, dtks_users.nik, dtks_users.username, dtks_users.fullname, dtks_users.email, dtks_users.nope, dtks_users.opr_sch, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, tb_roles.nm_role, lembaga_profil.lp_kode, lembaga_profil.lp_kepala, lembaga_profil.lp_sekretariat, lembaga_profil.lp_email, lembaga_profil.lp_kode_pos, lembaga_profil.lp_logo, lembaga_kategori.lk_nama, tb_villages.name as nama-desa');
+
+        $builder->join('tb_roles', 'dtks_users.role_id=tb_roles.id_role');
+        $builder->join('lembaga_profil', 'dtks_users.id=lembaga_profil.lp_user');
+        $builder->join('lembaga_kategori', 'lembaga_profil.lp_kategori=lembaga_kategori.lk_id');
+        $builder->join('tb_villages', 'lembaga_profil.lp_kode=tb_villages.id');
+        $query = $builder->getWhere(['dtks_users.id' => $user_id]);
+
+        return $query->getRowArray();
+    }
+
+    public function updatePersonalData($id_user, $personalData)
+    {
+        return $this->db
+            ->table('dtks_users')
+            ->where(["id" => $id_user])
+            ->set($personalData)
+            ->update();
+    }
 }

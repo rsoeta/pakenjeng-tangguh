@@ -16,6 +16,7 @@ use App\Models\Dtks\VeriVali09Model;
 use App\Models\Dtks\Usulan21Model;
 use App\Models\Dtks\VervalPbiModel;
 use App\Models\Dtks\KipModel;
+use App\Models\Dtks\AuthModel;
 
 
 class Pages extends BaseController
@@ -33,6 +34,7 @@ class Pages extends BaseController
         $this->verivali09 = new VeriVali09Model();
         $this->VervalPbiModel = new VervalPbiModel();
         $this->WilayahModel = new WilayahModel();
+        $this->AuthModel = new AuthModel();
     }
 
     public function home()
@@ -41,6 +43,8 @@ class Pages extends BaseController
             'namaApp' => 'Opr NewDTKS',
             'title' => 'Login',
             'statusRole' => $this->GenModel->getStatusRole(),
+            'user_login' => $this->AuthModel->getUserId(),
+
         ];
 
         return view('dtks/auth/login', $data);
@@ -106,6 +110,8 @@ class Pages extends BaseController
             'jmlPerbaikan' => $this->VervalPbiModel->perbaikanAll(),
             'percentages' => $this->VervalPbiModel->jml_persentase(),
             'statusRole' => $this->GenModel->getStatusRole(),
+            'user_login' => $this->AuthModel->getUserId(),
+
 
         ];
         // dd($data['rekapUsulan']);
