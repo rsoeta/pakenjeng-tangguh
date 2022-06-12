@@ -878,6 +878,7 @@ class Usulan22 extends BaseController
                 $bpnt = $row['bpnt'];
                 $pkh = $row['pkh'];
                 $pbi = $row['pbi'];
+                $bst = $row['bst'];
                 $total_usulan = $row['total_usulan'];
             }
 
@@ -966,6 +967,7 @@ class Usulan22 extends BaseController
                 'bpnt' => $bpnt,
                 'pkh' => $pkh,
                 'pbi' => $pbi,
+                'bst' => $bst,
                 // 'disabilitas' => $rekapUsulan['disabilitas'],
                 'total_usulan' => $total_usulan,
                 'nama_petugas' => strtoupper($user_login['fullname']),
