@@ -7,3 +7,4 @@
     - tabel dtks_users kolom password dipindah setelah kolom user_lembaga_id
     - tabel lembaga_profil ditambahkan
     - tabel lembaga_kategori ditambahkan
+    - tabel dtks_users ditambahkan kode_kec

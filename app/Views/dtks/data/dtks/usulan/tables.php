@@ -280,6 +280,13 @@
                 success: function(response) {
                     $('.viewmodal').html(response.data).show();
 
+                    // $('#modaltambah').modal('show');
+                    // $('#modaltambah').modal('show', function() {
+                    //     $($this).find('#nokk').focus();
+                    // });
+                    $('#modaltambah').on('shown.bs.modal', function(event) {
+                        $('#nokk').focus();
+                    });
                     $('#modaltambah').modal('show');
                 },
                 error: function(xhr, ajaxOptions, thrownError) {

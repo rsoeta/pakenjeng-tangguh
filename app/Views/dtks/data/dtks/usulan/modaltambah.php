@@ -7,7 +7,7 @@ $desa_id = session()->get('kode_desa');
 
 
 <!-- Modal -->
-<div class="modal fade" id="modaltambah" tabindex="-1" aria-labelledby="modaltambahLabel" aria-hidden="true">
+<div class="modal fade" id="modaltambah" aria-labelledby="modaltambahLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -22,7 +22,7 @@ $desa_id = session()->get('kode_desa');
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="nokk">No. KK</label>
                             <div class="col-8 col-sm-8">
-                                <input type="number" name="nokk" id="nokk" class="form-control form-control-sm" autocomplete="on">
+                                <input type="number" name="nokk" id="nokk" class="form-control form-control-sm" autocomplete="on" autofocus>
                                 <div class="invalid-feedback errornokk"></div>
                             </div>
                         </div>
