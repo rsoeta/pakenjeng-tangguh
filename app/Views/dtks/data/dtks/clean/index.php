@@ -14,7 +14,7 @@
             </div>
             <?php
             $user = session()->get('role_id');
-            $desa_id = $user_login['lp_kode'];
+            isset($user_login['lp_kode']) ? $desa_id = $user_login['lp_kode'] : $desa_id = session()->get('kode_desa');
             $ops = session()->get('jabatan');
             $level = session()->get('level');
             ?>

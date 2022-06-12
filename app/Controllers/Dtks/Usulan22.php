@@ -4,6 +4,7 @@ namespace App\Controllers\Dtks;
 
 
 use App\Controllers\BaseController;
+use App\Models\Dtks\AuthModel;
 use App\Models\Dtks\DtksModel;
 use App\Models\Dtks\Usulan22Model;
 use App\Models\WilayahModel;
@@ -18,9 +19,13 @@ use App\Models\Dtks\UsersModel;
 use App\Models\Dtks\VeriVali09Model;
 use App\Models\Dtks\VervalPbiModel;
 use App\Models\Dtks\DisabilitasJenisModel;
+use App\Models\Dtks\LembagaModel;
+use CodeIgniter\HTTP\Response;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Month;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Writer\Word2007;
 
 
 class Usulan22 extends BaseController
@@ -28,8 +33,8 @@ class Usulan22 extends BaseController
     protected $usulan22Model;
     public function __construct()
     {
-        helper(['form']);
-        $this->usulan22Model = new Usulan22Model();
+        $this->AuthModel = new AuthModel();
+        $this->Usulan22Model = new Usulan22Model();
         $this->VeriVali09Model = new VeriVali09Model();
         $this->VervalPbiModel = new VervalPbiModel();
         $this->DisabilitasJenisModel = new DisabilitasJenisModel();
@@ -54,6 +59,7 @@ class Usulan22 extends BaseController
             $data = [
                 'namaApp' => 'Opr NewDTKS',
                 'title' => 'Daftar Usulan DTKS',
+                'user_login' => $this->AuthModel->getUserId(),
                 'dtks' => $model->getDtks(),
                 'desa' => $desa->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
                 'datarw' => $this->RwModel->noRw(),
@@ -78,6 +84,7 @@ class Usulan22 extends BaseController
             $data = [
                 'namaApp' => 'Opr NewDTKS',
                 'title' => 'Daftar Usulan DTKS',
+                'user_login' => $this->AuthModel->getUserId(),
                 'dtks' => $model->getDtks(),
                 'desa' => $desa->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
                 'datarw' => $this->RwModel->noRw(),
@@ -135,8 +142,8 @@ class Usulan22 extends BaseController
             }
             $row[] = $key->alamat;
             $row[] = $key->jenis_shdk;
-            $row[] = '<a class="btn btn-sm btn-success" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->idUsulan . "'" . ')"><i class="far fa-edit"></i> Edit</a> | 
-			<button class="btn btn-sm btn-danger" data-id="' . $key->idUsulan . '" data-nama="' . $key->nama . '" id="deleteBtn"><i class="far fa-trash-alt"></i> Hapus</button>';
+            $row[] = '<a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->idUsulan . "'" . ')"><i class="far fa-edit"></i> Edit</a> | 
+			<button class="btn btn-sm btn-secondary" data-id="' . $key->idUsulan . '" data-nama="' . $key->nama . '" id="deleteBtn"><i class="far fa-trash-alt"></i> Hapus</button>';
             $data[] = $row;
         }
 
@@ -376,7 +383,7 @@ class Usulan22 extends BaseController
                     // 'foto_rumah' => $nama_foto_rumah,
                 ];
 
-                $this->usulan22Model->save($data);
+                $this->Usulan22Model->save($data);
 
                 $msg = [
                     'sukses' => 'Data berhasil ditambahkan',
@@ -400,7 +407,7 @@ class Usulan22 extends BaseController
         if ($this->request->isAJAX()) {
             $id = $this->request->getVar('id');
 
-            $this->usulan22Model->delete($id);
+            $this->Usulan22Model->delete($id);
 
             $msg = [
                 'sukses' => 'Data berhasil dihapus'
@@ -649,7 +656,7 @@ class Usulan22 extends BaseController
                     // 'foto_rumah' => $nama_foto_rumah,
                 ];
 
-                $this->usulan22Model->update($id, $data);
+                $this->Usulan22Model->update($id, $data);
 
                 $msg = [
                     'sukses' => 'Data berhasil diubah',
@@ -661,8 +668,26 @@ class Usulan22 extends BaseController
         }
     }
 
+    function bulan()
+    {
+        $bulan = array(
+            1 =>   'Januari',
+            'Februari',
+            'Maret',
+            'April',
+            'Mei',
+            'Juni',
+            'Juli',
+            'Agustus',
+            'September',
+            'Oktober',
+            'November',
+            'Desember'
+        );
+    }
     function export()
     {
+
         $wilayahModel = new WilayahModel();
         // $model = new Usulan22Model();
         // $tmbExpData = $this->request->getVar('btnExpData');
@@ -672,8 +697,7 @@ class Usulan22 extends BaseController
         $filter5 = $this->request->getVar('data_tahun');
         $filter6 = $this->request->getVar('data_bulan');
 
-        $desa = $wilayahModel->getVillage($filter1);
-        // dd($nama_desa);
+        // dd($desa);
         // if (isset($tmbExpData)) {
         // if ($filter4 == null || $filter5 == null || $filter6 == null) {
 
@@ -682,11 +706,26 @@ class Usulan22 extends BaseController
         // } else {
         // dd($filter1, $filter4, $filter5, $filter6);
 
-        $data = $this->usulan22Model->dataExport($filter1, $filter4, $filter5, $filter6)->getResultArray();
-
+        $data = $this->Usulan22Model->dataExport($filter1, $filter4, $filter5, $filter6)->getResultArray();
         // dd($data);
 
-        $file_name = 'TEMPLATE_PENGUSULAN_PAKENJENG - ' . $desa['name'] . ' - ' . $filter4 . '.xlsx';
+        $desa = $wilayahModel->getVillage($filter1);
+        $bulan = array(
+            1 =>   'Januari',
+            'Februari',
+            'Maret',
+            'April',
+            'Mei',
+            'Juni',
+            'Juli',
+            'Agustus',
+            'September',
+            'Oktober',
+            'November',
+            'Desember'
+        );
+        // $file_name = 'TEMPLATE_PENGUSULAN_PAKENJENG - ' . $desa['name'] . ' - ' . $filter4 . '.xlsx';
+        $file_name = 'TEMPLATE_EXCEL_USULAN - PAKENJENG - ' .  $desa['name'] . ' - ' . strtoupper($bulan[$filter6]) . '.xlsx';
 
         $spreadsheet = new Spreadsheet();
 
@@ -806,138 +845,143 @@ class Usulan22 extends BaseController
         readfile($file_name);
 
         exit;
-        // }
-        // }
+    }
 
-        // if (isset($tmbExpAll)) {
-        //     // dd($filter1, $filter4, $filter5, $filter6);
+    public function exportBa()
+    {
+        $user_id = session()->get('id');
 
-        //     $data = $this->usulan22Model->allExport($filter4, $filter5, $filter6)->getResultArray();
+        $wilayahModel = new WilayahModel();
+        $user_login = $this->AuthModel->getUserId();
+        // dd($user_login);
+        if (!isset($user_login['lp_sekretariat']) && !isset($user_login['user_lembaga_id'])) {
+            $str = '  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+               <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+               <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+               <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.35.1/js/bootstrap-dialog.min.js"></script>
+               <script type="text/javascript">
+                   setTimeout(function() { 
+                      BootstrapDialog.alert(\'Silahkan isi profil Anda dan Lembaga terlebih dahulu!!\') 
+                      window.location.href = \'/profil_user\';
+                    },100);
+               </script>';
+            echo $str;
+            // echo "<script>
+            //     alert('Some text');
+            //     window.location.href = '/usulan';// your redirect path here
+            //     </script>";
+        } else {
 
-        //     // dd($data);
+            $rekapUsulan = $this->Usulan22Model->rekapUsulanBa();
+            foreach ($rekapUsulan as $row) {
+                $nonbansos = $row['nonbansos'];
+                $bpnt = $row['bpnt'];
+                $pkh = $row['pkh'];
+                $pbi = $row['pbi'];
+                $total_usulan = $row['total_usulan'];
+            }
 
-        //     $file_name = 'USULAN - PAKENJENG - ' . $filter4 . '.xlsx';
+            // dd($rekapUsulan);
+            // dd(session()->get('kode_desa'));
 
-        //     $spreadsheet = new Spreadsheet();
+            $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor('data/templates/template_usulan.docx');
 
-        //     $sheet = $spreadsheet->getActiveSheet();
+            $kode_desa = session()->get('kode_desa');
+            $kode_tanggal = date('d');
+            $kode_bulan = date('n');
+            $kode_tahun = date('Y');
 
-        //     $sheet->setCellValue('A1', 'NIK');
-        //     $sheet->setCellValue('B1', 'PROGRAM BANSOS');
-        //     $sheet->setCellValue('C1', 'NOKK');
-        //     $sheet->setCellValue('D1', 'NAMA');
-        //     $sheet->setCellValue('E1', 'TEMPAT LAHIR');
-        //     $sheet->setCellValue('F1', "TANGGAL LAHIR\n(31/01/2000)");
-        //     $sheet->setCellValue('G1', 'IBU KANDUNG');
-        //     $sheet->setCellValue('H1', 'JENIS KELAMIN');
-        //     $sheet->setCellValue('I1', 'JENIS PEKERJAAN');
-        //     $sheet->setCellValue('J1', 'STATUS KAWIN');
-        //     $sheet->setCellValue('K1', 'ALAMAT');
-        //     $sheet->setCellValue('L1', 'RT');
-        //     $sheet->setCellValue('M1', 'RW');
-        //     $sheet->setCellValue('N1', 'PROVINSI');
-        //     $sheet->setCellValue('O1', 'KABUPATEN');
-        //     $sheet->setCellValue('P1', 'KECAMATAN');
-        //     $sheet->setCellValue('Q1', 'KELURAHAN');
-        //     $sheet->setCellValue('R1', 'STATUS DISABILITAS');
-        //     $sheet->setCellValue('S1', 'KODE JENIS DISABILITAS');
-        //     $sheet->setCellValue('T1', 'STATUS HAMIL');
-        //     $sheet->setCellValue('U1', "TGL MULAI HAMIL\n(31/12/2021)");
-        //     // $sheet->getStyle('A1:U1')->getFont()->setBold(true);
-        //     // $sheet->getStyle('A1:U1')->getAlignment()->setWrapText(true);
-        //     // $sheet->getStyle('A1:U1')->getAlignment()->setHorizontal('center');
+            $desa = $wilayahModel->getVillage($kode_desa);
+            // dd($desa);
+            if (is_array($desa)) {
+                $desaUpper = strtoupper($desa['name']);
+                $desaPropper = ucwords(strtolower($desa['name']));
+            } else {
+                $desaUpper = strtoupper($desa);
+                $desaPropper = ucwords(strtolower($desa));
+            }
 
-        //     $styleArray = [
-        //         'font' => [
-        //             'bold' => true,
-        //             'color' => array('rgb' => 'FFFFFF'),
-        //         ],
-        //         'alignment' => [
-        //             'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_BOTTOM,
-        //             'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
-        //             'wrapText'     => TRUE,
-        //         ],
-        //         'borders' => [
-        //             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-        //         ],
-        //         'fill' => [
-        //             'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-        //             // 'rotation' => 90,
-        //             'startColor' => [
-        //                 'rgb' => '4472C4',
-        //             ],
-        //             'endColor' => [
-        //                 'rgb' => '4472C4',
-        //             ],
-        //         ],
-        //     ];
 
-        //     $spreadsheet->getActiveSheet()->getStyle('A1:U1')->applyFromArray($styleArray);
+            // dd($desaUpper);
+            $bulan = array(
+                1 =>   'Januari',
+                'Februari',
+                'Maret',
+                'April',
+                'Mei',
+                'Juni',
+                'Juli',
+                'Agustus',
+                'September',
+                'Oktober',
+                'November',
+                'Desember'
+            );
+            $hari = date("D");
+            switch ($hari) {
+                case 'Sun':
+                    $hari_ini = "Minggu";
+                    break;
 
-        //     $count = 2;
+                case 'Mon':
+                    $hari_ini = "Senin";
+                    break;
 
-        //     foreach ($data as $row) {
+                case 'Tue':
+                    $hari_ini = "Selasa";
+                    break;
 
-        //         $tglLahir = date('d/m/Y', strtotime($row['tanggal_lahir']));
-        //         if ($row['hamil_status'] == 1) {
-        //             $status_hamil = 'YA';
-        //         } elseif ($row['hamil_status'] == 2) {
-        //             $status_hamil = 'TIDAK';
-        //         } else {
-        //             $status_hamil = '';
-        //         }
+                case 'Wed':
+                    $hari_ini = "Rabu";
+                    break;
 
-        //         if ($row['hamil_tgl'] > 1) {
-        //             $hamil_tgl = date('d/m/Y', strtotime($row['hamil_tgl']));
-        //         } else {
-        //             $hamil_tgl = '';
-        //         }
+                case 'Thu':
+                    $hari_ini = "Kamis";
+                    break;
 
-        //         $TglBuat = date('m/Y', strtotime($row['created_at']));
+                case 'Fri':
+                    $hari_ini = "Jumat";
+                    break;
 
-        //         $sheet->setCellValueExplicit('A' . $count, $row['du_nik'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-        //         $sheet->setCellValue('B' . $count, $row['dbj_nama_bansos']);
-        //         $sheet->setCellValueExplicit('C' . $count, $row['nokk'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-        //         $sheet->setCellValue('D' . $count, strtoupper($row['nama']));
-        //         $sheet->setCellValue('E' . $count, strtoupper($row['tempat_lahir']));
-        //         $sheet->setCellValue('F' . $count, $tglLahir);
-        //         $sheet->setCellValue('G' . $count, strtoupper($row['ibu_kandung']));
-        //         $sheet->setCellValue('H' . $count, $row['NamaJenKel']);
-        //         $sheet->setCellValue('I' . $count, $row['JenisPekerjaan']);
-        //         $sheet->setCellValue('J' . $count, $row['StatusKawin']);
-        //         $sheet->setCellValue('K' . $count, strtoupper($row['alamat']));
-        //         $sheet->setCellValue('L' . $count, $row['rt']);
-        //         $sheet->setCellValue('M' . $count, $row['rw']);
-        //         $sheet->setCellValue('N' . $count, $row['prov']);
-        //         $sheet->setCellValue('O' . $count, $row['kab']);
-        //         $sheet->setCellValue('P' . $count, $row['kec']);
-        //         $sheet->setCellValue('Q' . $count, $row['desa']);
-        //         $sheet->setCellValue('R' . $count, $row['dc_status']);
-        //         $sheet->setCellValue('S' . $count, $row['dj_kode']);
-        //         $sheet->setCellValue('T' . $count, $status_hamil);
-        //         $sheet->setCellValue('U' . $count, $hamil_tgl);
+                case 'Sat':
+                    $hari_ini = "Sabtu";
+                    break;
 
-        //         $count++;
-        //     }
-        //     foreach ($sheet->getColumnIterator() as $column) {
-        //         $sheet->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
-        //     }
-        //     $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
-        //     $sheet->setTitle('DATA');
+                default:
+                    $hari_ini = "Tidak di ketahui";
+                    break;
+            }
 
-        //     $writer = new Xlsx($spreadsheet);
-        //     $writer->save($file_name);
-        //     header("Content-Type: application/vnd.ms-excel");
-        //     header('Content-Disposition: attachment; filename="' . basename($file_name) . '"');
-        //     header('Expires: 0');
-        //     header('Cache-Control: must-revalidate');
-        //     header('Pragma: public');
-        //     header('Content-Length:' . filesize($file_name));
-        //     flush();
+            $templateProcessor->setValues([
+                'desaUpper' => $desaUpper,
+                'desaPropper' => $desaPropper,
+                'sekretariat' => $user_login['lp_sekretariat'],
+                'email' => $user_login['lp_email'],
+                'kode_pos' => $user_login['lp_kode_pos'],
+                'hari' => $hari_ini,
+                'tanggal' => $kode_tanggal,
+                'bulan' => $bulan[$kode_bulan],
+                'tahun' => $kode_tahun,
+                'nonbansos' => $nonbansos,
+                'bpnt' => $bpnt,
+                'pkh' => $pkh,
+                'pbi' => $pbi,
+                // 'disabilitas' => $rekapUsulan['disabilitas'],
+                'total_usulan' => $total_usulan,
+                'nama_petugas' => strtoupper($user_login['fullname']),
+                'nama_pimpinan' => strtoupper($user_login['lp_kepala']),
+            ]);
 
-        //     readfile($file_name);
+            $filename = 'BA_PENGUSULAN – PAKENJENG – ' . $desa['name'] . ' – ' . strtoupper($bulan[$kode_bulan]) . '.docx';
 
-        //     exit;
-        // }
+            header("Content-Description: File Transfer");
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+            header('Content-Transfer-Encoding: binary');
+            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            header('Expires: 0');
+
+            $templateProcessor->saveAs('php://output');
+        }
     }
 }

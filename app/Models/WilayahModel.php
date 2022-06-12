@@ -226,4 +226,20 @@ class WilayahModel extends Model
 
 		return $query;
 	}
+
+	public function getAjaxSearch()
+	{
+		$kecamatan = '32.05.33';
+
+		$builder = $this->db->table('tb_villages');
+		$builder->select('tb_villages.id as kode_desa, tb_villages.name as nama_desa, tb_districts.id as kode_kec, tb_districts.name as nama_kec, tb_regencies.id as kode_kab, tb_regencies.name as nama_kab, tb_provinces.id as kode_prov, tb_provinces.name as nama_prov');
+		$builder->join('tb_districts', 'tb_districts.id=tb_villages.district_id');
+		$builder->join('tb_regencies', 'tb_regencies.id=tb_villages.regency_id');
+		$builder->join('tb_provinces', 'tb_provinces.id=tb_villages.province_id');
+		$builder->where('tb_districts.id', $kecamatan);
+
+		$query = $builder->get();
+
+		return $query;
+	}
 }

@@ -21,6 +21,7 @@ class Users extends BaseController
         helper(['form']);
         $this->VervalPbiModel = new VervalPbiModel();
         $this->User = new UsersModel();
+        $this->AuthModel = new AuthModel();
         $this->Role = new RoleModel();
         $this->RwModel = new RwModel();
         $this->GenModel = new GenModel();
@@ -34,6 +35,7 @@ class Users extends BaseController
             'title' => 'Daftar Users',
             'title1' => 'Tambah User',
             'role' => $this->Role->getRole(),
+            'user_login' => $this->AuthModel->getUserId(),
             'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
             'datarw' => $this->WilayahModel->getDataRW()->getResultArray(),
             'users' => $this->User->getFindAll()->getResultArray(),

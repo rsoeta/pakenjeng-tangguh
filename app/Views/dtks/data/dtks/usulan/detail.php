@@ -1,4 +1,4 @@
-<?= $this->extend('dtks/templates/index'); ?>
+<?= $this->extend('templates/index'); ?>
 
 <?= $this->section('content'); ?>
 

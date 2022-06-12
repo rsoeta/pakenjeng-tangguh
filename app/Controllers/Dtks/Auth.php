@@ -96,6 +96,7 @@ class Auth extends BaseController
             'jabatan' => $user['level'],
             'opr_sch' => $user['opr_sch'],
             'user_image' => $user['user_image'],
+            'user_lembaga_id' => $user['user_lembaga_id'],
             'logDtks' => true,
         ];
 

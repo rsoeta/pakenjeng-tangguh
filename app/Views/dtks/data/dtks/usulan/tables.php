@@ -18,7 +18,7 @@
         $user = session()->get('role_id');
         $nik = session()->get('nik');
         $jabatan = session()->get('level');
-        $desa_id = session()->get('kode_desa');
+        $desa_id = $user_login['kode_desa'];
         ?>
         <div class="card-body">
             <?php if (session()->get('message')) : ?>
@@ -28,39 +28,38 @@
             <?php endif; ?>
             <?= form_open('dtks/usulan22/export', ['target' => 'blank']); ?>
             <div class="row">
-                <div class="col-6 col-sm-2 mb-2">
-                    <button type="button" class="btn btn-info btn-block" data-toggle="modal" onclick="reload_table()">
-                        <i class="fa fa-sync-alt"></i> Reload
-                    </button>
+                <div class="col-12 col-sm-6">
+                    <div class="row">
+                        <div class="col-6 col-sm-3 mb-2" <?= $user != 3 ?  'hidden' :  ''; ?>>
+                            <a href="exportBa" type="submit" name="btnExpBA" class="btn btn-danger btn-block" id="exportBA">
+                                <i class="fa fa-clipboard-check"></i> Export Berita Acara
+                            </a>
+                        </div>
+                        <div class="col-6 col-sm-3 mb-2" <?= $user > 3 ?  'hidden' :  ''; ?>>
+                            <button type="submit" name="btnExpData" class="btn btn-success btn-block" id="exportExcel">
+                                <i class="fa fa-file-excel"></i> Export Data
+                            </button>
+                        </div>
+                        <div class="col-6 col-sm-3 mb-2">
+                            <button type="button" class="btn btn-info btn-block" data-toggle="modal" onclick="reload_table()">
+                                <i class="fa fa-sync-alt"></i> Reload
+                            </button>
+                        </div>
+                        <div class="col-6 col-sm-3 mb-2">
+                            <button type="button" class="btn btn-primary btn-block tombolTambah">
+                                <i class="fa fa-plus"></i> Tambah Data
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-6 col-sm-2 mb-2">
-                    <button type="button" class="btn btn-primary btn-block tombolTambah">
-                        <i class="fa fa-plus"></i> Tambah Data
-                    </button>
-                </div>
-                <!-- <div class="col-12 col-sm-2 mb-2" <?= $user > 3 ?  'hidden' :  ''; ?>>
-                    <a href="/expUsulan" type="button" class="btn btn-success btn-block">
-                        <i class="fa fa-file-excel"></i> Export Data
-                    </a>
-                </div> -->
-                <div class="col-12 col-sm-2 mb-2" <?= $user > 3 ?  'hidden' :  ''; ?>>
-                    <button type="submit" name="btnExpData" class="btn btn-success btn-block" id="exportExcel">
-                        <i class="fa fa-file-excel"></i> Export Data
-                    </button>
-                </div>
-
             </div>
 
             <div class="row mb-2">
                 <div class="col-sm-2 col-6 mb-2">
-                    <select <?php if ($user >= 3) {
-                                echo 'disabled';
-                            } ?> class="form-control form-control-sm" name="desa" id="desa">
+                    <select <?= $user >= 3 ? 'disabled' : ''; ?> class="form-control form-control-sm" name="desa" id="desa">
                         <option value="">[ Desa Kosong ]</option>
                         <?php foreach ($desa as $row) { ?>
-                            <option <?php if ($desa_id == $row['id']) {
-                                        echo 'selected = "true"';
-                                    } ?> value="<?= $row['id']; ?>"><?= $row['name']; ?></option>
+                            <option <?= $desa_id == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id']; ?>"><?= $row['name']; ?></option>
                         <?php } ?>
                     </select>
                 </div>
@@ -276,7 +275,7 @@
         $('.tombolTambah').click(function(e) {
             e.preventDefault();
             $.ajax({
-                url: "<?= site_url() ?>/tambah",
+                url: "<?= site_url('tambah') ?>",
                 dataType: "json",
                 success: function(response) {
                     $('.viewmodal').html(response.data).show();
@@ -289,6 +288,8 @@
                 }
             });
         });
+
+
         $('#tabel_data');
 
 
@@ -360,6 +361,19 @@
 
     $(function() {
         $('#exportExcel').click(function() {
+            // $('#desa').removeAttr('disabled', '');
+            // window.location.reload();
+            // $("#desa").attr('disabled', 'true');
+            var $elt = $('#desa').removeAttr('disabled', '');
+            setTimeout(function() {
+                $elt.attr('disabled', true);
+            }, 500);
+
+        });
+    });
+
+    $(function() {
+        $('#exportBA').click(function() {
             // $('#desa').removeAttr('disabled', '');
             // window.location.reload();
             // $("#desa").attr('disabled', 'true');

@@ -15,14 +15,31 @@ class LembagaModel extends Model
 
 	protected $allowedFields = ['lk_nama'];
 
-	public function getLembaga($id = false)
+	public function getLembaga($user_id = false)
 	{
-		if ($id == false) {
-			return $this->findAll();
+		if ($user_id == false) {
+			return $this->orderby('lk_id', 'desc')->findAll();
 		}
 
 		return $this->asArray()
-			->where(['lk_id' => $id])
+			->where('lk_id', $user_id)
 			->first();
+	}
+
+	public function submitLembagaData($lembagaData)
+	{
+		return $this->db
+			->table('lembaga_profil')
+			->set($lembagaData)
+			->insert();
+	}
+
+	public function updateLembagaData($lp_id, $lembagaData)
+	{
+		return $this->db
+			->table('lembaga_profil')
+			->where("lp_id", $lp_id)
+			->set($lembagaData)
+			->update();
 	}
 }
