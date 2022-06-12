@@ -1,10 +1,11 @@
 
 
 ## Catatan Penambahan fitur profil user -- 2022-06-10
+## v2.5.0
 # Perbaharui Database
-    - tabel tb_roles ditambah kolom kategori_role setelah nm_role
-    - tabel dtks_users ditambah kolom user_alamat setelah user_image
-    - tabel dtks_users kolom password dipindah setelah kolom user_lembaga_id
-    - tabel lembaga_profil ditambahkan
-    - tabel lembaga_kategori ditambahkan
-    - tabel dtks_users ditambahkan kode_kec
+    - tambah kolom kategori_role setelah nm_role di tabel tb_roles
+    - tambah kolom user_lembaga_id(int) setelah user_image di tabel dtks_users 
+    - pindah kolom password setelah kolom user_lembaga_id di tabel dtks_users 
+    - impor lembaga_profil
+    - impor lembaga_kategori
+    - tambah kode_kec(vharchar)(100) di tabel dtks_users 
