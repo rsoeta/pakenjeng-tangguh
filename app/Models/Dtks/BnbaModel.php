@@ -15,7 +15,7 @@ class BnbaModel extends Model
 
     protected $useTimestamps = true;
 
-    var $column_order = array('', 'db_nama', 'db_id_dtks', 'db_nkk', 'db_nik', 'db_tmp_lahir', 'db_tgl_lahir');
+    var $column_order = array('', '', 'db_nama', 'db_jenkel_id', 'db_nkk', 'db_nik', 'db_tmp_lahir', 'db_tgl_lahir', 'db_shdk_id');
 
     var $order = array('db_id' => 'asc');
 
@@ -69,6 +69,7 @@ class BnbaModel extends Model
         $builder = $db->table('dtks_bnba');
         $query = $builder->select('*')
             ->join('tb_shdk', 'tb_shdk.id=dtks_bnba.db_shdk_id')
+            ->join('tbl_jenkel', 'tbl_jenkel.IdJenKel=dtks_bnba.db_jenkel_id')
             // ->join('pekerjaan_kondisi_pekerjaan', 'pekerjaan_kondisi_pekerjaan.IDKondisi=individu_data.KondisiPekerjaan')
             // ->join('pendidikan_pendb_tinggi', 'pendidikan_pendb_tinggi.IDPendidikan=individu_data.PendTertinggi')
             // ->join('ket_verivali', 'ket_verivali.idb_ketvv=individu_data.ket_verivali')

@@ -14,7 +14,7 @@
             </div>
             <?php
             $user = session()->get('role_id');
-            $desa_id = session()->get('kode_desa');
+            isset($user_login['lp_kode']) ? $desa_id = $user_login['lp_kode'] : $desa_id = session()->get('kode_desa');
             $ops = session()->get('jabatan');
             $level = session()->get('level');
             ?>
@@ -87,11 +87,12 @@
                         <th>No</th>
                         <th>Foto</th>
                         <th>Nama</th>
+                        <th>J/K</th>
                         <th>No. KK</th>
                         <th>NIK</th>
                         <th>Tempat Lahir</th>
                         <th>Tanggal Lahir</th>
-                        <th>Info</th>
+                        <th>SHDK</th>
                     </tr>
                 </thead>
                 <tbody></tbody>

@@ -56,4 +56,48 @@ class AuthModel extends Model
 
         return $data;
     }
+
+    public function getUserId()
+    {
+        $user_id = session()->get('id');
+
+        $builder = $this->db->table('dtks_users');
+        $builder->select('dtks_users.id as id_user, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.nope, dtks_users.opr_sch, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, 
+        tb_roles.id_role as role_id, tb_roles.nm_role,
+        lembaga_profil.lp_id, lembaga_profil.lp_kode, lembaga_profil.lp_kepala, lembaga_profil.lp_nip, lembaga_profil.lp_sekretariat, lembaga_profil.lp_email, lembaga_profil.lp_kode_pos, lembaga_profil.lp_logo, 
+        lembaga_kategori.lk_nama,
+        tb_villages.name as nama_desa');
+
+        $builder->join('tb_roles', 'dtks_users.role_id=tb_roles.id_role');
+        $builder->join('lembaga_profil', 'dtks_users.id=lembaga_profil.lp_user');
+        $builder->join('lembaga_kategori', 'dtks_users.role_id=lembaga_kategori.lk_id');
+        $builder->join('tb_villages', 'dtks_users.kode_desa=tb_villages.id');
+        $query = $builder->getWhere(['dtks_users.id' => $user_id])->getRowArray();
+
+
+        $buildor = $this->db->table('dtks_users');
+        $buildor->select('dtks_users.id as id_user, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.nope, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.opr_sch, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, 
+        tb_roles.id_role as role_id, tb_roles.nm_role');
+
+        $buildor->join('tb_roles', 'dtks_users.role_id=tb_roles.id_role');
+        // $buildor->join('lembaga_profil', 'dtks_users.id=lembaga_profil.lp_user');
+        // $buildor->join('lembaga_kategori', 'lembaga_profil.lp_kategori=lembaga_kategori.lk_id');
+        // $buildor->join('tb_villages', 'lembaga_profil.lp_kode=tb_villages.id');
+        $quero = $buildor->where('dtks_users.id', $user_id);
+        $quero = $quero->get()->getRowArray();
+
+        if ($query !== null) {
+            return $query;
+        }
+        return $quero;
+    }
+
+    public function updatePersonalData($id_user, $personalData)
+    {
+        return $this->db
+            ->table('dtks_users')
+            ->where(["id" => $id_user])
+            ->set($personalData)
+            ->update();
+    }
 }

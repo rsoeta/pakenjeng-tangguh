@@ -80,7 +80,8 @@ $routes->post('editUsulan', 'Dtks\Usulan22::formedit', ["filter" => "authfilterd
 $routes->post('updateUsulan', 'Dtks\Usulan22::update', ["filter" => "authfilterdtks"]);
 $routes->post('dltUsul', 'Dtks\Usulan22::delete', ["filter" => "authfilterdtks"]);
 $routes->post('tabel_data', 'Dtks\Usulan22::tabel_data', ["filter" => "authfilterdtks"]);
-$routes->get('expUsulan', 'Dtks\Usulan22::export', ["filter" => "authfilterdtks"]);
+$routes->post('expUsulan', 'Dtks\Usulan22::export', ["filter" => "authfilterdtks"]);
+$routes->match(['get', 'post'], 'exportBa', 'Dtks\Usulan22::exportBa', ["filter" => "authfilterdtks"]);
 
 
 // WILAYAH
@@ -133,6 +134,12 @@ $routes->match(['get', 'post'], 'update_status/(:num)/(:num)', 'Dtks\Users::upda
 $routes->post('hapus', 'Dtks\Users::hapus', ['filter' => 'authfilterdtks']);
 $routes->post('formview', 'Dtks\Users::formview', ['filter' => 'authfilterdtks']);
 $routes->post('updateDataUser', 'Dtks\Users::updatedata', ['filter' => 'authfilterdtks']);
+
+// profil
+$routes->match(['get', 'post'], 'profil_user', 'Profil\Profil_User::index', ['filter' => 'authfilterdtks']);
+$routes->post('update_user', 'Profil\Profil_User::update_user', ['filter' => 'authfilterdtks']);
+$routes->post('submit_lembaga', 'Profil\Profil_User::submit_lembaga', ['filter' => 'authfilterdtks']);
+$routes->post('update_lembaga', 'Profil\Profil_User::update_lembaga', ['filter' => 'authfilterdtks']);
 
 $routes->get('logout', 'Dtks\Auth::logout');
 /*

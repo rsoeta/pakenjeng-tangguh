@@ -12,6 +12,7 @@ use App\Models\WilayahModel;
 use App\Models\RwModel;
 use App\Models\RtModel;
 use App\Models\GenModel;
+use App\Models\Dtks\AuthModel;
 
 
 
@@ -29,6 +30,7 @@ class Bnba extends BaseController
         $this->keterangan = new DtksKetModel();
         $this->datashdk = new ShdkModel();
         $this->VervalPbiModel = new VervalPbiModel();
+        $this->AuthModel = new AuthModel();
     }
 
     public function index()
@@ -47,10 +49,12 @@ class Bnba extends BaseController
             'status' => $this->statusdtks->orderBy('jenis_status', 'asc')->findAll(),
             'percentages' => $this->VervalPbiModel->jml_persentase(),
             'statusRole' => $this->GenModel->getStatusRole(),
+            'user_login' => $this->AuthModel->getUserId(),
+
 
 
         ];
-        // dd($data['datarw']);
+        // dd($data['user_login']);
         return view('dtks/data/dtks/clean/index', $data);
     }
 
@@ -79,13 +83,18 @@ class Bnba extends BaseController
             $no++;
             $row = array();
             $row[] = $no;
-            $row[] = '<img src=' . FOTO_DOKUMEN('KPM_BNT' . $key->db_nik . 'A.jpg', 'foto-kpm') . ' alt="' . $key->db_nama . '" style="width: 30px; height: 40px; border-radius: 2px;">';
+            $row[] = '
+            <a href="javascript:void(0)" title="more info" onclick="detail_person(' . "'" . $key->db_id . "'" . ')">
+            <img src=' . FOTO_DOKUMEN('KPM_BNT' . $key->db_nik . 'A.jpg', 'foto-kpm') . ' alt="' . $key->db_nama . '" style="width: 30px; height: 40px; border-radius: 2px;">
+            </a>
+            ';
             $row[] = $key->db_nama;
+            $row[] = $key->NamaJenKel;
             $row[] = $key->db_nkk;
             $row[] = $key->db_nik;
             $row[] = $key->db_tmp_lahir;
             $row[] = $key->db_tgl_lahir;
-            $row[] = '<a class="btn btn-info btn-xs" href="javascript:void(0)" title="Info" onclick="detail_person(' . "'" . $key->db_id . "'" . ')"><i class="fa fa-info-circle"></i> Info</a>';
+            $row[] = $key->jenis_shdk;
             $data[] = $row;
         }
 

@@ -301,6 +301,31 @@ class Usulan22Model extends Model
         return $query;
     }
 
+    public function rekapUsulanBa()
+    {
+        $year = date('Y');
+        $month = date('n');
+        $kode_desa = session()->get('kode_desa');
+
+        $sql = "SELECT tb_villages.name as nama_desa, kelurahan,
+                    SUM(IF(`program_bansos` = 1,1,0)) pkh,
+                    SUM(IF(`program_bansos` = 2,1,0)) bpnt,
+                    SUM(IF(`program_bansos` = 3,1,0)) bst,
+                    SUM(IF(`program_bansos` = 4,1,0)) nonbansos,
+                    SUM(IF(`program_bansos` = 5,1,0)) pbi,
+                    SUM(IF(`program_bansos` > 0,1,0)) AS total_usulan
+                FROM dtks_usulan22
+                JOIN tb_villages ON tb_villages.id = dtks_usulan22.kelurahan
+                WHERE (kelurahan =  '" . $kode_desa . "'  AND created_at_year =  " . $year . "  AND created_at_month =  " . $month . " )";
+
+        // $query = $sql;
+        $builder = $this->db->query($sql);
+        $query = $builder->getResultArray();
+        // $query = $builder->getResultArray();
+
+        return $query;
+    }
+
 
     public function getBulan()
     {
