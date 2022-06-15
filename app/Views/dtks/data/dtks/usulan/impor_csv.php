@@ -275,7 +275,7 @@
 
     $(document).ready(function() {
 
-        $('body').addClass('sidebar-collapse');
+        // $('body').addClass('sidebar-collapse');
 
         $('.tombolTambah').click(function(e) {
             e.preventDefault();
