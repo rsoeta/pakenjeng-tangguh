@@ -1043,7 +1043,7 @@ class Usulan22 extends BaseController
             'statusRole' => $this->GenModel->getStatusRole(),
         ];
         // dd($data['session']);
-        return view('dtks/data/dtks/usulan/imporCsv', $data);
+        return view('dtks/data/dtks/usulan/impor_csv', $data);
     }
     public function importCsvToDb()
     {
@@ -1086,7 +1086,7 @@ class Usulan22 extends BaseController
             ];
             // dd($data['validation']);
             // $data['validation'] = $this->validator;
-            return view('dtks/data/dtks/usulan/imporCsv', $data);
+            return view('dtks/data/dtks/usulan/impor_csv', $data);
         } else {
             if ($file = $this->request->getFile('file')) {
                 if ($file->isValid() && !$file->hasMoved()) {
