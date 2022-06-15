@@ -332,7 +332,7 @@ class Usulan22Model extends Model
         $builder = $this->db->table('dtks_usulan22');
         $builder->select('created_at');
         $builder->distinct('created_at');
-        $query = $builder->get();
+        $query = $builder->get('vw_csv_report');
 
         return $query;
     }

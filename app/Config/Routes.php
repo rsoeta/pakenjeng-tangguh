@@ -82,6 +82,9 @@ $routes->post('dltUsul', 'Dtks\Usulan22::delete', ["filter" => "authfilterdtks"]
 $routes->post('tabel_data', 'Dtks\Usulan22::tabel_data', ["filter" => "authfilterdtks"]);
 $routes->post('expUsulan', 'Dtks\Usulan22::export', ["filter" => "authfilterdtks"]);
 $routes->match(['get', 'post'], 'exportBa', 'Dtks\Usulan22::exportBa', ["filter" => "authfilterdtks"]);
+$routes->get('import_csv', 'Dtks\Usulan22::import_csv', ["filter" => "authfilterdtks"]);
+$routes->post('importCsvToDb', 'Dtks\Usulan22::importCsvToDb', ["filter" => "authfilterdtks"]);
+$routes->post('tb_csv', 'Dtks\Usulan22::tbCsv', ["filter" => "authfilterdtks"]);
 
 
 // WILAYAH

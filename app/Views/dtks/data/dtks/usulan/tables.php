@@ -32,7 +32,7 @@
                     <div class="row">
                         <div class="col-6 col-sm-3 mb-2" <?= $user != 3 ?  'hidden' :  ''; ?>>
                             <a href="exportBa" type="submit" name="btnExpBA" class="btn btn-danger btn-block" id="exportBA">
-                                <i class="fa fa-clipboard-check"></i> Export Berita Acara
+                                <i class="fa fa-clipboard-check"></i> Export B.A
                             </a>
                         </div>
                         <div class="col-6 col-sm-3 mb-2" <?= $user > 3 ?  'hidden' :  ''; ?>>
@@ -218,7 +218,9 @@
                 },
                 dataType: "json",
                 success: function(response) {
-                    if (response.sukses) {
+                    if (response.informasi) {
+                        alert(response.informasi);
+                    } else if (response.sukses) {
                         const Toast = Swal.mixin({
                             toast: true,
                             position: 'top-end',
@@ -230,14 +232,12 @@
                                 toast.addEventListener('mouseleave', Swal.resumeTimer)
                             }
                         })
-
                         Toast.fire({
                             icon: 'success',
                             title: response.sukses,
                         });
                         // window.location.reload();
                         table.draw();
-
                     }
                 }
             });
@@ -256,11 +256,13 @@
             },
             dataType: "JSON",
             success: function(response) {
-                if (response.sukses) {
+                if (response.informasi) {
+                    alert(response.informasi);
+
+                } else if (response.sukses) {
                     $('.viewmodal').html(response.sukses).show();
                     $('#modaledit').modal('show');
                 }
-
             },
             error: function(xhr, ajaxOptions, thrownError) {
                 alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
@@ -290,8 +292,8 @@
                     $('#modaltambah').modal('show');
                 },
                 error: function(xhr, ajaxOptions, thrownError) {
-                    // alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
-                    alert('Batas waktu untuk Tambah Data, Telah Habis!!');
+                    alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
+                    // alert('Batas waktu untuk Tambah Data, Telah Habis!!');
                 }
             });
         });

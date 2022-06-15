@@ -20,17 +20,17 @@ use App\Models\Dtks\VeriVali09Model;
 use App\Models\Dtks\VervalPbiModel;
 use App\Models\Dtks\DisabilitasJenisModel;
 use App\Models\Dtks\LembagaModel;
+use App\Models\Dtks\CsvReportModel;
 use CodeIgniter\HTTP\Response;
 use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Month;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Writer\Word2007;
-
+use CodeIgniter\I18n\Time;
 
 class Usulan22 extends BaseController
 {
-    protected $usulan22Model;
     public function __construct()
     {
         $this->AuthModel = new AuthModel();
@@ -42,57 +42,61 @@ class Usulan22 extends BaseController
         $this->RtModel = new RtModel();
         $this->GenModel = new GenModel();
         $this->WilayahModel = new WilayahModel();
+        $this->BansosModel = new BansosModel();
+        $this->PekerjaanModel = new PekerjaanModel();
+        $this->StatusKawinModel = new StatusKawinModel();
+        $this->CsvReportModel = new CsvReportModel();
     }
 
     public function index()
     {
 
         if (session()->get('role_id') == 1) {
-            $model = new Usulan22Model();
-            $desa = new WilayahModel();
-            $rw = new RwModel();
-            $bansos = new BansosModel();
-            $pekerjaan = new PekerjaanModel();
-            $statusKawin = new StatusKawinModel();
-            $shdk = new ShdkModel();
+            $this->Usulan22Model = new Usulan22Model();
+            $this->WilayahModel = new WilayahModel();
+            $this->RwModel = new RwModel();
+            $this->BansosModel = new BansosModel();
+            $this->PekerjaanModel = new PekerjaanModel();
+            $this->StatusKawinModel = new StatusKawinModel();
+            $this->ShdkModel = new ShdkModel();
 
             $data = [
                 'namaApp' => 'Opr NewDTKS',
                 'title' => 'Daftar Usulan DTKS',
                 'user_login' => $this->AuthModel->getUserId(),
-                'dtks' => $model->getDtks(),
-                'desa' => $desa->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+                'dtks' => $this->Usulan22Model->getDtks(),
+                'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
                 'datarw' => $this->RwModel->noRw(),
-                'bansos' => $bansos->findAll(),
-                'pekerjaan' => $pekerjaan->orderBy('JenisPekerjaan', 'asc')->findAll(),
-                'statusKawin' => $statusKawin->orderBy('StatusKawin', 'asc')->findAll(),
-                'shdk' => $shdk->findAll(),
+                'bansos' => $this->BansosModel->findAll(),
+                'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
+                'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
+                'shdk' => $this->ShdkModel->findAll(),
                 'percentages' => $this->VervalPbiModel->jml_persentase(),
                 'statusRole' => $this->GenModel->getStatusRole(),
             ];
 
             return view('dtks/data/dtks/usulan/tables', $data);
         } else if (session()->get('role_id') >= 1) {
-            $model = new Usulan22Model();
-            $desa = new WilayahModel();
-            $datarw = new RwModel();
-            $bansos = new BansosModel();
-            $pekerjaan = new PekerjaanModel();
-            $statusKawin = new StatusKawinModel();
-            $shdk = new ShdkModel();
+            $this->Usulan22Model = new Usulan22Model();
+            $this->WilayahModel = new WilayahModel();
+            $this->RwModel = new RwModel();
+            $this->BansosModel = new BansosModel();
+            $this->PekerjaanModel = new PekerjaanModel();
+            $this->StatusKawinModel = new StatusKawinModel();
+            $this->ShdkModel = new ShdkModel();
 
             $data = [
                 'namaApp' => 'Opr NewDTKS',
                 'title' => 'Daftar Usulan DTKS',
                 'user_login' => $this->AuthModel->getUserId(),
-                'dtks' => $model->getDtks(),
-                'desa' => $desa->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+                'dtks' => $this->Usulan22Model->getDtks(),
+                'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
                 'datarw' => $this->RwModel->noRw(),
                 'datart' => $this->RtModel->noRt(),
-                'bansos' => $bansos->findAll(),
-                'pekerjaan' => $pekerjaan->orderBy('JenisPekerjaan', 'asc')->findAll(),
-                'statusKawin' => $statusKawin->orderBy('StatusKawin', 'asc')->findAll(),
-                'shdk' => $shdk->findAll(),
+                'bansos' => $this->BansosModel->findAll(),
+                'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
+                'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
+                'shdk' => $this->ShdkModel->findAll(),
                 'percentages' => $this->VervalPbiModel->jml_persentase(),
                 'statusRole' => $this->GenModel->getStatusRole(),
             ];
@@ -110,7 +114,7 @@ class Usulan22 extends BaseController
     public function tabel_data()
     {
 
-        $model = new Usulan22Model();
+        $this->Usulan22Model = new Usulan22Model();
         $csrfName = csrf_token();
         $csrfHash = csrf_hash();
 
@@ -121,9 +125,9 @@ class Usulan22 extends BaseController
         $filter5 = $this->request->getPost('data_tahun');
         $filter6 = $this->request->getPost('data_bulan');
 
-        $listing = $model->get_datatables($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
-        $jumlah_semua = $model->jumlah_semua();
-        $jumlah_filter = $model->jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
+        $listing = $this->Usulan22Model->get_datatables($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
+        $jumlah_semua = $this->Usulan22Model->jumlah_semua();
+        $jumlah_filter = $this->Usulan22Model->jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
 
         $data = array();
         $no = $_POST['start'];
@@ -163,13 +167,13 @@ class Usulan22 extends BaseController
     {
         if ($this->request->isAJAX()) {
 
-            $model = new Usulan22Model();
-            $desa = new WilayahModel();
+            $this->Usulan22Model = new Usulan22Model();
+            $this->WilayahModel = new WilayahModel();
             $rw = new RwModel();
-            $bansos = new BansosModel();
-            $pekerjaan = new PekerjaanModel();
-            $statusKawin = new StatusKawinModel();
-            $shdk = new ShdkModel();
+            $this->BansosModel = new BansosModel();
+            $this->PekerjaanModel = new PekerjaanModel();
+            $this->StatusKawinModel = new StatusKawinModel();
+            $this->ShdkModel = new ShdkModel();
             $users = new UsersModel();
             $DisabilitasJenisModel = new DisabilitasJenisModel();
 
@@ -177,21 +181,36 @@ class Usulan22 extends BaseController
                 'title' => 'Data Usulan DTKS',
 
                 'dtks' => $model->getDtks(),
-                'desa' => $desa->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+                'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
                 'datarw' => $this->RwModel->noRw(),
                 'datart' => $this->RtModel->noRt(),
-                'bansos' => $bansos->findAll(),
-                'pekerjaan' => $pekerjaan->orderBy('JenisPekerjaan', 'asc')->findAll(),
-                'statusKawin' => $statusKawin->orderBy('StatusKawin', 'asc')->findAll(),
-                'shdk' => $shdk->findAll(),
+                'bansos' => $this->BansosModel->findAll(),
+                'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
+                'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
+                'shdk' => $this->ShdkModel->findAll(),
                 'users' => $users->findAll(),
                 'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
             ];
 
-            $msg = [
-                'data' => view('dtks/data/dtks/usulan/modaltambah', $data),
-            ];
-            echo json_encode($msg);
+            $times = new Time();
+            $hari = $times->getDay();       // 12
+            $jam = $times->hour;           // 16
+            $menit = $times->minute;         // 15
+            $hari_ini = $hari . $jam . $menit;
+            $deadline = '141414';
+            if ($hari_ini > $deadline) {
+                $msg = [
+                    'data' => '<script>
+                        alert(\'Mohon Maaf, Batas waktu untuk Tambah Data Telah Habis!!\');
+                        </script>'
+                ];
+                echo json_encode($msg);
+            } else {
+                $msg = [
+                    'data' => view('dtks/data/dtks/usulan/modaltambah', $data),
+                ];
+                echo json_encode($msg);
+            }
         } else {
             return view('lockscreen');
         }
@@ -405,13 +424,24 @@ class Usulan22 extends BaseController
     function delete()
     {
         if ($this->request->isAJAX()) {
-            $id = $this->request->getVar('id');
 
-            $this->Usulan22Model->delete($id);
-
-            $msg = [
-                'sukses' => 'Data berhasil dihapus'
-            ];
+            $times = new Time();
+            $hari = $times->getDay();       // 12
+            $jam = $times->hour;           // 16
+            $menit = $times->minute;         // 15
+            $hari_ini = $hari . $jam . $menit;
+            $deadline = '141414';
+            if ($hari_ini > $deadline) {
+                $msg = [
+                    'informasi' => 'Mohon Maaf, Batas waktu untuk Perubahan Data, Telah Habis!!'
+                ];
+            } else {
+                $id = $this->request->getVar('id');
+                $this->Usulan22Model->delete($id);
+                $msg = [
+                    'sukses' => 'Data berhasil dihapus'
+                ];
+            }
             echo json_encode($msg);
         } else {
             $data = [
@@ -426,58 +456,72 @@ class Usulan22 extends BaseController
     {
         if ($this->request->isAJAX()) {
             // var_dump($this->request->getVar());
+            $times = new Time();
+            $hari = $times->getDay();       // 12
+            $jam = $times->hour;           // 16
+            $menit = $times->minute;         // 15
+            $hari_ini = $hari . $jam . $menit;
+            $deadline = '141414';
 
-            $pekerjaan = new PekerjaanModel();
-            $shdk = new ShdkModel();
-            $statusKawin = new StatusKawinModel();
-            $desa = new WilayahModel();
-            $bansos = new BansosModel();
-            $DisabilitasJenisModel = new DisabilitasJenisModel();
-            $users = new UsersModel();
+            if ($hari_ini > $deadline) {
+                $msg = [
+                    'informasi' => 'Mohon Maaf, Batas waktu untuk Perubahan Data Telah Habis!!'
+                ];
+                echo json_encode($msg);
+            } else {
+                $this->PekerjaanModel = new PekerjaanModel();
+                $this->ShdkModel = new ShdkModel();
+                $this->StatusKawinModel = new StatusKawinModel();
+                $this->WilayahModel = new WilayahModel();
+                $this->BansosModel = new BansosModel();
+                $DisabilitasJenisModel = new DisabilitasJenisModel();
+                $users = new UsersModel();
 
-            $id = $this->request->getVar('id');
-            $model = new Usulan22Model();
-            $row = $model->find($id);
+                $id = $this->request->getVar('id');
+                $model = new Usulan22Model();
+                $row = $model->find($id);
 
-            $data = [
-                'shdk' => $shdk->findAll(),
-                'pekerjaan' => $pekerjaan->orderBy('JenisPekerjaan', 'asc')->findAll(),
-                'statusKawin' => $statusKawin->orderBy('StatusKawin', 'asc')->findAll(),
-                'desa' => $desa->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
-                'rw' => $this->RwModel->noRw(),
-                'rt' => $this->RtModel->noRt(),
-                'bansos' => $bansos->findAll(),
-                'users' => $users->findAll(),
-                'jenkel' => $this->GenModel->getDataJenkel(),
-                'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
+                $data = [
+                    'shdk' => $this->ShdkModel->findAll(),
+                    'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
+                    'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
+                    'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+                    'rw' => $this->RwModel->noRw(),
+                    'rt' => $this->RtModel->noRt(),
+                    'bansos' => $this->BansosModel->findAll(),
+                    'users' => $users->findAll(),
+                    'jenkel' => $this->GenModel->getDataJenkel(),
+                    'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
 
-                'created_by' => session()->get('nik'),
-                'stahub' => $row['shdk'],
-                'kelurahan' => $row['kelurahan'],
-                'datarw' => $row["rw"],
-                'datart' => $row["rt"],
-                'alamat' => $row['alamat'],
-                'status_kawin' => $row["status_kawin"],
-                'jenis_pekerjaan' => $row["jenis_pekerjaan"],
-                'jenis_kelamin' => $row['jenis_kelamin'],
-                'ibu_kandung' => strtoupper($row["ibu_kandung"]),
-                'tanggal_lahir' => $row["tanggal_lahir"],
-                'tempat_lahir' => $row["tempat_lahir"],
-                'nama' => $row['nama'],
-                'nokk' => $row['nokk'],
-                'databansos' => $row['program_bansos'],
-                'du_nik' => $row['du_nik'],
-                'id' => $row['du_id'],
-                'disabil_status' => $row['disabil_status'],
-                'disabil_jenis' => $row['disabil_kode'],
-                'status_hamil' => $row['hamil_status'],
-                'tgl_hamil' => $row['hamil_tgl'],
-                // 'foto_rumah' => $nama_foto_rumah,
-            ];
-            $msg = [
-                'sukses' => view('dtks/data/dtks/usulan/modaledit', $data)
-            ];
-            echo json_encode($msg);
+                    'created_by' => session()->get('nik'),
+                    'stahub' => $row['shdk'],
+                    'kelurahan' => $row['kelurahan'],
+                    'datarw' => $row["rw"],
+                    'datart' => $row["rt"],
+                    'alamat' => $row['alamat'],
+                    'status_kawin' => $row["status_kawin"],
+                    'jenis_pekerjaan' => $row["jenis_pekerjaan"],
+                    'jenis_kelamin' => $row['jenis_kelamin'],
+                    'ibu_kandung' => strtoupper($row["ibu_kandung"]),
+                    'tanggal_lahir' => $row["tanggal_lahir"],
+                    'tempat_lahir' => $row["tempat_lahir"],
+                    'nama' => $row['nama'],
+                    'nokk' => $row['nokk'],
+                    'databansos' => $row['program_bansos'],
+                    'du_nik' => $row['du_nik'],
+                    'id' => $row['du_id'],
+                    'disabil_status' => $row['disabil_status'],
+                    'disabil_jenis' => $row['disabil_kode'],
+                    'status_hamil' => $row['hamil_status'],
+                    'tgl_hamil' => $row['hamil_tgl'],
+                    // 'foto_rumah' => $nama_foto_rumah,
+                ];
+
+                $msg = [
+                    'sukses' => view('dtks/data/dtks/usulan/modaledit', $data)
+                ];
+                echo json_encode($msg);
+            }
         } else {
             return view('lockscreen');
         }
@@ -697,7 +741,7 @@ class Usulan22 extends BaseController
         $filter5 = $this->request->getVar('data_tahun');
         $filter6 = $this->request->getVar('data_bulan');
 
-        // dd($desa);
+        // dd($this->WilayahModel);
         // if (isset($tmbExpData)) {
         // if ($filter4 == null || $filter5 == null || $filter6 == null) {
 
@@ -709,7 +753,7 @@ class Usulan22 extends BaseController
         $data = $this->Usulan22Model->dataExport($filter1, $filter4, $filter5, $filter6)->getResultArray();
         // dd($data);
 
-        $desa = $wilayahModel->getVillage($filter1);
+        $this->WilayahModel = $wilayahModel->getVillage($filter1);
         $bulan = array(
             1 =>   'Januari',
             'Februari',
@@ -724,8 +768,8 @@ class Usulan22 extends BaseController
             'November',
             'Desember'
         );
-        // $file_name = 'TEMPLATE_PENGUSULAN_PAKENJENG - ' . $desa['name'] . ' - ' . $filter4 . '.xlsx';
-        $file_name = 'TEMPLATE_EXCEL_USULAN - PAKENJENG - ' .  $desa['name'] . ' - ' . strtoupper($bulan[$filter6]) . '.xlsx';
+        // $file_name = 'TEMPLATE_PENGUSULAN_PAKENJENG - ' . $this->WilayahModel['name'] . ' - ' . $filter4 . '.xlsx';
+        $file_name = 'TEMPLATE_EXCEL_USULAN - PAKENJENG - ' .  $this->WilayahModel['name'] . ' - ' . strtoupper($bulan[$filter6]) . '.xlsx';
 
         $spreadsheet = new Spreadsheet();
 
@@ -892,18 +936,18 @@ class Usulan22 extends BaseController
             $kode_bulan = date('n');
             $kode_tahun = date('Y');
 
-            $desa = $wilayahModel->getVillage($kode_desa);
-            // dd($desa);
-            if (is_array($desa)) {
-                $desaUpper = strtoupper($desa['name']);
-                $desaPropper = ucwords(strtolower($desa['name']));
+            $this->WilayahModel = $wilayahModel->getVillage($kode_desa);
+            // dd($this->WilayahModel);
+            if (is_array($this->WilayahModel)) {
+                $this->WilayahModelUpper = strtoupper($this->WilayahModel['name']);
+                $this->WilayahModelPropper = ucwords(strtolower($this->WilayahModel['name']));
             } else {
-                $desaUpper = strtoupper($desa);
-                $desaPropper = ucwords(strtolower($desa));
+                $this->WilayahModelUpper = strtoupper($this->WilayahModel);
+                $this->WilayahModelPropper = ucwords(strtolower($this->WilayahModel));
             }
 
 
-            // dd($desaUpper);
+            // dd($this->WilayahModelUpper);
             $bulan = array(
                 1 =>   'Januari',
                 'Februari',
@@ -954,8 +998,8 @@ class Usulan22 extends BaseController
             }
 
             $templateProcessor->setValues([
-                'desaUpper' => $desaUpper,
-                'desaPropper' => $desaPropper,
+                'desaUpper' => $this->WilayahModelUpper,
+                'desaPropper' => $this->WilayahModelPropper,
                 'sekretariat' => $user_login['lp_sekretariat'],
                 'email' => $user_login['lp_email'],
                 'kode_pos' => $user_login['lp_kode_pos'],
@@ -974,7 +1018,7 @@ class Usulan22 extends BaseController
                 'nama_pimpinan' => strtoupper($user_login['lp_kepala']),
             ]);
 
-            $filename = 'BA_PENGUSULAN – PAKENJENG – ' . $desa['name'] . ' – ' . strtoupper($bulan[$kode_bulan]) . '.docx';
+            $filename = 'BA_PENGUSULAN – PAKENJENG – ' . $this->WilayahModel['name'] . ' – ' . strtoupper($bulan[$kode_bulan]) . '.docx';
 
             header("Content-Description: File Transfer");
             header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -985,5 +1029,197 @@ class Usulan22 extends BaseController
 
             $templateProcessor->saveAs('php://output');
         }
+    }
+
+    public function import_csv()
+    {
+        $data = [
+            'namaApp' => 'Opr NewDTKS',
+            'title' => 'Import CSV Report',
+            'user_login' => $this->AuthModel->getUserId(),
+            'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+            'datarw' => $this->RwModel->noRw(),
+            'bansos' => $this->BansosModel->findAll(),
+            'statusRole' => $this->GenModel->getStatusRole(),
+        ];
+        // dd($data['session']);
+        return view('dtks/data/dtks/usulan/imporCsv', $data);
+    }
+    public function importCsvToDb()
+    {
+        // $this->validate =  \Config\Services::validation();
+        // $input = $this->validate([
+        //     'file' => [
+        //         'rules' => 'uploaded[file]|max_size[file,2048]|ext_in[file,csv]',
+        //         'errors' => [
+        //             'uploaded' => 'Belum ada File yang di Upload',
+        //             'max_size' => 'Ukuran file terlalu besar',
+        //             'ext_in' => 'File yang anda Upload bukan CSV',
+        //         ]
+        //     ]
+        // ]);
+        // $input = $validation->setRules([
+        //     'file' => [
+        //         'label'  => 'File CSV',
+        //         'rules'  => 'uploaded[file]|max_size[file,2048]|ext_in[file,csv]',
+        //         'errors' => [
+        //             'uploaded' => 'Belum ada File yang di Upload',
+        //             'max_size' => 'Ukuran file terlalu besar',
+        //             'ext_in' => 'File yang anda Upload bukan CSV',
+        //         ]
+        //     ]
+        // ]);
+        $input = $this->validate([
+            'file' => 'uploaded[file]|max_size[file,2048]|ext_in[file,csv]'
+        ]);
+        if (!$input) {
+            $data = [
+                'namaApp' => 'Opr NewDTKS',
+                'title' => 'Import CSV Report',
+                'user_login' => $this->AuthModel->getUserId(),
+                'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+                'datarw' => $this->RwModel->noRw(),
+                'bansos' => $this->BansosModel->findAll(),
+                'statusRole' => $this->GenModel->getStatusRole(),
+                'session' => session()->get(),
+                'validation' => $this->validator,
+            ];
+            // dd($data['validation']);
+            // $data['validation'] = $this->validator;
+            return view('dtks/data/dtks/usulan/imporCsv', $data);
+        } else {
+            if ($file = $this->request->getFile('file')) {
+                if ($file->isValid() && !$file->hasMoved()) {
+
+                    // Get random file name
+                    $newName = $file->getRandomName();
+
+                    // Store file in public/csvfile/ folder
+                    $file->move('../public/csvfile', $newName);
+
+                    // Reading file
+                    $file = fopen("../public/csvfile/" . $newName, "r");
+                    $i = 0;
+                    $numberOfFields = 8; // Total number of fields
+
+                    $csvArr = array();
+
+                    // Initialize $importData_arr Array
+                    while (($filedata = fgetcsv($file, 1000, ",")) !== FALSE) {
+                        $num = count($filedata);
+
+                        // Skip first row & check number of fields
+                        if ($i > 0 && $num == $numberOfFields) {
+
+                            // Key names are the insert table field names - name, email, city, and status
+                            $csvArr[$i]['cr_nama_kec'] = $filedata[0];
+                            $csvArr[$i]['cr_nama_desa'] = $filedata[1];
+                            $csvArr[$i]['cr_nik_usulan'] = $filedata[2];
+                            $csvArr[$i]['cr_program_bansos'] = $filedata[3];
+                            $csvArr[$i]['cr_hasil'] = $filedata[4];
+                            $csvArr[$i]['cr_padan'] = $filedata[5];
+                            $csvArr[$i]['cr_nama_lgkp'] = $filedata[6];
+                            $csvArr[$i]['cr_ket_vali'] = $filedata[7];
+                            $csvArr[$i]['cr_created_by'] = session()->get('nik');
+                        }
+                        $i++;
+                    }
+                    fclose($file);
+
+                    // Insert data
+                    $count = 0;
+                    foreach ($csvArr as $userdata) {
+                        $this->CsvReportModel = new CsvReportModel();
+
+                        // Check record
+                        $findRecord = $this->CsvReportModel->where('cr_nik_usulan', $userdata['cr_nik_usulan'])->countAllResults();
+
+                        if ($findRecord == 0) {
+
+                            ## Insert Record
+                            if ($this->CsvReportModel->insert($userdata)) {
+                                $count++;
+                            }
+                        }
+                    }
+
+                    // Set Session
+                    session()->setFlashdata('message', $count . ' rows successfully added.');
+                    session()->setFlashdata('alert-class', 'alert-success');
+                } else {
+                    // Set Session
+                    session()->setFlashdata('message', 'CSV file coud not be imported.');
+                    session()->setFlashdata('alert-class', 'alert-danger');
+                }
+            } else {
+
+                // Set Session
+                session()->setFlashdata('message', 'CSV file coud not be imported.');
+                session()->setFlashdata('alert-class', 'alert-danger');
+            }
+        }
+        return redirect()->route('import_csv');
+    }
+
+    public function tbCsv()
+    {
+        $this->CsvReportModel = new CsvReportModel();
+        $csrfName = csrf_token();
+        $csrfHash = csrf_hash();
+
+        $filter1 = $this->request->getPost('desa');
+        $filter2 = $this->request->getPost('rw');
+        $filter3 = $this->request->getPost('rt');
+        $filter4 = $this->request->getPost('bansos');
+        $filter5 = '';
+        $filter6 = '';
+        // $filter5 = $this->request->getPost('data_tahun');
+        // $filter6 = $this->request->getPost('data_bulan');
+
+        $listing = $this->CsvReportModel->getDataTabel($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
+        $jumlah_semua = $this->CsvReportModel->semua();
+        $jumlah_filter = $this->CsvReportModel->filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
+
+        $data = array();
+        $no = $_POST['start'];
+        foreach ($listing as $key) {
+
+            $no++;
+            $row = array();
+            $row[] = $no;
+            if (session()->get('role_id') < 3) {
+                $row[] = $key->kecamatan;
+                $row[] = $key->kelurahan;
+            }
+            $row[] = $key->cr_nama_kec;
+            $row[] = $key->cr_nama_desa;
+            $row[] = $key->du_nik;
+            $row[] = $key->nama;
+            $row[] = $key->cr_nama_lgkp;
+            $row[] = $key->nokk;
+            $row[] = $key->alamat;
+            $row[] = $key->rt;
+            $row[] = $key->rw;
+            if (session()->get('role_id') < 3) {
+                $row[] = $key->program_bansos;
+            }
+            $row[] = $key->cr_program_bansos;
+            $row[] = $key->cr_hasil;
+            $row[] = $key->cr_padan;
+            $row[] = $key->cr_ket_vali;
+            $row[] = $key->cr_created_by;
+            $row[] = $key->cr_created_at;
+            $data[] = $row;
+        }
+
+        $output = array(
+            "draw" => $_POST['draw'],
+            "recordsTotal" => $jumlah_semua->jml,
+            "recordsFiltered" => $jumlah_filter->jml,
+            "data" => $data,
+        );
+        $output[$csrfName] = $csrfHash;
+
+        echo json_encode($output);
     }
 }

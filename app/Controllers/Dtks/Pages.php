@@ -61,7 +61,6 @@ class Pages extends BaseController
         $JandaModel = new JandaModel();
         $janda = $JandaModel->jmlJanda();
 
-
         // dd($yatim);
         // $yatims[];
 

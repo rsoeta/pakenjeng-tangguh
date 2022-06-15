@@ -202,6 +202,16 @@ $user = session()->get('role_id');
                                 </a>
                             </li>
                         </ul>
+                        <ul class="nav nav-treeview nav-second-level">
+                            <li class="nav-item">
+                                <a href="/import_csv" class="nav-link">
+                                    <i class="nav-icon fa-fw fas fa-file"></i>
+                                    <p>
+                                        Import
+                                    </p>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 </div>
                 <div class="user-panel">

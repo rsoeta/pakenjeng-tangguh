@@ -76,7 +76,7 @@ class Filters extends BaseConfig
 				// 'usulan', 'usulan/*',
 				// 'dtks', 'dtks/*',
 				// 'tmbUsul',
-				'tambah',
+				// 'tambah',
 				'verivali', 'verivali/*',
 				// 'verivalipbi', 'verivalipbi/*',
 				'users', 'users/*',

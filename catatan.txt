@@ -1,11 +1,31 @@
 
 
-## Catatan Penambahan fitur profil user -- 2022-06-10
-## v2.5.0
-# Perbaharui Database
-    - tambah kolom kategori_role setelah nm_role di tabel tb_roles
-    - tambah kolom user_lembaga_id(int) setelah user_image di tabel dtks_users 
-    - pindah kolom password setelah kolom user_lembaga_id di tabel dtks_users 
-    - impor lembaga_profil
-    - impor lembaga_kategori
-    - tambah kode_kec(vharchar)(100) di tabel dtks_users 
+## Catatan ##
+
+## v2.5.2 -- Penambahan fitur profil user -- 2022-06-10
+    # issue
+        - sebagai syarat ekspor BA diperlukan informasi tambahan semacam Nama Pejabat setempat & sekretariat
+
+    ** Perbaharui Database
+        - tambah kolom kategori_role setelah nm_role di tabel tb_roles
+        - tambah kolom user_lembaga_id(int) setelah user_image di tabel dtks_users 
+        - pindah kolom password setelah kolom user_lembaga_id di tabel dtks_users 
+        - impor lembaga_profil
+        - impor lembaga_kategori
+        - tambah kode_kec(vharchar)(100) di tabel dtks_users 
+
+
+## v2.6.0 -- Penambahan fitur impor CSV Report -- 2022-06-10
+    # issue
+        - hasil ekspor dari siks online tidak menampilkan nama, alamat, dll terusul.
+
+    ** Permbaharuan Database 
+        - tambah tabel dtks_csv_report
+        - buat view join tabel dtks_csv_report (hasil ekspor siks online) & tabel dtks_usulan22
+            "CREATE OR REPLACE VIEW vw_csv_report AS
+            SELECT cr_id, kecamatan, cr_nama_kec, kelurahan, cr_nama_desa, nokk, nama, cr_nama_lgkp, du_nik, alamat, rt, rw, program_bansos,
+            cr_program_bansos, cr_hasil, cr_padan, cr_ket_vali, cr_created_by, cr_created_at
+            FROM dtks_csv_report
+            INNER JOIN dtks_usulan22
+            ON dtks_csv_report.cr_nik_usulan = dtks_usulan22.du_nik;"
+        
