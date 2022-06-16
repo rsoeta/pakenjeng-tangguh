@@ -19,13 +19,32 @@
     # issue
         - hasil ekspor dari siks online tidak menampilkan nama, alamat, dll terusul.
 
+    * solusi
+        - mempermudah operator dalam menemukan nama, alamat dari NIK terusul.
+
     ** Permbaharuan Database 
         - tambah tabel dtks_csv_report
         - buat view join tabel dtks_csv_report (hasil ekspor siks online) & tabel dtks_usulan22
-            "CREATE OR REPLACE VIEW vw_csv_report AS
-            SELECT cr_id, kecamatan, cr_nama_kec, kelurahan, cr_nama_desa, nokk, nama, cr_nama_lgkp, du_nik, alamat, rt, rw, program_bansos,
-            cr_program_bansos, cr_hasil, cr_padan, cr_ket_vali, cr_created_by, cr_created_at
-            FROM dtks_csv_report
-            INNER JOIN dtks_usulan22
-            ON dtks_csv_report.cr_nik_usulan = dtks_usulan22.du_nik;"
-        
+
+            CREATE OR REPLACE VIEW vw_csv_report AS
+                SELECT cr_id, kecamatan, cr_nama_kec, kelurahan, cr_nama_desa, nokk, nama, cr_nama_lgkp, du_nik, alamat, rt, rw, program_bansos,
+                cr_program_bansos, cr_hasil, cr_padan, cr_ket_vali, cr_created_by, cr_created_at
+            FROM 
+                dtks_csv_report
+            INNER JOIN 
+                dtks_usulan22 ON dtks_csv_report.cr_nik_usulan = dtks_usulan22.du_nik;
+
+
+            ALTER 
+                ALGORITHM=MERGE
+            VIEW vw_csv_report AS
+                SELECT cr_id, kecamatan, cr_nama_kec, kelurahan, cr_nama_desa, nokk, nama, cr_nama_lgkp, du_nik, alamat, rt, rw, program_bansos,
+                cr_program_bansos, cr_hasil, cr_padan, cr_ket_vali, cr_ck_id, cr_created_by, cr_created_at
+            FROM 
+                dtks_csv_report
+            INNER JOIN 
+                dtks_usulan22 ON dtks_csv_report.cr_nik_usulan = dtks_usulan22.du_nik;
+
+
+        - tambah tabel dtks_csv_ket dengan struktur: Terproses, Error, Tidak valid, Valid, Belum dipadankan dukcapil, Padan dukcapil, Tidak padan dukcapil
+        - ubah struktur tabel dtks_csv_ket dengan ditambah cr_ck_id

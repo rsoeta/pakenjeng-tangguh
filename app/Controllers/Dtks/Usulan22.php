@@ -197,7 +197,7 @@ class Usulan22 extends BaseController
             $jam = $times->hour;           // 16
             $menit = $times->minute;         // 15
             $hari_ini = $hari . $jam . $menit;
-            $deadline = '141414';
+            $deadline = '141312';
             if ($hari_ini > $deadline) {
                 $msg = [
                     'data' => '<script>
@@ -430,7 +430,7 @@ class Usulan22 extends BaseController
             $jam = $times->hour;           // 16
             $menit = $times->minute;         // 15
             $hari_ini = $hari . $jam . $menit;
-            $deadline = '141414';
+            $deadline = '141312';
             if ($hari_ini > $deadline) {
                 $msg = [
                     'informasi' => 'Mohon Maaf, Batas waktu untuk Perubahan Data, Telah Habis!!'
@@ -461,7 +461,7 @@ class Usulan22 extends BaseController
             $jam = $times->hour;           // 16
             $menit = $times->minute;         // 15
             $hari_ini = $hari . $jam . $menit;
-            $deadline = '141414';
+            $deadline = '141312';
 
             if ($hari_ini > $deadline) {
                 $msg = [
@@ -1041,38 +1041,79 @@ class Usulan22 extends BaseController
             'datarw' => $this->RwModel->noRw(),
             'bansos' => $this->BansosModel->findAll(),
             'statusRole' => $this->GenModel->getStatusRole(),
+            'csv_ket' => $this->CsvReportModel->getCsvKet(),
         ];
-        // dd($data['session']);
+        // dd($data['csv_ket']);
         return view('dtks/data/dtks/usulan/impor_csv', $data);
     }
+
+    public function tbCsv()
+    {
+        $this->CsvReportModel = new CsvReportModel();
+        $csrfName = csrf_token();
+        $csrfHash = csrf_hash();
+
+        $filter1 = $this->request->getPost('desa');
+        $filter2 = $this->request->getPost('rw');
+        $filter3 = $this->request->getPost('rt');
+        $filter4 = $this->request->getPost('namaFile');
+        // $filter5 = '';
+        // $filter6 = '';
+        $filter5 = $this->request->getPost('data_tahun');
+        $filter6 = $this->request->getPost('data_bulan');
+
+        $listing = $this->CsvReportModel->getDataTabel($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
+        $jumlah_semua = $this->CsvReportModel->semua();
+        $jumlah_filter = $this->CsvReportModel->filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
+
+        $data = array();
+        $no = $_POST['start'];
+        foreach ($listing as $key) {
+
+            $no++;
+            $row = array();
+            $row[] = $no;
+            $row[] = $key->kecamatan;
+            $row[] = $key->kelurahan;
+            $row[] = $key->cr_nama_kec;
+            $row[] = $key->cr_nama_desa;
+            $row[] = $key->du_nik;
+            $row[] = $key->nama;
+            $row[] = $key->cr_nama_lgkp;
+            $row[] = $key->nokk;
+            $row[] = $key->alamat;
+            $row[] = $key->rt;
+            $row[] = $key->rw;
+            // $row[] = $key->program_bansos;
+            $row[] = $key->cr_program_bansos;
+            $row[] = $key->cr_hasil;
+            $row[] = $key->cr_padan;
+            $row[] = $key->cr_ket_vali;
+            $row[] = $key->cr_ck_id;
+            $data[] = $row;
+        }
+
+        $output = array(
+            "draw" => $_POST['draw'],
+            "recordsTotal" => $jumlah_semua->jml,
+            "recordsFiltered" => $jumlah_filter->jml,
+            "data" => $data,
+        );
+        $output[$csrfName] = $csrfHash;
+
+        echo json_encode($output);
+    }
+
     public function importCsvToDb()
     {
-        // $this->validate =  \Config\Services::validation();
-        // $input = $this->validate([
-        //     'file' => [
-        //         'rules' => 'uploaded[file]|max_size[file,2048]|ext_in[file,csv]',
-        //         'errors' => [
-        //             'uploaded' => 'Belum ada File yang di Upload',
-        //             'max_size' => 'Ukuran file terlalu besar',
-        //             'ext_in' => 'File yang anda Upload bukan CSV',
-        //         ]
-        //     ]
-        // ]);
-        // $input = $validation->setRules([
-        //     'file' => [
-        //         'label'  => 'File CSV',
-        //         'rules'  => 'uploaded[file]|max_size[file,2048]|ext_in[file,csv]',
-        //         'errors' => [
-        //             'uploaded' => 'Belum ada File yang di Upload',
-        //             'max_size' => 'Ukuran file terlalu besar',
-        //             'ext_in' => 'File yang anda Upload bukan CSV',
-        //         ]
-        //     ]
-        // ]);
         $input = $this->validate([
             'file' => 'uploaded[file]|max_size[file,2048]|ext_in[file,csv]'
         ]);
-        if (!$input) {
+        $namaFile = $this->request->getPost('ck_id');
+
+        // dd($namaFile);
+
+        if (!$input && ($namaFile = '' || $namaFile == null)) {
             $data = [
                 'namaApp' => 'Opr NewDTKS',
                 'title' => 'Import CSV Report',
@@ -1082,6 +1123,7 @@ class Usulan22 extends BaseController
                 'bansos' => $this->BansosModel->findAll(),
                 'statusRole' => $this->GenModel->getStatusRole(),
                 'session' => session()->get(),
+                'csv_ket' => $this->CsvReportModel->getCsvKet(),
                 'validation' => $this->validator,
             ];
             // dd($data['validation']);
@@ -1095,10 +1137,10 @@ class Usulan22 extends BaseController
                     $newName = $file->getRandomName();
 
                     // Store file in public/csvfile/ folder
-                    $file->move('../public/csvfile', $newName);
+                    $file->move('../public/data/csvfile', $newName);
 
                     // Reading file
-                    $file = fopen("../public/csvfile/" . $newName, "r");
+                    $file = fopen("../public/data/csvfile/" . $newName, "r");
                     $i = 0;
                     $numberOfFields = 8; // Total number of fields
 
@@ -1107,10 +1149,10 @@ class Usulan22 extends BaseController
                     // Initialize $importData_arr Array
                     while (($filedata = fgetcsv($file, 1000, ",")) !== FALSE) {
                         $num = count($filedata);
-
                         // Skip first row & check number of fields
                         if ($i > 0 && $num == $numberOfFields) {
 
+                            // $namaFile = $this->request->getPost('ck_id');
                             // Key names are the insert table field names - name, email, city, and status
                             $csvArr[$i]['cr_nama_kec'] = $filedata[0];
                             $csvArr[$i]['cr_nama_desa'] = $filedata[1];
@@ -1120,6 +1162,7 @@ class Usulan22 extends BaseController
                             $csvArr[$i]['cr_padan'] = $filedata[5];
                             $csvArr[$i]['cr_nama_lgkp'] = $filedata[6];
                             $csvArr[$i]['cr_ket_vali'] = $filedata[7];
+                            $csvArr[$i]['cr_ck_id'] = $namaFile;
                             $csvArr[$i]['cr_created_by'] = session()->get('nik');
                         }
                         $i++;
@@ -1159,67 +1202,5 @@ class Usulan22 extends BaseController
             }
         }
         return redirect()->route('import_csv');
-    }
-
-    public function tbCsv()
-    {
-        $this->CsvReportModel = new CsvReportModel();
-        $csrfName = csrf_token();
-        $csrfHash = csrf_hash();
-
-        $filter1 = $this->request->getPost('desa');
-        $filter2 = $this->request->getPost('rw');
-        $filter3 = $this->request->getPost('rt');
-        $filter4 = $this->request->getPost('bansos');
-        $filter5 = '';
-        $filter6 = '';
-        // $filter5 = $this->request->getPost('data_tahun');
-        // $filter6 = $this->request->getPost('data_bulan');
-
-        $listing = $this->CsvReportModel->getDataTabel($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
-        $jumlah_semua = $this->CsvReportModel->semua();
-        $jumlah_filter = $this->CsvReportModel->filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
-
-        $data = array();
-        $no = $_POST['start'];
-        foreach ($listing as $key) {
-
-            $no++;
-            $row = array();
-            $row[] = $no;
-            if (session()->get('role_id') < 3) {
-                $row[] = $key->kecamatan;
-                $row[] = $key->kelurahan;
-            }
-            $row[] = $key->cr_nama_kec;
-            $row[] = $key->cr_nama_desa;
-            $row[] = $key->du_nik;
-            $row[] = $key->nama;
-            $row[] = $key->cr_nama_lgkp;
-            $row[] = $key->nokk;
-            $row[] = $key->alamat;
-            $row[] = $key->rt;
-            $row[] = $key->rw;
-            if (session()->get('role_id') < 3) {
-                $row[] = $key->program_bansos;
-            }
-            $row[] = $key->cr_program_bansos;
-            $row[] = $key->cr_hasil;
-            $row[] = $key->cr_padan;
-            $row[] = $key->cr_ket_vali;
-            $row[] = $key->cr_created_by;
-            $row[] = $key->cr_created_at;
-            $data[] = $row;
-        }
-
-        $output = array(
-            "draw" => $_POST['draw'],
-            "recordsTotal" => $jumlah_semua->jml,
-            "recordsFiltered" => $jumlah_filter->jml,
-            "data" => $data,
-        );
-        $output[$csrfName] = $csrfHash;
-
-        echo json_encode($output);
     }
 }

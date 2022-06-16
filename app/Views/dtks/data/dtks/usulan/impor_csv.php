@@ -37,12 +37,26 @@
             <form action="<?= site_url('importCsvToDb') ?>" method="post" enctype="multipart/form-data">
                 <?= csrf_field(); ?>
                 <div class="row">
-                    <div class="col-12 col-sm-3">
-                        <div class="row">
-                            <div class="col-6 col-sm-4 mb-2 input-group">
-                                <input type="file" name="file" id="file" class="form-control">
-                                <!-- Error -->
-                                <input type="submit" name="submit" value="Upload" class="btn btn-info" />
+                    <div class="row">
+                        <div class="col-12 col-sm-12">
+                            <label for="ck_id" class="col-sm-2">Nama File Upload</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-sm-6 form-group row">
+                            <div class="col-12 col-sm-5">
+                                <select name="ck_id" id="ck_id" class="form-control form-control-sm">
+                                    <option value="">--File Kosong--</option>
+                                    <?php foreach ($csv_ket as $row) { ?>
+                                        <option value="<?= $row['ck_id']; ?>"><?= $row['ck_nama']; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                            <div class="col-10 col-sm-5">
+                                <input type="file" name="file" id="file" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-2 col-sm-2">
+                                <input type="submit" name="submit" value="Upload" class="btn btn-info btn-sm" />
                             </div>
                         </div>
                     </div>
@@ -51,7 +65,7 @@
             <div class="row mb-2">
                 <div class="col-sm-2 col-6 mb-2">
                     <select <?= $user >= 3 ? 'disabled' : ''; ?> class="form-control form-control-sm" name="desa" id="desa">
-                        <option value="">[ Desa Kosong ]</option>
+                        <option value="">[ Semua Desa ]</option>
                         <?php foreach ($desa as $row) { ?>
                             <option <?= $desa_id == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id']; ?>"><?= $row['name']; ?></option>
                         <?php } ?>
@@ -61,7 +75,7 @@
                     <select <?php if ($user >= 4) {
                                 echo 'disabled = "true"';
                             } ?> class="form-control form-control-sm" name="rw" id="rw">
-                        <option value="">[ RW Kosong ]</option>
+                        <option value="">[ Semua RW ]</option>
                         <?php foreach ($datarw as $row) { ?>
                             <option <?php if ($jabatan == $row['no_rw']) {
                                         echo 'selected';
@@ -71,20 +85,20 @@
                 </div>
                 <div class="col-sm-2 col-3 mb-2">
                     <select class="form-control form-control-sm" name="rt" id="rt">
-                        <option value="">[ RT Kosong ]</option>
+                        <option value="">[ Semua RT ]</option>
                     </select>
                 </div>
                 <div class="col-sm-2 col-6 mb-2">
-                    <select class="form-control form-control-sm" name="bansos" id="bansos">
-                        <option value="">[ Bansos Kosong ]</option>
-                        <?php foreach ($bansos as $row) { ?>
-                            <option value="<?= $row['dbj_id']; ?>"><?= $row['dbj_ket_bansos']; ?></option>
+                    <select class="form-control form-control-sm" name="namaFile" id="namaFile">
+                        <option value="">[ Semua File ]</option>
+                        <?php foreach ($csv_ket as $row) { ?>
+                            <option value="<?= $row['ck_id']; ?>"><?= $row['ck_nama']; ?></option>
                         <?php } ?>
                     </select>
                 </div>
                 <div class="col-sm-2 col-3 mb-2">
                     <select class="form-control form-control-sm" name="data_tahun" id="data_tahun">
-                        <option value="">[ Tahun Kosong ]</option>
+                        <option value="">[ Semua Tahun ]</option>
                         <?php
                         $mulai = 2021;
                         $tahun = date('Y');
@@ -117,27 +131,30 @@
             </div>
             <div>
                 <br>
-                <table class="table" id="tb_csv">
-                    <thead class=" text-primary">
+                <table class="display cell-border row-border compact stripe" id="tb_csv" cellspacing="0" width="100%">
+                    <thead class="text-center">
                         <tr>
-                            <th>NO</th>
-                            <?php if (session()->get('role_id') == 1) { ?>
-                                <th>KECAMATAN</th>
-                                <th>DESA / KEL.</th>
-                            <?php } ?>
-                            <th>KECAMATAN</th>
-                            <th>DESA / KEL.</th>
-                            <th>NO. KK</th>
-                            <th>NAMA PENDAFTAR</th>
-                            <th>NAMA TERDAFTAR</th>
-                            <th>NIK</th>
-                            <th>ALAMAT</th>
-                            <th>RT</th>
-                            <th>RW</th>
-                            <th>PROGRAM BANSOS</th>
-                            <th>HASIL</th>
-                            <th>STATUS PADAN</th>
-                            <th>KET. VALIDASI</th>
+                            <th rowspan="2">NO</th>
+                            <th rowspan="2">KODE KECAMATAN</th>
+                            <th rowspan="2">KODE DESA / KEL.</th>
+                            <th rowspan="2">KECAMATAN</th>
+                            <th rowspan="2">DESA / KEL.</th>
+                            <th rowspan="2">NO. KK</th>
+                            <th colspan="2">NAMA</th>
+                            <th rowspan="2">NIK</th>
+                            <th rowspan="2">ALAMAT</th>
+                            <th rowspan="2">RT</th>
+                            <th rowspan="2">RW</th>
+                            <!-- <th rowspan="2">KODE PROGRAM BANSOS</th> -->
+                            <th rowspan="2">PROGRAM BANSOS</th>
+                            <th rowspan="2">HASIL</th>
+                            <th rowspan="2">STATUS PADAN</th>
+                            <th rowspan="2">KET. VALIDASI</th>
+                            <th rowspan="2">FILE</th>
+                        </tr>
+                        <tr>
+                            <th>PENDAFTAR</th>
+                            <th>TERDAFTAR</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -160,31 +177,39 @@
         'responsive': true,
         'processing': true,
         'serverSide': true,
-        "ajax": {
-            "url": "<?= site_url('tb_csv'); ?>",
-            "type": "POST",
-            "data": {
-                "csrf_test_name": $('input[name=csrf_test_name]').val()
+        'ajax': {
+            'url': '<?= site_url('tb_csv'); ?>',
+            'type': 'POST',
+            'data': {
+                'csrf_test_name': $('input[name=csrf_test_name]').val()
             },
-            "data": function(data) {
+            'data': function(data) {
                 data.csrf_test_name = $('input[name=csrf_test_name]').val();
                 data.desa = $('#desa').val();
                 data.rw = $('#rw').val();
                 data.rt = $('#rt').val();
-                data.bansos = $('#bansos').val();
+                data.namaFile = $('#namaFile').val();
                 data.data_tahun = $('#data_tahun').val();
                 data.data_bulan = $('#data_bulan').val();
             },
-            "dataSrc": function(response) {
+            'dataSrc': function(response) {
                 $('input[name=csrf_test_name]').val(response.csrf_test_name);
                 return response.data;
             }
         },
 
-        "columnDefs": [{
-            "targets": [0],
-            "orderable": false
-        }]
+        columnDefs: [{
+                target: [1],
+                visible: false,
+                searchable: false,
+            },
+            {
+                target: [2],
+                visible: false,
+                searchable: false,
+            },
+        ]
+
     });
 
     $('#desa').change(function() {
@@ -196,7 +221,7 @@
     $('#rt').change(function() {
         table.draw();
     });
-    $('#bansos').change(function() {
+    $('#namaFile').change(function() {
         table.draw();
     });
     $('#data_tahun').change(function() {
@@ -301,9 +326,10 @@
             });
         });
 
-
-        $('#tb_csv');
-
+        var dt = $('#tb_csv').DataTable();
+        //hide the second and third columns
+        dt.columns([1, 2, 16]).visible(false);
+        // $('#tb_csv');
 
         $('#rw').change(function() {
             var desa = $('#desa').val();

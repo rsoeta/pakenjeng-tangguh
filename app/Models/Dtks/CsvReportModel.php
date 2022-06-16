@@ -3,6 +3,7 @@
 namespace App\Models\Dtks;
 
 use CodeIgniter\Database\ConnectionInterface;
+use CodeIgniter\I18n\Time;
 use CodeIgniter\Model;
 
 class CsvReportModel extends Model
@@ -17,6 +18,7 @@ class CsvReportModel extends Model
         'cr_padan',
         'cr_nama_lgkp',
         'cr_ket_vali',
+        'cr_ck_id',
         'cr_created_by',
         'cr_created_at',
     ];
@@ -25,7 +27,7 @@ class CsvReportModel extends Model
     protected $validationMessages = [];
     protected $skipValidation = false;
 
-    var $column_order = array('cr_id', 'kecamatan', 'kelurahan', 'cr_nama_kec', 'cr_nama_desa', 'du_nik', 'nama', 'cr_nama_lgkp', 'nokk', 'alamat', 'rt', 'rw', 'program_bansos', 'cr_program_bansos', 'cr_hasil', 'cr_padan', 'cr_ket_vali', 'cr_created_by', 'cr_created_at');
+    var $column_order = array('cr_id', 'cr_nama_kec', 'cr_nama_desa', 'du_nik', 'nama', 'cr_nama_lgkp', 'nokk', 'alamat', 'rt', 'rw', 'program_bansos', 'cr_program_bansos', 'cr_hasil', 'cr_padan', 'cr_ket_vali', 'cr_ck_id');
 
 
     var $order = array('vw_csv_report.cr_id' => 'asc');
@@ -54,19 +56,19 @@ class CsvReportModel extends Model
         if ($filter4 == "") {
             $kondisi_filter4 = "";
         } else {
-            $kondisi_filter4 = " AND program_bansos = '$filter4'";
+            $kondisi_filter4 = " AND cr_ck_id = '$filter4'";
         }
         // updated_at
         if ($filter5 == "") {
             $kondisi_filter5 = "";
         } else {
-            $kondisi_filter5 = " AND cr_hasil = '$filter5'";
+            $kondisi_filter5 = " AND tahun_upload = '$filter5'";
         }
         // updated_at
         if ($filter6 == "") {
             $kondisi_filter6 = "";
         } else {
-            $kondisi_filter6 = " AND cr_padan = '$filter6'";
+            $kondisi_filter6 = " AND bulan_upload = '$filter6'";
         }
 
         // search
@@ -90,7 +92,7 @@ class CsvReportModel extends Model
         if ($_POST['length'] != -1);
         $db = db_connect();
         $builder = $db->table('vw_csv_report');
-        $query = $builder->select('cr_id, kecamatan, kelurahan, cr_nama_kec, cr_nama_desa, du_nik, nama, cr_nama_lgkp, nokk, alamat, rt, rw, program_bansos, cr_program_bansos, cr_hasil, cr_padan, cr_ket_vali, cr_created_by, cr_created_at')
+        $query = $builder->select('cr_id, kecamatan, kelurahan, cr_nama_kec, cr_nama_desa, du_nik, nama, cr_nama_lgkp, nokk, alamat, rt, rw, program_bansos, cr_program_bansos, cr_hasil, cr_padan, cr_ket_vali, cr_ck_id, cr_created_by, cr_created_at, tahun_upload, bulan_upload')
             ->where($kondisi_search)
             ->orderBy($result_order, $result_dir)
             ->limit($_POST['length'], $_POST['start'])
@@ -132,19 +134,19 @@ class CsvReportModel extends Model
         if ($filter4 == "") {
             $kondisi_filter4 = "";
         } else {
-            $kondisi_filter4 = " AND program_bansos = '$filter4'";
+            $kondisi_filter4 = " AND cr_ck_id = '$filter4'";
         }
         // rt
         if ($filter5 == "") {
             $kondisi_filter5 = "";
         } else {
-            $kondisi_filter5 = " AND cr_hasil = '$filter5'";
+            $kondisi_filter5 = " AND tahun_upload = '$filter5'";
         }
         // updated_at
         if ($filter6 == "") {
             $kondisi_filter6 = "";
         } else {
-            $kondisi_filter6 = " AND cr_padan = '$filter6'";
+            $kondisi_filter6 = " AND bulan_upload = '$filter6'";
         }
 
         // kondisi search
@@ -158,6 +160,17 @@ class CsvReportModel extends Model
         $sQuery = "SELECT COUNT(cr_id) as jml FROM vw_csv_report WHERE cr_id != '' $kondisi_search";
         $db = db_connect();
         $query = $db->query($sQuery)->getRow();
+
+        return $query;
+    }
+
+    public function getCsvKet()
+    {
+        $builder = $this->db->table('tb_csv_ket')
+            ->select('*')
+            ->orderBy('ck_nama', 'ASC')
+            ->get();
+        $query = $builder->getResultArray();
 
         return $query;
     }
