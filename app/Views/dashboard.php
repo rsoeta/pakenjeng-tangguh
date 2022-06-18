@@ -64,7 +64,7 @@
                                                         <p>
                                                             <i class="fas fa-quote-left fa-lg text-warning me-2"></i>
                                                             <span class="font-italic mb-2">
-                                                                <strong>Assalamualaikum Selamat sore bapak/ibu</strong>
+                                                                <strong>Assalamualaikum Selamat <?= Salam(); ?> bapak/ibu</strong>
                                                             </span>
                                                             <br>
                                                             <span>
