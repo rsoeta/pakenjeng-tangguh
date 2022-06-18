@@ -66,4 +66,22 @@ class GenModel extends Model
 
 		return $query;
 	}
+
+	// function id data tb_penduduk_pekerjaan
+	public function getPendudukPekerjaan()
+	{
+		$builder = $this->db->table('tb_penduduk_pekerjaan');
+		$query = $builder->get();
+
+		return $query;
+	}
+
+	// function getdata from tb_ket_anomali
+	public function getDataKetAnomali()
+	{
+		$builder = $this->db->table('tb_ket_anomali');
+		$query = $builder->get();
+
+		return $query;
+	}
 }

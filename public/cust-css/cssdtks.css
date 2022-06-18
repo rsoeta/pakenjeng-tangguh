@@ -67,9 +67,17 @@ select[readonly] {
     touch-action: none;
 }
 
+#modalEdit .modal-dialog .modal-content .modal-header {
+        /* background yellow */
+        background-color: #f5b041;
+        /* style text header white */
+        color: white;
+    }
+
 #keluar {
     position: fixed;
     list-style-type: none;
     padding-bottom: 1em;
     bottom: 0;
 }
+

@@ -182,6 +182,25 @@ $user = session()->get('role_id');
                                     </p>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="nav-icon fa-fw fa fa-code-branch"></i>
+                                    <p>
+                                        DTKS
+                                        <i class="fas fa-angle-left right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview nav-third-level">
+                                    <li class="nav-item">
+                                        <a href="/verivaliAnomali" class="nav-link">
+                                            <i class="nav-icon fa-fw fa fa-user-alt-slash"></i>
+                                            <p>
+                                                Anomali
+                                            </p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
                         </ul>
                     </li>
                     <li class="nav-item">

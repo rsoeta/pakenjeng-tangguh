@@ -138,6 +138,11 @@
         animation-delay: .3s;
     }
 
+    a {
+        color: #fff;
+        text-decoration: none;
+    }
+
     @media (min-width: 768px) {
         html {
             font-size: 14px;
@@ -201,7 +206,8 @@
 <div class='under'>
     <header class='under__content'>
         <h1 class='under__title'>Maintenance :(</h1>
-        <div class='under__text'>Mohon maaf atas ketidaknyamanan Anda, <br>Menu / Halaman ini sedang dalam tahap perbaikan.</div>
+        <div class='under__text'>Mohon maaf atas ketidaknyamanan Anda, <br>Menu / Halaman ini tidak tersedia / sedang dalam tahap perbaikan.</div>
+        <div class='under__text'>Silakan <a href="<?= base_url(); ?>">Kembali</a> ke <a style="color: white;" href="<?= base_url(); ?>">Dashboard</a></div>
         <!-- , silahkan ikuti sosial media kami untuk tetap mendapatkan informasi terkini. -->
     </header>
     <footer class='under__footer'>

@@ -16,6 +16,17 @@
     #bg-orange {
         background-color: orange;
     }
+
+    .gradient-custom {
+        /* fallback for old browsers */
+        background: #f6d365;
+
+        /* Chrome 10-25, Safari 5.1-6 */
+        background: -webkit-linear-gradient(to right, rgba(246, 211, 101, 1), rgba(253, 160, 133, 1));
+
+        /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        background: linear-gradient(to right, rgba(246, 211, 101, 1), rgba(253, 160, 133, 1))
+    }
 </style>
 
 <div class="content-wrapper">
@@ -26,7 +37,70 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-12">
-
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><strong>Perbaikan Anomali DTKS</strong></h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Inner -->
+                            <div class="card-body">
+                                <!-- Single item -->
+                                <div class="row d-flex justify-content-center">
+                                    <div class="col-12 col-sm-10 col-md-10 col-lg-10 col-xl-11">
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0">
+                                                <img src="<?= base_url('icon-dtks.png'); ?>" class="rounded-circle mb-4 mb-lg-0 shadow-2" alt="icon app" width="50" height="50">
+                                            </div>
+                                            <div class="flex-grow-1 ms-4 ps-3">
+                                                <figure>
+                                                    <blockquote class="blockquote mb-4">
+                                                        <p>
+                                                            <i class="fas fa-quote-left fa-lg text-warning me-2"></i>
+                                                            <span class="font-italic mb-2">
+                                                                <strong>Assalamualaikum Selamat sore bapak/ibu</strong>
+                                                            </span>
+                                                            <br>
+                                                            <span>
+                                                                Ijin memberikan informasi perihal <a href="/verivaliAnomali"><strong>Perbaikan Data Anomali</strong></a> sudah dapat diakses, pastikan ketika pengerjaan data anomali data kependudukan sudah <strong>ONLINE dengan KEMENDAGRI</strong>.
+                                                                <br>
+                                                                Selain anomali pekerjaan juga ada anomali sebagai berikut :
+                                                                <br>
+                                                                <strong>- NIK ganda berbeda nama</strong> : silakan perbaiki sesuai dengan data lapangan, silakan periksa data kependudukan di CAPIL atau Kecamatan untuk memastikan yang bersangkutan NIKnya
+                                                                <br>
+                                                                <strong>- NIK nonaktif oleh DUKCAPIL</strong> : silakan hubungi DISDUKCAPIL atau KECAMATAN perihal tersebut barangkali yang bersangkutan belum perekaman E-KTP
+                                                                <br>
+                                                                <strong>- NIK Tidak ada di DATABASE Dukcapil</strong> : silakan hubungi DISDUKCAPIL atau Kecamatan untuk melakukan pengecekan NIK
+                                                                <br>
+                                                                <strong>- Pekerjaan PNS/TNI/POLRI (dll)</strong> : Silakan pastikan terlebih dahulu yang pekerjaan bersangkutan apakah PNS/TNI/POLRI (dll) apakah benar atau bukan, apabila bukan silakan perbaiki data kependudukannya di terlebih dahulu CAPIL
+                                                                <br>
+                                                                <strong>- RR Ulang NIK Padan Nama Simil dibawah 80 Persen</strong> : perbaiki nama berdasarkan DISDUKCAPIL/KEMENDAGRI yang dapat dilihat di KTP atau KK dari KPM yang bersangkutan sesuai dengan data lapangan (Bukan nama panggilan)
+                                                            </span>
+                                                        </p>
+                                                    </blockquote>
+                                                    <figcaption class="blockquote-footer">
+                                                        <small>Presented by: <cite title="Opr NewDTKS"><small>Opr NewDTKS</small></cite></small>
+                                                    </figcaption>
+                                                </figure>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer clearfix">
+                                <a href="/verivaliAnomali" class="btn btn-sm btn-primary float-right">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
                         <div class="card">
                             <div class="card-header">
                                 <h3 class="card-title"><strong>Rekap Usulan DTKS Per-Desa dibulan ini</strong></h3>

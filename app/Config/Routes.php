@@ -63,14 +63,16 @@ $routes->post('tabel_pbi_verivali', 'Dtks\VervalPbi::tabel_pbi_verivali', ["filt
 $routes->post('editpbi', 'Dtks\VervalPbi::formedit', ["filter" => "authfilterdtks"]);
 $routes->post('updatepbi', 'Dtks\VervalPbi::ajax_update', ["filter" => "authfilterdtks"]);
 $routes->post('addpbi', 'Dtks\VervalPbi::save', ["filter" => "authfilterdtks"]);
-// $routes->get('usulan', 'Lockscreen::maintenance', ["filter" => "authfilterdtks"]);
-// $routes->post('tmbUsul', 'Lockscreen::maintenance', ["filter" => "authfilterdtks"]);
-// $routes->get('tambah', 'Lockscreen::maintenance', ["filter" => "authfilterdtks"]);
-// $routes->post('editUsulan', 'Lockscreen::maintenance', ["filter" => "authfilterdtks"]);
-// $routes->post('updateUsulan', 'Lockscreen::maintenance', ["filter" => "authfilterdtks"]);
-// $routes->post('dltUsul', 'Lockscreen::maintenance', ["filter" => "authfilterdtks"]);
-// $routes->post('tabel_data', 'Lockscreen::maintenance', ["filter" => "authfilterdtks"]);
-// $routes->get('expUsulan', 'Lockscreen::maintenance', ["filter" => "authfilterdtks"]);
+
+// VERVAL DTKS-ANOMALI
+$routes->get('verivaliAnomali', 'Dtks\VerivaliAnomali::index', ["filter" => "authfilterdtks"]);
+$routes->post('imporAnomali', 'Dtks\VerivaliAnomali::simpanExcel', ["filter" => "authfilterdtks"]);
+$routes->post('tabelAnomali', 'Dtks\VerivaliAnomali::tabel_data', ["filter" => "authfilterdtks"]);
+$routes->post('tabelAnomali2', 'Dtks\VerivaliAnomali::tabel_data2', ["filter" => "authfilterdtks"]);
+$routes->post('editAnomali', 'Dtks\VerivaliAnomali::formedit', ["filter" => "authfilterdtks"]);
+$routes->post('editAnomali2', 'Dtks\VerivaliAnomali::formedit2', ["filter" => "authfilterdtks"]);
+$routes->post('updateAnomali', 'Dtks\VerivaliAnomali::ajax_update', ["filter" => "authfilterdtks"]);
+$routes->post('updateAnomali2', 'Dtks\VerivaliAnomali::ajax_update2', ["filter" => "authfilterdtks"]);
 
 // USULAN
 $routes->get('usulan', 'Dtks\Usulan22::index', ["filter" => "authfilterdtks"]);

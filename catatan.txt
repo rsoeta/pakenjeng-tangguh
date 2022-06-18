@@ -48,3 +48,69 @@
 
         - tambah tabel dtks_csv_ket dengan struktur: Terproses, Error, Tidak valid, Valid, Belum dipadankan dukcapil, Padan dukcapil, Tidak padan dukcapil
         - ubah struktur tabel dtks_csv_ket dengan ditambah cr_ck_id
+
+## v2.7.0 -- Penambahan fitur dan Menu Perbaikan data Anomali -- 2022-06-17
+    # issue
+        - Perbaikan data anomali agar dapat di akses dan informasikan kepada user tk. RW
+
+    * solusi
+        - Janten kan pakenjeng-tangguh.id th akses na tiasa di filter dugika ka tingkat RW, Numawi siks online mah akses na kan dugika tingkat desa, numawi dijembatani ku pakenjeng-tangguh.id. 
+        Teras Kasus nu ayeuna nuju di verivali th nyaéta data anomali isina (tidak ada tanggal lahir, nama ibu, pekerjaan dsb). 
+        Tiasa ke ketua RW verivali na dina pakenjeng-tangguh.id, ke eksekusi na ku operator desa kana siks.kemensos.go.id daripada kedah ngempel keun KK nu masyarakat, mending via aplikasi pakenjeng-tangguh.id.
+
+    ** perbaikan Database
+        - tambah tabel dtks_verivali_anomali
+        dengan struktur :
+                            va_id,
+                            va_id_dtks,
+                            va_nik,
+                            va_nama,
+                            va_nkk,
+                            va_tmp_lhr,
+                            va_tgl_lhr,
+                            va_alamat,
+                            va_provinsi,
+                            va_kab,
+                            va_kec,
+                            va_desa,
+                            va_jk,
+                            va_ibu,
+                            va_pekerjaan,
+                            va_rw,
+                            va_nama_anomali,
+                            va_status,
+                            va_creator,
+
+        - buat view untuk tabel userinterface 
+            CREATE OR REPLACE VIEW vw_verivali_anomali AS
+                SELECT 
+                    va_id,
+                    db_id_dtks,
+                    db_province,
+                    db_regency,
+                    db_district,
+                    db_village,
+                    db_alamat,
+                    db_dusun,
+                    db_rw,
+                    va_rw,
+                    db_rt,
+                    db_nkk,
+                    db_nik,
+                    db_nama,
+                    db_tgl_lahir,
+                    db_tmp_lahir,
+                    db_jenkel_id,
+                    db_ibu_kandung,
+                    va_pekerjaan,
+                    va_nama_anomali,
+                    va_status,
+                    va_updated_at
+                FROM 
+                    dtks_bnba
+                INNER JOIN 
+                    dtks_verivali_anomali ON dtks_bnba.db_id_dtks = dtks_verivali_anomali.va_id_dtks;
+
+        - tambah tabel tb_penduduk_pekerjaan
+        - tambah tabel tb_ket_anomali
+        - tambah tabel tb_status
