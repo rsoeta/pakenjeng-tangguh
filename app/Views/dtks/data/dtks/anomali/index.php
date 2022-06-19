@@ -22,7 +22,7 @@
             ?>
             <?php if ($role <= 3) {  ?>
                 <div class="row">
-                    <div class="col">
+                    <div class="col-12">
                         <?php if (session()->getFlashdata('message')) { ?>
                             <div class="alert alert-info alert-dismissible fade show" role="alert" style="text-align: center;">
                                 <?= session()->getFlashdata('message') ?>
@@ -34,16 +34,16 @@
                         <ol class="float-right">
                             <form action="<?= site_url('imporAnomali') ?>" method="post" enctype="multipart/form-data">
                                 <?= csrf_field(); ?>
-                                <div class="col-sm-12 form-group row">
-                                    <div class="col-sm-6">
+                                <div class="col-12 col-sm-12 form-group row">
+                                    <div class="col-4 col-sm-6">
                                         <input type="file" name="file" id="file" class="form-control form-control-sm  float-right" required accept=".xls, .xlsx">
                                     </div>
-                                    <div class="col-sm-3">
+                                    <div class="col-4 col-sm-3">
                                         <button type="submit" name="submit" class="btn btn-success btn-sm  float-right">
                                             <i class="fa fa-upload"></i> Upload
                                         </button>
                                     </div>
-                                    <div class="col-sm-3">
+                                    <div class="col-4 col-sm-3">
                                         <button type="button" class="btn btn-info btn-sm  float-right" data-toggle="modal" onclick="reload_table()">
                                             <i class="fa fa-sync-alt"></i> Reload
                                         </button>
@@ -206,6 +206,7 @@
                                     <th>NO. KEC</th>
                                     <th>NO. KAB</th>
                                     <th>NO. PROV</th>
+                                    <th>STATUS PM</th>
                                     <th>KET. ANOMALI</th>
                                     <th>#</th>
                                 </tr>

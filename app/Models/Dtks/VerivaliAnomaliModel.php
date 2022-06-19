@@ -28,6 +28,7 @@ class VerivaliAnomaliModel extends Model
         'va_rw',
         'va_nama_anomali',
         'va_status',
+        'va_ds_id',
         'va_creator',
         'va_updated_at',
     ];
@@ -37,7 +38,7 @@ class VerivaliAnomaliModel extends Model
 
 
     var $column_order = array('',  'db_nik', 'db_nama', 'db_nkk', 'db_alamat',  'db_tmp_lahir', 'db_tgl_lahir', 'db_ibu_kandung', 'va_nama_anomali');
-    var $column_order2 = array('',  'va_nik', 'va_nama', 'va_nkk', 'va_alamat',  'va_tmp_lhr', 'va_tgl_lhr', 'va_ibu', 'va_nama_anomali');
+    var $column_order2 = array('',  'va_nik', 'va_nama', 'va_nkk', 'va_alamat',  'va_tmp_lhr', 'va_tgl_lhr', 'va_ibu', 'va_nama_anomali', 'va_ds_id');
 
     var $order = array('va_updated_at' => 'desc');
 
@@ -97,6 +98,7 @@ class VerivaliAnomaliModel extends Model
         $db = db_connect();
         $builder = $db->table('vw_verivali_anomali');
         $query = $builder->select('*')
+            ->join('dtks_status2', 'dtks_status2.id_status = vw_verivali_anomali.va_ds_id')
             ->where($kondisi_search)
             ->orderBy($result_order, $result_dir)
             ->limit($_POST['length'], $_POST['start'])
@@ -215,6 +217,7 @@ class VerivaliAnomaliModel extends Model
             ->join('tbl_jenkel', 'tbl_jenkel.IdJenKel = dtks_verivali_anomali.va_jk')
             ->join('tb_status', 'tb_status.sta_id = dtks_verivali_anomali.va_status')
             ->join('tb_penduduk_pekerjaan', 'tb_penduduk_pekerjaan.pk_id = dtks_verivali_anomali.va_pekerjaan')
+            ->join('dtks_status2', 'dtks_status2.id_status = dtks_verivali_anomali.va_ds_id')
             ->where($kondisi_search)
             ->orderBy($result_order, $result_dir)
             ->limit($_POST['length'], $_POST['start'])

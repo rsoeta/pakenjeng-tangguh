@@ -13,7 +13,7 @@
         - impor lembaga_profil
         - impor lembaga_kategori
         - tambah kode_kec(vharchar)(100) di tabel dtks_users 
-
+---------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## v2.6.0 -- Penambahan fitur impor CSV Report -- 2022-06-10
     # issue
@@ -48,6 +48,7 @@
 
         - tambah tabel dtks_csv_ket dengan struktur: Terproses, Error, Tidak valid, Valid, Belum dipadankan dukcapil, Padan dukcapil, Tidak padan dukcapil
         - ubah struktur tabel dtks_csv_ket dengan ditambah cr_ck_id
+---------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## v2.7.0 -- Penambahan fitur dan Menu Perbaikan data Anomali -- 2022-06-17
     # issue
@@ -104,13 +105,59 @@
                     db_ibu_kandung,
                     va_pekerjaan,
                     va_nama_anomali,
+                    va_ds_id,
                     va_status,
                     va_updated_at
                 FROM 
-                    dtks_bnba
+                    ((dtks_bnba
                 INNER JOIN 
-                    dtks_verivali_anomali ON dtks_bnba.db_id_dtks = dtks_verivali_anomali.va_id_dtks;
+                    dtks_verivali_anomali ON dtks_bnba.db_id_dtks = dtks_verivali_anomali.va_id_dtks)
+                INNER JOIN
+                    dtks_status2 ON dtks_verivali_anomali.va_ds_id = id_status);
 
         - tambah tabel tb_penduduk_pekerjaan
         - tambah tabel tb_ket_anomali
         - tambah tabel tb_status
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+## v2.7.1 -- Penambahan fitur dan Menu Perbaikan data Anomali -- 2022-06-17
+    # bug tidak ada status anomali bahwa sudah meninggal atau belum
+        - ubah tabel dtks_verivali_anomali dengan ditambah va_ds_id
+            ALTER TABLE dtks_verivali_anomali
+                ADD COLUMN va_ds_id INT DEFAULT 1 AFTER va_status;
+
+                ALTER TABLE dtks_verivali_anomali
+                MODIFY va_ds_id INT DEFAULT '1';
+
+        - replace view vw_verivali_anomali 
+            CREATE OR REPLACE VIEW vw_verivali_anomali AS
+                SELECT 
+                    va_id,
+                    db_id_dtks,
+                    db_province,
+                    db_regency,
+                    db_district,
+                    db_village,
+                    db_alamat,
+                    db_dusun,
+                    db_rw,
+                    va_rw,
+                    db_rt,
+                    db_nkk,
+                    db_nik,
+                    db_nama,
+                    db_tgl_lahir,
+                    db_tmp_lahir,
+                    db_jenkel_id,
+                    db_ibu_kandung,
+                    va_pekerjaan,
+                    va_nama_anomali,
+                    va_ds_id,
+                    va_status,
+                    va_updated_at
+                FROM 
+                    ((dtks_bnba
+                INNER JOIN 
+                    dtks_verivali_anomali ON dtks_bnba.db_id_dtks = dtks_verivali_anomali.va_id_dtks)
+                INNER JOIN
+                    dtks_status2 ON dtks_verivali_anomali.va_ds_id = id_status);

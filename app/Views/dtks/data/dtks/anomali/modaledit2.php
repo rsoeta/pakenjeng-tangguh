@@ -157,6 +157,17 @@
                                 <div class="invalid-feedback errorva_ibu"></div>
                             </div>
                         </div>
+                        <div class="form-group row nopadding">
+                            <label for="va_ds_id" class="col-4 col-sm-4 col-form-label">Status PM</label>
+                            <div class="col-8 col-sm-8">
+                                <select id="va_ds_id" name="va_ds_id" class="form-select form-select-sm">
+                                    <?php foreach ($statusDtks as $row) { ?>
+                                        <option <?= ($row['id_status'] == $va_ds_id) ? 'selected' : ''; ?> value="<?= $row['id_status']; ?>"> <?php echo $row['jenis_status']; ?></option>
+                                    <?php } ?>
+                                </select>
+                                <div class="invalid-feedback errorva_ds_id"></div>
+                            </div>
+                        </div>
                         <div class="form-group row nopadding" <?= ($role > 3) ? 'style="display: none;"' : ''; ?>>
                             <label for="va_status" class="col-4 col-sm-4 col-form-label">Ket. Verivali</label>
                             <div class="col-8 col-sm-8">
@@ -295,6 +306,14 @@
                         } else {
                             $('#va_ibu_kandung').removeClass('is-invalid');
                             $('.errorva_ibu_kandung').html('');
+                        }
+
+                        if (response.error.va_ds_id) {
+                            $('#va_ds_id').addClass('is-invalid');
+                            $('.errorva_ds_id').html(response.error.va_ds_id);
+                        } else {
+                            $('#va_ds_id').removeClass('is-invalid');
+                            $('.errorva_ds_id').html('');
                         }
 
                     } else {

@@ -196,6 +196,8 @@ class VerivaliAnomali extends BaseController
         $jumlah_semua = $model->jumlah_semua2();
         $jumlah_filter = $model->jumlah_filter2($filter1, $filter2, $filter4, $filter5);
 
+        // dd($listing);
+
         $data = array();
         $no = $_POST['start'];
         foreach ($listing as $key) {
@@ -218,6 +220,7 @@ class VerivaliAnomali extends BaseController
             $row[] = $key->va_kec;
             $row[] = $key->va_kab;
             $row[] = $key->va_prov;
+            $row[] = strtoupper($key->jenis_status);
 
             $badges = $key->va_nama_anomali;
             foreach ($db->table('tb_ket_anomali')->get()->getResultArray() as $key2) {
@@ -273,7 +276,7 @@ class VerivaliAnomali extends BaseController
                 'status' => $db->table('tb_status')->get()->getResultArray(),
                 'jenisPekerjaan' => $this->GenModel->getPendudukPekerjaan()->getResultArray(),
                 'jenisKelamin' => $this->GenModel->getDataJenkel(),
-                'statusKawin' => $this->GenModel->getDataStatusKawin(),
+                'statusDtks' => $this->GenModel->getStatusDtks()->getResultArray(),
 
 
                 'va_id' => $va_id,
@@ -292,8 +295,11 @@ class VerivaliAnomali extends BaseController
                 'db_regency' => $model['db_regency'],
                 'db_province' => $model['db_province'],
                 'va_nama_anomali' => $model['va_nama_anomali'],
+                'va_ds_id' => $model['va_ds_id'],
                 'va_status' => $model['va_status'],
             ];
+
+            // dd($data['statusDtks']);
             $msg = [
                 'sukses' => view('dtks/data/dtks/anomali/modaledit', $data)
             ];
@@ -321,8 +327,7 @@ class VerivaliAnomali extends BaseController
                 'status' => $db->table('tb_status')->get()->getResultArray(),
                 'jenisPekerjaan' => $this->GenModel->getPendudukPekerjaan()->getResultArray(),
                 'jenisKelamin' => $this->GenModel->getDataJenkel(),
-                'statusKawin' => $this->GenModel->getDataStatusKawin(),
-
+                'statusDtks' => $this->GenModel->getStatusDtks()->getResultArray(),
 
                 'va_id' => $va_id,
                 'va_nik' => $model['va_nik'],
@@ -341,7 +346,10 @@ class VerivaliAnomali extends BaseController
                 'va_prov' => $model['va_prov'],
                 'va_nama_anomali' => $model['va_nama_anomali'],
                 'va_status' => $model['va_status'],
+                'va_ds_id' => $model['va_ds_id'],
+
             ];
+
             $msg = [
                 'sukses' => view('dtks/data/dtks/anomali/modaledit2', $data)
             ];
@@ -459,6 +467,13 @@ class VerivaliAnomali extends BaseController
                         'alpha_dash' => '{field} harus berisi alphabet.'
                     ]
                 ],
+                'va_ds_id' => [
+                    'label' => 'Status PM',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus dipilih.'
+                    ]
+                ],
             ]);
             if (!$valid) {
 
@@ -477,6 +492,7 @@ class VerivaliAnomali extends BaseController
                         'db_rt' => $validation->getError('db_rt'),
                         'db_rw' => $validation->getError('db_rw'),
                         'db_ibu_kandung' => $validation->getError('db_ibu_kandung'),
+                        'va_ds_id' => $validation->getError('va_ds_id'),
                     ]
                 ];
             } else {
@@ -492,6 +508,7 @@ class VerivaliAnomali extends BaseController
                     'va_alamat' => strtoupper($this->request->getVar('db_alamat')),
                     'va_rw' => $this->request->getVar("db_rw"),
                     'va_ibu' => strtoupper($this->request->getVar('db_ibu_kandung')),
+                    'va_ds_id' => $this->request->getVar('va_ds_id'),
                     'va_prov' => $this->request->getVar('db_province'),
                     'va_kab' => $this->request->getVar('db_regency'),
                     'va_kec' => $this->request->getVar('db_district'),
@@ -499,6 +516,7 @@ class VerivaliAnomali extends BaseController
                     'va_status' => $this->request->getVar('va_status'),
                     'va_creator' => session()->get('nik'),
                 ];
+                // dd($dataUpdate);
 
                 // $id = $this->VerivaliAnomaliModel->find($this->request->getVar('id'));
                 $this->VerivaliAnomaliModel->update($va_id, $dataUpdate);
@@ -568,6 +586,7 @@ class VerivaliAnomali extends BaseController
                     'va_kec' => $this->request->getVar('va_kec'),
                     'va_desa' => $this->request->getVar('va_desa'),
                     'va_status' => $this->request->getVar('va_status'),
+                    'va_ds_id' => $this->request->getVar('va_ds_id'),
                     'va_creator' => session()->get('nik'),
                 ];
 
