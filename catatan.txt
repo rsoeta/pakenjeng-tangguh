@@ -113,7 +113,7 @@
                 INNER JOIN 
                     dtks_verivali_anomali ON dtks_bnba.db_id_dtks = dtks_verivali_anomali.va_id_dtks)
                 INNER JOIN
-                    dtks_status2 ON dtks_verivali_anomali.va_ds_id = id_status);
+                    dtks_status ON dtks_verivali_anomali.va_ds_id = id_status);
 
         - tambah tabel tb_penduduk_pekerjaan
         - tambah tabel tb_ket_anomali
@@ -160,4 +160,9 @@
                 INNER JOIN 
                     dtks_verivali_anomali ON dtks_bnba.db_id_dtks = dtks_verivali_anomali.va_id_dtks)
                 INNER JOIN
-                    dtks_status2 ON dtks_verivali_anomali.va_ds_id = id_status);
+                    dtks_status ON dtks_verivali_anomali.va_ds_id = id_status);
+
+        - ubah tabel dtks_status, ditambah kolom ds_class
+        - ubah tabel tb_ket_anomali, ditambah kolom sta_class
+        - ubah tabel tb_status, ditambah kolom sta_class
+        - ubah view vw_verivali_anomali

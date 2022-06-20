@@ -41,12 +41,13 @@ class VerivaliAnomali extends BaseController
             'datarw' => $this->RwModel->noRw(),
             'datart' => $this->RtModel->noRt(),
             'dataStatus' => $db->table('tb_status')->get()->getResultArray(),
-            'dataStatus2' => $db->table('dtks_status2')->get()->getResultArray(),
+            'dataStatus2' => $db->table('dtks_status')->get()->getResultArray(),
             'verivaliAnomali' => $db->table('tb_ket_anomali')->orderBy('ano_nama', 'desc')->get()->getResultArray(),
             'statusRole' => $this->GenModel->getStatusRole(),
             'user_login' => $this->AuthModel->getUserId(),
 
         ];
+
         // dd($data['masuk']);
         return view('dtks/data/dtks/anomali/index', $data);
     }
@@ -182,6 +183,7 @@ class VerivaliAnomali extends BaseController
     {
         $db = \Config\Database::connect();
 
+
         $model = new VerivaliAnomaliModel();
         // $KetMasalah = new KetModel();
 
@@ -205,9 +207,8 @@ class VerivaliAnomali extends BaseController
         foreach ($listing as $key) {
 
             $no++;
-            $row = array();
+            $row = [];
             $row[] = $no;
-            // $row[] = '<a href="javascript:void(0)" title="View" onclick="edit_person(' . "'" . $key->va_id . "'" . ')">' . $key->db_nama . '</a>';
             $row[] = $key->va_nik;
             $row[] = $key->va_nama;
             $row[] = $key->va_nkk;
@@ -222,33 +223,32 @@ class VerivaliAnomali extends BaseController
             $row[] = $key->va_kec;
             $row[] = $key->va_kab;
             $row[] = $key->va_prov;
-            $row[] = strtoupper($key->jenis_status);
+            // $row[] = $key->va_ds_id;
+
+            $bdg = $key->va_ds_id;
+            foreach ($db->table('dtks_status')->get()->getResultArray() as $key2) {
+                if ($key2['id_status'] == $bdg) {
+                    $staPm = $key2['jenis_status'];
+                    $ds_class = $key2['ds_class'];
+                }
+            }
+            $row[] = '<span class="badge bg-' . $ds_class . '" selected>' . $staPm . '</span>';
+
+
 
             $badges = $key->va_nama_anomali;
             foreach ($db->table('tb_ket_anomali')->get()->getResultArray() as $key2) {
                 if ($key2['ano_id'] == $badges) {
                     $keterangan = $key2['ano_nama'];
+                    $ano_class = $key2['ano_class'];
                 }
             }
-            if ($badges == 1) {
-                $row[] = '<span class="badge bg-success" selected>' . $keterangan . '</span>';
-            } elseif ($badges == 2) {
-                $row[] = '<span class="badge bg-secondary" selected>' . $keterangan . '</span>';
-            } elseif ($badges == 3) {
-                $row[] = '<span class="badge bg-warning" selected>' . $keterangan . '</span>';
-            } elseif ($badges == 4) {
-                $row[] = '<span class="badge bg-warning" selected>' . $keterangan . '</span>';
-            } elseif ($badges == 5) {
-                $row[] = '<span class="badge bg-secondary" selected>' . $keterangan . '</span>';
-            } elseif ($badges == 6) {
-                $row[] = '<span class="badge bg-warning" selected>' . $keterangan . '</span>';
-            } else {
-                $row[] = '<span class="badge bg-warning" selected>' . $keterangan . '</span>';
-            }
+            $row[] = '<span class="badge bg-' . $ano_class . '" selected>' . $keterangan . '</span>';
 
             $row[] = '<a class="btn btn-sm" href="javascript:void(0)" title="View" onclick="edit_person2(' . "'" . $key->va_id . "'" . ')"><i class="fa fa-pencil-alt"></i></a>';
             $data[] = $row;
         }
+
 
         $output = array(
             "draw" => $_POST['draw'],

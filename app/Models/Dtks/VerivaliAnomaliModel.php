@@ -98,7 +98,7 @@ class VerivaliAnomaliModel extends Model
         $db = db_connect();
         $builder = $db->table('vw_verivali_anomali');
         $query = $builder->select('*')
-            ->join('dtks_status2', 'dtks_status2.id_status = vw_verivali_anomali.va_ds_id')
+            ->join('dtks_status', 'dtks_status.id_status = vw_verivali_anomali.va_ds_id')
             ->where($kondisi_search)
             ->orderBy($result_order, $result_dir)
             ->limit($_POST['length'], $_POST['start'])
@@ -223,7 +223,7 @@ class VerivaliAnomaliModel extends Model
             ->join('tbl_jenkel', 'tbl_jenkel.IdJenKel = dtks_verivali_anomali.va_jk')
             ->join('tb_status', 'tb_status.sta_id = dtks_verivali_anomali.va_status')
             ->join('tb_penduduk_pekerjaan', 'tb_penduduk_pekerjaan.pk_id = dtks_verivali_anomali.va_pekerjaan')
-            ->join('dtks_status2', 'dtks_status2.id_status = dtks_verivali_anomali.va_ds_id')
+            ->join('dtks_status', 'dtks_status.id_status = dtks_verivali_anomali.va_ds_id')
             ->where($kondisi_search)
             ->orderBy($result_order, $result_dir)
             ->limit($_POST['length'], $_POST['start'])
