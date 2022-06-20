@@ -41,6 +41,7 @@ class VerivaliAnomali extends BaseController
             'datarw' => $this->RwModel->noRw(),
             'datart' => $this->RtModel->noRt(),
             'dataStatus' => $db->table('tb_status')->get()->getResultArray(),
+            'dataStatus2' => $db->table('dtks_status2')->get()->getResultArray(),
             'verivaliAnomali' => $db->table('tb_ket_anomali')->orderBy('ano_nama', 'desc')->get()->getResultArray(),
             'statusRole' => $this->GenModel->getStatusRole(),
             'user_login' => $this->AuthModel->getUserId(),
@@ -191,10 +192,11 @@ class VerivaliAnomali extends BaseController
         $filter2 = $this->request->getPost('datarw2');
         $filter4 = $this->request->getPost('dataVerivaliAnomali2');
         $filter5 = $this->request->getPost('dataStatus2');
+        $filter6 = $this->request->getPost('dataStatusPm');
 
-        $listing = $model->get_datatables2($filter1, $filter2, $filter4, $filter5);
+        $listing = $model->get_datatables2($filter1, $filter2, $filter4, $filter5, $filter6);
         $jumlah_semua = $model->jumlah_semua2();
-        $jumlah_filter = $model->jumlah_filter2($filter1, $filter2, $filter4, $filter5);
+        $jumlah_filter = $model->jumlah_filter2($filter1, $filter2, $filter4, $filter5, $filter6);
 
         // dd($listing);
 

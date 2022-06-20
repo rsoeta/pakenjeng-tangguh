@@ -165,9 +165,11 @@
                                     </select>
                                 </div>
                                 <div class="col-sm-3 col-6 mb-1">
-                                    <select class="form-control form-control-sm" name="" id="datart2">
-                                        <option value="">[ Semua No. RT ]</option>
-
+                                    <select class="form-control form-control-sm" name="" id="dataStatusPm">
+                                        <option value="">[ Semua Status ]</option>
+                                        <?php foreach ($dataStatus2 as $row) { ?>
+                                            <option value="<?= $row['id_status']; ?>"><?= $row['jenis_status']; ?></option>
+                                        <?php } ?>
                                     </select>
                                 </div>
                                 <div class="col-sm-3 col-6 mb-1">
@@ -374,6 +376,7 @@
                 data.datart2 = $('#datart2').val();
                 data.dataVerivaliAnomali2 = $('#dataVerivaliAnomali2').val();
                 data.dataStatus2 = $('#dataStatus2').val();
+                data.dataStatusPm = $('#dataStatusPm').val();
             },
             "dataSrc": function(response) {
                 $('input[name=csrf_test_name]').val(response.csrf_test_name);
@@ -406,6 +409,9 @@
         table2.draw();
     });
     $('#dataStatus2').change(function() {
+        table2.draw();
+    });
+    $('#dataStatusPm').change(function() {
         table2.draw();
     });
 

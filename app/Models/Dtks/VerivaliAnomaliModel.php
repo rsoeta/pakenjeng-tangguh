@@ -164,7 +164,7 @@ class VerivaliAnomaliModel extends Model
         return $query;
     }
 
-    function get_datatables2($filter1, $filter2, $filter4, $filter5)
+    function get_datatables2($filter1, $filter2, $filter4, $filter5, $filter6)
     {
         // desa
         if ($filter1 == "") {
@@ -191,13 +191,19 @@ class VerivaliAnomaliModel extends Model
         } else {
             $kondisi_filter5 = " AND va_status = '$filter5'";
         }
+        // status
+        if ($filter6 == "") {
+            $kondisi_filter6 = "";
+        } else {
+            $kondisi_filter6 = " AND va_ds_id = '$filter6'";
+        }
 
         // search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "(va_nama LIKE '%$search%' OR va_nik LIKE '%$search%' OR va_nkk LIKE '%$search%' OR va_alamat LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter4 $kondisi_filter5";
+            $kondisi_search = "(va_nama LIKE '%$search%' OR va_nik LIKE '%$search%' OR va_nkk LIKE '%$search%' OR va_alamat LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
         } else {
-            $kondisi_search = "va_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter4 $kondisi_filter5";
+            $kondisi_search = "va_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
         }
 
         // order
@@ -235,7 +241,7 @@ class VerivaliAnomaliModel extends Model
         return $query;
     }
 
-    function jumlah_filter2($filter1, $filter2, $filter4, $filter5)
+    function jumlah_filter2($filter1, $filter2, $filter4, $filter5, $filter6)
     {
         // desa
         if ($filter1 == "") {
@@ -262,12 +268,18 @@ class VerivaliAnomaliModel extends Model
         } else {
             $kondisi_filter5 = " AND va_status = '$filter5'";
         }
+        // status
+        if ($filter6 == "") {
+            $kondisi_filter6 = "";
+        } else {
+            $kondisi_filter6 = " AND va_ds_id = '$filter6'";
+        }
         // kondisi search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "AND (va_nama LIKE '%$search%' OR va_nik LIKE '%$search%' OR va_nkk LIKE '%$search%' OR va_alamat LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter4 $kondisi_filter5";
+            $kondisi_search = "AND (va_nama LIKE '%$search%' OR va_nik LIKE '%$search%' OR va_nkk LIKE '%$search%' OR va_alamat LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
         } else {
-            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter4 $kondisi_filter5";
+            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
         }
 
         $sQuery = "SELECT COUNT(va_id) as jml FROM dtks_verivali_anomali WHERE va_id != '' $kondisi_search";
