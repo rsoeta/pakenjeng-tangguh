@@ -55,7 +55,7 @@ class VerivaliAnomaliModel extends Model
         if ($filter2 == "") {
             $kondisi_filter2 = "";
         } else {
-            $kondisi_filter2 = " AND db_rw = '$filter2'";
+            $kondisi_filter2 = " AND va_rw = '$filter2'";
         }
         // status
         if ($filter3 == "") {
@@ -129,7 +129,7 @@ class VerivaliAnomaliModel extends Model
         if ($filter2 == "") {
             $kondisi_filter2 = "";
         } else {
-            $kondisi_filter2 = " AND db_rw = '$filter2'";
+            $kondisi_filter2 = " AND va_rw = '$filter2'";
         }
         // status
         if ($filter3 == "") {

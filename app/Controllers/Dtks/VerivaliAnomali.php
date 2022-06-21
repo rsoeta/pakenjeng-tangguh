@@ -136,7 +136,7 @@ class VerivaliAnomali extends BaseController
             $row[] = $key->db_tgl_lahir;
             $row[] = $key->db_alamat;
             $row[] = $key->db_rt;
-            $row[] = $key->db_rw;
+            $row[] = $key->va_rw;
             $row[] = $key->db_village;
             $row[] = $key->db_district;
             $row[] = $key->db_regency;
@@ -289,7 +289,7 @@ class VerivaliAnomali extends BaseController
                 'db_tmp_lahir' => $model['db_tmp_lahir'],
                 'db_alamat' => $model['db_alamat'],
                 'db_rt' => $model['db_rt'],
-                'db_rw' => $model['db_rw'],
+                'db_rw' => $model['va_rw'],
                 'db_jenkel_id' => $model['db_jenkel_id'],
                 'va_pekerjaan' => $model['va_pekerjaan'],
                 'db_ibu_kandung' => $model['db_ibu_kandung'],
