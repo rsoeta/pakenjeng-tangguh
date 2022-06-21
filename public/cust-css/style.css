@@ -107,6 +107,8 @@ select[readonly] {
     touch-action: none;
 }
 
+
+/* ini style yang tidak masuk */
 #modalEdit .modal-dialog .modal-content .modal-header {
         /* background yellow */
         background-color: yellow;
