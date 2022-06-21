@@ -88,7 +88,7 @@ class GenModel extends Model
 	// function getdata from tb_status2
 	public function getStatusDtks()
 	{
-		$builder = $this->db->table('dtks_status2');
+		$builder = $this->db->table('dtks_status');
 		$query = $builder->get();
 
 		return $query;
