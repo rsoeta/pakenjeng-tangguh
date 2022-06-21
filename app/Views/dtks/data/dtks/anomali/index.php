@@ -332,7 +332,7 @@
                 "orderable": false,
             },
             {
-                "targets": [9, 10, 11, 12, 14],
+                "targets": [8, 9, 10, 11, 12, 14],
                 "visible": false,
             }
         ]
