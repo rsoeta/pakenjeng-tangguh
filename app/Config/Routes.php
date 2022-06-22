@@ -119,6 +119,9 @@ $routes->post('dltBpnt', 'Dtks\BpntGanti::delete', ["filter" => "authfilterdtks"
 $routes->post('editBpnt', 'Dtks\BpntGanti::formedit', ["filter" => "authfilterdtks"]);
 $routes->post('updateBpnt', 'Dtks\BpntGanti::update', ["filter" => "authfilterdtks"]);
 
+// GEOTAGGING
+$routes->get('geo', 'Dtks\Geotagging::index', ["filter" => "authfilterdtks"]);
+
 // Setting General
 $routes->get('chart_desa', 'Dtks\VeriVali09::chartDesa', ["filter" => "authfilterdtks"]);
 $routes->get('wilayah', 'Dtks\Wil::index', ["filter" => "authfilterdtks"]);
