@@ -64,15 +64,6 @@ $routes->post('editpbi', 'Dtks\VervalPbi::formedit', ["filter" => "authfilterdtk
 $routes->post('updatepbi', 'Dtks\VervalPbi::ajax_update', ["filter" => "authfilterdtks"]);
 $routes->post('addpbi', 'Dtks\VervalPbi::save', ["filter" => "authfilterdtks"]);
 
-// VERVAL DTKS-ANOMALI
-$routes->get('verivaliAnomali', 'Dtks\VerivaliAnomali::index', ["filter" => "authfilterdtks"]);
-$routes->post('imporAnomali', 'Dtks\VerivaliAnomali::simpanExcel', ["filter" => "authfilterdtks"]);
-$routes->post('tabelAnomali', 'Dtks\VerivaliAnomali::tabel_data', ["filter" => "authfilterdtks"]);
-$routes->post('tabelAnomali2', 'Dtks\VerivaliAnomali::tabel_data2', ["filter" => "authfilterdtks"]);
-$routes->post('editAnomali', 'Dtks\VerivaliAnomali::formedit', ["filter" => "authfilterdtks"]);
-$routes->post('editAnomali2', 'Dtks\VerivaliAnomali::formedit2', ["filter" => "authfilterdtks"]);
-$routes->post('updateAnomali', 'Dtks\VerivaliAnomali::ajax_update', ["filter" => "authfilterdtks"]);
-$routes->post('updateAnomali2', 'Dtks\VerivaliAnomali::ajax_update2', ["filter" => "authfilterdtks"]);
 
 // USULAN
 $routes->get('usulan', 'Dtks\Usulan22::index', ["filter" => "authfilterdtks"]);
@@ -100,6 +91,27 @@ $routes->post('hapusKetVvPbi', 'Dtks\VervalPbi::hapusKetVvPbi', ["filter" => "au
 $routes->post('viewKetVvPbi', 'Dtks\VervalPbi::viewKetVvPbi', ["filter" => "authfilterdtks"]);
 $routes->post('updKetVvPbi', 'Dtks\VervalPbi::updKetVvPbi', ["filter" => "authfilterdtks"]);
 
+// VERVAL DTKS-ANOMALI
+$routes->get('verivaliAnomali', 'Dtks\VerivaliAnomali::index', ["filter" => "authfilterdtks"]);
+$routes->post('imporAnomali', 'Dtks\VerivaliAnomali::simpanExcel', ["filter" => "authfilterdtks"]);
+$routes->post('tabelAnomali', 'Dtks\VerivaliAnomali::tabel_data', ["filter" => "authfilterdtks"]);
+$routes->post('tabelAnomali2', 'Dtks\VerivaliAnomali::tabel_data2', ["filter" => "authfilterdtks"]);
+$routes->post('tabelAnomali3', 'Dtks\VerivaliAnomali::tabel_data3', ["filter" => "authfilterdtks"]);
+$routes->post('editAnomali', 'Dtks\VerivaliAnomali::formedit', ["filter" => "authfilterdtks"]);
+$routes->post('editAnomali2', 'Dtks\VerivaliAnomali::formedit2', ["filter" => "authfilterdtks"]);
+$routes->post('editAnomali3', 'Dtks\VerivaliAnomali::formedit3', ["filter" => "authfilterdtks"]);
+$routes->post('updateAnomali', 'Dtks\VerivaliAnomali::ajax_update', ["filter" => "authfilterdtks"]);
+$routes->post('updateAnomali2', 'Dtks\VerivaliAnomali::ajax_update2', ["filter" => "authfilterdtks"]);
+$routes->post('updateAnomali3', 'Dtks\VerivaliAnomali::ajax_update3', ["filter" => "authfilterdtks"]);
+
+// VERIVALI GEOTAGGING
+$routes->get('geotagging', 'Dtks\Geotagging::index', ["filter" => "authfilterdtks"]);
+$routes->post('tabelGeo', 'Dtks\Geotagging::tabel_data', ["filter" => "authfilterdtks"]);
+$routes->post('tabelGeo2', 'Dtks\Geotagging::tabel_data2', ["filter" => "authfilterdtks"]);
+$routes->post('imporVerivaliGeo', 'Dtks\Geotagging::simpanExcel', ["filter" => "authfilterdtks"]);
+$routes->post('editGeo', 'Dtks\Geotagging::formedit', ["filter" => "authfilterdtks"]);
+$routes->post('updateGeo', 'Dtks\Geotagging::ajax_update', ["filter" => "authfilterdtks"]);
+
 // OPERATOR KIP
 $routes->get('/operatorsch', 'Dtks\DataKip::index', ["filter" => "authfilterdtks"]);
 $routes->get('datakip', 'Dtks\DataKip::index', ["filter" => "authfilterdtks"]);
@@ -119,8 +131,6 @@ $routes->post('dltBpnt', 'Dtks\BpntGanti::delete', ["filter" => "authfilterdtks"
 $routes->post('editBpnt', 'Dtks\BpntGanti::formedit', ["filter" => "authfilterdtks"]);
 $routes->post('updateBpnt', 'Dtks\BpntGanti::update', ["filter" => "authfilterdtks"]);
 
-// GEOTAGGING
-$routes->get('geo', 'Dtks\Geotagging::index', ["filter" => "authfilterdtks"]);
 
 // Setting General
 $routes->get('chart_desa', 'Dtks\VeriVali09::chartDesa', ["filter" => "authfilterdtks"]);

@@ -166,3 +166,46 @@
         - ubah tabel tb_ket_anomali, ditambah kolom sta_class
         - ubah tabel tb_status, ditambah kolom sta_class
         - ubah view vw_verivali_anomali
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+## v2.8.0 -- Penambahan fitur dan Menu Geotagging -- 2022-06-22
+    # issue
+        - PM harus difoto dengan foto Geotagging,
+
+    * solusi
+        - Tambh fitur Geotagging ke aplikasi,
+        - Dokumentasi PM tersimpan di database pakenjeng-tangguh.id,
+
+    ** perbaikan Database
+        - tambah tabel dtks_verivali_geo
+        dengan struktur :
+                            vg_id,
+                            vg_nik,
+                            vg_nama_lengkap,
+                            vg_nkk,
+                            vg_alamat,
+                            vg_rw,
+                            vg_rt,
+                            vg_desa,
+                            vg_kec,
+                            vg_kab,
+                            vg_prov,
+                            vg_dbj_id1,
+                            vg_dbj_id2,
+                            vg_norek,
+                            vg_source,
+                            vg_fp,
+                            vg_fr,
+                            vg_lat,
+                            vg_lang,
+                            vg_ds_id,
+                            vg_sta_id,
+                            vg_created_by,
+                            vg_created_at,
+                            vg_updated_by,
+                            vg_updated_at,
+
+    # issue
+        - ubah tab verivali anomali menjadi tabel verivali, proses verivali dan hasil verivali
+    ** perbaikan tb_status insert data value sta_id = 2, sta_nama = Sukses
+    ---------------------------------------------------------------------------------------------------------------------------------------------------

@@ -59,7 +59,10 @@
                     <button class="nav-link <?= ($role > 3) ? 'active' : ''; ?>" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">TABEL VERIVALI</button>
                 </li>
                 <li class="nav-item" role="presentation" <?= ($role > 3) ? 'hidden' : ''; ?>>
-                    <button class="nav-link <?= ($role <= 3) ? 'active' : ''; ?>" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">HASIL VERIVALI</button>
+                    <button class="nav-link <?= ($role <= 3) ? 'active' : ''; ?>" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">PROSES VERIVALI</button>
+                </li>
+                <li class="nav-item" role="presentation" <?= ($role > 3) ? 'hidden' : ''; ?>>
+                    <button class="nav-link" id="hasil-tab" data-bs-toggle="tab" data-bs-target="#hasil" type="button" role="tab" aria-controls="hasil" aria-selected="false">HASIL VERIVALI</button>
                 </li>
             </ul>
             <div class="tab-content" id="myTabContent">
@@ -191,6 +194,86 @@
                     </div>
                     <div class="container-fluid">
                         <table id="tabel_data2" class="table table-hover table-sm compact display" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>NO</th>
+                                    <th>NIK</th>
+                                    <th>NAMA</th>
+                                    <th>NO. KK</th>
+                                    <th>TGL LHR</th>
+                                    <th>TMP LHR</th>
+                                    <th>ALAMAT</th>
+                                    <th>NO. RW</th>
+                                    <th>JENIS KELAMIN</th>
+                                    <th>PEKERJAAN</th>
+                                    <th>NAMA IBU</th>
+                                    <th>NO. DESA</th>
+                                    <th>NO. KEC</th>
+                                    <th>NO. KAB</th>
+                                    <th>NO. PROV</th>
+                                    <th>STATUS PM</th>
+                                    <th>KET. ANOMALI</th>
+                                    <th>#</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade show" id="hasil" role="tabpanel" aria-labelledby="hasil-tab">
+                    <div class="row my-2">
+                        <div class="col">
+                            <div class="row">
+                                <div class="col-sm-3 col-6 mb-1">
+                                    <select <?php if ($role >= 3) {
+                                                echo 'disabled="disabled"';
+                                            } ?> class="form-control form-control-sm" name="" id="datadesa3">
+                                        <option value="">[ Semua Desa ]</option>
+                                        <?php foreach ($desKels as $row) { ?>
+                                            <option <?= $kode_desa == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id']; ?>"><?= $row['name']; ?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3 col-6 mb-1">
+                                    <select <?php if ($role > 3) {
+                                                echo 'disabled="disabled"';
+                                            } ?> class="form-control form-control-sm" name="" id="datarw3">
+                                        <option value="">[ Semua No. RW ]</option>
+                                        <?php foreach ($datarw as $row) { ?>
+                                            <option <?php if ($level == $row['no_rw']) {
+                                                        echo 'selected';
+                                                    } ?> value="<?php echo $row['no_rw']; ?>"><?php echo $row['no_rw']; ?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3 col-6 mb-1">
+                                    <select class="form-control form-control-sm" name="" id="dataStatusPm3">
+                                        <option value="">[ Semua Status ]</option>
+                                        <?php foreach ($dataStatus2 as $row) { ?>
+                                            <option value="<?= $row['id_status']; ?>"><?= $row['jenis_status']; ?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3 col-6 mb-1">
+                                    <select class="form-control form-control-sm" name="" id="dataVerivaliAnomali3">
+                                        <option value="">[ Semua Anomali ]</option>
+                                        <?php foreach ($verivaliAnomali as $row) { ?>
+                                            <option value="<?= $row['ano_id']; ?>"><?= $row['ano_nama']; ?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3 col-6 mb-1" hidden>
+                                    <select class="form-control form-control-sm" name="" id="dataStatus3">
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2" selected>2</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container-fluid">
+                        <table id="tabel_data3" class="table table-hover table-sm compact display" style="width: 100%;">
                             <thead>
                                 <tr>
                                     <th>NO</th>
@@ -415,6 +498,67 @@
         table2.draw();
     });
 
+    table3 = $('#tabel_data3').DataTable({
+        'order': [],
+        'fixedHeader': true,
+        'searching': true,
+        'paging': true,
+        'responsive': true,
+        'compact': true,
+        'processing': true,
+        'serverSide': true,
+        "ajax": {
+            "url": "<?= site_url('/tabelAnomali3'); ?>",
+            "type": "POST",
+            "data": {
+                "csrf_test_name": $('input[name=csrf_test_name]').val()
+            },
+            "data": function(data) {
+                data.csrf_test_name = $('input[name=csrf_test_name]').val();
+                data.datadesa3 = $('#datadesa3').val();
+                data.datarw3 = $('#datarw3').val();
+                data.datart3 = $('#datart3').val();
+                data.dataVerivaliAnomali3 = $('#dataVerivaliAnomali3').val();
+                data.dataStatus3 = $('#dataStatus3').val();
+                data.dataStatusPm3 = $('#dataStatusPm3').val();
+            },
+            "dataSrc": function(response) {
+                $('input[name=csrf_test_name]').val(response.csrf_test_name);
+                return response.data;
+            }
+        },
+
+        "columnDefs": [{
+                "targets": [0],
+                "orderable": false
+            },
+            {
+                "targets": [11, 12, 13, 14],
+                "visible": false,
+            }
+        ]
+    });
+
+
+    $('#datadesa3').change(function() {
+        table3.draw();
+    });
+    $('#datarw3').change(function() {
+        table3.draw();
+    });
+    $('#datart3').change(function() {
+        table3.draw();
+    });
+    $('#dataVerivaliAnomali3').change(function() {
+        table3.draw();
+    });
+    $('#dataStatus3').change(function() {
+        table3.draw();
+    });
+    $('#dataStatusPm3').change(function() {
+        table3.draw();
+    });
+
 
     function edit_person(va_id) {
         //Ajax Load data from ajax
@@ -460,8 +604,31 @@
         });
     }
 
+    function edit_person3(va_id) {
+        //Ajax Load data from ajax
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('editAnomali3') ?>",
+            data: {
+                va_id: va_id
+            },
+            dataType: "JSON",
+            success: function(response) {
+                if (response.sukses) {
+                    $('.viewmodal').html(response.sukses).show();
+                    $('#modalEdit').modal('show');
+                }
+
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
+            }
+        });
+    }
+
     function reload_table() {
         table2.ajax.reload(null, false); //reload datatable ajax 
+        table3.ajax.reload(null, false); //reload datatable ajax 
     }
 </script>
 

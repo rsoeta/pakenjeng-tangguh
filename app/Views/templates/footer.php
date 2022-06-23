@@ -1,6 +1,6 @@
 <footer class="main-footer">
     <strong>&copy; <?= date('Y'); ?> <a href="<?= base_url(); ?>/dashboard"><?= $namaApp; ?></a>.</strong>
-    Version <strong>2.7.1-<a href="https://twitter.com/riansutarsa" target="blank">rs</a></strong>
+    Version <strong>2.8.0-<a href="https://twitter.com/riansutarsa" target="blank">rs</a></strong>
 </footer>
 
 <!-- Control Sidebar -->

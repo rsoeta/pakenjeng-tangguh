@@ -200,6 +200,16 @@ $user = session()->get('role_id');
                                         </a>
                                     </li>
                                 </ul>
+                                <ul class="nav nav-treeview nav-third-level">
+                                    <li class="nav-item">
+                                        <a href="/geotagging" class="nav-link">
+                                            <i class="nav-icon fa-fw fas fa-map-marked-alt"></i>
+                                            <p>
+                                                Geotagging
+                                            </p>
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         </ul>
                     </li>

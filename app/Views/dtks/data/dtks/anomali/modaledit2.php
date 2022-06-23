@@ -172,9 +172,8 @@
                             <label for="va_status" class="col-4 col-sm-4 col-form-label">Ket. Verivali</label>
                             <div class="col-8 col-sm-8">
                                 <select id="va_status" name="va_status" class="form-select form-select-sm">
-                                    <option value="">-- Pilih --</option>
                                     <?php foreach ($status as $row) { ?>
-                                        <option selected value="<?= ($role > 3) ? 1 : $row['sta_id'] ?>"> <?php echo $row['sta_nama']; ?></option>
+                                        <option <?= ($row['sta_id'] == $va_status) ? 'selected' : ''; ?> value="<?= $row['sta_id']; ?>"> <?php echo $row['sta_nama']; ?></option>
                                     <?php } ?>
                                 </select>
                                 <div class="invalid-feedback errorva_status"></div>
@@ -331,6 +330,7 @@
                             $('#modalEdit').modal('hide');
                             // $('#tabel_data').DataTable().ajax.reload();
                             table2.draw();
+                            table3.draw();
                         }
                     }
                 },

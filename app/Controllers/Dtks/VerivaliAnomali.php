@@ -260,6 +260,87 @@ class VerivaliAnomali extends BaseController
         echo json_encode($output);
     }
 
+    public function tabel_data3()
+    {
+        $db = \Config\Database::connect();
+
+
+        $model = new VerivaliAnomaliModel();
+        // $KetMasalah = new KetModel();
+
+        $csrfName = csrf_token();
+        $csrfHash = csrf_hash();
+
+        $filter1 = $this->request->getPost('datadesa3');
+        $filter2 = $this->request->getPost('datarw3');
+        $filter4 = $this->request->getPost('dataVerivaliAnomali3');
+        $filter5 = $this->request->getPost('dataStatus3');
+        $filter6 = $this->request->getPost('dataStatusPm3');
+
+        $listing = $model->get_datatables2($filter1, $filter2, $filter4, $filter5, $filter6);
+        $jumlah_semua = $model->jumlah_semua2();
+        $jumlah_filter = $model->jumlah_filter2($filter1, $filter2, $filter4, $filter5, $filter6);
+
+        // dd($listing);
+
+        $data = array();
+        $no = $_POST['start'];
+        foreach ($listing as $key) {
+
+            $no++;
+            $row = [];
+            $row[] = $no;
+            $row[] = $key->va_nik;
+            $row[] = $key->va_nama;
+            $row[] = $key->va_nkk;
+            $row[] = $key->va_tgl_lhr;
+            $row[] = $key->va_tmp_lhr;
+            $row[] = $key->va_alamat;
+            $row[] = $key->va_rw;
+            $row[] = $key->NamaJenKel;
+            $row[] = $key->pk_nama;
+            $row[] = $key->va_ibu;
+            $row[] = $key->va_desa;
+            $row[] = $key->va_kec;
+            $row[] = $key->va_kab;
+            $row[] = $key->va_prov;
+            // $row[] = $key->va_ds_id;
+
+            $bdg = $key->va_ds_id;
+            foreach ($db->table('dtks_status')->get()->getResultArray() as $key2) {
+                if ($key2['id_status'] == $bdg) {
+                    $staPm = $key2['jenis_status'];
+                    $ds_class = $key2['ds_class'];
+                }
+            }
+            $row[] = '<span class="badge bg-' . $ds_class . '" selected>' . $staPm . '</span>';
+
+
+
+            $badges = $key->va_nama_anomali;
+            foreach ($db->table('tb_ket_anomali')->get()->getResultArray() as $key2) {
+                if ($key2['ano_id'] == $badges) {
+                    $keterangan = $key2['ano_nama'];
+                    $ano_class = $key2['ano_class'];
+                }
+            }
+            $row[] = '<span class="badge bg-' . $ano_class . '" selected>' . $keterangan . '</span>';
+
+            $row[] = '<a class="btn btn-sm" href="javascript:void(0)" title="View" onclick="edit_person3(' . "'" . $key->va_id . "'" . ')"><i class="fa fa-pencil-alt"></i></a>';
+            $data[] = $row;
+        }
+
+
+        $output = array(
+            "draw" => $_POST['draw'],
+            "recordsTotal" => $jumlah_semua->jml,
+            "recordsFiltered" => $jumlah_filter->jml,
+            "data" => $data,
+        );
+        $output[$csrfName] = $csrfHash;
+        echo json_encode($output);
+    }
+
     public function formedit()
     {
 
@@ -351,9 +432,61 @@ class VerivaliAnomali extends BaseController
                 'va_ds_id' => $model['va_ds_id'],
 
             ];
+            // dd($data['status']);
 
             $msg = [
                 'sukses' => view('dtks/data/dtks/anomali/modaledit2', $data)
+            ];
+
+            // var_dump(session()->get('kode_desa'));
+            echo json_encode($msg);
+        }
+    }
+
+    public function formedit3()
+    {
+
+        if ($this->request->isAJAX()) {
+            $db = \Config\Database::connect();
+            $va_id = $this->request->getVar('va_id');
+
+            $model = $db->table('dtks_verivali_anomali')->where('va_id', $va_id)->get()->getRowArray();
+            // $row = $model->find($va_id);
+
+            $data = [
+                'title' => 'Form. Edit',
+                'datarw' => $this->RwModel->noRw(),
+                'datart' => $this->RtModel->noRt(),
+                'keterangan' => $db->table('tb_ket_anomali')->orderBy('ano_nama', 'asc')->get()->getResultArray(),
+                'status' => $db->table('tb_status')->get()->getResultArray(),
+                'jenisPekerjaan' => $this->GenModel->getPendudukPekerjaan()->getResultArray(),
+                'jenisKelamin' => $this->GenModel->getDataJenkel(),
+                'statusDtks' => $this->GenModel->getStatusDtks()->getResultArray(),
+
+                'va_id' => $va_id,
+                'va_nik' => $model['va_nik'],
+                'va_nama' => $model['va_nama'],
+                'va_nkk' => $model['va_nkk'],
+                'va_tgl_lhr' => $model['va_tgl_lhr'],
+                'va_tmp_lhr' => $model['va_tmp_lhr'],
+                'va_alamat' => $model['va_alamat'],
+                'va_rw' => $model['va_rw'],
+                'va_jk' => $model['va_jk'],
+                'va_pekerjaan' => $model['va_pekerjaan'],
+                'va_ibu' => $model['va_ibu'],
+                'va_desa' => $model['va_desa'],
+                'va_kec' => $model['va_kec'],
+                'va_kab' => $model['va_kab'],
+                'va_prov' => $model['va_prov'],
+                'va_nama_anomali' => $model['va_nama_anomali'],
+                'va_status' => $model['va_status'],
+                'va_ds_id' => $model['va_ds_id'],
+
+            ];
+            // dd($data['status']);
+
+            $msg = [
+                'sukses' => view('dtks/data/dtks/anomali/modaledit3', $data)
             ];
 
             // var_dump(session()->get('kode_desa'));
@@ -534,6 +667,79 @@ class VerivaliAnomali extends BaseController
     }
 
     public function ajax_update2()
+    {
+        if ($this->request->isAJAX()) {
+            // var_dump($this->request->getPost());
+            // validasi input
+            $va_id = $this->request->getVar('va_id');
+            //cek nik
+            $nikLama = $this->VerivaliAnomaliModel->find($va_id);
+            if ($nikLama['va_nik'] == $this->request->getVar('va_nik')) {
+                $rule_nik = 'required|numeric|min_length[16]|max_length[16]';
+            } else {
+                $rule_nik = 'required|numeric|is_unique[vw_verivali_anomali.va_nik]|min_length[16]|max_length[16]';
+            }
+
+            $validation = \Config\Services::validation();
+
+            $valid = $this->validate([
+                'va_nik' => [
+                    'label' => 'NIK',
+                    'rules' => $rule_nik,
+                    'errors' => [
+                        'required' => '{field} harus diisi.',
+                        'numeric' => '{field} harus berisi angka.',
+                        'is_unique' => '{field} sudah digunakan',
+                        'min_length' => '{field} terlalu pendek',
+                        'max_length' => '{field} terlalu panjang',
+                    ]
+                ],
+            ]);
+            if (!$valid) {
+
+                $msg = [
+                    'error' => [
+                        'va_id' => $va_id,
+                        'va_nik' => $validation->getError('va_nik'),
+                    ]
+                ];
+            } else {
+                $dataUpdate = [
+                    'va_id' => $va_id,
+                    'va_nik' => $this->request->getVar('va_nik'),
+                    'va_nama' => strtoupper($this->request->getVar('va_nama')),
+                    'va_jk' => $this->request->getVar('va_jk'),
+                    'va_tgl_lhr' => $this->request->getVar("va_tgl_lhr"),
+                    'va_tmp_lhr' => strtoupper($this->request->getVar("va_tmp_lhr")),
+                    'va_pekerjaan' => $this->request->getVar('va_pekerjaan'),
+                    'va_nkk' => $this->request->getVar('va_nkk'),
+                    'va_alamat' => strtoupper($this->request->getVar('va_alamat')),
+                    'va_rw' => $this->request->getVar("va_rw"),
+                    'va_ibu' => strtoupper($this->request->getVar('va_ibu')),
+                    'va_prov' => $this->request->getVar('va_prov'),
+                    'va_kab' => $this->request->getVar('va_kab'),
+                    'va_kec' => $this->request->getVar('va_kec'),
+                    'va_desa' => $this->request->getVar('va_desa'),
+                    'va_status' => $this->request->getVar('va_status'),
+                    'va_ds_id' => $this->request->getVar('va_ds_id'),
+                    'va_creator' => session()->get('nik'),
+                ];
+
+                // $id = $this->VerivaliAnomaliModel->find($this->request->getVar('id'));
+                $this->VerivaliAnomaliModel->update($va_id, $dataUpdate);
+
+                $msg = [
+                    'sukses' => 'Data berhasil dikembalikan',
+                ];
+            }
+            echo json_encode($msg);
+        } else {
+            return view('lockscreen');
+        }
+    }
+
+
+    public function ajax_update3()
     {
         if ($this->request->isAJAX()) {
             // var_dump($this->request->getPost());
