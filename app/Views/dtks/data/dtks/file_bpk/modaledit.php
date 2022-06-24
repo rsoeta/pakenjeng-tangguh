@@ -255,7 +255,8 @@
 
 
 
-    Webcam.set({
+    Webcam.set('constraints', {
+        facingMode: 'environment',
         width: 320,
         height: 240,
         dest_width: 640,
