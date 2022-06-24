@@ -104,7 +104,7 @@
                         </div>
                         <div class="row">
                             <div class="col-12">
-                                <div id="kamera"></div>
+                                <div id="my_camera"></div>
                                 <p id="z"></p>
                             </div>
                         </div>
@@ -254,11 +254,35 @@
     var z = document.getElementById("z");
 
 
+    // var cameras = new Array(); //create empty array to later insert available devices
+    // navigator.mediaDevices.enumerateDevices() // get the available devices found in the machine
+    //     .then(function(devices) {
+    //         devices.forEach(function(device) {
+    //             var i = 0;
+    //             if (device.kind === "videoinput") { //filter video devices only
+    //                 cameras[i] = device.deviceId; // save the camera id's in the camera array
+    //                 i++;
+    //             }
+    //         });
+    //     })
 
+    // Webcam.set('constraints', { //set the constraints and initialize camera device (0 or 1 for back and front - varies which is which depending on device)
+    //     width: 1920,
+    //     height: 1080,
+    //     sourceId: cameras[1],
+    //     deviceId: {
+    //         exact: deviceId
+    //     }
+    // });
     Webcam.set('constraints', {
-        facingMode: 'environment',
-        width: 320,
-        height: 240,
+        // width: 1280,
+        // height: 720,
+        deviceId: {
+            exact: deviceId
+        },
+        // facingMode: 'environment',
+        // width: 320,
+        // height: 240,
         dest_width: 640,
         dest_height: 480,
         image_format: 'jpeg',
@@ -268,7 +292,7 @@
         enable_flash: true,
         fps: 45
     });
-    Webcam.attach('#kamera');
+    Webcam.attach('#my_camera');
 
     function getLocation() {
         if (navigator.geolocation) {
