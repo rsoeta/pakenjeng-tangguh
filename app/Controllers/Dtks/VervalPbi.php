@@ -10,6 +10,8 @@ use App\Models\GenModel;
 use App\Models\WilayahModel;
 use App\Models\RwModel;
 use App\Models\RtModel;
+use App\Models\Dtks\AuthModel;
+
 
 class VervalPbi extends BaseController
 {
@@ -23,6 +25,7 @@ class VervalPbi extends BaseController
         $this->RtModel = new RtModel();
         $this->statusdtks = new DtksStatusModel();
         $this->keterangan = new DtksKetModel();
+        $this->AuthModel = new AuthModel();
     }
 
     public function index()
@@ -40,6 +43,7 @@ class VervalPbi extends BaseController
             'verivali_pbi' => $this->GenModel->getDataVerivaliPbi(),
             'statusRole' => $this->GenModel->getStatusRole(),
             'percentages' => $this->VervalPbiModel->jml_persentase(),
+            'user_login' => $this->AuthModel->getUserId(),
 
 
         ];
