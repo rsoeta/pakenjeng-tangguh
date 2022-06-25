@@ -28,8 +28,8 @@
                                 <div class="invalid-feedback errorvg_dbj_id1"></div>
                             </div>
                             <input type="hidden" name="vg_id" id="vg_id" class="form-control form-control-sm" value="<?= set_value('vg_id', $vg_id); ?>">
-                            <label class="col-2 col-form-label" for="vg_nik">NIK</label>
-                            <div class="col-4">
+                            <label class="col-1 col-form-label" for="vg_nik">NIK</label>
+                            <div class="col-5">
                                 <input type="text" name="vg_nik" id="vg_nik" class="form-control form-control-sm" value="<?= set_value('vg_nik', $vg_nik); ?>" <?= $role > 2 ? 'readonly' : ''; ?>>
                                 <div class="invalid-feedback errornik"></div>
                             </div>
@@ -88,21 +88,43 @@
                     </div>
                     <hr>
                     <div class="col-sm-6 col-12">
-                        <div class="row">
-                            <div class="col-6">
-                                <!-- <label for="image_fr">Foto Rumah</label> -->
-                                <div id="result_fr" hidden></div>
-                                <input type="hidden" name="image_fr" class="image-tag2">
-                                <div class="invalid-feedback errorimage_fr"></div>
-                            </div>
-                            <div class="col-6">
-                                <!-- <label for="image_fp">Foto PM</label> -->
-                                <div id="result_fp" hidden></div>
-                                <input type="hidden" name="image_fp" class="image-tag1">
+                        <div class="form-group row">
+                            <label class="col-3 col-form-label mb-4" for="image_fp">Foto PM</label>
+                            <div class="col-9 mb-4">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-user"></i></span>
+                                    </div>
+                                    <input type="file" class="form-control" spellcheck="false" data-ms-editor="true" name="image_fp" accept="image/*" capture />
+                                </div>
                                 <div class="invalid-feedback errorimage_fp"></div>
                             </div>
+                            <label class="col-3 col-form-label" for="image_fr">Foto Rumah</label>
+                            <div class="col-9">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-home"></i></span>
+                                    </div>
+                                    <input type="file" class="form-control" spellcheck="false" data-ms-editor="true" name="image_fr" accept="image/*" capture />
+                                </div>
+                                <div class="invalid-feedback errorimage_fr"></div>
+                            </div>
                         </div>
-                        <div class="row">
+                        <input type="text" class="form-control form-control-sm mb-2" placeholder="Latitude" spellcheck="false" id="latitude" name="vg_lat" readonly>
+                        <div class="invalid-feedback errorivg_lat"></div>
+                        <input type="text" class="form-control form-control-sm mb-2" placeholder="Longitude" spellcheck="false" id="longitude" name="vg_lang" readonly>
+                        <div class="invalid-feedback errorivg_lang"></div>
+                        <!-- <device type="media" onchange="update(this.data)"></device> -->
+                        <!-- <video id="video" autoplay>Streaming video tidak tersedia.</video> -->
+                        <!-- <label for="image_fr">Foto Rumah</label> -->
+                        <!-- <div id="result_fr"></div> -->
+                        <!-- <input type="hidden" name="image_fr" class="image-tag2"> -->
+                    </div>
+                    <div class="col-6">
+                        <!-- <label for="image_fp">Foto PM</label> -->
+                        <!-- <div id="result_fp"></div> -->
+                        <!-- <input type="hidden" name="image_fp" class="image-tag1"> -->
+                        <!-- <div class="row">
                             <div class="col-12">
                                 <div id="my_camera"></div>
                                 <p id="z"></p>
@@ -110,16 +132,15 @@
                         </div>
                         <div class="row">
                             <div class="col-6">
-                                <input type="hidden" class="form-control form-control-sm mb-2" placeholder="Latitude" spellcheck="false" data-ms-editor="true" id="latitude" name="vg_lat">
                                 <button class="btn btn-sm btn-block btn-info" type="button" onclick="take_snapshot2();getLocation();"><i class="fa fa-home"></i> Foto Rumah</button>
                             </div>
                             <div class="col-6">
-                                <input type="hidden" class="form-control form-control-sm mb-2" placeholder="Longitude" spellcheck="false" data-ms-editor="true" id="longitude" name="vg_lang">
                                 <button class="btn btn-sm btn-block btn-primary" type="button" onclick="take_snapshot()"><i class="fa fa-user"></i> Foto PM</button>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                     <div class="modal-footer mt-3">
+                        <button type="button" class="btn btn-info btn-block" onclick="getLocation()">Cek Lokasi</button>
                         <button type="submit" class="btn btn-success btn-block btnSimpan">Submit</button>
                     </div>
                 </div>
@@ -195,6 +216,20 @@
                         } else {
                             $('#image_fr').removeClass('is-invalid');
                             $('.errorimage_fr').html('');
+                        }
+                        if (response.error.vg_lat) {
+                            $('#vg_lat').addClass('is-invalid');
+                            $('.errorvg_lat').html(response.error.vg_lat);
+                        } else {
+                            $('#vg_lat').removeClass('is-invalid');
+                            $('.errorvg_lat').html('');
+                        }
+                        if (response.error.vg_lang) {
+                            $('#vg_lang').addClass('is-invalid');
+                            $('.errorvg_lang').html(response.error.vg_lang);
+                        } else {
+                            $('#vg_lang').removeClass('is-invalid');
+                            $('.errorvg_lang').html('');
                         }
                     } else {
                         if (response.sukses) {
@@ -274,25 +309,44 @@
     //         exact: deviceId
     //     }
     // });
-    Webcam.set('constraints', {
-        // width: 1280,
-        // height: 720,
-        deviceId: {
-            exact: deviceId
-        },
-        // facingMode: 'environment',
-        // width: 320,
-        // height: 240,
-        dest_width: 640,
-        dest_height: 480,
-        image_format: 'jpeg',
-        jpeg_quality: 100,
-        force_flash: false,
-        flip_horiz: false,
-        enable_flash: true,
-        fps: 45
-    });
-    Webcam.attach('#my_camera');
+
+    // var constraints = {
+    //     audio: true,
+    //     video: {
+    //         facingMode: 'environment'
+    //     }
+    // };
+
+
+    // Webcam.set('constraints', {
+    //     width: 1280,
+    //     height: 720,
+    //     // facingMode: 'environment',
+    //     facingMode: {
+    //         exact: 'environment'
+    //     },
+    //     // width: 320,
+    //     // height: 240,
+    //     // dest_width: 640,
+    //     // dest_height: 480,
+    //     image_format: 'jpeg',
+    //     jpeg_quality: 100,
+    //     force_flash: false,
+    //     flip_horiz: false,
+    //     // enable_flash: true,
+    //     fps: 45
+    // });
+
+
+    // Webcam.set({
+    //     width: 320,
+    //     height: 240,
+    //     // facingMode: {
+    //     //     exact: 'environment'
+    //     // }
+    // });
+
+    // Webcam.attach('#my_camera');
 
     function getLocation() {
         if (navigator.geolocation) {
@@ -327,35 +381,35 @@
         }
     }
 
-    var shutter = new Audio();
-    shutter.autoplay = false;
-    shutter.src = navigator.userAgent.match(/Firefox/) ? 'shutter.ogg' : 'shutter.mp3';
+    // var shutter = new Audio();
+    // shutter.autoplay = false;
+    // shutter.src = navigator.userAgent.match(/Firefox/) ? 'shutter.ogg' : 'shutter.mp3';
 
-    function take_snapshot() {
+    // function take_snapshot() {
 
-        shutter.play();
+    //     shutter.play();
 
-        // take snapshot and get image data
-        Webcam.snap(function(data_uri) {
-            // display results in page
-            // document.getElementById('results').innerHTML =
-            //     '<img src="' + data_uri + '"/>';
-            $(".image-tag1").val(data_uri);
-            document.getElementById('result_fp').innerHTML = '<img src="' + data_uri + '"/>';
-        });
-    }
+    //     // take snapshot and get image data
+    //     Webcam.snap(function(data_uri) {
+    //         // display results in page
+    //         // document.getElementById('results').innerHTML =
+    //         //     '<img src="' + data_uri + '"/>';
+    //         $(".image-tag1").val(data_uri);
+    //         document.getElementById('result_fp').innerHTML = '<img src="' + data_uri + '"/>';
+    //     });
+    // }
 
-    function take_snapshot2() {
+    // function take_snapshot2() {
 
-        // shutter.play();
+    //     // shutter.play();
 
-        // take snapshot and get image data
-        Webcam.snap(function(data_uri) {
-            // display results in page
-            // document.getElementById('results').innerHTML =
-            //     '<img src="' + data_uri + '"/>';
-            $(".image-tag2").val(data_uri);
-            document.getElementById('result_fr').innerHTML = '<img src="' + data_uri + '"/>';
-        });
-    }
+    //     // take snapshot and get image data
+    //     Webcam.snap(function(data_uri) {
+    //         // display results in page
+    //         // document.getElementById('results').innerHTML =
+    //         //     '<img src="' + data_uri + '"/>';
+    //         $(".image-tag2").val(data_uri);
+    //         document.getElementById('result_fr').innerHTML = '<img src="' + data_uri + '"/>';
+    //     });
+    // }
 </script>

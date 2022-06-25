@@ -69,6 +69,8 @@ class Profil_User extends BaseController
     public function update_user()
     {
         if ($this->request->isAJAX()) {
+            // var_dump($this->request->getPost());
+
             $id_user = $this->request->getPost('id_user');
             $fullname = $this->request->getPost('fullname');
             $nik = $this->request->getPost('nik');

@@ -209,8 +209,11 @@ class Geotagging extends BaseController
     {
         if ($this->request->isAJAX()) {
             // var_dump($this->request->getPost());
+
+
             // validasi input
             $kode_desa = session()->get('kode_desa');
+            $user = session()->get('nik');
             $vg_id = $this->request->getPost('vg_id');
             $vg_nik = $this->request->getPost('vg_nik');
             //cek nik
@@ -220,16 +223,22 @@ class Geotagging extends BaseController
             $valid = $this->validate([
                 'image_fp' => [
                     'label' => 'Foto PM',
-                    'rules' => 'required',
+                    'rules' => 'uploaded[image_fp]|is_image[image_fp]|mime_in[image_fp,image/jpg,image/jpeg,image/png]|max_size[image_fp,2048]',
                     'errors' => [
-                        'required' => '{field} harus ada.'
+                        'uploade' => '{field} harus ada.',
+                        'is_image' => '{field} harus berupa gambar.',
+                        'mime_in' => '{field} harus berupa gambar.',
+                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
                     ]
                 ],
                 'image_fr' => [
                     'label' => 'Foto Rumah',
-                    'rules' => 'required',
+                    'rules' => 'uploaded[image_fr]|is_image[image_fr]|mime_in[image_fr,image/jpg,image/jpeg,image/png]|max_size[image_fr,2048]',
                     'errors' => [
-                        'required' => '{field} harus ada.'
+                        'uploaded' => '{field} harus ada.',
+                        'is_image' => '{field} harus berupa gambar.',
+                        'mime_in' => '{field} harus berupa gambar.',
+                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
                     ]
                 ],
                 'vg_alamat' => [
@@ -269,7 +278,6 @@ class Geotagging extends BaseController
                         'required' => '{field} harus harus ada.',
                     ]
                 ],
-
             ]);
             if (!$valid) {
 
@@ -286,61 +294,56 @@ class Geotagging extends BaseController
                     ]
                 ];
             } else {
+                // unlink file when same id
 
-                $cekdata = $this->VerivaliGeoModel->find($vg_nik);
+                $cekdata = $this->VerivaliGeoModel->find($vg_id);
 
                 $filename_fp = $cekdata['vg_nik'] . '.jpg';
-                $path_fp = '/data/foto_pm/' . $filename_fp;
+                $path_fp = 'data/foto_pm/' . $filename_fp;
                 if (file_exists($path_fp)) {
                     unlink($path_fp);
                 }
 
                 $filename_fr = $cekdata['vg_nik'] . '.jpg';
-                $path_fr = '/data/foto_rumah/' . $filename_fr;
+                $path_fr = 'data/foto_rumah/' . $filename_fr;
                 if (file_exists($path_fr)) {
                     unlink($path_fr);
                 }
 
-                $image_fp = $this->request->getPost('image_fp');
-                $image_fp = str_replace('data:image/jpeg;base64,', '', $image_fp);
-                $image_fp = base64_decode($image_fp, true);
-                $filename_fp = $vg_nik . '.jpg';
-                file_put_contents(FCPATH . './data/foto_pm/' . $filename_fp, $image_fp);
-                // $path_fp = '/data/file_bpk/' . $file_desa . '/folder_pm/'  . $filename_fp;
-                // file_put_contents($path_fp, $image_fp);
-
-
-                $image_fr = $this->request->getPost('image_fr');
-                $image_fr = str_replace('data:image/jpeg;base64,', '', $image_fr);
-                $image_fr = base64_decode($image_fr, true);
-                $filename_fr = $vg_nik . '.jpg';
-                file_put_contents(FCPATH . './data/foto_rumah/' . $filename_fr, $image_fr);
-                // $path_fr = '/data/file_bpk/' . $file_desa . '/folder_rumah/'  . $filename_fr;
-                // file_put_contents($path_fr, $image_fr);
-
-                $dataUpdate = [
-                    'vg_fp' => $filename_fp,
-                    'vg_fr' => $filename_fr,
+                $image_fp = $this->request->getFile('image_fp');
+                $image_fr = $this->request->getFile('image_fr');
+                // get filename by vg_nik
+                $filename_fp = $cekdata['vg_nik'] . '.' . $image_fp->getExtension();
+                $filename_fr = $cekdata['vg_nik'] . '.' . $image_fr->getExtension();
+                // move file to folder
+                $image_fp->move('data/foto_pm/', $filename_fp);
+                $image_fr->move('data/foto_rumah/', $filename_fr);
+                // $image_fp->move('data/foto_pm');
+                // $image_fr->move('data/foto_rumah');
+                // update data
+                $data = [
+                    'vg_alamat' => $this->request->getPost('vg_alamat'),
+                    'vg_rt' => $this->request->getPost('vg_rt'),
+                    'vg_rw' => $this->request->getPost('vg_rw'),
+                    'vg_ds_id' => $this->request->getPost('vg_ds_id'),
                     'vg_lat' => $this->request->getPost('vg_lat'),
                     'vg_lang' => $this->request->getPost('vg_lang'),
-                    'vg_alamat' => $this->request->getPost('vg_alamat'),
-                    'vg_rw' => $this->request->getPost('vg_rw'),
-                    'vg_rt' => $this->request->getPost('vg_rt'),
+                    'vg_fp' => $filename_fp,
+                    'vg_fr' => $filename_fr,
                     'vg_sta_id' => $this->request->getPost('vg_status'),
-                    'vg_updated_by' => session()->get('nik'),
+                    // 'vg_updated_by' => $user,
 
                 ];
-
-                $this->VerivaliGeoModel->update($vg_id, $dataUpdate);
+                // ];
+                // var_dump($dataUpdate);
+                // die;
+                $this->VerivaliGeoModel->update($vg_id, $data);
 
                 $msg = [
                     'sukses' => 'Upload Foto, Berhasil!',
                 ];
             }
             echo json_encode($msg);
-        } else {
-            $this->session->set_flashdata('error', 'Anda tidak memiliki akses');
-            redirect('/');
         }
     }
 }

@@ -2,8 +2,9 @@
 
 <?= $this->section('content'); ?>
 
-<script src="<?= base_url('/assets/dist/js/webcam.min.js'); ?>"></script>
+<!-- <script src="<?php base_url('/assets/dist/js/webcam.min.js'); ?>"></script> -->
 
+<script async src="<?= base_url('/assets/dist/js/capture.js'); ?>"></script>
 
 
 <div class="content-wrapper mt-1">

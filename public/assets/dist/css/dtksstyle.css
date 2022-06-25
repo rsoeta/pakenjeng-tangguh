@@ -1,0 +1,30 @@
+/* font */
+@import url('https://fonts.googleapis.com/css2?family=Bona+Nova:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Encode+Sans+Semi+Condensed:wght@100;200;300;400;500;600;700&display=swap');
+
+* {
+	font-family: 'Encode Sans Semi Condensed', sans-serif;
+	/* font-family: 'Roboto Slab', serif; */
+	/* font-family: 'Nanum Gothic', sans-serif; */
+	/* font-family: 'Oxygen', sans-serif; */
+	/* font-family: 'Bona Nova', serif; */
+	/* font-family: 'Titillium Web', sans-serif; */
+	font-size: 12px;
+}
+
+a {
+	text-decoration: none;
+}
+
+.nopadding {
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+tr th td {
+	padding: 0 !important;
+	margin: 0 !important;
+}
