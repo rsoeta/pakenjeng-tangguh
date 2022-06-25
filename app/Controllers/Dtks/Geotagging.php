@@ -60,7 +60,7 @@ class Geotagging extends BaseController
         $filter2 = $this->request->getPost('datarw');
         $filter3 = $this->request->getPost('datart');
         $filter4 = $this->request->getPost('dataBansos');
-        $filter5 = $this->request->getPost('dataStatus');
+        $filter5 = 0;
 
         $listing = $model->get_datatables($filter1, $filter2, $filter3, $filter4, $filter5);
         $jumlah_semua = $model->jumlah_semua();
