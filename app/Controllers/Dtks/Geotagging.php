@@ -223,9 +223,9 @@ class Geotagging extends BaseController
             $valid = $this->validate([
                 'image_fp' => [
                     'label' => 'Foto PM',
-                    'rules' => 'uploaded[image_fp]|is_image[image_fp]|mime_in[image_fp,image/jpg,image/jpeg,image/png]|max_size[image_fp,2048]',
+                    'rules' => 'uploaded[image_fp]|is_image[image_fp]|mime_in[image_fp,image/jpg,image/jpeg,image/png]',
                     'errors' => [
-                        'uploade' => '{field} harus ada.',
+                        'uploaded' => '{field} harus ada.',
                         'is_image' => '{field} harus berupa gambar.',
                         'mime_in' => '{field} harus berupa gambar.',
                         'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
@@ -233,7 +233,7 @@ class Geotagging extends BaseController
                 ],
                 'image_fr' => [
                     'label' => 'Foto Rumah',
-                    'rules' => 'uploaded[image_fr]|is_image[image_fr]|mime_in[image_fr,image/jpg,image/jpeg,image/png]|max_size[image_fr,2048]',
+                    'rules' => 'uploaded[image_fr]|is_image[image_fr]|mime_in[image_fr,image/jpg,image/jpeg,image/png]',
                     'errors' => [
                         'uploaded' => '{field} harus ada.',
                         'is_image' => '{field} harus berupa gambar.',
@@ -312,12 +312,58 @@ class Geotagging extends BaseController
 
                 $image_fp = $this->request->getFile('image_fp');
                 $image_fr = $this->request->getFile('image_fr');
+
+                //image manipulation codeigniter 4 compress and resize image
+                // $image = \Config\Services::image()
+                //     ->withFile($imgPath)
+                //     ->resize(200, 100, true, 'height')
+                //     ->save(FCPATH . '/images/' . $imgPath->getRandomName());
+
+                // $imgPath->move(WRITEPATH . 'uploads');
+
                 // get filename by vg_nik
                 $filename_fp = $cekdata['vg_nik'] . '.' . $image_fp->getExtension();
                 $filename_fr = $cekdata['vg_nik'] . '.' . $image_fr->getExtension();
                 // move file to folder
-                $image_fp->move('data/foto_pm/', $filename_fp);
-                $image_fr->move('data/foto_rumah/', $filename_fr);
+                // $image_fp->move('data/foto_pm/', $filename_fp);
+                $image_fp = \Config\Services::image()
+                    ->withFile($image_fp)
+                    ->text(
+                        $cekdata['vg_nama_lengkap'] . ' - ' . $cekdata['vg_lang'] . ', ' . $cekdata['vg_lat'],
+                        [
+                            'color'         => '#ffffff',
+                            'opacity'       => 0,
+                            'withShadow'    => false,
+                            'shadowColor'   => '#000000',
+                            'hAlign'        => 'center',
+                            'vAlign'        => 'bottom',
+                            'fontSize'      => 20,
+                        ]
+                    )
+                    ->resize(100, 200, true, 'height')
+                    // ->fit(100, 200, 'center')
+                    ->save(FCPATH . 'data/foto_pm/' . $filename_fp);
+
+                $image_fr = \Config\Services::image()
+                    ->withFile($image_fr)
+                    ->text(
+                        $cekdata['vg_nama_lengkap'] . ' - ' . $cekdata['vg_lang'] . ', ' . $cekdata['vg_lat'],
+
+                        [
+                            'color'         => '#ffffff',
+                            'shadowColor'   => '#000000',
+                            'opacity'       => 0,
+                            'withShadow'    => false,
+                            'hAlign'        => 'right',
+                            'vAlign'        => 'bottom',
+                            'fontSize'      => 20,
+                        ]
+                    )
+                    ->resize(100, 200, true, 'height')
+                    // ->fit(100, 200, 'center')
+                    ->save(FCPATH . 'data/foto_rumah/' . $filename_fr);
+
+                // $image_fr->move('data/foto_rumah/', $filename_fr);
                 // $image_fp->move('data/foto_pm');
                 // $image_fr->move('data/foto_rumah');
                 // update data

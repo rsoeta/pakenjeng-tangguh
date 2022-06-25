@@ -108,7 +108,7 @@
                                 </div>
                                 <div class="col-sm-3 col-6 mb-1" hidden>
                                     <select class="form-control form-control-sm" name="" id="dataStatus">
-                                        <option value="0" selected>0</option>
+                                        <option value="1" selected>0</option>
                                     </select>
                                 </div>
                             </div>

@@ -10,9 +10,9 @@
             $role = session()->get('role_id');
             $kode_desa = session()->get('kode_desa');
             ?>
+            <?= form_open_multipart('', ['class' => 'formupload']) ?>
+            <?= csrf_field(); ?>
             <div class="modal-body">
-                <?= form_open_multipart('', ['class' => 'formupload']) ?>
-                <?= csrf_field(); ?>
                 <div class="row">
                     <div class="col-12">
                         <div class="form-group row nopadding">
@@ -44,23 +44,20 @@
                         </div>
                     </div>
                     <hr>
-                    <div class="col-sm-6 col-12">
+                    <div class="col-sm-12 col-12 mt-2">
                         <div class="form-group row nopadding">
-                            <label class="col-3 col-sm-4 col-form-label" for="vg_alamat">Alamat</label>
-                            <div class="col-9 col-sm-8">
+                            <label class="col-3 col-sm-2 col-form-label" for="vg_alamat">Alamat</label>
+                            <div class="col-9 col-sm-4">
                                 <input type="text" name="vg_alamat" id="vg_alamat" class="form-control form-control-sm" value="<?= set_value('vg_alamat', $vg_alamat); ?>">
                                 <div class="invalid-feedback errorvg_alamat"></div>
                             </div>
-                        </div>
-
-                        <div class="form-group row nopadding">
-                            <label class="col-3 col-sm-4 col-form-label" for="vg_rt">No. RT</label>
-                            <div class="col-3 col-sm-8">
+                            <label class="col-3 col-sm-1 col-form-label" for="vg_rt">No. RT</label>
+                            <div class="col-3 col-sm-2">
                                 <input type="number" name="vg_rt" id="vg_rt" class="form-control form-control-sm" value="<?= set_value('vg_rt', $vg_rt); ?>">
                                 <div class="invalid-feedback errorvg_rt"></div>
                             </div>
-                            <label class="col-3 col-sm-4 col-form-label" for="vg_rw">No. RW</label>
-                            <div class="col-3 col-sm-8">
+                            <label class="col-3 col-sm-1 col-form-label" for="vg_rw">No. RW</label>
+                            <div class="col-3 col-sm-2">
                                 <input type="number" name="vg_rw" id="vg_rw" class="form-control form-control-sm" value="<?= set_value('vg_rw', $vg_rw); ?>">
                                 <div class="invalid-feedback errorvg_rw"></div>
                             </div>
@@ -86,66 +83,52 @@
                             </div>
                         </div>
                     </div>
-                    <hr>
-                    <div class="col-sm-6 col-12">
-                        <div class="form-group row">
-                            <label class="col-3 col-form-label mb-4" for="image_fp">Foto PM</label>
-                            <div class="col-9 mb-4">
+                    <div class="col-sm-12 col-12 mt-2">
+                        <label class="label-center mt-2">Foto Dokumentasi</label>
+                        <div class="form-group row nopadding">
+                            <label class="col-3 col-sm-2 col-form-label mb-2" for="image_fp">PM</label>
+                            <div class="col-9 col-sm-4 mb-2">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-user"></i></span>
                                     </div>
                                     <input type="file" class="form-control" spellcheck="false" data-ms-editor="true" name="image_fp" accept="image/*" capture />
                                 </div>
-                                <div class="invalid-feedback errorimage_fp"></div>
                             </div>
-                            <label class="col-3 col-form-label" for="image_fr">Foto Rumah</label>
-                            <div class="col-9">
+                            <div class="invalid-feedback errorimage_fp"></div>
+                            <label class="col-3 col-sm-1 col-form-label" for="image_fr">Rumah</label>
+                            <div class="col-9 col-sm-5">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-home"></i></span>
                                     </div>
                                     <input type="file" class="form-control" spellcheck="false" data-ms-editor="true" name="image_fr" accept="image/*" capture />
                                 </div>
-                                <div class="invalid-feedback errorimage_fr"></div>
+                            </div>
+                            <div class="invalid-feedback errorimage_fr"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-12 mt-2">
+                        <label class="label-center mt-2">Titik Koordinat</label>
+                        <div class="form-group row nopadding">
+                            <div class="col-sm-2 col-12"></div>
+                            <div class="col-sm-5 col-6">
+                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Latitude" spellcheck="false" id="latitude" name="vg_lat" readonly>
+                                <div class="invalid-feedback errorivg_lat"></div>
+                            </div>
+                            <div class="col-sm-5 col-6">
+                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Longitude" spellcheck="false" id="longitude" name="vg_lang" readonly>
+                                <div class="invalid-feedback errorivg_lang"></div>
                             </div>
                         </div>
-                        <input type="text" class="form-control form-control-sm mb-2" placeholder="Latitude" spellcheck="false" id="latitude" name="vg_lat" readonly>
-                        <div class="invalid-feedback errorivg_lat"></div>
-                        <input type="text" class="form-control form-control-sm mb-2" placeholder="Longitude" spellcheck="false" id="longitude" name="vg_lang" readonly>
-                        <div class="invalid-feedback errorivg_lang"></div>
-                        <!-- <device type="media" onchange="update(this.data)"></device> -->
-                        <!-- <video id="video" autoplay>Streaming video tidak tersedia.</video> -->
-                        <!-- <label for="image_fr">Foto Rumah</label> -->
-                        <!-- <div id="result_fr"></div> -->
-                        <!-- <input type="hidden" name="image_fr" class="image-tag2"> -->
-                    </div>
-                    <div class="col-6">
-                        <!-- <label for="image_fp">Foto PM</label> -->
-                        <!-- <div id="result_fp"></div> -->
-                        <!-- <input type="hidden" name="image_fp" class="image-tag1"> -->
-                        <!-- <div class="row">
-                            <div class="col-12">
-                                <div id="my_camera"></div>
-                                <p id="z"></p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-6">
-                                <button class="btn btn-sm btn-block btn-info" type="button" onclick="take_snapshot2();getLocation();"><i class="fa fa-home"></i> Foto Rumah</button>
-                            </div>
-                            <div class="col-6">
-                                <button class="btn btn-sm btn-block btn-primary" type="button" onclick="take_snapshot()"><i class="fa fa-user"></i> Foto PM</button>
-                            </div>
-                        </div> -->
-                    </div>
-                    <div class="modal-footer mt-3">
-                        <button type="button" class="btn btn-info btn-block" onclick="getLocation()">Cek Lokasi</button>
-                        <button type="submit" class="btn btn-success btn-block btnSimpan">Submit</button>
                     </div>
                 </div>
-                <?= form_close(); ?>
             </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-info" onclick="getLocation()">Get Coordinate</button>
+                <button type="submit" class="btn btn-success btnSimpan float-right">Submit</button>
+            </div>
+            <?= form_close(); ?>
         </div>
     </div>
 </div>

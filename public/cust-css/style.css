@@ -47,6 +47,12 @@ a:active {
     margin: 0 !important;
 }
 
+.label-center{
+    display: flex; 
+    font-size: 1.2em; 
+    justify-content: center; 
+    align-items: center;
+}
 /* #float{
     position: fixed;
     top: 3em;
