@@ -18,12 +18,12 @@
                         <div class="form-group row nopadding">
                             <label for="" class="col-2 col-form-label">Bansos</label>
                             <div class="col-4">
-                                <input type="text" class="form-control form-control-sm" value="<?= $bansosSatuNama['dbj_nama_bansos']; ?> <?= $bansosDuaNama['dbj_nama_bansos']; ?>" disabled>
+                                <input type="text" class="form-control form-control-sm" value="<?= $jenisBansosSatu; ?> <?= $jenisBansosDua; ?>" disabled>
                             </div>
                             <input type="hidden" name="vg_id" id="vg_id" class="form-control form-control-sm" value="<?= set_value('vg_id', $vg_id); ?>">
                             <label class="col-1 col-form-label" for="vg_nik">NIK</label>
                             <div class="col-5">
-                                <input type="text" name="vg_nik" id="vg_nik" class="form-control form-control-sm" value="<?= set_value('vg_nik', $vg_nik); ?>" <?= $role > 2 ? 'readonly' : ''; ?>>
+                                <input type="text" name="vg_nik" id="vg_nik" class="form-control form-control-sm" value="<?= set_value('vg_nik', $vg_nik); ?>" readonly>
                                 <div class="invalid-feedback errornik"></div>
                             </div>
                         </div>
@@ -31,7 +31,7 @@
                         <div class="form-group row nopadding">
                             <label class="col-2 col-form-label" for="vg_nama_lengkap">Nama</label>
                             <div class="col-10">
-                                <input type="text" name="vg_nama_lengkap" id="vg_nama_lengkap" class="form-control form-control-sm" value="<?= set_value('vg_nama_lengkap', $vg_nama_lengkap); ?>" <?= $role > 2 ? 'readonly' : ''; ?>>
+                                <input type="text" name="vg_nama_lengkap" id="vg_nama_lengkap" class="form-control form-control-sm" value="<?= set_value('vg_nama_lengkap', $vg_nama_lengkap); ?>" readonly>
                                 <div class="invalid-feedback errorvg_nama_lengkap"></div>
                             </div>
                         </div>
@@ -106,11 +106,11 @@
                         <div class="form-group row nopadding">
                             <div class="col-sm-2 col-12"></div>
                             <div class="col-sm-5 col-6">
-                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Latitude" value="<?= set_value('vg_lat', $vg_lat); ?>" spellcheck="false" id="latitude" name="vg_lat" readonly>
+                                <input type="text" class="form-control mb-2" placeholder="Latitude" value="<?= set_value('vg_lat', $vg_lat); ?>" spellcheck="false" id="latitude" name="vg_lat">
                                 <div class="invalid-feedback errorivg_lat"></div>
                             </div>
                             <div class="col-sm-5 col-6">
-                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Longitude" value="<?= set_value('vg_lang', $vg_lang); ?>" spellcheck="false" id="longitude" name="vg_lang" readonly>
+                                <input type="text" class="form-control mb-2" placeholder="Longitude" value="<?= set_value('vg_lang', $vg_lang); ?>" spellcheck="false" id="longitude" name="vg_lang">
                                 <div class="invalid-feedback errorivg_lang"></div>
                             </div>
                         </div>

@@ -75,13 +75,28 @@ class Geotagging extends BaseController
             $row[] = $key->vg_alamat;
             $row[] = $key->namaDesa;
 
-            $bansosSatu = $key->vg_dbj_id1;
-            $bansosDua = $key->vg_dbj_id2;
             // get name of 
+            $bansosSatu = $key->vg_dbj_id1;
             $bansosSatuNama = $db->table('dtks_bansos_jenis')->where('dbj_id', $bansosSatu)->get()->getRowArray();
-            $bansosDuaNama = $db->table('dtks_bansos_jenis')->where('dbj_id', $bansosDua)->get()->getRowArray();
+            if ($bansosSatuNama != null || $bansosSatuNama != 0 || $bansosSatuNama != '') {
+                $jenisBansosSatu = '<span class="badge bg-success">' . $bansosSatuNama['dbj_nama_bansos'] . '</span>';
+            } else {
+                $jenisBansosSatu = '';
+            }
 
-            $row[] = '<span class="badge bg-success">' . $bansosSatuNama['dbj_nama_bansos'] . '</span>' . ' ' . '<span class="badge bg-success">' . $bansosDuaNama['dbj_nama_bansos'] . '</span>';
+            $bansosDua = $key->vg_dbj_id2;
+            $bansosDuaNama = $db->table('dtks_bansos_jenis')->where('dbj_id', $bansosDua)->get()->getRowArray();
+            if ($bansosDuaNama != null || $bansosDuaNama != 0 || $bansosDuaNama != '') {
+                $jenisBansosDua = '<span class="badge bg-success">' . $bansosDuaNama['dbj_nama_bansos'] . '</span>';
+            } else {
+                $jenisBansosDua = '';
+            }
+
+            // $jenisBansosSatu = $bansosSatu;
+            // $jenisBansosDua = $bansosDua;
+
+            // $row[] = '<span class="badge bg-success">' . $bansosSatuNama['dbj_nama_bansos'] . '</span>' . ' ' . '<span class="badge bg-success">' . $bansosDuaNama['dbj_nama_bansos'] . '</span>';
+            $row[] = $jenisBansosSatu . ' ' . $jenisBansosDua;
             $row[] = $key->sta_nama;
             $row[] = '<a class="btn btn-sm" href="javascript:void(0)" title="Ambil Foto" onclick="edit_person(' . "'" . $key->vg_id . "'" . ')"><i class="fa fa-camera-retro fa-2x"></i></a>';
             $data[] = $row;
@@ -108,27 +123,11 @@ class Geotagging extends BaseController
         $csrfHash = csrf_hash();
 
 
-        $user = session()->get('role_id');
-        if ($user < 3) {
-            $filter1 = $this->request->getPost('datadesa2');
-            $filter2 = $this->request->getPost('datarw2');
-            $filter3 = $this->request->getPost('dataStatusPm');
-            $filter4 = $this->request->getPost('dataBansos2');
-            $filter5 = '1';
-        } elseif ($user > 2) {
-            $filter1 = $this->request->getPost('datadesa');
-            $filter2 = $this->request->getPost('datarw');
-            $filter3 = $this->request->getPost('datart');
-            $filter4 = $this->request->getPost('dataBansos');
-            $filter5 = '0';
-        } else {
-            $filter1 = '--';
-            $filter2 = '--';
-            $filter3 = '--';
-            $filter4 = '--';
-            $filter5 = '--';
-        }
-        // $filter5 = ($user < 2){'0';}elseif($user >2){'1';}else{'2';};
+        $filter1 = $this->request->getPost('datadesa2');
+        $filter2 = $this->request->getPost('datarw2');
+        $filter3 = $this->request->getPost('dataStatusPm');
+        $filter4 = $this->request->getPost('dataBansos2');
+        $filter5 = '1';
 
         $listing = $model->get_datatables2($filter1, $filter2, $filter3, $filter4, $filter5);
         $jumlah_semua = $model->jumlah_semua2();
@@ -147,21 +146,29 @@ class Geotagging extends BaseController
             $row[] = $key->vg_alamat;
             $row[] = $key->namaDesa;
 
-            // $badges = $key->vg_dbj_id1;
-            // foreach ($db->table('dtks_bansos_jenis')->get()->getResultArray() as $key2) {
-            //     if ($key2['dbj_id'] == $badges) {
-            //         $keterangan = $key2['dbj_nama_bansos'];
-            //     }
-            // }
             // get name of 
             $bansosSatu = $key->vg_dbj_id1;
             $bansosSatuNama = $db->table('dtks_bansos_jenis')->where('dbj_id', $bansosSatu)->get()->getRowArray();
+            if ($bansosSatuNama != null || $bansosSatuNama != 0 || $bansosSatuNama != '') {
+                $jenisBansosSatu = '<span class="badge bg-success">' . $bansosSatuNama['dbj_nama_bansos'] . '</span>';
+            } else {
+                $jenisBansosSatu = '';
+            }
+
             $bansosDua = $key->vg_dbj_id2;
             $bansosDuaNama = $db->table('dtks_bansos_jenis')->where('dbj_id', $bansosDua)->get()->getRowArray();
+            if ($bansosDuaNama != null || $bansosDuaNama != 0 || $bansosDuaNama != '') {
+                $jenisBansosDua = '<span class="badge bg-success">' . $bansosDuaNama['dbj_nama_bansos'] . '</span>';
+            } else {
+                $jenisBansosDua = '';
+            }
 
-            $row[] = '<span class="badge bg-success">' . $bansosSatuNama['dbj_nama_bansos'] . '</span>' . ' ' . '<span class="badge bg-success">' . $bansosDuaNama['dbj_nama_bansos'] . '</span>';
+            // $jenisBansosSatu = $bansosSatu;
+            // $jenisBansosDua = $bansosDua;
+            // $row[] = '<span class="badge bg-success">' . $bansosSatuNama['dbj_nama_bansos'] . '</span>' . ' ' . '<span class="badge bg-success">' . $bansosDuaNama['dbj_nama_bansos'] . '</span>';
+            $row[] = $jenisBansosSatu . ' ' . $jenisBansosDua;
             $row[] = $key->sta_nama;
-            $row[] = '<img id="myImg" src="' . base_url('/data/foto_pm/' . $key->vg_nik) . '.jpg" alt="' . $key->vg_nama_lengkap . '" style="width:10%;max-width:100px">';
+            $row[] = '<img id="myImg" src="' . '/data/foto_pm/' . $key->vg_nik . '.jpg" alt="' . $key->vg_nama_lengkap . '" style="width:10%;max-width:100px"> <img id="myImg" src="' . '/data/foto_rumah/' . $key->vg_nik . '.jpg" alt="' . $key->vg_nama_lengkap . '" style="width:10%;max-width:100px">';
             $row[] = '<a class="btn btn-sm" href="javascript:void(0)" title="Ambil Foto" onclick="edit_person(' . "'" . $key->vg_id . "'" . ')"><i class="fa fa-info-circle"></i></a>';
             $data[] = $row;
         }
@@ -254,13 +261,23 @@ class Geotagging extends BaseController
             foreach ($model as $key => $value) {
                 $data[$key] = $value;
             }
-            // var_dump($data);
+            // get name of 
             $bansosSatu = $data['vg_dbj_id1'];
-            $bansosDua = $data['vg_dbj_id2'];
-
             $bansosSatuNama = $db->table('dtks_bansos_jenis')->where('dbj_id', $bansosSatu)->get()->getRowArray();
+            if ($bansosSatuNama != null || $bansosSatuNama != 0 || $bansosSatuNama != '') {
+                $jenisBansosSatu = $bansosSatuNama['dbj_nama_bansos'];
+            } else {
+                $jenisBansosSatu = '';
+            }
+
+            $bansosDua = $data['vg_dbj_id2'];
             $bansosDuaNama = $db->table('dtks_bansos_jenis')->where('dbj_id', $bansosDua)->get()->getRowArray();
-            // var_dump($bansosSatuNama);
+            if ($bansosDuaNama != null || $bansosDuaNama != 0 || $bansosDuaNama != '') {
+                $jenisBansosDua = $bansosDuaNama['dbj_nama_bansos'];
+            } else {
+                $jenisBansosDua = '';
+            }
+
 
 
             $data = [
@@ -292,8 +309,8 @@ class Geotagging extends BaseController
                 'vg_dbj_id2' => $model['vg_dbj_id2'],
                 'vg_sta_id' => $model['vg_sta_id'],
                 'vg_ds_id' => $model['vg_ds_id'],
-                'bansosSatuNama' => $bansosSatuNama,
-                'bansosDuaNama' => $bansosDuaNama,
+                'jenisBansosSatu' => $jenisBansosSatu,
+                'jenisBansosDua' => $jenisBansosDua,
 
             ];
             // dd($data['status']);
@@ -464,8 +481,8 @@ class Geotagging extends BaseController
                                 'fontSize'      => 20,
                             ]
                         )
-                        ->resize(100, 200, false, 'height')
-                        // ->fit(100, 200, 'center')
+                        ->resize(200, 320, false, 'height')
+                        // ->fit(200, 200, 'center')
                         ->save(FCPATH . 'data/foto_pm/' . $filename_fp);
 
                     $image_fr = \Config\Services::image()
@@ -483,8 +500,8 @@ class Geotagging extends BaseController
                                 'fontSize'      => 20,
                             ]
                         )
-                        ->resize(100, 200, false, 'height')
-                        // ->fit(100, 200, 'center')
+                        ->resize(200, 320, false, 'height')
+                        // ->fit(200, 200, 'center')
                         ->save(FCPATH . 'data/foto_rumah/' . $filename_fr);
 
                     // $image_fr->move('data/foto_rumah/', $filename_fr);

@@ -209,5 +209,4 @@
         - ubah tab verivali anomali menjadi tabel verivali, proses verivali dan hasil verivali
 
     ** perbaikan tb_status insert data value sta_id = 2, sta_nama = Sukses
-       * sta_nama terdiri: langkah 1, langkah 2, langkah 3,
     ---------------------------------------------------------------------------------------------------------------------------------------------------

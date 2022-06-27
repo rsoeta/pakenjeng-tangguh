@@ -86,9 +86,7 @@
                         <div class="col">
                             <div class="row">
                                 <div class="col-sm-3 col-6 mb-1">
-                                    <select <?php if ($role >= 3) {
-                                                echo 'disabled="disabled"';
-                                            } ?> class="form-control form-control-sm" name="" id="datadesa">
+                                    <select <?= ($role > 2) ? 'readonly' : ''; ?> class="form-control form-control-sm" name="" id="datadesa">
                                         <option value="">[ Semua Desa ]</option>
                                         <?php foreach ($desKels as $row) { ?>
                                             <option <?= $kode_desa == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id']; ?>"><?= $row['name']; ?></option>
@@ -96,9 +94,7 @@
                                     </select>
                                 </div>
                                 <div class="col-sm-3 col-6 mb-1">
-                                    <select <?php if ($role > 3) {
-                                                echo 'disabled="disabled"';
-                                            } ?> class="form-control form-control-sm" name="" id="datarw">
+                                    <select <?= ($role > 3) ? 'readonly' : ''; ?> class="form-control form-control-sm" name="" id="datarw">
                                         <option value="">[ Semua No. RW ]</option>
                                         <?php foreach ($datarw as $row) { ?>
                                             <option <?php if ($level == $row['no_rw']) {
@@ -310,7 +306,7 @@
         'processing': true,
         'serverSide': true,
         "ajax": {
-            "url": "<?= site_url('tabelGeo'); ?>",
+            "url": "<?= site_url('/tabelGeo'); ?>",
             "type": "POST",
             "data": {
                 "csrf_test_name": $('input[name=csrf_test_name]').val()
@@ -366,7 +362,7 @@
         'processing': true,
         'serverSide': true,
         "ajax": {
-            "url": "<?= site_url('tabelGeo2'); ?>",
+            "url": "<?= site_url('/tabelGeo2'); ?>",
             "type": "POST",
             "data": {
                 "csrf_test_name": $('input[name=csrf_test_name]').val()
@@ -418,7 +414,7 @@
         //Ajax Load data from ajax
         $.ajax({
             type: "POST",
-            url: "<?php echo site_url('editGeo') ?>",
+            url: "<?php echo site_url('/editGeo') ?>",
             data: {
                 vg_id: vg_id
             },
