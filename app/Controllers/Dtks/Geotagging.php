@@ -7,6 +7,13 @@ use App\Models\WilayahModel;
 use App\Models\GenModel;
 use App\Models\RwModel;
 use App\Models\Dtks\VerivaliGeoModel;
+use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Settings as WordSettings;
+use PhpOffice\PhpWord\Shared\Html;
+use PhpOffice\PhpWord\TemplateProcessor;
+use PhpOffice\PhpWord\Writer\Word2007\Element\Container;
+use PhpOffice\Common\XMLWriter;
 
 
 use App\Controllers\BaseController;
@@ -28,7 +35,7 @@ class Geotagging extends BaseController
 
         $data = [
             'namaApp' => 'Opr NewDTKS',
-            'title' => 'Verifikasi dan Validasi Geotagging DTKS',
+            'title' => 'Verifikasi dan Validasi PDTT',
             'user_login' => $this->AuthModel->getUserId(),
             'statusRole' => $this->GenModel->getStatusRole(),
             'desKels' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
@@ -168,7 +175,7 @@ class Geotagging extends BaseController
             // $row[] = '<span class="badge bg-success">' . $bansosSatuNama['dbj_nama_bansos'] . '</span>' . ' ' . '<span class="badge bg-success">' . $bansosDuaNama['dbj_nama_bansos'] . '</span>';
             $row[] = $jenisBansosSatu . ' ' . $jenisBansosDua;
             $row[] = $key->sta_nama;
-            $row[] = '<img id="myImg" src="' . '/data/foto_pm/' . $key->vg_nik . '.jpg" alt="' . $key->vg_nama_lengkap . '" style="width:10%;max-width:100px"> <img id="myImg" src="' . '/data/foto_rumah/' . $key->vg_nik . '.jpg" alt="' . $key->vg_nama_lengkap . '" style="width:10%;max-width:100px">';
+            $row[] = '<img onclick="klikGambar(' . "'" . $key->vg_nik . "'" . ')" id="myImg" src="' . 'data/foto_pm/PDTT_FP' . $key->vg_nik . '.jpg" alt="' . $key->vg_nama_lengkap . '" style="width:10%;max-width:100px"> <img id="myImg2" src="' . 'data/foto_rumah/PDTT_FR' . $key->vg_nik . '.jpg" alt="' . $key->vg_nama_lengkap . '" style="width:10%;max-width:100px">';
             $row[] = '<a class="btn btn-sm" href="javascript:void(0)" title="Ambil Foto" onclick="edit_person(' . "'" . $key->vg_id . "'" . ')"><i class="fa fa-info-circle"></i></a>';
             $data[] = $row;
         }
@@ -323,6 +330,37 @@ class Geotagging extends BaseController
             echo json_encode($msg);
         }
     }
+    public function modGambar()
+    {
+        if ($this->request->isAJAX()) {
+            $db = \Config\Database::connect();
+            $vg_ni = $this->request->getVar('vg_ni');
+
+            $model = $db->table('dtks_verivali_geo')->where('vg_ni', $vg_ni)->get()->getRowArray();
+
+
+            $data = [
+                'title' => 'Form. Upload Foto',
+                'keterangan' => $db->table('tb_ket_anomali')->orderBy('ano_nama', 'asc')->get()->getResultArray(),
+                'status' => $this->GenModel->getStatusLimit()->getResultArray(),
+                'jenisPekerjaan' => $this->GenModel->getPendudukPekerjaan()->getResultArray(),
+                'jenisKelamin' => $this->GenModel->getDataJenkel(),
+                'statusDtks' => $this->GenModel->getStatusDtks()->getResultArray(),
+                'Bansos' => $db->table('dtks_bansos_jenis')->get()->getResultArray(),
+
+                'vg_nik' => $model['vg_nik'],
+
+            ];
+            // dd($data['status']);
+
+            $msg = [
+                'sukses' => view('dtks/data/dtks/file_bpk/modGambar', $data)
+            ];
+
+            // var_dump(session()->get('kode_desa'));
+            echo json_encode($msg);
+        }
+    }
 
 
     public function ajax_update()
@@ -439,13 +477,13 @@ class Geotagging extends BaseController
 
                     $cekdata = $this->VerivaliGeoModel->find($vg_id);
 
-                    $filename_fp = $cekdata['vg_nik'] . '.jpg';
+                    $filename_fp = 'PDTT_FP' . $cekdata['vg_nik'] . '.jpg';
                     $path_fp = 'data/foto_pm/' . $filename_fp;
                     if (file_exists($path_fp)) {
                         unlink($path_fp);
                     }
 
-                    $filename_fr = $cekdata['vg_nik'] . '.jpg';
+                    $filename_fr = 'PDTT_FR' . $cekdata['vg_nik'] . '.jpg';
                     $path_fr = 'data/foto_rumah/' . $filename_fr;
                     if (file_exists($path_fr)) {
                         unlink($path_fr);
@@ -463,8 +501,8 @@ class Geotagging extends BaseController
                     // $imgPath->move(WRITEPATH . 'uploads');
 
                     // get filename by vg_nik
-                    $filename_fp = $cekdata['vg_nik'] . '.' . $image_fp->getExtension();
-                    $filename_fr = $cekdata['vg_nik'] . '.' . $image_fr->getExtension();
+                    $filename_fp = 'PDTT_FP' . $cekdata['vg_nik'] . '.jpg';
+                    $filename_fr = 'PDTT_FR' . $cekdata['vg_nik'] . '.jpg';
                     // move file to folder
                     // $image_fp->move('data/foto_pm/', $filename_fp);
                     $image_fp = \Config\Services::image()
@@ -532,6 +570,114 @@ class Geotagging extends BaseController
                 }
             }
             echo json_encode($msg);
+        }
+    }
+
+    public function exportBA()
+    {
+        $wilayahModel = new WilayahModel();
+        $user_login = $this->AuthModel->getUserId();
+        // dd($user_login);
+        if (!isset($user_login['lp_sekretariat']) && !isset($user_login['user_lembaga_id'])) {
+            $str = '  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+               <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+               <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+               <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.35.1/js/bootstrap-dialog.min.js"></script>
+               <script type="text/javascript">
+                   setTimeout(function() { 
+                      BootstrapDialog.alert(\'Silahkan isi profil Anda dan Lembaga terlebih dahulu!!\') 
+                      window.location.href = \'/profil_user\';
+                    },10000);
+               </script>';
+            echo $str;
+        } else {
+
+            $filter1 = session()->get('kode_desa');
+            $filter5 = '1';
+            // dd($filter1);
+
+            $vervalPdtt = $this->VerivaliGeoModel->getVerivaliFix($filter1, $filter5);
+            // dd($vervalPdtt);
+            foreach ($vervalPdtt as $row) {
+                $vg_id = $row['vg_id'];
+                $vg_nik = $row['vg_nik'];
+                $vg_nama_lengkap = $row['vg_nama_lengkap'];
+                $vg_alamat = $row['vg_alamat'];
+                $vg_rt = $row['vg_rt'];
+                $vg_rw = $row['vg_rw'];
+                $vg_desa = $row['namaDesa'];
+                $vg_kec = $row['namaKec'];
+                $vg_lat = $row['vg_lat'];
+                $vg_lang = $row['vg_lang'];
+                $vg_fp = $row['vg_fp'];
+                $vg_fr = $row['vg_fr'];
+            }
+
+            $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor(FCPATH . 'data/templates/ba_pdtt.docx');
+
+            $phpWord = new \PhpOffice\PhpWord\PhpWord();
+            /* Note: any element you append to a document must reside inside of a Section. */
+
+            // Adding an empty Section to the document...
+            $section = $phpWord->addSection();
+            // Adding Text element to the Section having font styled by default...
+            $section->addPageBreak();
+
+            $section = $phpWord->addSection();
+            // Adding Text element to the Section having font styled by default...
+            $section->addText(
+                '"Learn from yesterday, live for today, hope for tomorrow. '
+                    . 'The important thing is not to stop questioning." '
+                    . '(Albert Einstein)'
+            );
+
+            /*
+ * Note: it's possible to customize font style of the Text element you add in three ways:
+ * - inline;
+ * - using named font style (new font style object will be implicitly created);
+ * - using explicitly created font style object.
+ */
+
+            // Adding Text element with font customized inline...
+            $section->addText(
+                '"Great achievement is usually born of great sacrifice, '
+                    . 'and is never the result of selfishness." '
+                    . '(Napoleon Hill)',
+                array('name' => 'Tahoma', 'size' => 10)
+            );
+
+            // Adding Text element with font customized using named font style...
+            $fontStyleName = 'oneUserDefinedStyle';
+            $phpWord->addFontStyle(
+                $fontStyleName,
+                array('name' => 'Tahoma', 'size' => 10, 'color' => '1B2232', 'bold' => true)
+            );
+            $section->addText(
+                '"The greatest accomplishment is not in never falling, '
+                    . 'but in rising again after you fall." '
+                    . '(Vince Lombardi)',
+                $fontStyleName
+            );
+
+            // Adding Text element with font customized using explicitly created font style object...
+            $fontStyle = new \PhpOffice\PhpWord\Style\Font();
+            $fontStyle->setBold(true);
+            $fontStyle->setName('Tahoma');
+            $fontStyle->setSize(13);
+            $myTextElement = $section->addText('"Believe you can and you\'re halfway there." (Theodor Roosevelt)');
+            $myTextElement->setFontStyle($fontStyle);
+
+            $filename = 'myFile.docx';
+            header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+            header('Content-Disposition: attachment;filename="' . $filename . '"'); //tell browser what's the file name
+            header('Cache-Control: max-age=0'); //no cache
+
+            // Saving the document as OOXML file...
+            $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+            $objWriter->save('php://output');
+
+            /* Note: we skip RTF, because it's not XML-based and requires a different example. */
+            /* Note: we skip PDF, because "HTML-to-PDF" approach is used to create PDF documents. */
         }
     }
 }

@@ -907,7 +907,7 @@ class Usulan22 extends BaseController
                    setTimeout(function() { 
                       BootstrapDialog.alert(\'Silahkan isi profil Anda dan Lembaga terlebih dahulu!!\') 
                       window.location.href = \'/profil_user\';
-                    },100);
+                    },10000);
                </script>';
             echo $str;
             // echo "<script>

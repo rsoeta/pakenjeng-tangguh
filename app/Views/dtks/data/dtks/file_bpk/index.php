@@ -6,7 +6,6 @@
 
 <script async src="<?= base_url('/assets/dist/js/capture.js'); ?>"></script>
 
-
 <div class="content-wrapper mt-1">
 
     <!-- Main content -->
@@ -72,21 +71,35 @@
                     </div><!-- /.col -->
                 </div>
             <?php } ?>
-            <ul class="nav nav-tabs" id="myTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link <?= ($role > 2) ? 'active' : ''; ?>" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">TABEL VERIVALI</button>
-                </li>
-                <li class="nav-item" role="presentation" <?= ($role > 2) ? 'hidden' : ''; ?>>
-                    <button class="nav-link <?= ($role <= 2) ? 'active' : ''; ?>" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">HASIL VERIVALI</button>
-                </li>
-            </ul>
+            <div class="row">
+                <div class="col-6">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link <?= ($role > 2) ? 'active' : ''; ?>" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">TABEL VERIVALI</button>
+                        </li>
+                        <li class="nav-item" role="presentation" <?= ($role > 2) ? 'hidden' : ''; ?>>
+                            <button class="nav-link <?= ($role <= 2) ? 'active' : ''; ?>" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">HASIL VERIVALI</button>
+                        </li>
+                    </ul>
+                </div>
+                <?php if ($role == 3) { ?>
+                    <div class="col-6">
+                        <div class="float-right">
+                            <a href="exportBaPdtt" id="exportBaPdtt" type="submit" class="btn btn-primary">
+                                <i class="fa fa-download"></i> Export B.A
+                            </a>
+                        </div>
+                    </div>
+                <?php } ?>
+            </div>
+            <!-- create breadcrump -->
             <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade <?= ($role > 2) ? 'show active' : ''; ?>" id="home" role="tabpanel" aria-labelledby="home-tab">
                     <div class="row my-2">
                         <div class="col">
                             <div class="row">
                                 <div class="col-sm-3 col-6 mb-1">
-                                    <select <?= ($role > 2) ? 'readonly' : ''; ?> class="form-control form-control-sm" name="" id="datadesa">
+                                    <select <?= ($role > 2) ? 'disabled' : ''; ?> class="form-control form-control-sm" name="datadesa" id="datadesa">
                                         <option value="">[ Semua Desa ]</option>
                                         <?php foreach ($desKels as $row) { ?>
                                             <option <?= $kode_desa == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id']; ?>"><?= $row['name']; ?></option>
@@ -218,6 +231,7 @@
         </div>
     </section>
 </div>
+
 <!-- /.container-fluid -->
 <div class="viewmodal" style="display: none;"></div>
 
@@ -432,19 +446,19 @@
         });
     }
 
-    function edit_person2(vg_id) {
+    function klikGambar(vg_nik) {
         //Ajax Load data from ajax
         $.ajax({
             type: "POST",
-            url: "<?php echo site_url('editGeo2') ?>",
+            url: "<?php echo site_url('modGambar') ?>",
             data: {
-                vg_id: vg_id
+                vg_nik: vg_nik
             },
             dataType: "JSON",
             success: function(response) {
                 if (response.sukses) {
                     $('.viewmodal').html(response.sukses).show();
-                    $('#modalEdit').modal('show');
+                    $('#myModal').modal('show');
                 }
 
             },
@@ -455,6 +469,7 @@
     }
 
     function reload_table() {
+        table.ajax.reload(null, false); //reload datatable ajax 
         table2.ajax.reload(null, false); //reload datatable ajax 
     }
 
@@ -469,7 +484,41 @@
                 return false;
         }
     }
-</script>
 
+    $(function() {
+        $('#exportBaPdtt').click(function() {
+            var $elt = $('#datadesa').removeAttr('disabled', '');
+            setTimeout(function() {
+                $elt.attr('disabled', true);
+            }, 500);
+
+        });
+    });
+
+    var myModal = document.getElementById("myModal");
+
+    // Get the image and insert it inside the modal - use its "alt" text as a caption
+    var myImg = document.getElementById("myImg");
+    var modalImg = document.getElementById("img01");
+    var captionText = document.getElementById("caption-image");
+    // myImg.onclick = function() {
+    //     myModal.style.display = "block";
+    //     modalImg.src = this.src;
+    //     captionText.innerHTML = this.alt;
+    // }
+    function klikGambar() {
+        myModal.style.display = "block";
+        modalImg.src = this.src;
+        captionText.innerHTML = this.alt;
+    }
+
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close-image")[0];
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        myModal.style.display = "none";
+    }
+</script>
 
 <?= $this->endSection(); ?>

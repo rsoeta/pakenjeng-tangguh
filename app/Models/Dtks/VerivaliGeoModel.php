@@ -352,4 +352,23 @@ class VerivaliGeoModel extends Model
 
         return $query;
     }
+
+    function getVerivaliFix($filter1, $filter5)
+    {
+
+        $db = db_connect();
+        $builder = $db->table('dtks_verivali_geo');
+        $builder->select('vg_id, vg_nik, vg_nama_lengkap, vg_nkk, vg_alamat, vg_rw, vg_rt, vg_desa, tb_villages.name as namaDesa, tb_districts.name as namaKec, dbj_nama_bansos, sta_nama, vg_kec, vg_kab, vg_prov, vg_dbj_id1, vg_dbj_id2, vg_norek, vg_source, vg_fp, vg_fr, vg_lat, vg_lang, vg_ds_id, vg_sta_id, vg_created_by, vg_created_at, vg_updated_by, vg_updated_at');
+        $builder->join('dtks_status', 'dtks_status.id_status = dtks_verivali_geo.vg_ds_id');
+        $builder->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id = dtks_verivali_geo.vg_dbj_id1');
+        $builder->join('tb_status', 'tb_status.sta_id = dtks_verivali_geo.vg_sta_id');
+        $builder->join('tb_villages', 'tb_villages.id = dtks_verivali_geo.vg_desa');
+        $builder->join('tb_districts', 'tb_districts.id = dtks_verivali_geo.vg_kec');
+        $builder->where('vg_desa', $filter1);
+        $builder->where('vg_sta_id', $filter5);
+        $builder->orderBy('vg_nama_lengkap', 'ASC');
+        $query = $builder->get();
+
+        return $query->getResultArray();
+    }
 }

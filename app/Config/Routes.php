@@ -111,6 +111,8 @@ $routes->post('tabelGeo2', 'Dtks\Geotagging::tabel_data2', ["filter" => "authfil
 $routes->post('imporVerivaliGeo', 'Dtks\Geotagging::simpanExcel', ["filter" => "authfilterdtks"]);
 $routes->post('editGeo', 'Dtks\Geotagging::formedit', ["filter" => "authfilterdtks"]);
 $routes->post('updateGeo', 'Dtks\Geotagging::ajax_update', ["filter" => "authfilterdtks"]);
+$routes->post('modGambar', 'Dtks\Geotagging::modGambar', ["filter" => "authfilterdtks"]);
+$routes->match(['get', 'post'], 'exportBaPdtt', 'Dtks\Geotagging::exportBA', ["filter" => "authfilterdtks"]);
 
 // OPERATOR KIP
 $routes->get('/operatorsch', 'Dtks\DataKip::index', ["filter" => "authfilterdtks"]);
