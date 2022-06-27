@@ -93,4 +93,25 @@ class GenModel extends Model
 
 		return $query;
 	}
+
+	// function getdata from tb_status with limit
+	public function getStatusLimit()
+	{
+		$user = session()->get('role_id');
+
+		if ($user < 3) {
+			$builder = $this->db->table('tb_status');
+			$query = $builder->get();
+		} elseif ($user >= 3) {
+			$builder = $this->db->table('tb_status');
+			$builder->limit(2);
+			$query = $builder->get();
+		} else {
+			$builder = $this->db->table('tb_status');
+			$builder->limit(1);
+			$query = $builder->get();
+		}
+
+		return $query;
+	}
 }

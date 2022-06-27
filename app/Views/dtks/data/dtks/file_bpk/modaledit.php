@@ -16,16 +16,9 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="form-group row nopadding">
-                            <label for="vg_dbj_id1" class="col-2 col-form-label">Bansos</label>
+                            <label for="" class="col-2 col-form-label">Bansos</label>
                             <div class="col-4">
-                                <select id="vg_dbj_id1" name="vg_dbj_id1" class="form-select form-select-sm" disabled>
-                                    <?php foreach ($Bansos as $row) { ?>
-                                        <option <?php if ($vg_dbj_id1 == $row['dbj_id']) {
-                                                    echo 'selected';
-                                                } ?> value="<?= $row['dbj_id'] ?>"> <?php echo $row['dbj_nama_bansos']; ?></option>
-                                    <?php } ?>
-                                </select>
-                                <div class="invalid-feedback errorvg_dbj_id1"></div>
+                                <input type="text" class="form-control form-control-sm" value="<?= $bansosSatuNama['dbj_nama_bansos']; ?> <?= $bansosDuaNama['dbj_nama_bansos']; ?>" disabled>
                             </div>
                             <input type="hidden" name="vg_id" id="vg_id" class="form-control form-control-sm" value="<?= set_value('vg_id', $vg_id); ?>">
                             <label class="col-1 col-form-label" for="vg_nik">NIK</label>
@@ -62,9 +55,9 @@
                                 <div class="invalid-feedback errorvg_rw"></div>
                             </div>
                         </div>
-                        <div class="form-group row nopadding" <?= ($role > 2) ? 'hidden' : ''; ?>>
-                            <label for="vg_ds_id" class="col-4 col-sm-4 col-form-label">Status PM</label>
-                            <div class="col-8 col-sm-8">
+                        <div class="form-group row nopadding">
+                            <label for="vg_ds_id" class="col-3 col-sm-2 col-form-label">Status PM</label>
+                            <div class="col-9 col-sm-4">
                                 <select id="vg_ds_id" name="vg_ds_id" class="form-select form-select-sm">
                                     <?php foreach ($statusDtks as $row) { ?>
                                         <option <?= ($row['id_status'] == $vg_ds_id) ? 'selected' : ''; ?> value="<?= $row['id_status']; ?>"> <?php echo $row['jenis_status']; ?></option>
@@ -72,12 +65,12 @@
                                 </select>
                                 <div class="invalid-feedback errorvg_ds_id"></div>
                             </div>
-                        </div>
-                        <div class="form-group row nopadding" <?= ($role > 2) ? 'hidden' : ''; ?>>
-                            <label for="vg_status" class="col-4 col-sm-4 col-form-label">Ket. Verivali</label>
-                            <div class="col-8 col-sm-8">
+                            <label for="vg_status" class="col-3 col-sm-1 col-form-label">Verivali</label>
+                            <div class="col-9 col-sm-5">
                                 <select id="vg_status" name="vg_status" class="form-select form-select-sm">
-                                    <option selected value="1"> Proses</option>
+                                    <?php foreach ($status as $row) { ?>
+                                        <option <?= ($row['sta_id'] == $vg_sta_id) ? 'selected' : ''; ?> value="<?= $row['sta_id']; ?>"> <?= $row['sta_nama']; ?></option>
+                                    <?php } ?>
                                 </select>
                                 <div class="invalid-feedback errorvg_status"></div>
                             </div>
@@ -92,7 +85,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-user"></i></span>
                                     </div>
-                                    <input type="file" class="form-control" spellcheck="false" data-ms-editor="true" name="image_fp" accept="image/*" capture />
+                                    <input type="file" class="form-control" spellcheck="false" value="<?= set_value('image_fp', $vg_fp); ?>" name="image_fp" accept="image/*" capture />
                                 </div>
                             </div>
                             <div class="invalid-feedback errorimage_fp"></div>
@@ -102,7 +95,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-home"></i></span>
                                     </div>
-                                    <input type="file" class="form-control" spellcheck="false" data-ms-editor="true" name="image_fr" accept="image/*" capture />
+                                    <input type="file" class="form-control" spellcheck="false" value="<?= set_value('image_fr', $vg_fr); ?>" name="image_fr" accept="image/*" capture />
                                 </div>
                             </div>
                             <div class="invalid-feedback errorimage_fr"></div>
@@ -113,11 +106,11 @@
                         <div class="form-group row nopadding">
                             <div class="col-sm-2 col-12"></div>
                             <div class="col-sm-5 col-6">
-                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Latitude" spellcheck="false" id="latitude" name="vg_lat" readonly>
+                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Latitude" value="<?= set_value('vg_lat', $vg_lat); ?>" spellcheck="false" id="latitude" name="vg_lat" readonly>
                                 <div class="invalid-feedback errorivg_lat"></div>
                             </div>
                             <div class="col-sm-5 col-6">
-                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Longitude" spellcheck="false" id="longitude" name="vg_lang" readonly>
+                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Longitude" value="<?= set_value('vg_lang', $vg_lang); ?>" spellcheck="false" id="longitude" name="vg_lang" readonly>
                                 <div class="invalid-feedback errorivg_lang"></div>
                             </div>
                         </div>
@@ -125,7 +118,7 @@
                 </div>
             </div>
             <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-info" onclick="getLocation()">Get Coordinate</button>
+                <button type="button" class="btn btn-primary" onclick="getLocation()">Get Coordinate</button>
                 <button type="submit" class="btn btn-success btnSimpan float-right">Submit</button>
             </div>
             <?= form_close(); ?>
@@ -229,6 +222,7 @@
                             $('#modalEdit').modal('hide');
                             // $('#tabel_data').DataTable().ajax.reload();
                             table.draw();
+                            table2.draw();
 
                         }
                     }

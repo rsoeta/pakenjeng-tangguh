@@ -36,10 +36,55 @@
         <section class="content">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-12 col-sm-6">
                         <div class="card">
                             <div class="card-header">
-                                <h3 class="card-title"><strong>Perbaikan Anomali DTKS</strong></h3>
+                                <img src="<?= base_url('icon-dtks.png'); ?>" class="brand-image rounded-circle mb-lg-0 shadow-2" alt="icon app" width="40" height="40">
+                                <span><strong> Verivali PDTT</strong></span>
+                                <div class="card-tools">
+                                    <a href="/geotagging" type="button" class="btn btn-tool" title="Lebih lanjut">
+                                        <i class="fas fa-question"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Inner -->
+                            <div class="card-body">
+                                <!-- Single item -->
+                                <div class="row d-flex justify-content-center">
+                                    <div class="col-12 col-sm-10 col-md-10 col-lg-10 col-xl-11">
+                                        <div class="d-flex">
+                                            <div class="flex-grow-1 ms-1 ps-1">
+                                                <figure>
+                                                    <blockquote class="blockquote mb-4">
+                                                        <p>
+                                                            <img src="<?= base_url('/data/general'); ?>/Adobe Scan 26 Jun 2022_1.jpg" alt="Surat Undangan PDTT" style="width: 100%;">
+                                                        </p>
+                                                    </blockquote>
+                                                    <figcaption class="blockquote-footer">
+                                                        <small>Presented by: <cite title="Opr NewDTKS"><small>Opr NewDTKS</small></cite></small>
+                                                    </figcaption>
+                                                </figure>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer clearfix">
+                                <a href="/geotagging" class="btn btn-sm btn-primary float-right">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <img src="<?= base_url('icon-dtks.png'); ?>" class="brand-image rounded-circle mb-lg-0 shadow-2" alt="icon app" width="40" height="40">
+                                <span><strong> Perbaikan Anomali DTKS</strong></span>
                                 <div class="card-tools">
                                     <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                         <i class="fas fa-minus"></i>
@@ -55,10 +100,7 @@
                                 <div class="row d-flex justify-content-center">
                                     <div class="col-12 col-sm-10 col-md-10 col-lg-10 col-xl-11">
                                         <div class="d-flex">
-                                            <div class="flex-shrink-0">
-                                                <img src="<?= base_url('icon-dtks.png'); ?>" class="rounded-circle mb-4 mb-lg-0 shadow-2" alt="icon app" width="50" height="50">
-                                            </div>
-                                            <div class="flex-grow-1 ms-4 ps-3">
+                                            <div class="flex-grow-1 ms-1 ps-1">
                                                 <figure>
                                                     <blockquote class="blockquote mb-4">
                                                         <p>

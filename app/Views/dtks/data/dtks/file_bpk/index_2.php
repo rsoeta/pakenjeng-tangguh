@@ -199,10 +199,10 @@
                         </div>
                     </div>
                     <div class="container-fluid">
-                        <table id="tabel_data2" class="table table-sm compact display" style="width: 100%;">
+                        <table id="example" class="table table-sm table-hover" cellspacing="0" width="100%">
                             <thead>
                                 <tr>
-                                    <th>No</th>
+                                    <th></th>
                                     <th>NAMA</th>
                                     <th>NIK</th>
                                     <th>NO. KK</th>
@@ -210,11 +210,9 @@
                                     <th>NO. DESA</th>
                                     <th>JENIS BANSOS</th>
                                     <th>STATUS</th>
-                                    <th>DOKUMENTASI</th>
                                     <th>#</th>
                                 </tr>
                             </thead>
-                            <tbody></tbody>
                         </table>
                     </div>
                 </div>
@@ -224,10 +222,152 @@
 </div>
 <!-- /.container-fluid -->
 <div class="viewmodal" style="display: none;"></div>
-
 <script>
     $(document).ready(function() {
         // $('body').addClass('sidebar-collapse');
+
+        var table = $('#example').DataTable({
+                'order': [],
+                'fixedHeader': true,
+                'searching': true,
+                'paging': true,
+                'responsive': true,
+                'compact': true,
+                'processing': true,
+                'serverSide': true,
+                'dom': "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'<'float-md-right ml-2'B>f>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                'ajax': {
+                    'url': '<?= site_url('tabelGeo2'); ?>',
+                    'type': 'POST',
+                    "data": {
+                        "csrf_test_name": $('input[name=csrf_test_name]').val()
+                    },
+                    "data": function(data) {
+                        data.csrf_test_name = $('input[name=csrf_test_name]').val();
+                        data.datadesa2 = $('#datadesa2').val();
+                        data.datarw2 = $('#datarw2').val();
+                        data.dataStatusPm = $('#dataStatusPm').val();
+                        data.dataBansos2 = $('#dataBansos2').val();
+                        data.dataStatus2 = $('#dataStatus2').val();
+                    },
+                    "dataSrc": function(response) {
+                        $('input[name=csrf_test_name]').val(response.csrf_test_name);
+                        return response.data;
+                    }
+                },
+                'buttons': ['csv', {
+                    'text': '<i class="fa fa-id-badge fa-fw" aria-hidden="true"></i>',
+                    'action': function(e, dt, node) {
+
+                        $(dt.table().node()).toggleClass('cards');
+                        $('.fa', node).toggleClass(['fa-table', 'fa-id-badge']);
+
+                        dt.draw('page');
+                    },
+                    'className': 'btn-sm',
+                    'attr': {
+                        'title': 'Change views',
+                    }
+                }],
+                'select': 'single',
+                'columns': [{
+                        'orderable': true,
+                        'data': null,
+                        'className': 'text-center',
+                        'render': function(data, type, full, meta) {
+                            if (type === 'display') {
+                                var token = (Math.random() * 3 * 1e38).toString(16);
+                                data = '<i class="fa fa-user fa-fw"></i>';
+                                data = '<img src="https://www.gravatar.com/avatar/' + token + '.png?d=robohash" class="avatar border rounded-circle">';
+                            }
+
+                            return data;
+                        }
+                    },
+                    {
+                        'data': 'vg_nama_lengkap'
+                    },
+                    {
+                        'data': 'vg_nik'
+                    },
+                    {
+                        'data': 'vg_nkk'
+                    },
+                    {
+                        'data': 'vg_alamat',
+                        // 'class': 'text-right'
+                    },
+                    {
+                        'data': 'namaDesa',
+                        // 'class': 'text-right'
+                    },
+                    {
+                        'data': 'dbj_nama_bansos',
+                    },
+                    {
+                        'data': 'sta_nama',
+                    },
+                    {
+                        'data': 'null'
+                    }
+                ],
+                'drawCallback': function(settings) {
+                    var api = this.api();
+                    var $table = $(api.table().node());
+
+                    if ($table.hasClass('cards')) {
+
+                        // Create an array of labels containing all table headers
+                        var labels = [];
+                        $('thead th', $table).each(function() {
+                            labels.push($(this).text());
+                        });
+
+                        // Add data-label attribute to each cell
+                        $('tbody tr', $table).each(function() {
+                            $(this).find('td').each(function(column) {
+                                $(this).attr('data-label', labels[column]);
+                            });
+                        });
+
+                        var max = 0;
+                        $('tbody tr', $table).each(function() {
+                            max = Math.max($(this).height(), max);
+                        }).height(max);
+
+                    } else {
+                        // Remove data-label attribute from each cell
+                        $('tbody td', $table).each(function() {
+                            $(this).removeAttr('data-label');
+                        });
+
+                        $('tbody tr', $table).each(function() {
+                            $(this).height('auto');
+                        });
+                    }
+                }
+            })
+            .on('select', function(e, dt, type, indexes) {
+                var rowData = table.rows(indexes).data().toArray()
+                $('#row-data').html(JSON.stringify(rowData));
+            })
+            .on('deselect', function() {
+                $('#row-data').empty();
+            })
+            .on('order.dt search.dt', function() {
+                table.column(0, {
+                    search: 'applied',
+                    order: 'applied'
+                }).nodes().each(function(cell, i) {
+                    cell.innerHTML = i + 1;
+                });
+            }).on('click', 'tbody td', function() {
+                var data = table.row($(this).parent()).data();
+                $('#row-data').html(JSON.stringify(data));
+            });
+
 
         $('.tombolTambah').click(function(e) {
             e.preventDefault();

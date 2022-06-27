@@ -203,6 +203,7 @@
 </style>
 <link rel="stylesheet" href="<?= base_url(); ?>/assets/plugins/fontawesome-free/css/all.min.css">
 
+
 <div class='under'>
     <header class='under__content'>
         <h1 class='under__title'>Maintenance :(</h1>
