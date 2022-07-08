@@ -180,7 +180,7 @@ class Usulan22 extends BaseController
             $data = [
                 'title' => 'Data Usulan DTKS',
 
-                'dtks' => $model->getDtks(),
+                'dtks' => $this->Usulan22Model->getDtks(),
                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
                 'datarw' => $this->RwModel->noRw(),
                 'datart' => $this->RtModel->noRt(),
@@ -712,23 +712,6 @@ class Usulan22 extends BaseController
         }
     }
 
-    function bulan()
-    {
-        $bulan = array(
-            1 =>   'Januari',
-            'Februari',
-            'Maret',
-            'April',
-            'Mei',
-            'Juni',
-            'Juli',
-            'Agustus',
-            'September',
-            'Oktober',
-            'November',
-            'Desember'
-        );
-    }
     function export()
     {
 
@@ -893,7 +876,6 @@ class Usulan22 extends BaseController
 
     public function exportBa()
     {
-        $user_id = session()->get('id');
 
         $wilayahModel = new WilayahModel();
         $user_login = $this->AuthModel->getUserId();
@@ -962,6 +944,7 @@ class Usulan22 extends BaseController
                 'November',
                 'Desember'
             );
+
             $hari = date("D");
             switch ($hari) {
                 case 'Sun':

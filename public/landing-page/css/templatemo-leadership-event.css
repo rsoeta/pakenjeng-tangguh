@@ -22,7 +22,7 @@ https://templatemo.com/tm-575-leadership-event
 
   --body-font-family:             'DM Sans', sans-serif;
 
-  --h1-font-size:                 62px;
+  /* --h1-font-size:                 62px;
   --h2-font-size:                 48px;
   --h3-font-size:                 36px;
   --h4-font-size:                 32px;
@@ -34,7 +34,20 @@ https://templatemo.com/tm-575-leadership-event
 
   --font-weight-normal:           400;
   --font-weight-medium:           500;
-  --font-weight-bold:             700;
+  --font-weight-bold:             700; */
+  --h1-font-size:                 32px;
+  --h2-font-size:                 24px;
+  --h3-font-size:                 22px;
+  --h4-font-size:                 18px;
+  --h5-font-size:                 14px;
+  --h6-font-size:                 13px;
+  --p-font-size:                  12px;
+  --menu-font-size:               12px;
+  --copyright-text-font-size:     12px;
+
+  --font-weight-normal:           200;
+  --font-weight-medium:           400;
+  --font-weight-bold:             500;
 }
 
 body {
@@ -131,8 +144,8 @@ a:hover {
 }
 
 .section-padding {
-  padding-top: 120px;
-  padding-bottom: 120px;
+  padding-top: 100px;
+  padding-bottom: 100px;
 }
 
 .custom-border-radius {
@@ -654,7 +667,7 @@ strong {
 
 .nav-tabs .nav-link small {
   display: block;
-  font-size: 18px;
+  font-size: 14px;
   font-weight: normal;
   color: var(--p-color);
 }
@@ -965,8 +978,8 @@ strong {
 
   .section-padding,
   .site-footer {
-    padding-top: 80px;
-    padding-bottom: 80px;
+    padding-top: 40px;
+    padding-bottom: 40px;
   }
 
   .custom-btn {

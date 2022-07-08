@@ -370,9 +370,6 @@
 
     $(function() {
         $('#exportExcel').click(function() {
-            // $('#desa').removeAttr('disabled', '');
-            // window.location.reload();
-            // $("#desa").attr('disabled', 'true');
             var $elt = $('#desa').removeAttr('disabled', '');
             setTimeout(function() {
                 $elt.attr('disabled', true);

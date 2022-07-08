@@ -183,33 +183,20 @@ $user = session()->get('role_id');
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="nav-icon fa-fw fa fa-code-branch"></i>
+                                <a href="/verivaliAnomali" class="nav-link">
+                                    <i class="nav-icon fa-fw fa fa-user-alt-slash"></i>
                                     <p>
-                                        DTKS
-                                        <i class="fas fa-angle-left right"></i>
+                                        Anomali
                                     </p>
                                 </a>
-                                <ul class="nav nav-treeview nav-third-level">
-                                    <li class="nav-item">
-                                        <a href="/verivaliAnomali" class="nav-link">
-                                            <i class="nav-icon fa-fw fa fa-user-alt-slash"></i>
-                                            <p>
-                                                Anomali
-                                            </p>
-                                        </a>
-                                    </li>
-                                </ul>
-                                <ul class="nav nav-treeview nav-third-level">
-                                    <li class="nav-item">
-                                        <a href="/geotagging" class="nav-link">
-                                            <i class="nav-icon fa-fw fas fa-map-marked-alt"></i>
-                                            <p>
-                                                Geotagging
-                                            </p>
-                                        </a>
-                                    </li>
-                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/geotagging" class="nav-link">
+                                    <i class="nav-icon fa-fw fas fa-map-marked-alt"></i>
+                                    <p>
+                                        PDTT
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                     </li>
@@ -245,18 +232,18 @@ $user = session()->get('role_id');
                 </div>
                 <div class="user-panel">
                     <li class="nav-header">SETTINGS</li>
-                    <li class="nav-item">
-                        <a href="/profil_user" class="nav-link">
-                            <i class="nav-icon fa-fw fa fa-user"></i>
-                            <p>
-                                Profil
-                            </p>
-                        </a>
-                    </li>
                     <?php if (session()->get('role_id') <= 2) { ?>
                         <li class="nav-item">
+                            <a href="/settings" class="nav-link">
+                                <i class="nav-icon fa fa-globe-asia"></i>
+                                <p>
+                                    Web
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="/users" class="nav-link">
-                                <i class="nav-icon fa fa-users"></i>
+                                <i class="nav-icon fa fa-user-cog"></i>
                                 <p>
                                     Users
                                 </p>
@@ -264,7 +251,7 @@ $user = session()->get('role_id');
                         </li>
                         <li class="nav-item">
                             <a href="#" class="nav-link">
-                                <i class="nav-icon fa-fw fa fa-cog"></i>
+                                <i class="nav-icon fa-fw fa fa-cogs"></i>
                                 <p>
                                     Lanjutan
                                     <i class="fas fa-angle-left right"></i>
@@ -290,6 +277,14 @@ $user = session()->get('role_id');
                             </ul>
                         </li>
                     <?php } ?>
+                    <li class="nav-item">
+                        <a href="/profil_user" class="nav-link">
+                            <i class="nav-icon fa-fw fa fa-user"></i>
+                            <p>
+                                Profil
+                            </p>
+                        </a>
+                    </li>
                     <li class="nav-item" id="keluar">
                         <a href="/logout" class="nav-link">
                             <i class="nav-icon fa-fw fa fa-sign-out-alt"></i>

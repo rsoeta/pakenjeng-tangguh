@@ -17,7 +17,7 @@ if (file_exists(SYSTEMPATH . 'Config/Routes.php')) {
  * --------------------------------------------------------------------
  */
 $routes->setDefaultNamespace('App\Controllers');
-$routes->setDefaultController('Home');
+$routes->setDefaultController('Landing');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
 $routes->set404Override(function () {
@@ -40,8 +40,10 @@ $routes->setAutoRoute(true);
 $routes->match(['get', 'post'], 'login', 'Dtks\Auth::login', ["filter" => "noauthfilterdtks"]);
 // $routes->match(['get', 'post'], 'register', 'Dtks\Auth::register', ["filter" => "noauthfilterdtks"]);
 $routes->match(['get', 'post'], 'register', 'Dtks\Auth::regOpSek', ["filter" => "noauthfilterdtks"]);
-$routes->get('/', 'Dtks\Pages::home', ["filter" => "noauthfilterdtks"]);
-// $routes->get('/', 'Landing::index', ["filter" => "noauthfilterdtks"]);
+// $routes->get('/', 'Dtks\Pages::home', ["filter" => "noauthfilterdtks"]);
+$routes->get('/', 'Landing::index');
+$routes->post('cek_usulan', 'Landing::cek_usulan');
+
 $routes->get('dashboard', 'Dtks\Pages::home', ["filter" => "noauthfilterdtks"]);
 $routes->get('pages', 'Dtks\Pages::index', ["filter" => "authfilterdtks"]);
 
@@ -113,6 +115,7 @@ $routes->post('editGeo', 'Dtks\Geotagging::formedit', ["filter" => "authfilterdt
 $routes->post('updateGeo', 'Dtks\Geotagging::ajax_update', ["filter" => "authfilterdtks"]);
 $routes->post('modGambar', 'Dtks\Geotagging::modGambar', ["filter" => "authfilterdtks"]);
 $routes->match(['get', 'post'], 'exportBaPdtt', 'Dtks\Geotagging::exportBA', ["filter" => "authfilterdtks"]);
+$routes->post('exportDataPdtt', 'Dtks\Geotagging::exportExcel', ["filter" => "authfilterdtks"]);
 
 // OPERATOR KIP
 $routes->get('/operatorsch', 'Dtks\DataKip::index', ["filter" => "authfilterdtks"]);
@@ -160,6 +163,11 @@ $routes->match(['get', 'post'], 'profil_user', 'Profil\Profil_User::index', ['fi
 $routes->post('update_user', 'Profil\Profil_User::update_user', ['filter' => 'authfilterdtks']);
 $routes->post('submit_lembaga', 'Profil\Profil_User::submit_lembaga', ['filter' => 'authfilterdtks']);
 $routes->post('update_lembaga', 'Profil\Profil_User::update_lembaga', ['filter' => 'authfilterdtks']);
+
+// setting web
+$routes->match(['get', 'post'], 'settings', 'Profil\Profil_Web::index', ['filter' => 'authfilterdtks']);
+$routes->post('update_web_admin', 'Profil\Profil_Web::update_data', ['filter' => 'authfilterdtks']);
+
 
 $routes->get('logout', 'Dtks\Auth::logout');
 /*

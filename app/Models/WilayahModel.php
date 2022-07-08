@@ -151,10 +151,11 @@ class WilayahModel extends Model
 		return $query;
 	}
 
-	public function getKec()
+	public function getKec($kode_kab)
 	{
 		$builder = $this->db->table('tb_districts');
 		$builder->select('id, regency_id, name');
+		$builder->where('regency_id', $kode_kab);
 		$builder->orderBy('name', 'asc');
 		$query = $builder->get();
 

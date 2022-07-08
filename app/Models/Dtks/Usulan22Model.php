@@ -326,13 +326,28 @@ class Usulan22Model extends Model
         return $query;
     }
 
-
     public function getBulan()
     {
         $builder = $this->db->table('dtks_usulan22');
         $builder->select('created_at');
         $builder->distinct('created_at');
         $query = $builder->get('vw_csv_report');
+
+        return $query;
+    }
+
+    public function getHasilPencarian($cek_desa, $cek_nik)
+    {
+        $builder = $this->db->table('dtks_usulan22');
+        $builder->select('*');
+        $builder->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id = dtks_usulan22.program_bansos');
+        $builder->join('tb_bulan', 'tb_bulan.tb_id = dtks_usulan22.created_at_month');
+        $builder->where('kelurahan =', $cek_desa);
+        $builder->where('du_nik =', $cek_nik);
+        // join function bulan_ini
+        // $builder->join('created_at_month =', $this->bulan_ini());
+
+        $query = $builder->get();
 
         return $query;
     }

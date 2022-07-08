@@ -16,7 +16,7 @@ class AuthModel extends Model
     protected $protectFields        = true;
 
     protected $allowedFields        = [
-        'nik', 'username', 'fullname', 'email', 'password', 'status', 'level', 'role_id', 'kode_desa', 'nope', 'opr_sch', 'jabatan', 'user_image', 'created_at', 'updated_at'
+        'nik', 'username', 'fullname', 'email', 'password', 'status', 'level', 'role_id', 'kode_desa', 'kode_kec', 'kode_kab', 'nope', 'opr_sch', 'jabatan', 'user_image', 'created_at', 'updated_at'
     ];
 
     protected $useTimestamps        = false;
@@ -62,7 +62,8 @@ class AuthModel extends Model
         $user_id = session()->get('id');
 
         $builder = $this->db->table('dtks_users');
-        $builder->select('dtks_users.id as id_user, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.nope, dtks_users.opr_sch, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, 
+        $builder->select('
+        dtks_users.id as id_user, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.nope, dtks_users.opr_sch, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, 
         tb_roles.id_role as role_id, tb_roles.nm_role,
         lembaga_profil.lp_id, lembaga_profil.lp_kode, lembaga_profil.lp_kepala, lembaga_profil.lp_nip, lembaga_profil.lp_sekretariat, lembaga_profil.lp_email, lembaga_profil.lp_kode_pos, lembaga_profil.lp_logo, 
         lembaga_kategori.lk_nama,

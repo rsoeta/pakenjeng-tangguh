@@ -11,7 +11,7 @@
     <meta name="keywords" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng">
     <meta name="description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng">
 
-    <meta property="og:title" content="<?= $namaApp; ?> | <?= $title; ?>" />
+    <meta property="og:title" content="<?= nameApp(); ?> | <?= $title; ?>" />
     <meta property="og:description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="<?= base_url(); ?>" />
@@ -20,11 +20,11 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@sutarsarian" />
     <meta name="twitter:creator" content="@sutarsarian" />
-    <meta name="twitter:title" content="<?= $namaApp; ?> | <?= $title; ?>" />
+    <meta name="twitter:title" content="<?= nameApp(); ?> | <?= $title; ?>" />
     <meta name="twitter:description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng" />
     <meta name="twitter:image" content="<?= base_url('icon-dtks.png'); ?>" />
 
-    <title><?= $namaApp; ?> | <?= $title; ?></title>
+    <title><?= nameApp(); ?> | <?= $title; ?></title>
 
 
     <!-- Google Font: Source Sans Pro -->

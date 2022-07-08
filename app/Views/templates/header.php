@@ -11,7 +11,7 @@
     <meta name="keywords" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng">
     <meta name="description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng">
 
-    <meta property="og:title" content="<?= $namaApp; ?> | <?= $title; ?>" />
+    <meta property="og:title" content="<?= nameApp(); ?> | <?= $title; ?>" />
     <meta property="og:description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="<?= base_url(); ?>" />
@@ -20,11 +20,11 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@sutarsarian" />
     <meta name="twitter:creator" content="@sutarsarian" />
-    <meta name="twitter:title" content="<?= $namaApp; ?> | <?= $title; ?>" />
+    <meta name="twitter:title" content="<?= nameApp(); ?> | <?= $title; ?>" />
     <meta name="twitter:description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng" />
     <meta name="twitter:image" content="<?= base_url('icon-dtks.png'); ?>" />
 
-    <title><?= $namaApp; ?> | <?= $title; ?></title>
+    <title><?= nameApp(); ?> | <?= $title; ?></title>
 
 
 
@@ -49,6 +49,9 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.2.0/css/fixedHeader.dataTables.min.css">
 
+    <!-- select2 -->
+    <link href="<?= base_url('assets/plugins/select2/css/select2.min.css'); ?>" rel="stylesheet" />
+
     <!-- DataTables -->
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
@@ -65,14 +68,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-migrate/3.3.2/jquery-migrate.min.js"></script>
     <script src="https://cdn.datatables.net/fixedheader/3.2.0/js/dataTables.fixedHeader.min.js"></script>
 
+    <!-- ChartJS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script>
     <!-- sweetalert -->
-    <link rel="stylesheet" href="<?= base_url(); ?>/assets/plugins/sweetalert2/sweetalert2.min.css">
+    <link rel="stylesheet" href="<?= base_url('assets/plugins/sweetalert2/sweetalert2.min.css'); ?>">
+    <!-- lightbox -->
+    <link rel="stylesheet" href="<?= base_url('assets/lightbox/dist/css/lightbox.min.css'); ?>">
 
     <link rel="shortcut icon" type="image/x-icon/png" href="<?= base_url('icon-dtks.png'); ?>" />
 
     <script src="<?= base_url(); ?>/assets/plugins/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="<?= base_url('assets/plugins/select2/js/select2.min.js'); ?>"></script>
+
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script> -->
     <!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script> -->
     <!-- <script src="https://cdn.datatables.net/v/bs4/dt-1.10.18/b-1.5.6/sc-2.0.0/sl-1.3.0/datatables.min.js"></script> -->

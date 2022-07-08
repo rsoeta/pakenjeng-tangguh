@@ -19,7 +19,7 @@ $user_image = $user_login['user_image'];
                 <img src="<?= Foto_Profil($user_image, 'profil'); ?>" class="img-size-50 mr-3 img-circle float-right" style="width: 30px; height: 30px; border-radius: 50%;">
             </a>
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right" style="left: inherit; right: 0px;">
-                <a href="/profil_user" class="dropdown-item">
+                <a href="<?= ($user_login['role_id'] == 2) ? '/settings' : '/profil_user'; ?>" class="dropdown-item">
                     <!-- Message Start -->
                     <div class="media">
                         <img src="<?= Foto_Profil($user_image, 'profil'); ?>" class="img-size-50 mr-3 img-circle">

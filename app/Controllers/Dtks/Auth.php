@@ -13,11 +13,10 @@ class Auth extends BaseController
 {
     public function login()
     {
-        helper(['form']);
 
         $data = [];
 
-        if ($this->request->getMethod() == 'post') {
+        if ($this->request->getPost()) {
 
             // var_dump($this->request->getvar());
             // $nik = $this->request->getVar('nik');
@@ -38,7 +37,6 @@ class Auth extends BaseController
                 $session->setFlashdata('message', 'User atau Password tidak sesuai!');
                 return view('dtks/auth/login', [
                     "validation" => $this->validator,
-                    'namaApp' => 'Opr NewDTKS',
                     "title" => 'Login',
                 ]);
             } else {
@@ -65,18 +63,7 @@ class Auth extends BaseController
         }
         // echo 'test';
         $data = [
-            'namaApp' => 'Opr NewDTKS',
             'title' => 'Sign In',
-            'pass_log' => [
-                'Admin' => password_hash('admindesa', PASSWORD_DEFAULT),
-                '001' => password_hash('2P1PZG9H', PASSWORD_DEFAULT),
-                '002' => password_hash('9VNYUI1W', PASSWORD_DEFAULT),
-                '003' => password_hash('19BW8NCI', PASSWORD_DEFAULT),
-                '004' => password_hash('N4W6BYJ1', PASSWORD_DEFAULT),
-                '005' => password_hash('PXVBSKE8', PASSWORD_DEFAULT),
-                '006' => password_hash('W6CY679Z', PASSWORD_DEFAULT),
-                '007' => password_hash('MU1LEU2Q', PASSWORD_DEFAULT),
-            ],
         ];
 
         return view('dtks/auth/login', $data);
@@ -93,6 +80,8 @@ class Auth extends BaseController
             'role_id' => $user['role_id'],
             'status' => $user['status'],
             'kode_desa' => $user['kode_desa'],
+            'kode_kec' => $user['kode_kec'],
+            'kode_kab' => $user['kode_kab'],
             'jabatan' => $user['level'],
             'opr_sch' => $user['opr_sch'],
             'user_image' => $user['user_image'],
@@ -113,7 +102,6 @@ class Auth extends BaseController
         $this->WilayahModel = new WilayahModel();
 
         $data = [
-            'namaApp' => 'Opr NewDTKS',
             'title' => 'Registration',
             'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
             'datarw' => $this->WilayahModel->getDataRW()->getResultArray(),

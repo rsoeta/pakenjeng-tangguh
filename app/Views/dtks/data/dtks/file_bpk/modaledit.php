@@ -16,21 +16,29 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="form-group row nopadding">
-                            <label for="" class="col-2 col-form-label">Bansos</label>
-                            <div class="col-4">
-                                <input type="text" class="form-control form-control-sm" value="<?= $jenisBansosSatu; ?> <?= $jenisBansosDua; ?>" disabled>
+                            <label for="" class="col-5 col-sm-2 col-form-label">Indikasi Temuan</label>
+                            <div class="col-7 col-sm-4">
+                                <select name="" id="" disabled>
+                                    <?php foreach ($indikasiTemuan as $row) { ?>
+                                        <option class="form-control form-control-sm" <?= ($row['tkt_num'] == $vg_source) ? 'selected' : ''; ?> value="<?= $row['tkt_num']; ?>"><?= $row['tkt_ket']; ?></option>
+                                    <?php } ?>
+                                </select>
                             </div>
-                            <input type="hidden" name="vg_id" id="vg_id" class="form-control form-control-sm" value="<?= set_value('vg_id', $vg_id); ?>">
-                            <label class="col-1 col-form-label" for="vg_nik">NIK</label>
-                            <div class="col-5">
-                                <input type="text" name="vg_nik" id="vg_nik" class="form-control form-control-sm" value="<?= set_value('vg_nik', $vg_nik); ?>" readonly>
-                                <div class="invalid-feedback errornik"></div>
+                            <label for="" class="col-5 col-sm-1 col-form-label">Bansos</label>
+                            <div class="col-7 col-sm-5">
+                                <input type="text" class="form-control form-control-sm" value="<?= $jenisBansosSatu; ?> <?= $jenisBansosDua; ?>" disabled>
                             </div>
                         </div>
                         <!-- <input type="file" name="foto" id="foto" class="form-control form-control-sm" hidden> -->
                         <div class="form-group row nopadding">
-                            <label class="col-2 col-form-label" for="vg_nama_lengkap">Nama</label>
-                            <div class="col-10">
+                            <input type="hidden" name="vg_id" id="vg_id" class="form-control form-control-sm" value="<?= set_value('vg_id', $vg_id); ?>">
+                            <label class="col-5 col-sm-2 col-form-label" for="vg_nik">NIK</label>
+                            <div class="col-7 col-sm-4">
+                                <input type="text" name="vg_nik" id="vg_nik" class="form-control form-control-sm" value="<?= set_value('vg_nik', $vg_nik); ?>" readonly>
+                                <div class="invalid-feedback errornik"></div>
+                            </div>
+                            <label class="col-5 col-sm-1 col-form-label" for="vg_nama_lengkap">Nama</label>
+                            <div class="col-7 col-sm-5">
                                 <input type="text" name="vg_nama_lengkap" id="vg_nama_lengkap" class="form-control form-control-sm" value="<?= set_value('vg_nama_lengkap', $vg_nama_lengkap); ?>" readonly>
                                 <div class="invalid-feedback errorvg_nama_lengkap"></div>
                             </div>
@@ -39,6 +47,16 @@
                     <hr>
                     <div class="col-sm-12 col-12 mt-2">
                         <div class="form-group row nopadding">
+                            <label class="col-3 col-sm-2 col-form-label" for="vg_nama_ktp">Nama KTP</label>
+                            <div class="col-9 col-sm-4">
+                                <input type="text" name="vg_nama_ktp" id="vg_nama_ktp" class="form-control form-control-sm" value="<?= set_value('vg_nama_ktp', $vg_nama_ktp); ?>">
+                                <div class="invalid-feedback errorvg_nama_ktp"></div>
+                            </div>
+                            <label class="col-3 col-sm-2 col-form-label" for="vg_nik_ktp">NIK KTP</label>
+                            <div class="col-9 col-sm-4">
+                                <input type="text" name="vg_nik_ktp" id="vg_nik_ktp" class="form-control form-control-sm" value="<?= set_value('vg_nik_ktp', $vg_nik_ktp); ?>">
+                                <div class="invalid-feedback errorvg_nik_ktp"></div>
+                            </div>
                             <label class="col-3 col-sm-2 col-form-label" for="vg_alamat">Alamat</label>
                             <div class="col-9 col-sm-4">
                                 <input type="text" name="vg_alamat" id="vg_alamat" class="form-control form-control-sm" value="<?= set_value('vg_alamat', $vg_alamat); ?>">
@@ -85,20 +103,54 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-user"></i></span>
                                     </div>
-                                    <input type="file" class="form-control" spellcheck="false" value="<?= set_value('image_fp', $vg_fp); ?>" name="image_fp" accept="image/*" capture />
+                                    <input type="file" class="form-control" spellcheck="false" value="<?= set_value('image_fp', $vg_fp); ?>" name="image_fp" accept="image/*" capture required />
                                 </div>
                             </div>
                             <div class="invalid-feedback errorimage_fp"></div>
-                            <label class="col-3 col-sm-1 col-form-label" for="image_fr">Rumah</label>
-                            <div class="col-9 col-sm-5">
+                            <label class="col-3 col-sm-1 col-form-label mb-2" for="image_fr">Rumah</label>
+                            <div class="col-9 col-sm-5 mb-2">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-home"></i></span>
                                     </div>
-                                    <input type="file" class="form-control" spellcheck="false" value="<?= set_value('image_fr', $vg_fr); ?>" name="image_fr" accept="image/*" capture />
+                                    <input type="file" class="form-control" spellcheck="false" value="<?= set_value('image_fr', $vg_fr); ?>" name="image_fr" accept="image/*" capture required />
                                 </div>
                             </div>
                             <div class="invalid-feedback errorimage_fr"></div>
+                            <label class="col-3 col-sm-2 col-form-label mb-2" for="vg_fktp">KTP</label>
+                            <div class="col-9 col-sm-4 mb-2">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-home"></i></span>
+                                    </div>
+                                    <input type="file" class="form-control" spellcheck="false" value="<?= set_value('vg_fktp', $vg_fr); ?>" name="vg_fktp" accept="image/*" capture required />
+                                </div>
+                            </div>
+                            <div class="invalid-feedback errorvg_fktp"></div>
+                            <label class="col-3 col-sm-1 col-form-label mb-2" for="vg_fkk">KK</label>
+                            <div class="col-9 col-sm-5 mb-2">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-home"></i></span>
+                                    </div>
+                                    <input type="file" class="form-control" spellcheck="false" value="<?= set_value('vg_fkk', $vg_fr); ?>" name="vg_fkk" accept="image/*" capture required />
+                                </div>
+                            </div>
+                            <div class="invalid-feedback errorvg_fkk"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-12 mt-2">
+                        <div class="form-group row nopadding">
+                            <div class="col-3">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-control form-check-input" name="vg_terbukti" id="exampleCheck1" value="1" <?= isset($vg_terbukti) ? 'checked="checked"' : ''; ?>>
+                                    <label class="form-check-label" for="exampleCheck1"><b>Terbukti</b></label>
+                                </div>
+                            </div>
+                            <div class="col-9">
+                                <label for="vg_alasan">| Alasan</label>
+                                <textarea name="vg_alasan" cols="10" rows="2" class="form-control" id="vg_alasan" placeholder="Tuliskan sedikitnya keterangan"></textarea>
+                            </div>
                         </div>
                     </div>
                     <div class="col-sm-12 col-12 mt-2">
@@ -106,11 +158,11 @@
                         <div class="form-group row nopadding">
                             <div class="col-sm-2 col-12"></div>
                             <div class="col-sm-5 col-6">
-                                <input type="text" class="form-control mb-2" placeholder="Latitude" value="<?= set_value('vg_lat', $vg_lat); ?>" spellcheck="false" id="latitude" name="vg_lat">
+                                <input type="text" class="form-control mb-2" placeholder="Latitude" value="<?= set_value('vg_lat', $vg_lat); ?>" spellcheck="false" id="latitude" name="vg_lat" required>
                                 <div class="invalid-feedback errorivg_lat"></div>
                             </div>
                             <div class="col-sm-5 col-6">
-                                <input type="text" class="form-control mb-2" placeholder="Longitude" value="<?= set_value('vg_lang', $vg_lang); ?>" spellcheck="false" id="longitude" name="vg_lang">
+                                <input type="text" class="form-control mb-2" placeholder="Longitude" value="<?= set_value('vg_lang', $vg_lang); ?>" spellcheck="false" id="longitude" name="vg_lang" required>
                                 <div class="invalid-feedback errorivg_lang"></div>
                             </div>
                         </div>

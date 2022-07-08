@@ -13,6 +13,15 @@
         - impor lembaga_profil
         - impor lembaga_kategori
         - tambah kode_kec(vharchar)(100) di tabel dtks_users 
+        - buat view usulan dibulan ini 
+            CREATE OR REPLACE VIEW dtks_usulan_view AS
+                SELECT dtks_usulan22.du_id, dtks_usulan22.du_nik
+            FROM 
+                dtks_usulan22 
+            WHERE 
+                dtks_usulan22.created_at_year = year(now()) and dtks_usulan22.created_at_month = month(now());
+
+    
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## v2.6.0 -- Penambahan fitur impor CSV Report -- 2022-06-10
@@ -168,7 +177,7 @@
         - ubah view vw_verivali_anomali
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
-## v2.8.0 -- Penambahan fitur dan Menu Geotagging -- 2022-06-22
+## v2.8.0 -- Penambahan fitur dan Menu PDTT -- 2022-06-22
     # issue
         - PM harus difoto dengan foto Geotagging,
 
@@ -209,4 +218,20 @@
         - ubah tab verivali anomali menjadi tabel verivali, proses verivali dan hasil verivali
 
     ** perbaikan tb_status insert data value sta_id = 2, sta_nama = Sukses
+
+    # issue
+        - ubah tabel sesuai data revisi 3.2.8
+    ** perbaikan table dtks_verivali_geo tambah column no. vg_no_data, vg_nik_ktp, vg_nama_ktp, vg_fktp, vg_fkk, vg_terbukti, 
+    ** tambah tabel tb_ket_temuan dengan struktur : tkt_id, tkt_num, tkt_ket 
     ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+## v2.8.1 -- Perbaikan Fitur Setting Web tingkat Kecamatan di Kabupaten Garut -- 2022-07-01
+    
+    # bug setting awal aplikasi untuk digunakan oleh Admin Kecamatan
+        - ubah tabel dtks_users MODIFY kode_kab DEFAULT ke 32.05
+
+    # tambah landing-page dengan fitur menampilkan cek usulan cpm
+        - tambah tabel tb_bulan
+            
+
+

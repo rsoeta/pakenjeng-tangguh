@@ -4,7 +4,7 @@
 
 <!-- <script src="<?php base_url('/assets/dist/js/webcam.min.js'); ?>"></script> -->
 
-<script async src="<?= base_url('/assets/dist/js/capture.js'); ?>"></script>
+<!-- <script async src="<?= base_url('/assets/dist/js/capture.js'); ?>"></script> -->
 
 <div class="content-wrapper mt-1">
 
@@ -22,7 +22,7 @@
             $ops = null;
             $level = session()->get('level');
             ?>
-            <?php if ($role <= 2) {  ?>
+            <?php if ($role <= 3) {  ?>
                 <div class="row">
                     <div class="col-12">
                         <?php if (session()->getFlashdata('message')) { ?>
@@ -36,69 +36,53 @@
                         <ol class="float-right">
                             <form action="<?= site_url('imporVerivaliGeo') ?>" method="post" enctype="multipart/form-data">
                                 <?= csrf_field(); ?>
-                                <!-- <div class="row">
-                                    <div class="col-12">
-                                        <label class="col-8" for="">Import Data</label>
-                                        <div class="input-group">
-                                            <input type="file" name="file" id="file" class="form-control">
-                                            <button type="submit" id="form_data" onclick="return confirmSubmit()" class="btn btn-outline-secondary">Upload File</button>
-                                        </div>
-                                        <div class="col-4">
-                                        </div>
-                                    </div>
-                                </div> -->
                                 <div class="row">
-                                    <div class="col-12 col-sm-9">
-                                        <label class="col-8" for="">Import Data</label>
-                                        <div class="col-12 col-sm-12 input-group">
+                                    <div class="col-12 col-sm-5" <?= ($role > 2) ? 'hidden' : ''; ?>>
+                                        <div class="col-12 input-group">
                                             <input type="file" name="file" class="form-control form-control float-right" required accept=".xls, .xlsx">
                                             <button type="submit" name="submit" class="btn btn-success btn float-right" onclick="return confirmSubmit()">
                                                 <i class="fa fa-upload"></i> Upload
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="col-12 col-sm-3">
-                                        <label class="col-12" for="">Reload Data</label>
-                                        <div class="col-12 col-sm-12 input-group">
-                                            <button type="button" class="btn btn-info btn  float-right" data-toggle="modal" onclick="reload_table()">
-                                                <i class="fa fa-sync-alt"></i> Reload
-                                            </button>
-                                        </div>
-                                    </div>
                                 </div>
                             </form>
                         </ol>
-                    </div><!-- /.col -->
+                    </div>
                 </div>
             <?php } ?>
             <div class="row">
-                <div class="col-6">
+                <div class="col-sm-6 col-12">
                     <ul class="nav nav-tabs" id="myTab" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link <?= ($role > 2) ? 'active' : ''; ?>" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">TABEL VERIVALI</button>
+                            <button class="nav-link active" id="diagram-tab" data-bs-toggle="tab" data-bs-target="#diagram" type="button" role="tab" aria-controls="diagram" aria-selected="true">DIAGRAM</button>
                         </li>
-                        <li class="nav-item" role="presentation" <?= ($role > 2) ? 'hidden' : ''; ?>>
-                            <button class="nav-link <?= ($role <= 2) ? 'active' : ''; ?>" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">HASIL VERIVALI</button>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="false">TAB VERIVALI</button>
+                        </li>
+                        <li class="nav-item" role="presentation" <?= ($role > 3) ? 'hidden' : ''; ?>>
+                            <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">PROSES VERIVALI</button>
                         </li>
                     </ul>
                 </div>
-                <?php if ($role == 3) { ?>
-                    <div class="col-6">
-                        <div class="float-right">
-                            <a href="exportBaPdtt" id="exportBaPdtt" type="submit" class="btn btn-primary">
-                                <i class="fa fa-download"></i> Export B.A
-                            </a>
-                        </div>
-                    </div>
+                <?php if ($role > 1) { ?>
+
                 <?php } ?>
             </div>
             <!-- create breadcrump -->
             <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade <?= ($role > 2) ? 'show active' : ''; ?>" id="home" role="tabpanel" aria-labelledby="home-tab">
+                <div class="tab-pane fade show active" id="diagram" role="tabpanel" aria-labelledby="diagram-tab">
+                    <div class="row my-2">
+                        <div class="col-sm-6 col-12">
+                            <canvas id="capaian-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
                     <div class="row my-2">
                         <div class="col">
                             <div class="row">
-                                <div class="col-sm-3 col-6 mb-1">
+                                <div class="col-sm-2 col-6 mb-1">
                                     <select <?= ($role > 2) ? 'disabled' : ''; ?> class="form-control form-control-sm" name="datadesa" id="datadesa">
                                         <option value="">[ Semua Desa ]</option>
                                         <?php foreach ($desKels as $row) { ?>
@@ -106,7 +90,7 @@
                                         <?php } ?>
                                     </select>
                                 </div>
-                                <div class="col-sm-3 col-6 mb-1">
+                                <div class="col-sm-2 col-6 mb-1">
                                     <select <?= ($role > 3) ? 'readonly' : ''; ?> class="form-control form-control-sm" name="" id="datarw">
                                         <option value="">[ Semua No. RW ]</option>
                                         <?php foreach ($datarw as $row) { ?>
@@ -116,13 +100,13 @@
                                         <?php } ?>
                                     </select>
                                 </div>
-                                <div class="col-sm-3 col-6 mb-1">
+                                <div class="col-sm-2 col-6 mb-1">
                                     <select class="form-control form-control-sm" name="" id="datart">
                                         <option value="">[ Semua No. RT ]</option>
 
                                     </select>
                                 </div>
-                                <div class="col-sm-3 col-6 mb-1">
+                                <div class="col-sm-2 col-6 mb-1">
                                     <select class="form-control form-control-sm" name="" id="dataBansos">
                                         <option value="">[ Semua Bansos ]</option>
                                         <?php foreach ($Bansos as $row) { ?>
@@ -130,9 +114,17 @@
                                         <?php } ?>
                                     </select>
                                 </div>
-                                <div class="col-sm-3 col-6 mb-1" hidden>
+                                <div class="col-sm-2 col-6 mb-1">
+                                    <select class="form-control form-control-sm" id="dataIndikasi" name="indikasi[]">
+                                        <option value="">[ Semua Kondisi ]</option>
+                                        <?php foreach ($indikasiTemuan as $row) { ?>
+                                            <option value="<?= $row['tkt_num']; ?>"><?= $row['tkt_ket']; ?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                                <div class="col-sm-2 col-6 mb-1">
                                     <select class="form-control form-control-sm" name="" id="dataStatus">
-                                        <option value="0" selected>0</option>
+                                        <option value="0" selected>Gagal</option>
                                     </select>
                                 </div>
                             </div>
@@ -157,54 +149,79 @@
                         </table>
                     </div>
                 </div>
-                <div class="tab-pane fade <?= ($role <= 2) ? 'show active' : ''; ?>" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                <div class="tab-pane fade <?= ($role > 2) ? 'hidden' : ''; ?>" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                     <div class="row my-2">
-                        <div class="col">
-                            <div class="row">
-                                <div class="col-sm-3 col-6 mb-1">
-                                    <select <?php if ($role >= 3) {
-                                                echo 'disabled="disabled"';
-                                            } ?> class="form-control form-control-sm" name="" id="datadesa2">
-                                        <option value="">[ Semua Desa ]</option>
-                                        <?php foreach ($desKels as $row) { ?>
-                                            <option <?= $kode_desa == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id']; ?>"><?= $row['name']; ?></option>
-                                        <?php } ?>
-                                    </select>
+                        <div class="col-12">
+                            <form action="<?= site_url('/exportDataPdtt') ?>" method="post">
+                                <?= csrf_field(); ?>
+                                <div class="row mb-2">
+                                    <div class="col-12 text-right">
+                                        <button type="button" class="btn btn-info" data-toggle="modal" onclick="reload_table()">
+                                            <i class="fa fa-sync-alt"></i> Reload
+                                        </button>
+                                        <!-- </div> -->
+                                        <button type="submit" name="" id="exportDataPdtt" class="btn btn-success" <?= ($role > 3) ? 'hidden' : ''; ?>>
+                                            <i class="fa fa-file-excel"></i> Export Data
+                                        </button>
+                                        <!-- </div> -->
+                                        <a href="/exportBaPdtt" type="submit" name="exportBaPdtt" id="exportBaPdtt" class="btn btn-danger" <?= ($role > 3) ? 'hidden' : ''; ?>>
+                                            <i class="fa fa-clipboard-check"></i> Export B.A
+                                        </a>
+                                    </div>
                                 </div>
-                                <div class="col-sm-3 col-6 mb-1">
-                                    <select <?php if ($role > 3) {
-                                                echo 'disabled="disabled"';
-                                            } ?> class="form-control form-control-sm" name="" id="datarw2">
-                                        <option value="">[ Semua No. RW ]</option>
-                                        <?php foreach ($datarw as $row) { ?>
-                                            <option <?php if ($level == $row['no_rw']) {
-                                                        echo 'selected';
-                                                    } ?> value="<?php echo $row['no_rw']; ?>"><?php echo $row['no_rw']; ?></option>
-                                        <?php } ?>
-                                    </select>
+                                <div class="row">
+                                    <div class="col-sm-2 col-6 mb-1">
+                                        <select <?= ($role >= 3) ? 'disabled="disabled"' : ''; ?> class="form-control form-control-sm" name="datadesa2" id="datadesa2">
+                                            <option value="">[ Semua Desa ]</option>
+                                            <?php foreach ($desKels as $row) { ?>
+                                                <option <?= $kode_desa == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id']; ?>"><?= $row['name']; ?></option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2 col-6 mb-1">
+                                        <select <?php if ($role > 3) {
+                                                    echo 'disabled="disabled"';
+                                                } ?> class="form-control form-control-sm" name="datarw2" id="datarw2">
+                                            <option value="">[ Semua No. RW ]</option>
+                                            <?php foreach ($datarw as $row) { ?>
+                                                <option <?php if ($level == $row['no_rw']) {
+                                                            echo 'selected';
+                                                        } ?> value="<?php echo $row['no_rw']; ?>"><?php echo $row['no_rw']; ?></option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2 col-6 mb-1">
+                                        <select class="form-control form-control-sm" name="dataStatusPm" id="dataStatusPm">
+                                            <option value="">[ Semua Status ]</option>
+                                            <?php foreach ($dataStatus2 as $row) { ?>
+                                                <option value="<?= $row['id_status']; ?>"><?= $row['jenis_status']; ?></option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2 col-6 mb-1">
+                                        <select class="form-control form-control-sm" name="dataBansos2" id="dataBansos2">
+                                            <option value="">[ Semua Bansos ]</option>
+                                            <?php foreach ($Bansos as $row) { ?>
+                                                <option value="<?= $row['dbj_id']; ?>"><?= $row['dbj_nama_bansos']; ?></option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2 col-6 mb-1">
+                                        <select class="form-control form-control-sm" name="dataIndikasi2" id="dataIndikasi2">
+                                            <option value="">[ Semua Kondisi ]</option>
+                                            <?php foreach ($indikasiTemuan as $row) { ?>
+                                                <option value="<?= $row['tkt_num']; ?>"><?= $row['tkt_ket']; ?></option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-2 col-6 mb-1">
+                                        <select class="form-control form-control-sm" name="dataStatus2" id="dataStatus2">
+                                            <option value="0">Gagal</option>
+                                            <option value="1" selected>Proses</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="col-sm-3 col-6 mb-1">
-                                    <select class="form-control form-control-sm" name="" id="dataStatusPm">
-                                        <option value="">[ Semua Status ]</option>
-                                        <?php foreach ($dataStatus2 as $row) { ?>
-                                            <option value="<?= $row['id_status']; ?>"><?= $row['jenis_status']; ?></option>
-                                        <?php } ?>
-                                    </select>
-                                </div>
-                                <div class="col-sm-3 col-6 mb-1">
-                                    <select class="form-control form-control-sm" name="" id="dataBansos2">
-                                        <option value="">[ Semua Bansos ]</option>
-                                        <?php foreach ($Bansos as $row) { ?>
-                                            <option value="<?= $row['dbj_id']; ?>"><?= $row['dbj_nama_bansos']; ?></option>
-                                        <?php } ?>
-                                    </select>
-                                </div>
-                                <div class="col-sm-3 col-6 mb-1" hidden>
-                                    <select class="form-control form-control-sm" name="" id="dataStatus2">
-                                        <option value="1" selected>1</option>
-                                    </select>
-                                </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
                     <div class="container-fluid">
@@ -238,7 +255,6 @@
 <script>
     $(document).ready(function() {
         // $('body').addClass('sidebar-collapse');
-
         $('.tombolTambah').click(function(e) {
             e.preventDefault();
             $.ajax({
@@ -306,6 +322,8 @@
                 $('#datartverivali').val('');
             }
         });
+
+        $('.select2').select2();
     });
 
     table = $('#tabel_data').DataTable({
@@ -331,6 +349,7 @@
                 data.datarw = $('#datarw').val();
                 data.datart = $('#datart').val();
                 data.dataBansos = $('#dataBansos').val();
+                data.dataIndikasi = $('#dataIndikasi').val();
                 data.dataStatus = $('#dataStatus').val();
             },
             "dataSrc": function(response) {
@@ -362,6 +381,9 @@
     $('#dataBansos').change(function() {
         table.draw();
     });
+    $('#dataIndikasi').change(function() {
+        table.draw();
+    });
     $('#dataStatus').change(function() {
         table.draw();
     });
@@ -388,6 +410,7 @@
                 data.dataStatusPm = $('#dataStatusPm').val();
                 data.dataBansos2 = $('#dataBansos2').val();
                 data.dataStatus2 = $('#dataStatus2').val();
+                data.dataIndikasi2 = $('#dataIndikasi2').val();
             },
             "dataSrc": function(response) {
                 $('input[name=csrf_test_name]').val(response.csrf_test_name);
@@ -422,6 +445,9 @@
     $('#dataStatus2').change(function() {
         table2.draw();
     });
+    $('#dataIndikasi2').change(function() {
+        table2.draw();
+    });
 
 
     function edit_person(vg_id) {
@@ -437,28 +463,6 @@
                 if (response.sukses) {
                     $('.viewmodal').html(response.sukses).show();
                     $('#modalEdit').modal('show');
-                }
-
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
-            }
-        });
-    }
-
-    function klikGambar(vg_nik) {
-        //Ajax Load data from ajax
-        $.ajax({
-            type: "POST",
-            url: "<?php echo site_url('modGambar') ?>",
-            data: {
-                vg_nik: vg_nik
-            },
-            dataType: "JSON",
-            success: function(response) {
-                if (response.sukses) {
-                    $('.viewmodal').html(response.sukses).show();
-                    $('#myModal').modal('show');
                 }
 
             },
@@ -487,7 +491,7 @@
 
     $(function() {
         $('#exportBaPdtt').click(function() {
-            var $elt = $('#datadesa').removeAttr('disabled', '');
+            var $elt = $('#datadesa2').removeAttr('disabled', '');
             setTimeout(function() {
                 $elt.attr('disabled', true);
             }, 500);
@@ -495,30 +499,110 @@
         });
     });
 
-    var myModal = document.getElementById("myModal");
+    $(function() {
+        $('#exportDataPdtt').click(function() {
+            var $elt = $('#datadesa2').removeAttr('disabled', '');
+            setTimeout(function() {
+                $elt.attr('disabled', true);
+            }, 500);
 
-    // Get the image and insert it inside the modal - use its "alt" text as a caption
-    var myImg = document.getElementById("myImg");
-    var modalImg = document.getElementById("img01");
-    var captionText = document.getElementById("caption-image");
-    // myImg.onclick = function() {
-    //     myModal.style.display = "block";
-    //     modalImg.src = this.src;
-    //     captionText.innerHTML = this.alt;
-    // }
-    function klikGambar() {
-        myModal.style.display = "block";
-        modalImg.src = this.src;
-        captionText.innerHTML = this.alt;
-    }
+        });
+    });
 
-    // Get the <span> element that closes the modal
-    var span = document.getElementsByClassName("close-image")[0];
+    $(function() {
 
-    // When the user clicks on <span> (x), close the modal
-    span.onclick = function() {
-        myModal.style.display = "none";
-    }
+        /*------------------------------------------
+        --------------------------------------------
+        Get the Pie Chart Canvas 
+        --------------------------------------------
+        --------------------------------------------*/
+        var cData = JSON.parse(`<?= isset($dataCapaian) ? $dataCapaian : ''; ?>`);
+        var ctx = $("#capaian-chart");
+
+        /*------------------------------------------
+        --------------------------------------------
+        Pie Chart Data 
+        --------------------------------------------
+        --------------------------------------------*/
+        var data = {
+            labels: cData.label,
+            datasets: [{
+                label: "Jumlah Capaian",
+                data: cData.dataCapaian,
+                backgroundColor: [
+                    "#DEB887",
+                    "#A9A9A9",
+                    "#DC143C",
+                    "#F4A460",
+                    "#2E8B57",
+                    "#1D7A46",
+                    "#CDA776",
+                ],
+                borderColor: [
+                    "#CDA776",
+                    "#989898",
+                    "#CB252B",
+                    "#E39371",
+                    "#1D7A46",
+                    "#F4A460",
+                    "#CDA776",
+                ],
+                borderWidth: [1, 1, 1, 1, 1, 1, 1]
+            }]
+        };
+
+        var options = {
+            responsive: true,
+            // scales: {
+            //     r: {
+            //         pointLabels: {
+            //             display: true,
+            //             centerPointLabels: true,
+            //             font: {
+            //                 size: 18
+            //             }
+            //         }
+            //     }
+            // },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Capaian Verivali PDTT'
+                }
+            }
+            // responsive: true,
+            // title: {
+            //     display: true,
+            //     position: "bottom",
+            //     text: "Capaian Verivali PDTT",
+            //     fontSize: 18,
+            //     fontColor: "#111"
+            // },
+            // legend: {
+            //     display: true,
+            //     position: "top",
+            //     labels: {
+            //         fontColor: "#333",
+            //         fontSize: 16
+            //     }
+            // }
+        };
+
+        /*------------------------------------------
+        --------------------------------------------
+        create Pie Chart class object
+        --------------------------------------------
+        --------------------------------------------*/
+        var chart1 = new Chart(ctx, {
+            type: "pie",
+            data: data,
+            options: options
+        });
+
+    });
 </script>
 
 <?= $this->endSection(); ?>

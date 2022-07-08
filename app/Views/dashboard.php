@@ -36,19 +36,16 @@
         <section class="content">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-12 col-sm-6">
+                    <div class="col-12 col-sm-2">
                         <div class="card">
                             <div class="card-header">
                                 <img src="<?= base_url('icon-dtks.png'); ?>" class="brand-image rounded-circle mb-lg-0 shadow-2" alt="icon app" width="40" height="40">
                                 <span><strong> Verivali PDTT</strong></span>
                                 <div class="card-tools">
-                                    <a href="/geotagging" type="button" class="btn btn-tool" title="Lebih lanjut">
+                                    <a href="/geotagging" type="button" class="btn btn-sm btn-tool" title="Lebih lanjut">
                                         <i class="fas fa-question"></i>
                                     </a>
-                                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                    <button type="button" class="btn btn-sm btn-tool" data-card-widget="remove">
                                         <i class="fas fa-times"></i>
                                     </button>
                                 </div>
@@ -63,7 +60,7 @@
                                                 <figure>
                                                     <blockquote class="blockquote mb-4">
                                                         <p>
-                                                            <img src="<?= base_url('/data/general'); ?>/Adobe Scan 26 Jun 2022_1.jpg" alt="Surat Undangan PDTT" style="width: 100%;">
+                                                            <img id="myImg" src="<?= base_url('/data/general/Adobe Scan 26 Jun 2022_1.jpg'); ?>" alt="Surat Undangan PDTT" style="width: 100%;">
                                                         </p>
                                                     </blockquote>
                                                     <figcaption class="blockquote-footer">
@@ -80,7 +77,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12 col-sm-6">
+                    <div class="col-12 col-sm-10">
                         <div class="card">
                             <div class="card-header">
                                 <img src="<?= base_url('icon-dtks.png'); ?>" class="brand-image rounded-circle mb-lg-0 shadow-2" alt="icon app" width="40" height="40">
@@ -593,7 +590,7 @@
                                             <span class="direct-chat-timestamp float-right">23 Jan 2:00 pm</span>
                                         </div>
                                         <!-- /.direct-chat-infos -->
-                                        <img class="direct-chat-img" src="<?= base_url(); ?>/assets/dist/img/user1-128x128.jpg" alt="Message User Image">
+                                        <img class="direct-chat-img" src="<?= base_url('/assets/dist/img/user1-128x128.jpg'); ?>" alt="Message User Image">
                                         <!-- /.direct-chat-img -->
                                         <div class="direct-chat-text">
                                             Is this template really for free? That's unbelievable!
@@ -609,7 +606,7 @@
                                             <span class="direct-chat-timestamp float-left">23 Jan 2:05 pm</span>
                                         </div>
                                         <!-- /.direct-chat-infos -->
-                                        <img class="direct-chat-img" src="<?= base_url(); ?>/assets/dist/img/user3-128x128.jpg" alt="Message User Image">
+                                        <img class="direct-chat-img" src="<?= base_url('/assets/dist/img/user3-128x128.jpg'); ?>" alt="Message User Image">
                                         <!-- /.direct-chat-img -->
                                         <div class="direct-chat-text">
                                             You better believe it!
@@ -692,7 +689,12 @@
             </div>
         </section>
     </div>
-
+</div>
+<!-- The Modal -->
+<div id="myModal" class="modal-image">
+    <span class="close-image">&times;</span>
+    <img class="modal-content-image" id="img01">
+    <div id="caption-image"></div>
 </div>
 
 <script>

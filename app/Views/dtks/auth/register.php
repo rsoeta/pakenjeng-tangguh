@@ -58,6 +58,14 @@
                                     </div>
                                     <div class="form-group my-1">
                                         <select id="kelurahan" name="kelurahan" class="form-control form-control-sm form-control-user">
+                                            <option value="">-- Pilih Kecamatan --</option>
+                                            <?php foreach ($desa as $row) { ?>
+                                                <option value="<?= $row['id'] ?>" <?= set_select('kelurahan', $row['id']); ?>> <?php echo $row['name']; ?></option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                    <div class="form-group my-1">
+                                        <select id="kelurahan" name="kelurahan" class="form-control form-control-sm form-control-user">
                                             <option value="">-- Pilih Desa / Kelurahan --</option>
                                             <?php foreach ($desa as $row) { ?>
                                                 <option value="<?= $row['id'] ?>" <?= set_select('kelurahan', $row['id']); ?>> <?php echo $row['name']; ?></option>

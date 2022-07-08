@@ -1,5 +1,5 @@
 <footer class="main-footer">
-    <strong>&copy; <?= date('Y'); ?> <a href="<?= base_url(); ?>/dashboard"><?= $namaApp; ?></a>.</strong>
+    <strong>&copy; <?= date('Y'); ?> <a href="<?= base_url(); ?>/dashboard"><?= nameApp(); ?></a>.</strong>
     Version <strong>2.8.0-<a href="https://twitter.com/riansutarsa" target="blank">rs</a></strong>
 </footer>
 
@@ -24,17 +24,17 @@
 <script src="<?= base_url(); ?>/assets/plugins/jquery-mapael/jquery.mapael.min.js"></script>
 <script src="<?= base_url(); ?>/assets/plugins/jquery-mapael/maps/usa_states.min.js"></script>
 
-<!-- ChartJS -->
-<script src="<?= base_url(); ?>/assets/plugins/chart.js/Chart.min.js"></script>
-
 <!-- AdminLTE for demo purposes -->
 <script src="<?= base_url(); ?>/assets/dist/js/demo.js"></script>
+
 <!-- ChartJS -->
-<script src="<?= base_url(); ?>/assets/plugins/chart.js/Chart.min.js"></script>
+<!-- <script src="https://www.jsdelivr.com/package/npm/chart.js"></script> -->
+<!-- <script src="<?= base_url(); ?>/assets/plugins/chart.js/Chart.min.js"></script> -->
 
 <!-- JavaScript Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="<?= base_url('assets/dist/js/script.js'); ?>"></script>
+<script src="<?= base_url('assets/lightbox/dist/js/lightbox.min.js'); ?>"></script>
 
 </body>
 
