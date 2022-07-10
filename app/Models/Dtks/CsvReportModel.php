@@ -27,7 +27,7 @@ class CsvReportModel extends Model
     protected $validationMessages = [];
     protected $skipValidation = false;
 
-    var $column_order = array('cr_id', 'cr_nama_kec', 'cr_nama_desa', 'du_nik', 'nama', 'cr_nama_lgkp', 'nokk', 'alamat', 'rt', 'rw', 'program_bansos', 'cr_program_bansos', 'cr_hasil', 'cr_padan', 'cr_ket_vali', 'cr_ck_id');
+    var $column_order = array('cr_id', 'du_nik', 'nama', 'cr_nama_lgkp', 'nokk', 'alamat', 'rt', 'rw', 'cr_nama_desa', 'cr_program_bansos', 'cr_hasil', 'cr_padan', 'cr_ket_vali', 'cr_ck_id');
 
 
     var $order = array('vw_csv_report.cr_id' => 'asc');

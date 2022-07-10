@@ -18,6 +18,16 @@ $desa_id = session()->get('kode_desa');
             <div class="modal-body">
                 <?= csrf_field(); ?>
                 <div class="row">
+                    <div class="form-group row nopadding mb-2">
+                        <label class="col-4 col-sm-2 col-form-label" for="dataCari">Cari Data</label>
+                        <div class="col-8 col-sm-10">
+                            <select name="dataCari" id="dataCari" class="form-control form-control-sm select2" style="width: 100%;">
+                                <option value='0'>-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <hr>
+
                     <div class="col-md-6 col-sm-6">
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="nokk">No. KK</label>
@@ -233,7 +243,80 @@ $desa_id = session()->get('kode_desa');
 </div>
 
 <script>
+    $('#dataCari').on('change', (event) => {
+        // console.log(event.target.value);
+        getData(event.target.value).then(data => {
+            $('#nokk').val(data.nokk);
+            $('#kelurahan').val(data.kelurahan);
+            $('#datarw').val(data.rw);
+            $('#datart').val(data.rt);
+            $('#alamat').val(data.alamat);
+            $('#nama').val(data.nama);
+            $('#nik').val(data.du_nik);
+            $('#tempat_lahir').val(data.tempat_lahir);
+            $('#tanggal_lahir').val(data.tanggal_lahir);
+            if (data.jenis_kelamin == '1') {
+                $('#chk-Lk').prop('checked', true);
+            }
+            if (data.jenis_kelamin == '2') {
+                $('#chk-Pr').prop('checked', true);
+            }
+            if (data.hamil_status == '1') {
+                $('#chk-YaHamil').prop('checked', true);
+                $('#tgl_hamil_div').show();
+                $('#tgl_hamil').val(data.tgl_hamil);
+            } else {
+                $('#chk-TidakHamil').prop('checked', true);
+                $('#tgl_hamil_div').hide();
+                $('#tgl_hamil').val('');
+            }
+            $('#jenis_pekerjaan').val(data.jenis_pekerjaan);
+            $('#status_kawin').val(data.status_kawin);
+            $('#shdk').val(data.shdk);
+            $('#databansos').val(data.program_bansos);
+            $('#ibu_kandung').val(data.ibu_kandung);
+            if (data.disabil_status == '1') {
+                $('#chk-Yes').prop('checked', true);
+                $('#disabil_jenis_div').show();
+                $('#disabil_jenis').val(data.disabil_jenis);
+            } else {
+                $('#chk-No').prop('checked', true);
+                $('#disabil_jenis_div').hide();
+            }
+            $('#chk-Yes').val(data.disabil_status);
+            $('#disabil_jenis').val(data.disabil_kode);
+        });
+    });
+
+    async function getData(id) {
+        let response = await fetch('/api/dtks_usulan/' + id);
+        let data = await response.json();
+
+        return data;
+    }
+
     $(document).ready(function() {
+        $('#dataCari').select2({
+            dropdownParent: $('#modaltambah'),
+            ajax: {
+                url: "<?php echo base_url('get_data_penduduk'); ?>",
+                type: "POST",
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        search: params.term,
+                    };
+                },
+                processResults: function(response) {
+                    return {
+                        results: response.data
+                    };
+                },
+                cache: true
+            }
+        });
+
         $('.formsimpan').submit(function(e) {
             e.preventDefault();
 

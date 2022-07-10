@@ -86,8 +86,8 @@
                     <tr>
                         <th>No</th>
                         <th>Foto</th>
+                        <th>ID DTKS</th>
                         <th>Nama</th>
-                        <th>J/K</th>
                         <th>No. KK</th>
                         <th>NIK</th>
                         <th>Tempat Lahir</th>
@@ -165,7 +165,13 @@
         "columnDefs": [{
             "targets": [0],
             "orderable": false
-        }]
+        }],
+
+        <?php if ($user > 3) { ?> "columnDefs": [{
+                "targets": [2],
+                "visible": false
+            }],
+        <?php } ?>
     });
 
 
@@ -294,6 +300,8 @@
             success: function(response) {
                 if (response.sukses) {
                     $('.viewmodal').html(response.sukses).show();
+                    // autofocus
+
                     $('#modaledit').modal('show');
                 }
 
@@ -316,6 +324,9 @@
             success: function(response) {
                 if (response.sukses) {
                     $('.viewmodal').html(response.sukses).show();
+                    $('#modaledit').on('shown.bs.modal', function(event) {
+                        $('#id_dtks').focus();
+                    });
                     $('#modaledit').modal('show');
                 }
 

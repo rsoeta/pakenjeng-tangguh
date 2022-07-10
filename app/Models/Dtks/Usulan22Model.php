@@ -269,8 +269,9 @@ class Usulan22Model extends Model
     {
         if ($id == false) {
             return $this->findAll();
+        } else {
+            return $this->db->table('dtks_usulan22')->where(['du_id' => $id]);
         }
-        return $this->where(['id' => $id])->first();
     }
 
     public function rekapUsulan()

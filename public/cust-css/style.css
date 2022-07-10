@@ -1,8 +1,30 @@
+/* font */
 @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bona+Nova:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Edu+VIC+WA+NT+Beginner:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Finlandica&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Overpass&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Saira+Condensed&display=swap');
 
 * {
-    font-family: 'Hind Siliguri', sans-serif;
-    font-size:13px;
+    /* font-family: 'Hind Siliguri', sans-serif;
+    font-size:13px; */
+
+     /* font-family: 'Nanum Gothic', sans-serif; */
+    /* font-family: 'Oxygen', sans-serif; */
+    /* font-family: 'Bona Nova', serif; */
+    /* font-family: 'Titillium Web', sans-serif; */
+    /* font-family: 'Edu VIC WA NT Beginner', cursive; */
+    /* font-family: 'Finlandica', sans-serif; */
+    /* font-family: 'Overpass', sans-serif; */
+    font-family: 'Saira Condensed', sans-serif;
+    font-size: 15px;
+    /* font-size: 14px; */
+    /* font-size: 12px; */
+    /* font-size: 11px; */
+    /* background-color: codetblue; */
 }
 
 a:link {

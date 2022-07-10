@@ -111,7 +111,7 @@
                 </div>
                 <div class="col-sm-2 col-3 mb-2">
                     <select class="form-control form-control-sm" name="data_bulan" id="data_bulan">
-                        <option value="">[ Bulan Kosong ]</option>
+                        <option value="">[ Semua Bulan ]</option>
                         <?php
 
                         $bulan = [1 => "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -135,16 +135,16 @@
                     <thead class="text-center">
                         <tr>
                             <th rowspan="2">NO</th>
-                            <th rowspan="2">KODE KECAMATAN</th>
-                            <th rowspan="2">KODE DESA / KEL.</th>
-                            <th rowspan="2">KECAMATAN</th>
-                            <th rowspan="2">DESA / KEL.</th>
-                            <th rowspan="2">NO. KK</th>
-                            <th colspan="2">NAMA</th>
                             <th rowspan="2">NIK</th>
+                            <th colspan="2">NAMA</th>
+                            <th rowspan="2">NO. KK</th>
                             <th rowspan="2">ALAMAT</th>
                             <th rowspan="2">RT</th>
                             <th rowspan="2">RW</th>
+                            <th rowspan="2">DESA / KEL.</th>
+                            <th rowspan="2">KODE DESA / KEL.</th>
+                            <th rowspan="2">KECAMATAN</th>
+                            <th rowspan="2">KODE KECAMATAN</th>
                             <!-- <th rowspan="2">KODE PROGRAM BANSOS</th> -->
                             <th rowspan="2">PROGRAM BANSOS</th>
                             <th rowspan="2">HASIL</th>
@@ -198,18 +198,6 @@
             }
         },
 
-        columnDefs: [{
-                target: [1],
-                visible: false,
-                searchable: false,
-            },
-            {
-                target: [2],
-                visible: false,
-                searchable: false,
-            },
-        ]
-
     });
 
     $('#desa').change(function() {
@@ -231,104 +219,14 @@
         table.draw();
     });
 
-    $(document).on('click', '#deleteBtn', function() {
-        var id = $(this).data('id');
-        var nama = $(this).data('nama');
-        // alert(id);
-        // $('.editIndividu').modal('show');
-        tanya = confirm(`HAPUS DATA "${nama}"?`);
-        if (tanya == true) {
-            $.ajax({
-                type: "post",
-                url: "<?= base_url('dltUsul'); ?>",
-                data: {
-                    id: id
-                },
-                dataType: "json",
-                success: function(response) {
-                    if (response.informasi) {
-                        alert(response.informasi);
-                    } else if (response.sukses) {
-                        const Toast = Swal.mixin({
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 3000,
-                            timerProgressBar: true,
-                            didOpen: (toast) => {
-                                toast.addEventListener('mouseenter', Swal.stopTimer)
-                                toast.addEventListener('mouseleave', Swal.resumeTimer)
-                            }
-                        })
-                        Toast.fire({
-                            icon: 'success',
-                            title: response.sukses,
-                        });
-                        // window.location.reload();
-                        table.draw();
-                    }
-                }
-            });
-        }
-
-    });
-
-
-    function edit_person(id) {
-        //Ajax Load data from ajax
-        $.ajax({
-            type: "POST",
-            url: "<?php echo site_url('editUsulan') ?>",
-            data: {
-                id: id
-            },
-            dataType: "JSON",
-            success: function(response) {
-                if (response.informasi) {
-                    alert(response.informasi);
-
-                } else if (response.sukses) {
-                    $('.viewmodal').html(response.sukses).show();
-                    $('#modaledit').modal('show');
-                }
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
-            }
-        });
-    }
 
     $(document).ready(function() {
 
         // $('body').addClass('sidebar-collapse');
 
-        $('.tombolTambah').click(function(e) {
-            e.preventDefault();
-            $.ajax({
-                url: "<?= site_url('tambah') ?>",
-                dataType: "json",
-                success: function(response) {
-                    $('.viewmodal').html(response.data).show();
-
-                    // $('#modaltambah').modal('show');
-                    // $('#modaltambah').modal('show', function() {
-                    //     $($this).find('#nokk').focus();
-                    // });
-                    $('#modaltambah').on('shown.bs.modal', function(event) {
-                        $('#nokk').focus();
-                    });
-                    $('#modaltambah').modal('show');
-                },
-                error: function(xhr, ajaxOptions, thrownError) {
-                    alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
-                    // alert('Batas waktu untuk Tambah Data, Telah Habis!!');
-                }
-            });
-        });
-
         var dt = $('#tb_csv').DataTable();
         //hide the second and third columns
-        dt.columns([1, 2, 16]).visible(false);
+        dt.columns([9, 10, 11]).visible(false);
         // $('#tb_csv');
 
         $('#rw').change(function() {

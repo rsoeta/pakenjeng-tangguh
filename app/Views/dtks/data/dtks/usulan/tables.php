@@ -57,7 +57,7 @@
             <div class="row mb-2">
                 <div class="col-sm-2 col-6 mb-2">
                     <select <?= $user >= 3 ? 'disabled' : ''; ?> class="form-control form-control-sm" name="desa" id="desa">
-                        <option value="">[ Desa Kosong ]</option>
+                        <option value="">[ Semua Desa ]</option>
                         <?php foreach ($desa as $row) { ?>
                             <option <?= $desa_id == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id']; ?>"><?= $row['name']; ?></option>
                         <?php } ?>
@@ -67,7 +67,7 @@
                     <select <?php if ($user >= 4) {
                                 echo 'disabled = "true"';
                             } ?> class="form-control form-control-sm" name="rw" id="rw">
-                        <option value="">[ RW Kosong ]</option>
+                        <option value="">[ Semua RW ]</option>
                         <?php foreach ($datarw as $row) { ?>
                             <option <?php if ($jabatan == $row['no_rw']) {
                                         echo 'selected';
@@ -77,12 +77,12 @@
                 </div>
                 <div class="col-sm-2 col-3 mb-2">
                     <select class="form-control form-control-sm" name="rt" id="rt">
-                        <option value="">[ RT Kosong ]</option>
+                        <option value="">[ Semua RT ]</option>
                     </select>
                 </div>
                 <div class="col-sm-2 col-6 mb-2">
                     <select class="form-control form-control-sm" name="bansos" id="bansos">
-                        <option value="">[ Bansos Kosong ]</option>
+                        <option value="">[ Semua Bansos ]</option>
                         <?php foreach ($bansos as $row) { ?>
                             <option value="<?= $row['dbj_id']; ?>"><?= $row['dbj_ket_bansos']; ?></option>
                         <?php } ?>
@@ -90,7 +90,7 @@
                 </div>
                 <div class="col-sm-2 col-3 mb-2">
                     <select class="form-control form-control-sm" name="data_tahun" id="data_tahun">
-                        <option value="">[ Tahun Kosong ]</option>
+                        <option value="">[ Semua Tahun ]</option>
                         <?php
                         $mulai = 2021;
                         $tahun = date('Y');
@@ -103,7 +103,7 @@
                 </div>
                 <div class="col-sm-2 col-3 mb-2">
                     <select class="form-control form-control-sm" name="data_bulan" id="data_bulan">
-                        <option value="">[ Bulan Kosong ]</option>
+                        <option value="">[ Semua Bulan ]</option>
                         <?php
 
                         $bulan = [1 => "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];

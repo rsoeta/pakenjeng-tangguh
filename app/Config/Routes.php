@@ -71,6 +71,7 @@ $routes->post('addpbi', 'Dtks\VervalPbi::save', ["filter" => "authfilterdtks"]);
 $routes->get('usulan', 'Dtks\Usulan22::index', ["filter" => "authfilterdtks"]);
 $routes->post('tmbUsul', 'Dtks\Usulan22::save', ["filter" => "authfilterdtks"]);
 $routes->get('tambah', 'Dtks\Usulan22::formtambah', ["filter" => "authfilterdtks"]);
+$routes->post('get_data_penduduk', 'Dtks\Usulan22::get_data_penduduk', ["filter" => "authfilterdtks"]);
 $routes->post('editUsulan', 'Dtks\Usulan22::formedit', ["filter" => "authfilterdtks"]);
 $routes->post('updateUsulan', 'Dtks\Usulan22::update', ["filter" => "authfilterdtks"]);
 $routes->post('dltUsul', 'Dtks\Usulan22::delete', ["filter" => "authfilterdtks"]);
@@ -80,6 +81,7 @@ $routes->match(['get', 'post'], 'exportBa', 'Dtks\Usulan22::exportBa', ["filter"
 $routes->get('import_csv', 'Dtks\Usulan22::import_csv', ["filter" => "authfilterdtks"]);
 $routes->post('importCsvToDb', 'Dtks\Usulan22::importCsvToDb', ["filter" => "authfilterdtks"]);
 $routes->post('tb_csv', 'Dtks\Usulan22::tbCsv', ["filter" => "authfilterdtks"]);
+$routes->resource('api/dtks_usulan', ['controller' => 'Api\Dtks_Usulan']);
 
 
 // WILAYAH

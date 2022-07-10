@@ -246,7 +246,7 @@ $desa_id = session()->get('kode_desa');
                     </div>
                 </div>
                 <div class="modal-footer mt-3">
-                    <button type="submit" class="btn btn-primary btn-block btnsimpan">Update</button>
+                    <button type="submit" class="btn btn-warning btn-block btnsimpan">Update</button>
                 </div>
                 <!-- </form> -->
                 <?php echo form_close();
@@ -263,7 +263,7 @@ $desa_id = session()->get('kode_desa');
 
             $.ajax({
                 type: "POST",
-                url: $(this).attr('action'),
+                url: '<?= base_url('/updateUsulan') ?>',
                 data: $(this).serialize(),
                 dataType: "json",
                 beforeSend: function() {
@@ -466,7 +466,6 @@ $desa_id = session()->get('kode_desa');
             }
         });
     });
-
 
     $(function() {
         $("input[name='jenis_kelamin']").click(function() {

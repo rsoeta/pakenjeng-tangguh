@@ -88,8 +88,8 @@ class Bnba extends BaseController
             <img src=' . FOTO_DOKUMEN('KPM_BNT' . $key->db_nik . 'A.jpg', 'foto-kpm') . ' alt="' . $key->db_nama . '" style="width: 30px; height: 40px; border-radius: 2px;">
             </a>
             ';
+            $row[] = $key->db_id_dtks;
             $row[] = $key->db_nama;
-            $row[] = $key->NamaJenKel;
             $row[] = $key->db_nkk;
             $row[] = $key->db_nik;
             $row[] = $key->db_tmp_lahir;
@@ -161,12 +161,13 @@ class Bnba extends BaseController
             $row = $model->find($id_data);
 
             // var_dump($row);
+            $kode_kab = $row['db_regency'];
 
             $data = [
                 'title' => 'Detail Penerima Manfaat',
                 'dataprov' => $this->WilayahModel->getProv()->getResultArray(),
                 'datakab' => $this->WilayahModel->getKab()->getResultArray(),
-                'datakec' => $this->WilayahModel->getKec()->getResultArray(),
+                'datakec' => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
                 'datadesa' => $this->WilayahModel->getDataDesa()->getResultArray(),
                 'datadusun' => $this->WilayahModel->getDusun()->getResultArray(),
                 'datarw' => $this->RwModel->noRw(),

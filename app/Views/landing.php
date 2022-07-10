@@ -484,7 +484,7 @@ https://templatemo.com/tm-575-leadership-event
             <h3 class="mb-5">Peta Lokasi</h3>
           </div>
           <div class="col-lg-6 col-sm-6 col-12">
-            <iframe class="google-map" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3956.0029159566393!2d107.66943441469304!3d-7.46492719461497!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e661f7fa14fe949%3A0xe162ee3852ef74e!2sKantor%20Kecamatan%20Pakenjeng!5e0!3m2!1sid!2sid!4v1654423808746!5m2!1sid!2sid" width="600" height="300" style="border:1;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10113.465026073532!2d107.66838273174673!3d-7.466390778748057!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e661f7fa14fe949%3A0xe162ee3852ef74e!2sKantor%20Kecamatan%20Pakenjeng!5e0!3m2!1sid!2sid!4v1657476411931!5m2!1sid!2sid" width="400" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
           </div>
 
           <div class="col-lg-6 col-sm-6 col-12 mt-5 mt-lg-0">

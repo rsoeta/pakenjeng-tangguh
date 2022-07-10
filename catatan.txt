@@ -37,7 +37,7 @@
 
             CREATE OR REPLACE VIEW vw_csv_report AS
                 SELECT cr_id, kecamatan, cr_nama_kec, kelurahan, cr_nama_desa, nokk, nama, cr_nama_lgkp, du_nik, alamat, rt, rw, program_bansos,
-                cr_program_bansos, cr_hasil, cr_padan, cr_ket_vali, cr_created_by, cr_created_at
+                cr_program_bansos, cr_hasil, cr_padan, cr_ket_vali, cr_ck_id, YEAR(cr_created_at) as tahun_upload, MONTH(cr_created_at) as bulan_upload, cr_created_by, cr_created_at
             FROM 
                 dtks_csv_report
             INNER JOIN 

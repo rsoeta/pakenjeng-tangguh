@@ -4,11 +4,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap');
 
 * {
-    font-family: 'Nanum Gothic', sans-serif;
+    /* font-family: 'Nanum Gothic', sans-serif; */
     /* font-family: 'Oxygen', sans-serif; */
     /* font-family: 'Bona Nova', serif; */
     /* font-family: 'Titillium Web', sans-serif; */
-    font-size: 12px;
+    /* font-size: 12px; */
+    font-size: 11px;
     /* background-color: codetblue; */
 }
 

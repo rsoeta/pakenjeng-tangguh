@@ -2,9 +2,6 @@
 
 <?= $this->section('content'); ?>
 
-<!-- <script src="<?php base_url('/assets/dist/js/webcam.min.js'); ?>"></script> -->
-
-<!-- <script async src="<?= base_url('/assets/dist/js/capture.js'); ?>"></script> -->
 
 <div class="content-wrapper mt-1">
 
@@ -73,8 +70,12 @@
             <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade show active" id="diagram" role="tabpanel" aria-labelledby="diagram-tab">
                     <div class="row my-2">
-                        <div class="col-sm-6 col-12">
-                            <canvas id="capaian-chart"></canvas>
+                        <div class="col">
+                            <div class="row">
+                                <div class="col-sm-6 col-12">
+                                    <canvas id="capaian-chart"></canvas>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

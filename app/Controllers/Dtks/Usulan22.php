@@ -421,6 +421,98 @@ class Usulan22 extends BaseController
         }
     }
 
+    public function get_data_penduduk()
+    {
+
+        $db = \Config\Database::connect();
+        $role = session()->get('role_id');
+        $kode_desa = session()->get('kode_desa');
+        $kode_rw = session()->get('level');
+
+        $request = service('request');
+        $postData = $request->getPost();
+
+        $response = array();
+        $data = array();
+        $builder = $db->table('dtks_usulan22');
+        $penduduk = [];
+        if (isset($postData['search'])) {
+            $search = $postData['search'];
+            if ($role == '1') {
+                $builder->select('*');
+                $builder->like('du_nik', $search);
+                $builder->orLike('nama', $search);
+                $builder->orLike('nokk', $search);
+                $builder->distinct('du_nik');
+                $query = $builder->get();
+                $data = $query->getResult();
+            } elseif ($role == '2') {
+                $builder->select('*');
+                $builder->like('du_nik', $search);
+                $builder->orLike('nama', $search);
+                $builder->orLike('nokk', $search);
+                $builder->distinct('du_nik');
+                $query = $builder->get();
+                $data = $query->getResult();
+            } elseif ($role == '3') {
+                $builder->select('*');
+                $builder->where('kelurahan', $kode_desa);
+                $builder->like('du_nik', $search);
+                $builder->orLike('nama', $search);
+                $builder->orLike('nokk', $search);
+                $builder->distinct('du_nik');
+                $query = $builder->get();
+                $data = $query->getResult();
+            } elseif ($role == '4') {
+                $builder->select('*');
+                $builder->where('kelurahan', $kode_desa);
+                $builder->where('rw', $kode_rw);
+                $builder->like('du_nik', $search);
+                $builder->orLike('nama', $search);
+                $builder->orLike('nokk', $search);
+                $builder->distinct('du_nik');
+                $query = $builder->get();
+                $data = $query->getResult();
+            } else {
+                $data = [];
+            }
+        } else {
+            if ($role == '1') {
+                $builder->select('*');
+                $query = $builder->get();
+                $data = $query->getResult();
+            } elseif ($role == '2') {
+                $builder->select('*');
+                $builder->distinct('du_nik');
+                $query = $builder->get();
+                $data = $query->getResult();
+            } elseif ($role == '3') {
+                $builder->select('*');
+                $builder->where('kelurahan', $kode_desa);
+                $builder->distinct('du_nik');
+                $query = $builder->get();
+                $data = $query->getResult();
+            } elseif ($role == '4') {
+                $builder->select('*');
+                $builder->where('kelurahan', $kode_desa);
+                $builder->where('rw', $kode_rw);
+                $builder->distinct('du_nik');
+                $query = $builder->get();
+                $data = $query->getResult();
+            } else {
+                $data = [];
+            }
+        }
+        foreach ($data as $pdk) {
+            $penduduk[] = array(
+                'id' => $pdk->du_id,
+                'text' => ' - NAMA: ' . $pdk->nama . ' NIK: ' . $pdk->du_nik . ' NO.KK: ' . $pdk->nokk,
+            );
+        }
+        $response['data'] = $penduduk;
+
+        return $this->response->setJSON($response);
+    }
     function delete()
     {
         if ($this->request->isAJAX()) {
@@ -1056,10 +1148,6 @@ class Usulan22 extends BaseController
             $no++;
             $row = array();
             $row[] = $no;
-            $row[] = $key->kecamatan;
-            $row[] = $key->kelurahan;
-            $row[] = $key->cr_nama_kec;
-            $row[] = $key->cr_nama_desa;
             $row[] = $key->du_nik;
             $row[] = $key->nama;
             $row[] = $key->cr_nama_lgkp;
@@ -1067,6 +1155,10 @@ class Usulan22 extends BaseController
             $row[] = $key->alamat;
             $row[] = $key->rt;
             $row[] = $key->rw;
+            $row[] = $key->cr_nama_desa;
+            $row[] = $key->kelurahan;
+            $row[] = $key->cr_nama_kec;
+            $row[] = $key->kecamatan;
             // $row[] = $key->program_bansos;
             $row[] = $key->cr_program_bansos;
             $row[] = $key->cr_hasil;
