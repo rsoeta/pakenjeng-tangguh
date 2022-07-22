@@ -8,7 +8,6 @@ function nameApp()
 {
     return 'Opr NewDTKS';
 }
-
 // function version app from database
 function versionApp()
 {
@@ -16,7 +15,6 @@ function versionApp()
     $data = $genModel->getVersion();
     return $data->tv_version;
 }
-
 
 function Profil_Admin()
 {

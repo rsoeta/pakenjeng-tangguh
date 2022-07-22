@@ -10,7 +10,7 @@ class BnbaModel extends Model
     protected $primaryKey = 'db_id';
 
     protected $allowedFields = [
-        "db_id_dtks", "db_province", "db_regency", "db_district", "db_village", "db_alamat", "db_dusun", "db_rw", "db_rt", "db_nkk", "db_nik", "db_nama", "db_tgl_lahir", "db_tmp_lahir", "db_jenkel_id", "db_ibu_kandung", "db_shdk_id", "db_status", "db_tgl_mati", "db_noreg_mati", "db_tb_status", "db_pkh", "db_bpnt", "db_bst", "db_bpnt_ppkm", "db_pbi", "db_creator", "db_created", "db_modifier", "db_modified"
+        "db_id_dtks", "db_province", "db_regency", "db_district", "db_village", "db_alamat", "db_dusun", "db_rw", "db_rt", "db_nkk", "db_nik", "db_nama", "db_tgl_lahir", "db_tmp_lahir", "db_jenkel_id", "db_ibu_kandung", "db_shdk_id", "db_status", "db_tgl_kejadian", "db_noreg_kejadian", "db_tb_status", "db_pkh", "db_bpnt", "db_bst", "db_bpnt_ppkm", "db_pbi", "db_creator", "db_created", "db_modifier", "db_modified"
     ];
 
     protected $useTimestamps = true;
@@ -19,11 +19,12 @@ class BnbaModel extends Model
 
 
     var $column_order = array('', '', 'db_nama', 'db_jenkel_id', 'db_nkk', 'db_nik', 'db_tmp_lahir', 'db_tgl_lahir', 'db_shdk_id');
+    var $column_order1 = array('', '', 'db_nama', 'db_jenkel_id', 'db_nkk', 'db_nik', 'db_tmp_lahir', 'db_tgl_lahir', 'db_modified');
 
     var $order = array('db_nama' => 'asc');
-    var $order1 = array('db_modified' => 'desc');
+    var $order1 = array('db_modified' => 'asc');
 
-    function get_datatables($filter1, $filter2, $filter3, $filter4, $filter0 = null)
+    function get_datatables($filter1, $filter2, $filter3, $filter4, $filter0)
     {
         // desa
         if ($filter1 == "") {
@@ -53,7 +54,7 @@ class BnbaModel extends Model
         if ($filter0 == "") {
             $kondisi_filter0 = "";
         } else {
-            $kondisi_filter0 = " AND db_status <= '$filter0'";
+            $kondisi_filter0 = " AND db_status = '$filter0'";
         }
 
         // search
@@ -99,7 +100,7 @@ class BnbaModel extends Model
         return $query;
     }
 
-    function jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter0 = null)
+    function jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter0)
     {
         // desa
         if ($filter1 == "") {
@@ -130,7 +131,7 @@ class BnbaModel extends Model
         if ($filter0 == "") {
             $kondisi_filter0 = "";
         } else {
-            $kondisi_filter0 = " AND db_status <= '$filter0'";
+            $kondisi_filter0 = " AND db_status = '$filter0'";
         }
 
         // kondisi search
@@ -197,10 +198,10 @@ class BnbaModel extends Model
 
         // order
         if (isset($_POST['order'])) {
-            $result_order = $this->column_order[$_POST['order']['0']['column']];
+            $result_order = $this->column_order1[$_POST['order']['0']['column']];
             $result_dir = $_POST['order']['0']['dir'];
-        } else if ($this->order) {
-            $order1 = $this->order;
+        } else if ($this->order1) {
+            $order1 = $this->order1;
             $result_order = key($order1);
             $result_dir = $order1[key($order1)];
         }
@@ -334,10 +335,10 @@ class BnbaModel extends Model
 
         // order
         if (isset($_POST['order'])) {
-            $result_order = $this->column_order[$_POST['order']['0']['column']];
+            $result_order = $this->column_order1[$_POST['order']['0']['column']];
             $result_dir = $_POST['order']['0']['dir'];
-        } else if ($this->order) {
-            $order1 = $this->order;
+        } else if ($this->order1) {
+            $order1 = $this->order1;
             $result_order = key($order1);
             $result_dir = $order1[key($order1)];
         }

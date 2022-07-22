@@ -2,16 +2,15 @@
 
 <?= $this->section('content'); ?>
 
-<div class="content-wrapper mt-1">
-
+<?php
+$user = session()->get('role_id');
+isset($user_login['lp_kode']) ? $desa_id = $user_login['lp_kode'] : $desa_id = session()->get('kode_desa');
+$ops = session()->get('jabatan');
+$level = session()->get('level');
+?>
+<div class="content-wrapper mt-3">
     <!-- Main content -->
     <section class="content">
-        <?php
-        $user = session()->get('role_id');
-        isset($user_login['lp_kode']) ? $desa_id = $user_login['lp_kode'] : $desa_id = session()->get('kode_desa');
-        $ops = session()->get('jabatan');
-        $level = session()->get('level');
-        ?>
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12">
@@ -39,207 +38,21 @@
                             </ul>
                         </div>
                         <div class="card-body">
-                            <div class="tab-content" id="custom-tabs-five-tabContent">
-                                <div class="tab-pane fade <?= $user >= 3 ? 'active show' : ''; ?>" id="custom-tabs-five-overlay" role="tabpanel" aria-labelledby="custom-tabs-five-overlay-tab">
-                                    <div class="row my-2">
-                                        <div class="col">
-                                            <div class="row">
-                                                <div class="col-sm-1 col-2 mb-1">
-                                                    <label for="datadesa" class="form-label">
-                                                        Desa
-                                                    </label>
-                                                </div>
-                                                <div class="col-sm-2 col-4">
-                                                    <select <?php if ($user >= 3) {
-                                                                echo 'disabled="disabled"';
-                                                            } ?> class="form-control form-control-sm" name="" id="datadesa">
-                                                        <option value="">-Pilih-</option>
-                                                        <?php foreach ($desKels as $row) { ?>
-                                                            <option <?php if ($desa_id == $row['id']) {
-                                                                        echo 'selected';
-                                                                    } ?> value="<?= $row['id']; ?>"><?= $row['name']; ?></option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                                <div class="col-sm-1 col-2 mb-1">
-                                                    <label for="datarw" class="form-label">
-                                                        RW
-                                                    </label>
-                                                </div>
-                                                <div class="col-sm-2 col-4">
-                                                    <select <?php if ($user >= 4) {
-                                                                echo 'disabled="disabled"';
-                                                            } ?> class="form-control form-control-sm" name="" id="datarw">
-                                                        <option value="">-Pilih-</option>
-                                                        <?php foreach ($datarw as $row) { ?>
-                                                            <option <?php if ($ops == $row['no_rw']) {
-                                                                        echo 'selected';
-                                                                    } ?> value="<?php echo $row['no_rw']; ?>"><?php echo $row['no_rw']; ?></option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                                <div class="col-sm-1 col-2 mb-1">
-                                                    <label for="datart" class="form-label">
-                                                        RT
-                                                    </label>
-                                                </div>
-                                                <div class="col-sm-2 col-4">
-                                                    <select class="form-control form-control-sm" name="" id="datart">
-                                                        <option value="">-Pilih-</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-sm-1 col-2 mb-1">
-                                                    <label for="datashdk" class="form-label">
-                                                        SHDK
-                                                    </label>
-                                                </div>
-                                                <div class="col-sm-2 col-4">
-                                                    <select class="form-control form-control-sm" name="" id="datashdk">
-                                                        <option value="">-Pilih-</option>
-                                                        <?php foreach ($datashdk as $row) { ?>
-                                                            <option value="<?= $row['id']; ?>"><?= $row['jenis_shdk']; ?></option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row my-2">
-                                        <table id="tabel_data" class="table table-hover table-sm compact" style="width: 100%;">
-                                            <thead>
-                                                <tr>
-                                                    <th>No</th>
-                                                    <th>Foto</th>
-                                                    <th>ID DTKS</th>
-                                                    <th>NIK</th>
-                                                    <th>Nama</th>
-                                                    <th>No. KK</th>
-                                                    <th>Alamat</th>
-                                                    <th>RT</th>
-                                                    <th>RW</th>
-                                                    <th>Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <?php if ($user <= 3) { ?>
-                                    <div class="tab-pane fade <?= $user <= 2 ? 'active show' : ''; ?>" id="custom-tabs-five-overlay-dark" role="tabpanel" aria-labelledby="custom-tabs-five-overlay-dark-tab">
-                                        <div class="overlay-wrapper">
-                                            <div class="row">
-                                                <div class="col">
-                                                    <div class="row mb-2">
-                                                        <div class="col">
-                                                            <button type="button" class="btn btn-info btn-sm  float-right" data-toggle="modal" onclick="reload_table()">
-                                                                <i class="fa fa-sync-alt"></i> Reload
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-sm-1 col-2 mb-1">
-                                                            <label for="datadesa1" class="form-label">
-                                                                Desa
-                                                            </label>
-                                                        </div>
-                                                        <div class="col-sm-2 col-4">
-                                                            <select <?php if ($user >= 3) {
-                                                                        echo 'disabled="disabled"';
-                                                                    } ?> class="form-control form-control-sm" name="" id="datadesa1">
-                                                                <option value="">-Pilih-</option>
-                                                                <?php foreach ($desKels as $row) { ?>
-                                                                    <option <?php if ($desa_id == $row['id']) {
-                                                                                echo 'selected';
-                                                                            } ?> value="<?= $row['id']; ?>"><?= $row['name']; ?></option>
-                                                                <?php } ?>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-sm-1 col-2 mb-1">
-                                                            <label for="datarw1" class="form-label">
-                                                                RW
-                                                            </label>
-                                                        </div>
-                                                        <div class="col-sm-2 col-4">
-                                                            <select <?php if ($user >= 4) {
-                                                                        echo 'disabled="disabled"';
-                                                                    } ?> class="form-control form-control-sm" name="" id="datarw1">
-                                                                <option value="">-Pilih-</option>
-                                                                <?php foreach ($datarw as $row) { ?>
-                                                                    <option <?php if ($ops == $row['no_rw']) {
-                                                                                echo 'selected';
-                                                                            } ?> value="<?php echo $row['no_rw']; ?>"><?php echo $row['no_rw']; ?></option>
-                                                                <?php } ?>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-sm-1 col-2 mb-1">
-                                                            <label for="datart1" class="form-label">
-                                                                RT
-                                                            </label>
-                                                        </div>
-                                                        <div class="col-sm-2 col-4">
-                                                            <select class="form-control form-control-sm" name="" id="datart1">
-                                                                <option value="">-Pilih-</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-sm-1 col-2 mb-1">
-                                                            <label for="data_status1" class="form-label">
-                                                                Status
-                                                            </label>
-                                                        </div>
-                                                        <div class="col-sm-2 col-4">
-                                                            <select class="form-control form-control-sm" name="" id="data_status1">
-                                                                <option value="">-Pilih-</option>
-                                                                <?php foreach ($status as $row) {  ?>
-                                                                    <option <?= (3 == $row['id_status']) ? 'selected' : ''; ?> value="<?= $row['id_status']; ?>"><?= $row['jenis_status']; ?></option>
-                                                                <?php } ?>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row my-2">
-                                                <table id="tabel_data1" class="table table-hover table-sm compact" style="width: 100%;">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>No</th>
-                                                            <th>Foto</th>
-                                                            <th>ID DTKS</th>
-                                                            <th>Nama</th>
-                                                            <th>NIK</th>
-                                                            <th>No. KK</th>
-                                                            <th>Desa</th>
-                                                            <th>Tanggal Meninggal</th>
-                                                            <th>No. Registrasi Meninggal</th>
-                                                            <th>Ket</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody></tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php } ?>
-                                <?php if ($user <= 2) { ?>
-                                    <div class="tab-pane fade" id="custom-tabs-five-normal" role="tabpanel" aria-labelledby="custom-tabs-five-normal-tab">
-                                        <div class="row">
+                            <?php if ($user <= 4) { ?>
+                                <div class="tab-content" id="custom-tabs-five-tabContent">
+                                    <div class="tab-pane fade <?= $user >= 3 ? 'active show' : ''; ?>" id="custom-tabs-five-overlay" role="tabpanel" aria-labelledby="custom-tabs-five-overlay-tab">
+                                        <div class="row my-2">
                                             <div class="col">
-                                                <div class="row mb-2">
-                                                    <div class="col">
-                                                        <button type="button" class="btn btn-info btn-sm float-right" data-toggle="modal" onclick="reload_table()">
-                                                            <i class="fa fa-sync-alt"></i> Reload
-                                                        </button>
-                                                    </div>
-                                                </div>
                                                 <div class="row">
                                                     <div class="col-sm-1 col-2 mb-1">
-                                                        <label for="datadesa2" class="form-label">
+                                                        <label for="datadesa" class="form-label">
                                                             Desa
                                                         </label>
                                                     </div>
                                                     <div class="col-sm-2 col-4">
                                                         <select <?php if ($user >= 3) {
                                                                     echo 'disabled="disabled"';
-                                                                } ?> class="form-control form-control-sm" name="" id="datadesa2">
+                                                                } ?> class="form-control form-control-sm" name="" id="datadesa">
                                                             <option value="">-Pilih-</option>
                                                             <?php foreach ($desKels as $row) { ?>
                                                                 <option <?php if ($desa_id == $row['id']) {
@@ -249,14 +62,14 @@
                                                         </select>
                                                     </div>
                                                     <div class="col-sm-1 col-2 mb-1">
-                                                        <label for="datarw2" class="form-label">
+                                                        <label for="datarw" class="form-label">
                                                             RW
                                                         </label>
                                                     </div>
                                                     <div class="col-sm-2 col-4">
                                                         <select <?php if ($user >= 4) {
                                                                     echo 'disabled="disabled"';
-                                                                } ?> class="form-control form-control-sm" name="" id="datarw2">
+                                                                } ?> class="form-control form-control-sm" name="" id="datarw">
                                                             <option value="">-Pilih-</option>
                                                             <?php foreach ($datarw as $row) { ?>
                                                                 <option <?php if ($ops == $row['no_rw']) {
@@ -266,53 +79,244 @@
                                                         </select>
                                                     </div>
                                                     <div class="col-sm-1 col-2 mb-1">
-                                                        <label for="datart2" class="form-label">
+                                                        <label for="datart" class="form-label">
                                                             RT
                                                         </label>
                                                     </div>
                                                     <div class="col-sm-2 col-4">
-                                                        <select class="form-control form-control-sm" name="" id="datart2">
+                                                        <select class="form-control form-control-sm" name="" id="datart">
                                                             <option value="">-Pilih-</option>
                                                         </select>
                                                     </div>
                                                     <div class="col-sm-1 col-2 mb-1">
-                                                        <label for="data_status2" class="form-label">
-                                                            Status
+                                                        <label for="datashdk" class="form-label">
+                                                            SHDK
                                                         </label>
                                                     </div>
                                                     <div class="col-sm-2 col-4">
-                                                        <select class="form-control form-control-sm" name="" id="data_status2">
+                                                        <select class="form-control form-control-sm" name="" id="datashdk">
                                                             <option value="">-Pilih-</option>
-                                                            <?php foreach ($status as $row) {  ?>
-                                                                <option <?= (3 == $row['id_status']) ? 'selected' : ''; ?> value="<?= $row['id_status']; ?>"><?= $row['jenis_status']; ?></option>
+                                                            <?php foreach ($datashdk as $row) { ?>
+                                                                <option value="<?= $row['id']; ?>"><?= $row['jenis_shdk']; ?></option>
                                                             <?php } ?>
                                                         </select>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <table id="tabel_data2" class="table table-hover table-sm compact" style="width: 100%;">
+                                        <div class="row my-2">
+                                            <table id="tabel_data" class="table table-hover table-sm compact" style="width: 100%;">
                                                 <thead>
                                                     <tr>
                                                         <th>No</th>
                                                         <th>Foto</th>
                                                         <th>ID DTKS</th>
-                                                        <th>Nama</th>
                                                         <th>NIK</th>
+                                                        <th>Nama</th>
                                                         <th>No. KK</th>
-                                                        <th>Desa</th>
-                                                        <th>Tanggal Meninggal</th>
-                                                        <th>No. Registrasi Meninggal</th>
-                                                        <th>Ket</th>
+                                                        <th>Alamat</th>
+                                                        <th>RT</th>
+                                                        <th>RW</th>
+                                                        <th>Status</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody></tbody>
                                             </table>
                                         </div>
                                     </div>
-                                <?php } ?>
-                            </div>
+                                    <?php if ($user <= 3) { ?>
+                                        <div class="tab-pane fade <?= $user <= 2 ? 'active show' : ''; ?>" id="custom-tabs-five-overlay-dark" role="tabpanel" aria-labelledby="custom-tabs-five-overlay-dark-tab">
+                                            <div class="overlay-wrapper">
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <div class="row mb-2">
+                                                            <div class="col">
+                                                                <button type="button" class="btn btn-info btn-sm  float-right" data-toggle="modal" onclick="reload_table()">
+                                                                    <i class="fa fa-sync-alt"></i> Reload
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-sm-1 col-2 mb-1">
+                                                                <label for="datadesa1" class="form-label">
+                                                                    Desa
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-sm-2 col-4">
+                                                                <select <?php if ($user >= 3) {
+                                                                            echo 'disabled="disabled"';
+                                                                        } ?> class="form-control form-control-sm" name="" id="datadesa1">
+                                                                    <option value="">-Pilih-</option>
+                                                                    <?php foreach ($desKels as $row) { ?>
+                                                                        <option <?php if ($desa_id == $row['id']) {
+                                                                                    echo 'selected';
+                                                                                } ?> value="<?= $row['id']; ?>"><?= $row['name']; ?></option>
+                                                                    <?php } ?>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-sm-1 col-2 mb-1">
+                                                                <label for="datarw1" class="form-label">
+                                                                    RW
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-sm-2 col-4">
+                                                                <select <?php if ($user >= 4) {
+                                                                            echo 'disabled="disabled"';
+                                                                        } ?> class="form-control form-control-sm" name="" id="datarw1">
+                                                                    <option value="">-Pilih-</option>
+                                                                    <?php foreach ($datarw as $row) { ?>
+                                                                        <option <?php if ($ops == $row['no_rw']) {
+                                                                                    echo 'selected';
+                                                                                } ?> value="<?php echo $row['no_rw']; ?>"><?php echo $row['no_rw']; ?></option>
+                                                                    <?php } ?>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-sm-1 col-2 mb-1">
+                                                                <label for="datart1" class="form-label">
+                                                                    RT
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-sm-2 col-4">
+                                                                <select class="form-control form-control-sm" name="" id="datart1">
+                                                                    <option value="">-Pilih-</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-sm-1 col-2 mb-1">
+                                                                <label for="data_status1" class="form-label">
+                                                                    Status
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-sm-2 col-4">
+                                                                <select class="form-control form-control-sm" name="" id="data_status1">
+                                                                    <option value="">-Pilih-</option>
+                                                                    <?php foreach ($status as $row) {  ?>
+                                                                        <option value="<?= $row['id_status']; ?>"><?= $row['jenis_status']; ?></option>
+                                                                    <?php } ?>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row my-2">
+                                                    <table id="tabel_data1" class="table table-hover table-sm compact" style="width: 100%;">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>No</th>
+                                                                <th>Foto</th>
+                                                                <th>ID DTKS</th>
+                                                                <th>Nama</th>
+                                                                <th>NIK</th>
+                                                                <th>No. KK</th>
+                                                                <th>Desa</th>
+                                                                <th>Status</th>
+                                                                <th>Tanggal Kejadian</th>
+                                                                <th>No. Registrasi Kejadian</th>
+                                                                <th>Ket</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php } ?>
+                                    <?php if ($user <= 2) { ?>
+                                        <div class="tab-pane fade" id="custom-tabs-five-normal" role="tabpanel" aria-labelledby="custom-tabs-five-normal-tab">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="row mb-2">
+                                                        <div class="col">
+                                                            <button type="button" class="btn btn-info btn-sm float-right" data-toggle="modal" onclick="reload_table()">
+                                                                <i class="fa fa-sync-alt"></i> Reload
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-1 col-2 mb-1">
+                                                            <label for="datadesa2" class="form-label">
+                                                                Desa
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-2 col-4">
+                                                            <select <?php if ($user >= 3) {
+                                                                        echo 'disabled="disabled"';
+                                                                    } ?> class="form-control form-control-sm" name="" id="datadesa2">
+                                                                <option value="">-Pilih-</option>
+                                                                <?php foreach ($desKels as $row) { ?>
+                                                                    <option <?php if ($desa_id == $row['id']) {
+                                                                                echo 'selected';
+                                                                            } ?> value="<?= $row['id']; ?>"><?= $row['name']; ?></option>
+                                                                <?php } ?>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-sm-1 col-2 mb-1">
+                                                            <label for="datarw2" class="form-label">
+                                                                RW
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-2 col-4">
+                                                            <select <?php if ($user >= 4) {
+                                                                        echo 'disabled="disabled"';
+                                                                    } ?> class="form-control form-control-sm" name="" id="datarw2">
+                                                                <option value="">-Pilih-</option>
+                                                                <?php foreach ($datarw as $row) { ?>
+                                                                    <option <?php if ($ops == $row['no_rw']) {
+                                                                                echo 'selected';
+                                                                            } ?> value="<?php echo $row['no_rw']; ?>"><?php echo $row['no_rw']; ?></option>
+                                                                <?php } ?>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-sm-1 col-2 mb-1">
+                                                            <label for="datart2" class="form-label">
+                                                                RT
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-2 col-4">
+                                                            <select class="form-control form-control-sm" name="" id="datart2">
+                                                                <option value="">-Pilih-</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-sm-1 col-2 mb-1">
+                                                            <label for="data_status2" class="form-label">
+                                                                Status
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-2 col-4">
+                                                            <select class="form-control form-control-sm" name="" id="data_status2">
+                                                                <option value="">-Pilih-</option>
+                                                                <?php foreach ($status as $row) {  ?>
+                                                                    <option value="<?= $row['id_status']; ?>"><?= $row['jenis_status']; ?></option>
+                                                                <?php } ?>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <table id="tabel_data2" class="table table-hover table-sm compact" style="width: 100%;">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>No</th>
+                                                            <th>Foto</th>
+                                                            <th>ID DTKS</th>
+                                                            <th>Nama</th>
+                                                            <th>NIK</th>
+                                                            <th>No. KK</th>
+                                                            <th>Desa</th>
+                                                            <th>Status</th>
+                                                            <th>Tanggal Kejadian</th>
+                                                            <th>No. Registrasi Kejadian</th>
+                                                            <th>Ket</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                            <?php } ?>
+
                         </div>
                     </div>
                 </div>

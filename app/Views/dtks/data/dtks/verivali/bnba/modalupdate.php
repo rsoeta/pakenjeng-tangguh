@@ -106,7 +106,7 @@ $level = session()->get('role_id');
                                     <select id="status" name="status" class="form-select form-select-sm">
                                         <option value="">-- Pilih Status --</option>
                                         <?php foreach ($status as $row) { ?>
-                                            <option <?php if (3 == $row['id_status']) {
+                                            <option <?php if (2 == $row['id_status']) {
                                                         echo 'selected';
                                                     } ?> value="<?= $row['id_status'] ?>"> <?= $row['jenis_status']; ?></option>
                                         <?php } ?>
@@ -115,17 +115,17 @@ $level = session()->get('role_id');
                                 </div>
                             </div>
                             <div class="form-group row nopadding">
-                                <label for="tanggal_meninggal" class="col-4 col-sm-4 col-form-label">Tgl Meninggal</label>
+                                <label for="tanggal_kejadian" class="col-4 col-sm-4 col-form-label">Tgl Kejadian</label>
                                 <div class="col-8 col-sm-8">
-                                    <input type="date" name="tanggal_meninggal" id="tanggal_meninggal" class="form-control form-control-sm" value="<?= set_value('tanggal_meninggal', $tanggal_meninggal); ?>">
-                                    <div class="invalid-feedback errortanggal_meninggal"></div>
+                                    <input type="date" name="tanggal_kejadian" id="tanggal_kejadian" class="form-control form-control-sm" value="<?= set_value('tanggal_kejadian', $tanggal_kejadian); ?>">
+                                    <div class="invalid-feedback errortanggal_kejadian"></div>
                                 </div>
                             </div>
                             <div class="form-group row nopadding">
-                                <label for="no_registrasi_meninggal" class="col-4 col-sm-4 col-form-label">No.Reg Meninggal</label>
+                                <label for="no_registrasi_kejadian" class="col-4 col-sm-4 col-form-label">No.Reg Kejadian</label>
                                 <div class="col-8 col-sm-8">
-                                    <input type="text" name="no_registrasi_meninggal" id="no_registrasi_meninggal" class="form-control form-control-sm" value="<?= set_value('no_registrasi_meninggal', $no_registrasi_meninggal); ?>">
-                                    <div class="invalid-feedback errorno_registrasi_meninggal"></div>
+                                    <input type="text" name="no_registrasi_kejadian" id="no_registrasi_kejadian" class="form-control form-control-sm" value="<?= set_value('no_registrasi_kejadian', $no_registrasi_kejadian); ?>">
+                                    <div class="invalid-feedback errorno_registrasi_kejadian"></div>
                                 </div>
                             </div>
                         </div>
@@ -172,19 +172,19 @@ $level = session()->get('role_id');
                             $('#status').removeClass('is-invalid');
                             $('.errorstatus').html('');
                         }
-                        if (response.error.tanggal_meninggal) {
-                            $('#tanggal_meninggal').addClass('is-invalid');
-                            $('.errortanggal_meninggal').html(response.error.tanggal_meninggal);
+                        if (response.error.tanggal_kejadian) {
+                            $('#tanggal_kejadian').addClass('is-invalid');
+                            $('.errortanggal_kejadian').html(response.error.tanggal_kejadian);
                         } else {
-                            $('#tanggal_meninggal').removeClass('is-invalid');
-                            $('.errortanggal_meninggal').html('');
+                            $('#tanggal_kejadian').removeClass('is-invalid');
+                            $('.errortanggal_kejadian').html('');
                         }
-                        if (response.error.no_registrasi_meninggal) {
-                            $('#no_registrasi_meninggal').addClass('is-invalid');
-                            $('.errorno_registrasi_meninggal').html(response.error.no_registrasi_meninggal);
+                        if (response.error.no_registrasi_kejadian) {
+                            $('#no_registrasi_kejadian').addClass('is-invalid');
+                            $('.errorno_registrasi_kejadian').html(response.error.no_registrasi_kejadian);
                         } else {
-                            $('#no_registrasi_meninggal').removeClass('is-invalid');
-                            $('.errorno_registrasi_meninggal').html('');
+                            $('#no_registrasi_kejadian').removeClass('is-invalid');
+                            $('.errorno_registrasi_kejadian').html('');
                         }
 
                     } else {

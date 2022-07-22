@@ -36,7 +36,7 @@ class VervalBnba extends BaseController
     {
         $kode_kec = Profil_Admin()['kode_kec'];
         $data = [
-            'title' => 'VERIVALI BNBA DTKS',
+            'title' => 'Verivali BNBA DTKS',
             'desKels' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
             // 'operator' => $this->operator->orderBy('NamaLengkap', 'asc')->findAll(),
             'datarw' => $this->RwModel->noRw(),
@@ -45,7 +45,6 @@ class VervalBnba extends BaseController
             'datart' => $this->BnbaModel->getDataRT()->getResultArray(),
             'datashdk' => $this->datashdk->findAll(),
             'status' => $this->statusdtks->orderBy('jenis_status', 'asc')->findAll(),
-            'percentages' => $this->VervalPbiModel->jml_persentase(),
             'statusRole' => $this->GenModel->getStatusRole(),
             'user_login' => $this->AuthModel->getUserId(),
 
@@ -64,7 +63,7 @@ class VervalBnba extends BaseController
         $csrfName = csrf_token();
         $csrfHash = csrf_hash();
 
-        $filter0 = '2';
+        $filter0 = 1;
         $filter1 = $this->request->getPost('datadesa');
         // $operator = $this->request->getPost('operator');
         $filter2 = $this->request->getPost('datarw');
@@ -157,8 +156,8 @@ class VervalBnba extends BaseController
                 'hubungan_keluarga' => $row['db_shdk_id'],
                 'created_by' => $row['db_creator'],
                 'db_status' => $row['db_status'],
-                'tanggal_meninggal' => $row['db_tgl_mati'],
-                'no_registrasi_meninggal' => $row['db_noreg_mati']
+                'tanggal_kejadian' => $row['db_tgl_kejadian'],
+                'no_registrasi_kejadian' => $row['db_noreg_kejadian']
             ];
 
 
@@ -193,7 +192,7 @@ class VervalBnba extends BaseController
                         'required' => '{field} harus dipilih.'
                     ]
                 ],
-                'tanggal_meninggal' => [
+                'tanggal_kejadian' => [
                     'label' => 'Tanggal Meninggal',
                     'rules' => 'required|valid_date',
                     'errors' => [
@@ -209,15 +208,15 @@ class VervalBnba extends BaseController
                 $msg = [
                     'error' => [
                         'status' => $validation->getError('status'),
-                        'tanggal_meninggal' => $validation->getError('tanggal_meninggal'),
-                        'no_registrasi_meninggal' => $validation->getError('no_registrasi_meninggal'),
+                        'tanggal_kejadian' => $validation->getError('tanggal_kejadian'),
+                        'no_registrasi_kejadian' => $validation->getError('no_registrasi_kejadian'),
                     ]
                 ];
             } else {
                 $data = [
                     'db_status' => $this->request->getVar('status'),
-                    'db_tgl_mati' => $this->request->getVar('tanggal_meninggal'),
-                    'db_noreg_mati' => $this->request->getVar('no_registrasi_meninggal'),
+                    'db_tgl_kejadian' => $this->request->getVar('tanggal_kejadian'),
+                    'db_noreg_kejadian' => $this->request->getVar('no_registrasi_kejadian'),
                     'db_tb_status' => '1',
                     'db_modifier' => session()->get('nik'),
                     'db_modified' => date('Y-m-d H:i:s'),
@@ -277,8 +276,9 @@ class VervalBnba extends BaseController
             $row[] = $key->db_nik;
             $row[] = $key->db_nkk;
             $row[] = $key->name;
-            $row[] = $key->db_tgl_mati;
-            $row[] = $key->db_noreg_mati;
+            $row[] = $key->jenis_status;
+            $row[] = $key->db_tgl_kejadian;
+            $row[] = $key->db_noreg_kejadian;
             $row[] =  ($role <= 2) ? $tombolEdit . ' ' . $tombolProses : $tombolEdit;
 
             # code...
@@ -343,8 +343,8 @@ class VervalBnba extends BaseController
                 'hubungan_keluarga' => $row['db_shdk_id'],
                 'created_by' => $row['db_creator'],
                 'db_status' => $row['db_status'],
-                'tanggal_meninggal' => $row['db_tgl_mati'],
-                'no_registrasi_meninggal' => $row['db_noreg_mati'],
+                'tanggal_kejadian' => $row['db_tgl_kejadian'],
+                'no_registrasi_kejadian' => $row['db_noreg_kejadian'],
             ];
 
 
@@ -387,15 +387,15 @@ class VervalBnba extends BaseController
                 $msg = [
                     'error' => [
                         'status' => $validation->getError('status'),
-                        'tanggal_meninggal' => $validation->getError('tanggal_meninggal'),
-                        'no_registrasi_meninggal' => $validation->getError('no_registrasi_meninggal'),
+                        'tanggal_kejadian' => $validation->getError('tanggal_kejadian'),
+                        'no_registrasi_kejadian' => $validation->getError('no_registrasi_kejadian'),
                     ]
                 ];
             } else {
                 $data = [
                     'db_status' => $this->request->getVar('status'),
-                    'db_tgl_mati' => $this->request->getVar('tanggal_meninggal'),
-                    'db_noreg_mati' => $this->request->getVar('no_registrasi_meninggal'),
+                    'db_tgl_kejadian' => $this->request->getVar('tanggal_kejadian'),
+                    'db_noreg_kejadian' => $this->request->getVar('no_registrasi_kejadian'),
                     'db_modifier' => session()->get('nik'),
                     'db_modified' => date('Y-m-d H:i:s'),
                     // 'foto_rumah' => $nama_foto_rumah,
@@ -485,8 +485,9 @@ class VervalBnba extends BaseController
             $row[] = $key->db_nik;
             $row[] = $key->db_nkk;
             $row[] = $key->name;
-            $row[] = $key->db_tgl_mati;
-            $row[] = $key->db_noreg_mati;
+            $row[] = $key->jenis_status;
+            $row[] = $key->db_tgl_kejadian;
+            $row[] = $key->db_noreg_kejadian;
             $row[] = $tombolProses;
 
             # code...
