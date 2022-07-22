@@ -66,15 +66,16 @@ class Bnba extends BaseController
         $csrfName = csrf_token();
         $csrfHash = csrf_hash();
 
+        $filter0 = '2';
         $filter1 = $this->request->getPost('datadesa');
         // $operator = $this->request->getPost('operator');
         $filter2 = $this->request->getPost('datarw');
         $filter3 = $this->request->getPost('datart');
         $filter4 = $this->request->getPost('datashdk');
 
-        $listing = $model->get_datatables($filter1, $filter2, $filter3, $filter4);
+        $listing = $model->get_datatables($filter1, $filter2, $filter3, $filter4, $filter0);
         $jumlah_semua = $model->jumlah_semua();
-        $jumlah_filter = $model->jumlah_filter($filter1, $filter2, $filter3, $filter4);
+        $jumlah_filter = $model->jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter0);
 
         $data = array();
         $no = $_POST['start'];
@@ -112,11 +113,11 @@ class Bnba extends BaseController
     public function detail($id)
     {
         if ($this->request->isAJAX()) {
-
+            $kode_kec = Profil_Admin()['kode_kec'];
             $BnbaModel = new BnbaModel();
 
-            $id = $this->request->getVar('db_id_dtks');
-            dd($id);
+            $id = $this->request->getVar('db_id');
+            // dd($id);
             $row = $BnbaModel->find($id);
 
             $data = [
@@ -134,10 +135,10 @@ class Bnba extends BaseController
                 'datarw' => $this->RwModel->noRw(),
                 'user_image' => $row['user_image'],
                 'roles' => $this->Role->getRole()->getResultArray(),
-                'desKels' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+                'desKels' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
 
             ];
-            dd($data);
+            // dd($data);
             $msg = [
                 'sukses' => view('dtks/users/formview', $data),
             ];
@@ -149,16 +150,16 @@ class Bnba extends BaseController
         }
     }
 
-    public function formedit()
+    public function formview()
     {
         if ($this->request->isAJAX()) {
 
             // var_dump($this->request->getPost());
 
-            $id_data = $this->request->getVar('id');
+            $id = $this->request->getVar('id');
 
             $model = new BnbaModel();
-            $row = $model->find($id_data);
+            $row = $model->find($id);
 
             // var_dump($row);
             $kode_kab = $row['db_regency'];
@@ -210,6 +211,67 @@ class Bnba extends BaseController
         }
     }
 
+    public function formedit()
+    {
+        if ($this->request->isAJAX()) {
+
+            // var_dump($this->request->getPost());
+
+            $id = $this->request->getVar('id_data');
+
+            $model = new BnbaModel();
+            $row = $model->find($id);
+
+            // var_dump($row);
+            $kode_kab = $row['db_regency'];
+
+            $data = [
+                'title' => 'Status Penerima Manfaat',
+                'dataprov' => $this->WilayahModel->getProv()->getResultArray(),
+                'datakab' => $this->WilayahModel->getKab()->getResultArray(),
+                'datakec' => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
+                'datadesa' => $this->WilayahModel->getDataDesa()->getResultArray(),
+                'datadusun' => $this->WilayahModel->getDusun()->getResultArray(),
+                'datarw' => $this->RwModel->noRw(),
+                'datart' => $this->RtModel->noRt(),
+                'keterangan' => $this->keterangan->orderBy('jenis_keterangan', 'asc')->findAll(),
+                'status' => $this->statusdtks->orderBy('jenis_status', 'asc')->findAll(),
+                'jenisKelamin' => $this->BnbaModel->getDataJenkel(),
+                'datashdk' => $this->BnbaModel->getDataShdk(),
+
+                'db_id' => $row['db_id'],
+                'db_id_dtks' => $row['db_id_dtks'],
+                'province_id' => $row['db_province'],
+                'regency_id' => $row['db_regency'],
+                'district_id' => $row['db_district'],
+                'village_id' => $row['db_village'],
+                'alamat' => $row['db_alamat'],
+                'dusun' => $row['db_dusun'],
+                'no_rw' => $row['db_rw'],
+                'no_rt' => $row['db_rt'],
+                'nomor_kk' => $row['db_nkk'],
+                'nomor_nik' => $row['db_nik'],
+                'nama' => $row['db_nama'],
+                'tempat_lahir' => $row['db_tmp_lahir'],
+                'tanggal_lahir' => $row['db_tgl_lahir'],
+                'jenis_kelamin' => $row['db_jenkel_id'],
+                'nama_ibu_kandung' => $row['db_ibu_kandung'],
+                'hubungan_keluarga' => $row['db_shdk_id'],
+                'created_by' => $row['db_creator'],
+                'db_status' => $row['db_status'],
+            ];
+
+
+            // dd($data);
+            $msg = [
+                'sukses' => view('dtks/data/dtks/clean/modalMati', $data)
+
+            ];
+
+            echo json_encode($msg);
+        }
+    }
+
     public function ajax_update()
     {
         // var_dump($this->request->getPost());
@@ -230,136 +292,26 @@ class Bnba extends BaseController
 
 
             $valid = $this->validate([
-                'province_id' => [
-                    'rules' => 'required',
-                    'label' => 'Provinsi',
-                    'errors' => [
-                        'required' => '{field} harus diisi.',
-                    ]
-                ],
-                'regency_id' => [
-                    'rules' => 'required',
-                    'label' => 'Kabupaten/Kota',
-                    'errors' => [
-                        'required' => '{field} harus diisi.',
-                    ]
-                ],
-                'district_id' => [
-                    'rules' => 'required',
-                    'label' => 'Kecamatan',
-                    'errors' => [
-                        'required' => '{field} harus diisi.',
-                    ]
-                ],
-                'village_id' => [
-                    'rules' => 'required',
-                    'label' => 'Desa/Kelurahan',
-                    'errors' => [
-                        'required' => '{field} harus diisi.',
-                    ]
-                ],
-                'alamat' => [
-                    'label' => 'Alamat',
+                'status' => [
+                    'label' => 'Status',
                     'rules' => 'required',
                     'errors' => [
-                        'required' => '{field} harus diisi.'
+                        'required' => '{field} harus dipilih.'
                     ]
                 ],
-                'dusun' => [
-                    'label' => 'Nama Dusun',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus diisi.'
-                    ]
-                ],
-                'no_rw' => [
-                    'label' => 'No. RW',
-                    'rules' => 'required|numeric',
-                    'errors' => [
-                        'required' => '{field} harus dipilih.',
-                        'numeric' => '{field} harus berisi angka.'
-                    ]
-                ],
-                'no_rt' => [
-                    'label' => 'No. RT',
-                    'rules' => 'required|numeric',
-                    'errors' => [
-                        'required' => '{field} harus dipilih.',
-                        'numeric' => '{field} harus berisi angka.'
-                    ]
-                ],
-                'nomor_kk' => [
-                    'label' => 'No. KK',
-                    'rules' => 'required|numeric|min_length[16]|max_length[16]',
-                    'errors' => [
-                        'required' => '{field} harus diisi.',
-                        'numeric' => '{field} harus berisi angka.',
-                        'is_unique' => '{field} sudah terdaftar.',
-                        'min_length' => '{field} terlalu pendek',
-                        'max_length' => '{field} terlalu panjang'
-                    ]
-                ],
-                'nomor_nik' => [
-                    'label' => 'NIK',
-                    'rules' => $rule_nik,
-                    'errors' => [
-                        'required' => '{field} harus diisi.',
-                        'numeric' => '{field} harus berisi angka.',
-                        'is_unique' => '{field} sudah terdaftar.',
-                        'min_length' => '{field} terlalu pendek',
-                        'max_length' => '{field} terlalu panjang',
-                    ]
-                ],
-                'nama' => [
-                    'label' => 'Nama Lengkap',
-                    'rules' => 'required|alpha_numeric_punct',
-                    'errors' => [
-                        'required' => '{field} harus diisi.',
-                        'alpha_numeric_punct' => '{field} harus berisi alphabet.'
-                    ]
-                ],
-                'tempat_lahir' => [
-                    'label' => 'Tempat Lahir',
-                    'rules' => 'required|alpha_numeric_punct',
-                    'errors' => [
-                        'required' => '{field} harus diisi.',
-                        'alpha_numeric_punct' => '{field} harus berisi alphabet.'
-                    ]
-                ],
-                'tanggal_lahir' => [
-                    'label' => 'Tanggal Lahir',
+                'tanggal_meninggal' => [
+                    'label' => 'Tanggal Meninggal',
                     'rules' => 'required|valid_date',
                     'errors' => [
                         'required' => '{field} harus diisi.',
                         'valid_date' => '{field} tidak valid.'
                     ]
                 ],
-                'jenis_kelamin' => [
-                    'label' => 'Jenis Kelamin',
+                'no_registrasi_meninggal' => [
+                    'label' => 'No. Registrasi Meninggal',
                     'rules' => 'required',
                     'errors' => [
-                        'required' => '{field} harus dipilih.'
-                    ]
-                ],
-                'nama_ibu_kandung' => [
-                    'label' => 'Nama Ibu Kandung',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus di isi.'
-                    ]
-                ],
-                'hubungan_keluarga' => [
-                    'label' => 'SHDK',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus dipilih.'
-                    ]
-                ],
-                'status' => [
-                    'label' => 'Status',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus dipilih.'
+                        'required' => '{field} harus diisi.',
                     ]
                 ],
             ]);
@@ -369,27 +321,13 @@ class Bnba extends BaseController
 
                 $msg = [
                     'error' => [
-                        'province_id' => $validation->getError('province_id'),
-                        'regency_id' => $validation->getError('regency_id'),
-                        'district_id' => $validation->getError('district_id'),
-                        'village_id' => $validation->getError('village_id'),
-                        'alamat' => $validation->getError('alamat'),
-                        'dusun' => $validation->getError('dusun'),
-                        'no_rw' => $validation->getError('no_rw'),
-                        'no_rt' => $validation->getError('no_rt'),
-                        'nomor_kk' => $validation->getError('nomor_kk'),
-                        'nomor_nik' => $validation->getError('nomor_nik'),
-                        'nama' => $validation->getError('nama'),
-                        'tempat_lahir' => $validation->getError('tempat_lahir'),
-                        'tanggal_lahir' => $validation->getError('tanggal_lahir'),
-                        'jenis_kelamin' => $validation->getError('jenis_kelamin'),
-                        'nama_ibu_kandung' => $validation->getError('nama_ibu_kandung'),
-                        'hubungan_keluarga' => $validation->getError('hubungan_keluarga'),
                         'status' => $validation->getError('status'),
+                        'tanggal_meninggal' => $validation->getError('tanggal_meninggal'),
+                        'no_registrasi_meninggal' => $validation->getError('no_registrasi_meninggal'),
                     ]
                 ];
             } else {
-                $dataBaru = [
+                $dataBnba = [
                     'province_id' => $this->request->getVar('province_id'),
                     'regency_id' => $this->request->getVar('regency_id'),
                     'district_id' => $this->request->getVar('district_id'),
@@ -413,7 +351,7 @@ class Bnba extends BaseController
                 ];
 
 
-                $this->BnbaModel->update($id_data, $dataBaru);
+                $this->BnbaModel->update($id_data, $dataBnba);
 
                 $msg = [
                     'sukses' => 'Data berhasil diupdate',

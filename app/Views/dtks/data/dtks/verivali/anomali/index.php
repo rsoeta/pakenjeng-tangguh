@@ -10,7 +10,7 @@
     <section class="content">
         <div class="container-fluid">
             <div class="card text-center">
-                <div class="card-header bg-success shadow">
+                <div class="card-header bg-dark">
                     <strong><?= $title; ?></strong>
                 </div>
             </div>

@@ -20,8 +20,8 @@
     /* font-family: 'Finlandica', sans-serif; */
     /* font-family: 'Overpass', sans-serif; */
     font-family: 'Saira Condensed', sans-serif;
-    font-size: 15px;
-    /* font-size: 14px; */
+    /* font-size: 15px; */
+    font-size: 14px;
     /* font-size: 12px; */
     /* font-size: 11px; */
     /* background-color: codetblue; */
@@ -120,6 +120,10 @@ footer ul li a {
 
 .nav-third-level li a {
     padding-left: 45px;
+}
+
+.nav-fourth-level li a {
+    padding-left: 65px;
 }
 
 .card-footer .btn .fa{
@@ -278,6 +282,10 @@ select[readonly] {
 
 tr.selected td:before {
    color: #CCC;
+}
+
+.select2-container {
+    width: 100% !important;
 }
 
 .table .avatar {

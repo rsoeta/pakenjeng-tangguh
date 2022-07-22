@@ -49,7 +49,7 @@ class VerivaliAnomali extends BaseController
         ];
 
         // dd($data['masuk']);
-        return view('dtks/data/dtks/anomali/index', $data);
+        return view('dtks/data/dtks/verivali/anomali/index', $data);
     }
 
     public function simpanExcel()
@@ -384,7 +384,7 @@ class VerivaliAnomali extends BaseController
 
             // dd($data['statusDtks']);
             $msg = [
-                'sukses' => view('dtks/data/dtks/anomali/modaledit', $data)
+                'sukses' => view('dtks/data/dtks/verivali/anomali/modaledit', $data)
             ];
 
             // var_dump(session()->get('kode_desa'));
@@ -435,7 +435,7 @@ class VerivaliAnomali extends BaseController
             // dd($data['status']);
 
             $msg = [
-                'sukses' => view('dtks/data/dtks/anomali/modaledit2', $data)
+                'sukses' => view('dtks/data/dtks/verivali/anomali/modaledit2', $data)
             ];
 
             // var_dump(session()->get('kode_desa'));
@@ -486,7 +486,7 @@ class VerivaliAnomali extends BaseController
             // dd($data['status']);
 
             $msg = [
-                'sukses' => view('dtks/data/dtks/anomali/modaledit3', $data)
+                'sukses' => view('dtks/data/dtks/verivali/anomali/modaledit3', $data)
             ];
 
             // var_dump(session()->get('kode_desa'));

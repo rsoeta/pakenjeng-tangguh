@@ -23,7 +23,7 @@
   <meta name="twitter:description" content="Aplikasi Opr. NewDTKS Kecamatan Pakenjeng Kabupaten Garut Provinsi Jawa Barat" />
   <meta name="twitter:image" content="<?= base_url('icon-dtks.png'); ?>" />
 
-  <title><?= nameApp(); ?></title>
+  <title><?= nameApp() . ' Kec. ' . ucwords(strtolower(Profil_Admin()['namaKec'])); ?></title>
 
   <!-- CSS FILES -->
   <link rel="preconnect" href="https://fonts.googleapis.com">

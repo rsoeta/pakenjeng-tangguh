@@ -6,6 +6,7 @@ use App\Models\Dtks\AuthModel;
 use App\Models\WilayahModel;
 use App\Models\GenModel;
 use App\Models\Dtks\LembagaModel;
+use App\Models\Dtks\MenuModel;
 
 
 use App\Controllers\BaseController;
@@ -18,6 +19,7 @@ class Profil_Web extends BaseController
         $this->GenModel = new GenModel();
         $this->LembagaModel = new LembagaModel();
         $this->WilayahModel = new WilayahModel();
+        $this->MenuModel = new MenuModel();
     }
     public function index()
     {
@@ -51,6 +53,7 @@ class Profil_Web extends BaseController
             'getKec' => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
             'user_role' => $user_role,
             'nama_pemerintah' => $nama_pemerintah,
+            'menu' => $this->MenuModel->orderBy('tm_parent_id', 'asc')->findAll(),
 
         ];
         // dd($data);
@@ -70,7 +73,7 @@ class Profil_Web extends BaseController
     public function update_data()
     {
         if ($this->request->isAJAX()) {
-            var_dump($this->request->getPost());
+            // var_dump($this->request->getPost());
 
             $id_user = $this->request->getPost('id_user');
             $fullname = $this->request->getPost('fullname');
@@ -101,8 +104,9 @@ class Profil_Web extends BaseController
             if ($file_gambar->getError() == 4) {
                 $nama_gambar = 'assets/dist/img/profile/default.png';
             } else {
-                // crop image
-                $file_gambar = \Config\Services::image_handler()->withFile($file_gambar)->crop(200, 200);
+                // crop gambar
+
+                // $file_gambar = \Config\Services::image_handler()->withFile($file_gambar)->crop(200, 200);
                 // // generate nama file
                 // $nama_gambar = $file_gambar->getRandomName();
 
@@ -220,6 +224,56 @@ class Profil_Web extends BaseController
 
 
         $data = $this->LembagaModel->updatelembagaData($lp_id, $lembagaData);
+        echo json_encode($data);
+    }
+
+    function load_data_menu()
+    {
+        $data = $this->MenuModel->load_data_menu();
+        echo json_encode($data);
+    }
+
+    function insert_data_menu()
+    {
+        $data = [
+            'tm_nama' => $this->request->getPost('tm_nama'),
+            'tm_class' => $this->request->getPost('tm_class'),
+            'tm_url' => $this->request->getPost('tm_url'),
+            'tm_icon' => $this->request->getPost('tm_icon'),
+            'tm_parent_id' => $this->request->getPost('tm_parent_id'),
+            'tm_grup_akses' => $this->request->getPost('tm_grup_akses'),
+            'tm_status' => $this->request->getPost('tm_status'),
+        ];
+        $this->MenuModel->insert_data_menu($data);
+    }
+
+    function update_data_menu()
+    {
+        // var_dump($this->request->getPost());
+        // die;
+
+        $id = $this->request->getPost('id');
+        $data = [
+            $this->request->getPost('table_column') => $this->request->getPost('value'),
+        ];
+        $this->MenuModel->update_data_menu($id, $data);
+    }
+
+    function delete_data_menu()
+    {
+        $id = $this->request->getPost('id');
+        // var_dump($id);
+
+        $this->MenuModel->delete_data_menu($id);
+    }
+
+    function get_nama_menu()
+    {
+        $id = $this->request->getPost('id');
+        $data = $this->MenuModel->get_nama_menu($id);
+
+        // echo json_encode(array('nama' => $data['tm_nama']));
+        // var_dump($data);
         echo json_encode($data);
     }
 }

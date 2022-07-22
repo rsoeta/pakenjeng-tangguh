@@ -40,18 +40,7 @@ $user = session()->get('role_id');
                         <ul class="nav nav-treeview nav-second-level">
                             <?php if ($user <= 4) { ?>
                                 <li class="nav-item">
-                                    <a href="
-                                <?php
-                                // foreach ($percentages as $row) {
-                                //     if (session()->get('kode_desa') == $row['desa_kode']) {
-                                //         $persentase = $row['percentage'];
-                                //     } else {
-                                //         $persentase = 100;
-                                //     }
-                                // }
-                                echo 'bnba';
-                                ?>
-                                " class="nav-link">
+                                    <a href="/bnba" class="nav-link">
                                         <i class="nav-icon fa-fw fa fa-clipboard-list"></i>
                                         <p>
                                             BNBA KESOS
@@ -174,6 +163,14 @@ $user = session()->get('role_id');
                             </p>
                         </a>
                         <ul class="nav nav-treeview nav-second-level">
+                            <li class="nav-item">
+                                <a href="/verivalibnba" class="nav-link">
+                                    <i class="nav-icon fa-fw fa fa-code-branch"></i>
+                                    <p>
+                                        Verivali BNBA
+                                    </p>
+                                </a>
+                            </li>
                             <li class="nav-item">
                                 <a href="/verivalipbi" class="nav-link">
                                     <i class="nav-icon fa-fw fa fa-credit-card"></i>

@@ -1,9 +1,22 @@
 <?php
 
+use CodeIgniter\I18n\Time;
+use App\Models\GenModel;
+
+
 function nameApp()
 {
     return 'Opr NewDTKS';
 }
+
+// function version app from database
+function versionApp()
+{
+    $genModel = new GenModel();
+    $data = $genModel->getVersion();
+    return $data->tv_version;
+}
+
 
 function Profil_Admin()
 {
@@ -16,6 +29,47 @@ function Profil_Admin()
 
     $query = $builder->get();
     return $query->getRowArray();
+}
+
+function menu()
+{
+    $db = \Config\Database::connect();
+    $builder = $db->table('tb_menu');
+    $builder->select('tm_id, tm_nama, tm_class, tm_url, tm_icon, tm_parent_id, tm_status, tm_grup_akses');
+    $query = $builder->get();
+
+    return $query->getResultArray();
+}
+
+// how to make fuction menu_child?
+function menu_child($menu_id)
+{
+    $db = \Config\Database::connect();
+    $builder = $db->table('tb_menu');
+    $builder->select('tm_id, tm_nama, tm_class, tm_url, tm_icon, tm_parent_id, tm_status, tm_grup_akses');
+    $builder->where('tm_parent_id', $menu_id);
+    $query = $builder->get();
+    return $query->getResultArray();
+}
+
+function menu_child_child($menu_child)
+{
+    $db = \Config\Database::connect();
+    $builder = $db->table('tb_menu');
+    $builder->select('tm_id, tm_nama, tm_class, tm_url, tm_icon, tm_parent_id, tm_status, tm_grup_akses');
+    $builder->where('tm_parent_id', $menu_child);
+    $query = $builder->get();
+    return $query->getResultArray();
+}
+
+function menu_child_child_child($menu_child_child)
+{
+    $db = \Config\Database::connect();
+    $builder = $db->table('tb_menu');
+    $builder->select('tm_id, tm_nama, tm_class, tm_url, tm_icon, tm_parent_id, tm_status, tm_grup_akses');
+    $builder->where('tm_parent_id', $menu_child_child);
+    $query = $builder->get();
+    return $query->getResultArray();
 }
 
 function FOTO_DOKUMEN($fileName = '', $dir = '', $defFile = '')
@@ -65,7 +119,6 @@ function Salam()
     return $salam;
 }
 
-
 function imagettfstroketext(&$image, $size, $angle, $x, $y, &$textcolor, &$strokecolor, $fontfile, $text, $px)
 {
     for ($c1 = ($x - abs($px)); $c1 <= ($x + abs($px)); $c1++)
@@ -73,8 +126,6 @@ function imagettfstroketext(&$image, $size, $angle, $x, $y, &$textcolor, &$strok
             $bg = imagettftext($image, $size, $angle, $c1, $c2, $strokecolor, $fontfile, $text);
     return imagettftext($image, $size, $angle, $x, $y, $textcolor, $fontfile, $text);
 }
-
-// function hari ini
 
 function hari_ini()
 {
@@ -165,4 +216,21 @@ function bulan_ini()
             break;
     }
     return $bulan_ini;
+}
+
+function deadline_usulan()
+{
+    $deadline = '141312';
+
+    $times = new Time();
+    $hari = $times->getDay();       // 12
+    $jam = $times->hour;           // 16
+    $menit = $times->minute;         // 15
+    $hari_ini = $hari . $jam . $menit;
+
+    return $hari_ini > $deadline;
+
+    // return $deadline_usulan;
+
+    // dd($deadline_usulan);
 }

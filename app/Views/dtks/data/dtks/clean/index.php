@@ -8,7 +8,7 @@
     <section class="content">
         <div class="container-fluid">
             <div class="card text-center">
-                <div class="card-header bg-dark">
+                <div class="card-header bg-primary">
                     <strong><?= $title; ?></strong>
                 </div>
             </div>
@@ -105,7 +105,7 @@
 <script>
     $(document).ready(function() {
 
-        $('body').addClass('sidebar-collapse');
+        // $('body').addClass('sidebar-collapse');
 
         $('#datarw').change(function() {
             var desa = $('#datadesa').val();
@@ -302,31 +302,6 @@
                     $('.viewmodal').html(response.sukses).show();
                     // autofocus
 
-                    $('#modaledit').modal('show');
-                }
-
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
-            }
-        });
-    }
-
-    function edit_person(id_data) {
-        //Ajax Load data from ajax
-        $.ajax({
-            type: "POST",
-            url: "<?php echo site_url('editBnba') ?>",
-            data: {
-                id_data: id_data
-            },
-            dataType: "JSON",
-            success: function(response) {
-                if (response.sukses) {
-                    $('.viewmodal').html(response.sukses).show();
-                    $('#modaledit').on('shown.bs.modal', function(event) {
-                        $('#id_dtks').focus();
-                    });
                     $('#modaledit').modal('show');
                 }
 

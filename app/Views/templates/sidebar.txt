@@ -1,0 +1,80 @@
+                    if ($menu['tm_parent_id'] == 0) {
+                        $child = menu_child($menu['tm_id']);
+                        if ($child) {
+                            echo '<hr style="display: block; height: 1px; border: 0; border-top: 1px solid #ccc; margin: 1em 0; padding: 0;">';
+                            echo '<li class="nav-item has-treeview">';
+                            echo '<a href="#" class="nav-link">';
+                            echo '<i class="nav-icon ' . $menu['tm_icon'] . ' mr-1"></i>';
+                            echo '<p>';
+                            echo $menu['tm_nama'];
+                            echo '<i class="right fas fa-angle-left"></i>';
+                            echo '</p>';
+                            echo '</a>';
+                            echo '<ul class="nav nav-treeview nav-second-level">';
+                            foreach ($child as $c) {
+                                $child2 = menu_child($c['tm_id']);
+                                if ($child2) {
+                                    echo '<li class="nav-item has-treeview">';
+                                    echo '<a href="#" class="nav-link">';
+                                    echo '<i class="nav-icon ' . $c['tm_icon'] . ' mr-1"></i>';
+                                    echo '<p>';
+                                    echo $c['tm_nama'];
+                                    echo '<i class="right fas fa-angle-left"></i>';
+                                    echo '</p>';
+                                    echo '</a>';
+                                    echo '<ul class="nav nav-treeview nav-third-level">';
+                                    foreach ($child2 as $c2) {
+                                        $child3 = menu_child($c2['tm_id']);
+                                        if ($child3) {
+                                            echo '<li class="nav-item has-treeview">';
+                                            echo '<a href="#" class="nav-link">';
+                                            echo '<i class="nav-icon ' . $c2['tm_icon'] . ' mr-1"></i>';
+                                            echo '<p>';
+                                            echo $c2['tm_nama'];
+                                            echo '<i class="right fas fa-angle-left"></i>';
+                                            echo '</p>';
+                                            echo '</a>';
+                                            echo '<ul class="nav nav-treeview nav-fourth-level">';
+                                            foreach ($child3 as $c3) {
+                                                echo '<li class="nav-item">';
+                                                echo '<a href="' . base_url($c3['tm_link']) . '" class="nav-link">';
+                                                echo '<i class="nav-icon ' . $c3['tm_icon'] . ' mr-1"></i>';
+                                                echo $c3['tm_nama'];
+                                                echo '</a>';
+                                                echo '</li>';
+                                            }
+                                            echo '</ul>';
+                                            echo '</li>';
+                                        } else {
+                                            echo '<li class="nav-item">';
+                                            echo '<a href="' . base_url($c2['tm_link']) . '" class="nav-link">';
+                                            echo '<i class="nav-icon ' . $c2['tm_icon'] . ' mr-1"></i>';
+                                            echo $c2['tm_nama'];
+                                            echo '</a>';
+                                            echo '</li>';
+                                        }
+                                    }
+                                    echo '</ul>';
+                                    echo '</li>';
+                                } else {
+                                    echo '<li class="nav-item">';
+                                    echo '<a href="' . base_url($c['tm_link']) . '" class="nav-link">';
+                                    echo '<i class="nav-icon ' . $c['tm_icon'] . '"></i>';
+                                    echo $c['tm_nama'];
+                                    echo '</a>';
+                                    echo '</li>';
+                                }
+                            }
+                            echo '</ul>';
+                            echo '</li>';
+                        } else {
+                            echo '<li class="nav-item">';
+                            echo '<a href="' . base_url($menu['tm_link']) . '" class="nav-link">';
+                            echo '<i class="nav-icon ' . $menu['tm_icon'] . ' mr-1"></i>';
+                            echo '<p>';
+                            echo $menu['tm_nama'];
+                            echo '</p>';
+                            echo '</a>';
+                            echo '</li>';
+                        }
+                    }

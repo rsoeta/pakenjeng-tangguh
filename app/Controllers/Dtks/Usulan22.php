@@ -50,7 +50,8 @@ class Usulan22 extends BaseController
 
     public function index()
     {
-
+        // var_dump(deadline_usulan());
+        // die;
         if (session()->get('role_id') == 1) {
             $this->Usulan22Model = new Usulan22Model();
             $this->WilayahModel = new WilayahModel();
@@ -103,16 +104,14 @@ class Usulan22 extends BaseController
 
             return view('dtks/data/dtks/usulan/tables', $data);
         } else {
-            $data = [
-                'title' => 'Access denied',
-            ];
-            return view('lockscreen', $data);
+            return redirect()->to('lockscreen');
         }
     }
 
 
     public function tabel_data()
     {
+        // var_dump(deadline_usulan());
 
         $this->Usulan22Model = new Usulan22Model();
         $csrfName = csrf_token();
@@ -191,14 +190,7 @@ class Usulan22 extends BaseController
                 'users' => $users->findAll(),
                 'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
             ];
-
-            $times = new Time();
-            $hari = $times->getDay();       // 12
-            $jam = $times->hour;           // 16
-            $menit = $times->minute;         // 15
-            $hari_ini = $hari . $jam . $menit;
-            $deadline = '141312';
-            if ($hari_ini > $deadline) {
+            if (!deadline_usulan()) {
                 $msg = [
                     'data' => '<script>
                         alert(\'Mohon Maaf, Batas waktu untuk Tambah Data Telah Habis!!\');
@@ -212,7 +204,7 @@ class Usulan22 extends BaseController
                 echo json_encode($msg);
             }
         } else {
-            return view('lockscreen');
+            return redirect()->to('lockscreen');
         }
     }
 
@@ -506,7 +498,7 @@ class Usulan22 extends BaseController
         foreach ($data as $pdk) {
             $penduduk[] = array(
                 'id' => $pdk->du_id,
-                'text' => ' - NAMA: ' . $pdk->nama . ' NIK: ' . $pdk->du_nik . ' NO.KK: ' . $pdk->nokk,
+                'text' => ' - NAMA: ' . $pdk->nama . ', NIK: ' . $pdk->du_nik . ', NO.KK: ' . $pdk->nokk,
             );
         }
         $response['data'] = $penduduk;
@@ -517,13 +509,8 @@ class Usulan22 extends BaseController
     {
         if ($this->request->isAJAX()) {
 
-            $times = new Time();
-            $hari = $times->getDay();       // 12
-            $jam = $times->hour;           // 16
-            $menit = $times->minute;         // 15
-            $hari_ini = $hari . $jam . $menit;
-            $deadline = '141312';
-            if ($hari_ini > $deadline) {
+
+            if (!deadline_usulan()) {
                 $msg = [
                     'informasi' => 'Mohon Maaf, Batas waktu untuk Perubahan Data, Telah Habis!!'
                 ];
@@ -548,14 +535,8 @@ class Usulan22 extends BaseController
     {
         if ($this->request->isAJAX()) {
             // var_dump($this->request->getVar());
-            $times = new Time();
-            $hari = $times->getDay();       // 12
-            $jam = $times->hour;           // 16
-            $menit = $times->minute;         // 15
-            $hari_ini = $hari . $jam . $menit;
-            $deadline = '141312';
 
-            if ($hari_ini > $deadline) {
+            if (!deadline_usulan()) {
                 $msg = [
                     'informasi' => 'Mohon Maaf, Batas waktu untuk Perubahan Data Telah Habis!!'
                 ];
@@ -615,7 +596,7 @@ class Usulan22 extends BaseController
                 echo json_encode($msg);
             }
         } else {
-            return view('lockscreen');
+            return redirect()->to('lockscreen');
         }
     }
 
@@ -973,7 +954,7 @@ class Usulan22 extends BaseController
         $user_login = $this->AuthModel->getUserId();
         // dd($user_login);
         if (!isset($user_login['lp_sekretariat']) && !isset($user_login['user_lembaga_id'])) {
-            $str = '  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+            $str = '<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
                <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
                <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
                <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.35.1/js/bootstrap-dialog.min.js"></script>

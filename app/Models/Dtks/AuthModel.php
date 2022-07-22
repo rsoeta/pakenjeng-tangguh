@@ -59,15 +59,12 @@ class AuthModel extends Model
 
     public function getUserId()
     {
-        $user_id = session()->get('id');
+        $logDtks = session()->get('logDtks');
 
+        // if ($logDtks !== null) {
+        $user_id = session()->get('id');
         $builder = $this->db->table('dtks_users');
-        $builder->select('
-        dtks_users.id as id_user, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.nope, dtks_users.opr_sch, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, 
-        tb_roles.id_role as role_id, tb_roles.nm_role,
-        lembaga_profil.lp_id, lembaga_profil.lp_kode, lembaga_profil.lp_kepala, lembaga_profil.lp_nip, lembaga_profil.lp_sekretariat, lembaga_profil.lp_email, lembaga_profil.lp_kode_pos, lembaga_profil.lp_logo, 
-        lembaga_kategori.lk_nama,
-        tb_villages.name as nama_desa');
+        $builder->select('dtks_users.id as id_user, dtks_users.password, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.nope, dtks_users.opr_sch, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, tb_roles.id_role as role_id, tb_roles.nm_role, lembaga_profil.lp_id, lembaga_profil.lp_kode, lembaga_profil.lp_kepala, lembaga_profil.lp_nip, lembaga_profil.lp_sekretariat, lembaga_profil.lp_email, lembaga_profil.lp_kode_pos, lembaga_profil.lp_logo, lembaga_kategori.lk_nama, tb_villages.name as nama_desa');
 
         $builder->join('tb_roles', 'dtks_users.role_id=tb_roles.id_role');
         $builder->join('lembaga_profil', 'dtks_users.id=lembaga_profil.lp_user');
@@ -77,8 +74,7 @@ class AuthModel extends Model
 
 
         $buildor = $this->db->table('dtks_users');
-        $buildor->select('dtks_users.id as id_user, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.nope, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.opr_sch, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, 
-        tb_roles.id_role as role_id, tb_roles.nm_role');
+        $buildor->select('dtks_users.id as id_user, dtks_users.password, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.nope, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.opr_sch, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, tb_roles.id_role as role_id, tb_roles.nm_role');
 
         $buildor->join('tb_roles', 'dtks_users.role_id=tb_roles.id_role');
         // $buildor->join('lembaga_profil', 'dtks_users.id=lembaga_profil.lp_user');
@@ -91,6 +87,9 @@ class AuthModel extends Model
             return $query;
         }
         return $quero;
+        // } else {
+        //     return redirect()->to(base_url('/'));
+        // }
     }
 
     public function updatePersonalData($id_user, $personalData)

@@ -10,16 +10,20 @@ class BnbaModel extends Model
     protected $primaryKey = 'db_id';
 
     protected $allowedFields = [
-        "db_id_dtks", "db_province", "db_regency", "db_district", "db_village", "db_alamat", "db_dusun", "db_rw", "db_rt", "db_nkk", "db_nik", "db_nama", "db_tgl_lahir", "db_tmp_lahir", "db_jenkel_id", "db_ibu_kandung", "db_shdk_id", "db_status", "db_pkh", "db_bpnt", "db_bst", "db_bpnt_ppkm", "db_pbi", "db_creator", "db_created", "db_modifier", "db_modified"
+        "db_id_dtks", "db_province", "db_regency", "db_district", "db_village", "db_alamat", "db_dusun", "db_rw", "db_rt", "db_nkk", "db_nik", "db_nama", "db_tgl_lahir", "db_tmp_lahir", "db_jenkel_id", "db_ibu_kandung", "db_shdk_id", "db_status", "db_tgl_mati", "db_noreg_mati", "db_tb_status", "db_pkh", "db_bpnt", "db_bst", "db_bpnt_ppkm", "db_pbi", "db_creator", "db_created", "db_modifier", "db_modified"
     ];
 
     protected $useTimestamps = true;
+    protected $createdField  = 'db_created';
+    protected $updatedField  = 'db_modified';
+
 
     var $column_order = array('', '', 'db_nama', 'db_jenkel_id', 'db_nkk', 'db_nik', 'db_tmp_lahir', 'db_tgl_lahir', 'db_shdk_id');
 
-    var $order = array('db_id' => 'asc');
+    var $order = array('db_nama' => 'asc');
+    var $order1 = array('db_modified' => 'desc');
 
-    function get_datatables($filter1, $filter2, $filter3, $filter4)
+    function get_datatables($filter1, $filter2, $filter3, $filter4, $filter0 = null)
     {
         // desa
         if ($filter1 == "") {
@@ -45,13 +49,19 @@ class BnbaModel extends Model
         } else {
             $kondisi_filter4 = " AND db_shdk_id = '$filter4'";
         }
+        // status
+        if ($filter0 == "") {
+            $kondisi_filter0 = "";
+        } else {
+            $kondisi_filter0 = " AND db_status <= '$filter0'";
+        }
 
         // search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "(db_nama LIKE '%$search%' OR db_nik LIKE '%$search%' OR db_nkk LIKE '%$search%' OR db_alamat LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "(db_nama LIKE '%$search%' OR db_nik LIKE '%$search%' OR db_nkk LIKE '%$search%' OR db_alamat LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter0";
         } else {
-            $kondisi_search = "db_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "db_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter0";
         }
 
         // order
@@ -70,8 +80,7 @@ class BnbaModel extends Model
         $query = $builder->select('*')
             ->join('tb_shdk', 'tb_shdk.id=dtks_bnba.db_shdk_id')
             ->join('tbl_jenkel', 'tbl_jenkel.IdJenKel=dtks_bnba.db_jenkel_id')
-            // ->join('pekerjaan_kondisi_pekerjaan', 'pekerjaan_kondisi_pekerjaan.IDKondisi=individu_data.KondisiPekerjaan')
-            // ->join('pendidikan_pendb_tinggi', 'pendidikan_pendb_tinggi.IDPendidikan=individu_data.PendTertinggi')
+            ->join('dtks_status', 'dtks_status.id_status=dtks_bnba.db_status')
             // ->join('ket_verivali', 'ket_verivali.idb_ketvv=individu_data.ket_verivali')
             ->where($kondisi_search)
             ->orderBy($result_order, $result_dir)
@@ -90,7 +99,7 @@ class BnbaModel extends Model
         return $query;
     }
 
-    function jumlah_filter($filter1, $filter2, $filter3, $filter4)
+    function jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter0 = null)
     {
         // desa
         if ($filter1 == "") {
@@ -117,13 +126,294 @@ class BnbaModel extends Model
         } else {
             $kondisi_filter4 = " AND db_shdk_id = '$filter4'";
         }
+        // status
+        if ($filter0 == "") {
+            $kondisi_filter0 = "";
+        } else {
+            $kondisi_filter0 = " AND db_status <= '$filter0'";
+        }
 
         // kondisi search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "AND (db_nama LIKE '%$search%' OR db_nik LIKE '%$search%' OR db_nkk LIKE '%$search%' OR db_alamat LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "AND (db_nama LIKE '%$search%' OR db_nik LIKE '%$search%' OR db_nkk LIKE '%$search%' OR db_alamat LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter0";
         } else {
-            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter0";
+        }
+
+        $sQuery = "SELECT COUNT(db_id) as jml FROM dtks_bnba WHERE db_id != '' $kondisi_search";
+        $db = db_connect();
+        $query = $db->query($sQuery)->getRow();
+
+        return $query;
+    }
+
+    function get_datatables1($filter1, $filter2, $filter3, $filter4, $filter0, $filter5)
+    {
+        // desa
+        if ($filter1 == "") {
+            $kondisi_filter1 = "";
+        } else {
+            $kondisi_filter1 = " AND db_village = '$filter1'";
+        }
+        // rw
+        if ($filter2 == "") {
+            $kondisi_filter2 = "";
+        } else {
+            $kondisi_filter2 = " AND db_rw = '$filter2'";
+        }
+        // status
+        if ($filter3 == "") {
+            $kondisi_filter3 = "";
+        } else {
+            $kondisi_filter3 = " AND db_rt = '$filter3'";
+        }
+        // status
+        if ($filter4 == "") {
+            $kondisi_filter4 = "";
+        } else {
+            $kondisi_filter4 = " AND db_shdk_id = '$filter4'";
+        }
+        // status
+        if ($filter0 == "") {
+            $kondisi_filter0 = "";
+        } else {
+            $kondisi_filter0 = " AND db_status = '$filter0'";
+        }
+
+        if ($filter5 == "") {
+            $kondisi_filter5 = "";
+        } else {
+            $kondisi_filter5 = " AND db_tb_status < '$filter5'";
+        }
+
+        // search
+        if ($_POST['search']['value']) {
+            $search = $_POST['search']['value'];
+            $kondisi_search = "(db_nama LIKE '%$search%' OR db_nik LIKE '%$search%' OR db_nkk LIKE '%$search%' OR db_alamat LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter0 $kondisi_filter5";
+        } else {
+            $kondisi_search = "db_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter0 $kondisi_filter5";
+        }
+
+        // order
+        if (isset($_POST['order'])) {
+            $result_order = $this->column_order[$_POST['order']['0']['column']];
+            $result_dir = $_POST['order']['0']['dir'];
+        } else if ($this->order) {
+            $order1 = $this->order;
+            $result_order = key($order1);
+            $result_dir = $order1[key($order1)];
+        }
+
+        if ($_POST['length'] != -1);
+        $db = db_connect();
+        $builder = $db->table('dtks_bnba');
+        $query = $builder->select('*')
+            ->join('tb_shdk', 'tb_shdk.id=dtks_bnba.db_shdk_id')
+            ->join('tbl_jenkel', 'tbl_jenkel.IdJenKel=dtks_bnba.db_jenkel_id')
+            ->join('dtks_status', 'dtks_status.id_status=dtks_bnba.db_status')
+            ->join('tb_villages', 'tb_villages.id=dtks_bnba.db_village')
+            // ->join('ket_verivali', 'ket_verivali.idb_ketvv=individu_data.ket_verivali')
+            ->where($kondisi_search)
+            ->orderBy($result_order, $result_dir)
+            ->limit($_POST['length'], $_POST['start'])
+            ->get();
+
+        return $query->getResult();
+    }
+
+    function jumlah_semua1()
+    {
+        $sQuery = "SELECT COUNT(db_id) as jml FROM dtks_bnba";
+        $db = db_connect();
+        $query = $db->query($sQuery)->getRow();
+
+        return $query;
+    }
+
+    function jumlah_filter1($filter1, $filter2, $filter3, $filter4, $filter0, $filter5)
+    {
+        // desa
+        if ($filter1 == "") {
+            $kondisi_filter1 = "";
+        } else {
+            $kondisi_filter1 = " AND db_village = '$filter1'";
+        }
+        // rw
+        if ($filter2 == "") {
+            $kondisi_filter2 = "";
+        } else {
+            $kondisi_filter2 = " AND db_rw = '$filter2'";
+        }
+        // status
+        if ($filter3 == "") {
+            $kondisi_filter3 = "";
+        } else {
+            $kondisi_filter3 = " AND db_rt = '$filter3'";
+        }
+        // status
+        if ($filter4 == "") {
+            $kondisi_filter4 = "";
+        } else {
+            $kondisi_filter4 = " AND db_shdk_id = '$filter4'";
+        }
+        // status
+        if ($filter0 == "") {
+            $kondisi_filter0 = "";
+        } else {
+            $kondisi_filter0 = " AND db_status = '$filter0'";
+        }
+
+        if ($filter5 == "") {
+            $kondisi_filter5 = "";
+        } else {
+            $kondisi_filter5 = " AND db_tb_status < '$filter5'";
+        }
+
+        // kondisi search
+        if ($_POST['search']['value']) {
+            $search = $_POST['search']['value'];
+            $kondisi_search = "AND (db_nama LIKE '%$search%' OR db_nik LIKE '%$search%' OR db_nkk LIKE '%$search%' OR db_alamat LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter0 $kondisi_filter5";
+        } else {
+            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter0 $kondisi_filter5";
+        }
+
+        $sQuery = "SELECT COUNT(db_id) as jml FROM dtks_bnba WHERE db_id != '' $kondisi_search";
+        $db = db_connect();
+        $query = $db->query($sQuery)->getRow();
+
+        return $query;
+    }
+
+    function get_datatables2($filter1, $filter2, $filter3, $filter4, $filter0, $filter5)
+    {
+        // desa
+        if ($filter1 == "") {
+            $kondisi_filter1 = "";
+        } else {
+            $kondisi_filter1 = " AND db_village = '$filter1'";
+        }
+        // rw
+        if ($filter2 == "") {
+            $kondisi_filter2 = "";
+        } else {
+            $kondisi_filter2 = " AND db_rw = '$filter2'";
+        }
+        // status
+        if ($filter3 == "") {
+            $kondisi_filter3 = "";
+        } else {
+            $kondisi_filter3 = " AND db_rt = '$filter3'";
+        }
+        // status
+        if ($filter4 == "") {
+            $kondisi_filter4 = "";
+        } else {
+            $kondisi_filter4 = " AND db_shdk_id = '$filter4'";
+        }
+        // status
+        if ($filter0 == "") {
+            $kondisi_filter0 = "";
+        } else {
+            $kondisi_filter0 = " AND db_status = '$filter0'";
+        }
+
+        if ($filter5 == "") {
+            $kondisi_filter5 = "";
+        } else {
+            $kondisi_filter5 = " AND db_tb_status = '$filter5'";
+        }
+
+        // search
+        if ($_POST['search']['value']) {
+            $search = $_POST['search']['value'];
+            $kondisi_search = "(db_nama LIKE '%$search%' OR db_nik LIKE '%$search%' OR db_nkk LIKE '%$search%' OR db_alamat LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter0 $kondisi_filter5";
+        } else {
+            $kondisi_search = "db_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter0 $kondisi_filter5";
+        }
+
+        // order
+        if (isset($_POST['order'])) {
+            $result_order = $this->column_order[$_POST['order']['0']['column']];
+            $result_dir = $_POST['order']['0']['dir'];
+        } else if ($this->order) {
+            $order1 = $this->order;
+            $result_order = key($order1);
+            $result_dir = $order1[key($order1)];
+        }
+
+        if ($_POST['length'] != -1);
+        $db = db_connect();
+        $builder = $db->table('dtks_bnba');
+        $query = $builder->select('*')
+            ->join('tb_shdk', 'tb_shdk.id=dtks_bnba.db_shdk_id')
+            ->join('tbl_jenkel', 'tbl_jenkel.IdJenKel=dtks_bnba.db_jenkel_id')
+            ->join('dtks_status', 'dtks_status.id_status=dtks_bnba.db_status')
+            ->join('tb_villages', 'tb_villages.id=dtks_bnba.db_village')
+            // ->join('ket_verivali', 'ket_verivali.idb_ketvv=individu_data.ket_verivali')
+            ->where($kondisi_search)
+            ->orderBy($result_order, $result_dir)
+            ->limit($_POST['length'], $_POST['start'])
+            ->get();
+
+        return $query->getResult();
+    }
+
+    function jumlah_semua2()
+    {
+        $sQuery = "SELECT COUNT(db_id) as jml FROM dtks_bnba";
+        $db = db_connect();
+        $query = $db->query($sQuery)->getRow();
+
+        return $query;
+    }
+
+    function jumlah_filter2($filter1, $filter2, $filter3, $filter4, $filter0, $filter5)
+    {
+        // desa
+        if ($filter1 == "") {
+            $kondisi_filter1 = "";
+        } else {
+            $kondisi_filter1 = " AND db_village = '$filter1'";
+        }
+
+        // rw
+        if ($filter2 == "") {
+            $kondisi_filter2 = "";
+        } else {
+            $kondisi_filter2 = " AND db_rw = '$filter2'";
+        }
+        // status
+        if ($filter3 == "") {
+            $kondisi_filter3 = "";
+        } else {
+            $kondisi_filter3 = " AND db_rt = '$filter3'";
+        }
+        // status
+        if ($filter4 == "") {
+            $kondisi_filter4 = "";
+        } else {
+            $kondisi_filter4 = " AND db_shdk_id = '$filter4'";
+        }
+        // status
+        if ($filter0 == "") {
+            $kondisi_filter0 = "";
+        } else {
+            $kondisi_filter0 = " AND db_status = '$filter0'";
+        }
+
+        if ($filter5 == "") {
+            $kondisi_filter5 = "";
+        } else {
+            $kondisi_filter5 = " AND db_tb_status = '$filter5'";
+        }
+
+        // kondisi search
+        if ($_POST['search']['value']) {
+            $search = $_POST['search']['value'];
+            $kondisi_search = "AND (db_nama LIKE '%$search%' OR db_nik LIKE '%$search%' OR db_nkk LIKE '%$search%' OR db_alamat LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter0 $kondisi_filter5";
+        } else {
+            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter0 $kondisi_filter5";
         }
 
         $sQuery = "SELECT COUNT(db_id) as jml FROM dtks_bnba WHERE db_id != '' $kondisi_search";
@@ -237,6 +527,7 @@ class BnbaModel extends Model
             ->get()
             ->getResultArray();
     }
+
     public function getIdDtks($id = false)
     {
         if ($id == false) {
@@ -256,6 +547,7 @@ class BnbaModel extends Model
         $query = $builder->countAllResults();
         return $query;
     }
+
     public function getListSisaPerb()
     {
         $jbt = (session()->get('jabatan'));
@@ -331,6 +623,32 @@ class BnbaModel extends Model
 
         // foreach ($query as $row) {
         // }
+
+        return $query;
+    }
+
+    function countStatusBnba()
+    {
+        $sql = 'SELECT tb_villages.name as nama_desa, 
+                    SUM(IF(`db_status` = 0,1,0)) "Tidak Aktif",
+                    SUM(IF(`db_status` = 1,1,0)) Aktif,
+                    SUM(IF(`db_status` = 2,1,0)) "Meninggal Dunia",
+                    SUM(IF(`db_status` = 3,1,0)) "Ganda",
+                    SUM(IF(`db_status` = 4,1,0)) "Pindah",
+                    SUM(IF(`db_status` = 5,1,0)) "Tidak Ditemukan",
+                    SUM(IF(`db_status` = 6,1,0)) "Menolak",
+                    SUM(IF(`db_status` >= 0,1,0)) DataTarget,
+                    SUM(IF(`db_status` >= 1,1,0)) Capaian,
+                    ROUND(( SUM(IF(`db_status` > 1,1,0))/SUM(IF(`db_status` > 0,1,0)) * 100 ),2) AS percentage
+                FROM dtks_bnba
+                JOIN tb_villages ON tb_villages.id = dtks_bnba.db_village
+                GROUP BY nama_desa            
+                ORDER BY nama_desa ASC';
+
+        // $query = $sql;
+        $builder = $this->db->query($sql);
+        $query = $builder->getResult();
+        // $query = $builder->getResultArray();
 
         return $query;
     }

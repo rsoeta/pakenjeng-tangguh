@@ -29,18 +29,21 @@
             <div class="card shadow">
                 <div class="card-header py-3">
                     <div class="row">
-                        <div class="col-md-2 col-12">
+                        <div class="col">
                             <!-- Button trigger modal -->
-                            <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#modalAdd">
-                                <i class="fa fa-plus fa-sm"></i> Tambah User
-                            </button>
+                            <h4 class="text-center"><?= $title; ?></h4>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-primary btn-tool float-right" data-toggle="modal" data-target="#modalAdd">
+                                    <i class="fa fa-plus fa-sm"></i> Tambah User
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="card-body">
                     <br>
                     <div class="tengah">
-                        <table id="tabelUser" class="table table-hover table-head-fixed compact">
+                        <table id="tabelUser" class="table table-sm table-hover table-head-fixed compact" style="width: 100%;">
                             <thead class="text-primary">
                                 <tr>
                                     <th>NO</th>
@@ -87,7 +90,7 @@
                                                 } ?>
                                             <?php } ?>
                                         </td>
-                                        <td><?= $row['user_image']; ?></td>
+                                        <td><a href="<?= Foto_Profil($row['user_image'], 'profil'); ?>" data-lightbox="<?= $row['fullname']; ?>" data-title="<?= $row['fullname']; ?>"><img src="<?= Foto_Profil($row['user_image'], 'profil'); ?>" alt="" style="border: 2px solid #ddd; border-radius: 5px; padding: 1px; width: 30px;"></a></td>
                                         <td><?= $row['created_at']; ?></td>
                                         <td>
                                             <?php $status = $row['status'] ?>
@@ -99,10 +102,10 @@
                                             <?php } ?>
                                         </td>
                                         <td>
-                                            <button type="button" class="btn" onclick="view('<?= $row['id']; ?>')">
+                                            <button type="button" class="btn btn-sm btn-outline-success" onclick="view('<?= $row['id']; ?>')">
                                                 <i class="fa fa-pen"></i>
                                             </button>
-                                            <button type="button" class="btn" onclick="hapus('<?= $row['id']; ?>','<?= $row['fullname']; ?>')">
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="hapus('<?= $row['id']; ?>','<?= $row['fullname']; ?>')">
                                                 <i class="fa fa-trash-alt"></i>
                                             </button>
                                         </td>
@@ -153,6 +156,15 @@
                 }
             });
         });
+
+        lightbox.option({
+            'resizeDuration': 110,
+            'wrapAround': true,
+            'disableScrolling': true,
+            'fitImagesInViewport': true,
+            'maxWidth': 800,
+            'maxHeight': 800,
+        })
     });
 
     function hapus(id, fullname) {

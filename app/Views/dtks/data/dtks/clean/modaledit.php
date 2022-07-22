@@ -11,7 +11,6 @@ $level = session()->get('role_id');
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <?php echo form_open('updatebnba', ['class' => 'formsimpan']); ?>
                 <?= csrf_field(); ?>
                 <div class="container-fluid">
                     <div class="row">
@@ -240,7 +239,6 @@ $level = session()->get('role_id');
                         </footer>
                         <!-- <small class="text-muted">-Opr NewDTKS-</small> -->
                     </div>
-                    <?= form_close(); ?>
                 </div>
             </div>
         </div>

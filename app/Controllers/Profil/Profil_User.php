@@ -21,41 +21,49 @@ class Profil_User extends BaseController
     }
     public function index()
     {
-        $user_id = session()->get('id');
-        $getAjax = $this->WilayahModel->getAjaxSearch()->getResultArray();
-        foreach ($getAjax as $row) {
-            $nama_kab = $row['nama_kab'];
-            $nama_kec = $row['nama_kec'];
-            $nama_desa = $row['nama_desa'];
-        }
+        $user_role = session()->get('role_id');
+        if ($user_role > 2) {
+            $user_id = session()->get('id');
 
-        if (session()->get('role_id') == 1) {
-            $user_role = 'Kabupaten';
-            $nama_pemerintah = $nama_kab;
-        } else if (session()->get('role_id') == 2) {
-            $user_role = 'Kecamatan';
-            $nama_pemerintah = $nama_kec;
+            $getAjax = $this->WilayahModel->getAjaxSearch()->getResultArray();
+            foreach ($getAjax as $row) {
+                $nama_kab = $row['nama_kab'];
+                $nama_kec = $row['nama_kec'];
+                $nama_desa = $row['nama_desa'];
+            }
+
+            if (session()->get('role_id') == 1) {
+                $user_role = 'Kabupaten';
+                $nama_pemerintah = $nama_kab;
+            } else if (session()->get('role_id') == 2) {
+                $user_role = 'Kecamatan';
+                $nama_pemerintah = $nama_kec;
+            } else {
+                $user_role = 'Desa';
+                $nama_pemerintah = $nama_desa;
+            }
+
+            $data = [
+                'namaApp' => 'Opr NewDTKS',
+                'title' => 'Profil',
+                'statusRole' => $this->GenModel->getStatusRole(),
+                'user_id' => $user_id,
+                'user_login' => $this->AuthModel->getUserId(),
+                'lembaga' => $this->LembagaModel->getLembaga($user_id = false),
+                'getAjax' => $this->WilayahModel->getAjaxSearch()->getResultArray(),
+                'user_role' => $user_role,
+                'nama_pemerintah' => $nama_pemerintah,
+
+            ];
+            // dd($data['getAjax']);
+            // dd($data['user_login']);
+            // dd(session()->get('id'));
+            return view('profil/index', $data);
+        } elseif ($user_role <= 2) {
+            return redirect()->to(base_url('/settings'));
         } else {
-            $user_role = 'Desa';
-            $nama_pemerintah = $nama_desa;
+            return redirect()->to(base_url('/login'));
         }
-
-        $data = [
-            'namaApp' => 'Opr NewDTKS',
-            'title' => 'Profil',
-            'statusRole' => $this->GenModel->getStatusRole(),
-            'user_id' => $user_id,
-            'user_login' => $this->AuthModel->getUserId(),
-            'lembaga' => $this->LembagaModel->getLembaga($user_id = false),
-            'getAjax' => $this->WilayahModel->getAjaxSearch()->getResultArray(),
-            'user_role' => $user_role,
-            'nama_pemerintah' => $nama_pemerintah,
-
-        ];
-        // dd($data['getAjax']);
-        // dd($data['user_login']);
-        // dd(session()->get('id'));
-        return view('profil/index', $data);
     }
 
     public function ajaxSearch()

@@ -13,7 +13,7 @@ class AdminFilter implements FilterInterface
         $sesi = session()->get('role_id');
         // Do something here
         if ($sesi > 2) {
-            return redirect()->to(base_url('lockscreen'));
+            // return redirect()->to(base_url('lockscreen'));
         }
     }
 

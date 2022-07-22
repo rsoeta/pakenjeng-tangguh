@@ -89,9 +89,11 @@ class GenModel extends Model
 	public function getStatusDtks()
 	{
 		$builder = $this->db->table('dtks_status');
+		$builder->select('*');
+		$builder->orderBy('jenis_status', 'asc');
 		$query = $builder->get();
 
-		return $query;
+		return $query->getResult();
 	}
 
 	// function getdata from tb_status with limit
@@ -113,5 +115,14 @@ class GenModel extends Model
 		}
 
 		return $query;
+	}
+
+	function getVersion()
+	{
+		$builder = $this->db->table('tb_version');
+		// get last row
+
+		$query = $builder->get();
+		return $query->getLastRow();
 	}
 }

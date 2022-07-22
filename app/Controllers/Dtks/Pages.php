@@ -17,13 +17,13 @@ use App\Models\Dtks\Usulan21Model;
 use App\Models\Dtks\VervalPbiModel;
 use App\Models\Dtks\KipModel;
 use App\Models\Dtks\AuthModel;
+use App\Models\Dtks\BnbaModel;
 
 
 class Pages extends BaseController
 {
     public function __construct()
     {
-        helper(['form']);
         $this->BansosModel = new BansosModel();
         $this->GenModel = new GenModel();
         $this->KipModel = new KipModel();
@@ -35,12 +35,12 @@ class Pages extends BaseController
         $this->VervalPbiModel = new VervalPbiModel();
         $this->WilayahModel = new WilayahModel();
         $this->AuthModel = new AuthModel();
+        $this->BnbaModel = new BnbaModel();
     }
 
     public function home()
     {
         $data = [
-            'namaApp' => 'Opr NewDTKS',
             'title' => 'Login',
             'statusRole' => $this->GenModel->getStatusRole(),
             'user_login' => $this->AuthModel->getUserId(),
@@ -84,12 +84,15 @@ class Pages extends BaseController
         foreach ($desa as $row) {
         }
 
+        // $sumStatusBnba = $this->BnbaModel->sumStatusBnba();
+        // dd($sumStatusBnba);
+
 
         $data = [
-            'namaApp' => 'Opr NewDTKS',
             'title' => 'Dashboard',
             'desa' => $row['id'],
             'bansos' => $BansosModel->getBansos(),
+            'dtks_status' => $this->GenModel->getStatusDtks(),
             'Rw' => $jbt,
             // 'DataRekRw' => $this->vv06Model->getDataRekRw()->getResultArray(),
             // 'DataInvalid' => $this->vv06Model->getInvalid()->getResultArray(),
@@ -110,17 +113,19 @@ class Pages extends BaseController
             'percentages' => $this->VervalPbiModel->jml_persentase(),
             'statusRole' => $this->GenModel->getStatusRole(),
             'user_login' => $this->AuthModel->getUserId(),
-
+            'countStatusBnba' => $this->BnbaModel->countStatusBnba(),
 
         ];
+        // dd($data['dtks_status'], $data['countStatusBnba']);
+        // dd($data);
         // dd($data['rekapUsulan']);
+        // dd($data['countStatusBnba']);
         // dd($data['jml_persentase']);
         if (session()->get('status') == 1 && session()->get('role_id') <= 4) {
             return view('dashboard', $data);
         } elseif (session()->get('status') == 1 && session()->get('role_id') == 5) {
 
             $data = [
-                'namaApp' => 'Opr NewDTKS',
                 'title' => 'Data Kartu Indonesia Pintar',
                 'statusRole' => $this->GenModel->getStatusRole(),
                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),

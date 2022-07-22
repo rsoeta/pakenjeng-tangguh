@@ -38,7 +38,7 @@
         <div class="input-group">
           <label class="form-control">Please Login before!
 
-            <a href="<?= base_url('login'); ?>" type="button" class="btn">
+            <a href="<?= base_url('logout'); ?>" type="button" class="btn">
               <i class="fas fa-arrow-right text-muted"></i>
             </a>
             <div class="input-group-append">
@@ -56,7 +56,7 @@
       <a href="javascript:window.history.go(-1);">back to previous page</a>
     </div>
     <div class=" lockscreen-footer text-center">
-      Copyright &copy; 2021 - <?php echo date('Y') ?> <b><a href="<?= base_url('login'); ?>" class="text-black">Opr NewDTKS</a></b><br>
+      Copyright &copy; 2021 - <?php echo date('Y') ?> <b><a href="<?= base_url(); ?>" class="text-black">Opr NewDTKS</a> - <a href="/dashboard">Dashboard</a></b><br>
       All rights reserved
     </div>
   </div>

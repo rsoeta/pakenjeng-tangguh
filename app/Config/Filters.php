@@ -11,7 +11,7 @@ use App\Filters\NoauthFilterDtks;
 use App\Filters\AdminFilter;
 use App\Filters\SchFilterKip;
 use App\Filters\TimeFilter;
-use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Days;
+use App\Filters\MenuFilterDtks;
 
 class Filters extends BaseConfig
 {
@@ -30,6 +30,7 @@ class Filters extends BaseConfig
 		'adminFilter' => AdminFilter::class,
 		'schfilterkip' => SchFilterKip::class,
 		'timeFilter' => TimeFilter::class,
+		'menufilterdtks' => MenuFilterDtks::class,
 	];
 
 	/**

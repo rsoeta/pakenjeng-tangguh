@@ -96,8 +96,6 @@ class Auth extends BaseController
 
     public function register()
     {
-        // $data = [];
-        helper(['form']);
 
         $this->WilayahModel = new WilayahModel();
 

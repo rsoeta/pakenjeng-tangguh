@@ -2,7 +2,7 @@
 $user_image = $user_login['user_image'];
 ?>
 
-<nav class="main-header navbar navbar-expand navbar-dark">
+<nav class="main-header navbar navbar-expand navbar-dark layout-navbar-fixed">
     <!-- Left navbar links -->
     <ul class="navbar-nav">
         <li class="nav-item">

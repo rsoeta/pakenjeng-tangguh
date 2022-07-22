@@ -3,7 +3,7 @@
 <?= $this->include('templates/navbar'); ?>
 
 <!-- Main Sidebar Container -->
-<?= $this->include('templates/sidebar'); ?>
+<?= $this->include('templates/sideba'); ?>
 
 <?= $this->renderSection('content'); ?>
 

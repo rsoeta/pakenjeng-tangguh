@@ -235,3 +235,11 @@
             
 
 
+## v2.8.2 -- Penambahan fitur Verivali BNBA KESOS
+
+    # perbaikan tabel dtks_bnba tambah kolom db_tgl_mati, db_noreg_mati, db_tb_status setelah kolom db_status
+
+## v2.8.3 -- Penambahan fitur Pengaturan Menu terintegrasi ke database
+    # buat tabel baru dengan nama tb_menu
+    # buat tabel baru dengan nama tb_version
+    # perbaikan tabel dtks_status
