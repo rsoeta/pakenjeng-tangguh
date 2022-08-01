@@ -1,0 +1,392 @@
+/* font */
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bona+Nova:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Edu+VIC+WA+NT+Beginner:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Finlandica&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Overpass&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Saira+Condensed&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cuprum:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+
+* {
+    /* font-family: 'Hind Siliguri', sans-serif;
+    font-size:13px; */
+
+     /* font-family: 'Nanum Gothic', sans-serif; */
+    /* font-family: 'Oxygen', sans-serif; */
+    /* font-family: 'Bona Nova', serif; */
+    /* font-family: 'Titillium Web', sans-serif; */
+    /* font-family: 'Edu VIC WA NT Beginner', cursive; */
+    /* font-family: 'Finlandica', sans-serif; */
+    /* font-family: 'Overpass', sans-serif; */
+    /* font-family: 'Saira Condensed', sans-serif; */
+    font-family: 'Cuprum', sans-serif;
+    /* font-size: 15px; */
+    /* font-size: 14px; */
+    font-size: 13px;
+    /* font-size: 12px; */
+    /* font-size: 11px; */
+    /* background-color: codetblue; */
+}
+
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+a:active {
+    text-decoration: underline;
+}
+
+.content-wrapper{
+    padding-top: 50px;
+}
+
+.kotak-menu
+{
+    text-align: center;
+    display: inline-block;
+    
+}
+.kotak
+{
+    text-align: center;
+    display: inline-block;
+    /* overflow: auto; */
+    margin: auto;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.table thead tr th{
+    vertical-align: middle;
+    text-align: center;
+}
+
+.nopadding {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.label-center{
+    display: flex; 
+    font-size: 1.2em; 
+    justify-content: center; 
+    align-items: center;
+}
+/* #float{
+    position: fixed;
+    top: 3em;
+    right: 2em;
+    z-index: 100;
+} */
+
+footer
+{
+    /* position: fixed; */
+    left: 0;
+    bottom: 0;
+    /* width: 100%; */
+    background-color:whitesmoke;
+    z-index: 99;
+    text-align: center;
+}
+footer ul {
+    display: inline-block;
+    list-style: none;
+    margin: auto;
+}
+
+footer ul li {
+    text-align: center;
+    float: left;
+}
+
+footer ul li a {
+    display: block;
+    text-decoration: none;
+    padding: 0px 20px;
+    line-height: 30px
+}
+.nav-second-level li,
+.nav-third-level li {
+    border-bottom: none !important;
+}
+
+.nav-second-level li a {
+    padding-left: 25px;
+}
+
+.nav-third-level li a {
+    padding-left: 45px;
+}
+
+.nav-fourth-level li a {
+    padding-left: 65px;
+}
+
+.card-footer .btn .fa{
+    font-family: 'Hind Siliguri',
+    sans-serif;
+    font-size:12px;
+}
+
+select[readonly] {
+    background: #eee;
+    /*Simular campo inativo - Sugestão @GabrielRodrigues*/
+    pointer-events: none;
+    touch-action: none;
+}
+
+/* ini style yang tidak masuk */
+#modalEdit .modal-dialog .modal-content .modal-header {
+        /* background yellow */
+        background-color: yellow;
+        /* style text header white */
+        color: black;
+    }
+
+
+#keluar{
+    position: fixed;
+    list-style-type: none;
+    padding-bottom:1em;
+    bottom: 0;
+}
+
+
+.context {
+    overflow: hidden;
+    position: relative;
+    border-radius: 10pt;
+    border-style: groove;
+    border-width: 5px;
+
+}
+
+.pink {
+    background: #ed145b;
+
+}
+
+.green {
+    background: #00a651;
+}
+
+.darkblue {
+    background: #0054a6;
+}
+
+.gold {
+    background: #d4ab07;
+}
+
+.boks {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0.9;
+    transition: .3s ease;
+
+}
+
+.context:hover .boks {
+    opacity: 1;
+
+}
+
+[onClick] {
+    cursor: pointer;
+}
+
+.text {
+    display: table;
+    width: 100%;
+    height: 100%;
+    font-size: 1.2rem;
+}
+
+.text>div {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+@media (max-width: 575.98px) {
+    /* img {
+        width: 100% !important;
+    } */
+
+    .text {
+        font-size: 100%;
+    }
+}
+
+  .pushable {
+      background: #0b00a3;
+      border-radius: 12px;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      outline-offset: 4px;
+  }
+
+  .front {
+      display: block;
+      padding: 12px 42px;
+      border-radius: 12px;
+      font-size: 1.25rem;
+      background: #0000f0;
+      color: white;
+      transform: translateY(-6px);
+  }
+
+  .pushable:active .front {
+      transform: translateY(-2px);
+  }
+
+
+
+  /* datatable - Card View */
+  .cards tbody tr {
+   float: left;
+   width: 19rem;
+   margin: 0.5rem;
+   border: 0.0625rem solid rgba(0, 0, 0, .125);
+   border-radius: .25rem;
+   box-shadow: 0.25rem 0.25rem 0.5rem rgba(0, 0, 0, 0.25);
+}
+
+.cards tbody td {
+   display: block;
+}
+
+.cards thead {
+   display: none;
+}
+
+.cards td:before {
+   content: attr(data-label);
+   position: relative;
+   float: left;
+   color: #808080;
+   min-width: 4rem;
+   margin-left: 0;
+   margin-right: 1rem;
+   text-align: left;   
+}
+
+tr.selected td:before {
+   color: #CCC;
+}
+
+.select2-container {
+    width: 100% !important;
+}
+
+.table .avatar {
+   width: 50px;
+}
+
+.cards .avatar {
+   width: 150px;
+   margin: 15px;
+}
+
+/* show modal image */
+#myImg {
+  border-radius: 3px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#myImg:hover {opacity: 0.7;}
+
+/* The Modal (background) */
+.modal-image {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1000; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+}
+
+/* Modal Content (image) */
+.modal-content-image {
+  margin: auto;
+  display: block;
+  width: 80%;
+  max-width: 700px;
+}
+
+/* Caption of Modal Image */
+#caption-image {
+  margin: auto;
+  display: block;
+  width: 80%;
+  max-width: 700px;
+  text-align: center;
+  color: #ccc;
+  padding: 10px 0;
+  height: 150px;
+}
+
+/* Add Animation */
+.modal-content-image, #caption-image {  
+  -webkit-animation-name: zoom;
+  -webkit-animation-duration: 0.6s;
+  animation-name: zoom;
+  animation-duration: 0.6s;
+}
+
+@-webkit-keyframes zoom {
+  from {-webkit-transform:scale(0)} 
+  to {-webkit-transform:scale(1)}
+}
+
+@keyframes zoom {
+  from {transform:scale(0)} 
+  to {transform:scale(1)}
+}
+
+/* The Close Button */
+.close-image {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.close-image:hover,
+.close-image:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* 100% Image Width on Smaller Screens */
+@media only screen and (max-width: 700px){
+  .modal-content {
+    width: 100%;
+  }
+}

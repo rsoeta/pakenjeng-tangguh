@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&display=swap');
+
+/* get div chat */
+.direct-chat {
+  /* relative */
+    z-index: 9999;
+    position: fixed !important;
+    /* position:absolute; */
+    top:1%;
+    right:1%;
+    /* margin-left:100%; */
+    max-width:700px;
+    width: auto;
+    /* min-height: 600px; */
+    /* height from top to bottom */
+    /* height: 400px !important; */
+    /* height: inherit; */
+    /* flex: none !important; */
+    /* resize: both !important; */
+    
+    /* height: 100vh; Use vh as a fallback for browsers that do not support Custom Properties */
+    /* height: calc(var(--vh, 1vh) * 100); */
+  }
+
+  .direct-chat .card-header h1.card-title {
+    font-family: 'Oxygen', sans-serif !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+    /* margin: 0 !important; */
+  }
+
+
+  .vl {
+  border-left: 6px solid green;
+  height: 90%;
+  position: absolute;
+  left: 50%;
+  margin-left: -3px;
+  top: 0;
+}
+
+  #plus-minus {
+    margin-bottom: 0;
+  }
+  /* .direct-chat .card-body { */
+  /* display: flex !important; */
+  /* flex-direction: column !important; */
+/* } */
+
+#getMsg {
+  /* overflow-y: scroll !important; */
+  /* -webkit-overflow-scrolling: touch !important; */
+  /* flex: auto !important; */
+    max-height: 700px !important;
+    height: auto !important;
+    overflow: auto !important;
+    display: flex !important;
+    flex-direction: column-reverse !important;
+}
+
+.direct-chat .card-body .direct-chat-messages .direct-chat-text {
+    height: auto;
+    white-space: normal;
+    /* white-space: pre; */
+    /* white-space: pre-wrap !important; */
+    /* white-space: break-spaces; */
+  }
+  
+.direct-chat .card-body .direct-chat-messages .direct-chat-text .pesan {
+  /* white-space: pre-line !important; */
+  padding: 0px !important;
+  margin: 0px !important;
+  /* white-space: pre-wrap; */
+  /* overflow-wrap: break-word !important;  */
+}
+
+/* .direct-chat .card-footer form {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  flex-direction: row !important;
+} */
+
+.direct-chat .card-body .direct-chat-messages .direct-chat-text .timestamp {
+  /* white-space: pre-line !important; */
+  font-size: xx-small !important;
+  font-style: italic !important;
+  /* /* padding-top: 15px !important; */
+  margin-top: 15px !important;
+}
+
+.profil-user {
+  padding: 0%;
+  width: 25px; 
+  height: 25px; 
+  border-radius: 50%;
+  margin-left: -10px;
+  /* line border */
+  border: 0.5px solid #057ff9;
+  background-color: greenyellow;
+  /* shadow */
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+}
