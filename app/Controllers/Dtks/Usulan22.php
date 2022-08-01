@@ -21,13 +21,8 @@ use App\Models\Dtks\VervalPbiModel;
 use App\Models\Dtks\DisabilitasJenisModel;
 use App\Models\Dtks\LembagaModel;
 use App\Models\Dtks\CsvReportModel;
-use CodeIgniter\HTTP\Response;
-use PhpOffice\PhpSpreadsheet\Calculation\DateTimeExcel\Month;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\Writer\Word2007;
-use CodeIgniter\I18n\Time;
 
 class Usulan22 extends BaseController
 {
@@ -190,7 +185,7 @@ class Usulan22 extends BaseController
                 'users' => $users->findAll(),
                 'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
             ];
-            if (!deadline_usulan()) {
+            if (deadline_usulan() == 1) {
                 $msg = [
                     'data' => '<script>
                         alert(\'Mohon Maaf, Batas waktu untuk Tambah Data Telah Habis!!\');
@@ -510,7 +505,7 @@ class Usulan22 extends BaseController
         if ($this->request->isAJAX()) {
 
 
-            if (!deadline_usulan()) {
+            if (deadline_usulan() == 1) {
                 $msg = [
                     'informasi' => 'Mohon Maaf, Batas waktu untuk Perubahan Data, Telah Habis!!'
                 ];
@@ -536,7 +531,7 @@ class Usulan22 extends BaseController
         if ($this->request->isAJAX()) {
             // var_dump($this->request->getVar());
 
-            if (!deadline_usulan()) {
+            if (deadline_usulan() == 1) {
                 $msg = [
                     'informasi' => 'Mohon Maaf, Batas waktu untuk Perubahan Data Telah Habis!!'
                 ];

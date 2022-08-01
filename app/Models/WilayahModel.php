@@ -162,6 +162,16 @@ class WilayahModel extends Model
 		return $query;
 	}
 
+	public function getDistrict($kode_kec)
+	{
+		$builder = $this->db->table('tb_districts');
+		$builder->select('id, regency_id, name');
+		$builder->where('id', $kode_kec);
+		$query = $builder->get();
+
+		return $query;
+	}
+
 	public function getDesa($district_id)
 	{
 		$builder = $this->db->table('tb_villages');

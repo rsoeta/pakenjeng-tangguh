@@ -220,6 +220,13 @@
         if ($('#countdown').length) {
             start_countdown();
         }
+
+        // #kecamatan disable false on submit
+        $('#formTambahUser').click(function(e) {
+            e.preventDefault();
+            $('#kecamatan').prop('disabled', false);
+            $('#mainform').submit();
+        });
     });
 </script>
 
@@ -233,7 +240,7 @@
             </div>
             <div class="modal-body">
                 <div class="container-fluid">
-                    <form action="/user_tambah" method="POST">
+                    <form action="/user_tambah" method="POST" id="mainform">
                         <?= csrf_field(); ?>
                         <div class="form-group my-1">
                             <input type="text" class="form-control form-control form-control-user" name="fullname" aria-describedby="emailHelp" placeholder="Masukan Nama Lengkap" value="<?= set_value('fullname'); ?>">
@@ -252,6 +259,14 @@
                         </div>
                         <div class="form-group my-1">
                             <input type="email" class="form-control form-control form-control-user" name="email" aria-describedby="emailHelp" placeholder="Masukan Email" value="<?= set_value('email'); ?>">
+                        </div>
+                        <div class="form-group my-1">
+                            <select id="kecamatan" name="kecamatan" class="form-control form-control form-control-user" disabled="true">
+                                <option value="">-- Pilih Kecamatan --</option>
+                                <?php foreach ($kecamatan as $row) { ?>
+                                    <option <?= $kode_kec == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id'] ?>" <?= set_select('kecamatan', $row['id']); ?>> <?php echo $row['name']; ?></option>
+                                <?php } ?>
+                            </select>
                         </div>
                         <div class="form-group my-1">
                             <select id="kelurahan" name="kelurahan" class="form-control form-control form-control-user">
@@ -288,7 +303,7 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary btn-block">
+                            <button id="formTambahUser" type="submit" class="btn btn-primary btn-block">
                                 <?= $title1; ?>
                             </button>
                         </div>

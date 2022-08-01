@@ -36,23 +36,34 @@
                     </div>
                 </div>
                 <div class="form-group row mb-1">
-                    <label for="kode_desa" class="col-4 col-sm-4">Desa</label>
+                    <label for="role" class="col-4 col-sm-4">Role</label>
                     <div class="col-8 col-sm-8">
-                        <select type="number" name="kode_desa" id="kode_desa" class="form-control form-control-sm" required>
+                        <select type="number" name="role" id="role" class="form-control form-control-sm">
                             <option value="">[ Kosong ]</option>
-                            <?php foreach ($desKels as $row) : ?>
-                                <option <?php if ($row['id'] == $kode_desa) echo 'selected="selected"'; ?> value="<?= $row['id']; ?>" <?= set_select('kode_desa', $row['id']); ?>><?= $row['name']; ?></option>
+                            <?php foreach ($roles as $row) : ?>
+                                <option <?php if ($row['id_role'] == $role_id) echo 'selected="selected"'; ?> value="<?= $row['id_role']; ?>" <?= set_select('role', $row['id_role']); ?>><?= $row['nm_role']; ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
                 </div>
                 <div class="form-group row mb-1">
-                    <label for="role" class="col-4 col-sm-4">Role</label>
+                    <label for="kode_kec" class="col-4 col-sm-4">Kecamatan</label>
                     <div class="col-8 col-sm-8">
-                        <select type="number" name="role" id="role" class="form-control form-control-sm" required>
+                        <select type="number" name="kode_kec" id="kode_kec" class="form-control form-control-sm" disabled>
                             <option value="">[ Kosong ]</option>
-                            <?php foreach ($roles as $row) : ?>
-                                <option <?php if ($row['id_role'] == $role_id) echo 'selected="selected"'; ?> value="<?= $row['id_role']; ?>" <?= set_select('role', $row['id_role']); ?>><?= $row['nm_role']; ?></option>
+                            <?php foreach ($kecamatan as $row) : ?>
+                                <option <?php if ($row['id'] == $kode_kec) echo 'selected="selected"'; ?> value="<?= $row['id']; ?>" <?= set_select('kode_kec', $row['id']); ?>><?= $row['name']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row mb-1">
+                    <label for="kode_desa" class="col-4 col-sm-4">Desa</label>
+                    <div class="col-8 col-sm-8">
+                        <select type="number" name="kode_desa" id="kode_desa" class="form-control form-control-sm">
+                            <option value="">[ Kosong ]</option>
+                            <?php foreach ($desKels as $row) : ?>
+                                <option <?php if ($row['id'] == $kode_desa) echo 'selected="selected"'; ?> value="<?= $row['id']; ?>" <?= set_select('kode_desa', $row['id']); ?>><?= $row['name']; ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>

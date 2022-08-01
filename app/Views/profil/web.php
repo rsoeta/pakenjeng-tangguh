@@ -11,6 +11,7 @@
                     <h1><?= $title; ?></h1>
                 </div>
                 <div class="col-sm-6">
+                    <!-- get breadcrumb from menu -->
                     <ol class="breadcrumb float-right">
                         <li class="breadcrumb-item"><a href="<?= base_url(); ?>">Home</a></li>
                         <li class="breadcrumb-item active"><?= $title; ?></li>
@@ -98,10 +99,7 @@
                         <div class="card-header p-0 pt-1 border-bottom-0">
                             <ul class="nav nav-tabs" id="custom-tabs-three-tab" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" id="custom-tabs-three-shield-tab" data-toggle="pill" href="#custom-tabs-three-shield" role="tab" aria-controls="custom-tabs-three-shield" aria-selected="true"><strong><i class="fas fa-shield-alt mr-1"></i> Ubah Password</strong></a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="custom-tabs-three-home-tab" data-toggle="pill" href="#custom-tabs-three-home" role="tab" aria-controls="custom-tabs-three-home" aria-selected="false"><strong><i class="far fa-user mr-1"></i> Personal</strong></a>
+                                    <a class="nav-link active" id="custom-tabs-three-home-tab" data-toggle="pill" href="#custom-tabs-three-home" role="tab" aria-controls="custom-tabs-three-home" aria-selected="false"><strong><i class="far fa-user mr-1"></i> Personal</strong></a>
                                 </li>
                                 <li class="nav-item" <?= $user_login['role_id'] > 3 ? 'hidden' : ''; ?>>
                                     <a class="nav-link" id="custom-tabs-three-profile-tab" data-toggle="pill" href="#custom-tabs-three-profile" role="tab" aria-controls="custom-tabs-three-profile" aria-selected="false"><strong><i class="fas fa-landmark mr-1"></i> Lembaga</strong></a>
@@ -110,13 +108,19 @@
                                 <li class="nav-item" <?= $user_login['role_id'] > 2 ? 'hidden' : ''; ?>>
                                     <a class="nav-link" id="custom-tabs-three-menu-tab" data-toggle="pill" href="#custom-tabs-three-menu" role="tab" aria-controls="custom-tabs-three-menu" aria-selected="false"><strong><i class="fas fa-bars mr-1"></i> Menu</strong></a>
                                 </li>
+                                <li class="nav-item" <?= $user_login['role_id'] > 2 ? 'hidden' : ''; ?>>
+                                    <a class="nav-link" id="custom-tabs-three-general-tab" data-toggle="pill" href="#custom-tabs-three-general" role="tab" aria-controls="custom-tabs-three-general" aria-selected="false"><strong><i class="fas fa-cog mr-1"></i> General</strong></a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="custom-tabs-three-shield-tab" data-toggle="pill" href="#custom-tabs-three-shield" role="tab" aria-controls="custom-tabs-three-shield" aria-selected="true"><strong><i class="fas fa-shield-alt mr-1"></i> Ubah Password</strong></a>
+                                </li>
                             </ul>
                         </div>
                         <div class="card-body">
                             <div class="alert alert-dismissible alert-success" id="personalMsg" style="display: none;"></div>
                             <div class="alert alert-dismissible alert-success" id="lembagaMsg" style="display: none;"></div>
                             <div class="tab-content" id="custom-tabs-three-tabContent">
-                                <div class="tab-pane fade" id="custom-tabs-three-home" role="tabpanel" aria-labelledby="custom-tabs-three-home-tab">
+                                <div class="tab-pane fade active show" id="custom-tabs-three-home" role="tabpanel" aria-labelledby="custom-tabs-three-home-tab">
                                     <div class="col-12 col-md-4 col-lg-4 col-4">
                                         <form id="personal_form" method="POST" enctype="multipart/form-data">
                                             <!-- Profile Image -->
@@ -176,6 +180,10 @@
                                         <form id="lembaga_form" method="POST" enctype="multipart/form-data">
 
                                             <?= form_input(['type' => 'hidden', 'name' => 'lp_id', 'class' => 'form-control', 'id' => 'lp_id', 'value' => isset($user_login['lp_id']) ? set_value('lp_id', $user_login['lp_id']) : '']); ?>
+
+
+                                            <?= form_input(['type' => 'hidden', 'name' => 'id_user', 'class' => 'form-control', 'id' => 'id_user', 'value' => isset($user_login) ? set_value('id_user', $user_login['id_user']) : '']); ?>
+
                                             <!-- /.card-header -->
                                             <strong><i class="fas fa-landmark mr-1"></i> Lembaga</strong>
                                             <select name="user_lembaga_id" id="user_lembaga_id" class="form-control" disabled>
@@ -208,8 +216,6 @@
                                             <strong><i class="fas fa-image mr-1"></i> Logo</strong>
                                             <hr>
 
-                                            <?= form_input(['type' => 'hidden', 'name' => 'id_user', 'class' => 'form-control', 'id' => 'id_user', 'value' => isset($user_login) ? set_value('id_user', $user_login['id_user']) : '']); ?>
-
                                             <?php if (isset($user_login['lp_id'])) : ?>
                                                 <button type="button" id="lembagaUpdate" class="btn btn-success btn-block">Update</button>
                                             <?php else : ?>
@@ -218,7 +224,7 @@
                                         </form>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade active show" id="custom-tabs-three-shield" role="tabpanel" aria-labelledby="custom-tabs-three-shield-tab">
+                                <div class="tab-pane fade" id="custom-tabs-three-shield" role="tabpanel" aria-labelledby="custom-tabs-three-shield-tab">
                                     <div class="col-12 col-md-4 col-lg-4 col-4">
                                         <form id="password_form" method="POST">
                                             <?= form_input(['type' => 'hidden', 'name' => 'id_user', 'class' => 'form-control', 'id' => 'id_user', 'value' => isset($user_login) ? set_value('id_user', $user_login['id_user']) : '']); ?>
@@ -257,12 +263,26 @@
                                         </table>
                                     </div>
                                 </div>
+                                <div class="tab-pane fade" id="custom-tabs-three-general" role="tabpanel" aria-labelledby="cuxtom-tab-three-general-tab" <?= $user_login['role_id'] > 2 ? 'hidden' : ''; ?>>
+                                    <div class="col-12 col-md-4 col-lg-4 col-4">
+                                        <form id="general_form" method="POST">
+                                            <input type="hidden" name="dd_id" id="dd_id" value="<?= isset($deadline) ? $deadline->dd_id : ''; ?>">
+                                            <strong><i class="fa fa-calendar-alt mr-1"></i> Tanggal Deadline</strong>
+                                            <input type="datetime-local" name="dd_waktu" id="dd_waktu" class="form-control" value="<?= isset($deadline) ? $deadline->dd_waktu : ''; ?>">
+                                            <hr>
+                                            <?php if (isset($deadline)) : ?>
+                                                <button type="button" id="btnGenUpdate" class="btn btn-success btn-block">Update</button>
+                                            <?php else : ?>
+                                                <button type="button" id="btnGenSubmit" class="btn btn-success btn-block">Submit</button>
+                                            <?php endif; ?>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
     </section>
 </div>
 <!-- End of Main Content -->
@@ -598,6 +618,119 @@
                 });
             } else {
                 alert('Isi Profil dengan lengkap!');
+            }
+        });
+
+        $("#lembagaSubmit").click(function(event) {
+            //     alert('test');
+            // });
+            event.preventDefault();
+            var form_data = new FormData($('#lembaga_form')[0]);
+            var id_user = $('#id_user').val();
+            var user_lembaga_id = $('#user_lembaga_id').val();
+            var lp_kepala = $('#lp_kepala').val();
+            var lp_sekretariat = $('#lp_sekretariat').val();
+            var lp_kode_pos = $('#lp_kode_pos').val();
+            var lp_email = $('#lp_email').val();
+
+            if (user_lembaga_id != '' || lp_kepala != '' || lp_sekretariat != '' || lp_kode_pos != '') {
+                $.ajax({
+                    type: "POST",
+                    url: '<?= site_url('submit_web_lembaga'); ?>',
+                    dataType: 'json',
+                    data: form_data,
+                    processData: false,
+                    contentType: false,
+                    success: function(res) {
+                        // alert(res);
+                        if (res) {
+                            $("#lembagaMsg").show();
+                            $("#lembagaMsg").html('Data berhasil diupdate.');
+                            setTimeout(function() {
+                                $("#lembagaMsg").hide();
+                            }, 2000);
+                            setTimeout(function() {
+                                location.reload();
+                            }, 2010);
+                            // alert (res)
+                        }
+                    }
+                });
+            } else {
+                alert('Isi Profil dengan lengkap!');
+            }
+        });
+
+        $("#btnGenSubmit").click(function(event) {
+            //     alert('test');
+            // });
+            event.preventDefault();
+            var form_data = new FormData($('#general_form')[0]);
+            var dd_id = $('#dd_id').val();
+            var dd_waktu = $('#dd_waktu').val();
+            var dd_deskripsi = $('#dd_deskripsi').val();
+
+            if (dd_waktu != '') {
+                $.ajax({
+                    type: "POST",
+                    url: '<?= site_url('submit_web_general'); ?>',
+                    dataType: 'json',
+                    data: form_data,
+                    processData: false,
+                    contentType: false,
+                    success: function(res) {
+                        // alert(res);
+                        if (res) {
+                            $("#lembagaMsg").show();
+                            $("#lembagaMsg").html('Data berhasil diinput.');
+                            setTimeout(function() {
+                                $("#lembagaMsg").hide();
+                            }, 2000);
+                            setTimeout(function() {
+                                location.reload();
+                            }, 2010);
+                            // alert (res)
+                        }
+                    }
+                });
+            } else {
+                alert('Isi dengan lengkap!');
+            }
+        });
+
+        $("#btnGenUpdate").click(function(event) {
+            //     alert('test');
+            // });
+            event.preventDefault();
+            var form_data = new FormData($('#general_form')[0]);
+            var dd_id = $('#dd_id').val();
+            var dd_waktu = $('#dd_waktu').val();
+
+            if (dd_waktu != '') {
+                $.ajax({
+                    type: "POST",
+                    url: '<?= site_url('update_web_general'); ?>',
+                    dataType: 'json',
+                    data: form_data,
+                    processData: false,
+                    contentType: false,
+                    success: function(res) {
+                        // alert(res);
+                        if (res) {
+                            $("#lembagaMsg").show();
+                            $("#lembagaMsg").html('Data berhasil diupdate.');
+                            setTimeout(function() {
+                                $("#lembagaMsg").hide();
+                            }, 2000);
+                            setTimeout(function() {
+                                location.reload();
+                            }, 2010);
+                            // alert (res)
+                        }
+                    }
+                });
+            } else {
+                alert('Isi dengan lengkap!');
             }
         });
 

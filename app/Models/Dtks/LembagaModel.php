@@ -15,15 +15,14 @@ class LembagaModel extends Model
 
 	protected $allowedFields = ['lk_nama'];
 
-	public function getLembaga($user_id = false)
+	public function getLembaga($role)
 	{
-		if ($user_id == false) {
+		if ($role == false) {
 			return $this->orderby('lk_id', 'desc')->findAll();
+		} else {
+			// return getrow
+			return $this->db->table($this->table)->where('lk_id', $role)->get();
 		}
-
-		return $this->asArray()
-			->where('lk_id', $user_id)
-			->first();
 	}
 
 	public function submitLembagaData($lembagaData)

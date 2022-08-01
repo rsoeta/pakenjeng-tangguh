@@ -185,7 +185,7 @@ class BnbaModel extends Model
         if ($filter5 == "") {
             $kondisi_filter5 = "";
         } else {
-            $kondisi_filter5 = " AND db_tb_status < '$filter5'";
+            $kondisi_filter5 = " AND db_tb_status = '$filter5'";
         }
 
         // search
@@ -268,7 +268,7 @@ class BnbaModel extends Model
         if ($filter5 == "") {
             $kondisi_filter5 = "";
         } else {
-            $kondisi_filter5 = " AND db_tb_status < '$filter5'";
+            $kondisi_filter5 = " AND db_tb_status = '$filter5'";
         }
 
         // kondisi search
@@ -637,7 +637,7 @@ class BnbaModel extends Model
                     SUM(IF(`db_status` = 3,1,0)) "Ganda",
                     SUM(IF(`db_status` = 4,1,0)) "Pindah",
                     SUM(IF(`db_status` = 5,1,0)) "Tidak Ditemukan",
-                    SUM(IF(`db_status` = 6,1,0)) "Menolak",
+                    SUM(IF(`db_status` = 6,1,0)) "Sudah Mampu/Menolak",
                     SUM(IF(`db_status` >= 0,1,0)) DataTarget,
                     SUM(IF(`db_status` >= 1,1,0)) Capaian,
                     ROUND(( SUM(IF(`db_status` > 1,1,0))/SUM(IF(`db_status` > 0,1,0)) * 100 ),2) AS percentage

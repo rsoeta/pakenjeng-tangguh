@@ -1,15 +1,11 @@
-<?php
-
-use App\Controllers\Profil\Profil_User;
-?>
 <?= $this->extend('templates/index'); ?>
 <?= $this->section('content'); ?>
 
 
 <!-- jQuery Library -->
-<script src="<?= base_url(); ?>/assets/plugins/jquery/jquery.min.js"></script>
-<script src="<?= base_url(); ?>/assets/dist/js/jquery/3.6.0/jquery-3.6.0.min.js"></script>
-<script src="<?= base_url(); ?>/assets/dist/js/jquery/datatables/1.10.19/jquery.dataTables.min.js"></script>
+<script src="<?= base_url('assets/plugins/jquery/jquery.min.js'); ?>"></script>
+<script src="<?= base_url('assets/dist/js/jquery/3.6.0/jquery-3.6.0.min.js'); ?>"></script>
+<script src="<?= base_url('assets/dist/js/jquery/datatables/1.10.19/jquery.dataTables.min.js'); ?>"></script>
 <script src="https://cdn.datatables.net/fixedheader/3.1.9/js/dataTables.fixedHeader.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap.min.js"></script>
@@ -163,6 +159,9 @@ use App\Controllers\Profil\Profil_User;
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="card-footer clearfix">
+                        <a href="/geotagging" class="btn btn-sm btn-primary float-right">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
             </div>
@@ -515,7 +514,8 @@ use App\Controllers\Profil\Profil_User;
                                         }
                                         // echo $persentase <= 95 ? '#' : 'usulan';
                                         ?>
-                                        " class="small-box-footer">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a>
+                                        " class="small-box-footer">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i>
+                                    </a>
                                 </div>
                             </div>
 
@@ -649,139 +649,16 @@ use App\Controllers\Profil\Profil_User;
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 col-12">
-                <!-- DIRECT CHAT SUCCESS -->
-                <div class="card card-success card-outline direct-chat direct-chat-success shadow-lg">
-                    <div class="card-header">
-                        <h3 class="card-title">Direct Chat</h3>
-
-                        <div class="card-tools">
-                            <span title="3 New Messages" class="badge bg-success">3</span>
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <button type="button" class="btn btn-tool" title="Contacts" data-widget="chat-pane-toggle">
-                                <i class="fas fa-comments"></i>
-                            </button>
-                            <button type="button" class="btn btn-tool" data-card-widget="remove">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <!-- /.card-header -->
-                    <div class="card-body">
-                        <!-- Conversations are loaded here -->
-                        <div class="direct-chat-messages">
-                            <!-- Message. Default to the left -->
-                            <div class="direct-chat-msg">
-                                <div class="direct-chat-infos clearfix">
-                                    <span class="direct-chat-name float-left">Alexander Pierce</span>
-                                    <span class="direct-chat-timestamp float-right">23 Jan 2:00 pm</span>
-                                </div>
-                                <!-- /.direct-chat-infos -->
-                                <img class="direct-chat-img" src="<?= base_url('/assets/dist/img/user1-128x128.jpg'); ?>" alt="Message User Image">
-                                <!-- /.direct-chat-img -->
-                                <div class="direct-chat-text">
-                                    Is this template really for free? That's unbelievable!
-                                </div>
-                                <!-- /.direct-chat-text -->
-                            </div>
-                            <!-- /.direct-chat-msg -->
-
-                            <!-- Message to the right -->
-                            <div class="direct-chat-msg right">
-                                <div class="direct-chat-infos clearfix">
-                                    <span class="direct-chat-name float-right">Sarah Bullock</span>
-                                    <span class="direct-chat-timestamp float-left">23 Jan 2:05 pm</span>
-                                </div>
-                                <!-- /.direct-chat-infos -->
-                                <img class="direct-chat-img" src="<?= base_url('/assets/dist/img/user3-128x128.jpg'); ?>" alt="Message User Image">
-                                <!-- /.direct-chat-img -->
-                                <div class="direct-chat-text">
-                                    You better believe it!
-                                </div>
-                                <!-- /.direct-chat-text -->
-                            </div>
-                            <div class="direct-chat-msg">
-                                <div class="direct-chat-infos clearfix">
-                                    <span class="direct-chat-name float-left">Alexander Pierce</span>
-                                    <span class="direct-chat-timestamp float-right">23 Jan 2:00 pm</span>
-                                </div>
-                                <!-- /.direct-chat-infos -->
-                                <img class="direct-chat-img" src="<?= base_url(); ?>/assets/dist/img/user1-128x128.jpg" alt="Message User Image">
-                                <!-- /.direct-chat-img -->
-                                <div class="direct-chat-text">
-                                    Is this template really for free? That's unbelievable!
-                                </div>
-                                <!-- /.direct-chat-text -->
-                            </div>
-                            <!-- /.direct-chat-msg -->
-
-                            <!-- Message to the right -->
-                            <div class="direct-chat-msg right">
-                                <div class="direct-chat-infos clearfix">
-                                    <span class="direct-chat-name float-right">Sarah Bullock</span>
-                                    <span class="direct-chat-timestamp float-left">23 Jan 2:05 pm</span>
-                                </div>
-                                <!-- /.direct-chat-infos -->
-                                <img class="direct-chat-img" src="<?= base_url(); ?>/assets/dist/img/user3-128x128.jpg" alt="Message User Image">
-                                <!-- /.direct-chat-img -->
-                                <div class="direct-chat-text">
-                                    You better believe it!
-                                </div>
-                                <!-- /.direct-chat-text -->
-                            </div>
-                            <!-- /.direct-chat-msg -->
-                        </div>
-                        <!--/.direct-chat-messages-->
-
-                        <!-- Contacts are loaded here -->
-                        <div class="direct-chat-contacts">
-                            <ul class="contacts-list">
-                                <li>
-                                    <a href="#">
-                                        <img class="contacts-list-img" src="<?= base_url(); ?>/assets/dist/img/user1-128x128.jpg" alt="User Avatar">
-
-                                        <div class="contacts-list-info">
-                                            <span class="contacts-list-name">
-                                                Count Dracula
-                                                <small class="contacts-list-date float-right">2/28/2015</small>
-                                            </span>
-                                            <span class="contacts-list-msg">How have you been? I was...</span>
-                                        </div>
-                                        <!-- /.contacts-list-info -->
-                                    </a>
-                                </li>
-                                <!-- End Contact Item -->
-                            </ul>
-                            <!-- /.contatcts-list -->
-                        </div>
-                        <!-- /.direct-chat-pane -->
-                    </div>
-                    <!-- /.card-body -->
-                    <div class="card-footer">
-                        <form action="#" method="post">
-                            <div class="input-group">
-                                <input type="text" name="message" placeholder="Type Message ..." class="form-control" spellcheck="false" data-ms-editor="true">
-                                <span class="input-group-append">
-                                    <button type="submit" class="btn btn-success"><i class="fas fa-paper-plane"></i></button>
-                                </span>
-                            </div>
-                        </form>
-                    </div>
-                    <!-- /.card-footer-->
-                </div>
-                <!--/.direct-chat -->
+            <div class="col-sm-3 col-md-3 col-12">
             </div>
         </div>
-
     </section>
 </div>
 <!-- The Modal -->
 <script>
+    'use strict';
     $(document).ready(function() {
         $('body').addClass('sidebar-collapse');
-
     });
 
     const ctx = document.getElementById('chart_bnba').getContext('2d');

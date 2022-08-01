@@ -3,7 +3,6 @@
 namespace App\Controllers\Dtks;
 
 
-use CodeIgniter\Controller;
 use App\Controllers\BaseController;
 use App\Models\Dtks\AuthModel;
 use App\Models\Dtks\UsersModel;
@@ -30,13 +29,17 @@ class Users extends BaseController
 
     public function index()
     {
+        $kode_kab = Profil_Admin()['kode_kab'];
+        $kode_kec = Profil_Admin()['kode_kec'];
         $data = [
             'namaApp' => 'Opr NewDTKS',
             'title' => 'Daftar Users',
             'title1' => 'Tambah User',
             'role' => $this->Role->getRole(),
             'user_login' => $this->AuthModel->getUserId(),
-            'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+            'kode_kec' => $kode_kec,
+            'kecamatan' => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
+            'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
             'datarw' => $this->WilayahModel->getDataRW()->getResultArray(),
             'users' => $this->User->getFindAll()->getResultArray(),
             'roles' => $this->Role->getRole()->getResultArray(),
@@ -51,12 +54,14 @@ class Users extends BaseController
     // function tambah user
     public function tambah()
     {
+        $kode_kab = Profil_Admin()['kode_kab'];
+        $kode_kec = Profil_Admin()['kode_kec'];
         if ($this->request->getPost()) {
             // let's do the validation here
             $rules = [
                 'fullname' => [
                     'label' => 'Nama Lengkap',
-                    'rules' => 'required|min_length[3]|max_length[25]',
+                    'rules' => 'required|min_length[3]|max_length[100]',
                     'errors' => [
                         'required' => '{field} harus diisi',
                         'min_length' => '{field} terlalu pendek',
@@ -83,13 +88,6 @@ class Users extends BaseController
                         'min_length' => '{field} terlalu pendek',
                         'max_length' => '{field} terlalu panjang',
                         'is_unique' => '{field} sudah terdaftar',
-                    ]
-                ],
-                'kelurahan' => [
-                    'label' => 'Nama Desa',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus diisi',
                     ]
                 ],
                 'email' => [
@@ -128,9 +126,12 @@ class Users extends BaseController
                     'namaApp' => 'Opr NewDTKS',
                     'title' => 'Daftar Users',
                     'title1' => 'Tambah User',
-                    'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+                    'kode_kec' => $kode_kec,
+                    'kecamatan' => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
+                    'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
                     'datarw' => $this->WilayahModel->getDataRW()->getResultArray(),
                     'users' => $this->User->getFindAll()->getResultArray(),
+                    'user_login' => $this->AuthModel->getUserId(),
                     'roles' => $this->Role->getRole()->getResultArray(),
                     'statusRole' => $this->GenModel->getStatusRole(),
 
@@ -139,16 +140,26 @@ class Users extends BaseController
                 //strore the user to database
                 $model = new AuthModel();
 
+                if ($this->request->getVar('kelurahan') != '') {
+                    $kode_desa = $this->request->getVar('kelurahan');
+                } else {
+                    $kode_desa = null;
+                }
+
                 $newData = [
                     'nik' => $this->request->getVar('nik'),
                     // 'username' => $this->request->getVar('username'),
                     'fullname' => strtoupper($this->request->getVar('fullname')),
                     'email' => $this->request->getVar('email'),
-                    'kode_desa' => $this->request->getVar('kelurahan'),
+                    // if 
+                    'kode_desa' => $kode_desa,
+                    'kode_kec' => $this->request->getVar('kecamatan'),
+                    'kode_kab' => '32.05',
+                    'kode_prov' => '32',
                     'status' => 0,
                     'opr_sch' => strtoupper($this->request->getVar('opr_sch')),
                     'nope' => $this->request->getVar('nope'),
-                    'role_id' => 5,
+                    'role_id' => 99,
                     'password' => $this->request->getVar('password'),
                     'created_at' => date('Y-m-d H:i:s'),
                 ];
@@ -183,6 +194,9 @@ class Users extends BaseController
 
             $UsersModel = new UsersModel;
 
+            $kode_kab = Profil_Admin()['kode_kab'];
+            $kode_kec = Profil_Admin()['kode_kec'];
+
             $id = $this->request->getVar('id');
             $row = $UsersModel->find($id);
 
@@ -191,6 +205,7 @@ class Users extends BaseController
                 'modTtl' => 'Form. View User',
                 'id' => $row['id'],
                 'nik' => $row['nik'],
+                'kode_kec' => $row['kode_kec'],
                 'kode_desa' => $row['kode_desa'],
                 'username' => $row['username'],
                 'fullname' => $row['fullname'],
@@ -201,7 +216,8 @@ class Users extends BaseController
                 'datarw' => $this->RwModel->noRw(),
                 'user_image' => $row['user_image'],
                 'roles' => $this->Role->getRole()->getResultArray(),
-                'desKels' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+                'kecamatan' => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
+                'desKels' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
 
             ];
             // var_dump($data);
@@ -218,12 +234,19 @@ class Users extends BaseController
 
     public function updatedata()
     {
+
+        if ($this->request->getVar('kode_desa') != '') {
+            $kode_desa = $this->request->getVar('kode_desa');
+        } else {
+            $kode_desa = null;
+        }
+
         if ($this->request->isAJAX()) {
             $simpandata = [
                 'nik' => $this->request->getVar('nik'),
                 'fullname' => $this->request->getVar('fullname'),
                 'email' => $this->request->getVar('email'),
-                'kode_desa' => $this->request->getVar('kode_desa'),
+                'kode_desa' => $kode_desa,
                 'role_id' => $this->request->getVar('role'),
                 'level' => $this->request->getVar('no_rw'),
                 'status' => $this->request->getVar('status'),

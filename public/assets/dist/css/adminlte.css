@@ -21070,7 +21070,7 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
   border: solid transparent;
   border-right-color: #d2d6de;
   content: " ";
-  height: 0;
+  height: auto;
   pointer-events: none;
   position: absolute;
   right: 100%;

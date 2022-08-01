@@ -15,12 +15,26 @@ class DtksGeotagging extends Migration
 				'unsigned'       => true,
 				'auto_increment' => true
 			],
+			'vg_no_data'     => [
+				'type'           => 'INT',
+				'constraint'     => 11,
+			],
 			'vg_nik'      => [
 				'type'          => 'VARCHAR',
 				'constraint'    => '16',
 				'null'        	=> true
 			],
+			'vg_nik_ktp'      => [
+				'type'          => 'VARCHAR',
+				'constraint'    => '16',
+				'null'        	=> true
+			],
 			'vg_nama_lengkap' => [
+				'type'           => 'VARCHAR',
+				'constraint'	=> '255',
+				'null'           => true,
+			],
+			'vg_nama_ktp'     => [
 				'type'           => 'VARCHAR',
 				'constraint'	=> '255',
 				'null'           => true,
@@ -35,12 +49,12 @@ class DtksGeotagging extends Migration
 				'constraint'    => '255',
 				'null'     		=> true,
 			],
-			'vg_rw'          => [
+			'vg_rt'          => [
 				'type'           => 'INT',
 				'constraint'     => 5,
 				'null'		=> true,
 			],
-			'vg_rt'          => [
+			'vg_rw'          => [
 				'type'           => 'INT',
 				'constraint'     => 5,
 				'null'		=> true,
@@ -81,8 +95,8 @@ class DtksGeotagging extends Migration
 				'null'           => true,
 			],
 			'vg_source' => [
-				'type'           => 'VARCHAR',
-				'constraint'	=> '100',
+				'type'           => 'INT',
+				'constraint'	=> 11,
 				'null'           => true,
 			],
 			'vg_fp' => [
@@ -91,6 +105,16 @@ class DtksGeotagging extends Migration
 				'null'           => true,
 			],
 			'vg_fr' => [
+				'type'           => 'VARCHAR',
+				'constraint'	=> '100',
+				'null'           => true,
+			],
+			'vg_fktp' => [
+				'type'           => 'VARCHAR',
+				'constraint'	=> '100',
+				'null'           => true,
+			],
+			'vg_fkk' => [
 				'type'           => 'VARCHAR',
 				'constraint'	=> '100',
 				'null'           => true,
@@ -113,6 +137,16 @@ class DtksGeotagging extends Migration
 			'vg_sta_id' => [
 				'type'           => 'INT',
 				'constraint'	=> 5,
+				'null'           => true,
+			],
+			'vg_terbukti' => [
+				'type'           => 'INT',
+				'constraint'	=> 5,
+				'null'           => true,
+			],
+			'vg_alasan' => [
+				// type text
+				'type'           => 'TEXT',
 				'null'           => true,
 			],
 			'vg_created_by'     => [

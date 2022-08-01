@@ -24,6 +24,8 @@ class Profil_Web extends BaseController
     public function index()
     {
         $user_id = session()->get('id');
+        $role = session()->get('role_id');
+        // dd($user_id);
         $getAjax = $this->WilayahModel->getAjaxSearch()->getResultArray();
         foreach ($getAjax as $row) {
             $nama_kab = $row['nama_kab'];
@@ -49,15 +51,16 @@ class Profil_Web extends BaseController
             'statusRole' => $this->GenModel->getStatusRole(),
             'user_id' => $user_id,
             'user_login' => $this->AuthModel->getUserId(),
-            'lembaga' => $this->LembagaModel->getLembaga($user_id = false),
+            'lembaga' => $this->LembagaModel->getLembaga($role)->getResultArray(),
             'getKec' => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
             'user_role' => $user_role,
             'nama_pemerintah' => $nama_pemerintah,
             'menu' => $this->MenuModel->orderBy('tm_parent_id', 'asc')->findAll(),
+            'deadline' => $this->GenModel->getDeadline(),
 
         ];
         // dd($data);
-        // dd($data['user_login']);
+        // dd($data['deadline']);
         // dd(session()->get('id'));
         return view('profil/web', $data);
     }
@@ -83,20 +86,12 @@ class Profil_Web extends BaseController
             $nama_pemerintah = $this->request->getPost('nama_pemerintah');
             $user_lembaga_id = $this->request->getPost('user_lembaga_id');
 
-            // if (!$this->validate([
-            //     'fp_user' => [
-            //         'rules' => 'mime_in[user_image,image/png,image/jpg]|ext_in[user_image,png,jpg,gif]|is_image[user_image]',
-            //         'errors' => [
-            //             // 'max_size' => 'Ukuran gambar terlalu besar',
-            //             'ext_in' => 'Yang ada pilih bukan gambar',
-            //             'is_image' => 'Yang ada pilih bukan gambar',
-            //             'mime_in' => 'Yang ada pilih bukan gambar',
-            //         ]
-            //     ]
-            // ])) {
-            //     $validation = \Config\Services::validation();
-            //     return redirect()->to('profil_user')->withInput()->with('validation', $validation);
-            // }
+            $namaFileGambar = 'profil_' . $nik . '.jpg';
+            $path = 'data/profil/' . $namaFileGambar;
+            if (file_exists($path)) {
+                unlink($path);
+            }
+
             // ambil gambar
             $file_gambar = $this->request->getFile('fp_user');
             // dd($file_gambar);
@@ -111,10 +106,10 @@ class Profil_Web extends BaseController
                 // $nama_gambar = $file_gambar->getRandomName();
 
                 // pindahkan file ke folder profil
-                $file_gambar->move('data/profil');
+                $file_gambar->move('data/profil', $namaFileGambar);
 
                 //ambil nama file
-                $nama_gambar = $file_gambar->getName();
+                $nama_gambar = $namaFileGambar;
             }
 
             $data = [
@@ -275,5 +270,31 @@ class Profil_Web extends BaseController
         // echo json_encode(array('nama' => $data['tm_nama']));
         // var_dump($data);
         echo json_encode($data);
+    }
+
+    function submit_general()
+    {
+        if ($this->request->isAJAX()) {
+            $data = [
+                'dd_waktu' => $this->request->getPost('dd_waktu'),
+                'dd_deskripsi' => $this->request->getPost('dd_deskripsi'),
+            ];
+            $data = $this->GenModel->submit_general($data);
+            echo json_encode($data);
+        }
+    }
+
+    function update_general()
+    {
+        if ($this->request->isAJAX()) {
+            $id = $this->request->getPost('dd_id');
+            $data = [
+                'dd_id' => $id,
+                'dd_waktu' => $this->request->getPost('dd_waktu'),
+                'dd_deskripsi' => $this->request->getPost('dd_deskripsi'),
+            ];
+            $data = $this->GenModel->update_general($id, $data);
+            echo json_encode($data);
+        }
     }
 }

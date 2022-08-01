@@ -1,4 +1,5 @@
 <?php
+
 $user_image = $user_login['user_image'];
 ?>
 
@@ -12,7 +13,6 @@ $user_image = $user_login['user_image'];
             <a href="/dashboard" class="nav-link">Home</a>
         </li>
     </ul>
-
     <ul class="navbar-nav ml-auto">
         <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
@@ -45,6 +45,5 @@ $user_image = $user_login['user_image'];
             </div>
         </li>
         <!-- Notifications Dropdown Menu -->
-
     </ul>
 </nav>

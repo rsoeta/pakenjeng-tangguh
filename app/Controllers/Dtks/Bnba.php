@@ -66,7 +66,7 @@ class Bnba extends BaseController
         $csrfName = csrf_token();
         $csrfHash = csrf_hash();
 
-        $filter0 = '2';
+        $filter0 = '1';
         $filter1 = $this->request->getPost('datadesa');
         // $operator = $this->request->getPost('operator');
         $filter2 = $this->request->getPost('datarw');

@@ -66,14 +66,14 @@ $level = session()->get('role_id');
                             <div class="form-group row nopadding">
                                 <label class="col-4 col-sm-4 col-form-label" for="alamat">Alamat</label>
                                 <div class="col-8 col-sm-8">
-                                    <input type="text" name="alamat" id="alamat" class="form-control form-control-sm" value="<?= set_value('alamat', $alamat); ?>" disabled>
+                                    <input type="text" name="alamat" id="alamat" class="form-control form-control-sm" value="<?= set_value('alamat', $alamat); ?>">
                                     <div class="invalid-feedback erroralamat"></div>
                                 </div>
                             </div>
                             <div class="form-group row nopadding">
                                 <label class="col-4 col-sm-4 col-form-label" for="no_rt">No. RT</label>
                                 <div class="col-8 col-sm-8">
-                                    <select id="no_rt" name="no_rt" class="form-select form-select-sm" disabled>
+                                    <select id="no_rt" name="no_rt" class="form-select form-select-sm">
                                         <option value="">-- Pilih RT --</option>
                                         <?php foreach ($datart as $row) { ?>
                                             <option <?php if ($no_rt == $row['no_rt']) {
@@ -87,7 +87,7 @@ $level = session()->get('role_id');
                             <div class="form-group row nopadding">
                                 <label class="col-4 col-sm-4 col-form-label" for="no_rw">No. RW</label>
                                 <div class="col-8 col-sm-8">
-                                    <select id="no_rw" name="no_rw" class="form-select form-select-sm" disabled>
+                                    <select id="no_rw" name="no_rw" class="form-select form-select-sm">
                                         <option value="">-- Pilih RW --</option>
                                         <?php foreach ($datarw as $row) { ?>
                                             <option <?php if ($no_rw == $row['no_rw']) {
@@ -105,10 +105,8 @@ $level = session()->get('role_id');
                                 <div class="col-8 col-sm-8">
                                     <select id="status" name="status" class="form-select form-select-sm">
                                         <option value="">-- Pilih Status --</option>
-                                        <?php foreach ($status as $row) { ?>
-                                            <option <?php if (2 == $row['id_status']) {
-                                                        echo 'selected';
-                                                    } ?> value="<?= $row['id_status'] ?>"> <?= $row['jenis_status']; ?></option>
+                                        <?php foreach ($status1 as $row) { ?>
+                                            <option <?= $db_status == $row['id_status'] ? 'selected' : ''; ?> value="<?= $row['id_status'] ?>"> <?= $row['jenis_status']; ?></option>
                                         <?php } ?>
                                     </select>
                                     <div class="invalid-feedback errorstatus"></div>
@@ -165,6 +163,27 @@ $level = session()->get('role_id');
                 success: function(response) {
                     if (response.error) {
 
+                        if (response.error.alamat) {
+                            $('#alamat').addClass('is-invalid');
+                            $('.erroralamat').html(response.error.alamat);
+                        } else {
+                            $('#alamat').removeClass('is-invalid');
+                            $('.erroralamat').html('');
+                        }
+                        if (response.error.no_rt) {
+                            $('#no_rt').addClass('is-invalid');
+                            $('.errorrt').html(response.error.no_rt);
+                        } else {
+                            $('#no_rt').removeClass('is-invalid');
+                            $('.errorrt').html('');
+                        }
+                        if (response.error.no_rw) {
+                            $('#no_rw').addClass('is-invalid');
+                            $('.errorrw').html(response.error.no_rw);
+                        } else {
+                            $('#no_rw').removeClass('is-invalid');
+                            $('.errorrw').html('');
+                        }
                         if (response.error.status) {
                             $('#status').addClass('is-invalid');
                             $('.errorstatus').html(response.error.status);
@@ -186,6 +205,7 @@ $level = session()->get('role_id');
                             $('#no_registrasi_kejadian').removeClass('is-invalid');
                             $('.errorno_registrasi_kejadian').html('');
                         }
+
 
                     } else {
                         if (response.sukses) {

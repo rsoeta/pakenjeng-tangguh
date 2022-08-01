@@ -29,8 +29,6 @@ $level = session()->get('level');
                                     <li class="nav-item">
                                         <a class="nav-link <?= $user <= 2 ? 'active' : ''; ?>" id="custom-tabs-five-overlay-dark-tab" data-toggle="pill" href="#custom-tabs-five-overlay-dark" role="tab" aria-controls="custom-tabs-five-overlay-dark" aria-selected="false">Progres Verivali</a>
                                     </li>
-                                <?php } ?>
-                                <?php if ($user <= 2) { ?>
                                     <li class="nav-item">
                                         <a class="nav-link" id="custom-tabs-five-normal-tab" data-toggle="pill" href="#custom-tabs-five-normal" role="tab" aria-controls="custom-tabs-five-normal" aria-selected="true">Succes Verivali</a>
                                     </li>
@@ -189,7 +187,7 @@ $level = session()->get('level');
                                                             <div class="col-sm-2 col-4">
                                                                 <select class="form-control form-control-sm" name="" id="data_status1">
                                                                     <option value="">-Pilih-</option>
-                                                                    <?php foreach ($status as $row) {  ?>
+                                                                    <?php foreach ($status1 as $row) {  ?>
                                                                         <option value="<?= $row['id_status']; ?>"><?= $row['jenis_status']; ?></option>
                                                                     <?php } ?>
                                                                 </select>
@@ -220,7 +218,7 @@ $level = session()->get('level');
                                             </div>
                                         </div>
                                     <?php } ?>
-                                    <?php if ($user <= 2) { ?>
+                                    <?php if ($user <= 3) { ?>
                                         <div class="tab-pane fade" id="custom-tabs-five-normal" role="tabpanel" aria-labelledby="custom-tabs-five-normal-tab">
                                             <div class="row">
                                                 <div class="col">
@@ -284,7 +282,7 @@ $level = session()->get('level');
                                                         <div class="col-sm-2 col-4">
                                                             <select class="form-control form-control-sm" name="" id="data_status2">
                                                                 <option value="">-Pilih-</option>
-                                                                <?php foreach ($status as $row) {  ?>
+                                                                <?php foreach ($status1 as $row) {  ?>
                                                                     <option value="<?= $row['id_status']; ?>"><?= $row['jenis_status']; ?></option>
                                                                 <?php } ?>
                                                             </select>
@@ -812,6 +810,77 @@ $level = session()->get('level');
         } else {
             $('#datart2').val('');
         }
+    });
+
+    var editor; // use a global for the submit and return data rendering in the examples
+
+    $(document).ready(function() {
+        // Register date formats to allow DataTables sorting of the dates
+        $.fn.dataTable.moment('M/D/YYYY');
+        $.fn.dataTable.moment('dddd D MMMM YYYY');
+
+        editor = new $.fn.dataTable.Editor({
+            ajax: '../php/dates.php?format=custom',
+            table: '#example',
+            fields: [{
+                label: 'First name:',
+                name: 'first_name'
+            }, {
+                label: 'Last name:',
+                name: 'last_name'
+            }, {
+                label: 'Updated date:',
+                name: 'updated_date',
+                type: 'datetime',
+                def: function() {
+                    return new Date();
+                },
+                format: 'M/D/YYYY',
+                fieldInfo: 'US style m/d/y format'
+            }, {
+                label: 'Registered date:',
+                name: 'registered_date',
+                type: 'datetime',
+                def: function() {
+                    return new Date();
+                },
+                format: 'dddd D MMMM YYYY',
+                fieldInfo: 'Verbose date format',
+                keyInput: false
+            }]
+        });
+
+        $('#example').DataTable({
+            dom: 'Bfrtip',
+            ajax: '../php/dates.php?format=custom',
+            columns: [{
+                    data: 'first_name'
+                },
+                {
+                    data: 'last_name'
+                },
+                {
+                    data: 'updated_date'
+                },
+                {
+                    data: 'registered_date'
+                }
+            ],
+            select: true,
+            buttons: [{
+                    extend: 'create',
+                    editor: editor
+                },
+                {
+                    extend: 'edit',
+                    editor: editor
+                },
+                {
+                    extend: 'remove',
+                    editor: editor
+                }
+            ]
+        });
     });
 </script>
 

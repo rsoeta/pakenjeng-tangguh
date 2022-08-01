@@ -14,7 +14,8 @@
 		"laminas/laminas-escaper": "^2.6",
 		"psr/log": "^1.1",
 		"phpoffice/phpspreadsheet": "^1.18",
-		"phpoffice/phpword": "dev-master"
+		"phpoffice/phpword": "dev-master",
+		"cboden/ratchet": "^0.4.4"
 	},
 	"require-dev": {
 		"codeigniter4/codeigniter4-standard": "^1.0",

@@ -125,4 +125,30 @@ class GenModel extends Model
 		$query = $builder->get();
 		return $query->getLastRow();
 	}
+
+	function getDeadline()
+	{
+		$builder = $this->db->table('dtks_deadline');
+		// get last row
+
+		$query = $builder->get();
+		return $query->getLastRow();
+	}
+
+	function submit_general($data)
+	{
+		return $this->db
+			->table('dtks_deadline')
+			->set($data)
+			->insert();
+	}
+
+	function update_general($id, $data)
+	{
+		return $this->db
+			->table('dtks_deadline')
+			->where('dd_id', $id)
+			->set($data)
+			->update();
+	}
 }

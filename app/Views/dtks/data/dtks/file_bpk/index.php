@@ -34,7 +34,7 @@
                             <form action="<?= site_url('imporVerivaliGeo') ?>" method="post" enctype="multipart/form-data">
                                 <?= csrf_field(); ?>
                                 <div class="row">
-                                    <div class="col-12 col-sm-5" <?= ($role > 2) ? 'hidden' : ''; ?>>
+                                    <div class="col-12" <?= ($role > 2) ? 'hidden' : ''; ?>>
                                         <div class="col-12 input-group">
                                             <input type="file" name="file" class="form-control form-control float-right" required accept=".xls, .xlsx">
                                             <button type="submit" name="submit" class="btn btn-success btn float-right" onclick="return confirmSubmit()">
@@ -482,7 +482,7 @@
     function confirmSubmit() {
         // pop up comfirm to submit send data
         {
-            var agree = confirm("Data sebelumnya akan terhapus. \nApakah Anda yakin akan mengimport data ini?");
+            var agree = confirm("Hati-Hati!!\nData sebelumnya akan terhapus. \nApakah Anda yakin akan mengimport data ini?");
             if (agree)
                 return true;
             else

@@ -47,6 +47,12 @@ $routes->post('cek_usulan', 'Landing::cek_usulan');
 $routes->get('dashboard', 'Dtks\Pages::home', ['filter' => 'noauthfilterdtks']);
 $routes->get('pages', 'Dtks\Pages::index', ['filter' => 'authfilterdtks']);
 
+// CHATTING
+$routes->match(['get', 'post'], 'chatt', 'Chat::index', ['filter' => 'authfilterdtks']);
+$routes->get('getMsg', 'Chat::getMsg', ['filter' => 'authfilterdtks']);
+$routes->get('getUserLogged', 'Chat::getUserLogged', ['filter' => 'authfilterdtks']);
+$routes->post('updateLastActivity', 'Chat::updateLastActivity', ['filter' => 'authfilterdtks']);
+
 // BNBA
 $routes->get('bnba', 'Dtks\Bnba::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tabel_bnba', 'Dtks\Bnba::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -185,6 +191,8 @@ $routes->post('insert_data_menu', 'Profil\Profil_Web::insert_data_menu', ['filte
 $routes->post('update_data_menu', 'Profil\Profil_Web::update_data_menu', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('delete_data_menu', 'Profil\Profil_Web::delete_data_menu', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('get_nama_menu', 'Profil\Profil_Web::get_nama_menu', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('submit_web_general', 'Profil\Profil_Web::submit_general', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('update_web_general', 'Profil\Profil_Web::update_general', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 
 $routes->get('logout', 'Dtks\Auth::logout');

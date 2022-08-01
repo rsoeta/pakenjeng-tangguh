@@ -86,20 +86,12 @@ class Profil_User extends BaseController
             $nope = $this->request->getPost('nope');
             $user_lembaga_id = $this->request->getPost('user_lembaga_id');
 
-            // if (!$this->validate([
-            //     'fp_user' => [
-            //         'rules' => 'mime_in[user_image,image/png,image/jpg]|ext_in[user_image,png,jpg,gif]|is_image[user_image]',
-            //         'errors' => [
-            //             // 'max_size' => 'Ukuran gambar terlalu besar',
-            //             'ext_in' => 'Yang ada pilih bukan gambar',
-            //             'is_image' => 'Yang ada pilih bukan gambar',
-            //             'mime_in' => 'Yang ada pilih bukan gambar',
-            //         ]
-            //     ]
-            // ])) {
-            //     $validation = \Config\Services::validation();
-            //     return redirect()->to('profil_user')->withInput()->with('validation', $validation);
-            // }
+            $namaFileGambar = 'profil_' . $nik . '.jpg';
+            $path = 'data/profil/' . $namaFileGambar;
+            if (file_exists($path)) {
+                unlink($path);
+            }
+
             // ambil gambar
             $file_gambar = $this->request->getFile('fp_user');
             // dd($file_gambar);
@@ -111,10 +103,10 @@ class Profil_User extends BaseController
                 // $nama_gambar = $file_gambar->getRandomName();
 
                 // pindahkan file ke folder profil
-                $file_gambar->move('data/profil');
+                $file_gambar->move('data/profil', $namaFileGambar);
 
                 //ambil nama file
-                $nama_gambar = $file_gambar->getName();
+                $nama_gambar = $namaFileGambar;
             }
 
             $personalData = [

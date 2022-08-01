@@ -45,13 +45,14 @@ class VervalBnba extends BaseController
             'datart' => $this->BnbaModel->getDataRT()->getResultArray(),
             'datashdk' => $this->datashdk->findAll(),
             'status' => $this->statusdtks->orderBy('jenis_status', 'asc')->findAll(),
+            'status1' => $this->statusdtks->where('id_status !=', 1)->orderBy('jenis_status', 'asc')->findAll(),
             'statusRole' => $this->GenModel->getStatusRole(),
             'user_login' => $this->AuthModel->getUserId(),
 
 
 
         ];
-        // dd($data['user_login']);
+        // dd($data['status1']);
         return view('dtks/data/dtks/verivali/bnba/index', $data);
     }
 
@@ -133,6 +134,7 @@ class VervalBnba extends BaseController
                 'datart' => $this->RtModel->noRt(),
                 'keterangan' => $this->keterangan->orderBy('jenis_keterangan', 'asc')->findAll(),
                 'status' => $this->statusdtks->orderBy('jenis_status', 'asc')->findAll(),
+                'status1' => $this->statusdtks->where('id_status !=', 1)->orderBy('jenis_status', 'asc')->findAll(),
                 'jenisKelamin' => $this->BnbaModel->getDataJenkel(),
                 'datashdk' => $this->BnbaModel->getDataShdk(),
 
@@ -185,6 +187,24 @@ class VervalBnba extends BaseController
 
 
             $valid = $this->validate([
+                'alamat' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'Alamat tidak boleh kosong'
+                    ]
+                ],
+                'no_rt' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'No RT tidak boleh kosong'
+                    ]
+                ],
+                'no_rw' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'No RW tidak boleh kosong'
+                    ]
+                ],
                 'status' => [
                     'label' => 'Status',
                     'rules' => 'required',
@@ -193,7 +213,7 @@ class VervalBnba extends BaseController
                     ]
                 ],
                 'tanggal_kejadian' => [
-                    'label' => 'Tanggal Meninggal',
+                    'label' => 'Tanggal Kejadian',
                     'rules' => 'required|valid_date',
                     'errors' => [
                         'required' => '{field} harus diisi.',
@@ -207,6 +227,9 @@ class VervalBnba extends BaseController
 
                 $msg = [
                     'error' => [
+                        'alamat' => $this->validator->getError('alamat'),
+                        'no_rt' => $this->validator->getError('no_rt'),
+                        'no_rw' => $this->validator->getError('no_rw'),
                         'status' => $validation->getError('status'),
                         'tanggal_kejadian' => $validation->getError('tanggal_kejadian'),
                         'no_registrasi_kejadian' => $validation->getError('no_registrasi_kejadian'),
@@ -214,6 +237,9 @@ class VervalBnba extends BaseController
                 ];
             } else {
                 $data = [
+                    'db_alamat' => $this->request->getVar('alamat'),
+                    'db_rw' => $this->request->getVar('no_rw'),
+                    'db_rt' => $this->request->getVar('no_rt'),
                     'db_status' => $this->request->getVar('status'),
                     'db_tgl_kejadian' => $this->request->getVar('tanggal_kejadian'),
                     'db_noreg_kejadian' => $this->request->getVar('no_registrasi_kejadian'),
@@ -251,7 +277,7 @@ class VervalBnba extends BaseController
         $filter2 = $this->request->getPost('datarw1');
         $filter3 = $this->request->getPost('datart1');
         $filter4 = $this->request->getPost('datashdk1');
-        $filter5 = 2;
+        $filter5 = 1;
 
         $listing = $model->get_datatables1($filter1, $filter2, $filter3, $filter4, $filter0, $filter5);
         $jumlah_semua = $model->jumlah_semua1();
@@ -276,8 +302,14 @@ class VervalBnba extends BaseController
             $row[] = $key->db_nik;
             $row[] = $key->db_nkk;
             $row[] = $key->name;
-            $row[] = $key->jenis_status;
-            $row[] = $key->db_tgl_kejadian;
+            $row[] = strtoupper($key->jenis_status);
+            if ($key->db_tgl_kejadian == null) {
+                $row[] = '-';
+            } else if ($key->db_tgl_kejadian == '0000-00-00') {
+                $row[] = '-';
+            } else {
+                $row[] = date_format(date_create($key->db_tgl_kejadian), 'd/m/Y');
+            }
             $row[] = $key->db_noreg_kejadian;
             $row[] =  ($role <= 2) ? $tombolEdit . ' ' . $tombolProses : $tombolEdit;
 
@@ -320,6 +352,7 @@ class VervalBnba extends BaseController
                 'datart' => $this->RtModel->noRt(),
                 'keterangan' => $this->keterangan->orderBy('jenis_keterangan', 'asc')->findAll(),
                 'status' => $this->statusdtks->orderBy('jenis_status', 'asc')->findAll(),
+                'status1' => $this->statusdtks->where('id_status !=', 1)->orderBy('jenis_status', 'asc')->findAll(),
                 'jenisKelamin' => $this->BnbaModel->getDataJenkel(),
                 'datashdk' => $this->BnbaModel->getDataShdk(),
 
@@ -372,6 +405,24 @@ class VervalBnba extends BaseController
 
 
             $valid = $this->validate([
+                'alamat' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'Alamat tidak boleh kosong'
+                    ]
+                ],
+                'no_rw' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'No RW tidak boleh kosong'
+                    ]
+                ],
+                'no_rt' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => 'No RT tidak boleh kosong'
+                    ]
+                ],
                 'status' => [
                     'label' => 'Status',
                     'rules' => 'required',
@@ -386,6 +437,9 @@ class VervalBnba extends BaseController
 
                 $msg = [
                     'error' => [
+                        'alamat' => $this->validator->getError('alamat'),
+                        'no_rw' => $this->validator->getError('no_rw'),
+                        'no_rt' => $this->validator->getError('no_rt'),
                         'status' => $validation->getError('status'),
                         'tanggal_kejadian' => $validation->getError('tanggal_kejadian'),
                         'no_registrasi_kejadian' => $validation->getError('no_registrasi_kejadian'),
@@ -393,6 +447,9 @@ class VervalBnba extends BaseController
                 ];
             } else {
                 $data = [
+                    'db_alamat' => $this->request->getVar('alamat'),
+                    'db_rw' => $this->request->getVar('no_rw'),
+                    'db_rt' => $this->request->getVar('no_rt'),
                     'db_status' => $this->request->getVar('status'),
                     'db_tgl_kejadian' => $this->request->getVar('tanggal_kejadian'),
                     'db_noreg_kejadian' => $this->request->getVar('no_registrasi_kejadian'),
@@ -485,10 +542,20 @@ class VervalBnba extends BaseController
             $row[] = $key->db_nik;
             $row[] = $key->db_nkk;
             $row[] = $key->name;
-            $row[] = $key->jenis_status;
-            $row[] = $key->db_tgl_kejadian;
+            $row[] = strtoupper($key->jenis_status);
+            if ($key->db_tgl_kejadian == null) {
+                $row[] = '-';
+            } else if ($key->db_tgl_kejadian == '0000-00-00') {
+                $row[] = '-';
+            } else {
+                $row[] = date_format(date_create($key->db_tgl_kejadian), 'd/m/Y');
+            }
             $row[] = $key->db_noreg_kejadian;
-            $row[] = $tombolProses;
+            if ($role <= 2) {
+                $row[] = $tombolProses;
+            } else {
+                $row[] = '--';
+            }
 
             # code...
             $data[] = $row;

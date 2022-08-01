@@ -52,7 +52,7 @@ class VerivaliGeoModel extends Model
 
     var $order = array('vg_nama_lengkap' => 'asc');
 
-    function get_datatables($filter1, $filter2, $filter3, $filter4, $filter5, $filter6)
+    function get_datatables($filter1, $filter2, $filter3, $filter4, $filter5 = null, $filter6)
     {
         // desa
         if ($filter1 == "") {
@@ -407,7 +407,30 @@ class VerivaliGeoModel extends Model
         return $dataArray;
     }
 
-    function getJmlVerval($filter1, $filter4)
+    function getVerivaliFix1($filter4, $filter5)
+    {
+
+        $db = db_connect();
+        $builder = $db->table('dtks_verivali_geo');
+        $builder->select('vg_id, vg_nik, vg_nama_lengkap, vg_nkk, vg_alamat, vg_rw, vg_rt, vg_desa, tb_villages.name as namaDesa, dbj_nama_bansos, sta_nama, vg_kec, vg_kab, vg_prov, vg_dbj_id1, vg_dbj_id2, vg_norek, vg_source, vg_fp, vg_fr, vg_lat, vg_lang, vg_ds_id, vg_sta_id, vg_created_by, vg_created_at, vg_updated_by, vg_updated_at');
+        $builder->join('dtks_status', 'dtks_status.id_status = dtks_verivali_geo.vg_ds_id');
+        $builder->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id = dtks_verivali_geo.vg_dbj_id1');
+        $builder->join('tb_status', 'tb_status.sta_id = dtks_verivali_geo.vg_sta_id');
+        $builder->join('tb_villages', 'tb_villages.id = dtks_verivali_geo.vg_desa');
+        $builder->where('vg_dbj_id1 !=', $filter4);
+        $builder->where('vg_sta_id', $filter5);
+        $builder->orderBy('vg_nama_lengkap', 'ASC');
+        $query = $builder->get();
+
+        $dataArray = $query->getResultArray();
+        foreach ($dataArray as $key => $value) {
+            $data = $value;
+        }
+
+        return $dataArray;
+    }
+
+    function getJmlVerval($filter1 = null, $filter4)
     {
         $db = db_connect();
         $builder = $db->table('dtks_verivali_geo');
@@ -419,13 +442,37 @@ class VerivaliGeoModel extends Model
         return $query->getRowArray();
     }
 
-    function getJmlVervalFix($filter1, $filter4, $filter5)
+    function getJmlVervalFix($filter1 = null, $filter4, $filter5)
     {
         $db = db_connect();
         $builder = $db->table('dtks_verivali_geo');
         // select count
         $builder->select('COUNT(vg_id) as jml');
         $builder->where('vg_desa', $filter1);
+        $builder->where('vg_dbj_id1 !=', $filter4);
+        $builder->where('vg_sta_id', $filter5);
+        $query = $builder->get();
+
+        return $query->getRowArray();
+    }
+
+    function getJmlVerval1($filter4)
+    {
+        $db = db_connect();
+        $builder = $db->table('dtks_verivali_geo');
+        $builder->select('COUNT(vg_id) as jml');
+        $builder->where('vg_dbj_id1 !=', $filter4);
+        $query = $builder->get();
+
+        return $query->getRowArray();
+    }
+
+    function getJmlVervalFix1($filter4, $filter5)
+    {
+        $db = db_connect();
+        $builder = $db->table('dtks_verivali_geo');
+        // select count
+        $builder->select('COUNT(vg_id) as jml');
         $builder->where('vg_dbj_id1 !=', $filter4);
         $builder->where('vg_sta_id', $filter5);
         $query = $builder->get();

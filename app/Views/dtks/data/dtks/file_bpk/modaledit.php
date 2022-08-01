@@ -78,7 +78,7 @@
                             <div class="col-9 col-sm-4">
                                 <select id="vg_ds_id" name="vg_ds_id" class="form-select form-select-sm">
                                     <?php foreach ($statusDtks as $row) { ?>
-                                        <option <?= ($row['id_status'] == $vg_ds_id) ? 'selected' : ''; ?> value="<?= $row['id_status']; ?>"> <?php echo $row['jenis_status']; ?></option>
+                                        <option <?= ($row->id_status == $vg_ds_id) ? 'selected' : ''; ?> value="<?= $row->id_status; ?>"> <?php echo $row->jenis_status; ?></option>
                                     <?php } ?>
                                 </select>
                                 <div class="invalid-feedback errorvg_ds_id"></div>

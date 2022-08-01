@@ -4,7 +4,7 @@ namespace App\Controllers\Dtks;
 
 use App\Models\Dtks\AuthModel;
 use App\Models\WilayahModel;
-use App\Models\RwModel;
+use App\Models\Dtks\UsersLoginModel;
 
 
 use App\Controllers\BaseController;
@@ -46,6 +46,17 @@ class Auth extends BaseController
                 $user = $model->where('email', $this->request->getVar('email'))->first();
                 // dd($user);
                 $this->setUserSession($user);
+                $UsersLogin = new UsersLoginModel();
+                $data_login = [
+                    'dul_du_id' => $user['id'],
+                    'dul_last_activity' => date('Y-m-d H:i:s'),
+                ];
+                $last_id = $UsersLogin->where('dul_du_id', $user['id'])->first();
+                if (!empty($last_id)) {
+                    $UsersLogin->update_data($last_id, $data_login);
+                } else {
+                    $UsersLogin->save_data($data_login);
+                }
 
 
                 // dd($this->setUserSession($user));
@@ -96,14 +107,14 @@ class Auth extends BaseController
 
     public function register()
     {
-
+        $kode_kab = Profil_Admin()['kode_kab'];
+        $kode_kec = Profil_Admin()['kode_kec'];
         $this->WilayahModel = new WilayahModel();
 
         $data = [
             'title' => 'Registration',
-            'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+            'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
             'datarw' => $this->WilayahModel->getDataRW()->getResultArray(),
-
         ];
 
         if ($this->request->getPost()) {
@@ -181,7 +192,7 @@ class Auth extends BaseController
                 return view('dtks/auth/register', [
                     "validation" => $this->validator,
                     'title' => 'Register',
-                    'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+                    'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
                     'datarw' => $this->WilayahModel->getDataRW()->getResultArray(),
 
                 ]);
@@ -195,6 +206,8 @@ class Auth extends BaseController
                     'fullname' => $this->request->getVar('fullname'),
                     'email' => $this->request->getVar('email'),
                     'kode_desa' => $this->request->getVar('kelurahan'),
+                    'kode_kec' => $kode_kec,
+                    'kode_kab' => $kode_kab,
                     'status' => 0,
                     'level' => $this->request->getVar('no_rw'),
                     'nope' => $this->request->getVar('nope'),
@@ -217,13 +230,13 @@ class Auth extends BaseController
     {
         // $data = [];
         helper(['form']);
-
+        $kode_kec = Profil_Admin()['kode_kec'];
         $this->WilayahModel = new WilayahModel();
 
         $data = [
             'namaApp' => 'Opr NewDTKS',
             'title' => 'Registration',
-            'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+            'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
             'datarw' => $this->WilayahModel->getDataRW()->getResultArray(),
 
         ];
@@ -302,9 +315,8 @@ class Auth extends BaseController
             if (!$this->validate($rules)) {
                 return view('dtks/auth/regopsek', [
                     "validation" => $this->validator,
-                    'namaApp' => 'Opr NewDTKS',
                     'title' => 'Registration',
-                    'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+                    'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
                     'datarw' => $this->WilayahModel->getDataRW()->getResultArray(),
 
                 ]);

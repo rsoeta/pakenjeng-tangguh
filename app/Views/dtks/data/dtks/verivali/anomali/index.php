@@ -19,6 +19,7 @@
             $kode_desa = session()->get('kode_desa');
             $ops = null;
             $level = session()->get('level');
+
             ?>
             <?php if ($role <= 3) {  ?>
                 <div class="row">
@@ -116,7 +117,7 @@
                         </div>
                     </div>
                     <div class="container-fluid">
-                        <table id="tabel_data" class="table table-hover table-sm compact display" style="width: 100%;">
+                        <table cellspacing="0%" id="tabel_data" class="table table-hover table-sm compact display" style="width: 100%;">
                             <thead>
                                 <tr>
                                     <th>No</th>
@@ -193,7 +194,7 @@
                         </div>
                     </div>
                     <div class="container-fluid">
-                        <table id="tabel_data2" class="table table-hover table-sm compact display" style="width: 100%;">
+                        <table cellspacing="0%" id="tabel_data2" class="table table-hover table-sm compact display" style="width: 100%;">
                             <thead>
                                 <tr>
                                     <th>NO</th>
@@ -273,7 +274,7 @@
                         </div>
                     </div>
                     <div class="container-fluid">
-                        <table id="tabel_data3" class="table table-hover table-sm compact display" style="width: 100%;">
+                        <table cellspacing="0%" id="tabel_data3" class="table table-hover table-sm compact display" style="width: 100%;">
                             <thead>
                                 <tr>
                                     <th>NO</th>
@@ -308,7 +309,7 @@
 <div class="viewmodal" style="display: none;"></div>
 <script>
     $(document).ready(function() {
-        // $('body').addClass('sidebar-collapse');
+        $('body').addClass('sidebar-collapse');
 
         $('.tombolTambah').click(function(e) {
             e.preventDefault();

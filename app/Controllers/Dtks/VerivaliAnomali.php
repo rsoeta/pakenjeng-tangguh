@@ -133,6 +133,14 @@ class VerivaliAnomali extends BaseController
             $row[] = $key->db_nama;
             $row[] = $key->db_nkk;
             $row[] = $key->db_tmp_lahir;
+            if ($key->db_tgl_lahir == '0000-00-00') {
+                $row[] = '-';
+            } elseif ($key->db_tgl_lahir == null) {
+                $row[] = '-';
+            } else {
+                // date_format
+                $row[] = date('d-m-Y', strtotime($key->db_tgl_lahir));
+            }
             $row[] = $key->db_tgl_lahir;
             $row[] = $key->db_alamat;
             $row[] = $key->db_rt;
@@ -212,7 +220,14 @@ class VerivaliAnomali extends BaseController
             $row[] = $key->va_nik;
             $row[] = $key->va_nama;
             $row[] = $key->va_nkk;
-            $row[] = $key->va_tgl_lhr;
+            if ($key->va_tgl_lhr == null) {
+                $row[] = '-';
+            } elseif ($key->va_tgl_lhr == '0000-00-00') {
+                $row[] = '-';
+            } else {
+                // date_format
+                $row[] = date_format(date_create($key->va_tgl_lhr), 'd-m-Y');
+            }
             $row[] = $key->va_tmp_lhr;
             $row[] = $key->va_alamat;
             $row[] = $key->va_rw;
@@ -293,7 +308,15 @@ class VerivaliAnomali extends BaseController
             $row[] = $key->va_nik;
             $row[] = $key->va_nama;
             $row[] = $key->va_nkk;
-            $row[] = $key->va_tgl_lhr;
+            if ($key->va_tgl_lhr == '0000-00-00') {
+                $row[] = '-';
+            } elseif ($key->va_tgl_lhr == null) {
+                $row[] = '-';
+            } else {
+                // date_format
+                $row[] = date('d-m-Y', strtotime($key->va_tgl_lhr));
+            }
+            // $row[] = $key->va_tgl_lhr;
             $row[] = $key->va_tmp_lhr;
             $row[] = $key->va_alamat;
             $row[] = $key->va_rw;

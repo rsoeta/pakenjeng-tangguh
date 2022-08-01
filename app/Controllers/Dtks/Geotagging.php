@@ -259,6 +259,8 @@ class Geotagging extends BaseController
                 $vg_fkk = $row[21];
                 $vg_lat = $row[22];
                 $vg_lang = $row[23];
+                $vg_ds_id = $row[24];
+                $vg_sta_id = $row[25];
                 $vg_created_by = session()->get('nik');
                 $vg_created_at = date('Y-m-d H:i:s');
 
@@ -271,7 +273,7 @@ class Geotagging extends BaseController
                 } else {
 
                     $simpandata = [
-                        'vg_no_data' => $vg_no_data, 'vg_nik' => $vg_nik, 'vg_nik_ktp' => $vg_nik_ktp, 'vg_nama_lengkap' => $vg_nama_lengkap, 'vg_nama_ktp' => $vg_nama_ktp, 'vg_nkk' => $vg_nkk, 'vg_alamat' => $vg_alamat, 'vg_rt' => $vg_rt, 'vg_rw' => $vg_rw, 'vg_desa' => $vg_desa, 'vg_kec' => $vg_kec, 'vg_kab' => $vg_kab, 'vg_prov' => $vg_prov, 'vg_norek' => $vg_norek, 'vg_dbj_id1' => $vg_dbj_id1, 'vg_dbj_id2' => $vg_dbj_id2, 'vg_source' => $vg_source, 'vg_fp' => $vg_fp, 'vg_fr' => $vg_fr, 'vg_fktp' => $vg_fktp, 'vg_fkk' => $vg_fkk, 'vg_lat' => $vg_lat, 'vg_lang' => $vg_lang, 'vg_created_by' => $vg_created_by, 'vg_created_at' => $vg_created_at
+                        'vg_no_data' => $vg_no_data, 'vg_nik' => $vg_nik, 'vg_nik_ktp' => $vg_nik_ktp, 'vg_nama_lengkap' => $vg_nama_lengkap, 'vg_nama_ktp' => $vg_nama_ktp, 'vg_nkk' => $vg_nkk, 'vg_alamat' => $vg_alamat, 'vg_rt' => $vg_rt, 'vg_rw' => $vg_rw, 'vg_desa' => $vg_desa, 'vg_kec' => $vg_kec, 'vg_kab' => $vg_kab, 'vg_prov' => $vg_prov, 'vg_dbj_id1' => $vg_dbj_id1, 'vg_dbj_id2' => $vg_dbj_id2, 'vg_norek' => $vg_norek, 'vg_source' => $vg_source, 'vg_fp' => $vg_fp, 'vg_fr' => $vg_fr, 'vg_fktp' => $vg_fktp, 'vg_fkk' => $vg_fkk, 'vg_lat' => $vg_lat, 'vg_lang' => $vg_lang, 'vg_ds_id' => $vg_ds_id, 'vg_sta_id' => $vg_sta_id, 'vg_created_by' => $vg_created_by, 'vg_created_at' => $vg_created_at
                     ];
 
                     $db->table('dtks_verivali_geo')->insert($simpandata);
@@ -324,7 +326,7 @@ class Geotagging extends BaseController
                 'status' => $this->GenModel->getStatusLimit()->getResultArray(),
                 'jenisPekerjaan' => $this->GenModel->getPendudukPekerjaan()->getResultArray(),
                 'jenisKelamin' => $this->GenModel->getDataJenkel(),
-                'statusDtks' => $this->GenModel->getStatusDtks()->getResultArray(),
+                'statusDtks' => $this->GenModel->getStatusDtks(),
                 'Bansos' => $db->table('dtks_bansos_jenis')->get()->getResultArray(),
 
                 'vg_id' => $vg_id,
@@ -368,6 +370,57 @@ class Geotagging extends BaseController
             // var_dump(session()->get('kode_desa'));
             echo json_encode($msg);
         }
+    }
+
+    function resizeImage($sourceImage, $targetImage, $maxWidth, $maxHeight, $quality = 80)
+    {
+        // Obtain image from given source file.
+        if (!$image = @imagecreatefromjpeg($sourceImage)) {
+            return false;
+        }
+
+        // Get dimensions of source image.
+        list($origWidth, $origHeight) = getimagesize($sourceImage);
+
+        if ($maxWidth == 0) {
+            $maxWidth  = $origWidth;
+        }
+
+        if ($maxHeight == 0) {
+            $maxHeight = $origHeight;
+        }
+
+        // Calculate ratio of desired maximum sizes and original sizes.
+        $widthRatio = $maxWidth / $origWidth;
+        $heightRatio = $maxHeight / $origHeight;
+
+        // Ratio used for calculating new image dimensions.
+        $ratio = min($widthRatio, $heightRatio);
+
+        // Calculate new image dimensions.
+        $newWidth  = (int)$origWidth  * $ratio;
+        $newHeight = (int)$origHeight * $ratio;
+
+        // Create final image with new dimensions.
+        $newImage = imagecreatetruecolor($newWidth, $newHeight);
+        imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $origWidth, $origHeight);
+        imagejpeg($newImage, $targetImage, $quality);
+
+        // Free up the memory.
+        imagedestroy($image);
+        imagedestroy($newImage);
+
+        return true;
+    }
+
+    function image_resize($image_type_id, $img_width, $img_height)
+    {
+
+        $target_width = $img_width;
+        $target_height = $img_height;
+        $target_layer = imagecreatetruecolor($target_width, $target_height);
+        imagecopyresampled($target_layer, $image_type_id, 0, 0, 0, 0, $target_width, $target_height, $img_width, $img_height);
+        return $target_layer;
     }
 
     public function ajax_update()
@@ -550,6 +603,7 @@ class Geotagging extends BaseController
                     $image_ktp = $this->request->getFile('vg_fktp');
                     $image_kk = $this->request->getFile('vg_fkk');
 
+
                     // get filename by vg_nik
                     $filename_fp = 'PDTT_FP' . $cekdata['vg_nik'] . '.jpg';
                     $filename_fr = 'PDTT_FR' . $cekdata['vg_nik'] . '.jpg';
@@ -572,6 +626,39 @@ class Geotagging extends BaseController
                     $img_fr = imagecreatefromjpeg($image_fr);
                     $img_ktp = imagecreatefromjpeg($image_ktp);
                     $img_kk = imagecreatefromjpeg($image_kk);
+
+                    // get width and height of image
+                    $width_fp = imagesx($img_fp);
+                    $height_fp = imagesy($img_fp);
+                    $width_fr = imagesx($img_fr);
+                    $height_fr = imagesy($img_fr);
+                    $width_ktp = imagesx($img_ktp);
+                    $height_ktp = imagesy($img_ktp);
+                    $width_kk = imagesx($img_kk);
+                    $height_kk = imagesy($img_kk);
+
+                    // reorient image if width is greater than height
+                    if ($width_fp > $height_fp) {
+                        $img_fp = imagerotate($img_fp, -90, 0);
+                    }
+                    if ($width_fr > $height_fr) {
+                        $img_fr = imagerotate($img_fr, -90, 0);
+                    }
+                    if ($width_ktp > $height_ktp) {
+                        $img_ktp = imagerotate($img_ktp, -90, 0);
+                    }
+                    if ($width_kk > $height_kk) {
+                        $img_kk = imagerotate($img_kk, -90, 0);
+                    }
+                    // resize image
+
+
+                    // resizing image
+                    $img_fp = imagescale($img_fp, 480, 640);
+                    $img_fr = imagescale($img_fr, 480, 640);
+                    $img_ktp = imagescale($img_ktp, 480, 640);
+                    $img_kk = imagescale($img_kk, 480, 640);
+
 
                     $txtNik = $this->request->getPost('vg_nik_ktp');
                     $txtNama = $this->request->getPost('vg_nama_ktp');
@@ -600,7 +687,7 @@ class Geotagging extends BaseController
 
                     // pos x from left, pos y from bottom
                     $posX = 0.02 * imagesx($img_fp);
-                    $posY = 0.50 * imagesy($img_fp);
+                    $posY = 0.75 * imagesy($img_fp);
 
                     // $posX = 10;
                     // $posY = 830;
@@ -610,6 +697,7 @@ class Geotagging extends BaseController
                     // $img_fp = imagescale($img_fp, imagesx($img_fp) / 2, imagesy($img_fp) / 2);
                     // $img_fr = imagescale($img_fr, imagesx($img_fr) / 2, imagesy($img_fr) / 2);
                     // $img_ktp = imagescale($img_ktp, imagesx($img_ktp) / 2, imagesy($img_ktp) / 2);
+
 
                     imagettfstroketext($img_fp, $fontSize, $angle, $posX, $posY, $white, $stroke_color, $fontFile, $txt, 3);
                     imagettfstroketext($img_fr, $fontSize, $angle, $posX, $posY, $white, $stroke_color, $fontFile, $txt, 3);
@@ -708,118 +796,254 @@ class Geotagging extends BaseController
 
             // dd($user_login);
             $this->WilayahModel = new WilayahModel();
-            $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor(FCPATH . 'data/templates/ba_pdtt.docx');
+            if ($user_login['role_id'] == 3) {
 
-            $filter1 = session()->get('kode_desa');
-            // not equal to
-            $filter4 = '1';
-            $filter5 = '1';
+                $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor(FCPATH . 'data/templates/ba_pdtt.docx');
+
+                $filter1 = session()->get('kode_desa');
+                // not equal to
+                $filter4 = '1';
+                $filter5 = '1';
 
 
-            $kode_tanggal = date('d');
-            $kode_bulan = date('n');
-            $kode_tahun = date('Y');
+                $kode_tanggal = date('d');
+                $kode_bulan = date('n');
+                $kode_tahun = date('Y');
 
-            $this->WilayahModel = $this->WilayahModel->getVillage($filter1);
-            // dd($this->WilayahModel);
-            if (is_array($this->WilayahModel)) {
-                $this->WilayahModelUpper = strtoupper($this->WilayahModel['name']);
-                $this->WilayahModelPropper = ucwords(strtolower($this->WilayahModel['name']));
+                $this->WilayahModel = $this->WilayahModel->getVillage($filter1);
+                // dd($this->WilayahModel);
+                if (is_array($this->WilayahModel)) {
+                    $this->WilayahModelUpper = strtoupper($this->WilayahModel['name']);
+                    $this->WilayahModelPropper = ucwords(strtolower($this->WilayahModel['name']));
+                } else {
+                    $this->WilayahModelUpper = strtoupper($this->WilayahModel);
+                    $this->WilayahModelPropper = ucwords(strtolower($this->WilayahModel));
+                }
+
+
+                // dd($this->WilayahModelUpper);
+                $bulan_ini = bulan_ini();
+
+                $hari_ini = hari_ini();
+
+                // dd($filter1);
+                $jmlVerval = $this->VerivaliGeoModel->getJmlVerval($filter1, $filter4);
+                $jmlVerval = $jmlVerval['jml'];
+                // dd($jmlVerval);
+
+                // get $jmlVervalFix()
+                $jmlVervalFix = $this->VerivaliGeoModel->getJmlVervalFix($filter1, $filter4, $filter5);
+                $jmlVervalFix = $jmlVervalFix['jml'];
+                // dd($jmlVervalFix);
+
+                $jmlNonVerval = $jmlVerval - $jmlVervalFix;
+                // dd($jmlVervalFix);
+                // get $jmlVervalFix()
+
+                $templateProcessor->setValues([
+                    'desaUpper' => $this->WilayahModelUpper,
+                    'desaPropper' => $this->WilayahModelPropper,
+                    'sekretariat' => $user_login['lp_sekretariat'],
+                    'email' => $user_login['lp_email'],
+                    'kode_pos' => $user_login['lp_kode_pos'],
+                    'hari' => $hari_ini,
+                    'tanggal' => $kode_tanggal,
+                    'bulan' => $bulan_ini,
+                    'tahun' => $kode_tahun,
+                    'nama_petugas' => $user_login['fullname'],
+                    'nik_petugas' => $user_login['nik'],
+                    'nama_apdes' => $user_login['lp_kepala'],
+                    'jmlVerval' => $jmlVerval,
+                    'jmlVervalFix' => $jmlVervalFix,
+                    'jmlNonVerval' => $jmlNonVerval,
+                ]);
+
+                $vervalPdtt = $this->VerivaliGeoModel->getVerivaliFix($filter1, $filter4, $filter5);
+                // dd($vervalPdtt);
+
+
+                $coba = [];
+                foreach ($vervalPdtt as $i => $value) {
+
+                    $coba[] = [
+                        'vg_no' => $i + 1,
+                        'vg_nik' => $value['vg_nik'],
+                        'vg_nama_lengkap' => $value['vg_nama_lengkap'],
+                        'vg_alamat' => $value['vg_alamat'],
+                        'vg_rt' => $value['vg_rt'],
+                        'vg_rw' => $value['vg_rw'],
+                        'vg_desa' => $value['namaDesa'],
+                        'dbj_nama_bansos' => $value['dbj_nama_bansos'],
+                        'vg_lat' => $value['vg_lat'],
+                        'vg_lang' => $value['vg_lang'],
+                        'vg_fp_name' => $value['vg_fp'],
+                        'vg_fp' => $value['vg_fp'],
+                        'vg_fr_name' => $value['vg_fr'],
+                        'vg_fr' => $value['vg_fr'],
+                    ];
+                    $i++;
+                }
+                // dd($coba);
+
+                $templateProcessor->cloneRowAndSetValues('vg_no', $coba);
+                foreach ($coba as $i => $item) {
+                    // path php to folder
+                    // $path = base_url('data/foto_pm/' . $item['vg_fp']);
+                    // $templateProcessor->setImageValue(sprintf('gmb_fp#%d', $i + 1), array('path' => $path, 'width' => 10, 'height' => 10, 'ratio' => false));
+                    // dd($path);
+                }
+
+                /* Note: any element you append to a document must reside inside of a Section. */
+
+
+                $filename = 'BA VERVAL PDTT.docx';
+
+                header("Content-Description: File Transfer");
+                header('Content-Disposition: attachment;filename="' . $filename . '"'); //tell browser what's the file name
+                header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+                header('Content-Transfer-Encoding: binary');
+                header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+                header('Expires: 0');
+
+                // Saving the document as OOXML file...
+                $templateProcessor->saveAs('php://output');
+
+
+                /* Note: we skip RTF, because it's not XML-based and requires a different example. */
+                /* Note: we skip PDF, because "HTML-to-PDF" approach is used to create PDF documents. */
+            } elseif ($user_login['role_id'] <= 2) {
+
+                $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor(FCPATH . 'data/templates/ba_pdtt_admin.docx');
+
+                $kode_kec = Profil_Admin()['kode_kec'];
+                // dd($kode_kec);
+                // $filter1 = null;
+                // not equal to
+                $filter4 = '0';
+                $filter5 = '1';
+
+
+                $kode_tanggal = date('d');
+                $kode_bulan = date('n');
+                $kode_tahun = date('Y');
+
+                $wilayah = $this->WilayahModel->getDistrict($kode_kec)->getResultArray();
+                // foreach ($wilayah as $w) {
+                //     $wil = $w;
+                //     $wilUpper = strtoupper($wil['name']);
+                //     $wilPropper = ucwords(strtolower($wil['name']));
+                // }
+                // dd($wilayah);
+
+                if (is_array($wilayah)) {
+                    $wilayahUpper = strtoupper($wilayah[0]['name']);
+                    $wilayahPropper = ucwords(strtolower($wilayah[0]['name']));
+                } else {
+                    $wilayahUpper = strtoupper($wilayah);
+                    $wilayahPropper = ucwords(strtolower($wilayah));
+                }
+
+
+                // dd($this->WilayahModelUpper);
+                $bulan_ini = bulan_ini();
+
+                $hari_ini = hari_ini();
+
+                // dd($filter1);
+                $jmlVerval = $this->VerivaliGeoModel->getJmlVerval1($filter4);
+                $jmlVerval = $jmlVerval['jml'];
+                // dd($jmlVerval);
+
+                // get $jmlVervalFix()
+                $jmlVervalFix = $this->VerivaliGeoModel->getJmlVervalFix1($filter4, $filter5);
+                $jmlVervalFix = $jmlVervalFix['jml'];
+                // dd($jmlVervalFix);
+
+                $jmlNonVerval = $jmlVerval - $jmlVervalFix;
+                // dd($jmlVervalFix);
+                // get $jmlVervalFix()
+
+                $templateProcessor->setValues([
+                    'KECUPPER' => $wilayahUpper,
+                    'kecPropper' => $wilayahPropper,
+                    'sekretariat' => $user_login['lp_sekretariat'],
+                    'email' => $user_login['lp_email'],
+                    'kode_pos' => $user_login['lp_kode_pos'],
+                    'hari' => $hari_ini,
+                    'tanggal' => $kode_tanggal,
+                    'bulan' => $bulan_ini,
+                    'tahun' => $kode_tahun,
+                    'nama_petugas' => $user_login['fullname'],
+                    'nik_petugas' => $user_login['nik'],
+                    'nama_apdes' => $user_login['lp_kepala'],
+                    'jmlVerval' => $jmlVerval,
+                    'jmlVervalFix' => $jmlVervalFix,
+                    'jmlNonVerval' => $jmlNonVerval,
+                ]);
+
+                $vervalPdtt = $this->VerivaliGeoModel->getVerivaliFix1($filter4, $filter5);
+                dd($vervalPdtt);
+
+
+                $coba = [];
+                foreach ($vervalPdtt as $i => $value) {
+
+                    $coba[] = [
+                        'vg_no' => $i + 1,
+                        'vg_nik' => $value['vg_nik'],
+                        'vg_nama_lengkap' => $value['vg_nama_lengkap'],
+                        'vg_alamat' => $value['vg_alamat'],
+                        'vg_rt' => $value['vg_rt'],
+                        'vg_rw' => $value['vg_rw'],
+                        'vg_desa' => $value['namaDesa'],
+                        'dbj_nama_bansos' => $value['dbj_nama_bansos'],
+                        'vg_lat' => $value['vg_lat'],
+                        'vg_lang' => $value['vg_lang'],
+                        'vg_fp_name' => $value['vg_fp'],
+                        'vg_fp' => $value['vg_fp'],
+                        'vg_fr_name' => $value['vg_fr'],
+                        'vg_fr' => $value['vg_fr'],
+                    ];
+                    $i++;
+                }
+                // dd($coba);
+
+                $templateProcessor->cloneRowAndSetValues('vg_no', $coba);
+                foreach ($coba as $i => $item) {
+                    // path php to folder
+                    // $path = base_url('data/foto_pm/' . $item['vg_fp']);
+                    // $templateProcessor->setImageValue(sprintf('gmb_fp#%d', $i + 1), array('path' => $path, 'width' => 10, 'height' => 10, 'ratio' => false));
+                    // dd($path);
+                }
+
+                /* Note: any element you append to a document must reside inside of a Section. */
+
+
+                $filename = 'BA VERVAL PDTT.docx';
+
+                header("Content-Description: File Transfer");
+                header('Content-Disposition: attachment;filename="' . $filename . '"'); //tell browser what's the file name
+                header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+                header('Content-Transfer-Encoding: binary');
+                header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+                header('Expires: 0');
+
+                // Saving the document as OOXML file...
+                $templateProcessor->saveAs('php://output');
             } else {
-                $this->WilayahModelUpper = strtoupper($this->WilayahModel);
-                $this->WilayahModelPropper = ucwords(strtolower($this->WilayahModel));
+                // return alert
+                $str = '  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+               <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+               <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+               <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.35.1/js/bootstrap-dialog.min.js"></script>
+               <script type="text/javascript">
+                   setTimeout(function() { 
+                      BootstrapDialog.alert(\'Anda Tidak memiliki Akses!!\') 
+                      window.location.href = \'/logout\';
+                    },10000);
+               </script>';
+                echo $str;
             }
-
-
-            // dd($this->WilayahModelUpper);
-            $bulan_ini = bulan_ini();
-
-            $hari_ini = hari_ini();
-
-            // dd($filter1);
-            $jmlVerval = $this->VerivaliGeoModel->getJmlVerval($filter1, $filter4);
-            $jmlVerval = $jmlVerval['jml'];
-            // dd($jmlVerval);
-
-            // get $jmlVervalFix()
-            $jmlVervalFix = $this->VerivaliGeoModel->getJmlVervalFix($filter1, $filter4, $filter5);
-            $jmlVervalFix = $jmlVervalFix['jml'];
-            // dd($jmlVervalFix);
-
-            $jmlNonVerval = $jmlVerval - $jmlVervalFix;
-            // dd($jmlVervalFix);
-            // get $jmlVervalFix()
-
-            $templateProcessor->setValues([
-                'desaUpper' => $this->WilayahModelUpper,
-                'desaPropper' => $this->WilayahModelPropper,
-                'sekretariat' => $user_login['lp_sekretariat'],
-                'email' => $user_login['lp_email'],
-                'kode_pos' => $user_login['lp_kode_pos'],
-                'hari' => $hari_ini,
-                'tanggal' => $kode_tanggal,
-                'bulan' => $bulan_ini,
-                'tahun' => $kode_tahun,
-                'nama_petugas' => $user_login['fullname'],
-                'nik_petugas' => $user_login['nik'],
-                'nama_apdes' => $user_login['lp_kepala'],
-                'jmlVerval' => $jmlVerval,
-                'jmlVervalFix' => $jmlVervalFix,
-                'jmlNonVerval' => $jmlNonVerval,
-            ]);
-
-            $vervalPdtt = $this->VerivaliGeoModel->getVerivaliFix($filter1, $filter4, $filter5);
-            // dd($vervalPdtt);
-
-
-            $coba = [];
-            foreach ($vervalPdtt as $i => $value) {
-
-                $coba[] = [
-                    'vg_no' => $i + 1,
-                    'vg_nik' => $value['vg_nik'],
-                    'vg_nama_lengkap' => $value['vg_nama_lengkap'],
-                    'vg_alamat' => $value['vg_alamat'],
-                    'vg_rt' => $value['vg_rt'],
-                    'vg_rw' => $value['vg_rw'],
-                    'vg_desa' => $value['namaDesa'],
-                    'dbj_nama_bansos' => $value['dbj_nama_bansos'],
-                    'vg_lat' => $value['vg_lat'],
-                    'vg_lang' => $value['vg_lang'],
-                    'vg_fp_name' => $value['vg_fp'],
-                    'vg_fp' => $value['vg_fp'],
-                    'vg_fr_name' => $value['vg_fr'],
-                    'vg_fr' => $value['vg_fr'],
-                ];
-                $i++;
-            }
-            // dd($coba);
-
-            $templateProcessor->cloneRowAndSetValues('vg_no', $coba);
-            foreach ($coba as $i => $item) {
-                // path php to folder
-                // $path = base_url('data/foto_pm/' . $item['vg_fp']);
-                // $templateProcessor->setImageValue(sprintf('gmb_fp#%d', $i + 1), array('path' => $path, 'width' => 10, 'height' => 10, 'ratio' => false));
-                // dd($path);
-            }
-
-            /* Note: any element you append to a document must reside inside of a Section. */
-
-
-            $filename = 'BA VERVAL PDTT.docx';
-
-            header("Content-Description: File Transfer");
-            header('Content-Disposition: attachment;filename="' . $filename . '"'); //tell browser what's the file name
-            header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-            header('Content-Transfer-Encoding: binary');
-            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-            header('Expires: 0');
-
-            // Saving the document as OOXML file...
-            $templateProcessor->saveAs('php://output');
-
-            /* Note: we skip RTF, because it's not XML-based and requires a different example. */
-            /* Note: we skip PDF, because "HTML-to-PDF" approach is used to create PDF documents. */
         }
     }
 

@@ -17,6 +17,15 @@ a{
 	text-decoration: black;
 }
 
+body {
+	background-image: url("../img/IMG-20211022-WA0017.jpg");
+	/* height: 100%; */
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover; 
+	/* background-color: #cccccc; */
+}
+
 .nopadding {
 	padding: 0 !important;
 	margin: 0 !important;

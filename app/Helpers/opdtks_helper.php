@@ -21,7 +21,7 @@ function Profil_Admin()
     $db = \Config\Database::connect();
 
     $builder = $db->table('dtks_users');
-    $builder->select('fullname, kode_kec, tb_districts.name as namaKec, user_image');
+    $builder->select('fullname, kode_kec, tb_districts.name as namaKec, user_image, kode_kab');
     $builder->join('tb_districts', 'tb_districts.id=dtks_users.kode_kec');
     $builder->where('dtks_users.role_id', 2);
 
@@ -218,17 +218,32 @@ function bulan_ini()
 
 function deadline_usulan()
 {
-    $deadline = '141312';
-
     $times = new Time();
+    $tahun = $times->getYear();
+    $bulan = $times->getMonth();
     $hari = $times->getDay();       // 12
-    $jam = $times->hour;           // 16
-    $menit = $times->minute;         // 15
-    $hari_ini = $hari . $jam . $menit;
+    $jam = $times->getHour();           // 16
+    $menit = $times->getMinute();         // 15
 
-    return $hari_ini > $deadline;
+    // $dead = date('Y-m-d H:i') . "<br>";
+    $dead = ($tahun . '-' . $bulan . '-' . '28 10:23');
+    $strdead = (strtotime($dead));
+    // $ini_tanggal = strtotime("14 14:12") . "<br>";
+    // $ini_tanggal = strtotime() . "<br>";
 
-    // return $deadline_usulan;
+    // $deadline = '141312';
+
+
+    $hari_ini = $tahun . '-' . $bulan . '-' . $hari . ' ' . $jam . ':' . $menit;
+    $strhari_ini = strtotime($hari_ini);
+
+    $deadline = $strhari_ini > $strdead ? 1 : 0;
+
+
+    // return $ini_tanggal;
+    // return $hari_ini > $deadline;
+
+    return $deadline;
 
     // dd($deadline_usulan);
 }

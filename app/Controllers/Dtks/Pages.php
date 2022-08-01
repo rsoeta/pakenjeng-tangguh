@@ -20,6 +20,7 @@ use App\Models\Dtks\AuthModel;
 use App\Models\Dtks\BnbaModel;
 
 
+
 class Pages extends BaseController
 {
     public function __construct()
@@ -52,6 +53,7 @@ class Pages extends BaseController
 
     public function index()
     {
+
         $BansosModel = new BansosModel();
         $DesaModel = new WilayahModel();
 
@@ -60,6 +62,7 @@ class Pages extends BaseController
 
         $JandaModel = new JandaModel();
         $janda = $JandaModel->jmlJanda();
+
 
         // dd($yatim);
         // $yatims[];
@@ -84,23 +87,12 @@ class Pages extends BaseController
         foreach ($desa as $row) {
         }
 
-        // $sumStatusBnba = $this->BnbaModel->sumStatusBnba();
-        // dd($sumStatusBnba);
-
-
         $data = [
             'title' => 'Dashboard',
             'desa' => $row['id'],
             'bansos' => $BansosModel->getBansos(),
             'dtks_status' => $this->GenModel->getStatusDtks(),
             'Rw' => $jbt,
-            // 'DataRekRw' => $this->vv06Model->getDataRekRw()->getResultArray(),
-            // 'DataInvalid' => $this->vv06Model->getInvalid()->getResultArray(),
-            // 'yatims' => ($yatims),
-            // 'jandas' => ($jandas),
-            // 'LisVv' => $this->vv06Model->getListVv(),
-            // 'LisSisaPerb' => $this->vv06Model->getListSisaPerb(),
-            // 'LisPerb' => ($this->vv06Model->getListVv()) - ($this->vv06Model->getListSisaPerb()),
             'jmlRecord' => $this->verivali09->jumlah_semua(),
             'getDataGrup' => $this->verivali09->getDataGroupBy(),
             'rekapUsulan' => $this->Usulan22Model->rekapUsulan(),
@@ -116,13 +108,9 @@ class Pages extends BaseController
             'countStatusBnba' => $this->BnbaModel->countStatusBnba(),
 
         ];
-        // dd($data['dtks_status'], $data['countStatusBnba']);
-        // dd($data);
-        // dd($data['rekapUsulan']);
-        // dd($data['countStatusBnba']);
-        // dd($data['jml_persentase']);
         if (session()->get('status') == 1 && session()->get('role_id') <= 4) {
             return view('dashboard', $data);
+            // return view('dash', $data);
         } elseif (session()->get('status') == 1 && session()->get('role_id') == 5) {
 
             $data = [

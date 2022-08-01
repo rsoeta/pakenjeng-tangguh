@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <!-- <meta http-equiv="Content-Security-Policy" content="connect-src 'ws://localhost:8080';"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Rian Sutarsa">
     <meta name="keywords" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng">
@@ -36,13 +37,15 @@
     <link rel="stylesheet" href="<?= base_url('assets/dist/css/adminlte.min.css'); ?>">
     <!-- Ionicons -->
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <link rel="stylesheet" href="<?= base_url('cust-css/style.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/dist/css/style.css'); ?>">
+    <!-- <link rel="stylesheet" href="<?= base_url('assets/dist/css/chat.css'); ?>"> -->
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css"> -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.2/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.0/css/buttons.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.1.9/css/fixedHeader.bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"> -->
+    <link rel="stylesheet" href="<?= base_url('landing-page/css/bootstrap.min.css'); ?>">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/rowreorder/1.2.8/css/rowReorder.dataTables.min.css">
@@ -51,6 +54,10 @@
 
     <!-- select2 -->
     <link href="<?= base_url('assets/plugins/select2/css/select2.min.css'); ?>" rel="stylesheet" />
+
+    <!-- fontawesome -->
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" />
 
     <!-- DataTables -->
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>

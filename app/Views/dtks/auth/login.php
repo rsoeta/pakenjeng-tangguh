@@ -6,7 +6,9 @@
     <!-- /.login-logo -->
     <div class="card card-outline card-primary">
         <div class="card-header text-center">
-            <img src="<?= base_url('icon-dtks.png'); ?>" alt="Logo" style="height: 50%; width: 50%;">
+            <a href="<?= base_url(); ?>">
+                <img src="<?= base_url('icon-dtks.png'); ?>" alt="Logo" style="height: 50%; width: 50%;">
+            </a>
         </div>
         <div class="card-body">
             <p class="login-box-msg">

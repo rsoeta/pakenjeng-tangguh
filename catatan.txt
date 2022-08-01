@@ -234,7 +234,7 @@
         - tambah tabel tb_bulan
 ---------------------------------------------------------------------------------------------------------------------------------------------------            
 
-## v2.8.2 -- Penambahan fitur Verivali BNBA KESOS
+## v2.8.2 -- Penambahan fitur Verivali BNBA KESOS -- 2022-07-23
 
     # perbaikan tabel dtks_bnba tambah kolom db_tgl_kejadian, db_noreg_kejadian, db_tb_status setelah kolom db_status
 
@@ -244,3 +244,14 @@
     # perbaikan tabel dtks_status
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+## v2.8.4 -- Perbaikan Bug Profil Lembaga Admin Kecamatan & Ekspor BA PDTT -- 2022-07-24
+    # template BA PDTT bagi Admin
+    # perbaiki table dtks_status, keterangan Menolak menjadi Sudah Mampu/Menolak
+    # perbaiki table dtks_users, tambah kolom jabatan_id int(11) setelah status
+    # tambah tabel tb_jabatan
+    # tambah tabel dtks_deadline
+
+## v2.9.0 -- tambah fitur online user
+    # tambah tabel tb_chatt
+    # tambah tabel dtks_users_login
