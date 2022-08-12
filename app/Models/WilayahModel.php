@@ -240,7 +240,7 @@ class WilayahModel extends Model
 
 	public function getAjaxSearch()
 	{
-		$kecamatan = '32.05.33';
+		$kecamatan = Profil_Admin()['kode_kec'];
 
 		$builder = $this->db->table('tb_villages');
 		$builder->select('tb_villages.id as kode_desa, tb_villages.name as nama_desa, tb_districts.id as kode_kec, tb_districts.name as nama_kec, tb_regencies.id as kode_kab, tb_regencies.name as nama_kab, tb_provinces.id as kode_prov, tb_provinces.name as nama_prov');
