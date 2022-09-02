@@ -234,7 +234,7 @@ $desa_id = session()->get('kode_desa');
                         ?>
                     </div>
                     <div class="modal-footer mt-3">
-                        <button type="submit" class="btn btn-primary btn-block btnsimpan">Save</button>
+                        <button type="submit" class="btn btn-primary btn-block btnsimpan">Simpan</button>
                     </div>
                 </div>
             </div>
