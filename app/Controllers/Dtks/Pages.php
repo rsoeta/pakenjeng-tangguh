@@ -63,6 +63,9 @@ class Pages extends BaseController
         $JandaModel = new JandaModel();
         $janda = $JandaModel->jmlJanda();
 
+        $Usulan22Model = new Usulan22Model();
+        $rekapUsulan = $Usulan22Model->rekapUsulan();
+
 
         // dd($yatim);
         // $yatims[];
@@ -87,9 +90,14 @@ class Pages extends BaseController
         foreach ($desa as $row) {
         }
 
+        $capaianAll = 0;
+        foreach ($rekapUsulan as $row) {
+            $capaianAll += $row->Capaian;
+        }
+
         $data = [
             'title' => 'Dashboard',
-            'desa' => $row['id'],
+            // 'desa' => $row['id'],
             'bansos' => $BansosModel->getBansos(),
             'dtks_status' => $this->GenModel->getStatusDtks(),
             'Rw' => $jbt,
@@ -106,9 +114,10 @@ class Pages extends BaseController
             'statusRole' => $this->GenModel->getStatusRole(),
             'user_login' => $this->AuthModel->getUserId(),
             'countStatusBnba' => $this->BnbaModel->countStatusBnba(),
-
+            'capaianAll' => $capaianAll,
         ];
         if (session()->get('status') == 1 && session()->get('role_id') <= 4) {
+            // dd($data['capaianAll']);
             return view('dashboard', $data);
             // return view('dash', $data);
         } elseif (session()->get('status') == 1 && session()->get('role_id') == 5) {

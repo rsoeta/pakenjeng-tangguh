@@ -277,11 +277,10 @@
                             <div class="col-12 col-md-3 mb-4">
                                 <h4>PERSENTASE</h4>
                                 <?php
-                                $total = 0;
+                                $total = $capaianAll;
                                 foreach ($rekapUsulan as $row) {
                                     $nama_desa = $row->namaDesa;
                                     $capaian = $row->Capaian;
-                                    $total += $capaian;
                                     $persentase = ($capaian / $total) * 100;
                                 ?>
                                     <div class="progress-group">
@@ -303,7 +302,6 @@
                                                 <th rowspan="2">NAMA DESA</th>
                                                 <th colspan="5">KRITERIA</th>
                                                 <th rowspan="2">JUMLAH TOTAL</th>
-
                                             </tr>
                                             <tr>
                                                 <?php
