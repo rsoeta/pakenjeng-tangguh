@@ -289,7 +289,7 @@ $desa_id = session()->get('kode_desa');
     });
 
     async function getData(id) {
-        let response = await fetch('/api_usulan' + id);
+        let response = await fetch('/api_usulan/' + id);
         let data = await response.json();
 
         return data;

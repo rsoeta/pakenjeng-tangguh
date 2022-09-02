@@ -45,12 +45,20 @@
     <section class="content mt-2">
         <div class="row">
             <div class="col-12">
-                <div class="card">
+                <div class="card displayNone">
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-chart-pie mr-1"></i>
                             Rincian Verivali KKPM
                         </h3>
+                        <div class="card-tools">
+                            <a href="/verivalibnba" type="button" class="btn btn-sm btn-tool" title="Lebih lanjut">
+                                <i class="fas fa-question"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                     </div>
                     <!-- /.card-header -->
                     <div class="row">
@@ -125,7 +133,7 @@
         </div>
         <div class="row">
             <div class="col-12 col-sm-2 col-md-2">
-                <div class="card">
+                <div class="card displayNone">
                     <div class="card-header">
                         <img src="<?= base_url('icon-dtks.png'); ?>" class="brand-image rounded-circle mb-lg-0 shadow-2" alt="icon app" width="40" height="40">
                         <span><strong> Verivali PDTT</strong></span>
@@ -166,7 +174,7 @@
                 </div>
             </div>
             <div class="col-12 col-sm-10 col-md-10">
-                <div class="card">
+                <div class="card displayNone">
                     <div class="card-header">
                         <img src="<?= base_url('icon-dtks.png'); ?>" class="brand-image rounded-circle mb-lg-0 shadow-2" alt="icon app" width="40" height="40">
                         <span><strong> Perbaikan Anomali DTKS</strong></span>
@@ -659,6 +667,7 @@
     'use strict';
     $(document).ready(function() {
         $('body').addClass('sidebar-collapse');
+        $('.displayNone').css('display', 'none')
     });
 
     const ctx = document.getElementById('chart_bnba').getContext('2d');
