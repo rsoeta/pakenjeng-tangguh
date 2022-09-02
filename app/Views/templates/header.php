@@ -58,7 +58,12 @@
     <!-- fontawesome -->
     <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" />
+    <!-- sweetalert -->
+    <link rel="stylesheet" href="<?= base_url('assets/plugins/sweetalert2/sweetalert2.min.css'); ?>">
+    <!-- lightbox -->
+    <link rel="stylesheet" href="<?= base_url('assets/lightbox/dist/css/lightbox.min.css'); ?>">
 
+    <link rel="shortcut icon" type="image/x-icon/png" href="<?= base_url('icon-dtks.png'); ?>" />
     <!-- DataTables -->
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
@@ -80,12 +85,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- sweetalert -->
-    <link rel="stylesheet" href="<?= base_url('assets/plugins/sweetalert2/sweetalert2.min.css'); ?>">
-    <!-- lightbox -->
-    <link rel="stylesheet" href="<?= base_url('assets/lightbox/dist/css/lightbox.min.css'); ?>">
-
-    <link rel="shortcut icon" type="image/x-icon/png" href="<?= base_url('icon-dtks.png'); ?>" />
 
     <script src="<?= base_url('assets/plugins/sweetalert2/sweetalert2.all.min.js'); ?>"></script>
     <script src="<?= base_url('assets/plugins/select2/js/select2.min.js'); ?>"></script>

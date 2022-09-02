@@ -75,7 +75,7 @@ class VervalPbiModel extends Model
         $db = db_connect();
         $builder = $db->table('dtks_pbi_jkn');
         $query = $builder->select('*')
-            ->join('tb_status_kawin', 'tb_status_kawin.idStatus=dtks_pbi_jkn.kdstawin')
+            // ->join('tb_status_kawin', 'tb_status_kawin.idStatus=dtks_pbi_jkn.kdstawin')
             // ->join('pekerjaan_kondisi_pekerjaan', 'pekerjaan_kondisi_pekerjaan.IDKondisi=individu_data.KondisiPekerjaan')
             // ->join('pendidikan_pend_tinggi', 'pendidikan_pend_tinggi.IDPendidikan=individu_data.PendTertinggi')
             // ->join('ket_verivali', 'ket_verivali.id_ketvv=individu_data.ket_verivali')
@@ -288,14 +288,6 @@ class VervalPbiModel extends Model
         return $query->getResultArray();
     }
 
-    public function getDataLogin($email, $tbl)
-    {
-        $builder = $this->db->table($tbl);
-        $builder->where('email', $email);
-        $log = $builder->get()->getRow();
-        return $log;
-    }
-
     public function getDtks()
     {
         $builder = $this->db->table('dtks_vv06');
@@ -384,12 +376,12 @@ class VervalPbiModel extends Model
             ->get()
             ->getResultArray();
     }
-    public function getIdDtks($id = false)
+    public function getIdPbi($id = false)
     {
         if ($id == false) {
             return $this->findAll();
         }
-        return $this->where(['ids' => $id])->first();
+        return $this->db->table($this->table)->where('id', $id);
     }
 
     public function getListVv()

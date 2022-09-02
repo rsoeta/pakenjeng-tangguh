@@ -10,8 +10,6 @@ use App\Models\Dtks\VerivaliGeoModel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-
-
 use App\Controllers\BaseController;
 
 class Geotagging extends BaseController
@@ -269,7 +267,7 @@ class Geotagging extends BaseController
                 $cekId = $db->table('dtks_verivali_geo')->getWhere(['vg_nik' => $vg_nik])->getResult();
 
                 if (count($cekId) > 0) {
-                    session()->setFlashdata('message', '<b style="color:red">Data Gagal di Import, ada ID yang sama</b>');
+                    session()->setFlashdata('message', '<b style="color:red">Data Gagal di Import, ada NIK yang sama</b>');
                 } else {
 
                     $simpandata = [
@@ -285,7 +283,6 @@ class Geotagging extends BaseController
         // return to maintenance
         return redirect()->to('maintenance');
     }
-
 
     public function formedit()
     {

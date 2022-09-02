@@ -22,17 +22,13 @@
                                 <hr>
                                 <!-- pesan validasi error -->
                                 <?php if (session()->get('success')) : ?>
-                                    <div class="col-12 mb-2" style="background-color: darkorange; border-radius: 3px; padding: 10px;">
-                                        <div class="alert alert-success text-success" role="alert">
-                                            <?= session()->get('success'); ?>
-                                        </div>
+                                    <div class="alert alert-success text-center" role="alert">
+                                        <?= session()->get('success'); ?>
                                     </div>
                                 <?php endif; ?>
                                 <?php if (session()->get('message')) : ?>
-                                    <div class="col-12 mb-2" style="background-color: darkorange; border-radius: 3px; padding: 10px;">
-                                        <div class="alert alert-success text-danger" role="alert">
-                                            <?= session()->get('message'); ?>
-                                        </div>
+                                    <div class="alert alert-warning text-center" role="alert">
+                                        <?= session()->get('message'); ?>
                                     </div>
                                 <?php endif; ?>
                                 <?php if (isset($validation)) : ?>
@@ -78,7 +74,7 @@
                                             <?php } ?>
                                         </select>
                                     </div>
-                                    <div class="form-group my-1">
+                                    <div class="form-group my-1" hidden>
                                         <input type="text" class="form-control form-control-sm form-control-user" name="opr_sch" aria-describedby="opr_sch" placeholder="Masukan Nama Sekolah" value="<?= set_value('opr_sch'); ?>" autocomplete="off">
                                     </div>
                                     <div class="form-group my-1">

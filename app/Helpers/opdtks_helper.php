@@ -21,9 +21,9 @@ function Profil_Admin()
     $db = \Config\Database::connect();
 
     $builder = $db->table('dtks_users');
-    $builder->select('fullname, kode_kec, tb_districts.name as namaKec, user_image, kode_kab');
+    $builder->select('fullname, tb_districts.name as namaKec, user_image, kode_kab, kode_kec');
     $builder->join('tb_districts', 'tb_districts.id=dtks_users.kode_kec');
-    $builder->where('dtks_users.role_id', 2);
+    $builder->where('dtks_users.role_id <=', 2);
 
     $query = $builder->get();
     return $query->getRowArray();

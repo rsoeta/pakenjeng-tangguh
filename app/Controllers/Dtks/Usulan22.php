@@ -425,7 +425,7 @@ class Usulan22 extends BaseController
         $penduduk = [];
         if (isset($postData['search'])) {
             $search = $postData['search'];
-            if ($role == '1') {
+            if ($role === '1') {
                 $builder->select('*');
                 $builder->like('du_nik', $search);
                 $builder->orLike('nama', $search);
@@ -433,7 +433,7 @@ class Usulan22 extends BaseController
                 $builder->distinct('du_nik');
                 $query = $builder->get();
                 $data = $query->getResult();
-            } elseif ($role == '2') {
+            } elseif ($role === '2') {
                 $builder->select('*');
                 $builder->like('du_nik', $search);
                 $builder->orLike('nama', $search);
@@ -441,7 +441,7 @@ class Usulan22 extends BaseController
                 $builder->distinct('du_nik');
                 $query = $builder->get();
                 $data = $query->getResult();
-            } elseif ($role == '3') {
+            } elseif ($role === '3') {
                 $builder->select('*');
                 $builder->where('kelurahan', $kode_desa);
                 $builder->like('du_nik', $search);
@@ -450,7 +450,7 @@ class Usulan22 extends BaseController
                 $builder->distinct('du_nik');
                 $query = $builder->get();
                 $data = $query->getResult();
-            } elseif ($role == '4') {
+            } elseif ($role === '4') {
                 $builder->select('*');
                 $builder->where('kelurahan', $kode_desa);
                 $builder->where('rw', $kode_rw);
@@ -464,22 +464,22 @@ class Usulan22 extends BaseController
                 $data = [];
             }
         } else {
-            if ($role == '1') {
+            if ($role === '1') {
                 $builder->select('*');
                 $query = $builder->get();
                 $data = $query->getResult();
-            } elseif ($role == '2') {
+            } elseif ($role === '2') {
                 $builder->select('*');
                 $builder->distinct('du_nik');
                 $query = $builder->get();
                 $data = $query->getResult();
-            } elseif ($role == '3') {
+            } elseif ($role === '3') {
                 $builder->select('*');
                 $builder->where('kelurahan', $kode_desa);
                 $builder->distinct('du_nik');
                 $query = $builder->get();
                 $data = $query->getResult();
-            } elseif ($role == '4') {
+            } elseif ($role === '4') {
                 $builder->select('*');
                 $builder->where('kelurahan', $kode_desa);
                 $builder->where('rw', $kode_rw);
@@ -493,13 +493,14 @@ class Usulan22 extends BaseController
         foreach ($data as $pdk) {
             $penduduk[] = array(
                 'id' => $pdk->du_id,
-                'text' => ' - NAMA: ' . $pdk->nama . ', NIK: ' . $pdk->du_nik . ', NO.KK: ' . $pdk->nokk,
+                'text' => ' - NAMA: ' . $pdk->nama . ', NIK: ' . $pdk->du_nik,
             );
         }
         $response['data'] = $penduduk;
 
         return $this->response->setJSON($response);
     }
+
     function delete()
     {
         if ($this->request->isAJAX()) {

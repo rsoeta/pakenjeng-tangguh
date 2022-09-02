@@ -9,7 +9,7 @@ $uri = $request->uri->getSegment(1);
 $menus = menu()
 ?>
 
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
+<aside class="main-sidebar sidebar-dark-primary elevation-4" style="height: 100%;">
     <!-- Brand Logo -->
     <a href="/dashboard" class="brand-link">
         <img src="<?= base_url('icon-dtks.png'); ?>" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
@@ -51,7 +51,7 @@ $menus = menu()
                             if (menu_child($menu['tm_id']) != null) {
                                 echo '<li class="nav-item has-treeview">';
                                 echo '<a href="' . base_url($menu['tm_url']) . '" class="nav-link">';
-                                echo '<i class="nav-icon ' . $menu['tm_icon'] . '"></i>';
+                                echo '<i class="nav-icon ' . $menu['tm_icon'] . ' mr-1"></i>';
                                 echo '<p>' . $menu['tm_nama'] . '<i class="right fas fa-angle-left"></i></p>';
                                 echo '</a>';
                                 echo '<ul class="nav nav-treeview nav-second-level">';
@@ -61,7 +61,7 @@ $menus = menu()
                                         if (menu_child_child($menu_child['tm_id']) != null) {
                                             echo '<li class="nav-item has-treeview">';
                                             echo '<a href="' . base_url($menu_child['tm_url']) . '" class="nav-link">';
-                                            echo '<i class="nav-icon ' . $menu_child['tm_icon'] . '"></i>';
+                                            echo '<i class="nav-icon ' . $menu_child['tm_icon'] . ' mr-1"></i>';
                                             echo '<p>' . $menu_child['tm_nama'] . '<i class="right fas fa-angle-left"></i></p>';
                                             echo '</a>';
                                             echo '<ul class="nav nav-treeview nav-third-level">';
@@ -71,7 +71,7 @@ $menus = menu()
                                                     if (menu_child_child_child($menu_child_child['tm_id']) != null) {
                                                         echo '<li class="nav-item has-treeview">';
                                                         echo '<a href="' . base_url($menu_child_child['tm_url']) . '" class="nav-link">';
-                                                        echo '<i class="nav-icon ' . $menu_child_child['tm_icon'] . '"></i>';
+                                                        echo '<i class="nav-icon ' . $menu_child_child['tm_icon'] . ' mr-1"></i>';
                                                         echo '<p>' . $menu_child_child['tm_nama'] . '<i class="right fas fa-angle-left"></i></p>';
                                                         echo '</a>';
                                                         echo '<ul class="nav nav-treeview nav-fourth-level">';
@@ -80,7 +80,7 @@ $menus = menu()
                                                             if ($menu_child_child_child['tm_status'] == 1 && $menu_child_child_child['tm_grup_akses'] >= $user) {
                                                                 echo '<li class="nav-item">';
                                                                 echo '<a href="' . base_url($menu_child_child_child['tm_url']) . '" class="nav-link">';
-                                                                echo '<i class="nav-icon ' . $menu_child_child_child['tm_icon'] . '"></i>';
+                                                                echo '<i class="nav-icon ' . $menu_child_child_child['tm_icon'] . ' mr-1"></i>';
                                                                 echo '<p>' . $menu_child_child_child['tm_nama'] . '</p>';
                                                                 echo '</a>';
                                                                 echo '</li>';
@@ -91,7 +91,7 @@ $menus = menu()
                                                     } else {
                                                         echo '<li class="nav-item">';
                                                         echo '<a href="' . base_url($menu_child_child['tm_url']) . '" class="nav-link">';
-                                                        echo '<i class="nav-icon ' . $menu_child_child['tm_icon'] . '"></i>';
+                                                        echo '<i class="nav-icon ' . $menu_child_child['tm_icon'] . ' mr-1"></i>';
                                                         echo '<p>' . $menu_child_child['tm_nama'] . '</p>';
                                                         echo '</a>';
                                                         echo '</li>';
@@ -103,7 +103,7 @@ $menus = menu()
                                         } else {
                                             echo '<li class="nav-item">';
                                             echo '<a href="' . base_url($menu_child['tm_url']) . '" class="nav-link">';
-                                            echo '<i class="nav-icon ' . $menu_child['tm_icon'] . '"></i>';
+                                            echo '<i class="nav-icon ' . $menu_child['tm_icon'] . ' mr-1"></i>';
                                             echo '<p>' . $menu_child['tm_nama'] . '</p>';
                                             echo '</a>';
                                             echo '</li>';
@@ -115,7 +115,7 @@ $menus = menu()
                             } else {
                                 echo '<li class="nav-item">';
                                 echo '<a href="' . base_url($menu['tm_url']) . '" class="nav-link">';
-                                echo '<i class="nav-icon ' . $menu['tm_icon'] . '"></i>';
+                                echo '<i class="nav-icon ' . $menu['tm_icon'] . ' mr-1"></i>';
                                 echo '<p>' . $menu['tm_nama'] . '</p>';
                                 echo '</a>';
                                 echo '</li>';

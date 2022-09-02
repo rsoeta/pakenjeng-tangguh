@@ -2,10 +2,7 @@
 
 <?= $this->section('content'); ?>
 
-
-
 <div class="content-wrapper mt-1">
-
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
@@ -23,11 +20,34 @@
             <?php if ($role <= 3) {  ?>
                 <div class="container-fluid">
                     <div class="row">
+                        <?php if (session()->getFlashdata('message')) { ?>
+                            <div class="alert alert-warning alert-dismissible fade show" role="alert" style="text-align: center;">
+                                <?= session()->getFlashdata('message') ?>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        <?php } ?>
                         <div class="col-12">
                             <ol class="breadcrumb float-right">
                                 <div class="row">
                                     <div class="btn-group">
-                                        <button href="/exportExcel" type="button" class="btn btn-sm btn-primary float-right tombolTambah"><i class="fa fa-upload"></i> Tambah Data</button>
+                                        <?php if ($role < 3) { ?>
+                                            <form action="<?= site_url('importInactive') ?>" method="post" enctype="multipart/form-data">
+                                                <?= csrf_field(); ?>
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <div class="col-12 input-group">
+                                                            <input type="file" name="file" class="form-control form-control float-right" required accept=".xls, .xlsx">
+                                                            <button type="submit" name="submit" class="btn btn-info float-right" onclick="return confirmSubmit()">
+                                                                <i class="fa fa-cloud-upload-alt"></i> Upload
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        <?php } ?>
+                                        <button href="#" type="button" class="btn btn-sm btn-primary float-right tombolTambah"><i class="fa fa-plus"></i> Tambah Data</button>
                                         <a href="/exportExcel" type="button" class="btn btn-sm btn-success float-right"><i class="fa fa-file-excel"></i> Export Excel</a>
                                     </div>
                                 </div>
@@ -98,7 +118,7 @@
                         </div>
                     </div>
                     <div class="container-fluid">
-                        <table id="tabel_data" class="table table-hover table-sm compact display" style="width: 100%;">
+                        <table id="tabel_data" class="table table-sm table-striped compact" style="width: 100%;">
                             <thead>
                                 <tr>
                                     <th>No</th>
@@ -172,7 +192,7 @@
                         </div>
                     </div>
                     <div class="container-fluid">
-                        <table id="tabel_data_verivali" class="table table-striped compact display" style="width: 100%;">
+                        <table id="tabel_data_verivali" class="table table-sm table-striped compact" style="width: 100%;">
                             <thead>
                                 <tr>
                                     <th>No</th>
@@ -466,6 +486,60 @@
             }
         });
     }
+
+    function confirmSubmit() {
+        // pop up comfirm to submit send data
+        {
+            var agree = confirm("Hati-Hati!!\nData sebelumnya akan terhapus. \nApakah Anda yakin akan mengimport data ini?");
+            if (agree)
+                return true;
+            else
+                return false;
+        }
+    }
+
+
+    $(document).on('click', '#deleteBtn', function() {
+        var id = $(this).data('id');
+        var nama = $(this).data('nama');
+        // alert(id);
+        // $('.editIndividu').modal('show');
+        tanya = confirm(`HAPUS DATA "${nama}"?`);
+        if (tanya == true) {
+            $.ajax({
+                type: "post",
+                url: "<?= base_url('dltPbi'); ?>",
+                data: {
+                    id: id
+                },
+                dataType: "json",
+                success: function(response) {
+                    if (response.informasi) {
+                        alert(response.informasi);
+                    } else if (response.sukses) {
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                        Toast.fire({
+                            icon: 'success',
+                            title: response.sukses,
+                        });
+                        // window.location.reload();
+                        table.draw();
+                    }
+                }
+            });
+        }
+
+    });
 </script>
 
 <?= $this->endSection(); ?>

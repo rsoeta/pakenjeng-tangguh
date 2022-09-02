@@ -66,15 +66,26 @@ $routes->get('exportExcel', 'Dtks\VervalPbi::excelpage', ['filter' => 'authfilte
 $routes->get('tmbData', 'Dtks\VervalPbi::formtambah', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tabexport', 'Dtks\VervalPbi::tabexport', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tabel_pbi_verivali', 'Dtks\VervalPbi::tabel_pbi_verivali', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('dltPbi', 'Dtks\VervalPbi::hapus', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('editpbi', 'Dtks\VervalPbi::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updatepbi', 'Dtks\VervalPbi::ajax_update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('addpbi', 'Dtks\VervalPbi::save', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->get('pbi_nonaktif', 'Dtks\VervalPbi::pbi_nonaktif', ['filter' => 'authfilterdtks']);
+$routes->post('tb_pbi_nonaktif', 'Dtks\VervalPbi::tb_pbi_nonaktif', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->get('tmbNA', 'Dtks\VervalPbi::formTmbNA', ['filter' => 'authfilterdtks']);
+$routes->post('get_data_pbi', 'Dtks\VervalPbi::get_data_pbi', ['filter' => 'authfilterdtks']);
+$routes->resource('api_pbi', ['controller' => 'Api\Dtks_Pbi', 'filter' => 'menufilterdtks']);
+$routes->post('saveInactive', 'Dtks\VervalPbi::saveInactive', ['filter' => 'authfilterdtks']);
+$routes->post('editInactive', 'Dtks\VervalPbi::formEditInactive', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('updateInactive', 'Dtks\VervalPbi::updateInactive', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('importInactive', 'Dtks\VervalPbi::importExcel', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 // USULAN
 $routes->get('usulan', 'Dtks\Usulan22::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tmbUsul', 'Dtks\Usulan22::save', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->get('tambah', 'Dtks\Usulan22::formtambah', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('get_data_penduduk', 'Dtks\Usulan22::get_data_penduduk', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->resource('api_usulan', ['controller' => 'Api\Dtks_Usulan', 'filter' => 'menufilterdtks']);
 $routes->post('editUsulan', 'Dtks\Usulan22::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updateUsulan', 'Dtks\Usulan22::update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('dltUsul', 'Dtks\Usulan22::delete', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -84,7 +95,6 @@ $routes->match(['get', 'post'], 'exportBa', 'Dtks\Usulan22::exportBa', ['filter'
 $routes->get('import_csv', 'Dtks\Usulan22::import_csv', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('importCsvToDb', 'Dtks\Usulan22::importCsvToDb', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tb_csv', 'Dtks\Usulan22::tbCsv', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->resource('api/dtks_usulan', ['controller' => 'Api\Dtks_Usulan', 'filter' => 'menufilterdtks']);
 
 
 // WILAYAH
@@ -153,7 +163,6 @@ $routes->post('dltBpnt', 'Dtks\BpntGanti::delete', ['filter' => 'authfilterdtks'
 $routes->post('editBpnt', 'Dtks\BpntGanti::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updateBpnt', 'Dtks\BpntGanti::update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
-
 // Setting General
 $routes->get('chart_desa', 'Dtks\VeriVali09::chartDesa', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->get('wilayah', 'Dtks\Wil::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -182,7 +191,7 @@ $routes->post('submit_lembaga', 'Profil\Profil_User::submit_lembaga', ['filter' 
 $routes->post('update_lembaga', 'Profil\Profil_User::update_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 // setting web
-$routes->match(['get', 'post'], 'settings', 'Profil\Profil_Web::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->match(['get', 'post'], 'settings', 'Profil\Profil_Web::index', ['filter' => 'authfilterdtks']);
 $routes->post('update_web_admin', 'Profil\Profil_Web::update_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('submit_web_lembaga', 'Profil\Profil_Web::submit_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('update_web_lembaga', 'Profil\Profil_Web::update_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);

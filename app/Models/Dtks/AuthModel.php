@@ -12,14 +12,14 @@ class AuthModel extends Model
     protected $useAutoIncrement     = true;
     protected $insertID             = 0;
     protected $returnType           = 'array';
-    protected $useSoftDelete        = false;
+    protected $useSoftDelete        = true;
     protected $protectFields        = true;
 
     protected $allowedFields        = [
         'nik', 'username', 'fullname', 'email', 'password', 'status', 'level', 'role_id', 'kode_desa', 'kode_kec', 'kode_kab', 'nope', 'opr_sch', 'jabatan', 'user_image', 'created_at', 'updated_at'
     ];
 
-    protected $useTimestamps        = false;
+    protected $useTimestamps        = true;
     // protected $dateFormat           = 'datetime';
     // protected $createdField         = 'created_at';
     // protected $updatedField         = 'updated_at';

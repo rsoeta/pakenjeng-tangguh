@@ -21,7 +21,6 @@ class BpntGanti extends BaseController
 {
     public function __construct()
     {
-        helper(['form']);
         $this->VeriVali09Model = new VeriVali09Model();
         $this->VervalPbiModel = new VervalPbiModel();
         $this->WilayahModel = new WilayahModel();

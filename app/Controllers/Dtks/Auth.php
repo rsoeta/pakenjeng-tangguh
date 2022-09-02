@@ -107,9 +107,10 @@ class Auth extends BaseController
 
     public function register()
     {
+        $this->WilayahModel = new WilayahModel();
+
         $kode_kab = Profil_Admin()['kode_kab'];
         $kode_kec = Profil_Admin()['kode_kec'];
-        $this->WilayahModel = new WilayahModel();
 
         $data = [
             'title' => 'Registration',
@@ -200,9 +201,11 @@ class Auth extends BaseController
                 //strore the user to database
                 $model = new AuthModel();
 
+                $kode_kab = substr($this->request->getVar('kelurahan'), 0, 5);
+                $kode_kec = substr($this->request->getVar('kelurahan'), 0, 8);
+
                 $newData = [
                     'nik' => $this->request->getVar('nik'),
-                    // 'username' => $this->request->getVar('username'),
                     'fullname' => $this->request->getVar('fullname'),
                     'email' => $this->request->getVar('email'),
                     'kode_desa' => $this->request->getVar('kelurahan'),
@@ -229,7 +232,7 @@ class Auth extends BaseController
     public function regOpSek()
     {
         // $data = [];
-        helper(['form']);
+        $kode_kab = Profil_Admin()['kode_kab'];
         $kode_kec = Profil_Admin()['kode_kec'];
         $this->WilayahModel = new WilayahModel();
 
@@ -330,6 +333,8 @@ class Auth extends BaseController
                     'fullname' => strtoupper($this->request->getVar('fullname')),
                     'email' => $this->request->getVar('email'),
                     'kode_desa' => $this->request->getVar('kelurahan'),
+                    'kode_kec' => $kode_kec,
+                    'kode_kab' => $kode_kab,
                     'level' => $this->request->getVar('no_rw'),
                     'status' => 0,
                     'opr_sch' => strtoupper($this->request->getVar('opr_sch')),

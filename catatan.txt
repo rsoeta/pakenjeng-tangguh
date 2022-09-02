@@ -255,3 +255,8 @@
 ## v2.9.0 -- tambah fitur online user
     # tambah tabel tb_chatt
     # tambah tabel dtks_users_login
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+## v2.9.1 -- tambah fitur rekap pbi_nonaktif
+    # tambah tablel dtks_pbi_nonaktif

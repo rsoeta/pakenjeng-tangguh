@@ -42,6 +42,7 @@
                                         </div>
                                     </div>
                                 <?php endif; ?>
+
                                 <form action="/register" method="POST">
                                     <?= csrf_field(); ?>
                                     <div class="form-group my-1">
