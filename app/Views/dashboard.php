@@ -3,14 +3,13 @@
 
 
 <!-- jQuery Library -->
-<script src="<?= base_url('assets/plugins/jquery/jquery.min.js'); ?>"></script>
-<script src="<?= base_url('assets/dist/js/jquery/3.6.0/jquery-3.6.0.min.js'); ?>"></script>
-<script src="<?= base_url('assets/dist/js/jquery/datatables/1.10.19/jquery.dataTables.min.js'); ?>"></script>
-<script src="https://cdn.datatables.net/fixedheader/3.1.9/js/dataTables.fixedHeader.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap.min.js"></script>
-
-<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script><!-- Content Wrapper. Contains page content -->
+<script async src="<?= base_url('assets/plugins/jquery/jquery.min.js'); ?>"></script>
+<script async src="<?= base_url('assets/dist/js/jquery/3.6.0/jquery-3.6.0.min.js'); ?>"></script>
+<script async src="<?= base_url('assets/dist/js/jquery/datatables/1.10.19/jquery.dataTables.min.js'); ?>"></script>
+<script async src="https://cdn.datatables.net/fixedheader/3.1.9/js/dataTables.fixedHeader.min.js"></script>
+<script async src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+<script async src="https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap.min.js"></script>
+<script async src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script><!-- Content Wrapper. Contains page content -->
 
 <style>
     #bg-orange {

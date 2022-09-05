@@ -33,7 +33,7 @@
                                 <div class="row">
                                     <div class="btn-group">
                                         <?php if ($role < 3) { ?>
-                                            <form action="<?= site_url('importInactive') ?>" method="post" enctype="multipart/form-data">
+                                            <form action="<?= site_url('importPbi') ?>" method="post" enctype="multipart/form-data">
                                                 <?= csrf_field(); ?>
                                                 <div class="row">
                                                     <div class="col-12">
@@ -497,7 +497,6 @@
                 return false;
         }
     }
-
 
     $(document).on('click', '#deleteBtn', function() {
         var id = $(this).data('id');

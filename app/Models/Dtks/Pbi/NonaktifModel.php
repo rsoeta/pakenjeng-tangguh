@@ -42,7 +42,7 @@ class NonaktifModel extends Model
         // search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "(dpn_noka_kis LIKE '%$search%' OR dpn_nama_kis LIKE '%$search%' OR dpn_nik_kis LIKE '%$search%' OR dpn_alamat_kis LIKE '%$search%' OR dpn_nik_pm LIKE '%$search%' OR dpn_nama_pm LIKE '%$search%' OR dpn_nkk_pm LIKE '%$search% OR dpn_alamat_pm LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
+            $kondisi_search = "(dpn_noka_kis LIKE '%$search%' OR dpn_nama_kis LIKE '%$search%' OR dpn_nik_kis LIKE '%$search%' OR dpn_alamat_kis LIKE '%$search%' OR dpn_nik_pm LIKE '%$search%' OR dpn_nama_pm LIKE '%$search%' OR dpn_nkk_pm LIKE '%$search%' OR dpn_alamat_pm LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
         } else {
             $kondisi_search = "dpn_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
         }
@@ -106,7 +106,7 @@ class NonaktifModel extends Model
         // kondisi search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "AND (dpn_noka_kis LIKE '%$search%' OR dpn_nama_kis LIKE '%$search%' OR dpn_nik_kis LIKE '%$search%' OR dpn_alamat_kis LIKE '%$search%' OR dpn_nik_pm LIKE '%$search%' OR dpn_nama_pm LIKE '%$search%' OR dpn_nkk_pm LIKE '%$search% OR dpn_alamat_pm LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
+            $kondisi_search = "AND (dpn_noka_kis LIKE '%$search%' OR dpn_nama_kis LIKE '%$search%' OR dpn_nik_kis LIKE '%$search%' OR dpn_alamat_kis LIKE '%$search%' OR dpn_nik_pm LIKE '%$search%' OR dpn_nama_pm LIKE '%$search%' OR dpn_nkk_pm LIKE '%$search%' OR dpn_alamat_pm LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
         } else {
             $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
         }

@@ -70,15 +70,18 @@ $routes->post('dltPbi', 'Dtks\VervalPbi::hapus', ['filter' => 'authfilterdtks', 
 $routes->post('editpbi', 'Dtks\VervalPbi::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updatepbi', 'Dtks\VervalPbi::ajax_update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('addpbi', 'Dtks\VervalPbi::save', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->get('pbi_nonaktif', 'Dtks\VervalPbi::pbi_nonaktif', ['filter' => 'authfilterdtks']);
-$routes->post('tb_pbi_nonaktif', 'Dtks\VervalPbi::tb_pbi_nonaktif', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->get('tmbNA', 'Dtks\VervalPbi::formTmbNA', ['filter' => 'authfilterdtks']);
-$routes->post('get_data_pbi', 'Dtks\VervalPbi::get_data_pbi', ['filter' => 'authfilterdtks']);
+$routes->post('importPbi', 'Dtks\VervalPbi::importExcel', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+
+// PBI INACTIVE
+$routes->get('pbi_nonaktif', 'Dtks\Pbi\Inactive::pbi_nonaktif', ['filter' => 'authfilterdtks']);
+$routes->post('tb_pbi_nonaktif', 'Dtks\Pbi\Inactive::tb_pbi_nonaktif', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->get('tmbNA', 'Dtks\Pbi\Inactive::formTmbNA', ['filter' => 'authfilterdtks']);
+$routes->post('get_data_pbi', 'Dtks\Pbi\Inactive::get_data_pbi', ['filter' => 'authfilterdtks']);
 $routes->resource('api_pbi', ['controller' => 'Api\Dtks_Pbi', 'filter' => 'menufilterdtks']);
-$routes->post('saveInactive', 'Dtks\VervalPbi::saveInactive', ['filter' => 'authfilterdtks']);
-$routes->post('editInactive', 'Dtks\VervalPbi::formEditInactive', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('updateInactive', 'Dtks\VervalPbi::updateInactive', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('importInactive', 'Dtks\VervalPbi::importExcel', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('saveInactive', 'Dtks\Pbi\Inactive::saveInactive', ['filter' => 'authfilterdtks']);
+$routes->post('editInactive', 'Dtks\Pbi\Inactive::formEditInactive', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('updateInactive', 'Dtks\Pbi\Inactive::updateInactive', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('dltInactive', 'Dtks\Pbi\Inactive::hapus', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 // USULAN
 $routes->get('usulan', 'Dtks\Usulan22::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);

@@ -111,14 +111,6 @@
                             </div>
                         </div>
                         <hr>
-
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="dpn_nik_pm">NIK PM</label>
-                            <div class="col-8 col-sm-8">
-                                <input type="text" name="dpn_nik_pm" id="dpn_nik_pm" class="form-control form-control-sm" value="<?= set_value('dpn_nik_pm', $dpn_nik_pm); ?>">
-                                <div class="invalid-feedback errordpn_nik_pm"></div>
-                            </div>
-                        </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dpn_nama_pm">Nama</label>
                             <div class="col-8 col-sm-8">
@@ -126,6 +118,14 @@
                                 <div class="invalid-feedback errordpn_nama_pm"></div>
                             </div>
                         </div>
+                        <div class="form-group row nopadding">
+                            <label class="col-4 col-sm-4 col-form-label" for="dpn_nik_pm">NIK PM</label>
+                            <div class="col-8 col-sm-8">
+                                <input type="text" name="dpn_nik_pm" id="dpn_nik_pm" class="form-control form-control-sm" value="<?= set_value('dpn_nik_pm', $dpn_nik_pm); ?>">
+                                <div class="invalid-feedback errordpn_nik_pm"></div>
+                            </div>
+                        </div>
+
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dpn_nkk_pm">No. KK</label>
                             <div class="col-8 col-sm-8">

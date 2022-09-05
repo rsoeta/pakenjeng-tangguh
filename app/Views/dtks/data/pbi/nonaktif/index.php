@@ -103,7 +103,7 @@
 <div class="viewmodal" style="display: none;"></div>
 <script>
     $(document).ready(function() {
-        // $('body').addClass('sidebar-collapse');
+        $('body').addClass('sidebar-collapse');
 
         $('.tombolTambah').click(function(e) {
             e.preventDefault();
@@ -172,6 +172,48 @@
                 $('#datartverivali').val('');
             }
         });
+    });
+
+    $(document).on('click', '#deleteBtn', function() {
+        var id = $(this).data('id');
+        var nama = $(this).data('nama');
+        // alert(id);
+        // $('.editIndividu').modal('show');
+        tanya = confirm(`HAPUS DATA "${nama}"?`);
+        if (tanya == true) {
+            $.ajax({
+                type: "post",
+                url: "<?= base_url('dltInactive'); ?>",
+                data: {
+                    id: id
+                },
+                dataType: "json",
+                success: function(response) {
+                    if (response.informasi) {
+                        alert(response.informasi);
+                    } else if (response.sukses) {
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+                        Toast.fire({
+                            icon: 'success',
+                            title: response.sukses,
+                        });
+                        // window.location.reload();
+                        table.draw();
+                    }
+                }
+            });
+        }
+
     });
 
     table = $('#tb_pbi_nonaktif').DataTable({
