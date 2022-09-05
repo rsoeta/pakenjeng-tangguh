@@ -252,7 +252,7 @@
                         <div class="row">
                             <?php foreach ($rekapUsulan as $row) { ?>
                                 <div class="col-sm-2 col-md-2 col-6">
-                                    <div class="small-box bg-info">
+                                    <div class="small-box bg-primary">
                                         <div class="container">
                                             <div class="row">
                                                 <div class="col mt-4">
@@ -286,7 +286,7 @@
                                         <span class="progress-text"><b><?= $nama_desa; ?></b></span>
                                         <span class="progress-number float-right"><?php echo number_format($persentase, 2); ?>%</span>
                                         <div class="progress sm">
-                                            <div class="progress-bar bg-info" style="width: <?php echo number_format($persentase, 2); ?>%"></div>
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: <?php echo number_format($persentase, 2); ?>%"></div>
                                         </div>
                                     </div>
                                 <?php } ?>
