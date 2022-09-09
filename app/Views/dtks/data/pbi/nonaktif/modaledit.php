@@ -36,35 +36,35 @@
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dpn_nama_kis">Nama</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dpn_nama_kis" id="dpn_nama_kis" class="form-control form-control-sm" value="<?= set_value('dpn_nama_kis', $dpn_nama_kis); ?>" <?= $role > 3 ? 'readonly' : ''; ?>>
+                                <input type="text" name="dpn_nama_kis" id="dpn_nama_kis" class="form-control form-control-sm" value="<?= $dpn_nama_kis; ?>" <?= $role > 3 ? 'readonly' : ''; ?>>
                                 <div class="invalid-feedback errordpn_nama_kis"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dpn_noka_kis">NOKA</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dpn_noka_kis" id="dpn_noka_kis" class="form-control form-control-sm" value="<?= set_value('dpn_noka_kis', $dpn_noka_kis); ?>">
+                                <input type="text" name="dpn_noka_kis" id="dpn_noka_kis" class="form-control form-control-sm" value="<?= $dpn_noka_kis; ?>">
                                 <div class="invalid-feedback errordpn_noka_kis"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dpn_nik_kis">NIKKA</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dpn_nik_kis" id="dpn_nik_kis" class="form-control form-control-sm" value="<?= set_value('dpn_nik_kis', $dpn_nik_kis); ?>">
+                                <input type="text" name="dpn_nik_kis" id="dpn_nik_kis" class="form-control form-control-sm" value="<?= $dpn_nik_kis; ?>">
                                 <div class="invalid-feedback errordpn_nik_kis"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dpn_tmp_lhr_kis">Tempat Lahir</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dpn_tmp_lhr_kis" id="dpn_tmp_lhr_kis" class="form-control form-control-sm" value="<?= set_value('dpn_tmp_lhr_kis', $dpn_tmp_lhr_kis); ?>">
+                                <input type="text" name="dpn_tmp_lhr_kis" id="dpn_tmp_lhr_kis" class="form-control form-control-sm" value="<?= $dpn_tmp_lhr_kis; ?>">
                                 <div class="invalid-feedback errordpn_tmp_lhr_kis"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dpn_tgl_lhr_kis">Tanggal Lahir</label>
                             <div class="col-8 col-sm-8">
-                                <input type="date" name="dpn_tgl_lhr_kis" id="dpn_tgl_lhr_kis" class="form-control form-control-sm" value="<?= set_value('dpn_tgl_lhr_kis', $dpn_tgl_lhr_kis); ?>">
+                                <input type="date" name="dpn_tgl_lhr_kis" id="dpn_tgl_lhr_kis" class="form-control form-control-sm" value="<?= $dpn_tgl_lhr_kis; ?>">
                                 <div class="invalid-feedback errordpn_tgl_lhr_kis"></div>
                             </div>
                         </div>
@@ -74,7 +74,7 @@
                                 <select id="dpn_rw_kis" name="dpn_rw_kis" class="form-select form-select-sm">
                                     <option value="">-- Pilih RW --</option>
                                     <?php foreach ($datarw as $row) { ?>
-                                        <option <?= $dpn_rw_kis == $row['no_rw'] ? 'selected' : ''; ?> value="<?= $row['no_rw'] ?>"> <?php echo $row['no_rw']; ?></option>
+                                        <option <?= $dpn_rw_kis == $row['no_rw'] ? 'selected' : ''; ?> value="<?= $row['no_rw'] ?>"> <?= $row['no_rw']; ?></option>
                                     <?php } ?>
                                 </select>
                                 <div class="invalid-feedback errordpn_rw_kis"></div>
@@ -86,7 +86,7 @@
                                 <select id="dpn_rt_kis" name="dpn_rt_kis" class="form-select form-select-sm">
                                     <option value="">-Kosong-</option>
                                     <?php foreach ($datart as $row) { ?>
-                                        <option <?= $dpn_rt_kis == $row['no_rt'] ? 'selected' : ''; ?> value="<?= $row['no_rt'] ?>"> <?php echo $row['no_rt']; ?></option>
+                                        <option <?= $dpn_rt_kis == $row['no_rt'] ? 'selected' : ''; ?> value="<?= $row['no_rt'] ?>"> <?= $row['no_rt']; ?></option>
                                     <?php } ?>
                                 </select>
                                 <div class="invalid-feedback errordpn_rt_kis"></div>
@@ -95,7 +95,7 @@
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dpn_alamat_kis">Alamat</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dpn_alamat_kis" id="dpn_alamat_kis" class="form-control form-control-sm" value="<?= set_value('dpn_alamat_kis', $dpn_alamat_kis); ?>">
+                                <input type="text" name="dpn_alamat_kis" id="dpn_alamat_kis" class="form-control form-control-sm" value="<?= $dpn_alamat_kis; ?>">
                                 <div class="invalid-feedback errordpn_alamat_kis"></div>
                             </div>
                         </div>
@@ -106,7 +106,7 @@
                             <label class="col-4 col-form-label" for="cariPm">Cari Data PM</label>
                             <div class="col-8">
                                 <select name="cariPm" id="cariPm" class="form-select form-select-sm select2" style="width: 100%;">
-                                    <option value='0'>-- Select --</option>
+                                    <option value="0">-- Select --</option>
                                 </select>
                             </div>
                         </div>
@@ -114,14 +114,14 @@
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dpn_nama_pm">Nama</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dpn_nama_pm" id="dpn_nama_pm" class="form-control form-control-sm" value="<?= set_value('dpn_nama_pm', $dpn_nama_pm); ?>">
+                                <input type="text" name="dpn_nama_pm" id="dpn_nama_pm" class="form-control form-control-sm" value="<?= $dpn_nama_pm; ?>">
                                 <div class="invalid-feedback errordpn_nama_pm"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dpn_nik_pm">NIK PM</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dpn_nik_pm" id="dpn_nik_pm" class="form-control form-control-sm" value="<?= set_value('dpn_nik_pm', $dpn_nik_pm); ?>">
+                                <input type="text" name="dpn_nik_pm" id="dpn_nik_pm" class="form-control form-control-sm" value="<?= $dpn_nik_pm; ?>">
                                 <div class="invalid-feedback errordpn_nik_pm"></div>
                             </div>
                         </div>
@@ -129,21 +129,21 @@
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dpn_nkk_pm">No. KK</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dpn_nkk_pm" id="dpn_nkk_pm" class="form-control form-control-sm" value="<?= set_value('dpn_nkk_pm', $dpn_nkk_pm); ?>">
+                                <input type="text" name="dpn_nkk_pm" id="dpn_nkk_pm" class="form-control form-control-sm" value="<?= $dpn_nkk_pm; ?>">
                                 <div class="invalid-feedback errordpn_nkk_pm"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dpn_tmp_lhr_pm">Tempat Lahir</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dpn_tmp_lhr_pm" id="dpn_tmp_lhr_pm" class="form-control form-control-sm" value="<?= set_value('dpn_tmp_lhr_pm', $dpn_tmp_lhr_pm); ?>">
+                                <input type="text" name="dpn_tmp_lhr_pm" id="dpn_tmp_lhr_pm" class="form-control form-control-sm" value="<?= $dpn_tmp_lhr_pm; ?>">
                                 <div class="invalid-feedback errordpn_tmp_lhr_pm"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dpn_tgl_lhr_pm">Tanggal Lahir</label>
                             <div class="col-8 col-sm-8">
-                                <input type="date" name="dpn_tgl_lhr_pm" id="dpn_tgl_lhr_pm" class="form-control form-control-sm" value="<?= set_value('dpn_tgl_lhr_pm', $dpn_tgl_lhr_pm); ?>">
+                                <input type="date" name="dpn_tgl_lhr_pm" id="dpn_tgl_lhr_pm" class="form-control form-control-sm" value="<?= $dpn_tgl_lhr_pm; ?>">
                                 <div class="invalid-feedback errordpn_tgl_lhr_pm"></div>
                             </div>
                         </div>
@@ -153,7 +153,7 @@
                                 <select id="dpn_kode_desa" name="dpn_kode_desa" class="form-select form-select-sm">
                                     <option value="">-- Pilih Desa --</option>
                                     <?php foreach ($desKels as $row) { ?>
-                                        <option <?= session()->get('kode_desa') == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id'] ?>" <?= set_select('dpn_kode_desa', $dpn_kode_desa); ?>> <?php echo $row['name']; ?></option>
+                                        <option <?= session()->get('kode_desa') == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id'] ?>" <?= $dpn_kode_desa; ?>> <?php echo $row['name']; ?></option>
                                     <?php } ?>
                                 </select>
                                 <div class="invalid-feedback errordpn_kode_desa"></div>
@@ -165,7 +165,7 @@
                                 <select id="dpn_rw_pm" name="dpn_rw_pm" class="form-select form-select-sm">
                                     <option value="">-- Pilih RW --</option>
                                     <?php foreach ($datarw as $row) { ?>
-                                        <option <?= $dpn_rw_pm == $row['no_rw'] ? 'selected' : ''; ?> value="<?= $row['no_rw'] ?>"> <?php echo $row['no_rw']; ?></option>
+                                        <option <?= $dpn_rw_pm == $row['no_rw'] ? 'selected' : ''; ?> value="<?= $row['no_rw'] ?>"> <?= $row['no_rw']; ?></option>
                                     <?php } ?>
                                 </select>
                                 <div class="invalid-feedback errordpn_rw_pm"></div>
@@ -177,7 +177,7 @@
                                 <select id="dpn_rt_pm" name="dpn_rt_pm" class="form-select form-select-sm">
                                     <option value="">-Kosong-</option>
                                     <?php foreach ($datart as $row) { ?>
-                                        <option <?= $dpn_rt_pm == $row['no_rt'] ? 'selected' : ''; ?> value="<?= $row['no_rt'] ?>"> <?php echo $row['no_rt']; ?></option>
+                                        <option <?= $dpn_rt_pm == $row['no_rt'] ? 'selected' : ''; ?> value="<?= $row['no_rt'] ?>"> <?= $row['no_rt']; ?></option>
                                     <?php } ?>
                                 </select>
                                 <div class="invalid-feedback errordpn_rt_pm"></div>
@@ -186,7 +186,7 @@
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dpn_alamat_pm">Alamat</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dpn_alamat_pm" id="dpn_alamat_pm" class="form-control form-control-sm" value="<?= set_value('dpn_alamat_pm', $dpn_alamat_pm); ?>">
+                                <input type="text" name="dpn_alamat_pm" id="dpn_alamat_pm" class="form-control form-control-sm" value="<?= $dpn_alamat_pm; ?>">
                                 <div class="invalid-feedback errordpn_alamat_pm"></div>
                             </div>
                         </div>

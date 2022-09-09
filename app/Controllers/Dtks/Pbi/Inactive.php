@@ -483,9 +483,11 @@ class Inactive extends BaseController
     {
         if ($this->request->isAJAX()) {
             // var_dump($this->request->getPost());
+            // die;
+
             $creator = session()->get('nik');
             // validasi input
-            $id = $this->request->getVar('id');
+            $id = $this->request->getVar('dpn_id');
             //cek nik
             $validation = \Config\Services::validation();
             $valid = $this->validate([

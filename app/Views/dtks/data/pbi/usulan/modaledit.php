@@ -97,7 +97,7 @@ $desa_id = session()->get('kode_desa');
                             <?php foreach ($pekerjaan as $row) { ?>
                                 <option <?php if ($jenis_pekerjaan == $row['idPekerjaan']) {
                                             echo 'selected';
-                                        } ?> value="<?= $row['idPekerjaan'] ?>"> <?php echo $row['JenisPekerjaan']; ?></option>
+                                        } ?> value="<?= $row['idPekerjaan'] ?>"> <?= $row['JenisPekerjaan']; ?></option>
                             <?php } ?>
                         </select>
                         <div class="invalid-feedback errorjenis_pekerjaan"></div>
@@ -111,7 +111,7 @@ $desa_id = session()->get('kode_desa');
                             <?php foreach ($statusKawin as $row) { ?>
                                 <option <?php if ($status_kawin == $row['idStatus']) {
                                             echo 'selected';
-                                        } ?> value="<?= $row['idStatus'] ?>"> <?php echo $row['StatusKawin']; ?></option>
+                                        } ?> value="<?= $row['idStatus'] ?>"> <?= $row['StatusKawin']; ?></option>
                             <?php } ?>
                         </select>
                         <div class="invalid-feedback errorstatus_kawin"></div>
@@ -127,7 +127,7 @@ $desa_id = session()->get('kode_desa');
                             <?php foreach ($desa as $row) { ?>
                                 <option <?php if ($desa_id == $row['id']) {
                                             echo 'selected';
-                                        } ?> value="<?= $row['id'] ?>"> <?php echo $row['name']; ?></option>
+                                        } ?> value="<?= $row['id'] ?>"> <?= $row['name']; ?></option>
                             <?php } ?>
                         </select>
                         <div class="invalid-feedback errorkelurahan"></div>
@@ -143,7 +143,7 @@ $desa_id = session()->get('kode_desa');
                             <?php foreach ($rw as $row) { ?>
                                 <option <?php if ($datarw == $row['no_rw']) {
                                             echo 'selected';
-                                        } ?> value="<?= $row['no_rw'] ?>"> <?php echo $row['no_rw']; ?></option>
+                                        } ?> value="<?= $row['no_rw'] ?>"> <?= $row['no_rw']; ?></option>
                             <?php } ?>
                         </select>
                         <div class="invalid-feedback errordatarw"></div>
@@ -157,7 +157,7 @@ $desa_id = session()->get('kode_desa');
                             <?php foreach ($rt as $row) { ?>
                                 <option <?php if ($datart == $row['id_rt']) {
                                             echo 'selected';
-                                        } ?> value="<?= $row['id_rt'] ?>"> <?php echo $row['id_rt']; ?></option>
+                                        } ?> value="<?= $row['id_rt'] ?>"> <?= $row['id_rt']; ?></option>
                             <?php } ?>
                         </select>
                         <div class="invalid-feedback errordatart"></div>
@@ -178,7 +178,7 @@ $desa_id = session()->get('kode_desa');
                             <?php foreach ($bansos as $row) { ?>
                                 <option <?php if ($databansos == $row['Id']) {
                                             echo 'selected';
-                                        } ?> value="<?= $row['Id'] ?>"> <?php echo $row['NamaBansos']; ?></option>
+                                        } ?> value="<?= $row['Id'] ?>"> <?= $row['NamaBansos']; ?></option>
                             <?php } ?>
                         </select>
                         <div class="invalid-feedback errordatabansos"></div>
