@@ -166,6 +166,16 @@ $routes->post('dltBpnt', 'Dtks\BpntGanti::delete', ['filter' => 'authfilterdtks'
 $routes->post('editBpnt', 'Dtks\BpntGanti::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updateBpnt', 'Dtks\BpntGanti::update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
+// DAFTAR KELUARGA MISKIN
+$routes->get('dkm', 'Dtks\Dkm\Kemis::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('tb_dkm', 'Dtks\Dkm\Kemis::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('detailDkm', 'Dtks\Dkm\Kemis::formview', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->get('tmbKemis', 'Dtks\Dkm\Kemis::formTmb', ['filter' => 'authfilterdtks']);
+$routes->post('simpanDkm', 'Dtks\Dkm\Kemis::simpan_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('updateDkm', 'Dtks\Dkm\Kemis::update_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('dltDkm', 'Dtks\Dkm\Kemis::delete', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+
+
 // Setting General
 $routes->get('chart_desa', 'Dtks\VeriVali09::chartDesa', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->get('wilayah', 'Dtks\Wil::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);

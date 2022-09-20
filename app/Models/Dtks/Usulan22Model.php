@@ -267,9 +267,20 @@ class Usulan22Model extends Model
     }
     public function getIdDtks($id = false)
     {
+        $role_id = session()->get('role_id');
+        $kelurahan = session()->get('kode_desa');
+        $rw = session()->get('level');
+
         if ($id == false) {
-            return $this->findAll();
+            // return $this->findAll();
+            // } elseif ($id !== false && $role_id <= '2') {
+            //     return $this->db->table('dtks_usulan22')->where(['du_id' => $id]);
+            // } elseif ($id !== false && $role_id == '3') {
+            //     return $this->db->table('dtks_usulan22')->where(['du_id' => $id])->where(['kelurahan' => $kelurahan]);
+            // } elseif ($id !== false && $role_id == '4') {
+            //     return $this->db->table('dtks_usulan22')->where(['du_id' => $id])->where(['kelurahan' => $kelurahan])->where(['rw' => $rw]);
         } else {
+            // denied
             return $this->db->table('dtks_usulan22')->where(['du_id' => $id]);
         }
     }

@@ -593,8 +593,6 @@ class Geotagging extends BaseController
                         unlink($path_kk);
                     }
 
-
-
                     $image_fp = $this->request->getFile('image_fp');
                     $image_fr = $this->request->getFile('image_fr');
                     $image_ktp = $this->request->getFile('vg_fktp');

@@ -46,7 +46,6 @@ class VerivaliGeoModel extends Model
     protected $useTimestamps = true;
     protected $updatedField  = 'vg_updated_at';
 
-
     var $column_order = array('',  'vg_nik', 'vg_nama_lengkap', 'vg_nkk', 'vg_alamat',  'vg_dbj_id1', 'vg_norek');
     var $column_order2 = array('',  'vg_nik', 'vg_nama_lengkap', 'vg_nkk', 'vg_alamat',  'vg_dbj_id1', 'vg_norek');
 

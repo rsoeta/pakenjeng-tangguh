@@ -247,3 +247,17 @@ function deadline_usulan()
 
     // dd($deadline_usulan);
 }
+
+function dkm_foto_cpm($fileName = '', $dir = '', $defFile = '')
+{
+    if ($fileName !== '' && $fileName !== null && file_exists(FCPATH . 'data/dkm/' . $dir . '/' . $fileName)) {
+        return base_url('data/dkm/' . $dir . '/' . $fileName);
+    } else {
+        if ($defFile == '') {
+            return base_url('assets/images/image_not_available.jpg');
+        } else {
+            return base_url('assets/images/' . $defFile);
+        }
+    }
+    # code...
+}

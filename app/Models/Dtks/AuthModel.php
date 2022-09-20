@@ -16,7 +16,7 @@ class AuthModel extends Model
     protected $protectFields        = true;
 
     protected $allowedFields        = [
-        'nik', 'username', 'fullname', 'email', 'password', 'status', 'level', 'role_id', 'kode_desa', 'kode_kec', 'kode_kab', 'nope', 'opr_sch', 'jabatan', 'user_image', 'created_at', 'updated_at'
+        'nik', 'username', 'fullname', 'email', 'password', 'status', 'level', 'role_id', 'kode_desa', 'kode_kec', 'kode_kab', 'nope', 'opr_sch', 'jabatan_id', 'user_image', 'created_at', 'updated_at'
     ];
 
     protected $useTimestamps        = true;
@@ -62,7 +62,7 @@ class AuthModel extends Model
         $user_id = session()->get('id');
 
         $builder = $this->db->table('dtks_users');
-        $builder->select('dtks_users.id as id_user, dtks_users.password, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.nope, dtks_users.opr_sch, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, tb_roles.id_role as role_id, tb_roles.nm_role, lembaga_profil.lp_id, lembaga_profil.lp_kode, lembaga_profil.lp_kepala, lembaga_profil.lp_nip, lembaga_profil.lp_sekretariat, lembaga_profil.lp_email, lembaga_profil.lp_kode_pos, lembaga_profil.lp_logo, lembaga_kategori.lk_nama, tb_villages.name as nama_desa');
+        $builder->select('dtks_users.id as id_user, dtks_users.password, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.level, dtks_users.nope, dtks_users.opr_sch, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, tb_roles.id_role as role_id, tb_roles.nm_role, lembaga_profil.lp_id, lembaga_profil.lp_kode, lembaga_profil.lp_kepala, lembaga_profil.lp_nip, lembaga_profil.lp_sekretariat, lembaga_profil.lp_email, lembaga_profil.lp_kode_pos, lembaga_profil.lp_logo, lembaga_kategori.lk_nama, tb_villages.name as nama_desa');
         $builder->join('tb_roles', 'dtks_users.role_id=tb_roles.id_role');
         $builder->join('lembaga_profil', 'dtks_users.id=lembaga_profil.lp_user');
         $builder->join('lembaga_kategori', 'dtks_users.role_id=lembaga_kategori.lk_id');
@@ -70,7 +70,7 @@ class AuthModel extends Model
         $query = $builder->getWhere(['dtks_users.id' => $user_id])->getRowArray();
 
         $buildar = $this->db->table('dtks_users');
-        $buildar->select('dtks_users.id as id_user, dtks_users.password, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.nope, dtks_users.opr_sch, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, tb_roles.id_role as role_id, tb_roles.nm_role, lembaga_profil.lp_id, lembaga_profil.lp_kode, lembaga_profil.lp_kepala, lembaga_profil.lp_nip, lembaga_profil.lp_sekretariat, lembaga_profil.lp_email, lembaga_profil.lp_kode_pos, lembaga_profil.lp_logo, lembaga_kategori.lk_nama');
+        $buildar->select('dtks_users.id as id_user, dtks_users.password, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.level, dtks_users.nope, dtks_users.opr_sch, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, tb_roles.id_role as role_id, tb_roles.nm_role, lembaga_profil.lp_id, lembaga_profil.lp_kode, lembaga_profil.lp_kepala, lembaga_profil.lp_nip, lembaga_profil.lp_sekretariat, lembaga_profil.lp_email, lembaga_profil.lp_kode_pos, lembaga_profil.lp_logo, lembaga_kategori.lk_nama');
         $buildar->join('tb_roles', 'dtks_users.role_id=tb_roles.id_role');
         $buildar->join('lembaga_profil', 'dtks_users.id=lembaga_profil.lp_user');
         $buildar->join('lembaga_kategori', 'dtks_users.role_id=lembaga_kategori.lk_id');
@@ -79,7 +79,7 @@ class AuthModel extends Model
         $quera = $buildar->getWhere(['dtks_users.id' => $user_id])->getRowArray();
 
         $buildor = $this->db->table('dtks_users');
-        $buildor->select('dtks_users.id as id_user, dtks_users.password, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.nope, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.opr_sch, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, tb_roles.id_role as role_id, tb_roles.nm_role');
+        $buildor->select('dtks_users.id as id_user, dtks_users.password, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.level, dtks_users.nope, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.opr_sch, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, tb_roles.id_role as role_id, tb_roles.nm_role');
         $buildor->join('tb_roles', 'dtks_users.role_id=tb_roles.id_role');
         // $buildor->join('lembaga_profil', 'dtks_users.id=lembaga_profil.lp_user');
         // $buildor->join('lembaga_kategori', 'lembaga_profil.lp_kategori=lembaga_kategori.lk_id');

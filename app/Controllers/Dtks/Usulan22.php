@@ -410,7 +410,6 @@ class Usulan22 extends BaseController
 
     public function get_data_penduduk()
     {
-
         $db = \Config\Database::connect();
         $role = session()->get('role_id');
         $kode_desa = session()->get('kode_desa');
@@ -463,32 +462,32 @@ class Usulan22 extends BaseController
             } else {
                 $data = [];
             }
-        } else {
-            if ($role === '1') {
-                $builder->select('*');
-                $query = $builder->get();
-                $data = $query->getResult();
-            } elseif ($role === '2') {
-                $builder->select('*');
-                $builder->distinct('du_nik');
-                $query = $builder->get();
-                $data = $query->getResult();
-            } elseif ($role === '3') {
-                $builder->select('*');
-                $builder->where('kelurahan', $kode_desa);
-                $builder->distinct('du_nik');
-                $query = $builder->get();
-                $data = $query->getResult();
-            } elseif ($role === '4') {
-                $builder->select('*');
-                $builder->where('kelurahan', $kode_desa);
-                $builder->where('rw', $kode_rw);
-                $builder->distinct('du_nik');
-                $query = $builder->get();
-                $data = $query->getResult();
-            } else {
-                $data = [];
-            }
+            // } else {
+            //     if ($role === '1') {
+            //         $builder->select('*');
+            //         $query = $builder->get();
+            //         $data = $query->getResult();
+            //     } elseif ($role === '2') {
+            //         $builder->select('*');
+            //         $builder->distinct('du_nik');
+            //         $query = $builder->get();
+            //         $data = $query->getResult();
+            //     } elseif ($role === '3') {
+            //         $builder->select('*');
+            //         $builder->where('kelurahan', $kode_desa);
+            //         $builder->distinct('du_nik');
+            //         $query = $builder->get();
+            //         $data = $query->getResult();
+            //     } elseif ($role === '4') {
+            //         $builder->select('*');
+            //         $builder->where('kelurahan', $kode_desa);
+            //         $builder->where('rw', $kode_rw);
+            //         $builder->distinct('du_nik');
+            //         $query = $builder->get();
+            //         $data = $query->getResult();
+            //     } else {
+            //         $data = [];
+            //     }
         }
         foreach ($data as $pdk) {
             $penduduk[] = array(
@@ -604,7 +603,6 @@ class Usulan22 extends BaseController
             $id = $this->request->getVar('id');
             $validation = \Config\Services::validation();
             $valid = $this->validate([
-
                 'nik' => [
                     'label' => 'NIK',
                     'rules' => 'required|numeric|is_unique[dtks_usulan_view.du_nik,du_id,{id}]|min_length[16]|max_length[16]',

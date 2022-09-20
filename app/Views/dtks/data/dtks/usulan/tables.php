@@ -246,7 +246,6 @@
 
     });
 
-
     function edit_person(id) {
         //Ajax Load data from ajax
         $.ajax({

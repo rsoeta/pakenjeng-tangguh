@@ -20,7 +20,6 @@ $desa_id = session()->get('kode_desa');
                 <?= csrf_field(); ?>
                 <div class="row">
                     <div class="col-12 col-sm-6">
-
                         <div class="form-group row nopadding" hidden>
                             <label class="col-4 col-sm-4 col-form-label" for="id">ID</label>
                             <div class="col-8 col-sm-8">
@@ -260,7 +259,6 @@ $desa_id = session()->get('kode_desa');
     $(document).ready(function() {
         $('.formsimpan').submit(function(e) {
             e.preventDefault();
-
             $.ajax({
                 type: "POST",
                 url: '<?= base_url('/updateUsulan') ?>',

@@ -20,7 +20,6 @@ class Bnba extends BaseController
 {
     public function __construct()
     {
-        helper(['form']);
         $this->BnbaModel = new BnbaModel();
         $this->WilayahModel = new WilayahModel();
         $this->RwModel = new RwModel();
