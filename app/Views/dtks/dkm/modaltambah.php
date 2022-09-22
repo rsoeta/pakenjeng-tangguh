@@ -77,21 +77,21 @@
                             <div class="d-flex justify-content-center">
                                 <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_blt"><b>BLT</b></label>
                                 <div class="form-check col-sm-1 col-1">
-                                    <input type="checkbox" class="form-control form-check-input" name="dd_blt" id="dd_blt" value="1" <?= isset($dd_blt) ? 'checked="checked"' : ''; ?>>
+                                    <input type="checkbox" class="form-control form-check-input" name="dd_blt" id="dd_blt" value="1">
                                 </div>
                                 <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_blt_dd"><b>BLT DD</b></label>
                                 <div class="form-check col-sm-1 col-1">
-                                    <input type="checkbox" class="form-control form-check-input" name="dd_blt_dd" id="dd_blt_dd" value="1" <?= isset($dd_blt_dd) ? 'checked="checked"' : ''; ?>>
+                                    <input type="checkbox" class="form-control form-check-input" name="dd_blt_dd" id="dd_blt_dd" value="1">
                                 </div>
                             </div>
                             <div class="d-flex justify-content-center">
                                 <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_bpnt"><b>BPNT</b></label>
                                 <div class="form-check col-sm-1 col-1">
-                                    <input type="checkbox" class="form-control form-check-input" name="dd_bpnt" id="dd_bpnt" value="1" <?= isset($dd_bpnt) ? 'checked="checked"' : ''; ?>>
+                                    <input type="checkbox" class="form-control form-check-input" name="dd_bpnt" id="dd_bpnt" value="1">
                                 </div>
                                 <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_pkh"><b>PKH</b></label>
                                 <div class="form-check col-sm-1 col-1">
-                                    <input type="checkbox" class="form-control form-check-input" name="dd_pkh" id="dd_pkh" value="1" <?= isset($dd_pkh) ? 'checked="checked"' : ''; ?>>
+                                    <input type="checkbox" class="form-control form-check-input" name="dd_pkh" id="dd_pkh" value="1">
                                 </div>
                             </div>
                         </div>

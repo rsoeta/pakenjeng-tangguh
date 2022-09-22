@@ -46,7 +46,7 @@
             <div class="col-12 col-sm-6 col-md-3">
                 <a href="/dkm">
                     <div class="info-box heart">
-                        <span class="info-box-icon bg-gradient elevation-1"><i class="fas fa-retweet fa-1x mr-2"></i></span>
+                        <span class="info-box-icon bg-gradient elevation-1"><i class="fas fa-hand-holding-heart fa-1x mr-2"></i></span>
                         <div class="info-box-content">
                             <span class="info-box-text">Daftar Keluarga Miskin</span>
                             <!-- <span class="info-box-number">10<small>%</small></span> -->

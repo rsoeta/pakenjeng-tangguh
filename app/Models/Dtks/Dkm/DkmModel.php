@@ -31,7 +31,7 @@ class DkmModel extends Model
 
     var $order = array('dd_created_at' => 'asc');
 
-    function get_datatables($filter0, $filter1, $filter2, $filter3, $filter4)
+    function get_datatables($filter0, $filter1, $filter2, $filter3)
     {
         // status
         if ($filter0 == "") {
@@ -58,19 +58,13 @@ class DkmModel extends Model
         } else {
             $kondisi_filter3 = " AND dd_rt = '$filter3'";
         }
-        // status
-        if ($filter4 == "") {
-            $kondisi_filter4 = "";
-        } else {
-            $kondisi_filter4 = " AND dd_deleted_at = '$filter4'";
-        }
 
         // search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "(db_nama LIKE '%$search%' OR db_nik LIKE '%$search%' OR db_nkk LIKE '%$search%' OR db_alamat LIKE '%$search%') $kondisi_filter0 $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "(db_nama LIKE '%$search%' OR db_nik LIKE '%$search%' OR db_nkk LIKE '%$search%' OR db_alamat LIKE '%$search%') $kondisi_filter0 $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
         } else {
-            $kondisi_search = "dd_id != '' $kondisi_filter0 $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "dd_id != '' $kondisi_filter0 $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
         }
 
         // order
@@ -109,7 +103,7 @@ class DkmModel extends Model
         return $query;
     }
 
-    function jumlah_filter($filter0, $filter1, $filter2, $filter3, $filter4)
+    function jumlah_filter($filter0, $filter1, $filter2, $filter3)
     {
         // status
         if ($filter0 == "") {
@@ -135,19 +129,13 @@ class DkmModel extends Model
         } else {
             $kondisi_filter3 = " AND dd_rt = '$filter3'";
         }
-        // status
-        if ($filter4 == "") {
-            $kondisi_filter4 = "";
-        } else {
-            $kondisi_filter4 = " AND dd_deleted_at = '$filter4'";
-        }
 
         // kondisi search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "AND (db_nama LIKE '%$search%' OR db_nik LIKE '%$search%' OR db_nkk LIKE '%$search%' OR db_alamat LIKE '%$search%') $kondisi_filter0 $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "AND (db_nama LIKE '%$search%' OR db_nik LIKE '%$search%' OR db_nkk LIKE '%$search%' OR db_alamat LIKE '%$search%') $kondisi_filter0 $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
         } else {
-            $kondisi_search = "$kondisi_filter0 $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "$kondisi_filter0 $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
         }
 
         $sQuery = "SELECT COUNT(dd_id) as jml FROM dtks_dkm WHERE dd_id != '' $kondisi_search";

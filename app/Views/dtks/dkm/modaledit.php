@@ -115,19 +115,20 @@
                                         <div class="invalid-feedback errordd_rw"></div>
                                     </div>
                                 </div>
-
-                                <div class="form-group row nopadding">
-                                    <label class="col-4 col-sm-4 col-form-label" for="dd_desa">Desa/Kelurahan</label>
-                                    <div class="col-8 col-sm-8">
-                                        <select id="dd_desa" name="dd_desa" class="form-select form-select-sm">
-                                            <option value="">-- Pilih --</option>
-                                            <?php foreach ($datadesa as $row) { ?>
-                                                <option <?php if ($dd_desa == $row['id']) {
-                                                            echo 'selected';
-                                                        } ?> value="<?= $row['id'] ?>"> <?php echo $row['name']; ?></option>
-                                            <?php } ?>
-                                        </select>
-                                        <div class="invalid-feedback errordd_desa"></div>
+                                <div <?= $user_login['role_id'] > 2 ? 'hidden' : ''; ?>>
+                                    <div class="form-group row nopadding">
+                                        <label class="col-4 col-sm-4 col-form-label" for="dd_desa">Desa/Kelurahan</label>
+                                        <div class="col-8 col-sm-8">
+                                            <select id="dd_desa" name="dd_desa" class="form-select form-select-sm">
+                                                <option value="">-- Pilih --</option>
+                                                <?php foreach ($datadesa as $row) { ?>
+                                                    <option <?php if ($dd_desa == $row['id']) {
+                                                                echo 'selected';
+                                                            } ?> value="<?= $row['id'] ?>"> <?php echo $row['name']; ?></option>
+                                                <?php } ?>
+                                            </select>
+                                            <div class="invalid-feedback errordd_desa"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -464,7 +465,7 @@
                                 title: response.sukses,
                             });
                             // window.location.reload();
-                            location.reload(true);
+                            window.location.href = window.location.href;
 
                         }
 

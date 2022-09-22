@@ -65,11 +65,10 @@ class Kemis extends BaseController
         // $operator = $this->request->getPost('operator');
         $filter2 = $this->request->getPost('datarw');
         $filter3 = $this->request->getPost('datart');
-        $filter4 = $this->request->getPost('dataDelete');
 
-        $listing = $model->get_datatables($filter0, $filter1, $filter2, $filter3, $filter4);
+        $listing = $model->get_datatables($filter0, $filter1, $filter2, $filter3);
         $jumlah_semua = $model->jumlah_semua();
-        $jumlah_filter = $model->jumlah_filter($filter0, $filter1, $filter2, $filter3, $filter4);
+        $jumlah_filter = $model->jumlah_filter($filter0, $filter1, $filter2, $filter3);
 
         $data = array();
         $no = $_POST['start'];
@@ -110,10 +109,11 @@ class Kemis extends BaseController
     public function formview()
     {
         if ($this->request->isAJAX()) {
+            $user_login = $this->AuthModel->getUserId();
 
             // var_dump($this->request->getPost());
             $kode_kec = Profil_Admin()['kode_kec'];
-            $id = $this->request->getVar('id');
+            $id = $this->request->getPost('id');
 
             $model = new DkmModel();
             $row = $model->find($id);
@@ -127,6 +127,7 @@ class Kemis extends BaseController
                 // 'dataprov' => $this->WilayahModel->getProv()->getResultArray(),
                 // 'datakab' => $this->WilayahModel->getKab()->getResultArray(),
                 // 'datakec' => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
+                'user_login' => $user_login,
                 'datadesa' => $this->WilayahModel->getDesa($kode_kec),
                 'datadusun' => $this->WilayahModel->getDusun()->getResultArray(),
                 'datarw' => $this->RwModel->noRw(),
@@ -184,7 +185,7 @@ class Kemis extends BaseController
     public function update_data()
     {
         if ($this->request->isAJAX()) {
-            // var_dump($this->request->getPost());
+            // var_dump($this->request->getPost('dd_id'));
             // var_dump($this->request->getPost('dd_foto_cpm'));
             // var_dump($this->request->getFile('dd_foto_cpm'));
             // die;
@@ -794,6 +795,10 @@ class Kemis extends BaseController
                 ];
             } else {
                 $id = $this->request->getVar('id');
+                $data = [
+                    'dd_status' => 0,
+                ];
+                $this->DkmModel->update($id, $data);
                 $this->DkmModel->delete($id);
                 $msg = [
                     'sukses' => 'Data berhasil dihapus'

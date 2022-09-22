@@ -77,53 +77,41 @@
                                 <option value="">-Pilih-</option>
                             </select>
                         </div>
-                        <div class="col-sm-1 col-2 mb-1">
-                            <label for="datastatus" class="form-label">
-                                Status
-                            </label>
-                        </div>
-                        <div class="col-sm-2 col-4">
-                            <select class="form-control form-control-sm" name="" id="datastatus">
-                                <option value="">-Semua Status-</option>
-                                <?php foreach ($status as $row) { ?>
-                                    <option value="<?= $row['id_status']; ?>"><?= $row['jenis_status']; ?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row" <?= $user_login['role_id'] > 3 ? ' hidden' : ''; ?>>
-                        <div class="col-sm-1 col-2 mb-1">
-                            <label for="dataDelete" class="form-label">
-                                Data
-                            </label>
-                        </div>
-                        <div class="col-sm-2 col-4">
-                            <select class="form-control form-control-sm" name="" id="dataDelete">
-                                <option value="">-Semua Data-</option>
-                                <option value="">Dihapus</option>
-                                <option value="<?= null; ?>">Tidak Dihapus</option>
-                            </select>
+                        <div <?= $user_login['role_id'] > 3 ? ' hidden' : ''; ?> style="display: flex;">
+                            <div class="col-sm-1 col-2 mb-1">
+                                <label for="datastatus" class="form-label">
+                                    Status
+                                </label>
+                            </div>
+                            <div class="col-sm-2 col-4">
+                                <select class="form-control form-control-sm" name="" id="datastatus">
+                                    <option value="">-Semua Status-</option>
+                                    <?php foreach ($status as $row) { ?>
+                                        <option <?= $user_login['role_id'] > 3 ? 'value="1" selected="selected"' : 'value="' . $row['id_status'] . '"' ?>><?= $row['jenis_status']; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="table-responsive">
-                <table id="tabel_data" class="table table-sm table-hover nowrap" style="width: 100%;">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th style="text-align: center;">Foto</th>
-                            <th>Nama</th>
-                            <th>NIK</th>
-                            <th>Alamat</th>
-                            <th>RT</th>
-                            <th>RW</th>
-                            <th style="text-align: center;">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
+        </div>
+        <div class="table-responsive">
+            <table id="tabel_data" class="table table-sm table-hover nowrap" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th style="text-align: center;">Foto</th>
+                        <th>Nama</th>
+                        <th>NIK</th>
+                        <th>Alamat</th>
+                        <th>RT</th>
+                        <th>RW</th>
+                        <th style="text-align: center;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </section>
 </div>
@@ -336,7 +324,7 @@
         //Ajax Load data from ajax
         $.ajax({
             type: "POST",
-            url: "<?php echo site_url('detailDkm') ?>",
+            url: "<?= site_url('/detailDkm') ?>",
             data: {
                 id: id
             },
