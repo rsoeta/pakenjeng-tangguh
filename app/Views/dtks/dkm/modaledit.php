@@ -1,7 +1,11 @@
 <!-- Modal -->
-<?php
-// $level = session()->get('role_id');
-?>
+<style>
+    .center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
 <!-- Modal -->
 <div class="modal fade" id="modaledit" tabindex="-1" aria-labelledby="modaleditLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -16,35 +20,27 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-6 col-12 col-sm-6">
-                            <div class="form-group row nopadding" hidden>
-                                <label class="col-4 col-sm-4 col-form-label" for="dd_id">ID</label>
-                                <div class="col-8 col-sm-8">
-                                    <input type="text" name="dd_id" id="dd_id" class="form-control form-control-sm" value="<?= $dd_id; ?>">
-                                    <div class="invalid-feedback errordd_id"></div>
-                                </div>
-                            </div>
-                            <div class="form-group row" style="text-align: center;">
-                                <div class="col-6 col-sm-4 nopadding">
+                            <div class="center">
+                                <input type="text" name="dd_id" id="dd_id" class="form-control form-control-sm" value="<?= $dd_id; ?>" style="display: none;">
+                                <div class="col-3 col-sm-3">
                                     <a href="<?= dkm_foto_cpm('DKM_FP' . $dd_nik . '.jpg', 'foto-cpm') ?>" data-lightbox="dataCpm">
                                         <img src="<?= dkm_foto_cpm('DKM_FP' . $dd_nik . '.jpg', 'foto-cpm') ?>" style="width: 80px; border-radius: 5px;">
                                     </a>
-                                    <figcaption><span>Foto PM</span></figcaption>
+                                    <figcaption><span>Foto Calon PM</span></figcaption>
                                 </div>
-                                <div class="col-6 col-sm-4">
+                                <div class="col-3 col-sm-3">
                                     <a href="<?= dkm_foto_cpm('DKM_FH' . $dd_nik . '.jpg', 'foto-rumah-depan') ?>" data-lightbox="dataCpm">
                                         <img src="<?= dkm_foto_cpm('DKM_FH' . $dd_nik . '.jpg', 'foto-rumah-depan') ?>" style="width: 80px; border-radius: 5px;">
                                     </a>
                                     <figcaption><span>Foto Rumah Depan</span></figcaption>
                                 </div>
-                            </div>
-                            <div class="form-group row" style="text-align: center;">
-                                <div class="col-6 col-sm-4">
+                                <div class="col-3 col-sm-3">
                                     <a href="<?= dkm_foto_cpm('DKM_BH' . $dd_nik . '.jpg', 'foto-rumah-belakang') ?>" data-lightbox="dataCpm">
                                         <img src="<?= dkm_foto_cpm('DKM_BH' . $dd_nik . '.jpg', 'foto-rumah-belakang') ?>" style="width: 80px; border-radius: 5px;">
                                     </a>
                                     <figcaption><span>Foto Rumah Belakang</span></figcaption>
                                 </div>
-                                <div class="col-6 col-sm-4">
+                                <div class="col-3 col-sm-3">
                                     <a href="<?= dkm_foto_cpm('DKM_KK' . $dd_nik . '.jpg', 'foto-kk') ?>" data-lightbox="dataCpm">
                                         <img src="<?= dkm_foto_cpm('DKM_KK' . $dd_nik . '.jpg', 'foto-kk') ?>" style="width: 80px; border-radius: 5px;">
                                     </a>
@@ -139,41 +135,19 @@
                         <!-- Data Adminduk -->
                         <div class="col-md-6 col-12 col-sm-6">
                             <label class="label-center mt-2">Kepemilikan Adminduk</label>
-                            <div class="form-group row">
+                            <div class="d-flex justify-content-center">
                                 <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_adminduk"><b>Adminduk</b></label>
                                 <div class="form-check col-sm-1 col-1">
                                     <input type="checkbox" class="form-control form-check-input" name="dd_adminduk" id="dd_adminduk" value="<?= $dd_adminduk == 1 ? set_checkbox('dd_adminduk', $dd_adminduk) : ''; ?>" <?= isset($dd_adminduk) ? 'checked="checked"' : ''; ?>>
                                 </div>
-                                <div class="col-sm-8 col-7">
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fa fa-address-card"></i></span>
-                                        </div>
-                                        <input type="file" class="form-control form-control-sm" spellcheck="false" name="dd_adminduk_foto" value="" accept="image/*" capture />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group row">
                                 <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_bpjs"><b>BPJS</b></label>
                                 <div class="form-check col-sm-1 col-1">
                                     <input type="checkbox" class="form-control form-check-input" name="dd_bpjs" id="dd_bpjs" value="<?= $dd_bpjs == 1 ? set_checkbox('dd_bpjs', $dd_bpjs) : ''; ?>" <?= isset($dd_bpjs) ? 'checked="checked"' : ''; ?>>
                                 </div>
-                                <div class="col-sm-8 col-7 mb-2">
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fa fa-credit-card"></i></span>
-                                        </div>
-                                        <input type="file" class="form-control form-control-sm" spellcheck="false" name="dd_bpjs_foto" value="" accept="image/*" capture />
-                                    </div>
-                                </div>
                             </div>
-                        </div>
-                        <!-- Bantuan -->
-                        <label class="label-center mt-2">Penerimaan Bantuan</label>
-                        <div class="col-3"></div>
-                        <div class="col-9">
-                            <!-- <div class="col-12"> -->
-                            <div class="form-group row">
+                            <!-- Bantuan -->
+                            <label class="label-center mt-2">Penerimaan Bantuan</label>
+                            <div class="d-flex justify-content-center">
                                 <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_blt"><b>BLT</b></label>
                                 <div class="form-check col-sm-1 col-1">
                                     <input type="checkbox" class="form-control form-check-input" name="dd_blt" id="dd_blt" value="<?= $dd_blt == 1 ? set_checkbox('dd_blt', $dd_blt) : ''; ?>" <?= isset($dd_blt) ? 'checked="checked"' : ''; ?>>
@@ -183,7 +157,7 @@
                                     <input type="checkbox" class="form-control form-check-input" name="dd_blt_dd" id="dd_blt_dd" value="<?= $dd_blt_dd == 1 ? set_checkbox('dd_blt_dd', $dd_blt_dd) : ''; ?>" <?= isset($dd_blt_dd) ? 'checked="checked"' : ''; ?>>
                                 </div>
                             </div>
-                            <div class="form-group row">
+                            <div class="d-flex justify-content-center">
                                 <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_bpnt"><b>BPNT</b></label>
                                 <div class="form-check col-sm-1 col-1">
                                     <input type="checkbox" class="form-control form-check-input" name="dd_bpnt" id="dd_bpnt" value="<?= $dd_bpnt == 1 ? set_checkbox('dd_bpnt', $dd_bpnt) : ''; ?>" <?= isset($dd_bpnt) ? 'checked="checked"' : ''; ?>>
@@ -245,7 +219,7 @@
                             <label class="label-center mt-2">Titik Koordinat</label>
                             <div class="form-group row nopadding">
                                 <div class="col-sm-2 col-2">
-                                    <button type="button" class="btn btn-sm btn-primary" onclick="getLocation()">Cek</button>
+                                    <button type="button" class="btn btn-primary" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i></button>
                                 </div>
                                 <div class="col-sm-5 col-5">
                                     <input type="text" class="form-control form-control-sm mb-2" placeholder="Latitude" spellcheck="false" id="latitude" name="dd_latitude" value="<?= set_value('dd_latitude', $dd_latitude); ?>" required>
@@ -278,7 +252,7 @@
             let data = new FormData(form);
             $.ajax({
                 type: "POST",
-                url: '<?= base_url('updateDkm') ?>',
+                url: '<?= site_url('/updateDkm') ?>',
                 data: data,
                 enctype: 'multipart/form-data',
                 processData: false,
@@ -286,12 +260,12 @@
                 cache: false,
                 dataType: "json",
                 beforeSend: function() {
-                    $('.btnsimpan').attr('disable', 'disabled');
-                    $('.btnsimpan').html('<i class="fa fa-spin fa-spinner"></i>');
+                    $('.btnUpdate').attr('disable', 'disabled');
+                    $('.btnUpdate').html('<i class="fa fa-spin fa-spinner"></i>');
                 },
                 complete: function() {
-                    $('.btnsimpan').removeAttr('disable');
-                    $('.btnsimpan').html('Update');
+                    $('.btnUpdate').removeAttr('disable');
+                    $('.btnUpdate').html('Update');
                 },
                 success: function(response) {
                     if (response.error) {
@@ -490,12 +464,11 @@
                                 title: response.sukses,
                             });
                             // window.location.reload();
-                            table.draw();
+                            location.reload(true);
 
                         }
 
                         $('#modaledit').modal('hide');
-                        table.draw();
 
                     }
                 },

@@ -188,9 +188,6 @@ class Kemis extends BaseController
             // var_dump($this->request->getPost('dd_foto_cpm'));
             // var_dump($this->request->getFile('dd_foto_cpm'));
             // die;
-            $kode_desa = session()->get('kode_desa');
-            $namaDesa = $this->WilayahModel->getVillage($kode_desa);
-            $desaNama = $namaDesa['name'];
 
             $id = $this->request->getPost('dd_id');
             $validation = \Config\Services::validation();
@@ -248,20 +245,6 @@ class Kemis extends BaseController
                         'numeric' => '{field} harus berisi angka.'
                     ]
                 ],
-                // 'dd_adminduk_foto' => [
-                //     'label' => 'Foto Adminduk',
-                //     'rules' => $adminduk_rule,
-                //     'errors' => [
-                //         'required' => '{field} harus diisi.',
-                //     ]
-                // ],
-                // 'dd_bpjs_foto' => [
-                //     'label' => 'Foto BPJS',
-                //     'rules' => $bpjs_rule,
-                //     'errors' => [
-                //         'required' => '{field} harus diisi.',
-                //     ]
-                // ],
                 'dd_foto_cpm' => [
                     'label' => 'Foto CPM',
                     'rules' => 'uploaded[dd_foto_cpm]|is_image[dd_foto_cpm]|mime_in[dd_foto_cpm,image/jpg,image/jpeg,image/png]',
@@ -327,12 +310,14 @@ class Kemis extends BaseController
                 ];
             } else {
 
+                $kode_desa = session()->get('kode_desa');
+                $namaDesa = $this->WilayahModel->getVillage($kode_desa);
+                $desaNama = $namaDesa['name'];
+
                 $dd_foto_cpm = $this->request->getFile('dd_foto_cpm');
                 $dd_foto_rumah_depan = $this->request->getFile('dd_foto_rumah_depan');
                 $dd_foto_rumah_belakang = $this->request->getFile('dd_foto_rumah_belakang');
                 $dd_foto_kk = $this->request->getFile('dd_foto_kk');
-                $dd_adminduk_foto = $this->request->getFile('dd_adminduk_foto');
-                $dd_bpjs_foto = $this->request->getFile('dd_bpjs_foto');
 
                 // var_dump($dd_foto_cpm);
                 // die;
@@ -342,15 +327,11 @@ class Kemis extends BaseController
                 $filename_dua = 'DKM_FH' . $this->request->getPost('dd_nik') . '.jpg';
                 $filename_tiga = 'DKM_BH' . $this->request->getPost('dd_nik') . '.jpg';
                 $filename_empat = 'DKM_KK' . $this->request->getPost('dd_nik') . '.jpg';
-                $filename_lima = 'DKM_KTP' . $this->request->getPost('dd_nik') . '.jpg';
-                $filename_enam = 'DKM_BPJS' . $this->request->getPost('dd_nik') . '.jpg';
 
                 $img_satu = imagecreatefromjpeg($dd_foto_cpm);
                 $img_dua = imagecreatefromjpeg($dd_foto_rumah_depan);
                 $img_tiga = imagecreatefromjpeg($dd_foto_rumah_belakang);
                 $img_empat = imagecreatefromjpeg($dd_foto_kk);
-                $img_lima = imagecreatefromjpeg($dd_adminduk_foto);
-                $img_enam = imagecreatefromjpeg($dd_bpjs_foto);
 
                 // get width and height of image
                 $width_satu = imagesx($img_satu);
@@ -361,10 +342,6 @@ class Kemis extends BaseController
                 $height_tiga = imagesy($img_tiga);
                 $width_empat = imagesx($img_empat);
                 $height_empat = imagesy($img_empat);
-                $width_lima = imagesx($img_lima);
-                $height_lima = imagesy($img_lima);
-                $width_enam = imagesx($img_enam);
-                $height_enam = imagesy($img_enam);
 
                 // reorient image if width is greater than height
                 if ($width_satu > $height_satu) {
@@ -381,19 +358,11 @@ class Kemis extends BaseController
                 ) {
                     $img_empat = imagerotate($img_empat, -90, 0);
                 }
-                if ($width_lima > $height_lima) {
-                    $img_lima = imagerotate($img_lima, -90, 0);
-                }
-                if ($width_enam > $height_enam) {
-                    $img_enam = imagerotate($img_enam, -90, 0);
-                }
                 // resize image
                 $img_satu = imagescale($img_satu, 480, 640);
                 $img_dua = imagescale($img_dua, 480, 640);
                 $img_tiga = imagescale($img_tiga, 480, 640);
                 $img_empat = imagescale($img_empat, 480, 640);
-                $img_lima = imagescale($img_lima, 480, 640);
-                $img_enam = imagescale($img_enam, 480, 640);
 
                 $txtNik = $this->request->getPost('dd_nik');
                 $txtNama = $this->request->getPost('dd_nama');
@@ -456,8 +425,6 @@ class Kemis extends BaseController
                 );
                 imagejpeg($img_tiga, 'data/dkm/foto-rumah-belakang/' . $filename_tiga, $quality);
                 imagejpeg($img_empat, 'data/dkm/foto-kk/' . $filename_empat, $quality);
-                imagejpeg($img_lima, 'data/dkm/foto-ktp/' . $filename_lima, $quality);
-                imagejpeg($img_enam, 'data/dkm/foto-bpjs/' . $filename_enam, $quality);
                 // var_dump($img_satu);
                 // die;
 
@@ -472,9 +439,7 @@ class Kemis extends BaseController
                     'dd_kec' => Profil_Admin()['kode_kec'],
                     'dd_kab' => Profil_Admin()['kode_kab'],
                     'dd_adminduk' => $this->request->getPost('dd_adminduk'),
-                    'dd_adminduk_foto' => $filename_lima,
                     'dd_bpjs' => $this->request->getPost('dd_bpjs'),
-                    'dd_bpjs_foto' => $filename_enam,
                     'dd_blt' => $this->request->getPost('dd_blt'),
                     'dd_blt_dd' => $this->request->getPost('dd_blt_dd'),
                     'dd_bpnt' => $this->request->getPost('dd_bpnt'),
@@ -540,117 +505,103 @@ class Kemis extends BaseController
 
             $validation = \Config\Services::validation();
             $valid = $this->validate([
-                // 'dd_nkk' => [
-                //     'label' => 'No. KK',
-                //     'rules' => 'required|numeric|min_length[16]|max_length[16]',
-                //     'errors' => [
-                //         'required' => '{field} harus diisi.',
-                //         'numeric' => '{field} harus berupa angka.',
-                //         'min_length' => '{field} harus berupa {param} karakter.',
-                //         'max_length' => '{field} harus berupa {param} karakter.'
-                //     ]
-                // ],
-                // 'dd_nama' => [
-                //     'label' => 'Nama',
-                //     'rules' => 'required|min_length[3]|max_length[150]',
-                //     'errors' => [
-                //         'required' => '{field} harus diisi.',
-                //         'min_length' => '{field} harus berupa {param} karakter.',
-                //         'max_length' => '{field} harus berupa {param} karakter.'
-                //     ]
-                // ],
-                // 'dd_nik' => [
-                //     'label' => 'NIK',
-                //     'rules' => 'required|numeric|min_length[16]|max_length[16]|is_unique[dtks_dkm.dd_nik,dd_id,{dd_id}]',
-                //     'errors' => [
-                //         'required' => '{field} harus diisi.',
-                //         'numeric' => '{field} harus berupa angka.',
-                //         'min_length' => '{field} harus berupa {param} karakter.',
-                //         'max_length' => '{field} harus berupa {param} karakter.',
-                //         'is_unique' => '{field} sudah terdaftar'
-                //     ]
-                // ],
-                // 'dd_alamat' => [
-                //     'label' => 'Alamat',
-                //     'rules' => 'required',
-                //     'errors' => [
-                //         'required' => '{field} harus diisi.'
-                //     ]
-                // ],
-                // 'dd_rt' => [
-                //     'label' => 'No. RT',
-                //     'rules' => 'required|numeric',
-                //     'errors' => [
-                //         'required' => '{field} harus diisi.',
-                //         'numeric' => '{field} harus berisi angka.'
-                //     ]
-                // ],
-                // 'dd_rw' => [
-                //     'label' => 'No. RW',
-                //     'rules' => 'required|numeric',
-                //     'errors' => [
-                //         'required' => '{field} harus diisi.',
-                //         'numeric' => '{field} harus berisi angka.'
-                //     ]
-                // ],
-                // 'dd_adminduk_foto' => [
-                //     'label' => 'Foto Adminduk',
-                //     'rules' => $adminduk_rule,
-                //     'errors' => [
-                //         'required' => '{field} harus diisi.',
-                //     ]
-                // ],
-                // 'dd_bpjs_foto' => [
-                //     'label' => 'Foto BPJS',
-                //     'rules' => $bpjs_rule,
-                //     'errors' => [
-                //         'required' => '{field} harus diisi.',
-                //     ]
-                // ],
-                // 'dd_foto_cpm' => [
-                //     'label' => 'Foto CPM',
-                //     'rules' => 'uploaded[dd_foto_cpm]|is_image[dd_foto_cpm]|mime_in[dd_foto_cpm,image/jpg,image/jpeg,image/png]',
-                //     'errors' => [
-                //         'uploaded' => '{field} harus ada.',
-                //         'is_image' => '{field} harus berupa gambar.',
-                //         'mime_in' => '{field} harus berupa gambar.',
-                //         'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
-                //     ]
-                // ],
-                // 'dd_foto_rumah_depan' => [
-                //     'label' => 'Foto Depan Rumah',
-                //     'rules' => 'uploaded[dd_foto_rumah_depan]|is_image[dd_foto_rumah_depan]|mime_in[dd_foto_rumah_depan,image/jpg,image/jpeg,image/png]',
-                //     'errors' => [
-                //         'uploaded' => '{field} harus ada.',
-                //         'is_image' => '{field} harus berupa gambar.',
-                //         'mime_in' => '{field} harus berupa gambar.',
-                //         'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
-                //     ]
-                // ],
-                // 'dd_foto_rumah_belakang' => [
-                //     'label' => 'Foto Belakang Rumah',
-                //     'rules' => 'uploaded[dd_foto_rumah_belakang]|is_image[dd_foto_rumah_belakang]|mime_in[dd_foto_rumah_belakang,image/jpg,image/jpeg,image/png]',
-                //     'errors' => [
-                //         'uploaded' => '{field} harus ada.',
-                //         'is_image' => '{field} harus berupa gambar.',
-                //         'mime_in' => '{field} harus berupa gambar.',
-                //         'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
-                //     ]
-                // ],
-                // 'dd_latitude' => [
-                //     'label' => 'Latitude',
-                //     'rules' => 'required',
-                //     'errors' => [
-                //         'required' => '{field} harus harus ada.',
-                //     ]
-                // ],
-                // 'dd_longitude' => [
-                //     'label' => 'Longitude',
-                //     'rules' => 'required',
-                //     'errors' => [
-                //         'required' => '{field} harus harus ada.',
-                //     ]
-                // ],
+                'dd_nkk' => [
+                    'label' => 'No. KK',
+                    'rules' => 'required|numeric|min_length[16]|max_length[16]',
+                    'errors' => [
+                        'required' => '{field} harus diisi.',
+                        'numeric' => '{field} harus berupa angka.',
+                        'min_length' => '{field} harus berupa {param} karakter.',
+                        'max_length' => '{field} harus berupa {param} karakter.'
+                    ]
+                ],
+                'dd_nama' => [
+                    'label' => 'Nama',
+                    'rules' => 'required|min_length[3]|max_length[150]',
+                    'errors' => [
+                        'required' => '{field} harus diisi.',
+                        'min_length' => '{field} harus berupa {param} karakter.',
+                        'max_length' => '{field} harus berupa {param} karakter.'
+                    ]
+                ],
+                'dd_nik' => [
+                    'label' => 'NIK',
+                    'rules' => 'required|numeric|min_length[16]|max_length[16]|is_unique[dtks_dkm.dd_nik,dd_id,{dd_id}]',
+                    'errors' => [
+                        'required' => '{field} harus diisi.',
+                        'numeric' => '{field} harus berupa angka.',
+                        'min_length' => '{field} harus berupa {param} karakter.',
+                        'max_length' => '{field} harus berupa {param} karakter.',
+                        'is_unique' => '{field} sudah terdaftar'
+                    ]
+                ],
+                'dd_alamat' => [
+                    'label' => 'Alamat',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus diisi.'
+                    ]
+                ],
+                'dd_rt' => [
+                    'label' => 'No. RT',
+                    'rules' => 'required|numeric',
+                    'errors' => [
+                        'required' => '{field} harus diisi.',
+                        'numeric' => '{field} harus berisi angka.'
+                    ]
+                ],
+                'dd_rw' => [
+                    'label' => 'No. RW',
+                    'rules' => 'required|numeric',
+                    'errors' => [
+                        'required' => '{field} harus diisi.',
+                        'numeric' => '{field} harus berisi angka.'
+                    ]
+                ],
+                'dd_foto_cpm' => [
+                    'label' => 'Foto CPM',
+                    'rules' => 'uploaded[dd_foto_cpm]|is_image[dd_foto_cpm]|mime_in[dd_foto_cpm,image/jpg,image/jpeg,image/png]',
+                    'errors' => [
+                        'uploaded' => '{field} harus ada.',
+                        'is_image' => '{field} harus berupa gambar.',
+                        'mime_in' => '{field} harus berupa gambar.',
+                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
+                    ]
+                ],
+                'dd_foto_rumah_depan' => [
+                    'label' => 'Foto Depan Rumah',
+                    'rules' => 'uploaded[dd_foto_rumah_depan]|is_image[dd_foto_rumah_depan]|mime_in[dd_foto_rumah_depan,image/jpg,image/jpeg,image/png]',
+                    'errors' => [
+                        'uploaded' => '{field} harus ada.',
+                        'is_image' => '{field} harus berupa gambar.',
+                        'mime_in' => '{field} harus berupa gambar.',
+                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
+                    ]
+                ],
+                'dd_foto_rumah_belakang' => [
+                    'label' => 'Foto Belakang Rumah',
+                    'rules' => 'uploaded[dd_foto_rumah_belakang]|is_image[dd_foto_rumah_belakang]|mime_in[dd_foto_rumah_belakang,image/jpg,image/jpeg,image/png]',
+                    'errors' => [
+                        'uploaded' => '{field} harus ada.',
+                        'is_image' => '{field} harus berupa gambar.',
+                        'mime_in' => '{field} harus berupa gambar.',
+                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
+                    ]
+                ],
+                'dd_latitude' => [
+                    'label' => 'Latitude',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus harus ada.',
+                    ]
+                ],
+                'dd_longitude' => [
+                    'label' => 'Longitude',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus harus ada.',
+                    ]
+                ],
             ]);
             if (!$valid) {
                 $msg = [
@@ -680,8 +631,6 @@ class Kemis extends BaseController
                 $dd_foto_rumah_depan = $this->request->getFile('dd_foto_rumah_depan');
                 $dd_foto_rumah_belakang = $this->request->getFile('dd_foto_rumah_belakang');
                 $dd_foto_kk = $this->request->getFile('dd_foto_kk');
-                $dd_adminduk_foto = $this->request->getFile('dd_adminduk_foto');
-                $dd_bpjs_foto = $this->request->getFile('dd_bpjs_foto');
 
                 // var_dump($dd_foto_cpm);
                 // die;
@@ -697,15 +646,11 @@ class Kemis extends BaseController
                 $filename_dua = 'DKM_FH' . $this->request->getPost('dd_nik') . '.jpg';
                 $filename_tiga = 'DKM_BH' . $this->request->getPost('dd_nik') . '.jpg';
                 $filename_empat = 'DKM_KK' . $this->request->getPost('dd_nik') . '.jpg';
-                $filename_lima = 'DKM_KTP' . $this->request->getPost('dd_nik') . '.jpg';
-                $filename_enam = 'DKM_BPJS' . $this->request->getPost('dd_nik') . '.jpg';
 
                 $img_satu = imagecreatefromjpeg($dd_foto_cpm);
                 $img_dua = imagecreatefromjpeg($dd_foto_rumah_depan);
                 $img_tiga = imagecreatefromjpeg($dd_foto_rumah_belakang);
                 $img_empat = imagecreatefromjpeg($dd_foto_kk);
-                $img_lima = imagecreatefromjpeg($dd_adminduk_foto);
-                $img_enam = imagecreatefromjpeg($dd_bpjs_foto);
 
                 // get width and height of image
                 $width_satu = imagesx($img_satu);
@@ -720,12 +665,6 @@ class Kemis extends BaseController
                 $width_empat = imagesx($img_empat);
                 $height_empat = imagesy($img_empat);
 
-                $width_lima = imagesx($img_lima);
-                $height_lima = imagesy($img_lima);
-
-                $width_enam = imagesx($img_enam);
-                $height_enam = imagesy($img_enam);
-
                 // reorient image if width is greater than height
                 if ($width_satu > $height_satu) {
                     $img_satu = imagerotate($img_satu, -90, 0);
@@ -739,19 +678,11 @@ class Kemis extends BaseController
                 if ($width_empat > $height_empat) {
                     $img_empat = imagerotate($img_empat, -90, 0);
                 }
-                if ($width_lima > $height_lima) {
-                    $img_lima = imagerotate($img_lima, -90, 0);
-                }
-                if ($width_enam > $height_enam) {
-                    $img_enam = imagerotate($img_enam, -90, 0);
-                }
                 // resize image
                 $img_satu = imagescale($img_satu, 480, 640);
                 $img_dua = imagescale($img_dua, 480, 640);
                 $img_tiga = imagescale($img_tiga, 480, 640);
                 $img_empat = imagescale($img_empat, 480, 640);
-                $img_lima = imagescale($img_lima, 480, 640);
-                $img_enam = imagescale($img_enam, 480, 640);
 
                 $txtNik = $this->request->getPost('dd_nik');
                 $txtNama = $this->request->getPost('dd_nama');
@@ -811,8 +742,6 @@ class Kemis extends BaseController
                 imagejpeg($img_dua, 'data/dkm/foto-rumah-depan/' . $filename_dua, $quality);
                 imagejpeg($img_tiga, 'data/dkm/foto-rumah-belakang/' . $filename_tiga, $quality);
                 imagejpeg($img_empat, 'data/dkm/foto-kk/' . $filename_empat, $quality);
-                imagejpeg($img_lima, 'data/dkm/foto-ktp/' . $filename_lima, $quality);
-                imagejpeg($img_enam, 'data/dkm/foto-bpjs/' . $filename_enam, $quality);
                 // var_dump($img_satu);
                 // die;
 
@@ -827,9 +756,7 @@ class Kemis extends BaseController
                     'dd_kec' => Profil_Admin()['kode_kec'],
                     'dd_kab' => Profil_Admin()['kode_kab'],
                     'dd_adminduk' => $this->request->getPost('dd_adminduk'),
-                    'dd_adminduk_foto' => $filename_lima,
                     'dd_bpjs' => $this->request->getPost('dd_bpjs'),
-                    'dd_bpjs_foto' => $filename_enam,
                     'dd_blt' => $this->request->getPost('dd_blt'),
                     'dd_blt_dd' => $this->request->getPost('dd_blt_dd'),
                     'dd_bpnt' => $this->request->getPost('dd_bpnt'),

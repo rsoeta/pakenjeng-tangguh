@@ -1,3 +1,10 @@
+<style>
+    .center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
 <!-- Modal -->
 <div class="modal fade" id="modaltambah" aria-labelledby="modaltambahLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -56,58 +63,35 @@
                                 <div class="invalid-feedback errordd_rw"></div>
                             </div>
                             <label class="label-center mt-2">Kepemilikan Adminduk</label>
-                            <div class="col-12">
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_adminduk"><b>Adminduk</b></label>
-                                    <div class="form-check col-sm-1 col-1">
-                                        <input type="checkbox" class="form-control form-check-input" name="dd_adminduk" id="dd_adminduk">
-                                    </div>
-                                    <div class="col-sm-8 col-7">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i class="fa fa-address-card"></i></span>
-                                            </div>
-                                            <input type="file" class="form-control" spellcheck="false" name="dd_adminduk_foto" accept="image/*" capture />
-                                        </div>
-                                    </div>
+                            <div class="d-flex justify-content-center">
+                                <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_adminduk"><b>Adminduk</b></label>
+                                <div class="form-check col-sm-1 col-1">
+                                    <input type="checkbox" class="form-control form-check-input" name="dd_adminduk" id="dd_adminduk">
                                 </div>
-                                <div class="row">
-                                    <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_bpjs"><b>BPJS</b></label>
-                                    <div class="form-check col-sm-1 col-1">
-                                        <input type="checkbox" class="form-control form-check-input" name="dd_bpjs" id="dd_bpjs">
-                                    </div>
-                                    <div class="col-sm-8 col-7 mb-2">
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text"><i class="fa fa-credit-card"></i></span>
-                                            </div>
-                                            <input type="file" class="form-control" spellcheck="false" name="dd_bpjs_foto" accept="image/*" capture />
-                                        </div>
-                                    </div>
+                                <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_bpjs"><b>BPJS</b></label>
+                                <div class="form-check col-sm-1 col-1">
+                                    <input type="checkbox" class="form-control form-check-input" name="dd_bpjs" id="dd_bpjs">
                                 </div>
                             </div>
                             <label class="label-center mt-2">Penerimaan Bantuan</label>
-                            <div class="col-3"></div>
-                            <div class="col-9">
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_blt"><b>BLT</b></label>
-                                    <div class="form-check col-sm-1 col-1">
-                                        <input type="checkbox" class="form-control form-check-input" name="dd_blt" id="dd_blt" value="1" <?= isset($dd_blt) ? 'checked="checked"' : ''; ?>>
-                                    </div>
-                                    <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_blt_dd"><b>BLT DD</b></label>
-                                    <div class="form-check col-sm-1 col-1">
-                                        <input type="checkbox" class="form-control form-check-input" name="dd_blt_dd" id="dd_blt_dd" value="1" <?= isset($dd_blt_dd) ? 'checked="checked"' : ''; ?>>
-                                    </div>
+                            <div class="d-flex justify-content-center">
+                                <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_blt"><b>BLT</b></label>
+                                <div class="form-check col-sm-1 col-1">
+                                    <input type="checkbox" class="form-control form-check-input" name="dd_blt" id="dd_blt" value="1" <?= isset($dd_blt) ? 'checked="checked"' : ''; ?>>
                                 </div>
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_bpnt"><b>BPNT</b></label>
-                                    <div class="form-check col-sm-1 col-1">
-                                        <input type="checkbox" class="form-control form-check-input" name="dd_bpnt" id="dd_bpnt" value="1" <?= isset($dd_bpnt) ? 'checked="checked"' : ''; ?>>
-                                    </div>
-                                    <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_pkh"><b>PKH</b></label>
-                                    <div class="form-check col-sm-1 col-1">
-                                        <input type="checkbox" class="form-control form-check-input" name="dd_pkh" id="dd_pkh" value="1" <?= isset($dd_pkh) ? 'checked="checked"' : ''; ?>>
-                                    </div>
+                                <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_blt_dd"><b>BLT DD</b></label>
+                                <div class="form-check col-sm-1 col-1">
+                                    <input type="checkbox" class="form-control form-check-input" name="dd_blt_dd" id="dd_blt_dd" value="1" <?= isset($dd_blt_dd) ? 'checked="checked"' : ''; ?>>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_bpnt"><b>BPNT</b></label>
+                                <div class="form-check col-sm-1 col-1">
+                                    <input type="checkbox" class="form-control form-check-input" name="dd_bpnt" id="dd_bpnt" value="1" <?= isset($dd_bpnt) ? 'checked="checked"' : ''; ?>>
+                                </div>
+                                <label class="col-sm-2 col-3 form-check-label mr-3" for="dd_pkh"><b>PKH</b></label>
+                                <div class="form-check col-sm-1 col-1">
+                                    <input type="checkbox" class="form-control form-check-input" name="dd_pkh" id="dd_pkh" value="1" <?= isset($dd_pkh) ? 'checked="checked"' : ''; ?>>
                                 </div>
                             </div>
                         </div>
@@ -161,7 +145,7 @@
                             <label class="label-center mt-2">Titik Koordinat</label>
                             <div class="form-group row nopadding">
                                 <div class="col-sm-2 col-2">
-                                    <button type="button" class="btn btn-primary" onclick="getLocation()">Cek</button>
+                                    <button type="button" class="btn btn-primary" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i></button>
                                 </div>
                                 <div class="col-sm-5 col-5">
                                     <input type="text" class="form-control mb-2" placeholder="Latitude" spellcheck="false" id="latitude" name="dd_latitude" required>
@@ -197,38 +181,6 @@
             $('#dd_rw').val(data.rw);
             $('#dd_rt').val(data.rt);
             $('#dd_desa').val(data.kelurahan);
-            // $('#tempat_lahir').val(data.tempat_lahir);
-            // $('#tanggal_lahir').val(data.tanggal_lahir);
-            // if (data.jenis_kelamin == '1') {
-            //     $('#chk-Lk').prop('checked', true);
-            // }
-            // if (data.jenis_kelamin == '2') {
-            //     $('#chk-Pr').prop('checked', true);
-            // }
-            // if (data.hamil_status == '1') {
-            //     $('#chk-YaHamil').prop('checked', true);
-            //     $('#tgl_hamil_div').show();
-            //     $('#tgl_hamil').val(data.tgl_hamil);
-            // } else {
-            //     $('#chk-TidakHamil').prop('checked', true);
-            //     $('#tgl_hamil_div').hide();
-            //     $('#tgl_hamil').val('');
-            // }
-            // $('#jenis_pekerjaan').val(data.jenis_pekerjaan);
-            // $('#status_kawin').val(data.status_kawin);
-            // $('#shdk').val(data.shdk);
-            // $('#databansos').val(data.program_bansos);
-            // $('#ibu_kandung').val(data.ibu_kandung);
-            // if (data.disabil_status == '1') {
-            //     $('#chk-Yes').prop('checked', true);
-            //     $('#disabil_jenis_div').show();
-            //     $('#disabil_jenis').val(data.disabil_jenis);
-            // } else {
-            //     $('#chk-No').prop('checked', true);
-            //     $('#disabil_jenis_div').hide();
-            // }
-            // $('#chk-Yes').val(data.disabil_status);
-            // $('#disabil_jenis').val(data.disabil_kode);
         });
     });
 
@@ -249,7 +201,7 @@
 
             $.ajax({
                 type: "POST",
-                url: "<?= site_url('simpanDkm'); ?>",
+                url: "<?= site_url('/simpanDkm'); ?>",
                 data: data,
                 enctype: 'multipart/form-data',
                 processData: false,
