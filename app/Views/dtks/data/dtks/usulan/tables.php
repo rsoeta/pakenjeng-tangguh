@@ -32,8 +32,8 @@
                 <div class="col-12 col-sm-6">
                     <div class="row">
                         <div class="col-6 col-sm-3 mb-2" <?= $user != 3 ?  'hidden' :  ''; ?>>
-                            <a href="exportBa" type="submit" name="btnExpBA" class="btn btn-danger btn-block" id="exportBA">
-                                <i class="fa fa-clipboard-check"></i> Export B.A
+                            <a href="exportBa" type="submit" name="btnExpBA" class="btn btn-primary btn-block" id="exportBA">
+                                <i class="fas fa-file-word"></i> Export B.A
                             </a>
                         </div>
                         <div class="col-6 col-sm-3 mb-2" <?= $user > 3 ?  'hidden' :  ''; ?>>

@@ -40,27 +40,52 @@
                                 <input type="text" name="dd_nik" id="dd_nik" class="form-control form-control-sm" value="">
                                 <div class="invalid-feedback errordd_nik"></div>
                             </div>
-                            <div hidden>
-                                <label class="col-3 col-sm-2 col-form-label" for="dd_desa">Desa</label>
+                            <div class="form-group row nopadding" <?php if ($user_login['role_id'] > 2) { ?> style="display: none;" <?php } ?>>
+                                <label class="col-3 col-sm-2 col-form-label" for="dd_desa">Desa/Kelurahan</label>
                                 <div class="col-9 col-sm-4">
-                                    <input type="text" name="dd_desa" id="dd_desa" class="form-control form-control-sm" value="">
+                                    <select id="dd_desa" name="dd_desa" class="form-select form-select-sm">
+                                        <option value="">-- Pilih Desa / Kelurahan --</option>
+                                        <?php foreach ($desKels as $row) { ?>
+                                            <option <?php if ($user_login['kode_desa'] == $row['id']) {
+                                                        echo 'selected';
+                                                    } ?> value="<?= $row['id'] ?>"> <?php echo $row['name']; ?></option>
+                                        <?php } ?>
+                                    </select>
                                     <div class="invalid-feedback errordd_desa"></div>
                                 </div>
                             </div>
-                            <label class="col-3 col-sm-2 col-form-label" for="dd_alamat">Alamat</label>
-                            <div class="col-9 col-sm-4">
-                                <input type="text" name="dd_alamat" id="dd_alamat" class="form-control form-control-sm" value="">
-                                <div class="invalid-feedback errordd_alamat"></div>
+                            <div class="form-group row nopadding" <?php if ($user_login['role_id'] > 3) { ?> style="display: none;" <?php } ?>>
+                                <label class="col-3 col-sm-2 col-form-label" for="dd_rw">No. RW</label>
+                                <div class="col-9 col-sm-4">
+                                    <select id="dd_rw" name="dd_rw" class="form-select form-select-sm">
+                                        <option value="">-- Pilih --</option>
+                                        <?php foreach ($datarw as $row) { ?>
+                                            <option <?php if ($user_login['level'] == $row['no_rw']) {
+                                                        echo 'selected';
+                                                    } ?> value="<?= $row['no_rw']; ?>"> <?php echo $row['no_rw']; ?></option>
+                                        <?php } ?>
+                                    </select>
+                                    <div class="invalid-feedback errordd_rw"></div>
+                                </div>
                             </div>
-                            <label class="col-3 col-sm-1 col-form-label" for="dd_rt">No. RT</label>
-                            <div class="col-3 col-sm-2">
-                                <input type="number" name="dd_rt" id="dd_rt" class="form-control form-control-sm" value="">
-                                <div class="invalid-feedback errordd_rt"></div>
+                            <div class="form-group row nopadding">
+                                <label class="col-3 col-sm-2 col-form-label" for="dd_rt">No. RT</label>
+                                <div class="col-9 col-sm-4">
+                                    <select id="dd_rt" name="dd_rt" class="form-select form-select-sm">
+                                        <option value="">[ Kosong ]</option>
+                                        <?php foreach ($datart as $row) { ?>
+                                            <option value="<?= $row['no_rt'] ?>"> <?php echo $row['no_rt']; ?></option>
+                                        <?php } ?>
+                                    </select>
+                                    <div class="invalid-feedback errordd_rt"></div>
+                                </div>
                             </div>
-                            <label class="col-3 col-sm-1 col-form-label" for="dd_rw">No. RW</label>
-                            <div class="col-3 col-sm-2">
-                                <input type="number" name="dd_rw" id="dd_rw" class="form-control form-control-sm" value="">
-                                <div class="invalid-feedback errordd_rw"></div>
+                            <div class="form-group row nopadding">
+                                <label class="col-3 col-sm-2 col-form-label" for="dd_alamat">Alamat</label>
+                                <div class="col-9 col-sm-4">
+                                    <input type="text" name="dd_alamat" id="dd_alamat" class="form-control form-control-sm" value="">
+                                    <div class="invalid-feedback errordd_alamat"></div>
+                                </div>
                             </div>
                             <label class="label-center mt-2">Kepemilikan Adminduk</label>
                             <div class="d-flex justify-content-center">
@@ -337,9 +362,9 @@
             });
         });
 
-        $('#rw').change(function() {
-            var desa = $('#datadesa').val();
-            var no_rw = $('#rw').val();
+        $('#dd_rw').change(function() {
+            var desa = $('#dd_desa').val();
+            var no_rw = $('#dd_rw').val();
             var action = 'get_rt';
             if (no_rw != '') {
                 $.ajax({
@@ -356,11 +381,11 @@
                         for (var count = 0; count < data.length; count++) {
                             html += '<option value="' + data[count].no_rt + '">' + data[count].no_rt + '</option>';
                         }
-                        $('#rt').html(html);
+                        $('#dd_rt').html(html);
                     }
                 });
             } else {
-                $('#rt').val('');
+                $('#dd_rt').val('');
             }
         });
 

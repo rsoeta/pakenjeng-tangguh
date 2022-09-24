@@ -16,7 +16,7 @@
                             <div class="row">
                                 <div class="btn-group">
                                     <?php if ($user_login['role_id'] <= 3) { ?>
-                                        <a href="#" type="button" class="btn btn-sm btn-success float-right"><i class="fa fa-file-excel"></i> Export Excel</a>
+                                        <a href="/exportDkm" type="button" class="btn btn-sm btn-primary float-right" id="exportBA"><i class="fas fa-file-word"></i> Export Data</a>
                                     <?php } ?>
                                     <button type="button" class="btn btn-sm btn-primary float-end tombolTambah"><i class="fa fa-plus"></i> Tambah data</button>
                                 </div>
@@ -164,6 +164,35 @@
         });
 
     });
+
+
+    $('#datarw').ready(function() {
+        var desa = $('#datadesa').val();
+        var no_rw = $('#datarw').val();
+        var action = 'get_rt';
+        if (no_rw != '') {
+            $.ajax({
+                url: "<?php echo base_url('action'); ?>",
+                method: "POST",
+                data: {
+                    desa: desa,
+                    no_rw: no_rw,
+                    action: action
+                },
+                dataType: "JSON",
+                success: function(data) {
+                    var html = '<option value="">-Pilih-</option>';
+                    for (var count = 0; count < data.length; count++) {
+                        html += '<option value="' + data[count].no_rt + '">' + data[count].no_rt + '</option>';
+                    }
+                    $('#datart').html(html);
+                }
+            });
+        } else {
+            $('#datart').val('');
+        }
+    });
+
 
     table = $('#tabel_data').DataTable({
         'order': [],
@@ -343,6 +372,17 @@
             }
         });
     }
+
+    $('#exportBA').click(function() {
+        // $('#desa').removeAttr('disabled', '');
+        // window.location.reload();
+        // $("#desa").attr('disabled', 'true');
+        var $elt = $('#desa').removeAttr('disabled', '');
+        setTimeout(function() {
+            $elt.attr('disabled', true);
+        }, 500);
+
+    });
 </script>
 
 <?= $this->endSection(); ?>

@@ -108,7 +108,6 @@ class VervalBnba extends BaseController
         echo json_encode($output);
     }
 
-
     public function formedit()
     {
         if ($this->request->isAJAX()) {
@@ -500,7 +499,6 @@ class VervalBnba extends BaseController
                     </script>';
         }
     }
-
 
     public function tabel_data2()
     {

@@ -431,9 +431,9 @@ class Kemis extends BaseController
 
                 $data = [
                     'dd_nkk' => $this->request->getPost('dd_nkk'),
-                    'dd_nama' => $this->request->getPost('dd_nama'),
+                    'dd_nama' => strtoupper($this->request->getPost('dd_nama')),
                     'dd_nik' => $this->request->getPost('dd_nik'),
-                    'dd_alamat' => $this->request->getPost('dd_alamat'),
+                    'dd_alamat' => strtoupper($this->request->getPost('dd_alamat')),
                     'dd_rt' => $this->request->getPost('dd_rt'),
                     'dd_rw' => $this->request->getPost('dd_rw'),
                     'dd_desa' => session()->get('kode_desa'),
@@ -470,10 +470,12 @@ class Kemis extends BaseController
     public function formTmb()
     {
         if ($this->request->isAJAX()) {
+            $user_login = $this->AuthModel->getUserId();
 
             $district_id = Profil_Admin()['kode_kec'];
             $data = [
                 'title' => 'Form. Tambah Data',
+                'user_login' => $user_login,
                 'desKels' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $district_id)->findAll(),
                 'datarw' => $this->RwModel->noRw(),
                 'datart' => $this->RtModel->noRt(),
@@ -748,9 +750,9 @@ class Kemis extends BaseController
 
                 $data = [
                     'dd_nkk' => $this->request->getPost('dd_nkk'),
-                    'dd_nama' => $this->request->getPost('dd_nama'),
+                    'dd_nama' => strtoupper($this->request->getPost('dd_nama')),
                     'dd_nik' => $this->request->getPost('dd_nik'),
-                    'dd_alamat' => $this->request->getPost('dd_alamat'),
+                    'dd_alamat' => strtoupper($this->request->getPost('dd_alamat')),
                     'dd_rt' => $this->request->getPost('dd_rt'),
                     'dd_rw' => $this->request->getPost('dd_rw'),
                     'dd_desa' => session()->get('kode_desa'),
@@ -808,6 +810,241 @@ class Kemis extends BaseController
         } else {
 
             return redirect()->to('lockscreen');
+        }
+    }
+
+    public function exportBA()
+    {
+        $user_login = $this->AuthModel->getUserId();
+        // dd($user_login);
+        if (!isset($user_login['lp_sekretariat']) && !isset($user_login['user_lembaga_id'])) {
+            $str = '  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+               <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+               <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+               <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.35.1/js/bootstrap-dialog.min.js"></script>
+               <script type="text/javascript">
+                   setTimeout(function() { 
+                      BootstrapDialog.alert(\'Silahkan isi profil Anda dan Lembaga terlebih dahulu!!\') 
+                      window.location.href = \'/profil_user\';
+                    },10000);
+               </script>';
+            echo $str;
+        } else {
+
+            // dd($user_login);
+            $this->WilayahModel = new WilayahModel();
+
+            $kode_kec = Profil_Admin()['kode_kec'];
+            $filter1 = session()->get('kode_desa');
+            $filter4 = '1';
+            $filter5 = '1';
+
+            $kode_tanggal = date('d');
+            $kode_bulan = date('n');
+            $kode_tahun = date('Y');
+            $bulan_ini = bulan_ini();
+            $hari_ini = hari_ini();
+
+            if ($user_login['role_id'] == 3) {
+
+                $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor(FCPATH . 'data/templates/ba_dkm.docx');
+
+                $this->WilayahModel = $this->WilayahModel->getVillage($filter1);
+                // dd($this->WilayahModel);
+                if (is_array($this->WilayahModel)) {
+                    $this->WilayahModelUpper = strtoupper($this->WilayahModel['name']);
+                    $this->WilayahModelPropper = ucwords(strtolower($this->WilayahModel['name']));
+                } else {
+                    $this->WilayahModelUpper = strtoupper($this->WilayahModel);
+                    $this->WilayahModelPropper = ucwords(strtolower($this->WilayahModel));
+                }
+
+                $templateProcessor->setValues([
+                    'desaUpper' => $this->WilayahModelUpper,
+                    'desaPropper' => $this->WilayahModelPropper,
+                    'sekretariat' => $user_login['lp_sekretariat'],
+                    'email' => $user_login['lp_email'],
+                    'kode_pos' => $user_login['lp_kode_pos'],
+                    'hari' => $hari_ini,
+                    'tanggal' => $kode_tanggal,
+                    'bulan' => $bulan_ini,
+                    'tahun' => $kode_tahun,
+                    'nama_apdes' => $user_login['lp_kepala'],
+                ]);
+
+                $fotoDkm = $this->DkmModel->getGambar($filter1, $filter4);
+
+                $pathFP = 'data/dkm/foto-cpm/';
+                $pathFH = 'data/dkm/foto-rumah-depan/';
+                $pathBH = 'data/dkm/foto-rumah-belakang/';
+                $pathKK = 'data/dkm/foto-kk/';
+
+                $coba = [];
+                foreach ($fotoDkm as $i => $value) {
+
+                    $coba[] = [
+                        'dd_no' => $i + 1,
+                        'dd_nik' => $value['dd_nik'],
+                        'dd_nama' => $value['dd_nama'],
+                        'dd_alamat' => $value['dd_alamat'],
+                        'dd_rt' => $value['dd_rt'],
+                        'dd_rw' => $value['dd_rw'],
+                        'dd_adminduk' => $value['dd_adminduk'],
+                        'dd_bpjs' => $value['dd_bpjs'],
+                        'dd_blt' => $value['dd_blt'],
+                        'dd_blt_dd' => $value['dd_blt_dd'],
+                        'dd_pkh' => $value['dd_pkh'],
+                        'dd_bpnt' => $value['dd_bpnt'],
+                        'dd_latitude' => $value['dd_latitude'],
+                        'dd_longitude' => $value['dd_longitude'],
+                        'dd_foto_cpm' => $pathFP . $value['dd_foto_cpm'],
+                        'dd_foto_rumah_depan' => $pathFH . $value['dd_foto_rumah_depan'],
+                        'dd_foto_rumah_belakang' => $pathBH . $value['dd_foto_rumah_belakang'],
+                        'dd_foto_kk' => $pathKK . $value['dd_foto_kk'],
+                    ];
+                    $i++;
+                }
+                // dd($coba);
+
+                $templateProcessor->cloneRowAndSetValues('dd_no', $coba);
+                foreach ($coba as $i => $item) {
+                    // path php to folder
+                    // $path = base_url('data/foto_pm/' . $item['vg_fp']);
+                    $templateProcessor->setImageValue(sprintf('gmb_fp#%d', $i + 1), array($item['dd_foto_cpm'], 'width' => 100, 'height' => 100, 'ratio' => false));
+                    $templateProcessor->setImageValue(sprintf('gmb_fh#%d', $i + 1), array($item['dd_foto_rumah_depan'], 'width' => 100, 'height' => 100, 'ratio' => false));
+                    $templateProcessor->setImageValue(sprintf('gmb_bh#%d', $i + 1), array($item['dd_foto_rumah_belakang'], 'width' => 100, 'height' => 100, 'ratio' => false));
+                    $templateProcessor->setImageValue(sprintf('gmb_kk#%d', $i + 1), array($item['dd_foto_kk'], 'width' => 100, 'height' => 100, 'ratio' => false));
+                    // dd($path);
+                }
+
+                /* Note: any element you append to a document must reside inside of a Section. */
+
+
+                $filename = 'DAFTAR KELUARGA MISKIN.docx';
+
+                header("Content-Description: File Transfer");
+                header('Content-Disposition: attachment;filename="' . $filename . '"'); //tell browser what's the file name
+                header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+                header('Content-Transfer-Encoding: binary');
+                header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+                header('Expires: 0');
+
+                // Saving the document as OOXML file...
+                $templateProcessor->saveAs('php://output');
+
+
+                /* Note: we skip RTF, because it's not XML-based and requires a different example. */
+                /* Note: we skip PDF, because "HTML-to-PDF" approach is used to create PDF documents. */
+            } elseif ($user_login['role_id'] <= 2) {
+
+                $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor(FCPATH . 'data/templates/ba_dkm.docx');
+
+                $kode_tanggal = date('d');
+                $kode_bulan = date('n');
+                $kode_tahun = date('Y');
+
+                $wilayah = $this->WilayahModel->getDistrict($kode_kec)->getResultArray();
+                // foreach ($wilayah as $w) {
+                //     $wil = $w;
+                //     $wilUpper = strtoupper($wil['name']);
+                //     $wilPropper = ucwords(strtolower($wil['name']));
+                // }
+                // dd($wilayah);
+
+                if (is_array($wilayah)) {
+                    $wilayahUpper = strtoupper($wilayah[0]['name']);
+                    $wilayahPropper = ucwords(strtolower($wilayah[0]['name']));
+                } else {
+                    $wilayahUpper = strtoupper($wilayah);
+                    $wilayahPropper = ucwords(strtolower($wilayah));
+                }
+
+                $templateProcessor->setValues([
+                    'KECUPPER' => $wilayahUpper,
+                    'kecPropper' => $wilayahPropper,
+                    'sekretariat' => $user_login['lp_sekretariat'],
+                    'email' => $user_login['lp_email'],
+                    'kode_pos' => $user_login['lp_kode_pos'],
+                    'hari' => $hari_ini,
+                    'tanggal' => $kode_tanggal,
+                    'bulan' => $bulan_ini,
+                    'tahun' => $kode_tahun,
+                    'nama_apdes' => $user_login['lp_kepala'],
+                ]);
+
+                $vervalPdtt = $this->DkmModel->getGambar($filter1 = false, $filter4);
+
+                $pathFP = 'data/dkm/foto-cpm/';
+                $pathFH = 'data/dkm/foto-rumah-depan/';
+                $pathBH = 'data/dkm/foto-rumah-belakang/';
+                $pathKK = 'data/dkm/foto-kk/';
+
+                $coba = [];
+                foreach ($vervalPdtt as $i => $value) {
+
+                    $coba[] = [
+                        'dd_no' => $i + 1,
+                        'dd_nik' => $value['dd_nik'],
+                        'dd_nama' => $value['dd_nama'],
+                        'dd_alamat' => $value['dd_alamat'],
+                        'dd_rt' => $value['dd_rt'],
+                        'dd_rw' => $value['dd_rw'],
+                        'dd_adminduk' => $value['dd_adminduk'],
+                        'dd_bpjs' => $value['dd_bpjs'],
+                        'dd_blt' => $value['dd_blt'],
+                        'dd_blt_dd' => $value['dd_blt_dd'],
+                        'dd_pkh' => $value['dd_pkh'],
+                        'dd_bpnt' => $value['dd_bpnt'],
+                        'dd_latitude' => $value['dd_latitude'],
+                        'dd_longitude' => $value['dd_longitude'],
+                        'dd_foto_cpm' => $pathFP . $value['dd_foto_cpm'],
+                        'dd_foto_rumah_depan' => $pathFH . $value['dd_foto_rumah_depan'],
+                        'dd_foto_rumah_belakang' => $pathBH . $value['dd_foto_rumah_belakang'],
+                        'dd_foto_kk' => $pathKK . $value['dd_foto_kk'],
+                    ];
+                    $i++;
+                }
+                // dd($coba);
+
+                $templateProcessor->cloneRowAndSetValues('dd_no', $coba);
+                foreach ($coba as $i => $item) {
+                    // path php to folder
+                    // $path = base_url('data/foto_pm/' . $item['vg_fp']);
+                    $templateProcessor->setImageValue(sprintf('gmb_fp#%d', $i + 1), array($item['dd_foto_cpm'], 'width' => 100, 'height' => 100, 'ratio' => false));
+                    $templateProcessor->setImageValue(sprintf('gmb_fh#%d', $i + 1), array($item['dd_foto_rumah_depan'], 'width' => 100, 'height' => 100, 'ratio' => false));
+                    $templateProcessor->setImageValue(sprintf('gmb_bh#%d', $i + 1), array($item['dd_foto_rumah_belakang'], 'width' => 100, 'height' => 100, 'ratio' => false));
+                    $templateProcessor->setImageValue(sprintf('gmb_kk#%d', $i + 1), array($item['dd_foto_kk'], 'width' => 100, 'height' => 100, 'ratio' => false));
+                    // dd($path);
+                }
+
+                /* Note: any element you append to a document must reside inside of a Section. */
+
+
+                $filename = 'DAFTAR KELUARGA MISKIN.docx';
+
+                header("Content-Description: File Transfer");
+                header('Content-Disposition: attachment;filename="' . $filename . '"'); //tell browser what's the file name
+                header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+                header('Content-Transfer-Encoding: binary');
+                header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+                header('Expires: 0');
+
+                // Saving the document as OOXML file...
+                $templateProcessor->saveAs('php://output');
+            } else {
+                // return alert
+                $str = '  <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+               <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+               <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+               <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.35.1/js/bootstrap-dialog.min.js"></script>
+               <script type="text/javascript">
+                   setTimeout(function() { 
+                      BootstrapDialog.alert(\'Anda Tidak memiliki Akses!!\') 
+                      window.location.href = \'/logout\';
+                    },10000);
+               </script>';
+                echo $str;
+            }
         }
     }
 }

@@ -79,42 +79,7 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group row nopadding">
-                                    <label class="col-4 col-sm-4 col-form-label" for="dd_alamat">Alamat</label>
-                                    <div class="col-8 col-sm-8">
-                                        <input type="text" name="dd_alamat" id="dd_alamat" class="form-control form-control-sm" value="<?= set_value('dd_alamat', $dd_alamat); ?>">
-                                        <div class="invalid-feedback errordd_alamat"></div>
-                                    </div>
-                                </div>
 
-                                <div class="form-group row nopadding">
-                                    <label class="col-4 col-sm-4 col-form-label" for="dd_rt">No. RT</label>
-                                    <div class="col-8 col-sm-8">
-                                        <select id="dd_rt" name="dd_rt" class="form-select form-select-sm">
-                                            <option value="">-- Pilih RT --</option>
-                                            <?php foreach ($datart as $row) { ?>
-                                                <option <?php if ($dd_rt == $row['no_rt']) {
-                                                            echo 'selected';
-                                                        } ?> value="<?= $row['no_rt'] ?>"> <?php echo $row['no_rt']; ?></option>
-                                            <?php } ?>
-                                        </select>
-                                        <div class="invalid-feedback errordd_rt"></div>
-                                    </div>
-                                </div>
-                                <div class="form-group row nopadding">
-                                    <label class="col-4 col-sm-4 col-form-label" for="dd_rw">No. RW</label>
-                                    <div class="col-8 col-sm-8">
-                                        <select id="dd_rw" name="dd_rw" class="form-select form-select-sm">
-                                            <option value="">-- Pilih RW --</option>
-                                            <?php foreach ($datarw as $row) { ?>
-                                                <option <?php if ($dd_rw == $row['no_rw']) {
-                                                            echo 'selected';
-                                                        } ?> value="<?= $row['no_rw'] ?>"> <?php echo $row['no_rw']; ?></option>
-                                            <?php } ?>
-                                        </select>
-                                        <div class="invalid-feedback errordd_rw"></div>
-                                    </div>
-                                </div>
                                 <div <?= $user_login['role_id'] > 2 ? 'hidden' : ''; ?>>
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="dd_desa">Desa/Kelurahan</label>
@@ -131,6 +96,43 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="form-group row nopadding" <?php if ($user_login['role_id'] > 3) { ?> style="display: none;" <?php } ?>>
+                                    <label class="col-4 col-sm-4 col-form-label" for="dd_rw">No. RW</label>
+                                    <div class="col-8 col-sm-8">
+                                        <select id="dd_rw" name="dd_rw" class="form-select form-select-sm">
+                                            <option value="">-- Pilih RW --</option>
+                                            <?php foreach ($datarw as $row) { ?>
+                                                <option <?php if ($dd_rw == $row['no_rw']) {
+                                                            echo 'selected';
+                                                        } ?> value="<?= $row['no_rw'] ?>"> <?php echo $row['no_rw']; ?></option>
+                                            <?php } ?>
+                                        </select>
+                                        <div class="invalid-feedback errordd_rw"></div>
+                                    </div>
+                                </div>
+                                <div class="form-group row nopadding">
+                                    <label class="col-4 col-sm-4 col-form-label" for="dd_rt">No. RT</label>
+                                    <div class="col-8 col-sm-8">
+                                        <select id="dd_rt" name="dd_rt" class="form-select form-select-sm">
+                                            <option value="">-- Pilih RT --</option>
+                                            <?php foreach ($datart as $row) { ?>
+                                                <option <?php if ($dd_rt == $row['no_rt']) {
+                                                            echo 'selected';
+                                                        } ?> value="<?= $row['no_rt'] ?>"> <?php echo $row['no_rt']; ?></option>
+                                            <?php } ?>
+                                        </select>
+                                        <div class="invalid-feedback errordd_rt"></div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row nopadding">
+                                    <label class="col-4 col-sm-4 col-form-label" for="dd_alamat">Alamat</label>
+                                    <div class="col-8 col-sm-8">
+                                        <input type="text" name="dd_alamat" id="dd_alamat" class="form-control form-control-sm" value="<?= set_value('dd_alamat', $dd_alamat); ?>">
+                                        <div class="invalid-feedback errordd_alamat"></div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                         <!-- Data Adminduk -->

@@ -62,7 +62,7 @@ class DkmModel extends Model
         // search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "(db_nama LIKE '%$search%' OR db_nik LIKE '%$search%' OR db_nkk LIKE '%$search%' OR db_alamat LIKE '%$search%') $kondisi_filter0 $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
+            $kondisi_search = "(dd_nama LIKE '%$search%' OR dd_nik LIKE '%$search%' OR dd_nkk LIKE '%$search%' OR dd_alamat LIKE '%$search%') $kondisi_filter0 $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
         } else {
             $kondisi_search = "dd_id != '' $kondisi_filter0 $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
         }
@@ -133,7 +133,7 @@ class DkmModel extends Model
         // kondisi search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "AND (db_nama LIKE '%$search%' OR db_nik LIKE '%$search%' OR db_nkk LIKE '%$search%' OR db_alamat LIKE '%$search%') $kondisi_filter0 $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
+            $kondisi_search = "AND (dd_nama LIKE '%$search%' OR dd_nik LIKE '%$search%' OR dd_nkk LIKE '%$search%' OR dd_alamat LIKE '%$search%') $kondisi_filter0 $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
         } else {
             $kondisi_search = "$kondisi_filter0 $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
         }
@@ -143,5 +143,17 @@ class DkmModel extends Model
         $query = $db->query($sQuery)->getRow();
 
         return $query;
+    }
+
+    function getGambar($filter1 = false, $filter4)
+    {
+        $buildar = $this->db->table($this->table);
+        $buildar->select('dd_nama, dd_nik, dd_alamat, dd_rt, dd_rw, dd_adminduk, dd_bpjs, dd_blt, dd_blt_dd, dd_pkh, dd_bpnt, dd_latitude, dd_longitude, dd_foto_cpm, dd_foto_rumah_depan, dd_foto_rumah_belakang, dd_foto_kk');
+        $buildar->where('dd_desa', $filter1);
+        $buildar->where('dd_status', $filter4);
+
+        $query = $buildar->get();
+
+        return $query->getResultArray();
     }
 }
