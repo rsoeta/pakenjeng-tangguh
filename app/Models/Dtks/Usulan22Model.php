@@ -88,9 +88,10 @@ class Usulan22Model extends Model
         if ($_POST['length'] != -1);
         $db = db_connect();
         $builder = $db->table('dtks_usulan22');
-        $query = $builder->select('dtks_usulan22.du_id as idUsulan, tb_villages.name as namaDesa, tb_districts.name as namaKec, nama, nokk, dtks_usulan22.du_nik, jenis_kelamin, tempat_lahir, tanggal_lahir, ibu_kandung, jenis_pekerjaan, JenisPekerjaan, StatusKawin, jenis_shdk, status_kawin, alamat, rt, rw, kelurahan, kecamatan, shdk, foto_rumah, created_at, created_at_year, created_at_month')
+        $query = $builder->select('dtks_usulan22.du_id as idUsulan, tb_villages.name as namaDesa, tb_districts.name as namaKec, nama, nokk, dtks_usulan22.du_nik, jenis_kelamin, tempat_lahir, tanggal_lahir, ibu_kandung, jenis_pekerjaan, JenisPekerjaan, StatusKawin, dbj_nama_bansos, jenis_shdk, status_kawin, alamat, rt, rw, kelurahan, kecamatan, shdk, foto_rumah, created_at, created_at_year, created_at_month')
             ->join('tbl_pekerjaan', 'tbl_pekerjaan.idPekerjaan=dtks_usulan22.jenis_pekerjaan')
             ->join('tb_status_kawin', 'tb_status_kawin.idStatus=dtks_usulan22.status_kawin')
+            ->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id=dtks_usulan22.program_bansos')
             ->join('tb_shdk', 'tb_shdk.id=dtks_usulan22.shdk')
             ->join('tb_villages', 'tb_villages.id=dtks_usulan22.kelurahan')
             ->join('tb_districts', 'tb_districts.id=dtks_usulan22.kecamatan')
@@ -176,27 +177,6 @@ class Usulan22Model extends Model
 
     public function dataExport($filter1, $filter4, $filter5, $filter6)
     {
-        // fil$filter1
-        // return $this->table('dtks_usulan22')
-        //     ->select('dbj_nama_bansos, tb_villages.name as desa, tb_districts.name as kec, tb_regencies.name as kab, tb_provinces.name as prov, nama, nokk, du_nik, NamaJenKel, tempat_lahir, tanggal_lahir, ibu_kandung, JenisPekerjaan, StatusKawin, jenis_shdk, status_kawin, alamat, rt, rw, kelurahan, kecamatan, dc_status, dj_kode, hamil_status, hamil_tgl, created_at, created_at_year, created_at_month')
-        //     ->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id=dtks_usulan22.program_bansos', 'LEFT')
-        //     ->join('tbl_pekerjaan', 'tbl_pekerjaan.idPekerjaan=dtks_usulan22.jenis_pekerjaan', 'LEFT')
-        //     ->join('tb_status_kawin', 'tb_status_kawin.idStatus=dtks_usulan22.status_kawin', 'LEFT')
-        //     ->join('tb_disabil_jenis', 'tb_disabil_jenis.dj_id=dtks_usulan22.disabil_kode', 'LEFT')
-        //     ->join('tb_disabil_cek', 'tb_disabil_cek.dc_id=dtks_usulan22.disabil_status', 'LEFT')
-        //     // ->join('tb_hamil_cek', 'tb_hamil_cek.hc_id=dtks_usulan22.hamil_status', 'LEFT')
-        //     ->join('tbl_jenkel', 'tbl_jenkel.IdJenKel=dtks_usulan22.jenis_kelamin', 'LEFT')
-        //     ->join('tb_districts', 'tb_districts.id=dtks_usulan22.kecamatan', 'LEFT')
-        //     ->join('tb_regencies', 'tb_regencies.id=dtks_usulan22.kabupaten', 'LEFT')
-        //     ->join('tb_provinces', 'tb_provinces.id=dtks_usulan22.provinsi', 'LEFT')
-        //     ->join('tb_villages', 'tb_villages.id=dtks_usulan22.kelurahan', 'LEFT')
-        //     ->join('tb_shdk', 'tb_shdk.id=dtks_usulan22.shdk', 'LEFT')
-        //     ->where('created_at_year =', $filter5)
-        //     ->where('created_at_month =', $filter6)
-        //     ->where('program_bansos =', $filter4)
-        //     ->where('kelurahan =', $filter1)
-        //     ->get();
-
         $builder = $this->db->table('dtks_usulan22');
         $builder->select('dbj_nama_bansos, tb_villages.name as desa, tb_districts.name as kec, tb_regencies.name as kab, tb_provinces.name as prov, nama, nokk, du_nik, NamaJenKel, tempat_lahir, tanggal_lahir, ibu_kandung, JenisPekerjaan, StatusKawin, jenis_shdk, status_kawin, alamat, rt, rw, kelurahan, kecamatan, dc_status, dj_kode, hamil_status, hamil_tgl, created_at, created_at_year, created_at_month');
         $builder->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id=dtks_usulan22.program_bansos', 'LEFT');
@@ -256,6 +236,7 @@ class Usulan22Model extends Model
     {
         return $this->db->table('dtks_usulan22')->get()->getResultArray();
     }
+
     public function getData()
     {
         $jbt = (session()->get('jabatan'));
@@ -265,6 +246,7 @@ class Usulan22Model extends Model
             ->get()
             ->getResultArray();
     }
+
     public function getIdDtks($id = false)
     {
         $role_id = session()->get('role_id');

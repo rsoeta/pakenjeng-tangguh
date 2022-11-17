@@ -130,16 +130,30 @@ class Usulan22 extends BaseController
             $no++;
             $row = array();
             $row[] = $no;
+            $row[] = $key->du_nik;
             $row[] = $key->nama;
             $row[] = $key->nokk;
-            $row[] = $key->du_nik;
+            $row[] = $key->tempat_lahir;
+            if ($key->tanggal_lahir == '0000-00-00') {
+                $row[] = '-';
+            } elseif ($key->tanggal_lahir == null) {
+                $row[] = '-';
+            } else {
+                // date_format
+                $row[] = date('d/m/Y', strtotime($key->tanggal_lahir));
+            }
+            $row[] = $key->ibu_kandung;
             if ($key->jenis_kelamin == 1) {
                 $row[] = 'LAKI-LAKI';
             } else {
                 $row[] = 'PEREMPUAN';
             }
+            $row[] = $key->JenisPekerjaan;
+            $row[] = $key->StatusKawin;
+            $row[] = $key->rt;
+            $row[] = $key->rw;
             $row[] = $key->alamat;
-            $row[] = $key->jenis_shdk;
+            $row[] = $key->dbj_nama_bansos;
             $row[] = '<a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->idUsulan . "'" . ')"><i class="far fa-edit"></i> Edit</a> | 
 			<button class="btn btn-sm btn-secondary" data-id="' . $key->idUsulan . '" data-nama="' . $key->nama . '" id="deleteBtn"><i class="far fa-trash-alt"></i> Hapus</button>';
             $data[] = $row;

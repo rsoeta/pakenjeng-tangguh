@@ -125,16 +125,23 @@
             <?= form_close() ?>
             <div>
                 <br>
-                <table class="table" id="tabel_data">
-                    <thead class=" text-primary">
+                <table class="table" id="tabel_data" style="width: 100%;">
+                    <thead class="text-primary">
                         <tr>
                             <th>NO</th>
+                            <th>NIK</th>
                             <th>NAMA</th>
                             <th>NO. KK</th>
-                            <th>NIK</th>
+                            <th>TEMPAT LAHIR</th>
+                            <th>TANGGAL LAHIR</th>
+                            <th>IBU KANDUNG</th>
                             <th>JENIS KELAMIN</th>
+                            <th>JENIS PEKERJAAN</th>
+                            <th>STATUS</th>
+                            <th>RT</th>
+                            <th>RW</th>
                             <th>ALAMAT</th>
-                            <th>SHDK</th>
+                            <th>PROGRAM</th>
                             <th>ACTION</th>
                         </tr>
                     </thead>
@@ -147,6 +154,12 @@
 <!-- /.container-fluid -->
 <div class="viewmodal" style="display: none;"></div>
 <script>
+    'use strict';
+    $(document).ready(function() {
+        $('body').addClass('sidebar-collapse');
+        $('.displayNone').css('display', 'none')
+    });
+
     var save_method; //for save method string
     var table;
 
