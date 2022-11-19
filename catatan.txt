@@ -265,3 +265,8 @@
 
 ## v2.10.0 -- tambah fitur / menu DKM (Daftar Keluarga Kemiskinan)
     # tambah tabel dtks_dkm
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+## v2.11.0 -- tambah fitur / proses usulan sukses / gagal
+    # tambah field di tabel dtks_usulan22: ALTER TABLE `dtks_usulan22` ADD `du_proses` INT NULL DEFAULT NULL AFTER `hamil_tgl`;

@@ -14,7 +14,7 @@ class Usulan22Model extends Model
     protected $table      = 'dtks_usulan22';
     protected $primaryKey = 'du_id';
 
-    protected $allowedFields = ["du_nik", "program_bansos", "nokk", "nama", "tempat_lahir", "tanggal_lahir", "ibu_kandung", "jenis_kelamin", "jenis_pekerjaan", "status_kawin", "alamat", "rt", "rw", "provinsi", "kabupaten", "kecamatan", "kelurahan", "shdk", "foto_rumah", "disabil_status", "disabil_kode", "hamil_status", "hamil_tgl", "created_at", "created_at_year", "created_at_month", "created_by", "updated_at", "updated_by"];
+    protected $allowedFields = ["du_nik", "program_bansos", "nokk", "nama", "tempat_lahir", "tanggal_lahir", "ibu_kandung", "jenis_kelamin", "jenis_pekerjaan", "status_kawin", "alamat", "rt", "rw", "provinsi", "kabupaten", "kecamatan", "kelurahan", "shdk", "foto_rumah", "disabil_status", "disabil_kode", "hamil_status", "hamil_tgl", "du_proses", "created_at", "created_at_year", "created_at_month", "created_by", "updated_at", "updated_by"];
 
     protected $useTimestamps = false;
     protected $createdField  = 'created_at';
@@ -28,7 +28,7 @@ class Usulan22Model extends Model
     var $order = array('dtks_usulan22.du_id' => 'asc');
 
 
-    function get_datatables($filter1, $filter2, $filter3, $filter4, $filter5, $filter6)
+    function get_datatables($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7)
     {
         // fil$filter1
         if ($filter1 == "") {
@@ -66,13 +66,19 @@ class Usulan22Model extends Model
         } else {
             $kondisi_filter6 = " AND created_at_month = '$filter6'";
         }
+        // du_proses
+        if ($filter7 == "") {
+            $kondisi_filter7 = "";
+        } else {
+            $kondisi_filter7 = " AND du_proses = '$filter7'";
+        }
 
         // search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "(nama LIKE '%$search%' OR nokk LIKE '%$search%' OR du_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
+            $kondisi_search = "(nama LIKE '%$search%' OR nokk LIKE '%$search%' OR du_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
         } else {
-            $kondisi_search = "dtks_usulan22.du_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
+            $kondisi_search = "dtks_usulan22.du_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
         }
 
         // order
@@ -112,7 +118,7 @@ class Usulan22Model extends Model
         return $query;
     }
 
-    function jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6)
+    function jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7)
     {
         // fil$filter1
         if ($filter1 == "") {
@@ -150,13 +156,169 @@ class Usulan22Model extends Model
         } else {
             $kondisi_filter6 = " AND created_at_month = '$filter6'";
         }
+        // du_proses
+        if ($filter7 == "") {
+            $kondisi_filter7 = "";
+        } else {
+            $kondisi_filter7 = " AND du_proses = '$filter7'";
+        }
 
         // kondisi search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "AND (nama LIKE '%$search%' OR nokk LIKE '%$search%' OR du_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
+            $kondisi_search = "AND (nama LIKE '%$search%' OR nokk LIKE '%$search%' OR du_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
         } else {
-            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
+            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
+        }
+
+        $sQuery = "SELECT COUNT(du_id) as jml FROM dtks_usulan22 WHERE du_id != '' $kondisi_search";
+        $db = db_connect();
+        $query = $db->query($sQuery)->getRow();
+
+        return $query;
+    }
+
+    function get_datatables01($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7)
+    {
+        // fil$filter1
+        if ($filter1 == "") {
+            $kondisi_filter1 = "";
+        } else {
+            $kondisi_filter1 = " AND kelurahan = '$filter1'";
+        }
+        // status
+        if ($filter2 == "") {
+            $kondisi_filter2 = "";
+        } else {
+            $kondisi_filter2 = " AND rw = '$filter2'";
+        }
+        // rw
+        if ($filter3 == "") {
+            $kondisi_filter3 = "";
+        } else {
+            $kondisi_filter3 = " AND rt = '$filter3'";
+        }
+        // rt
+        if ($filter4 == "") {
+            $kondisi_filter4 = "";
+        } else {
+            $kondisi_filter4 = " AND program_bansos = '$filter4'";
+        }
+        // updated_at
+        if ($filter5 == "") {
+            $kondisi_filter5 = "";
+        } else {
+            $kondisi_filter5 = " AND created_at_year = '$filter5'";
+        }
+        // updated_at
+        if ($filter6 == "") {
+            $kondisi_filter6 = "";
+        } else {
+            $kondisi_filter6 = " AND created_at_month = '$filter6'";
+        }
+        // du_proses
+        if ($filter7 == "") {
+            $kondisi_filter7 = "";
+        } else {
+            $kondisi_filter7 = " AND du_proses = '$filter7'";
+        }
+
+        // search
+        if ($_POST['search']['value']) {
+            $search = $_POST['search']['value'];
+            $kondisi_search = "(nama LIKE '%$search%' OR nokk LIKE '%$search%' OR du_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
+        } else {
+            $kondisi_search = "dtks_usulan22.du_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
+        }
+
+        // order
+        if (isset($_POST['order'])) {
+            $result_order = $this->column_order[$_POST['order']['0']['column']];
+            $result_dir = $_POST['order']['0']['dir'];
+        } else if ($this->order) {
+            $order = $this->order;
+            $result_order = key($order);
+            $result_dir = $order[key($order)];
+        }
+
+        if ($_POST['length'] != -1);
+        $db = db_connect();
+        $builder = $db->table('dtks_usulan22');
+        $query = $builder->select('dtks_usulan22.du_id as idUsulan, tb_villages.name as namaDesa, tb_districts.name as namaKec, nama, nokk, dtks_usulan22.du_nik, jenis_kelamin, tempat_lahir, tanggal_lahir, ibu_kandung, jenis_pekerjaan, JenisPekerjaan, StatusKawin, dbj_nama_bansos, jenis_shdk, status_kawin, alamat, rt, rw, kelurahan, kecamatan, shdk, foto_rumah, created_at, created_at_year, created_at_month')
+            ->join('tbl_pekerjaan', 'tbl_pekerjaan.idPekerjaan=dtks_usulan22.jenis_pekerjaan')
+            ->join('tb_status_kawin', 'tb_status_kawin.idStatus=dtks_usulan22.status_kawin')
+            ->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id=dtks_usulan22.program_bansos')
+            ->join('tb_shdk', 'tb_shdk.id=dtks_usulan22.shdk')
+            ->join('tb_villages', 'tb_villages.id=dtks_usulan22.kelurahan')
+            ->join('tb_districts', 'tb_districts.id=dtks_usulan22.kecamatan')
+            ->where($kondisi_search)
+            ->orderBy($result_order, $result_dir)
+            ->limit($_POST['length'], $_POST['start'])
+            ->get();
+
+        return $query->getResult();
+    }
+
+    function jumlah_semua01()
+    {
+        $sQuery = "SELECT COUNT(du_id) as jml FROM dtks_usulan22";
+        $db = db_connect();
+        $query = $db->query($sQuery)->getRow();
+
+        return $query;
+    }
+
+    function jumlah_filter01($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7)
+    {
+        // fil$filter1
+        if ($filter1 == "") {
+            $kondisi_filter1 = "";
+        } else {
+            $kondisi_filter1 = " AND kelurahan = '$filter1'";
+        }
+        // status
+        if ($filter2 == "") {
+            $kondisi_filter2 = "";
+        } else {
+            $kondisi_filter2 = " AND rw = '$filter2'";
+        }
+        // rw
+        if ($filter3 == "") {
+            $kondisi_filter3 = "";
+        } else {
+            $kondisi_filter3 = " AND rt = '$filter3'";
+        }
+        // rt
+        if ($filter4 == "") {
+            $kondisi_filter4 = "";
+        } else {
+            $kondisi_filter4 = " AND program_bansos = '$filter4'";
+        }
+        // rt
+        if ($filter5 == "") {
+            $kondisi_filter5 = "";
+        } else {
+            $kondisi_filter5 = " AND created_at_year = '$filter5'";
+        }
+        // updated_at
+        if ($filter6 == "") {
+            $kondisi_filter6 = "";
+        } else {
+            $kondisi_filter6 = " AND created_at_month = '$filter6'";
+        }
+        // du_proses
+        if ($filter7 == "") {
+            $kondisi_filter7 = "";
+        } else {
+            $kondisi_filter7 = " AND du_proses = '$filter7'";
+        }
+
+        // kondisi search
+        if ($_POST['search']['value']) {
+            $search = $_POST['search']['value'];
+            $kondisi_search = "AND (nama LIKE '%$search%' OR nokk LIKE '%$search%' OR du_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
+        } else {
+            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
         }
 
         $sQuery = "SELECT COUNT(du_id) as jml FROM dtks_usulan22 WHERE du_id != '' $kondisi_search";

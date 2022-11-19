@@ -474,12 +474,12 @@ $desa_id = session()->get('kode_desa');
                             });
                             // window.location.reload();
                             table.draw();
-
+                            tabel_padan.draw();
                         }
 
                         $('#modaltambah').modal('hide');
                         table.draw();
-
+                        tabel_padan.draw();
                     }
                 },
                 error: function(xhr, ajaxOptions, thrownError) {

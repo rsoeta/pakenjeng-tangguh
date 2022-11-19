@@ -103,7 +103,6 @@ class Usulan22 extends BaseController
         }
     }
 
-
     public function tabel_data()
     {
         // var_dump(deadline_usulan());
@@ -112,16 +111,19 @@ class Usulan22 extends BaseController
         $csrfName = csrf_token();
         $csrfHash = csrf_hash();
 
+        $role = session()->get('role_id');
+
         $filter1 = $this->request->getPost('desa');
         $filter2 = $this->request->getPost('rw');
         $filter3 = $this->request->getPost('rt');
         $filter4 = $this->request->getPost('bansos');
         $filter5 = $this->request->getPost('data_tahun');
         $filter6 = $this->request->getPost('data_bulan');
+        $filter7 = $this->request->getPost('data_reg');
 
-        $listing = $this->Usulan22Model->get_datatables($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
+        $listing = $this->Usulan22Model->get_datatables($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7);
         $jumlah_semua = $this->Usulan22Model->jumlah_semua();
-        $jumlah_filter = $this->Usulan22Model->jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
+        $jumlah_filter = $this->Usulan22Model->jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7);
 
         $data = array();
         $no = $_POST['start'];
@@ -154,8 +156,8 @@ class Usulan22 extends BaseController
             $row[] = $key->rw;
             $row[] = $key->alamat;
             $row[] = $key->dbj_nama_bansos;
-            $row[] = '<a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->idUsulan . "'" . ')"><i class="far fa-edit"></i> Edit</a> | 
-			<button class="btn btn-sm btn-secondary" data-id="' . $key->idUsulan . '" data-nama="' . $key->nama . '" id="deleteBtn"><i class="far fa-trash-alt"></i> Hapus</button>';
+            $row[] = '<a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->idUsulan . "'" . ')"><i class="far fa-edit"></i></a> | 
+                <button class="btn btn-sm btn-secondary" data-id="' . $key->idUsulan . '" data-nama="' . $key->nama . '" id="deleteBtn"><i class="far fa-trash-alt"></i></button>';
             $data[] = $row;
         }
 
@@ -170,6 +172,52 @@ class Usulan22 extends BaseController
         echo json_encode($output);
     }
 
+    public function tabel_padan()
+    {
+        // var_dump(deadline_usulan());
+
+        $this->Usulan22Model = new Usulan22Model();
+        $csrfName = csrf_token();
+        $csrfHash = csrf_hash();
+
+        $role = session()->get('role_id');
+
+        $filter1 = $this->request->getPost('desa01');
+        $filter2 = $this->request->getPost('rw01');
+        $filter3 = $this->request->getPost('rt01');
+        $filter4 = $this->request->getPost('bansos01');
+        $filter5 = $this->request->getPost('data_tahun01');
+        $filter6 = $this->request->getPost('data_bulan01');
+        $filter7 = $this->request->getPost('data_reg01');
+
+        $listing = $this->Usulan22Model->get_datatables01($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7);
+        $jumlah_semua = $this->Usulan22Model->jumlah_semua01();
+        $jumlah_filter = $this->Usulan22Model->jumlah_filter01($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7);
+
+        $data = array();
+        $no = $_POST['start'];
+        foreach ($listing as $key) {
+
+            $no++;
+            $row = array();
+            $row[] = $no;
+            $row[] = $key->du_nik;
+            $row[] = $key->nama;
+            $row[] = $key->nokk;
+            $row[] = $key->dbj_nama_bansos;
+            $data[] = $row;
+        }
+
+        $output = array(
+            "draw" => $_POST['draw'],
+            "recordsTotal" => $jumlah_semua->jml,
+            "recordsFiltered" => $jumlah_filter->jml,
+            "data" => $data,
+        );
+        $output[$csrfName] = $csrfHash;
+
+        echo json_encode($output);
+    }
 
     public function formtambah()
     {
@@ -596,6 +644,7 @@ class Usulan22 extends BaseController
                     'disabil_jenis' => $row['disabil_kode'],
                     'status_hamil' => $row['hamil_status'],
                     'tgl_hamil' => $row['hamil_tgl'],
+                    'du_proses' => $row['du_proses'],
                     // 'foto_rumah' => $nama_foto_rumah,
                 ];
 
@@ -775,6 +824,7 @@ class Usulan22 extends BaseController
                     'disabil_kode' => $this->request->getVar('disabil_jenis'),
                     'hamil_status' => $this->request->getVar('status_hamil'),
                     'hamil_tgl' => $this->request->getVar('tgl_hamil'),
+                    'du_proses' => $this->request->getVar('du_proses'),
                     'updated_at' => date("Y-m-d H:i:s"),
                     'updated_by' => session()->get('nik'),
 

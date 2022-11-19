@@ -244,7 +244,29 @@ $desa_id = session()->get('kode_desa');
                         </div>
                     </div>
                 </div>
+                <div <?= $user > 3 ? ' hidden' : ''; ?>>
+                    <hr>
+                    <div class="row">
+                        <div class="form-group row nopadding">
+                            <div class="col-12 nopadding">
+                                <label class="col-2 col-form-label" for="du_proses">Status</label>
+                                <!-- <div class="col-10"> -->
+                                <!-- <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="register" name="du_proses" <?= $du_proses == '' ? 'checked' : ''; ?> value="" />
+                                    <label for="register" class="form-check-label"> Register</label>
+                                </div> -->
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
+                                    <label for="proses" class="form-check-label"> Padan</label>
+                                </div>
+                                <div class="invalid-feedback errordu_proses"></div>
+                                <!-- </div> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="modal-footer mt-3">
+
                     <button type="submit" class="btn btn-warning btn-block btnsimpan">Update</button>
                 </div>
                 <!-- </form> -->
@@ -423,6 +445,7 @@ $desa_id = session()->get('kode_desa');
                             });
                             // window.location.reload();
                             table.draw();
+                            tabel_padan.draw();
 
                         }
 
