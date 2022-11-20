@@ -25,7 +25,7 @@ class Usulan22Model extends Model
 
     var $column_order = array('', 'nama', 'nokk', 'du_nik', 'jenis_kelamin',  'alamat', 'shdk');
 
-    var $order = array('dtks_usulan22.du_id' => 'asc');
+    var $order = array('dtks_usulan22.updated_at' => 'asc');
 
 
     function get_datatables($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7)
