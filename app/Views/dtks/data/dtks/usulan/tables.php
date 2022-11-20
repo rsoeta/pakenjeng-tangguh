@@ -74,7 +74,7 @@
                                                         <i class="fa fa-sync-alt"></i> Reload
                                                     </button>
                                                 </div>
-                                                <div class="col-6 col-sm-3 mb-2">
+                                                <div class="col-6 col-sm-3 mb-2" hidden>
                                                     <button type="button" class="btn btn-primary btn-block tombolTambah">
                                                         <i class="fa fa-plus"></i> Tambah Data
                                                     </button>
