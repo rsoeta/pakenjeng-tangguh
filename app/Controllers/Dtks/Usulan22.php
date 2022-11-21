@@ -204,6 +204,15 @@ class Usulan22 extends BaseController
             $row[] = $key->du_nik;
             $row[] = $key->nama;
             $row[] = $key->nokk;
+            $row[] = $key->tempat_lahir;
+            if ($key->tanggal_lahir == '0000-00-00') {
+                $row[] = '-';
+            } elseif ($key->tanggal_lahir == null) {
+                $row[] = '-';
+            } else {
+                // date_format
+                $row[] = date('d/m/Y', strtotime($key->tanggal_lahir));
+            }
             $row[] = $key->dbj_nama_bansos;
             $data[] = $row;
         }

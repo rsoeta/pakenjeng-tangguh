@@ -277,6 +277,8 @@
                                                     <th>NIK</th>
                                                     <th>NAMA</th>
                                                     <th>NO. KK</th>
+                                                    <th>TEMPAT LAHIR</th>
+                                                    <th>TANGGAL LAHIR</th>
                                                     <th>PROGRAM</th>
                                                 </tr>
                                             </thead>
