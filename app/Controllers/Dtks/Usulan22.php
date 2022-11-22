@@ -213,6 +213,8 @@ class Usulan22 extends BaseController
                 // date_format
                 $row[] = date('d/m/Y', strtotime($key->tanggal_lahir));
             }
+            $row[] = $key->ibu_kandung;
+            $row[] = $key->JenisPekerjaan;
             $row[] = $key->dbj_nama_bansos;
             $data[] = $row;
         }

@@ -279,6 +279,8 @@
                                                     <th>NO. KK</th>
                                                     <th>TEMPAT LAHIR</th>
                                                     <th>TANGGAL LAHIR</th>
+                                                    <th>IBU KANDUNG</th>
+                                                    <th>PEKERJAAN</th>
                                                     <th>PROGRAM</th>
                                                 </tr>
                                             </thead>
