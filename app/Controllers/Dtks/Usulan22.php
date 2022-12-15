@@ -573,29 +573,29 @@ class Usulan22 extends BaseController
         return $this->response->setJSON($response);
     }
 
-    function delete()
+    public function delete()
     {
         if ($this->request->isAJAX()) {
 
 
-            if (deadline_usulan() == 1) {
-                $msg = [
-                    'informasi' => 'Mohon Maaf, Batas waktu untuk Perubahan Data, Telah Habis!!'
-                ];
-            } else {
-                $id = $this->request->getVar('id');
-                $this->Usulan22Model->delete($id);
-                $msg = [
-                    'sukses' => 'Data berhasil dihapus'
-                ];
-            }
-            echo json_encode($msg);
-        } else {
-            $data = [
-                'title' => 'Access denied',
+            // if (deadline_usulan() == 1) {
+            //     $msg = [
+            //         'informasi' => 'Mohon Maaf, Batas waktu untuk Perubahan Data, Telah Habis!!'
+            //     ];
+            // } else {
+            $id = $this->request->getVar('id');
+            $this->Usulan22Model->delete($id);
+            $msg = [
+                'sukses' => 'Data berhasil dihapus'
             ];
+            // }
+            echo json_encode($msg);
+            // } else {
+            //     $data = [
+            //         'title' => 'Access denied',
+            //     ];
 
-            return redirect()->to('lockscreen');
+            //     return redirect()->to('lockscreen');
         }
     }
 

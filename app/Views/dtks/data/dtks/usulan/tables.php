@@ -44,6 +44,7 @@
                     </div>
                 </div>
             </div>
+            <?= form_close() ?>
             <div class="row">
                 <div class="col-12">
                     <div class="card card-primary card-tabs">
@@ -155,7 +156,6 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <?= form_close() ?>
                                     <div>
                                         <br>
                                         <table class="table" id="tabel_data" style="width: 100%;">
@@ -307,7 +307,7 @@
 <!-- /.container-fluid -->
 <div class="viewmodal" style="display: none;"></div>
 <script>
-    'use strict';
+    // 'use strict';
     $(document).ready(function() {
         $('body').addClass('sidebar-collapse');
         $('.displayNone').css('display', 'none')
@@ -441,8 +441,8 @@
         tanya = confirm(`HAPUS DATA "${nama}"?`);
         if (tanya == true) {
             $.ajax({
-                type: "post",
-                url: "<?= base_url('dltUsul'); ?>",
+                type: "POST",
+                url: "<?= site_url('dltUsul'); ?>",
                 data: {
                     id: id
                 },
