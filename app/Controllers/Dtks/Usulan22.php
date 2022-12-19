@@ -604,66 +604,66 @@ class Usulan22 extends BaseController
         if ($this->request->isAJAX()) {
             // var_dump($this->request->getVar());
 
-            if (deadline_usulan() == 1) {
-                $msg = [
-                    'informasi' => 'Mohon Maaf, Batas waktu untuk Perubahan Data Telah Habis!!'
-                ];
-                echo json_encode($msg);
-            } else {
-                $this->PekerjaanModel = new PekerjaanModel();
-                $this->ShdkModel = new ShdkModel();
-                $this->StatusKawinModel = new StatusKawinModel();
-                $this->WilayahModel = new WilayahModel();
-                $this->BansosModel = new BansosModel();
-                $DisabilitasJenisModel = new DisabilitasJenisModel();
-                $users = new UsersModel();
+            // if (deadline_usulan() == 1) {
+            //     $msg = [
+            //         'informasi' => 'Mohon Maaf, Batas waktu untuk Perubahan Data Telah Habis!!'
+            //     ];
+            //     echo json_encode($msg);
+            // } else {
+            $this->PekerjaanModel = new PekerjaanModel();
+            $this->ShdkModel = new ShdkModel();
+            $this->StatusKawinModel = new StatusKawinModel();
+            $this->WilayahModel = new WilayahModel();
+            $this->BansosModel = new BansosModel();
+            $DisabilitasJenisModel = new DisabilitasJenisModel();
+            $users = new UsersModel();
 
-                $id = $this->request->getVar('id');
-                $model = new Usulan22Model();
-                $row = $model->find($id);
+            $id = $this->request->getVar('id');
+            $model = new Usulan22Model();
+            $row = $model->find($id);
 
-                $data = [
-                    'shdk' => $this->ShdkModel->findAll(),
-                    'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
-                    'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
-                    'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
-                    'rw' => $this->RwModel->noRw(),
-                    'rt' => $this->RtModel->noRt(),
-                    'bansos' => $this->BansosModel->findAll(),
-                    'users' => $users->findAll(),
-                    'jenkel' => $this->GenModel->getDataJenkel(),
-                    'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
+            $data = [
+                'shdk' => $this->ShdkModel->findAll(),
+                'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
+                'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
+                'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+                'rw' => $this->RwModel->noRw(),
+                'rt' => $this->RtModel->noRt(),
+                'bansos' => $this->BansosModel->findAll(),
+                'users' => $users->findAll(),
+                'jenkel' => $this->GenModel->getDataJenkel(),
+                'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
 
-                    'created_by' => session()->get('nik'),
-                    'stahub' => $row['shdk'],
-                    'kelurahan' => $row['kelurahan'],
-                    'datarw' => $row["rw"],
-                    'datart' => $row["rt"],
-                    'alamat' => $row['alamat'],
-                    'status_kawin' => $row["status_kawin"],
-                    'jenis_pekerjaan' => $row["jenis_pekerjaan"],
-                    'jenis_kelamin' => $row['jenis_kelamin'],
-                    'ibu_kandung' => strtoupper($row["ibu_kandung"]),
-                    'tanggal_lahir' => $row["tanggal_lahir"],
-                    'tempat_lahir' => $row["tempat_lahir"],
-                    'nama' => $row['nama'],
-                    'nokk' => $row['nokk'],
-                    'databansos' => $row['program_bansos'],
-                    'du_nik' => $row['du_nik'],
-                    'id' => $row['du_id'],
-                    'disabil_status' => $row['disabil_status'],
-                    'disabil_jenis' => $row['disabil_kode'],
-                    'status_hamil' => $row['hamil_status'],
-                    'tgl_hamil' => $row['hamil_tgl'],
-                    'du_proses' => $row['du_proses'],
-                    // 'foto_rumah' => $nama_foto_rumah,
-                ];
+                'created_by' => session()->get('nik'),
+                'stahub' => $row['shdk'],
+                'kelurahan' => $row['kelurahan'],
+                'datarw' => $row["rw"],
+                'datart' => $row["rt"],
+                'alamat' => $row['alamat'],
+                'status_kawin' => $row["status_kawin"],
+                'jenis_pekerjaan' => $row["jenis_pekerjaan"],
+                'jenis_kelamin' => $row['jenis_kelamin'],
+                'ibu_kandung' => strtoupper($row["ibu_kandung"]),
+                'tanggal_lahir' => $row["tanggal_lahir"],
+                'tempat_lahir' => $row["tempat_lahir"],
+                'nama' => $row['nama'],
+                'nokk' => $row['nokk'],
+                'databansos' => $row['program_bansos'],
+                'du_nik' => $row['du_nik'],
+                'id' => $row['du_id'],
+                'disabil_status' => $row['disabil_status'],
+                'disabil_jenis' => $row['disabil_kode'],
+                'status_hamil' => $row['hamil_status'],
+                'tgl_hamil' => $row['hamil_tgl'],
+                'du_proses' => $row['du_proses'],
+                // 'foto_rumah' => $nama_foto_rumah,
+            ];
 
-                $msg = [
-                    'sukses' => view('dtks/data/dtks/usulan/modaledit', $data)
-                ];
-                echo json_encode($msg);
-            }
+            $msg = [
+                'sukses' => view('dtks/data/dtks/usulan/modaledit', $data)
+            ];
+            echo json_encode($msg);
+            // }
         } else {
             return redirect()->to('lockscreen');
         }
