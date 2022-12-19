@@ -224,8 +224,9 @@ function deadline_usulan()
     $hari = $times->getDay();       // 12
     $jam = $times->getHour();           // 16
     $menit = $times->getMinute();         // 15
-
+    $bulanNext = $bulan + 1;
     // $dead = date('Y-m-d H:i') . "<br>";
+    $dead_mulai = ($tahun . '-' . $bulanNext . '-' . '15 00:10');
     $dead = ($tahun . '-' . $bulan . '-' . '20 00:10');
     $strdead = (strtotime($dead));
     // $ini_tanggal = strtotime("14 14:12") . "<br>";
