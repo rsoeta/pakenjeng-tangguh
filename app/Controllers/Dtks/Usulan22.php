@@ -1086,6 +1086,7 @@ class Usulan22 extends BaseController
                 'November',
                 'Desember'
             );
+            $bulanUpper = strtoupper($bulan[$kode_bulan]);
 
             $hari = date("D");
             switch ($hari) {
@@ -1131,6 +1132,7 @@ class Usulan22 extends BaseController
                 'hari' => $hari_ini,
                 'tanggal' => $kode_tanggal,
                 'bulan' => $bulan[$kode_bulan],
+                'bulanUpper' => strtoupper($bulan[$kode_bulan]),
                 'tahun' => $kode_tahun,
                 'nonbansos' => $nonbansos,
                 'bpnt' => $bpnt,
