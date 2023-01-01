@@ -226,9 +226,10 @@ function deadline_usulan()
     $menit = $times->getMinute();         // 15
     $bulanNext = $bulan + 1;
     // $dead = date('Y-m-d H:i') . "<br>";
-    $dead_mulai = ($tahun . '-' . $bulanNext . '-' . '15 00:10');
-    $dead = ($tahun . '-' . $bulan . '-' . '20 00:10');
-    $strdead = (strtotime($dead));
+    $dead_mulai = ($tahun . '-' . $bulan . '-' . '15 00:10');
+    $dead_akhir = ($tahun . '-' . $bulan . '-' . '20 00:10');
+    $strdead1 = (strtotime($dead_mulai));
+    $strdead2 = (strtotime($dead_akhir));
     // $ini_tanggal = strtotime("14 14:12") . "<br>";
     // $ini_tanggal = strtotime() . "<br>";
 
@@ -238,7 +239,7 @@ function deadline_usulan()
     $hari_ini = $tahun . '-' . $bulan . '-' . $hari . ' ' . $jam . ':' . $menit;
     $strhari_ini = strtotime($hari_ini);
 
-    $deadline = $strhari_ini > $strdead ? 1 : 0;
+    $deadline = ($strhari_ini < $strdead1 || $strhari_ini > $strdead2) ? 1 : 0;
 
 
     // return $ini_tanggal;
