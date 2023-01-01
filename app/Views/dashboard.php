@@ -264,6 +264,18 @@
                     </div>
                     <!-- /.col -->
                     <div class="card-body">
+
+                        <div class="row">
+                            <div class="col-12 col-md-6 mb-4">
+                                <h4>Informasi</h4>
+                                <ul>
+                                    <li>Usulan DTKS dibuka pada tanggal <b>15 s.d 19</b> setiap Bulannya</li>
+                                    <li>Penandatanganan <b>Berita Acara</b> dilaksanakan pada tanggal 20 di Periode Usulan</li>
+                                    <li>Data Usulan berdasarkan <b>Pemadanan Data Kependudukan</b> melalui SIKS-NG</li>
+                                </ul>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <?php foreach ($rekapUsulan as $row) { ?>
                                 <div class="col-sm-2 col-md-2 col-6">
@@ -289,7 +301,7 @@
                         <!-- /.col -->
                         <div class="row">
                             <div class="col-12 col-md-3 mb-4">
-                                <h4>PERSENTASE</h4>
+                                <h4>Persentase</h4>
                                 <?php
                                 $total = $capaianAll;
                                 foreach ($rekapUsulan as $row) {
@@ -307,7 +319,7 @@
                                 <?php } ?>
                             </div>
                             <div class="col-12 col-md-9">
-                                <h4>RINCIAN</h4>
+                                <h4>Rincian</h4>
                                 <div class="table-responsive">
                                     <table class="table table-bordered">
                                         <thead>
@@ -604,7 +616,7 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-12 col-md-3 mb-4">
-                                <h4>PERSENTASE</h4>
+                                <h4>Persentase</h4>
                                 <?php foreach ($jml_persentase as $row) { ?>
                                     <?php
                                     $persentase = $row['percentage'];
@@ -621,7 +633,7 @@
 
 
                             <div class="col-12 col-md-9">
-                                <h4>RINCIAN</h4>
+                                <h4>Rincian</h4>
                                 <div class="table-responsive">
                                     <table class="table table-bordered">
                                         <thead>
