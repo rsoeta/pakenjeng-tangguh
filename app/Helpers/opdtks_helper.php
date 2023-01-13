@@ -6,7 +6,7 @@ use App\Models\GenModel;
 
 function nameApp()
 {
-    return 'Opr NewDTKS';
+    return 'Opt NewDTKS';
 }
 // function version app from database
 function versionApp()
@@ -226,8 +226,8 @@ function deadline_usulan()
     $menit = $times->getMinute();         // 15
     $bulanNext = $bulan + 1;
     // $dead = date('Y-m-d H:i') . "<br>";
-    $dead_mulai = ($tahun . '-' . $bulan . '-' . '15 00:10');
-    $dead_akhir = ($tahun . '-' . $bulan . '-' . '20 00:10');
+    $dead_mulai = ($tahun . '-' . $bulan . '-' . '13 00:01');
+    $dead_akhir = ($tahun . '-' . $bulan . '-' . '20 00:00');
     $strdead1 = (strtotime($dead_mulai));
     $strdead2 = (strtotime($dead_akhir));
     // $ini_tanggal = strtotime("14 14:12") . "<br>";
@@ -254,6 +254,20 @@ function dkm_foto_cpm($fileName = '', $dir = '', $defFile = '')
 {
     if ($fileName !== '' && $fileName !== null && file_exists(FCPATH . 'data/dkm/' . $dir . '/' . $fileName)) {
         return base_url('data/dkm/' . $dir . '/' . $fileName);
+    } else {
+        if ($defFile == '') {
+            return base_url('assets/images/image_not_available.jpg');
+        } else {
+            return base_url('assets/images/' . $defFile);
+        }
+    }
+    # code...
+}
+
+function usulan_foto($fileName = '', $dir = '', $defFile = '')
+{
+    if ($fileName !== '' && $fileName !== null && file_exists(FCPATH . 'data/usulan/' . $dir . '/' . $fileName)) {
+        return base_url('data/usulan/' . $dir . '/' . $fileName);
     } else {
         if ($defFile == '') {
             return base_url('assets/images/image_not_available.jpg');

@@ -14,9 +14,9 @@ $desa_id = session()->get('kode_desa');
                 <h5 class="modal-title" id="modaltambahLabel">Form. Tambah Data</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <?php echo form_open('tmbUsul', ['class' => 'formsimpan']) ?>
+            <?= form_open_multipart('', ['class' => 'formsimpan']) ?>
+            <?= csrf_field(); ?>
             <div class="modal-body">
-                <?= csrf_field(); ?>
                 <div class="row">
                     <div class="form-group row nopadding mb-2">
                         <label class="col-4 col-sm-2 col-form-label" for="dataCari">Cari Data</label>
@@ -28,6 +28,7 @@ $desa_id = session()->get('kode_desa');
                     </div>
                     <hr>
 
+                    <label class="label-center mt-2">Identitas</label>
                     <div class="col-md-6 col-sm-6">
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="nokk">No. KK</label>
@@ -206,7 +207,7 @@ $desa_id = session()->get('kode_desa');
                             </div>
                         </div>
                         <div class="form-group row nopadding">
-                            <label for="disabil_status" class="col-4 col-form-label">Status Disabilitas</label>
+                            <label for="disabil_status" class="col-4 col-form-label">Disabilitas</label>
                             <div class="col-8 col-sm-8">
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" id="chk-Yes" name="disabil_status" value="1" />
@@ -229,15 +230,55 @@ $desa_id = session()->get('kode_desa');
                                 </select>
                             </div>
                         </div>
-                        <!-- </form> -->
-                        <?php echo form_close();
-                        ?>
                     </div>
-                    <div class="modal-footer mt-3">
-                        <button type="submit" class="btn btn-primary btn-block btnsimpan">Simpan</button>
+                    <div class="col-sm-12 col-12 mt-2">
+                        <label class="label-center mt-2">Dokumen</label>
+                        <div class="form-group row nopadding">
+                            <div class="col-12 col-sm-6 mb-2">
+                                <label for="du_foto_identitas">Foto KTP / KIA / Akta Kelahiran</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-address-card"></i></span>
+                                    </div>
+                                    <input type="file" class="form-control" spellcheck="false" name="du_foto_identitas" accept="image/*" capture required />
+                                </div>
+                            </div>
+                            <div class="invalid-feedback errordu_foto_identitas"></div>
+                            <div class="col-12 col-sm-6 mb-2">
+                                <label for="du_foto_rumah">Foto Rumah</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-home"></i></span>
+                                    </div>
+                                    <input type="file" class="form-control" spellcheck="false" name="du_foto_rumah" accept="image/*" capture required />
+                                </div>
+                            </div>
+                            <div class="invalid-feedback errordu_foto_rumah"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-12 mt-2">
+                        <label class="label-center mt-2">Titik Koordinat</label>
+                        <div class="form-group row nopadding">
+                            <div class="col-sm-2 col-2">
+                                <button type="button" class="btn btn-primary" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i></button>
+                            </div>
+                            <div class="col-sm-5 col-5">
+                                <input type="text" class="form-control mb-2" placeholder="Latitude" spellcheck="false" id="latitude" name="du_latitude" readonly required>
+                                <div class="invalid-feedback errordu_latitude"></div>
+                            </div>
+                            <div class="col-sm-5 col-5">
+                                <input type="text" class="form-control mb-2" placeholder="Longitude" spellcheck="false" id="longitude" name="du_longitude" readonly required>
+                                <div class="invalid-feedback errordu_longitude"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                <div class="modal-footer mt-3">
+                    <button type="submit" class="btn btn-primary btn-block btnSimpan">Simpan</button>
+                </div>
             </div>
+            <!-- </form> -->
+            <?php echo form_close(); ?>
         </div>
     </div>
 </div>
@@ -317,12 +358,18 @@ $desa_id = session()->get('kode_desa');
             }
         });
 
-        $('.formsimpan').submit(function(e) {
+        $('.btnSimpan').click(function(e) {
             e.preventDefault();
+            let form = $('.formsimpan')[0];
+            let data = new FormData(form);
             $.ajax({
                 type: "POST",
-                url: $(this).attr('action'),
-                data: $(this).serialize(),
+                url: "<?= site_url('/tmbUsul'); ?>",
+                data: data,
+                enctype: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                cache: false,
                 dataType: "json",
                 beforeSend: function() {
                     $('.btnsimpan').attr('disable', 'disabled');
@@ -454,6 +501,38 @@ $desa_id = session()->get('kode_desa');
                             $('.errordatabansos').html('');
                         }
 
+                        if (response.error.du_foto_identitas) {
+                            $('#du_foto_identitas').addClass('is-invalid');
+                            $('.errordu_foto_identitas').html(response.error.du_foto_identitas);
+                        } else {
+                            $('#du_foto_identitas').removeClass('is-invalid');
+                            $('.errordu_foto_identitas').html('');
+                        }
+
+                        if (response.error.du_foto_rumah) {
+                            $('#du_foto_rumah').addClass('is-invalid');
+                            $('.errordu_foto_rumah').html(response.error.du_foto_rumah);
+                        } else {
+                            $('#du_foto_rumah').removeClass('is-invalid');
+                            $('.errordu_foto_rumah').html('');
+                        }
+
+                        if (response.error.du_latitude) {
+                            $('#du_latitude').addClass('is-invalid');
+                            $('.errordu_latitude').html(response.error.du_latitude);
+                        } else {
+                            $('#du_latitude').removeClass('is-invalid');
+                            $('.errordu_latitude').html('');
+                        }
+
+                        if (response.error.du_longitude) {
+                            $('#du_longitude').addClass('is-invalid');
+                            $('.errordu_longitude').html(response.error.du_longitude);
+                        } else {
+                            $('#du_longitude').removeClass('is-invalid');
+                            $('.errordu_longitude').html('');
+                        }
+
                     } else {
                         if (response.sukses) {
                             const Toast = Swal.mixin({
@@ -545,4 +624,41 @@ $desa_id = session()->get('kode_desa');
         });
 
     });
+
+    var x = document.getElementById("latitude");
+    var y = document.getElementById("longitude");
+    var z = document.getElementById("z");
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            // z.innerHTML = "Geolokasi Tidak Didukung oleh Browser Ini";
+            alert("Geolokasi Tidak Didukung oleh Browser Ini");
+        }
+    }
+
+    function showPosition(position) {
+        $("#latitude").val(`${position.coords.latitude}`);
+        $("#longitude").val(`${position.coords.longitude}`);
+        // x.innerHTML = position.coords.latitude;
+        // y.innerHTML = position.coords.longitude;
+    }
+
+    function showError(error) {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                alert("Pengguna menolak permintaan geolokasi.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("Informasi lokasi tidak tersedia.");
+                break;
+            case error.TIMEOUT:
+                alert("Permintaan untuk menghitung waktu lokasi pengguna.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("Terjadi kesalahan yang tidak diketahui.");
+                break;
+        }
+    }
 </script>

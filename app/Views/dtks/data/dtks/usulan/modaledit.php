@@ -16,7 +16,7 @@ $desa_id = session()->get('kode_desa');
             </div>
 
             <div class="modal-body">
-                <?php echo form_open('updateUsulan', ['class' => 'formsimpan']) ?>
+                <?= form_open_multipart('', ['class' => 'formsimpan']) ?>
                 <?= csrf_field(); ?>
                 <div class="row">
                     <div class="col-12 col-sm-6">
@@ -98,7 +98,7 @@ $desa_id = session()->get('kode_desa');
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="nik">NIK</label>
                             <div class="col-8 col-sm-8">
-                                <input type="number" name="nik" id="nik" class="form-control form-control-sm" value="<?= $du_nik; ?>" autocomplete="off">
+                                <input type="number" name="nik" id="nik" class="form-control form-control-sm" value="<?= $du_nik; ?>" autocomplete="off" readonly="on">
                                 <div class="invalid-feedback errornik"></div>
                             </div>
                         </div>
@@ -153,7 +153,6 @@ $desa_id = session()->get('kode_desa');
                                 <div class="invalid-feedback errortanggal_lahir"></div>
                             </div>
                         </div>
-
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="jenis_pekerjaan">Pekerjaan</label>
                             <div class="col-8 col-sm-8">
@@ -219,7 +218,7 @@ $desa_id = session()->get('kode_desa');
                             </div>
                         </div>
                         <div class="form-group row nopadding">
-                            <label for="disabil_status" class="col-4 col-form-label">Status Disabilitas</label>
+                            <label for="disabil_status" class="col-4 col-form-label">Disabilitas</label>
                             <div class="col-8 col-sm-8">
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="radio" id="chk-Yes" name="disabil_status" <?= $disabil_status == 1 ? 'checked' : ''; ?> value="1" />
@@ -243,31 +242,70 @@ $desa_id = session()->get('kode_desa');
                             </div>
                         </div>
                     </div>
+                    <div class="col-sm-12 col-12 mt-2">
+                        <label class="label-center mt-2">Dokumen</label>
+                        <div class="form-group row nopadding">
+                            <div class="col-12 col-sm-6 mb-2">
+                                <a download="<?= 'DUD_ID' . $du_nik . '.jpg'; ?>" href="<?= usulan_foto('DUD_ID' . $du_nik . '.jpg', 'foto_identitas'); ?>">
+                                    <img src="<?= usulan_foto('DUD_ID' . $du_nik . '.jpg', 'foto_identitas'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                </a>
+                                <label for="du_foto_identitas">Foto KTP / KIA / Akta Kelahiran</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-address-card"></i></span>
+                                    </div>
+                                    <input type="file" class="form-control" spellcheck="false" name="du_foto_identitas" accept="image/*" capture />
+                                </div>
+                            </div>
+                            <div class="invalid-feedback errordu_foto_identitas"></div>
+                            <div class="col-12 col-sm-6 mb-2">
+                                <a download="<?= 'DUD_FH' . $du_nik . '.jpg'; ?>" href="<?= usulan_foto('DUD_FH' . $du_nik . '.jpg', 'foto_rumah'); ?>">
+                                    <img src="<?= usulan_foto('DUD_FH' . $du_nik . '.jpg', 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                </a>
+                                <label for="du_foto_rumah">Foto Rumah</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-home"></i></span>
+                                    </div>
+                                    <input type="file" class="form-control" spellcheck="false" name="du_foto_rumah" accept="image/*" capture />
+                                </div>
+                            </div>
+                            <div class="invalid-feedback errordu_foto_rumah"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-12 mt-2">
+                        <label class="label-center mt-2">Titik Koordinat</label>
+                        <div class="form-group row nopadding">
+                            <div class="col-sm-2 col-2">
+                                <button type="button" class="btn btn-primary" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i></button>
+                            </div>
+                            <div class="col-sm-5 col-5">
+                                <input type="text" class="form-control mb-2" placeholder="Latitude" spellcheck="false" id="latitude" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
+                                <div class="invalid-feedback errordu_latitude"></div>
+                            </div>
+                            <div class="col-sm-5 col-5">
+                                <input type="text" class="form-control mb-2" placeholder="Longitude" spellcheck="false" id="longitude" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
+                                <div class="invalid-feedback errordu_longitude"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div <?= $user > 3 ? ' hidden' : ''; ?>>
                     <hr>
                     <div class="row">
-                        <div class="form-group row nopadding">
-                            <div class="col-12 nopadding">
-                                <label class="col-2 col-form-label" for="du_proses">Status</label>
-                                <!-- <div class="col-10"> -->
-                                <!-- <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="register" name="du_proses" <?= $du_proses == '' ? 'checked' : ''; ?> value="" />
-                                    <label for="register" class="form-check-label"> Register</label>
-                                </div> -->
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
-                                    <label for="proses" class="form-check-label"> Padan</label>
-                                </div>
-                                <div class="invalid-feedback errordu_proses"></div>
-                                <!-- </div> -->
+                        <div class="col-12 d-flex justify-content-center">
+                            <div class="form-check form-check-inline">
+                                <label for="proses" class="form-check-label"> Padan</label>
+                                <input class="form-check-input" type="checkbox" id="proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
                             </div>
+                            <div class="invalid-feedback errordu_proses"></div>
+                            <!-- </div> -->
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer mt-3">
 
-                    <button type="submit" class="btn btn-warning btn-block btnsimpan">Update</button>
+                    <button type="submit" class="btn btn-warning btn-block btnSimpan">Update</button>
                 </div>
                 <!-- </form> -->
                 <?php echo form_close();
@@ -279,12 +317,18 @@ $desa_id = session()->get('kode_desa');
 
 <script>
     $(document).ready(function() {
-        $('.formsimpan').submit(function(e) {
+        $('.btnSimpan').click(function(e) {
             e.preventDefault();
+            let form = $('.formsimpan')[0];
+            let data = new FormData(form);
             $.ajax({
                 type: "POST",
                 url: '<?= base_url('/updateUsulan') ?>',
-                data: $(this).serialize(),
+                data: data,
+                enctype: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                cache: false,
                 dataType: "json",
                 beforeSend: function() {
                     $('.btnsimpan').attr('disable', 'disabled');
@@ -425,6 +469,38 @@ $desa_id = session()->get('kode_desa');
                             $('.errordatabansos').html('');
                         }
 
+                        if (response.error.du_foto_identitas) {
+                            $('#du_foto_identitas').addClass('is-invalid');
+                            $('.errordu_foto_identitas').html(response.error.du_foto_identitas);
+                        } else {
+                            $('#du_foto_identitas').removeClass('is-invalid');
+                            $('.errordu_foto_identitas').html('');
+                        }
+
+                        if (response.error.du_foto_rumah) {
+                            $('#du_foto_rumah').addClass('is-invalid');
+                            $('.errordu_foto_rumah').html(response.error.du_foto_rumah);
+                        } else {
+                            $('#du_foto_rumah').removeClass('is-invalid');
+                            $('.errordu_foto_rumah').html('');
+                        }
+
+                        if (response.error.du_latitude) {
+                            $('#du_latitude').addClass('is-invalid');
+                            $('.errordu_latitude').html(response.error.du_latitude);
+                        } else {
+                            $('#du_latitude').removeClass('is-invalid');
+                            $('.errordu_latitude').html('');
+                        }
+
+                        if (response.error.du_longitude) {
+                            $('#du_longitude').addClass('is-invalid');
+                            $('.errordu_longitude').html(response.error.du_longitude);
+                        } else {
+                            $('#du_longitude').removeClass('is-invalid');
+                            $('.errordu_longitude').html('');
+                        }
+
                     } else {
                         if (response.sukses) {
                             const Toast = Swal.mixin({
@@ -517,4 +593,41 @@ $desa_id = session()->get('kode_desa');
         });
 
     });
+
+    var x = document.getElementById("latitude");
+    var y = document.getElementById("longitude");
+    var z = document.getElementById("z");
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            // z.innerHTML = "Geolokasi Tidak Didukung oleh Browser Ini";
+            alert("Geolokasi Tidak Didukung oleh Browser Ini");
+        }
+    }
+
+    function showPosition(position) {
+        $("#latitude").val(`${position.coords.latitude}`);
+        $("#longitude").val(`${position.coords.longitude}`);
+        // x.innerHTML = position.coords.latitude;
+        // y.innerHTML = position.coords.longitude;
+    }
+
+    function showError(error) {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                alert("Pengguna menolak permintaan geolokasi.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("Informasi lokasi tidak tersedia.");
+                break;
+            case error.TIMEOUT:
+                alert("Permintaan untuk menghitung waktu lokasi pengguna.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("Terjadi kesalahan yang tidak diketahui.");
+                break;
+        }
+    }
 </script>

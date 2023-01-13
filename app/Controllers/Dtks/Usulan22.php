@@ -133,7 +133,10 @@ class Usulan22 extends BaseController
             $row = array();
             $row[] = $no;
             $row[] = $key->du_nik;
-            $row[] = $key->nama;
+            $row[] = '<a href=' . usulan_foto('DUD_ID' . $key->du_nik . '.jpg', 'foto_identitas') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Identitas">' . $key->nama . '</a>
+            <a href=' . usulan_foto('DUD_FH' . $key->du_nik . '.jpg', 'foto_rumah') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Rumah Depan"></a>
+            ';
+            // $row[] = $key->nama;
             $row[] = $key->nokk;
             $row[] = $key->tempat_lahir;
             if ($key->tanggal_lahir == '0000-00-00') {
@@ -202,7 +205,10 @@ class Usulan22 extends BaseController
             $row = array();
             $row[] = $no;
             $row[] = $key->du_nik;
-            $row[] = $key->nama;
+            $row[] =
+                '<a href=' . usulan_foto('DUD_ID' . $key->du_nik . '.jpg', 'foto_identitas') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Identitas">' . $key->nama . '</a>
+            <a href=' . usulan_foto('DUD_FH' . $key->du_nik . '.jpg', 'foto_rumah') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Rumah Depan"></a>
+            ';
             $row[] = $key->nokk;
             $row[] = $key->tempat_lahir;
             if ($key->tanggal_lahir == '0000-00-00') {
@@ -351,7 +357,6 @@ class Usulan22 extends BaseController
                         'required' => '{field} harus dipilih.'
                     ]
                 ],
-
                 'jenis_pekerjaan' => [
                     'label' => 'Jenis Pekerjaan',
                     'rules' => 'required',
@@ -396,17 +401,40 @@ class Usulan22 extends BaseController
                         'required' => '{field} harus dipilih.'
                     ]
                 ],
-
-                //     //     // 'foto_rumah' => [
-                //     //     //     'rules' => 'uploaded[rmh_depan]|max_size[rmh_depan,10000]|is_image[rmh_depan]|mime_in[rmh_depan,image/jpg,image/jpeg,image/png]',
-                //     //     //     'errors' => [
-                //     //     //         'uploaded' => '{field} harus diisi.',
-                //     //     //         'max_size' => 'Ukuran foto terlalu besar',
-                //     //     //         'is_image' => 'Yang anda pilih bukan gambar',
-                //     //     //         'mime_in' => 'Yang anda pilih bukan gambar'
-
-                //     //     //     ]
-                //     //     // ]
+                'du_foto_identitas' => [
+                    'label' => 'Foto Identitas',
+                    'rules' => 'uploaded[du_foto_identitas]|is_image[du_foto_identitas]|mime_in[du_foto_identitas,image/jpg,image/jpeg,image/png]',
+                    'errors' => [
+                        'uploaded' => '{field} harus ada.',
+                        'is_image' => '{field} harus berupa gambar.',
+                        'mime_in' => '{field} harus berupa gambar.',
+                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
+                    ]
+                ],
+                'du_foto_rumah' => [
+                    'label' => 'Foto Depan Rumah',
+                    'rules' => 'uploaded[du_foto_rumah]|is_image[du_foto_rumah]|mime_in[du_foto_rumah,image/jpg,image/jpeg,image/png]',
+                    'errors' => [
+                        'uploaded' => '{field} harus ada.',
+                        'is_image' => '{field} harus berupa gambar.',
+                        'mime_in' => '{field} harus berupa gambar.',
+                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
+                    ]
+                ],
+                'du_latitude' => [
+                    'label' => 'Garis Lintang',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus terisi.'
+                    ]
+                ],
+                'du_longitude' => [
+                    'label' => 'Garis Bujur',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus terisi.'
+                    ]
+                ],
             ]);
             if (!$valid) {
 
@@ -427,10 +455,93 @@ class Usulan22 extends BaseController
                         'datarw' => $validation->getError('datarw'),
                         'kelurahan' => $validation->getError('kelurahan'),
                         'shdk' => $validation->getError('shdk'),
+                        'du_foto_identitas' => $validation->getError('du_foto_identitas'),
+                        'du_foto_rumah' => $validation->getError('du_foto_rumah'),
+                        'du_latitude' => $validation->getError('du_latitude'),
+                        'du_longitude' => $validation->getError('du_longitude'),
                         'created_by' => $validation->getError('created_by'),
                     ]
                 ];
             } else {
+
+                $kode_desa = session()->get('kode_desa');
+                $namaDesa = $this->WilayahModel->getVillage($kode_desa);
+                $desaNama = $namaDesa['name'];
+
+                $du_foto_rumah = $this->request->getFile('du_foto_rumah');
+                $du_foto_identitas = $this->request->getFile('du_foto_identitas');
+
+                // var_dump($dd_foto_cpm);
+                // die;
+
+                $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . '.jpg';
+                $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . '.jpg';
+
+                $img_dua = imagecreatefromjpeg($du_foto_rumah);
+                $img_empat = imagecreatefromjpeg($du_foto_identitas);
+
+                // get width and height of image
+
+                $width_dua = imagesx($img_dua);
+                $height_dua = imagesy($img_dua);
+
+                $width_empat = imagesx($img_empat);
+                $height_empat = imagesy($img_empat);
+
+                // reorient image if width is greater than height
+                if ($width_dua > $height_dua) {
+                    $img_dua = imagerotate($img_dua, -90, 0);
+                }
+                if ($width_empat > $height_empat) {
+                    $img_empat = imagerotate($img_empat, -90, 0);
+                }
+                // resize image
+                $img_dua = imagescale($img_dua, 480, 640);
+                $img_empat = imagescale($img_empat, 480, 640);
+
+                $txtNik = $this->request->getPost('nik');
+                $txtNama = strtoupper($this->request->getPost('nama'));
+                $txtAlamat = strtoupper($this->request->getPost('alamat') . ' RT/RW ' . $this->request->getPost('datart') . "/" . $this->request->getPost('datarw'));
+                $txtKelurahan = $desaNama;
+                $txtKecamatan = 'PAKENJENG';
+                $txtKabupaten = 'GARUT';
+                $txtProvinsi = 'JAWA BARAT';
+                $txtLat = $this->request->getPost('du_latitude');
+                $txtLang = $this->request->getPost('du_longitude');
+                date_default_timezone_set('Asia/Jakarta');
+                $txtTimestap = date("d M Y H:i:s");
+
+                $txt = "NIK : " . $txtNik . "\nNama : " . $txtNama . "\nAlamat : " . $txtAlamat . "\n"  . $txtKelurahan . ", " . $txtKecamatan . ", " . $txtKabupaten . ", " . $txtProvinsi . "\nLokasi : " . $txtLat . ", " . $txtLang . "\nDibuat pada : " . $txtTimestap . "
+                \n@" . nameApp() . " Kec. " . ucwords(strtolower(Profil_Admin()['namaKec']));
+                $fontFile = FCPATH . 'assets/fonts/Futura Bk BT Book.ttf';
+
+                $fontSizeDua = 0.020 * imagesx($img_dua);
+                $whiteDua = imagecolorallocate($img_dua, 255, 255, 255);
+                $strokeColorDua = imagecolorallocate($img_dua, 0, 0, 0);
+
+                // pos x from left, pos y from bottom
+                $posXdua = 0.02 * imagesx($img_dua);
+                $posYdua = 0.80 * imagesy($img_dua);
+
+                // $posX = 10;
+                // $posY = 830;
+                $angle = 0;
+
+                // stroke watermark image
+                imagettfstroketext($img_dua, $fontSizeDua, $angle, $posXdua, $posYdua, $whiteDua, $strokeColorDua, $fontFile, $txt, 1);
+
+
+                header("Content-type: image/jpg");
+                $quality = 90; // 0 to 100
+
+                // var_dump($img_satu);
+                // die;
+
+                imagejpeg($img_dua, 'data/usulan/foto_rumah/' . $filename_dua, $quality);
+                imagejpeg($img_empat, 'data/usulan/foto_identitas/' . $filename_empat, $quality);
+                // var_dump($img_satu);
+                // die;
+
                 $data = [
                     'provinsi' => '32',
                     'kabupaten' => '32.05',
@@ -454,10 +565,16 @@ class Usulan22 extends BaseController
                     'disabil_kode' => $this->request->getVar('disabil_jenis'),
                     'hamil_status' => $this->request->getVar('status_hamil'),
                     'hamil_tgl' => $this->request->getVar('tgl_hamil'),
+                    'foto_identitas' => $filename_empat,
+                    'foto_rumah' => $filename_dua,
+                    'du_latitude' => $this->request->getVar('du_latitude'),
+                    'du_longitude' => $this->request->getVar('du_longitude'),
                     'created_at' => date("Y-m-d H:i:s"),
+                    'updated_at' => date("Y-m-d H:i:s"),
                     'created_at_year' => date('Y'),
                     'created_at_month' => date('n'),
                     'created_by' => session()->get('nik'),
+                    'updated_by' => session()->get('nik'),
 
                     // 'foto_rumah' => $nama_foto_rumah,
                 ];
@@ -500,16 +617,12 @@ class Usulan22 extends BaseController
             if ($role === '1') {
                 $builder->select('*');
                 $builder->like('du_nik', $search);
-                $builder->orLike('nama', $search);
-                $builder->orLike('nokk', $search);
                 $builder->distinct('du_nik');
                 $query = $builder->get();
                 $data = $query->getResult();
             } elseif ($role === '2') {
                 $builder->select('*');
                 $builder->like('du_nik', $search);
-                $builder->orLike('nama', $search);
-                $builder->orLike('nokk', $search);
                 $builder->distinct('du_nik');
                 $query = $builder->get();
                 $data = $query->getResult();
@@ -517,8 +630,6 @@ class Usulan22 extends BaseController
                 $builder->select('*');
                 $builder->where('kelurahan', $kode_desa);
                 $builder->like('du_nik', $search);
-                $builder->orLike('nama', $search);
-                $builder->orLike('nokk', $search);
                 $builder->distinct('du_nik');
                 $query = $builder->get();
                 $data = $query->getResult();
@@ -527,8 +638,6 @@ class Usulan22 extends BaseController
                 $builder->where('kelurahan', $kode_desa);
                 $builder->where('rw', $kode_rw);
                 $builder->like('du_nik', $search);
-                $builder->orLike('nama', $search);
-                $builder->orLike('nokk', $search);
                 $builder->distinct('du_nik');
                 $query = $builder->get();
                 $data = $query->getResult();
@@ -565,7 +674,7 @@ class Usulan22 extends BaseController
         foreach ($data as $pdk) {
             $penduduk[] = array(
                 'id' => $pdk->du_id,
-                'text' => ' - NAMA: ' . $pdk->nama . ', NIK: ' . $pdk->du_nik,
+                'text' => ' - NIK: ' . $pdk->du_nik . ', NAMA: ' . $pdk->nama,
             );
         }
         $response['data'] = $penduduk;
@@ -655,6 +764,10 @@ class Usulan22 extends BaseController
                 'disabil_jenis' => $row['disabil_kode'],
                 'status_hamil' => $row['hamil_status'],
                 'tgl_hamil' => $row['hamil_tgl'],
+                'du_foto_identitas' => $row['foto_identitas'],
+                'du_foto_rumah' => $row['foto_rumah'],
+                'du_latitude' => $row['du_latitude'],
+                'du_longitude' => $row['du_longitude'],
                 'du_proses' => $row['du_proses'],
                 // 'foto_rumah' => $nama_foto_rumah,
             ];
@@ -788,9 +901,40 @@ class Usulan22 extends BaseController
                         'required' => '{field} harus dipilih.'
                     ]
                 ],
+                'du_foto_identitas' => [
+                    'label' => 'Foto Identitas',
+                    'rules' => 'is_image[du_foto_identitas]|mime_in[du_foto_identitas,image/jpg,image/jpeg,image/png]',
+                    'errors' => [
+                        'is_image' => '{field} harus berupa gambar.',
+                        'mime_in' => '{field} harus berekstensi gambar.',
+                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
+                    ]
+                ],
+                'du_foto_rumah' => [
+                    'label' => 'Foto Depan Rumah',
+                    'rules' => 'is_image[du_foto_rumah]|mime_in[du_foto_rumah,image/jpg,image/jpeg,image/png]',
+                    'errors' => [
+                        'is_image' => '{field} harus berupa gambar.',
+                        'mime_in' => '{field} harus berekstensi gambar.',
+                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
+                    ]
+                ],
+                'du_latitude' => [
+                    'label' => 'Garis Lintang',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus terisi.'
+                    ]
+                ],
+                'du_longitude' => [
+                    'label' => 'Garis Bujur',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus terisi.'
+                    ]
+                ],
             ]);
             if (!$valid) {
-
                 $msg = [
                     'error' => [
                         'nik' => $validation->getError('nik'),
@@ -808,50 +952,203 @@ class Usulan22 extends BaseController
                         'datarw' => $validation->getError('datarw'),
                         'kelurahan' => $validation->getError('kelurahan'),
                         'shdk' => $validation->getError('shdk'),
+                        'du_foto_identitas' => $validation->getError('du_foto_identitas'),
+                        'du_foto_rumah' => $validation->getError('du_foto_rumah'),
+                        'du_latitude' => $validation->getError('du_latitude'),
+                        'du_longitude' => $validation->getError('du_longitude'),
                         'created_by' => $validation->getError('created_by'),
                     ]
                 ];
             } else {
-                $data = [
-                    'provinsi' => '32',
-                    'kabupaten' => '32.05',
-                    'kecamatan' => '32.05.33',
-                    'shdk' => $this->request->getVar('shdk'),
-                    'kelurahan' => $this->request->getVar('kelurahan'),
-                    'rw' => $this->request->getVar("datarw"),
-                    'rt' => $this->request->getVar("datart"),
-                    'alamat' => strtoupper($this->request->getVar('alamat')),
-                    'status_kawin' => $this->request->getVar("status_kawin"),
-                    'jenis_pekerjaan' => $this->request->getVar("jenis_pekerjaan"),
-                    'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
-                    'ibu_kandung' => strtoupper($this->request->getVar("ibu_kandung")),
-                    'tanggal_lahir' => $this->request->getVar("tanggal_lahir"),
-                    'tempat_lahir' => $this->request->getVar("tempat_lahir"),
-                    'nama' => strtoupper($this->request->getVar('nama')),
-                    'nokk' => $this->request->getVar('nokk'),
-                    'program_bansos' => $this->request->getVar('databansos'),
-                    'du_nik' => $this->request->getVar('nik'),
-                    'disabil_status' => $this->request->getVar('disabil_status'),
-                    'disabil_kode' => $this->request->getVar('disabil_jenis'),
-                    'hamil_status' => $this->request->getVar('status_hamil'),
-                    'hamil_tgl' => $this->request->getVar('tgl_hamil'),
-                    'du_proses' => $this->request->getVar('du_proses'),
-                    'updated_at' => date("Y-m-d H:i:s"),
-                    'updated_by' => session()->get('nik'),
 
-                    // 'foto_rumah' => $nama_foto_rumah,
-                ];
+                $duFotoIdentitas = $_FILES['du_foto_identitas']['name'];
+                $duFotoRumah = $_FILES['du_foto_rumah']['name'];
 
-                $this->Usulan22Model->update($id, $data);
+                if (($duFotoRumah || $duFotoIdentitas) != NULL) {
 
-                $msg = [
-                    'sukses' => 'Data berhasil diubah',
-                ];
+                    $kode_desa = session()->get('kode_desa');
+                    $namaDesa = $this->WilayahModel->getVillage($kode_desa);
+                    $desaNama = $namaDesa['name'];
+
+                    $du_foto_rumah = $this->request->getFile('du_foto_rumah');
+                    $du_foto_identitas = $this->request->getFile('du_foto_identitas');
+
+                    // var_dump($dd_foto_cpm);
+                    // die;
+                    $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . '.jpg';
+                    $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . '.jpg';
+
+                    $img_dua = imagecreatefromjpeg($du_foto_rumah);
+                    $img_empat = imagecreatefromjpeg($du_foto_identitas);
+
+                    // get width and height of image
+
+                    $width_dua = imagesx($img_dua);
+                    $height_dua = imagesy($img_dua);
+
+                    $width_empat = imagesx($img_empat);
+                    $height_empat = imagesy($img_empat);
+
+                    // reorient image if width is greater than height
+                    if ($width_dua > $height_dua) {
+                        $img_dua = imagerotate($img_dua, -90, 0);
+                    }
+                    if ($width_empat > $height_empat) {
+                        $img_empat = imagerotate($img_empat, -90, 0);
+                    }
+                    // resize image
+                    $img_dua = imagescale($img_dua, 480, 640);
+                    $img_empat = imagescale($img_empat, 480, 640);
+
+                    $txtNik = $this->request->getPost('nik');
+                    $txtNama = strtoupper($this->request->getPost('nama'));
+                    $txtAlamat = strtoupper($this->request->getPost('alamat') . ' RT/RW ' . $this->request->getPost('datart') . "/" . $this->request->getPost('datarw'));
+                    $txtKelurahan = $desaNama;
+                    $txtKecamatan = 'PAKENJENG';
+                    $txtKabupaten = 'GARUT';
+                    $txtProvinsi = 'JAWA BARAT';
+                    $txtLat = $this->request->getPost('du_latitude');
+                    $txtLang = $this->request->getPost('du_longitude');
+                    date_default_timezone_set('Asia/Jakarta');
+                    $txtTimestap = date("d M Y H:i:s");
+
+                    $txt = "NIK : " . $txtNik . "\nNama : " . $txtNama . "\nAlamat : " . $txtAlamat . "\n"  . $txtKelurahan . ", " . $txtKecamatan . ", " . $txtKabupaten . ", " . $txtProvinsi . "\nLokasi : " . $txtLat . ", " . $txtLang . "\nDibuat pada : " . $txtTimestap . "
+                \n@" . nameApp() . " Kec. " . ucwords(strtolower(Profil_Admin()['namaKec']));
+                    $fontFile = FCPATH . 'assets/fonts/Futura Bk BT Book.ttf';
+
+                    $fontSizeDua = 0.020 * imagesx($img_dua);
+                    $whiteDua = imagecolorallocate($img_dua, 255, 255, 255);
+                    $strokeColorDua = imagecolorallocate($img_dua, 0, 0, 0);
+
+                    // pos x from left, pos y from bottom
+                    $posXdua = 0.02 * imagesx($img_dua);
+                    $posYdua = 0.80 * imagesy($img_dua);
+
+                    // $posX = 10;
+                    // $posY = 830;
+                    $angle = 0;
+
+                    // stroke watermark image
+                    imagettfstroketext($img_dua, $fontSizeDua, $angle, $posXdua, $posYdua, $whiteDua, $strokeColorDua, $fontFile, $txt, 1);
+
+
+                    header("Content-type: image/jpg");
+                    $quality = 90; // 0 to 100
+
+                    // var_dump($img_satu);
+                    // die;
+
+                    imagejpeg($img_dua, 'data/usulan/foto_rumah/' . $filename_dua, $quality);
+                    imagejpeg($img_empat, 'data/usulan/foto_identitas/' . $filename_empat, $quality);
+                    // var_dump($img_satu);
+                    // die;
+
+                    $data = [
+                        'provinsi' => '32',
+                        'kabupaten' => '32.05',
+                        'kecamatan' => '32.05.33',
+                        'shdk' => $this->request->getVar('shdk'),
+                        'kelurahan' => $this->request->getVar('kelurahan'),
+                        'rw' => $this->request->getVar("datarw"),
+                        'rt' => $this->request->getVar("datart"),
+                        'alamat' => strtoupper($this->request->getVar('alamat')),
+                        'status_kawin' => $this->request->getVar("status_kawin"),
+                        'jenis_pekerjaan' => $this->request->getVar("jenis_pekerjaan"),
+                        'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
+                        'ibu_kandung' => strtoupper($this->request->getVar("ibu_kandung")),
+                        'tanggal_lahir' => $this->request->getVar("tanggal_lahir"),
+                        'tempat_lahir' => $this->request->getVar("tempat_lahir"),
+                        'nama' => strtoupper($this->request->getVar('nama')),
+                        'nokk' => $this->request->getVar('nokk'),
+                        'program_bansos' => $this->request->getVar('databansos'),
+                        'du_nik' => $this->request->getVar('nik'),
+                        'disabil_status' => $this->request->getVar('disabil_status'),
+                        'disabil_kode' => $this->request->getVar('disabil_jenis'),
+                        'hamil_status' => $this->request->getVar('status_hamil'),
+                        'hamil_tgl' => $this->request->getVar('tgl_hamil'),
+                        'foto_identitas' => $filename_empat,
+                        'foto_rumah' => $filename_dua,
+                        'du_latitude' => $this->request->getVar('du_latitude'),
+                        'du_longitude' => $this->request->getVar('du_longitude'),
+                        'du_proses' => $this->request->getVar('du_proses'),
+                        'updated_at' => date("Y-m-d H:i:s"),
+                        'updated_by' => session()->get('nik'),
+
+                        // 'foto_rumah' => $nama_foto_rumah,
+                    ];
+
+                    $this->Usulan22Model->update($id, $data);
+
+                    $msg = [
+                        'sukses' => 'Data berhasil diubah',
+                    ];
+                } else {
+
+                    $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . '.jpg';
+                    $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . '.jpg';
+
+                    $data = [
+                        'provinsi' => '32',
+                        'kabupaten' => '32.05',
+                        'kecamatan' => '32.05.33',
+                        'shdk' => $this->request->getVar('shdk'),
+                        'kelurahan' => $this->request->getVar('kelurahan'),
+                        'rw' => $this->request->getVar("datarw"),
+                        'rt' => $this->request->getVar("datart"),
+                        'alamat' => strtoupper($this->request->getVar('alamat')),
+                        'status_kawin' => $this->request->getVar("status_kawin"),
+                        'jenis_pekerjaan' => $this->request->getVar("jenis_pekerjaan"),
+                        'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
+                        'ibu_kandung' => strtoupper($this->request->getVar("ibu_kandung")),
+                        'tanggal_lahir' => $this->request->getVar("tanggal_lahir"),
+                        'tempat_lahir' => $this->request->getVar("tempat_lahir"),
+                        'nama' => strtoupper($this->request->getVar('nama')),
+                        'nokk' => $this->request->getVar('nokk'),
+                        'program_bansos' => $this->request->getVar('databansos'),
+                        'du_nik' => $this->request->getVar('nik'),
+                        'disabil_status' => $this->request->getVar('disabil_status'),
+                        'disabil_kode' => $this->request->getVar('disabil_jenis'),
+                        'hamil_status' => $this->request->getVar('status_hamil'),
+                        'hamil_tgl' => $this->request->getVar('tgl_hamil'),
+                        'foto_rumah' => $filename_dua,
+                        'foto_identitas' => $filename_empat,
+                        'du_latitude' => $this->request->getVar('du_latitude'),
+                        'du_longitude' => $this->request->getVar('du_longitude'),
+                        'du_proses' => $this->request->getVar('du_proses'),
+                        'updated_at' => date("Y-m-d H:i:s"),
+                        'updated_by' => session()->get('nik'),
+
+                        // 'foto_rumah' => $nama_foto_rumah,
+                    ];
+
+                    $this->Usulan22Model->update($id, $data);
+
+                    $msg = [
+                        'sukses' => 'Data berhasil diubah',
+                    ];
+                }
+                echo json_encode($msg);
             }
-            echo json_encode($msg);
         } else {
             return redirect()->to('lockscreen');
         }
+    }
+
+    function downIden($id)
+    {
+        $url = 'data/usulan/foto_identitas/' . $id;
+
+        // Use basename() function to return the base name of file
+        $file_name = basename($url);
+
+        // Use file_get_contents() function to get the file
+        // from url and use file_put_contents() function to
+        // save the file by using base name
+        file_put_contents($file_name, file_get_contents($url));
+
+        // $usulan = new Usulan22Model();
+        // $data = $usulan->find($id);
+        // return $this->response->download('data/usulan/foto_identitas/' . $data->usulan, null);
     }
 
     function export()

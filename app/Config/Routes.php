@@ -99,6 +99,7 @@ $routes->match(['get', 'post'], 'exportBa', 'Dtks\Usulan22::exportBa', ['filter'
 $routes->get('import_csv', 'Dtks\Usulan22::import_csv', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('importCsvToDb', 'Dtks\Usulan22::importCsvToDb', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tb_csv', 'Dtks\Usulan22::tbCsv', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('downIden', 'Dtks\Usulan22::downIden');
 
 
 // WILAYAH

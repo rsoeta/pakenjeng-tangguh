@@ -559,6 +559,33 @@
             }
         });
 
+        $('#rw01').change(function() {
+            var desa = $('#desa').val();
+            var no_rw = $('#rw01').val();
+            var action = 'get_rt';
+            if (no_rw != '') {
+                $.ajax({
+                    url: "<?php echo base_url('action'); ?>",
+                    method: "POST",
+                    data: {
+                        desa: desa,
+                        no_rw: no_rw,
+                        action: action
+                    },
+                    dataType: "JSON",
+                    success: function(data) {
+                        var html = '<option value="">-Pilih-</option>';
+                        for (var count = 0; count < data.length; count++) {
+                            html += '<option value="' + data[count].no_rt + '">' + data[count].no_rt + '</option>';
+                        }
+                        $('#rt01').html(html);
+                    }
+                });
+            } else {
+                $('#rt01').val('');
+            }
+        });
+
         window.setTimeout(function() {
             $(".alert").fadeTo(500, 0).slideUp(500, function() {
                 $(this).remove();
@@ -595,6 +622,33 @@
             });
         } else {
             $('#rt').val('');
+        }
+    });
+
+    $('#rw01').ready(function() {
+        var desa = $('#desa').val();
+        var no_rw = $('#rw01').val();
+        var action = 'get_rt';
+        if (no_rw != '') {
+            $.ajax({
+                url: "<?php echo base_url('action'); ?>",
+                method: "POST",
+                data: {
+                    desa: desa,
+                    no_rw: no_rw,
+                    action: action
+                },
+                dataType: "JSON",
+                success: function(data) {
+                    var html = '<option value="">-Pilih-</option>';
+                    for (var count = 0; count < data.length; count++) {
+                        html += '<option value="' + data[count].no_rt + '">' + data[count].no_rt + '</option>';
+                    }
+                    $('#rt01').html(html);
+                }
+            });
+        } else {
+            $('#rt01').val('');
         }
     });
 

@@ -14,7 +14,7 @@ class Usulan22Model extends Model
     protected $table      = 'dtks_usulan22';
     protected $primaryKey = 'du_id';
 
-    protected $allowedFields = ["du_nik", "program_bansos", "nokk", "nama", "tempat_lahir", "tanggal_lahir", "ibu_kandung", "jenis_kelamin", "jenis_pekerjaan", "status_kawin", "alamat", "rt", "rw", "provinsi", "kabupaten", "kecamatan", "kelurahan", "shdk", "foto_rumah", "disabil_status", "disabil_kode", "hamil_status", "hamil_tgl", "du_proses", "created_at", "created_at_year", "created_at_month", "created_by", "updated_at", "updated_by"];
+    protected $allowedFields = ["du_nik", "program_bansos", "nokk", "nama", "tempat_lahir", "tanggal_lahir", "ibu_kandung", "jenis_kelamin", "jenis_pekerjaan", "status_kawin", "alamat", "rt", "rw", "provinsi", "kabupaten", "kecamatan", "kelurahan", "shdk", "foto_identitas", "foto_rumah", "disabil_status", "disabil_kode", "hamil_status", "hamil_tgl", "du_latitude", "du_longitude", "du_proses", "created_at", "created_at_year", "created_at_month", "created_by", "updated_at", "updated_by"];
 
     protected $useTimestamps = false;
     protected $createdField  = 'created_at';

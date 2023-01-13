@@ -270,3 +270,10 @@
 
 ## v2.11.0 -- tambah fitur / proses usulan sukses / gagal
     # tambah field di tabel dtks_usulan22: ALTER TABLE `dtks_usulan22` ADD `du_proses` INT NULL DEFAULT NULL AFTER `hamil_tgl`;
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+## v2.12.0 -- penyesuaian versi SIKS-NG 0.8.19
+    # tambah foto KTP & Rumah
+        - tambah field baru di tabel dtks_usulan22: ALTER TABLE `dtks_usulan22` ADD `foto_identitas` VARCHAR(255) NULL DEFAULT NULL AFTER `shdk`;
+        - tambah field baru di tabel dtks_usulan22: ALTER TABLE `dtks_usulan22` ADD `du_latitude` VARCHAR(255) NULL DEFAULT NULL AFTER `hamil_tgl`, ADD `du_longitude` VARCHAR(255) NULL DEFAULT NULL AFTER `du_latitude`;
+        - tambah directory penyimpanan foto tersebut

@@ -77,10 +77,7 @@ class Kemis extends BaseController
             $no++;
             $row = array();
             $row[] = $no;
-            $row[] = '
-            <a href=' . dkm_foto_cpm('DKM_FP' . $key->dd_nik . '.jpg', 'foto-cpm') . ' data-lightbox="dataCpm' . $key->dd_nik . '"' . ' data-title="Foto Calon Penerima Manfaat">
-            <img src=' . dkm_foto_cpm('DKM_FP' . $key->dd_nik . '.jpg', 'foto-cpm') . ' style="width: 30px; height: 40px; border-radius: 2px;">
-            </a>
+            $row[] = '<a href=' . dkm_foto_cpm('DKM_FP' . $key->dd_nik . '.jpg', 'foto-cpm') . ' data-lightbox="dataCpm' . $key->dd_nik . '"' . ' data-title="Foto Calon Penerima Manfaat"><img src=' . dkm_foto_cpm('DKM_FP' . $key->dd_nik . '.jpg', 'foto-cpm') . ' style="width: 30px; height: 40px; border-radius: 2px;"></a>
             <a href=' . dkm_foto_cpm('DKM_FH' . $key->dd_nik . '.jpg', 'foto-rumah-depan') . ' data-lightbox="dataCpm' . $key->dd_nik . '"' . ' data-title="Foto Rumah Depan"></a>
             <a href=' . dkm_foto_cpm('DKM_BH' . $key->dd_nik . '.jpg', 'foto-rumah-belakang') . ' data-lightbox="dataCpm' . $key->dd_nik . '"' . ' data-title="Foto Rumah Belakang"></a>
             <a href=' . dkm_foto_cpm('DKM_KK' . $key->dd_nik . '.jpg', 'foto-kk') . ' data-lightbox="dataCpm' . $key->dd_nik . '"' . ' data-title="Foto Kartu Keluarga"></a>
@@ -731,11 +728,7 @@ class Kemis extends BaseController
                 // die;
 
                 imagejpeg($img_satu, 'data/dkm/foto-cpm/' . $filename_satu, $quality);
-                imagejpeg(
-                    $img_dua,
-                    'data/dkm/foto-rumah-depan/' . $filename_dua,
-                    $quality
-                );
+                imagejpeg($img_dua, 'data/dkm/foto-rumah-depan/' . $filename_dua, $quality);
                 imagejpeg($img_tiga, 'data/dkm/foto-rumah-belakang/' . $filename_tiga, $quality);
                 imagejpeg($img_empat, 'data/dkm/foto-kk/' . $filename_empat, $quality);
                 // var_dump($img_satu);

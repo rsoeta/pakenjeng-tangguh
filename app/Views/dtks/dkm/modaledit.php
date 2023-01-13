@@ -181,7 +181,7 @@
                                         <div class="input-group-prepend">
                                             <span class="input-group-text"><i class="fa fa-user"></i></span>
                                         </div>
-                                        <input type="file" class="form-control form-control-sm" spellcheck="false" name="dd_foto_cpm" value="" accept="image/*" capture required />
+                                        <input type="file" class="form-control form-control-sm" spellcheck="false" name="dd_foto_cpm" value="" accept="image/*" capture />
                                     </div>
                                 </div>
                                 <div class="invalid-feedback errordd_foto_cpm"></div>
@@ -191,7 +191,7 @@
                                         <div class="input-group-prepend">
                                             <span class="input-group-text"><i class="fa fa-home"></i></span>
                                         </div>
-                                        <input type="file" class="form-control form-control-sm" spellcheck="false" name="dd_foto_rumah_depan" value="" accept="image/*" capture required />
+                                        <input type="file" class="form-control form-control-sm" spellcheck="false" name="dd_foto_rumah_depan" value="" accept="image/*" capture />
                                     </div>
                                 </div>
                                 <div class="invalid-feedback errordd_foto_rumah_depan"></div>
@@ -201,7 +201,7 @@
                                         <div class="input-group-prepend">
                                             <span class="input-group-text"><i class="fas fa-house-damage"></i></span>
                                         </div>
-                                        <input type="file" class="form-control form-control-sm" spellcheck="false" name="dd_foto_rumah_belakang" value="" accept="image/*" capture required />
+                                        <input type="file" class="form-control form-control-sm" spellcheck="false" name="dd_foto_rumah_belakang" value="" accept="image/*" capture />
                                     </div>
                                 </div>
                                 <div class="invalid-feedback errordd_foto_rumah_belakang"></div>
@@ -211,7 +211,7 @@
                                         <div class="input-group-prepend">
                                             <span class="input-group-text"><i class="fas fa-chalkboard-teacher"></i></span>
                                         </div>
-                                        <input type="file" class="form-control form-control-sm" spellcheck="false" name="dd_foto_kk" value="" accept="image/*" capture required />
+                                        <input type="file" class="form-control form-control-sm" spellcheck="false" name="dd_foto_kk" value="" accept="image/*" capture />
                                     </div>
                                 </div>
                                 <div class="invalid-feedback errordd_foto_kk"></div>
