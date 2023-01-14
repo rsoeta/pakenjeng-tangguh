@@ -372,12 +372,12 @@ $desa_id = session()->get('kode_desa');
                 cache: false,
                 dataType: "json",
                 beforeSend: function() {
-                    $('.btnsimpan').attr('disable', 'disabled');
-                    $('.btnsimpan').html('<i class="fa fa-spin fa-spinner"></i>');
+                    $('.btnSimpan').attr('disable', 'disabled');
+                    $('.btnSimpan').html('<i class="fa fa-spin fa-spinner"></i>');
                 },
                 complete: function() {
-                    $('.btnsimpan').removeAttr('disable');
-                    $('.btnsimpan').html('Simpan');
+                    $('.btnSimpan').removeAttr('disable');
+                    $('.btnSimpan').html('Simpan');
                 },
                 success: function(response) {
                     if (response.error) {

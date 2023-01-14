@@ -35,7 +35,7 @@
         <div class="container-fluid">
             <i class="fas fa-quote-left fa-lg text-warning me-2"></i>
             <span class="font-italic mb-2">
-                <strong>Assalamualaikum... Selamat <?= Salam(); ?>, Bapak <?= ucwords(strtolower(session()->get('fullname'))); ?></strong>
+                <strong>Assalamualaikum... Selamat <?= Salam(); ?>, Bapak/Ibu <?= ucwords(strtolower(session()->get('fullname'))); ?></strong>
             </span>
         </div>
     </section>
@@ -269,9 +269,9 @@
                             <div class="col-12 col-md-6 mb-4">
                                 <h4>Informasi</h4>
                                 <ul>
-                                    <li>Usulan DTKS dibuka pada tanggal <b>15 s.d 19</b> setiap Bulannya</li>
-                                    <li>Penandatanganan <b>Berita Acara</b> dilaksanakan pada tanggal 20 di Periode Usulan</li>
-                                    <li>Data Usulan berdasarkan <b>Pemadanan Data Kependudukan</b> melalui SIKS-NG</li>
+                                    <li>Usulan DTKS dibuka pada tanggal <b>13 s.d 19</b> setiap Bulannya</li>
+                                    <li>Penandatanganan <b>Berita Acara dilaksanakan pada tanggal 20</b> di Periode Usulan</li>
+                                    <li>Data Usulan berdasarkan <b>Pemadanan Data Kependudukan</b> pada SIKS-NG</li>
                                 </ul>
                             </div>
                         </div>

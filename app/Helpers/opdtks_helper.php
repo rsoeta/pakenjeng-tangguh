@@ -227,7 +227,7 @@ function deadline_usulan()
     $bulanNext = $bulan + 1;
     // $dead = date('Y-m-d H:i') . "<br>";
     $dead_mulai = ($tahun . '-' . $bulan . '-' . '13 00:01');
-    $dead_akhir = ($tahun . '-' . $bulan . '-' . '20 00:00');
+    $dead_akhir = ($tahun . '-' . $bulan . '-' . '19 23:59');
     $strdead1 = (strtotime($dead_mulai));
     $strdead2 = (strtotime($dead_akhir));
     // $ini_tanggal = strtotime("14 14:12") . "<br>";

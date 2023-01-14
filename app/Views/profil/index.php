@@ -120,15 +120,15 @@
                                                 </li>
                                                 <li class="list-group-item mt-3">
                                                     <b><i class="fas fa-user mr-1"></i> Nama Lengkap</b>
-                                                    <?= form_input(['name' => 'fullname', 'class' => 'form-control', 'id' => 'fullname', 'value' => isset($user_login) ? set_value('fullname', strtoupper($user_login['fullname'])) : '', 'spellcheck' => 'false']); ?>
+                                                    <?= form_input(['name' => 'fullname', 'class' => 'form-control', 'id' => 'fullname', 'value' => isset($user_login) ? set_value('fullname', strtoupper($user_login['fullname'])) : '', 'spellcheck' => 'false', 'readonly' => 'true']); ?>
                                                 </li>
                                                 <li class="list-group-item mt-3">
                                                     <b><i class="fas fa-id-card mr-1"></i> NIK</b>
-                                                    <?= form_input(['name' => 'nik', 'class' => 'form-control', 'id' => 'nik', 'value' => isset($user_login) ? set_value('nik', $user_login['nik']) : '']); ?>
+                                                    <?= form_input(['name' => 'nik', 'class' => 'form-control', 'id' => 'nik', 'value' => isset($user_login) ? set_value('nik', $user_login['nik']) : '', 'readonly' => 'true']); ?>
                                                 </li>
                                                 <li class="list-group-item mt-3">
                                                     <b><i class="fas fa-envelope mr-1"></i> Email </b>
-                                                    <?= form_input(['name' => 'email', 'class' => 'form-control', 'id' => 'email', 'value' => isset($user_login) ? set_value('email', $user_login['email']) : '']); ?>
+                                                    <?= form_input(['name' => 'email', 'class' => 'form-control', 'id' => 'email', 'value' => isset($user_login) ? set_value('email', $user_login['email']) : '', 'readonly' => 'true']); ?>
                                                 </li>
                                                 <li class="list-group-item mt-3">
                                                     <b><i class="fas fa-phone mr-1"></i> No. HP </b>
