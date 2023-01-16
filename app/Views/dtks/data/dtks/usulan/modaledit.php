@@ -99,6 +99,21 @@ $desa_id = session()->get('kode_desa');
                         </div>
                     </div>
                     <div class="col-12 col-sm-6">
+                        <div class="form-group row nopadding">
+                            <label class="col-4 col-sm-4 col-form-label" for="status_kawin">Status</label>
+                            <div class="col-8 col-sm-8">
+                                <select id="status_kawin" name="status_kawin" class="form-select form-select-sm">
+                                    <option value="">-- Pilih Status Perkawinan --</option>
+                                    <?php foreach ($statusKawin as $row) { ?>
+                                        <option <?php if ($status_kawin == $row['idStatus']) {
+                                                    echo 'selected';
+                                                } ?> value="<?= $row['idStatus'] ?>"> <?php echo $row['StatusKawin']; ?></option>
+                                    <?php } ?>
+                                </select>
+                                <div class="invalid-feedback errorstatus_kawin"></div>
+                            </div>
+                        </div>
+
                         <div class="form-group row nopadding" <?php if ($user != 1) {
                                                                     echo 'hidden';
                                                                 } ?>>
@@ -174,21 +189,6 @@ $desa_id = session()->get('kode_desa');
                                 <div class="invalid-feedback errortgl_hamil"></div>
                             </div>
                         </div>
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="status_kawin">Status</label>
-                            <div class="col-8 col-sm-8">
-                                <select id="status_kawin" name="status_kawin" class="form-select form-select-sm">
-                                    <option value="">-- Pilih Status Perkawinan --</option>
-                                    <?php foreach ($statusKawin as $row) { ?>
-                                        <option <?php if ($status_kawin == $row['idStatus']) {
-                                                    echo 'selected';
-                                                } ?> value="<?= $row['idStatus'] ?>"> <?php echo $row['StatusKawin']; ?></option>
-                                    <?php } ?>
-                                </select>
-                                <div class="invalid-feedback errorstatus_kawin"></div>
-                            </div>
-                        </div>
-
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="shdk">SHDK</label>
                             <div class="col-8 col-sm-8">
