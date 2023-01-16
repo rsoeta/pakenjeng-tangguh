@@ -83,6 +83,27 @@ $desa_id = session()->get('kode_desa');
                                 <div class="invalid-feedback errorjenis_kelamin"></div>
                             </div>
                         </div>
+                        <div class="form-group row nopadding" id="status_hamil_div" style="display: none">
+                            <label class="col-4 col-sm-4 col-form-label" for="status_hamil">Status Hamil</label>
+                            <div class="col-8 col-sm-8">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="chk-YaHamil" name="status_hamil" <?= $status_hamil == 1 ? 'checked' : ''; ?> value="1" />
+                                    <label for="chk-YaHamil" class="form-check-label"> Ya </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="chk-TidakHamil" name="status_hamil" <?= $status_hamil == 2 ? 'checked' : ''; ?> value="2" />
+                                    <label for="chk-TidakHamil" class="form-check-label"> Tidak </label>
+                                </div>
+                                <div class="invalid-feedback errorstatus_hamil"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row nopadding" id="tgl_hamil_div" style="display: none;">
+                            <label class="col-4 col-sm-4 col-form-label" for="tgl_hamil">Tgl Mulai Hamil</label>
+                            <div class="col-8 col-sm-8">
+                                <input type="date" name="tgl_hamil" id="tgl_hamil" class="form-control form-control-sm" value="<?= $tgl_hamil; ?>">
+                                <div class="invalid-feedback errortgl_hamil"></div>
+                            </div>
+                        </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="jenis_pekerjaan">Pekerjaan</label>
                             <div class="col-8 col-sm-8">
@@ -168,27 +189,7 @@ $desa_id = session()->get('kode_desa');
                                 <div class="invalid-feedback erroralamat"></div>
                             </div>
                         </div>
-                        <div class="form-group row nopadding" id="status_hamil_div" style="display: none">
-                            <label class="col-4 col-sm-4 col-form-label" for="status_hamil">Status Hamil</label>
-                            <div class="col-8 col-sm-8">
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="chk-YaHamil" name="status_hamil" <?= $status_hamil == 1 ? 'checked' : ''; ?> value="1" />
-                                    <label for="chk-YaHamil" class="form-check-label"> Ya </label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="chk-TidakHamil" name="status_hamil" <?= $status_hamil == 2 ? 'checked' : ''; ?> value="2" />
-                                    <label for="chk-TidakHamil" class="form-check-label"> Tidak </label>
-                                </div>
-                                <div class="invalid-feedback errorstatus_hamil"></div>
-                            </div>
-                        </div>
-                        <div class="form-group row nopadding" id="tgl_hamil_div" style="display: none;">
-                            <label class="col-4 col-sm-4 col-form-label" for="tgl_hamil">Tgl Mulai Hamil</label>
-                            <div class="col-8 col-sm-8">
-                                <input type="date" name="tgl_hamil" id="tgl_hamil" class="form-control form-control-sm" value="<?= $tgl_hamil; ?>">
-                                <div class="invalid-feedback errortgl_hamil"></div>
-                            </div>
-                        </div>
+
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="shdk">SHDK</label>
                             <div class="col-8 col-sm-8">
