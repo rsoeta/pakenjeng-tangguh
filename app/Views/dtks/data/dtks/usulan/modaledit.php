@@ -23,8 +23,22 @@ $desa_id = session()->get('kode_desa');
                         <div class="form-group row nopadding" hidden>
                             <label class="col-4 col-sm-4 col-form-label" for="id">ID</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="id" id="id" class="form-control form-control-sm" value="<?= $id; ?>">
+                                <input type="text" name="id" id="id" class="form-control form-control-sm" value="<?= $id; ?>" autofocus>
                                 <div class="invalid-feedback errorid"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row nopadding">
+                            <label class="col-4 col-sm-4 col-form-label" for="nik">NIK</label>
+                            <div class="col-8 col-sm-8">
+                                <input type="number" name="nik" id="nik" class="form-control form-control-sm" value="<?= $du_nik; ?>" autocomplete="off" <?= $user > 3 ? 'readonly="on"' : ''; ?>>
+                                <div class="invalid-feedback errornik"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row nopadding">
+                            <label class="col-4 col-sm-4 col-form-label" for="nama">Nama</label>
+                            <div class="col-8 col-sm-8">
+                                <input type="text" name="nama" id="nama" class="form-control form-control-sm" value="<?= $nama; ?>">
+                                <div class="invalid-feedback errornama"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
@@ -34,6 +48,57 @@ $desa_id = session()->get('kode_desa');
                                 <div class="invalid-feedback errornokk"></div>
                             </div>
                         </div>
+                        <div class="form-group row nopadding">
+                            <label class="col-4 col-sm-4 col-form-label" for="tempat_lahir">Tempat Lahir</label>
+                            <div class="col-8 col-sm-8">
+                                <input type="text" name="tempat_lahir" id="tempat_lahir" class="form-control form-control-sm" value="<?= $tempat_lahir; ?>">
+                                <div class="invalid-feedback errortempat_lahir"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row nopadding">
+                            <label class="col-4 col-sm-4 col-form-label" for="tanggal_lahir">Tgl Lahir</label>
+                            <div class="col-8 col-sm-8">
+                                <input type="date" name="tanggal_lahir" id="tanggal_lahir" class="form-control form-control-sm" value="<?= $tanggal_lahir; ?>">
+                                <div class="invalid-feedback errortanggal_lahir"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row nopadding">
+                            <label class="col-4 col-sm-4 col-form-label" for="ibu_kandung">Ibu Kandung</label>
+                            <div class="col-8 col-sm-8">
+                                <input type="text" name="ibu_kandung" id="ibu_kandung" class="form-control form-control-sm" value="<?= $ibu_kandung; ?>">
+                                <div class="invalid-feedback erroribu_kandung"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row nopadding">
+                            <label class="col-4 col-sm-4 col-form-label" for="jenis_kelamin">Jenis Kelamin</label>
+                            <div class="col-8 col-sm-8">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="chk-Lk" name="jenis_kelamin" <?= $jenis_kelamin == '1' ? 'checked' : ''; ?> value="1" />
+                                    <label for="chk-Lk" class="form-check-label"> Laki-Laki </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="chk-Pr" name="jenis_kelamin" <?= $jenis_kelamin == '2' ? 'checked' : ''; ?> value="2" />
+                                    <label for="chk-Pr" class="form-check-label"> Perempuan </label>
+                                </div>
+                                <div class="invalid-feedback errorjenis_kelamin"></div>
+                            </div>
+                        </div>
+                        <div class="form-group row nopadding">
+                            <label class="col-4 col-sm-4 col-form-label" for="jenis_pekerjaan">Pekerjaan</label>
+                            <div class="col-8 col-sm-8">
+                                <select id="jenis_pekerjaan" name="jenis_pekerjaan" class="form-select form-select-sm">
+                                    <option value="">-- Pilih Jenis Pekerjaan --</option>
+                                    <?php foreach ($pekerjaan as $row) { ?>
+                                        <option <?php if ($jenis_pekerjaan == $row['idPekerjaan']) {
+                                                    echo 'selected';
+                                                } ?> value="<?= $row['idPekerjaan'] ?>"> <?php echo $row['JenisPekerjaan']; ?></option>
+                                    <?php } ?>
+                                </select>
+                                <div class="invalid-feedback errorjenis_pekerjaan"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6">
                         <div class="form-group row nopadding" <?php if ($user != 1) {
                                                                     echo 'hidden';
                                                                 } ?>>
@@ -80,40 +145,12 @@ $desa_id = session()->get('kode_desa');
                                 <div class="invalid-feedback errordatart"></div>
                             </div>
                         </div>
+
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="alamat">Alamat</label>
                             <div class="col-8 col-sm-8">
                                 <input type="text" name="alamat" id="alamat" class="form-control form-control-sm" value="<?= $alamat; ?>">
                                 <div class="invalid-feedback erroralamat"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="nama">Nama</label>
-                            <div class="col-8 col-sm-8">
-                                <input type="text" name="nama" id="nama" class="form-control form-control-sm" value="<?= $nama; ?>">
-                                <div class="invalid-feedback errornama"></div>
-                            </div>
-                        </div>
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="nik">NIK</label>
-                            <div class="col-8 col-sm-8">
-                                <input type="number" name="nik" id="nik" class="form-control form-control-sm" value="<?= $du_nik; ?>" autocomplete="off" readonly="on">
-                                <div class="invalid-feedback errornik"></div>
-                            </div>
-                        </div>
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="jenis_kelamin">Jenis Kelamin</label>
-                            <div class="col-8 col-sm-8">
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="chk-Lk" name="jenis_kelamin" <?= $jenis_kelamin == '1' ? 'checked' : ''; ?> value="1" />
-                                    <label for="chk-Lk" class="form-check-label"> Laki-Laki </label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="chk-Pr" name="jenis_kelamin" <?= $jenis_kelamin == '2' ? 'checked' : ''; ?> value="2" />
-                                    <label for="chk-Pr" class="form-check-label"> Perempuan </label>
-                                </div>
-                                <div class="invalid-feedback errorjenis_kelamin"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding" id="status_hamil_div" style="display: none">
@@ -135,36 +172,6 @@ $desa_id = session()->get('kode_desa');
                             <div class="col-8 col-sm-8">
                                 <input type="date" name="tgl_hamil" id="tgl_hamil" class="form-control form-control-sm" value="<?= $tgl_hamil; ?>">
                                 <div class="invalid-feedback errortgl_hamil"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-sm-6">
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="tempat_lahir">Tempat Lahir</label>
-                            <div class="col-8 col-sm-8">
-                                <input type="text" name="tempat_lahir" id="tempat_lahir" class="form-control form-control-sm" value="<?= $tempat_lahir; ?>">
-                                <div class="invalid-feedback errortempat_lahir"></div>
-                            </div>
-                        </div>
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="tanggal_lahir">Tgl Lahir</label>
-                            <div class="col-8 col-sm-8">
-                                <input type="date" name="tanggal_lahir" id="tanggal_lahir" class="form-control form-control-sm" value="<?= $tanggal_lahir; ?>">
-                                <div class="invalid-feedback errortanggal_lahir"></div>
-                            </div>
-                        </div>
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="jenis_pekerjaan">Pekerjaan</label>
-                            <div class="col-8 col-sm-8">
-                                <select id="jenis_pekerjaan" name="jenis_pekerjaan" class="form-select form-select-sm">
-                                    <option value="">-- Pilih Jenis Pekerjaan --</option>
-                                    <?php foreach ($pekerjaan as $row) { ?>
-                                        <option <?php if ($jenis_pekerjaan == $row['idPekerjaan']) {
-                                                    echo 'selected';
-                                                } ?> value="<?= $row['idPekerjaan'] ?>"> <?php echo $row['JenisPekerjaan']; ?></option>
-                                    <?php } ?>
-                                </select>
-                                <div class="invalid-feedback errorjenis_pekerjaan"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
@@ -210,13 +217,7 @@ $desa_id = session()->get('kode_desa');
                                 <div class="invalid-feedback errordatabansos"></div>
                             </div>
                         </div>
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="ibu_kandung">Ibu Kandung</label>
-                            <div class="col-8 col-sm-8">
-                                <input type="text" name="ibu_kandung" id="ibu_kandung" class="form-control form-control-sm" value="<?= $ibu_kandung; ?>">
-                                <div class="invalid-feedback erroribu_kandung"></div>
-                            </div>
-                        </div>
+
                         <div class="form-group row nopadding">
                             <label for="disabil_status" class="col-4 col-form-label">Disabilitas</label>
                             <div class="col-8 col-sm-8">
