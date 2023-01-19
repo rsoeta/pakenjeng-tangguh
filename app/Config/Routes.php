@@ -90,6 +90,7 @@ $routes->get('tambah', 'Dtks\Usulan22::formtambah', ['filter' => 'authfilterdtks
 $routes->post('get_data_penduduk', 'Dtks\Usulan22::get_data_penduduk', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->resource('api_usulan', ['controller' => 'Api\Dtks_Usulan', 'filter' => 'menufilterdtks']);
 $routes->post('editUsulan', 'Dtks\Usulan22::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('viewUsulan', 'Dtks\Usulan22::formview', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updateUsulan', 'Dtks\Usulan22::update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('dltUsul', 'Dtks\Usulan22::delete', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tabel_data', 'Dtks\Usulan22::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);

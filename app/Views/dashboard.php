@@ -269,7 +269,7 @@
                             <div class="col-12 col-md-6 mb-4">
                                 <h4>Informasi</h4>
                                 <ul>
-                                    <li>Usulan DTKS dibuka pada tanggal <b>13 s.d 19</b> setiap Bulannya</li>
+                                    <li>Usulan DTKS dibuka pada tanggal <b>15 s.d 19</b> setiap Bulannya</li>
                                     <li>Penandatanganan <b>Berita Acara dilaksanakan pada tanggal 20</b> di Periode Usulan</li>
                                     <li>Data Usulan berdasarkan <b>Pemadanan Data Kependudukan</b> pada SIKS-NG</li>
                                 </ul>
@@ -278,24 +278,26 @@
 
                         <div class="row">
                             <?php foreach ($rekapUsulan as $row) { ?>
-                                <div class="col-sm-2 col-md-2 col-6">
-                                    <div class="small-box bg-primary">
-                                        <div class="container">
-                                            <div class="row">
-                                                <div class="col mt-4">
-                                                    <div class="inner">
-                                                        <h6><?= $row->namaDesa; ?></h6>
-                                                        <h3><?php echo number_format($row->Capaian, '0', ',', '.'); ?></h3>
+                                <a href="/usulan">
+                                    <div class="col-sm-2 col-md-2 col-6">
+                                        <div class="small-box bg-primary">
+                                            <div class="container">
+                                                <div class="row">
+                                                    <div class="col mt-4">
+                                                        <div class="inner">
+                                                            <h6><?= $row->namaDesa; ?></h6>
+                                                            <h3><?php echo number_format($row->Capaian, '0', ',', '.'); ?></h3>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="icon">
+                                                <i class="ion ion-person"></i>
+                                            </div>
+                                            <a href="/usulan" class="small-box-footer">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a>
                                         </div>
-                                        <div class="icon">
-                                            <i class="ion ion-person"></i>
-                                        </div>
-                                        <a href="/usulan" class="small-box-footer">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a>
                                     </div>
-                                </div>
+                                </a>
                             <?php } ?>
                         </div>
                         <!-- /.col -->

@@ -138,27 +138,12 @@ class Usulan22 extends BaseController
             ';
             // $row[] = $key->nama;
             $row[] = $key->nokk;
-            $row[] = $key->tempat_lahir;
-            if ($key->tanggal_lahir == '0000-00-00') {
-                $row[] = '-';
-            } elseif ($key->tanggal_lahir == null) {
-                $row[] = '-';
-            } else {
-                // date_format
-                $row[] = date('d/m/Y', strtotime($key->tanggal_lahir));
-            }
             $row[] = $key->ibu_kandung;
-            if ($key->jenis_kelamin == 1) {
-                $row[] = 'LAKI-LAKI';
-            } else {
-                $row[] = 'PEREMPUAN';
-            }
             $row[] = $key->JenisPekerjaan;
             $row[] = $key->StatusKawin;
-            $row[] = $key->rt;
-            $row[] = $key->rw;
-            $row[] = $key->alamat;
             $row[] = $key->dbj_nama_bansos;
+            $row[] = '<a href="mailto:' . $key->email . '">' . $key->email . '</a>';
+            $row[] = $key->updated_at;
             $row[] = '<a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->idUsulan . "'" . ')"><i class="far fa-edit"></i></a> | 
                 <button class="btn btn-sm btn-secondary" data-id="' . $key->idUsulan . '" data-nama="' . $key->nama . '" id="deleteBtn"><i class="far fa-trash-alt"></i></button>';
             $data[] = $row;
@@ -210,18 +195,10 @@ class Usulan22 extends BaseController
             <a href=' . usulan_foto('DUD_FH' . $key->du_nik . '.jpg', 'foto_rumah') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Rumah Depan"></a>
             ';
             $row[] = $key->nokk;
-            $row[] = $key->tempat_lahir;
-            if ($key->tanggal_lahir == '0000-00-00') {
-                $row[] = '-';
-            } elseif ($key->tanggal_lahir == null) {
-                $row[] = '-';
-            } else {
-                // date_format
-                $row[] = date('d/m/Y', strtotime($key->tanggal_lahir));
-            }
-            $row[] = $key->ibu_kandung;
             $row[] = $key->JenisPekerjaan;
-            $row[] = $key->dbj_nama_bansos;
+            $row[] = '<a href="mailto:' . $key->email . '">' . $key->email . '</a>';
+            $row[] = $key->updated_at;
+            $row[] = '<a class="btn btn-sm btn-success" href="javascript:void(0)" title="View" onclick="view_person(' . "'" . $key->idUsulan . "'" . ')"><i class="fas fa-eye"></i></a>';
             $data[] = $row;
         }
 
@@ -774,6 +751,80 @@ class Usulan22 extends BaseController
 
             $msg = [
                 'sukses' => view('dtks/data/dtks/usulan/modaledit', $data)
+            ];
+            echo json_encode($msg);
+            // }
+        } else {
+            return redirect()->to('lockscreen');
+        }
+    }
+
+    public function formview()
+    {
+        if ($this->request->isAJAX()) {
+            // var_dump($this->request->getVar());
+
+            // if (deadline_usulan() == 1) {
+            //     $msg = [
+            //         'informasi' => 'Mohon Maaf, Batas waktu untuk Perubahan Data Telah Habis!!'
+            //     ];
+            //     echo json_encode($msg);
+            // } else {
+            $this->PekerjaanModel = new PekerjaanModel();
+            $this->ShdkModel = new ShdkModel();
+            $this->StatusKawinModel = new StatusKawinModel();
+            $this->WilayahModel = new WilayahModel();
+            $this->BansosModel = new BansosModel();
+            $DisabilitasJenisModel = new DisabilitasJenisModel();
+            $users = new UsersModel();
+
+            $id = $this->request->getVar('id');
+            $model = new Usulan22Model();
+            $row = $model->find($id);
+
+            $data = [
+                'shdk' => $this->ShdkModel->findAll(),
+                'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
+                'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
+                'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+                'rw' => $this->RwModel->noRw(),
+                'rt' => $this->RtModel->noRt(),
+                'bansos' => $this->BansosModel->findAll(),
+                'users' => $users->findAll(),
+                'jenkel' => $this->GenModel->getDataJenkel(),
+                'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
+
+                'created_by' => session()->get('nik'),
+                'stahub' => $row['shdk'],
+                'kelurahan' => $row['kelurahan'],
+                'datarw' => $row["rw"],
+                'datart' => $row["rt"],
+                'alamat' => $row['alamat'],
+                'status_kawin' => $row["status_kawin"],
+                'jenis_pekerjaan' => $row["jenis_pekerjaan"],
+                'jenis_kelamin' => $row['jenis_kelamin'],
+                'ibu_kandung' => strtoupper($row["ibu_kandung"]),
+                'tanggal_lahir' => $row["tanggal_lahir"],
+                'tempat_lahir' => $row["tempat_lahir"],
+                'nama' => $row['nama'],
+                'nokk' => $row['nokk'],
+                'databansos' => $row['program_bansos'],
+                'du_nik' => $row['du_nik'],
+                'id' => $row['du_id'],
+                'disabil_status' => $row['disabil_status'],
+                'disabil_jenis' => $row['disabil_kode'],
+                'status_hamil' => $row['hamil_status'],
+                'tgl_hamil' => $row['hamil_tgl'],
+                'du_foto_identitas' => $row['foto_identitas'],
+                'du_foto_rumah' => $row['foto_rumah'],
+                'du_latitude' => $row['du_latitude'],
+                'du_longitude' => $row['du_longitude'],
+                'du_proses' => $row['du_proses'],
+                // 'foto_rumah' => $nama_foto_rumah,
+            ];
+
+            $msg = [
+                'sukses' => view('dtks/data/dtks/usulan/modalview', $data)
             ];
             echo json_encode($msg);
             // }

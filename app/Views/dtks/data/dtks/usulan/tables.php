@@ -165,17 +165,13 @@
                                                     <th>NIK</th>
                                                     <th>NAMA</th>
                                                     <th>NO. KK</th>
-                                                    <th>TEMPAT LAHIR</th>
-                                                    <th>TANGGAL LAHIR</th>
                                                     <th>IBU KANDUNG</th>
-                                                    <th>JENIS KELAMIN</th>
                                                     <th>JENIS PEKERJAAN</th>
                                                     <th>STATUS</th>
-                                                    <th>RT</th>
-                                                    <th>RW</th>
-                                                    <th>ALAMAT</th>
                                                     <th>PROGRAM</th>
-                                                    <th>ACTION</th>
+                                                    <th>PENGUSUL</th>
+                                                    <th>UPDATE PADA</th>
+                                                    <th>AKSI</th>
                                                 </tr>
                                             </thead>
                                             <tbody></tbody>
@@ -277,11 +273,10 @@
                                                     <th>NIK</th>
                                                     <th>NAMA</th>
                                                     <th>NO. KK</th>
-                                                    <th>TEMPAT LAHIR</th>
-                                                    <th>TANGGAL LAHIR</th>
-                                                    <th>IBU KANDUNG</th>
                                                     <th>PEKERJAAN</th>
-                                                    <th>PROGRAM</th>
+                                                    <th>PENGUSUL</th>
+                                                    <th>UPDATE PADA</th>
+                                                    <th>AKSI</th>
                                                 </tr>
                                             </thead>
                                             <tbody></tbody>
@@ -491,6 +486,30 @@
                 } else if (response.sukses) {
                     $('.viewmodal').html(response.sukses).show();
                     $('#modaledit').modal('show');
+                }
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
+            }
+        });
+    }
+
+    function view_person(id) {
+        //Ajax Load data from ajax
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('viewUsulan') ?>",
+            data: {
+                id: id
+            },
+            dataType: "JSON",
+            success: function(response) {
+                if (response.informasi) {
+                    alert(response.informasi);
+
+                } else if (response.sukses) {
+                    $('.viewmodal').html(response.sukses).show();
+                    $('#modalview').modal('show');
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {

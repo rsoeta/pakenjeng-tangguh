@@ -94,13 +94,14 @@ class Usulan22Model extends Model
         if ($_POST['length'] != -1);
         $db = db_connect();
         $builder = $db->table('dtks_usulan22');
-        $query = $builder->select('dtks_usulan22.du_id as idUsulan, tb_villages.name as namaDesa, tb_districts.name as namaKec, nama, nokk, dtks_usulan22.du_nik, jenis_kelamin, tempat_lahir, tanggal_lahir, ibu_kandung, jenis_pekerjaan, JenisPekerjaan, StatusKawin, dbj_nama_bansos, jenis_shdk, status_kawin, alamat, rt, rw, kelurahan, kecamatan, shdk, foto_rumah, created_at, created_at_year, created_at_month')
+        $query = $builder->select('dtks_usulan22.du_id as idUsulan, tb_villages.name as namaDesa, tb_districts.name as namaKec, nama, nokk, dtks_usulan22.du_nik, jenis_kelamin, tempat_lahir, tanggal_lahir, ibu_kandung, jenis_pekerjaan, JenisPekerjaan, StatusKawin, dbj_nama_bansos, jenis_shdk, status_kawin, alamat, rt, rw, kelurahan, kecamatan, shdk, foto_rumah, dtks_usulan22.created_at, created_at_year, created_at_month, created_by, dtks_users.email, dtks_usulan22.updated_at')
             ->join('tbl_pekerjaan', 'tbl_pekerjaan.idPekerjaan=dtks_usulan22.jenis_pekerjaan')
             ->join('tb_status_kawin', 'tb_status_kawin.idStatus=dtks_usulan22.status_kawin')
             ->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id=dtks_usulan22.program_bansos')
             ->join('tb_shdk', 'tb_shdk.id=dtks_usulan22.shdk')
             ->join('tb_villages', 'tb_villages.id=dtks_usulan22.kelurahan')
             ->join('tb_districts', 'tb_districts.id=dtks_usulan22.kecamatan')
+            ->join('dtks_users', 'dtks_users.nik=dtks_usulan22.created_by')
             ->where($kondisi_search)
             ->orderBy($result_order, $result_dir)
             ->limit($_POST['length'], $_POST['start'])
@@ -244,13 +245,14 @@ class Usulan22Model extends Model
         if ($_POST['length'] != -1);
         $db = db_connect();
         $builder = $db->table('dtks_usulan22');
-        $query = $builder->select('dtks_usulan22.du_id as idUsulan, tb_villages.name as namaDesa, tb_districts.name as namaKec, nama, nokk, dtks_usulan22.du_nik, jenis_kelamin, tempat_lahir, tanggal_lahir, ibu_kandung, jenis_pekerjaan, JenisPekerjaan, StatusKawin, dbj_nama_bansos, jenis_shdk, status_kawin, alamat, rt, rw, kelurahan, kecamatan, shdk, foto_rumah, created_at, created_at_year, created_at_month')
+        $query = $builder->select('dtks_usulan22.du_id as idUsulan, tb_villages.name as namaDesa, tb_districts.name as namaKec, nama, nokk, dtks_usulan22.du_nik, jenis_kelamin, tempat_lahir, tanggal_lahir, ibu_kandung, jenis_pekerjaan, JenisPekerjaan, StatusKawin, dbj_nama_bansos, jenis_shdk, status_kawin, alamat, rt, rw, kelurahan, kecamatan, shdk, foto_rumah, dtks_usulan22.created_at, created_at_year, created_at_month, created_by, dtks_users.email, dtks_usulan22.updated_at')
             ->join('tbl_pekerjaan', 'tbl_pekerjaan.idPekerjaan=dtks_usulan22.jenis_pekerjaan')
             ->join('tb_status_kawin', 'tb_status_kawin.idStatus=dtks_usulan22.status_kawin')
             ->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id=dtks_usulan22.program_bansos')
             ->join('tb_shdk', 'tb_shdk.id=dtks_usulan22.shdk')
             ->join('tb_villages', 'tb_villages.id=dtks_usulan22.kelurahan')
             ->join('tb_districts', 'tb_districts.id=dtks_usulan22.kecamatan')
+            ->join('dtks_users', 'dtks_users.nik=dtks_usulan22.created_by')
             ->where($kondisi_search)
             ->orderBy($result_order, $result_dir)
             ->limit($_POST['length'], $_POST['start'])

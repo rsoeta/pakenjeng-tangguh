@@ -226,7 +226,7 @@ function deadline_usulan()
     $menit = $times->getMinute();         // 15
     $bulanNext = $bulan + 1;
     // $dead = date('Y-m-d H:i') . "<br>";
-    $dead_mulai = ($tahun . '-' . $bulan . '-' . '13 00:01');
+    $dead_mulai = ($tahun . '-' . $bulan . '-' . '15 00:01');
     $dead_akhir = ($tahun . '-' . $bulan . '-' . '19 23:59');
     $strdead1 = (strtotime($dead_mulai));
     $strdead2 = (strtotime($dead_akhir));
