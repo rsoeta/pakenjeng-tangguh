@@ -22,7 +22,7 @@ $desa_id = session()->get('kode_desa');
                         <label class="col-4 col-sm-2 col-form-label" for="dataCari">Cari Data</label>
                         <div class="col-8 col-sm-10">
                             <select name="dataCari" id="dataCari" class="form-control form-control-sm select2" style="width: 100%;">
-                                <option value='0'>-- Select --</option>
+                                <option value='0'>-- Pilih --</option>
                             </select>
                         </div>
                     </div>

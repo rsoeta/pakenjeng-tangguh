@@ -6,6 +6,14 @@ $desa_id = session()->get('kode_desa');
 ?>
 
 
+<style>
+    input.larger {
+        width: 150px;
+        height: 15px;
+    }
+</style>
+
+
 <!-- Modal -->
 <div class="modal fade" id="modalview" tabindex="-1" aria-labelledby="modalviewLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -297,9 +305,9 @@ $desa_id = session()->get('kode_desa');
                     <div class="row">
                         <div class="col-12 d-flex justify-content-center">
                             <div class="form-check form-check-inline">
-                                <label for="proses" class="form-check-label"> Padan</label>
-                                <input class="form-check-input" type="checkbox" id="proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
+                                <input class="form-check-input larger" type="checkbox" id="proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
                             </div>
+                            <label for="proses" class="form-check-label"> PADAN</label>
                             <div class="invalid-feedback errordu_proses"></div>
                             <!-- </div> -->
                         </div>

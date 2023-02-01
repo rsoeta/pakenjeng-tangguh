@@ -587,7 +587,7 @@ class Usulan22 extends BaseController
 
         $response = array();
         $data = array();
-        $builder = $db->table('dtks_usulan22');
+        $builder = $db->table('dtks_usulan_caridata');
         $penduduk = [];
         if (isset($postData['search'])) {
             $search = $postData['search'];
