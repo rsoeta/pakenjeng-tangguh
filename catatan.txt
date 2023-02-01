@@ -288,4 +288,17 @@
         CREATE OR REPLACE VIEW dtks_usulan_caridata AS
         SELECT dtks_usulan22.du_id, dtks_usulan22.du_nik, dtks_usulan22.program_bansos, dtks_usulan22.nokk, dtks_usulan22.nama, dtks_usulan22.tempat_lahir, dtks_usulan22.tanggal_lahir, dtks_usulan22.ibu_kandung, dtks_usulan22.jenis_kelamin, dtks_usulan22.jenis_pekerjaan, dtks_usulan22.status_kawin, dtks_usulan22.alamat, dtks_usulan22.rt, dtks_usulan22.rw, dtks_usulan22.provinsi, dtks_usulan22.kabupaten, dtks_usulan22.kecamatan, dtks_usulan22.kelurahan, dtks_usulan22.shdk, dtks_usulan22.foto_identitas, dtks_usulan22.foto_rumah, dtks_usulan22.disabil_status, dtks_usulan22.disabil_kode, dtks_usulan22.hamil_status, dtks_usulan22.hamil_tgl, dtks_usulan22.du_latitude, dtks_usulan22.du_longitude, dtks_usulan22.du_proses, dtks_usulan22.created_at, dtks_usulan22.created_at_year, dtks_usulan22.created_at_month, dtks_usulan22.created_by, dtks_usulan22.updated_at, dtks_usulan22.updated_by
         FROM dtks_usulan22
-        INNER JOIN dtks_usulan_view_nik ON dtks_usulan22.du_nik=dtks_usulan_view_nik.du_nik;
+        JOIN dtks_usulan_view_nik ON dtks_usulan22.du_nik=dtks_usulan_view_nik.du_nik;
+
+        CREATE OR REPLACE VIEW dtks_usulan_caridata AS
+        SELECT DISTINCT dtks_usulan22.du_nik, dtks_usulan22.program_bansos, dtks_usulan22.nokk, dtks_usulan22.nama, dtks_usulan22.tempat_lahir, dtks_usulan22.tanggal_lahir, dtks_usulan22.ibu_kandung, dtks_usulan22.jenis_kelamin, dtks_usulan22.jenis_pekerjaan, dtks_usulan22.status_kawin, dtks_usulan22.alamat, dtks_usulan22.rt, dtks_usulan22.rw, dtks_usulan22.provinsi, dtks_usulan22.kabupaten, dtks_usulan22.kecamatan, dtks_usulan22.kelurahan, dtks_usulan22.shdk
+        FROM dtks_usulan22
+        JOIN dtks_usulan_view_nik ON dtks_usulan22.du_nik=dtks_usulan_view_nik.du_nik;
+
+        3205336606740001
+
+        SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
+        CREATE OR REPLACE VIEW dtks_usulan_caridata AS
+        SELECT dtks_usulan22.du_id, dtks_usulan22.du_nik, dtks_usulan22.program_bansos, dtks_usulan22.nokk, dtks_usulan22.nama, dtks_usulan22.tempat_lahir, dtks_usulan22.tanggal_lahir, dtks_usulan22.ibu_kandung, dtks_usulan22.jenis_kelamin, dtks_usulan22.jenis_pekerjaan, dtks_usulan22.status_kawin, dtks_usulan22.alamat, dtks_usulan22.rt, dtks_usulan22.rw, dtks_usulan22.provinsi, dtks_usulan22.kabupaten, dtks_usulan22.kecamatan, dtks_usulan22.kelurahan, dtks_usulan22.shdk, dtks_usulan22.foto_identitas, dtks_usulan22.foto_rumah, dtks_usulan22.disabil_status, dtks_usulan22.disabil_kode, dtks_usulan22.hamil_status, dtks_usulan22.hamil_tgl, dtks_usulan22.du_latitude, dtks_usulan22.du_longitude, dtks_usulan22.du_proses, dtks_usulan22.created_at, dtks_usulan22.created_at_year, dtks_usulan22.created_at_month, dtks_usulan22.created_by, dtks_usulan22.updated_at, dtks_usulan22.updated_by
+        FROM dtks_usulan22
+        GROUP BY dtks_usulan22.du_nik;

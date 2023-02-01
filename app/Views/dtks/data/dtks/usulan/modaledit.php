@@ -254,7 +254,7 @@ $desa_id = session()->get('kode_desa');
                         <label class="label-center mt-2">Dokumen</label>
                         <div class="form-group row nopadding">
                             <div class="col-12 col-sm-6 mb-2">
-                                <a download="<?= 'DUD_ID' . $du_nik . '.jpg'; ?>" href="<?= usulan_foto('DUD_ID' . $du_nik . '.jpg', 'foto_identitas'); ?>">
+                                <a download="<?= 'DUD_ID' . $du_nik . '.jpg'; ?>" href="<?= usulan_foto('DUD_ID' . $du_nik . date_format($updated_at, 'Y-m-d') . date_format($updated_at, 'H:i:s') . '.jpg', 'foto_identitas'); ?>">
                                     <img src="<?= usulan_foto('DUD_ID' . $du_nik . '.jpg', 'foto_identitas'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
                                 </a>
                                 <label for="du_foto_identitas">Foto KTP / KIA / Akta Kelahiran</label>
@@ -267,8 +267,8 @@ $desa_id = session()->get('kode_desa');
                             </div>
                             <div class="invalid-feedback errordu_foto_identitas"></div>
                             <div class="col-12 col-sm-6 mb-2">
-                                <a download="<?= 'DUD_FH' . $du_nik . '.jpg'; ?>" href="<?= usulan_foto('DUD_FH' . $du_nik . '.jpg', 'foto_rumah'); ?>">
-                                    <img src="<?= usulan_foto('DUD_FH' . $du_nik . '.jpg', 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                <a download="<?= 'DUD_FH' . $du_nik . '.jpg'; ?>" href="<?= usulan_foto('DUD_FH' . $du_nik . date_format($updated_at, 'Y-m-d') . '_' . date_format($updated_at, 'H:i:s') . '.jpg', 'foto_rumah'); ?>">
+                                    <img src="<?= usulan_foto('DUD_FH' . $du_nik . date_format($updated_at, 'Y-m-d') . '_' . date_format($updated_at, 'H:i:s') . '.jpg', 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
                                 </a>
                                 <label for="du_foto_rumah">Foto Rumah</label>
                                 <div class="input-group">

@@ -427,7 +427,7 @@ class Usulan22Model extends Model
             //     return $this->db->table('dtks_usulan22')->where(['du_id' => $id])->where(['kelurahan' => $kelurahan])->where(['rw' => $rw]);
         } else {
             // denied
-            return $this->db->table('dtks_usulan_caridata')->where(['du_id' => $id]);
+            return $this->db->table('dtks_usulan22')->where(['du_id' => $id]);
         }
     }
 

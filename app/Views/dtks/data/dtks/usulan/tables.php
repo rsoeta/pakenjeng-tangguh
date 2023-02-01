@@ -20,6 +20,9 @@
         $jabatan = session()->get('level');
         $desa_id = $user_login['kode_desa'];
         // echo deadline_usulan();
+
+        echo $filename_dua =  date('Y-m-d') . '_' . date('H:i:s') . '.jpg' . '<br>';
+        echo $filename_empat =  date('Y-m-d') . '_' . date('H:i:s') . '.jpg';
         ?>
         <div class="card-body">
             <?php if (session()->get('message')) : ?>

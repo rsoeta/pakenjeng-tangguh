@@ -450,9 +450,11 @@ class Usulan22 extends BaseController
 
                 // var_dump($dd_foto_cpm);
                 // die;
+                $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . '_' . date('Y-m-d') . '_' . date('H:i:s') . '.jpg';
+                $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . '_' . date('Y-m-d') . '_' . date('H:i:s') . '.jpg';
 
-                $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . '.jpg';
-                $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . '.jpg';
+                // var_dump($filename_dua);
+                // die;
 
                 $img_dua = imagecreatefromjpeg($du_foto_rumah);
                 $img_empat = imagecreatefromjpeg($du_foto_identitas);
@@ -594,20 +596,17 @@ class Usulan22 extends BaseController
             if ($role === '1') {
                 $builder->select('*');
                 $builder->like('du_nik', $search);
-                $builder->distinct('du_nik');
                 $query = $builder->get();
                 $data = $query->getResult();
             } elseif ($role === '2') {
                 $builder->select('*');
                 $builder->like('du_nik', $search);
-                $builder->distinct('du_nik');
                 $query = $builder->get();
                 $data = $query->getResult();
             } elseif ($role === '3') {
                 $builder->select('*');
                 $builder->where('kelurahan', $kode_desa);
                 $builder->like('du_nik', $search);
-                $builder->distinct('du_nik');
                 $query = $builder->get();
                 $data = $query->getResult();
             } elseif ($role === '4') {
@@ -615,7 +614,6 @@ class Usulan22 extends BaseController
                 $builder->where('kelurahan', $kode_desa);
                 $builder->where('rw', $kode_rw);
                 $builder->like('du_nik', $search);
-                $builder->distinct('du_nik');
                 $query = $builder->get();
                 $data = $query->getResult();
             } else {
@@ -746,6 +744,7 @@ class Usulan22 extends BaseController
                 'du_latitude' => $row['du_latitude'],
                 'du_longitude' => $row['du_longitude'],
                 'du_proses' => $row['du_proses'],
+                'updated_at' => $row['updated_at'],
                 // 'foto_rumah' => $nama_foto_rumah,
             ];
 
@@ -1026,8 +1025,8 @@ class Usulan22 extends BaseController
 
                     // var_dump($dd_foto_cpm);
                     // die;
-                    $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . '.jpg';
-                    $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . '.jpg';
+                    $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . date_format($this->request->getPost('updated_at'), 'Y-m-d_H:i:s') . '.jpg';
+                    $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . date_format($this->request->getPost('updated_at'), 'Y-m-d_H:i:s') . '.jpg';
 
                     $img_dua = imagecreatefromjpeg($du_foto_rumah);
                     $img_empat = imagecreatefromjpeg($du_foto_identitas);
