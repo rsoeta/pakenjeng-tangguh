@@ -16,8 +16,9 @@ $desa_id = session()->get('kode_desa');
 <div class="modal fade" id="modaledit" tabindex="-1" aria-labelledby="modaleditLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modaleditLabel">Form. Edit Data</h5>
+            <div class="modal-header modal-header-warning">
+                <img src="<?= logoApp(); ?>" alt="<?= nameApp(); ?> Logo" class="brand-image" style="width:30px; margin-right: auto">
+                <h5 class="modal-title" id="modaleditLabel"><?= $title; ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
@@ -124,8 +125,6 @@ $desa_id = session()->get('kode_desa');
                                 <div class="invalid-feedback errorjenis_pekerjaan"></div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-12 col-sm-6">
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="status_kawin">Status</label>
                             <div class="col-8 col-sm-8">
@@ -140,6 +139,8 @@ $desa_id = session()->get('kode_desa');
                                 <div class="invalid-feedback errorstatus_kawin"></div>
                             </div>
                         </div>
+                    </div>
+                    <div class="col-12 col-sm-6">
 
                         <div class="form-group row nopadding" <?php if ($user != 1) {
                                                                     echo 'hidden';
@@ -157,6 +158,15 @@ $desa_id = session()->get('kode_desa');
                                 <div class="invalid-feedback errorkelurahan"></div>
                             </div>
                         </div>
+
+                        <div class="form-group row nopadding">
+                            <label class="col-4 col-sm-4 col-form-label" for="alamat">Alamat</label>
+                            <div class="col-8 col-sm-8">
+                                <input type="text" name="alamat" id="alamat" class="form-control form-control-sm" value="<?= $alamat; ?>">
+                                <div class="invalid-feedback erroralamat"></div>
+                            </div>
+                        </div>
+
                         <div class="form-group row nopadding" <?php if ($user > 3) {
                                                                     echo 'hidden';
                                                                 } ?>>
@@ -185,14 +195,6 @@ $desa_id = session()->get('kode_desa');
                                     <?php } ?>
                                 </select>
                                 <div class="invalid-feedback errordatart"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="alamat">Alamat</label>
-                            <div class="col-8 col-sm-8">
-                                <input type="text" name="alamat" id="alamat" class="form-control form-control-sm" value="<?= $alamat; ?>">
-                                <div class="invalid-feedback erroralamat"></div>
                             </div>
                         </div>
 
@@ -254,10 +256,10 @@ $desa_id = session()->get('kode_desa');
                         <label class="label-center mt-2">Dokumen</label>
                         <div class="form-group row nopadding">
                             <div class="col-12 col-sm-6 mb-2">
-                                <a download="<?= 'DUD_ID' . $du_nik . '.jpg'; ?>" href="<?= usulan_foto('DUD_ID' . $du_nik . date_format($updated_at, 'Y-m-d') . date_format($updated_at, 'H:i:s') . '.jpg', 'foto_identitas'); ?>">
-                                    <img src="<?= usulan_foto('DUD_ID' . $du_nik . '.jpg', 'foto_identitas'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                <a download="<?= $du_foto_identitas; ?>" href="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>">
+                                    <img src="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
                                 </a>
-                                <label for="du_foto_identitas">Foto KTP / KIA / Akta Kelahiran</label>
+                                <label for="du_foto_identitas">Foto KTP / KK / KIA / AKL</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-address-card"></i></span>
@@ -267,8 +269,8 @@ $desa_id = session()->get('kode_desa');
                             </div>
                             <div class="invalid-feedback errordu_foto_identitas"></div>
                             <div class="col-12 col-sm-6 mb-2">
-                                <a download="<?= 'DUD_FH' . $du_nik . '.jpg'; ?>" href="<?= usulan_foto('DUD_FH' . $du_nik . date_format($updated_at, 'Y-m-d') . '_' . date_format($updated_at, 'H:i:s') . '.jpg', 'foto_rumah'); ?>">
-                                    <img src="<?= usulan_foto('DUD_FH' . $du_nik . date_format($updated_at, 'Y-m-d') . '_' . date_format($updated_at, 'H:i:s') . '.jpg', 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                <a download="<?= $du_foto_rumah; ?>" href="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>">
+                                    <img src="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
                                 </a>
                                 <label for="du_foto_rumah">Foto Rumah</label>
                                 <div class="input-group">
@@ -311,6 +313,7 @@ $desa_id = session()->get('kode_desa');
                         </div>
                     </div>
                 </div>
+                <input type="datetime-local" name="updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
                 <div class="modal-footer mt-3">
 
                     <button type="submit" class="btn btn-warning btn-block btnSimpan">Update</button>

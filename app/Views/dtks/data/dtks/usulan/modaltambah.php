@@ -10,8 +10,9 @@ $desa_id = session()->get('kode_desa');
 <div class="modal fade" id="modaltambah" aria-labelledby="modaltambahLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modaltambahLabel">Form. Tambah Data</h5>
+            <div class="modal-header modal-header-primary">
+                <img src="<?= logoApp(); ?>" alt="<?= nameApp(); ?> Logo" class="brand-image" style="width:30px; margin-right: auto">
+                <h5 class="modal-title" id="modaltambahLabel"><?= $title; ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <?= form_open_multipart('', ['class' => 'formsimpan']) ?>
@@ -235,7 +236,7 @@ $desa_id = session()->get('kode_desa');
                         <label class="label-center mt-2">Dokumen</label>
                         <div class="form-group row nopadding">
                             <div class="col-12 col-sm-6 mb-2">
-                                <label for="du_foto_identitas">Foto KTP / KIA / Akta Kelahiran</label>
+                                <label for="du_foto_identitas">Foto KTP / KK / KIA / AKL</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-address-card"></i></span>
@@ -272,6 +273,7 @@ $desa_id = session()->get('kode_desa');
                             </div>
                         </div>
                     </div>
+                    <input type="datetime-local" name="updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
                 </div>
                 <div class="modal-footer mt-3">
                     <button type="submit" class="btn btn-primary btn-block btnSimpan">Simpan</button>

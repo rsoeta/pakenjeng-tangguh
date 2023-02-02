@@ -279,7 +279,7 @@
                         <div class="row">
                             <?php foreach ($rekapUsulan as $row) { ?>
                                 <div class="col-sm-2 col-md-2 col-6">
-                                        <a href="/usulan">
+                                    <a href="/usulan" style="text-decoration:none;">
                                         <div class="small-box bg-primary">
                                             <div class="container">
                                                 <div class="row">
@@ -297,7 +297,7 @@
                                             <a href="/usulan" class="small-box-footer">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a>
                                         </div>
                                     </a>
-                                    </div>
+                                </div>
                             <?php } ?>
                         </div>
                         <!-- /.col -->

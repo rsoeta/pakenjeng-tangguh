@@ -8,6 +8,12 @@ function nameApp()
 {
     return 'Opt NewDTKS';
 }
+
+function logoApp()
+{
+    return base_url('icon-dtks.png');
+}
+
 // function version app from database
 function versionApp()
 {
@@ -225,22 +231,28 @@ function deadline_usulan()
     $jam = $times->getHour();           // 16
     $menit = $times->getMinute();         // 15
     $bulanNext = $bulan + 1;
+    $hak_akses = session()->get('role_id');
     // $dead = date('Y-m-d H:i') . "<br>";
-    $dead_mulai = ($tahun . '-' . $bulan . '-' . '01 00:01');
-    $dead_akhir = ($tahun . '-' . $bulan . '-' . '19 23:59');
+    $dead_mulai = ($tahun . '-' . $bulan . '-' . '15 06:00'); // starting waktu
+    $dead_akhir = ($tahun . '-' . $bulan . '-' . '19 20:00'); // ending waktu untuk user
+    $dead_akhir2 = ($tahun . '-' . $bulan . '-' . '24 23:59'); // ending waktu untuk operator
+
     $strdead1 = (strtotime($dead_mulai));
     $strdead2 = (strtotime($dead_akhir));
+    $strdead3 = (strtotime($dead_akhir2));
     // $ini_tanggal = strtotime("14 14:12") . "<br>";
     // $ini_tanggal = strtotime() . "<br>";
 
     // $deadline = '141312';
 
-
     $hari_ini = $tahun . '-' . $bulan . '-' . $hari . ' ' . $jam . ':' . $menit;
     $strhari_ini = strtotime($hari_ini);
 
-    $deadline = ($strhari_ini < $strdead1 || $strhari_ini > $strdead2) ? 1 : 0;
-
+    if ($hak_akses <= 3) {
+        $deadline = ($strhari_ini <= $strdead1 || $strhari_ini >= $strdead3) ? 1 : 0;
+    } else {
+        $deadline = ($strhari_ini <= $strdead1 || $strhari_ini >= $strdead2) ? 1 : 0;
+    }
 
     // return $ini_tanggal;
     // return $hari_ini > $deadline;
@@ -277,3 +289,34 @@ function usulan_foto($fileName = '', $dir = '', $defFile = '')
     }
     # code...
 }
+
+// $nohp = "08562121141";
+function nope($nohp)
+{
+    // kadang ada penulisan no hp 0811 239 345
+    $nohp = str_replace(" ", "", $nohp);
+    // kadang ada penulisan no hp (0274) 778787
+    $nohp = str_replace("(", "", $nohp);
+    // kadang ada penulisan no hp (0274) 778787
+    $nohp = str_replace(")", "", $nohp);
+    // kadang ada penulisan no hp 0811.239.345
+    $nohp = str_replace(".", "", $nohp);
+
+    // cek apakah no hp mengandung karakter + dan 0-9
+    if (!preg_match('/[^+0-9]/', trim($nohp))) {
+        // cek apakah no hp karakter 1-3 adalah +62
+        if (substr(trim($nohp), 0, 3) == '62') {
+            $hp = trim($nohp);
+        }
+        // cek apakah no hp karakter 1 adalah 0
+        elseif (substr(trim($nohp), 0, 1) == '0') {
+            $hp = '62' . substr(trim($nohp), 1);
+        }
+        // abaikan no hp karakter 1 bukan 0
+        else {
+            $hp = $nohp;
+        }
+    }
+    return $hp;
+}
+// hp($nohp);

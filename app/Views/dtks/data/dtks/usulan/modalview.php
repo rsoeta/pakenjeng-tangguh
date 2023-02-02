@@ -18,8 +18,9 @@ $desa_id = session()->get('kode_desa');
 <div class="modal fade" id="modalview" tabindex="-1" aria-labelledby="modalviewLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalviewLabel">Form. View Data</h5>
+            <div class="modal-header modal-header-info">
+                <img src="<?= logoApp(); ?>" alt="<?= nameApp(); ?> Logo" class="brand-image" style="width:30px; margin-right: auto">
+                <h5 class="modal-title" id="modalviewLabel"><?= $title; ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
@@ -31,49 +32,49 @@ $desa_id = session()->get('kode_desa');
                         <div class="form-group row nopadding" hidden>
                             <label class="col-4 col-sm-4 col-form-label" for="id">ID</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="id" id="id" class="form-control form-control-sm" value="<?= $id; ?>" autofocus>
+                                <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" name="id" id="id" class="form-control form-control-sm" value="<?= $id; ?>" autofocus>
                                 <div class="invalid-feedback errorid"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="nik">NIK</label>
                             <div class="col-8 col-sm-8">
-                                <input type="number" name="nik" id="nik" class="form-control form-control-sm" value="<?= $du_nik; ?>" autocomplete="off" <?= $user > 3 ? 'readonly="on"' : ''; ?> readonly>
+                                <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="number" name="nik" id="nik" class="form-control form-control-sm" value="<?= $du_nik; ?>" autocomplete="off">
                                 <div class="invalid-feedback errornik"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="nama">Nama</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="nama" id="nama" class="form-control form-control-sm" value="<?= $nama; ?>" readonly>
+                                <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" name="nama" id="nama" class="form-control form-control-sm" value="<?= $nama; ?>">
                                 <div class="invalid-feedback errornama"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="nokk">No. KK</label>
                             <div class="col-8 col-sm-8">
-                                <input type="number" name="nokk" id="nokk" class="form-control form-control-sm" value="<?= $nokk; ?>" autocomplete="on" readonly>
+                                <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="number" name="nokk" id="nokk" class="form-control form-control-sm" value="<?= $nokk; ?>" autocomplete="on">
                                 <div class="invalid-feedback errornokk"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="tempat_lahir">Tempat Lahir</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="tempat_lahir" id="tempat_lahir" class="form-control form-control-sm" value="<?= $tempat_lahir; ?>" readonly>
+                                <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" name="tempat_lahir" id="tempat_lahir" class="form-control form-control-sm" value="<?= $tempat_lahir; ?>">
                                 <div class="invalid-feedback errortempat_lahir"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="tanggal_lahir">Tgl Lahir</label>
                             <div class="col-8 col-sm-8">
-                                <input type="date" name="tanggal_lahir" id="tanggal_lahir" class="form-control form-control-sm" value="<?= $tanggal_lahir; ?>" readonly>
+                                <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="date" name="tanggal_lahir" id="tanggal_lahir" class="form-control form-control-sm" value="<?= $tanggal_lahir; ?>">
                                 <div class="invalid-feedback errortanggal_lahir"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="ibu_kandung">Ibu Kandung</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="ibu_kandung" id="ibu_kandung" class="form-control form-control-sm" value="<?= $ibu_kandung; ?>" readonly>
+                                <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" name="ibu_kandung" id="ibu_kandung" class="form-control form-control-sm" value="<?= $ibu_kandung; ?>">
                                 <div class="invalid-feedback erroribu_kandung"></div>
                             </div>
                         </div>
@@ -81,11 +82,11 @@ $desa_id = session()->get('kode_desa');
                             <label class="col-4 col-sm-4 col-form-label" for="jenis_kelamin">Jenis Kelamin</label>
                             <div class="col-8 col-sm-8">
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="chk-Lk" name="jenis_kelamin" <?= $jenis_kelamin == '1' ? 'checked' : ''; ?> value="1" readonly />
+                                    <input <?= $user > 3 ? ' disabled="on"' : ''; ?> class="form-check-input" type="radio" id="chk-Lk" name="jenis_kelamin" <?= $jenis_kelamin == '1' ? 'checked' : ''; ?> value="1" />
                                     <label for="chk-Lk" class="form-check-label"> Laki-Laki </label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="chk-Pr" name="jenis_kelamin" <?= $jenis_kelamin == '2' ? 'checked' : ''; ?> value="2" readonly />
+                                    <input <?= $user > 3 ? ' disabled="on"' : ''; ?> class="form-check-input" type="radio" id="chk-Pr" name="jenis_kelamin" <?= $jenis_kelamin == '2' ? 'checked' : ''; ?> value="2" />
                                     <label for="chk-Pr" class="form-check-label"> Perempuan </label>
                                 </div>
                                 <div class="invalid-feedback errorjenis_kelamin"></div>
@@ -95,11 +96,11 @@ $desa_id = session()->get('kode_desa');
                             <label class="col-4 col-sm-4 col-form-label" for="status_hamil">Status Hamil</label>
                             <div class="col-8 col-sm-8">
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="chk-YaHamil" name="status_hamil" <?= $status_hamil == 1 ? 'checked' : ''; ?> value="1" readonly />
+                                    <input <?= $user > 3 ? ' disabled="on"' : ''; ?> class="form-check-input" type="radio" id="chk-YaHamil" name="status_hamil" <?= $status_hamil == 1 ? 'checked' : ''; ?> value="1" />
                                     <label for="chk-YaHamil" class="form-check-label"> Ya </label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="chk-TidakHamil" name="status_hamil" <?= $status_hamil == 2 ? 'checked' : ''; ?> value="2" readonly />
+                                    <input <?= $user > 3 ? ' disabled="on"' : ''; ?> class="form-check-input" type="radio" id="chk-TidakHamil" name="status_hamil" <?= $status_hamil == 2 ? 'checked' : ''; ?> value="2" />
                                     <label for="chk-TidakHamil" class="form-check-label"> Tidak </label>
                                 </div>
                                 <div class="invalid-feedback errorstatus_hamil"></div>
@@ -108,14 +109,14 @@ $desa_id = session()->get('kode_desa');
                         <div class="form-group row nopadding" id="tgl_hamil_div" style="display: none;">
                             <label class="col-4 col-sm-4 col-form-label" for="tgl_hamil">Tgl Mulai Hamil</label>
                             <div class="col-8 col-sm-8">
-                                <input readonly type="date" name="tgl_hamil" id="tgl_hamil" class="form-control form-control-sm" value="<?= $tgl_hamil; ?>">
+                                <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="date" name="tgl_hamil" id="tgl_hamil" class="form-control form-control-sm" value="<?= $tgl_hamil; ?>">
                                 <div class="invalid-feedback errortgl_hamil"></div>
                             </div>
                         </div>
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="jenis_pekerjaan">Pekerjaan</label>
                             <div class="col-8 col-sm-8">
-                                <select id="jenis_pekerjaan" name="jenis_pekerjaan" class="form-select form-select-sm">
+                                <select <?= $user > 3 ? ' disabled="on' : ''; ?> id="jenis_pekerjaan" name="jenis_pekerjaan" class="form-select form-select-sm">
                                     <option value="">-- Pilih Jenis Pekerjaan --</option>
                                     <?php foreach ($pekerjaan as $row) { ?>
                                         <option <?php if ($jenis_pekerjaan == $row['idPekerjaan']) {
@@ -131,7 +132,7 @@ $desa_id = session()->get('kode_desa');
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="status_kawin">Status</label>
                             <div class="col-8 col-sm-8">
-                                <select id="status_kawin" name="status_kawin" class="form-select form-select-sm">
+                                <select <?= $user > 3 ? ' disabled="on' : ''; ?> id="status_kawin" name="status_kawin" class="form-select form-select-sm">
                                     <option value="">-- Pilih Status Perkawinan --</option>
                                     <?php foreach ($statusKawin as $row) { ?>
                                         <option <?php if ($status_kawin == $row['idStatus']) {
@@ -148,7 +149,7 @@ $desa_id = session()->get('kode_desa');
                                                                 } ?>>
                             <label class="col-4 col-sm-4 col-form-label" for="kelurahan">Desa/Kelurahan</label>
                             <div class="col-8 col-sm-8">
-                                <select id="kelurahan" name="kelurahan" class="form-select form-select-sm">
+                                <select <?= $user > 3 ? ' disabled="on' : ''; ?> id="kelurahan" name="kelurahan" class="form-select form-select-sm">
                                     <option value="">-- Pilih Desa / Kelurahan --</option>
                                     <?php foreach ($desa as $row) { ?>
                                         <option <?php if ($desa_id == $row['id']) {
@@ -164,7 +165,7 @@ $desa_id = session()->get('kode_desa');
                                                                 } ?>>
                             <label class="col-4 col-sm-4 col-form-label" for="datarw">No. RW</label>
                             <div class="col-8 col-sm-8">
-                                <select id="datarw" name="datarw" class="form-select form-select-sm">
+                                <select <?= $user > 3 ? ' disabled="on' : ''; ?> id="datarw" name="datarw" class="form-select form-select-sm">
                                     <option value="">-- Pilih RW --</option>
                                     <?php foreach ($rw as $row) { ?>
                                         <option <?php if ($datarw == $row['no_rw']) {
@@ -178,7 +179,7 @@ $desa_id = session()->get('kode_desa');
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="datart">No. RT</label>
                             <div class="col-8 col-sm-8">
-                                <select id="datart" name="datart" class="form-select form-select-sm">
+                                <select <?= $user > 3 ? ' disabled="on' : ''; ?> id="datart" name="datart" class="form-select form-select-sm">
                                     <option value="">-- Pilih RT --</option>
                                     <?php foreach ($rt as $row) { ?>
                                         <option <?php if ($datart == $row['no_rt']) {
@@ -193,7 +194,7 @@ $desa_id = session()->get('kode_desa');
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="alamat">Alamat</label>
                             <div class="col-8 col-sm-8">
-                                <input readonly type="text" name="alamat" id="alamat" class="form-control form-control-sm" value="<?= $alamat; ?>">
+                                <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" name="alamat" id="alamat" class="form-control form-control-sm" value="<?= $alamat; ?>">
                                 <div class="invalid-feedback erroralamat"></div>
                             </div>
                         </div>
@@ -201,7 +202,7 @@ $desa_id = session()->get('kode_desa');
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="shdk">SHDK</label>
                             <div class="col-8 col-sm-8">
-                                <select id="shdk" name="shdk" class="form-select form-select-sm">
+                                <select <?= $user > 3 ? ' disabled="on' : ''; ?> id="shdk" name="shdk" class="form-select form-select-sm">
                                     <option value="">-- Status Hubungan dalam Keluarga --</option>
                                     <?php foreach ($shdk as $row) { ?>
                                         <option <?php if ($stahub == $row['id']) {
@@ -215,7 +216,7 @@ $desa_id = session()->get('kode_desa');
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="databansos">Program</label>
                             <div class="col-8 col-sm-8">
-                                <select id="databansos" name="databansos" class="form-select form-select-sm">
+                                <select <?= $user > 3 ? ' disabled="on' : ''; ?> id="databansos" name="databansos" class="form-select form-select-sm">
                                     <option value="">-- Pilih Program --</option>
                                     <?php foreach ($bansos as $row) { ?>
                                         <option <?php if ($databansos == $row['dbj_id']) {
@@ -231,11 +232,11 @@ $desa_id = session()->get('kode_desa');
                             <label for="disabil_status" class="col-4 col-form-label">Disabilitas</label>
                             <div class="col-8 col-sm-8">
                                 <div class="form-check form-check-inline">
-                                    <input readonly class="form-check-input" type="radio" id="chk-Yes" name="disabil_status" <?= $disabil_status == 1 ? 'checked' : ''; ?> value="1" />
+                                    <input <?= $user > 3 ? ' disabled="on"' : ''; ?> class="form-check-input" type="radio" id="chk-Yes" name="disabil_status" <?= $disabil_status == 1 ? 'checked' : ''; ?> value="1" />
                                     <label for="chk-Yes" class="form-check-label"> Ya</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input readonly class="form-check-input" type="radio" id="chk-No" name="disabil_status" <?= $disabil_status == 2 ? 'checked' : ''; ?> value="2" />
+                                    <input <?= $user > 3 ? ' disabled="on"' : ''; ?> class="form-check-input" type="radio" id="chk-No" name="disabil_status" <?= $disabil_status == 2 ? 'checked' : ''; ?> value="2" />
                                     <label for="chk-No" class="form-check-label"> Tidak</label>
                                 </div>
                             </div>
@@ -243,7 +244,7 @@ $desa_id = session()->get('kode_desa');
                         <div class="form-group row nopadding" id="disabil_jenis_div" style="display: none">
                             <label for="disabil_jenis" class="col-4 col-form-label">Jenis Disabilitas</label>
                             <div class="col-8 col-sm-8">
-                                <select id="disabil_jenis" name="disabil_jenis" class="form-select form-select-sm">
+                                <select <?= $user > 3 ? ' disabled="on' : ''; ?> id="disabil_jenis" name="disabil_jenis" class="form-select form-select-sm">
                                     <option value="">-- Pilih Jenis Disabilitas --</option>
                                     <?php foreach ($DisabilitasJenisModel as $row) { ?>
                                         <option <?= $disabil_jenis == $row['dj_id'] ? 'selected' : ''; ?> value="<?= $row['dj_id'] ?>"> <?php echo $row['dj_keterangan']; ?></option>
@@ -256,28 +257,28 @@ $desa_id = session()->get('kode_desa');
                         <label class="label-center mt-2">Dokumen</label>
                         <div class="form-group row nopadding">
                             <div class="col-12 col-sm-6 mb-2">
-                                <a download="<?= 'DUD_ID' . $du_nik . '.jpg'; ?>" href="<?= usulan_foto('DUD_ID' . $du_nik . '.jpg', 'foto_identitas'); ?>">
-                                    <img src="<?= usulan_foto('DUD_ID' . $du_nik . '.jpg', 'foto_identitas'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                <a download="<?= $du_foto_identitas; ?>" href="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>">
+                                    <img src="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
                                 </a>
-                                <label for="du_foto_identitas">Foto KTP / KIA / Akta Kelahiran</label>
+                                <label for="du_foto_identitas">Foto KTP / KK / KIA / AKL</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-address-card"></i></span>
                                     </div>
-                                    <input readonly type="file" class="form-control" spellcheck="false" name="du_foto_identitas" accept="image/*" capture />
+                                    <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="file" class="form-control" spellcheck="false" name="du_foto_identitas" accept="image/*" capture />
                                 </div>
                             </div>
                             <div class="invalid-feedback errordu_foto_identitas"></div>
                             <div class="col-12 col-sm-6 mb-2">
-                                <a download="<?= 'DUD_FH' . $du_nik . '.jpg'; ?>" href="<?= usulan_foto('DUD_FH' . $du_nik . '.jpg', 'foto_rumah'); ?>">
-                                    <img src="<?= usulan_foto('DUD_FH' . $du_nik . '.jpg', 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                <a download="<?= $du_foto_rumah; ?>" href="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>">
+                                    <img src="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
                                 </a>
                                 <label for="du_foto_rumah">Foto Rumah</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-home"></i></span>
                                     </div>
-                                    <input readonly type="file" class="form-control" spellcheck="false" name="du_foto_rumah" accept="image/*" capture />
+                                    <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="file" class="form-control" spellcheck="false" name="du_foto_rumah" accept="image/*" capture />
                                 </div>
                             </div>
                             <div class="invalid-feedback errordu_foto_rumah"></div>
@@ -286,15 +287,15 @@ $desa_id = session()->get('kode_desa');
                     <div class="col-sm-12 col-12 mt-2">
                         <label class="label-center mt-2">Titik Koordinat</label>
                         <div class="form-group row nopadding">
-                            <div class="col-sm-2 col-2">
+                            <!-- <div class="col-sm-2 col-2">
                                 <button type="button" class="btn btn-primary" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i></button>
-                            </div>
-                            <div class="col-sm-5 col-5">
-                                <input readonly type="text" class="form-control mb-2" placeholder="Latitude" spellcheck="false" id="latitude" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
+                            </div> -->
+                            <div class="col-sm-6 col-6">
+                                <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" class="form-control mb-2" placeholder="Latitude" spellcheck="false" id="latitude" name="du_latitude" value="<?= $du_latitude; ?>" required>
                                 <div class="invalid-feedback errordu_latitude"></div>
                             </div>
-                            <div class="col-sm-5 col-5">
-                                <input readonly type="text" class="form-control mb-2" placeholder="Longitude" spellcheck="false" id="longitude" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
+                            <div class="col-sm-6 col-6">
+                                <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" class="form-control mb-2" placeholder="Longitude" spellcheck="false" id="longitude" name="du_longitude" value="<?= $du_longitude; ?>" required>
                                 <div class="invalid-feedback errordu_longitude"></div>
                             </div>
                         </div>
@@ -305,17 +306,16 @@ $desa_id = session()->get('kode_desa');
                     <div class="row">
                         <div class="col-12 d-flex justify-content-center">
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input larger" type="checkbox" id="proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
+                                <input <?= $user > 3 ? ' readonly="on"' : ''; ?> class="form-check-input larger" type="checkbox" id="proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
                             </div>
                             <label for="proses" class="form-check-label"> PADAN</label>
                             <div class="invalid-feedback errordu_proses"></div>
-                            <!-- </div> -->
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer mt-3">
+                    <div class="modal-footer mt-3">
 
-                    <button type="submit" class="btn btn-warning btn-block btnSimpan">Update</button>
+                        <button type="submit" class="btn btn-info btn-block btnSimpan">Update</button>
+                    </div>
                 </div>
                 <!-- </form> -->
                 <?php echo form_close();

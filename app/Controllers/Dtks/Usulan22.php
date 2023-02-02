@@ -133,8 +133,8 @@ class Usulan22 extends BaseController
             $row = array();
             $row[] = $no;
             $row[] = $key->du_nik;
-            $row[] = '<a href=' . usulan_foto('DUD_ID' . $key->du_nik . '.jpg', 'foto_identitas') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Identitas">' . $key->nama . '</a>
-            <a href=' . usulan_foto('DUD_FH' . $key->du_nik . '.jpg', 'foto_rumah') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Rumah Depan"></a>
+            $row[] = '<a href=' . usulan_foto($key->foto_identitas, 'foto_identitas') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Identitas" style="text-decoration:none;">' . $key->nama . '</a>
+            <a href=' . usulan_foto($key->foto_rumah, 'foto_rumah') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Rumah Depan"></a>
             ';
             // $row[] = $key->nama;
             $row[] = $key->nokk;
@@ -142,7 +142,7 @@ class Usulan22 extends BaseController
             $row[] = $key->JenisPekerjaan;
             $row[] = $key->StatusKawin;
             $row[] = $key->dbj_nama_bansos;
-            $row[] = '<a href="mailto:' . $key->email . '">' . $key->email . '</a>';
+            $row[] = '<a href="https://wa.me/' . nope($key->nope) . '" target="_blank" style="text-decoration:none;">' . strtoupper($key->fullname) . '</a>';
             $row[] = $key->updated_at;
             $row[] = '<a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->idUsulan . "'" . ')"><i class="far fa-edit"></i></a> | 
                 <button class="btn btn-sm btn-secondary" data-id="' . $key->idUsulan . '" data-nama="' . $key->nama . '" id="deleteBtn"><i class="far fa-trash-alt"></i></button>';
@@ -190,13 +190,13 @@ class Usulan22 extends BaseController
             $row = array();
             $row[] = $no;
             $row[] = $key->du_nik;
-            $row[] =
-                '<a href=' . usulan_foto('DUD_ID' . $key->du_nik . '.jpg', 'foto_identitas') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Identitas">' . $key->nama . '</a>
-            <a href=' . usulan_foto('DUD_FH' . $key->du_nik . '.jpg', 'foto_rumah') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Rumah Depan"></a>
+            $row[] = '<a href=' . usulan_foto($key->foto_identitas, 'foto_identitas') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Identitas" style="text-decoration:none;">' . $key->nama . '</a>
+            <a href=' . usulan_foto($key->foto_rumah, 'foto_rumah') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Rumah Depan"></a>
             ';
             $row[] = $key->nokk;
             $row[] = $key->JenisPekerjaan;
-            $row[] = '<a href="mailto:' . $key->email . '">' . $key->email . '</a>';
+            $row[] = $key->dbj_nama_bansos;
+            $row[] = '<a href="https://wa.me/' . nope($key->nope) . '" target="_blank" style="text-decoration:none;">' . strtoupper($key->fullname) . '</a>';
             $row[] = $key->updated_at;
             $row[] = '<a class="btn btn-sm btn-success" href="javascript:void(0)" title="View" onclick="view_person(' . "'" . $key->idUsulan . "'" . ')"><i class="fas fa-eye"></i></a>';
             $data[] = $row;
@@ -228,8 +228,7 @@ class Usulan22 extends BaseController
             $DisabilitasJenisModel = new DisabilitasJenisModel();
 
             $data = [
-                'title' => 'Data Usulan DTKS',
-
+                'title' => 'Form. Tambah Data',
                 'dtks' => $this->Usulan22Model->getDtks(),
                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
                 'datarw' => $this->RwModel->noRw(),
@@ -241,10 +240,23 @@ class Usulan22 extends BaseController
                 'users' => $users->findAll(),
                 'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
             ];
-            if (deadline_usulan() == 1) {
+            if (deadline_usulan() === 1) {
+
+                // alert(\'Mohon Maaf, Batas waktu untuk Tambah Data Telah Habis!!\');
+                // Swal.fire({
+                //     icon: "error",
+                //     title: "Oops...",
+                //     text: "Something went wrong!",
+                //     footer: "<a href="">Why do I have this issue?</a>"
+                // })
                 $msg = [
-                    'data' => '<script>
-                        alert(\'Mohon Maaf, Batas waktu untuk Tambah Data Telah Habis!!\');
+                    'data' =>
+                    '<script>
+                            Swal.fire({
+                                icon: "error",
+                                title: "Ops...",
+                                text: "Akses Tidak Sesuai!",
+                                })
                         </script>'
                 ];
                 echo json_encode($msg);
@@ -450,9 +462,9 @@ class Usulan22 extends BaseController
 
                 // var_dump($dd_foto_cpm);
                 // die;
-                $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . '_' . date('Y-m-d') . '_' . date('H:i:s') . '.jpg';
-                $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . '_' . date('Y-m-d') . '_' . date('H:i:s') . '.jpg';
-
+                $buat_tanggal = date_create($this->request->getVar('updated_at'));
+                $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Y_m_d_H_i_s') . '.jpg';
+                $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Y_m_d_H_i_s') . '.jpg';
                 // var_dump($filename_dua);
                 // die;
 
@@ -496,7 +508,8 @@ class Usulan22 extends BaseController
 
                 $fontSizeDua = 0.020 * imagesx($img_dua);
                 $whiteDua = imagecolorallocate($img_dua, 255, 255, 255);
-                $strokeColorDua = imagecolorallocate($img_dua, 0, 0, 0);
+                // $strokeColorDua = imagecolorallocate($img_dua, 0, 0, 0);
+                $strokeColorDua = imagecolorallocate($img_dua, 26, 36, 33);
 
                 // pos x from left, pos y from bottom
                 $posXdua = 0.02 * imagesx($img_dua);
@@ -548,8 +561,8 @@ class Usulan22 extends BaseController
                     'foto_rumah' => $filename_dua,
                     'du_latitude' => $this->request->getVar('du_latitude'),
                     'du_longitude' => $this->request->getVar('du_longitude'),
-                    'created_at' => date("Y-m-d H:i:s"),
-                    'updated_at' => date("Y-m-d H:i:s"),
+                    'created_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
+                    'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                     'created_at_year' => date('Y'),
                     'created_at_month' => date('n'),
                     'created_by' => session()->get('nik'),
@@ -707,6 +720,7 @@ class Usulan22 extends BaseController
             $row = $model->find($id);
 
             $data = [
+                'title' => 'Form. Edit Data',
                 'shdk' => $this->ShdkModel->findAll(),
                 'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
                 'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
@@ -782,6 +796,7 @@ class Usulan22 extends BaseController
             $row = $model->find($id);
 
             $data = [
+                'title' => 'Form. View Data',
                 'shdk' => $this->ShdkModel->findAll(),
                 'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
                 'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
@@ -1025,8 +1040,9 @@ class Usulan22 extends BaseController
 
                     // var_dump($dd_foto_cpm);
                     // die;
-                    $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . date_format($this->request->getPost('updated_at'), 'Y-m-d_H:i:s') . '.jpg';
-                    $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . date_format($this->request->getPost('updated_at'), 'Y-m-d_H:i:s') . '.jpg';
+                    $buat_tanggal = date_create($this->request->getVar('updated_at'));
+                    $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Y_m_d_H_i_s') . '.jpg';
+                    $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Y_m_d_H_i_s') . '.jpg';
 
                     $img_dua = imagecreatefromjpeg($du_foto_rumah);
                     $img_empat = imagecreatefromjpeg($du_foto_identitas);
@@ -1068,7 +1084,8 @@ class Usulan22 extends BaseController
 
                     $fontSizeDua = 0.020 * imagesx($img_dua);
                     $whiteDua = imagecolorallocate($img_dua, 255, 255, 255);
-                    $strokeColorDua = imagecolorallocate($img_dua, 0, 0, 0);
+                    // $strokeColorDua = imagecolorallocate($img_dua, 0, 0, 0);
+                    $strokeColorDua = imagecolorallocate($img_dua, 26, 36, 33);
 
                     // pos x from left, pos y from bottom
                     $posXdua = 0.02 * imagesx($img_dua);
@@ -1121,7 +1138,7 @@ class Usulan22 extends BaseController
                         'du_latitude' => $this->request->getVar('du_latitude'),
                         'du_longitude' => $this->request->getVar('du_longitude'),
                         'du_proses' => $this->request->getVar('du_proses'),
-                        'updated_at' => date("Y-m-d H:i:s"),
+                        'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                         'updated_by' => session()->get('nik'),
 
                         // 'foto_rumah' => $nama_foto_rumah,
@@ -1134,8 +1151,9 @@ class Usulan22 extends BaseController
                     ];
                 } else {
 
-                    $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . '.jpg';
-                    $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . '.jpg';
+                    $buat_tanggal = date_create($this->request->getVar('updated_at'));
+                    // $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Y_m_d_H_i_s') . '.jpg';
+                    // $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Y_m_d_H_i_s') . '.jpg';
 
                     $data = [
                         'provinsi' => '32',
@@ -1160,12 +1178,12 @@ class Usulan22 extends BaseController
                         'disabil_kode' => $this->request->getVar('disabil_jenis'),
                         'hamil_status' => $this->request->getVar('status_hamil'),
                         'hamil_tgl' => $this->request->getVar('tgl_hamil'),
-                        'foto_rumah' => $filename_dua,
-                        'foto_identitas' => $filename_empat,
+                        // 'foto_rumah' => $filename_dua,
+                        // 'foto_identitas' => $filename_empat,
                         'du_latitude' => $this->request->getVar('du_latitude'),
                         'du_longitude' => $this->request->getVar('du_longitude'),
                         'du_proses' => $this->request->getVar('du_proses'),
-                        'updated_at' => date("Y-m-d H:i:s"),
+                        'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                         'updated_by' => session()->get('nik'),
 
                         // 'foto_rumah' => $nama_foto_rumah,

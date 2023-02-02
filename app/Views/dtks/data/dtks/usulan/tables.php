@@ -2,7 +2,6 @@
 
 <?= $this->section('content'); ?>
 
-
 <div class="content-wrapper mt-1">
     <section class="content-header">
         <div class="container-fluid">
@@ -20,9 +19,6 @@
         $jabatan = session()->get('level');
         $desa_id = $user_login['kode_desa'];
         // echo deadline_usulan();
-
-        echo $filename_dua =  date('Y-m-d') . '_' . date('H:i:s') . '.jpg' . '<br>';
-        echo $filename_empat =  date('Y-m-d') . '_' . date('H:i:s') . '.jpg';
         ?>
         <div class="card-body">
             <?php if (session()->get('message')) : ?>
@@ -277,6 +273,7 @@
                                                     <th>NAMA</th>
                                                     <th>NO. KK</th>
                                                     <th>PEKERJAAN</th>
+                                                    <th>PROGRAM</th>
                                                     <th>PENGUSUL</th>
                                                     <th>UPDATE PADA</th>
                                                     <th>AKSI</th>
@@ -305,6 +302,7 @@
 <!-- /.container-fluid -->
 <div class="viewmodal" style="display: none;"></div>
 <script>
+    
     // 'use strict';
     $(document).ready(function() {
         $('body').addClass('sidebar-collapse');
