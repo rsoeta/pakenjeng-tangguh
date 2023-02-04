@@ -233,7 +233,7 @@ function deadline_usulan()
     $bulanNext = $bulan + 1;
     $hak_akses = session()->get('role_id');
     // $dead = date('Y-m-d H:i') . "<br>";
-    $dead_mulai = ($tahun . '-' . $bulan . '-' . '04 06:00'); // starting waktu
+    $dead_mulai = ($tahun . '-' . $bulan . '-' . '15 06:00'); // starting waktu
     $dead_akhir = ($tahun . '-' . $bulan . '-' . '19 20:00'); // ending waktu untuk user
     $dead_akhir2 = ($tahun . '-' . $bulan . '-' . '24 23:59'); // ending waktu untuk operator
 
