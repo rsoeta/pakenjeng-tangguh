@@ -235,9 +235,10 @@ $desa_id = session()->get('kode_desa');
                     <div class="col-sm-12 col-12 mt-2">
                         <label class="label-center mt-2">Dokumen</label>
                         <div class="form-group row nopadding">
-                            <div class="col-12 col-sm-6 mb-2">
+                            <div class="col-6 col-sm-6 mb-2">
                                 <img class="img-preview-id" src="<?= usulan_foto(null, 'foto_identitas'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
-                                <label for="du_foto_identitas">Foto KTP / KK / KIA / AKL</label>
+                                <br>
+                                <label for="du_foto_identitas">Foto KTP/KK/KIA/AKL</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-address-card"></i></span>
@@ -246,8 +247,9 @@ $desa_id = session()->get('kode_desa');
                                 </div>
                             </div>
                             <div class="invalid-feedback errordu_foto_identitas"></div>
-                            <div class="col-12 col-sm-6 mb-2">
+                            <div class="col-6 col-sm-6 mb-2">
                                 <img class="img-preview-rmh" src="<?= usulan_foto(null, 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                <br>
                                 <label for="du_foto_rumah">Foto Rumah</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
