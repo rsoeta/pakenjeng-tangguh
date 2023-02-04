@@ -10,9 +10,7 @@ class GenModel extends Model
 {
 
 	protected $table = 'tb_shdk';
-
 	protected $primaryKey = 'id';
-
 	protected $allowedFields = ['jenis_shdk'];
 
 	public function getDataJenkel()

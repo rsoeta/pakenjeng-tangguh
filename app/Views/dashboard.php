@@ -41,7 +41,7 @@
     </section>
     <!-- Content Header (Page header) -->
     <!-- Main content -->
-    <section class="content mt-2">
+    <section class="content mt-2 displayNone">
         <div class="row">
             <div class="col-12 col-sm-6 col-md-3">
                 <a href="/dkm">

@@ -256,32 +256,20 @@ $desa_id = session()->get('kode_desa');
                     <div class="col-sm-12 col-12 mt-2">
                         <label class="label-center mt-2">Dokumen</label>
                         <div class="form-group row nopadding">
-                            <div class="col-12 col-sm-6 mb-2">
+                            <div class="col-6 col-sm-6 mb-2">
                                 <a download="<?= $du_foto_identitas; ?>" href="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>">
-                                    <img src="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                    <img src="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>" style="width: 60px; border-radius: 2px;">
                                 </a>
+                                <br>
                                 <label for="du_foto_identitas">Foto KTP / KK / KIA / AKL</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i class="fas fa-address-card"></i></span>
-                                    </div>
-                                    <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="file" class="form-control" spellcheck="false" name="du_foto_identitas" accept="image/*" capture />
-                                </div>
                             </div>
-                            <div class="invalid-feedback errordu_foto_identitas"></div>
-                            <div class="col-12 col-sm-6 mb-2">
+                            <div class="col-6 col-sm-6 mb-2">
                                 <a download="<?= $du_foto_rumah; ?>" href="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>">
-                                    <img src="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                    <img src="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>" style="width: 60px; border-radius: 2px;">
                                 </a>
+                                <br>
                                 <label for="du_foto_rumah">Foto Rumah</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i class="fa fa-home"></i></span>
-                                    </div>
-                                    <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="file" class="form-control" spellcheck="false" name="du_foto_rumah" accept="image/*" capture />
-                                </div>
                             </div>
-                            <div class="invalid-feedback errordu_foto_rumah"></div>
                         </div>
                     </div>
                     <div class="col-sm-12 col-12 mt-2">

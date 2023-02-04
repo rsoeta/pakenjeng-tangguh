@@ -463,8 +463,8 @@ class Usulan22 extends BaseController
                 // var_dump($dd_foto_cpm);
                 // die;
                 $buat_tanggal = date_create($this->request->getVar('updated_at'));
-                $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Y_m_d_H_i_s') . '.jpg';
-                $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Y_m_d_H_i_s') . '.jpg';
+                $filename_dua = 'DUDFH_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
+                $filename_empat = 'DUDID_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
                 // var_dump($filename_dua);
                 // die;
 
@@ -681,6 +681,11 @@ class Usulan22 extends BaseController
             //     ];
             // } else {
             $id = $this->request->getVar('id');
+
+            $usulan = $this->Usulan22Model->find($id);
+            unlink('data/usulan/foto_identitas/' . $usulan['foto_identitas']);
+            unlink('data/usulan/foto_rumah/' . $usulan['foto_rumah']);
+
             $this->Usulan22Model->delete($id);
             $msg = [
                 'sukses' => 'Data berhasil dihapus'
@@ -1031,6 +1036,17 @@ class Usulan22 extends BaseController
 
                 if (($duFotoRumah || $duFotoIdentitas) != NULL) {
 
+                    $usulan = $this->Usulan22Model->find($id);
+
+                    $du_fotoid_old = $usulan['foto_identitas'];
+                    $du_fotorumah_old = $usulan['foto_rumah'];
+
+                    $dir_identintas = 'data/usulan/foto_identitas/' . $du_fotoid_old;
+                    $dir_rumah = 'data/usulan/foto_rumah/' . $du_fotorumah_old;
+
+                    unlink($dir_identintas);
+                    unlink($dir_rumah);
+
                     $kode_desa = session()->get('kode_desa');
                     $namaDesa = $this->WilayahModel->getVillage($kode_desa);
                     $desaNama = $namaDesa['name'];
@@ -1041,8 +1057,8 @@ class Usulan22 extends BaseController
                     // var_dump($dd_foto_cpm);
                     // die;
                     $buat_tanggal = date_create($this->request->getVar('updated_at'));
-                    $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Y_m_d_H_i_s') . '.jpg';
-                    $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Y_m_d_H_i_s') . '.jpg';
+                    $filename_dua = 'DUDFH_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
+                    $filename_empat = 'DUDID_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
 
                     $img_dua = imagecreatefromjpeg($du_foto_rumah);
                     $img_empat = imagecreatefromjpeg($du_foto_identitas);
@@ -1152,8 +1168,8 @@ class Usulan22 extends BaseController
                 } else {
 
                     $buat_tanggal = date_create($this->request->getVar('updated_at'));
-                    // $filename_dua = 'DUD_FH' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Y_m_d_H_i_s') . '.jpg';
-                    // $filename_empat = 'DUD_ID' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Y_m_d_H_i_s') . '.jpg';
+                    // $filename_dua = 'DUDFH_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
+                    // $filename_empat = 'DUDID_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
 
                     $data = [
                         'provinsi' => '32',

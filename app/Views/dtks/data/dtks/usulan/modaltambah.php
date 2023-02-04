@@ -236,22 +236,24 @@ $desa_id = session()->get('kode_desa');
                         <label class="label-center mt-2">Dokumen</label>
                         <div class="form-group row nopadding">
                             <div class="col-12 col-sm-6 mb-2">
+                                <img class="img-preview-id" src="<?= usulan_foto(null, 'foto_identitas'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
                                 <label for="du_foto_identitas">Foto KTP / KK / KIA / AKL</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-address-card"></i></span>
                                     </div>
-                                    <input type="file" class="form-control" spellcheck="false" name="du_foto_identitas" accept="image/*" capture required />
+                                    <input type="file" class="form-control" spellcheck="false" name="du_foto_identitas" id="du_foto_identitas" onchange="previewImgId()" accept="image/*" capture required />
                                 </div>
                             </div>
                             <div class="invalid-feedback errordu_foto_identitas"></div>
                             <div class="col-12 col-sm-6 mb-2">
+                                <img class="img-preview-rmh" src="<?= usulan_foto(null, 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
                                 <label for="du_foto_rumah">Foto Rumah</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-home"></i></span>
                                     </div>
-                                    <input type="file" class="form-control" spellcheck="false" name="du_foto_rumah" accept="image/*" capture required />
+                                    <input type="file" class="form-control" spellcheck="false" name="du_foto_rumah" id="du_foto_rumah" onchange="previewImgRmh()" accept="image/*" capture required />
                                 </div>
                             </div>
                             <div class="invalid-feedback errordu_foto_rumah"></div>

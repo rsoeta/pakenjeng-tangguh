@@ -302,7 +302,6 @@
 <!-- /.container-fluid -->
 <div class="viewmodal" style="display: none;"></div>
 <script>
-    
     // 'use strict';
     $(document).ready(function() {
         $('body').addClass('sidebar-collapse');
@@ -695,6 +694,32 @@
 
         });
     });
+
+    function previewImgId() {
+        const du_foto_identitas = document.querySelector('#du_foto_identitas');
+        const imgPreview = document.querySelector('.img-preview-id');
+
+
+        const fileIdentitas = new FileReader();
+        fileIdentitas.readAsDataURL(du_foto_identitas.files[0]);
+
+        fileIdentitas.onload = function(e) {
+            imgPreview.src = e.target.result;
+        }
+    }
+
+    function previewImgRmh() {
+        const du_foto_rumah = document.querySelector('#du_foto_rumah');
+        const imgPreview = document.querySelector('.img-preview-rmh');
+
+
+        const fileIdentitas = new FileReader();
+        fileIdentitas.readAsDataURL(du_foto_rumah.files[0]);
+
+        fileIdentitas.onload = function(e) {
+            imgPreview.src = e.target.result;
+        }
+    }
 </script>
 
 <?= $this->endSection(); ?>
