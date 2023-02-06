@@ -158,7 +158,7 @@ $desa_id = session()->get('kode_desa');
                                 <select id="jenis_pekerjaan" name="jenis_pekerjaan" class="form-select form-select-sm">
                                     <option value="">-- Pilih Jenis Pekerjaan --</option>
                                     <?php foreach ($pekerjaan as $row) { ?>
-                                        <option value="<?= $row['idPekerjaan'] ?>"> <?php echo $row['JenisPekerjaan']; ?></option>
+                                        <option value="<?= $row['idPekerjaan'] ?>"> <?= $row['JenisPekerjaan']; ?></option>
                                     <?php } ?>
                                 </select>
                                 <div class="invalid-feedback errorjenis_pekerjaan"></div>
@@ -170,7 +170,7 @@ $desa_id = session()->get('kode_desa');
                                 <select id="status_kawin" name="status_kawin" class="form-select form-select-sm">
                                     <option value="">-- Pilih Status Perkawinan --</option>
                                     <?php foreach ($statusKawin as $row) { ?>
-                                        <option value="<?= $row['idStatus'] ?>"> <?php echo $row['StatusKawin']; ?></option>
+                                        <option value="<?= $row['idStatus'] ?>"> <?= $row['StatusKawin']; ?></option>
                                     <?php } ?>
                                 </select>
                                 <div class="invalid-feedback errorstatus_kawin"></div>

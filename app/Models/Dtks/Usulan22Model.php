@@ -263,6 +263,7 @@ class Usulan22Model extends Model
 
     function jumlah_semua01()
     {
+        // $sQuery = "SELECT COUNT(du_id) as jml FROM dtks_usulan22";
         $sQuery = "SELECT COUNT(du_id) as jml FROM dtks_usulan22";
         $db = db_connect();
         $query = $db->query($sQuery)->getRow();

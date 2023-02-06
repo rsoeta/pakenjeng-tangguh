@@ -60,7 +60,7 @@ class Profil_Web extends BaseController
 
         ];
         // dd($data);
-        // dd($data['deadline']);
+        // dd($data['statusRole']);
         // dd(session()->get('id'));
         return view('profil/web', $data);
     }
@@ -276,9 +276,14 @@ class Profil_Web extends BaseController
     {
         if ($this->request->isAJAX()) {
             $data = [
-                'dd_waktu' => $this->request->getPost('dd_waktu'),
+                'dd_waktu_start' => $this->request->getPost('dd_waktu_start'),
+                'dd_waktu_end' => $this->request->getPost('dd_waktu_end'),
+                'dd_role' => $this->request->getPost('dd_role'),
                 'dd_deskripsi' => $this->request->getPost('dd_deskripsi'),
             ];
+
+            // var_dump($data);
+            // die;
             $data = $this->GenModel->submit_general($data);
             echo json_encode($data);
         }
@@ -288,9 +293,13 @@ class Profil_Web extends BaseController
     {
         if ($this->request->isAJAX()) {
             $id = $this->request->getPost('dd_id');
+            // dd($id);
+
             $data = [
                 'dd_id' => $id,
-                'dd_waktu' => $this->request->getPost('dd_waktu'),
+                'dd_waktu_start' => $this->request->getPost('dd_waktu_start'),
+                'dd_waktu_end' => $this->request->getPost('dd_waktu_end'),
+                'dd_role' => $this->request->getPost('dd_role'),
                 'dd_deskripsi' => $this->request->getPost('dd_deskripsi'),
             ];
             $data = $this->GenModel->update_general($id, $data);

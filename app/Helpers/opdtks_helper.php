@@ -225,6 +225,7 @@ function bulan_ini()
 function deadline_usulan()
 {
     $times = new Time();
+    $db = \Config\Database::connect();
     $tahun = $times->getYear();
     $bulan = $times->getMonth();
     $hari = $times->getDay();       // 12
@@ -232,10 +233,25 @@ function deadline_usulan()
     $menit = $times->getMinute();         // 15
     $bulanNext = $bulan + 1;
     $hak_akses = session()->get('role_id');
+
+    $builder = $db->table('dtks_deadline');
+    // get last row
+    // $builder = $builder->select('*');
+    $query = $builder->where('dd_role', $hak_akses)->get();
+
+    $data = $query->getRowArray();
+    // dd($data);
+    // foreach ($data as $d) {
+    $tanggal_mulai = $data['dd_waktu_start'];
+    $tanggal_akhir = $data['dd_waktu_end'];
+    // }
+    $tgl_a = date_create($tanggal_mulai);
+    $tgl_b = date_create($tanggal_akhir);
+
     // $dead = date('Y-m-d H:i') . "<br>";
-    $dead_mulai = ($tahun . '-' . $bulan . '-' . '15 06:00'); // starting waktu
-    $dead_akhir = ($tahun . '-' . $bulan . '-' . '19 20:00'); // ending waktu untuk user
-    $dead_akhir2 = ($tahun . '-' . $bulan . '-' . '24 23:59'); // ending waktu untuk operator
+    $dead_mulai = ($tahun . '-' . $bulan . '-' . date_format($tgl_a, 'd H:i')); // starting waktu
+    $dead_akhir = ($tahun . '-' . $bulan . '-' . date_format($tgl_b, 'd H:i')); // ending waktu untuk user
+    $dead_akhir2 = ($tahun . '-' . $bulan . '-' . date_format($tgl_b, 'd H:i')); // ending waktu untuk operator
 
     $strdead1 = (strtotime($dead_mulai));
     $strdead2 = (strtotime($dead_akhir));

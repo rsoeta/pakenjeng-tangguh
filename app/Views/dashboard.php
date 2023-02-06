@@ -267,11 +267,11 @@
 
                         <div class="row">
                             <div class="col-12 col-md-6 mb-4">
-                                <h4>Informasi</h4>
+                                <h5><i>Informasi</i></h5>
                                 <ul>
-                                    <li>Usulan DTKS dibuka pada tanggal <b>15 s.d 19</b> setiap Bulannya</li>
-                                    <li>Penandatanganan <b>Berita Acara dilaksanakan pada tanggal 20</b> di Periode Usulan</li>
                                     <li>Data Usulan berdasarkan <b>Pemadanan Data Kependudukan</b> pada SIKS-NG</li>
+                                    <li>Usulan DTKS dibuka pada <b>tanggal <?= date_format($dd_waktu_start, 'd'); ?> jam <?= date_format($dd_waktu_start, 'H:i:s'); ?> s.d tanggal <?= date_format($dd_waktu_end, 'd'); ?> jam <?= date_format($dd_waktu_end, 'H:i:s'); ?></b> setiap Bulannya</li>
+                                    <li>Penandatanganan <b>Berita Acara dilaksanakan pada H+1 akhir tanggal usulan</b> di Periode tersebut</li>
                                 </ul>
                             </div>
                         </div>

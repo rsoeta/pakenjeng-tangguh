@@ -13,7 +13,7 @@
                 <div class="col-sm-6">
                     <!-- get breadcrumb from menu -->
                     <ol class="breadcrumb float-right">
-                        <li class="breadcrumb-item"><a href="<?= base_url(); ?>">Home</a></li>
+                        <li class="breadcrumb-item"><a href="<?= base_url('/dashboard'); ?>">Home</a></li>
                         <li class="breadcrumb-item active"><?= $title; ?></li>
                     </ol>
                 </div>
@@ -264,19 +264,58 @@
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="custom-tabs-three-general" role="tabpanel" aria-labelledby="cuxtom-tab-three-general-tab" <?= $user_login['role_id'] > 2 ? 'hidden' : ''; ?>>
-                                    <div class="col-12 col-md-4 col-lg-4 col-4">
-                                        <form id="general_form" method="POST">
-                                            <input type="hidden" name="dd_id" id="dd_id" value="<?= isset($deadline) ? $deadline->dd_id : ''; ?>">
-                                            <strong><i class="fa fa-calendar-alt mr-1"></i> Tanggal Deadline</strong>
-                                            <input type="datetime-local" name="dd_waktu" id="dd_waktu" class="form-control" value="<?= isset($deadline) ? $deadline->dd_waktu : ''; ?>">
-                                            <hr>
-                                            <?php if (isset($deadline)) : ?>
-                                                <button type="button" id="btnGenUpdate" class="btn btn-success btn-block">Update</button>
-                                            <?php else : ?>
-                                                <button type="button" id="btnGenSubmit" class="btn btn-success btn-block">Submit</button>
-                                            <?php endif; ?>
-                                        </form>
-                                    </div>
+                                    <form id="update_form" method="POST">
+                                        <?php foreach ($deadline as $dd) { ?>
+                                            <div class="row">
+                                                <div class="col-6 col-sm-3">
+                                                    <input type="hidden" name="dd_id" id="dd_id" value="<?= $dd['dd_id']; ?>">
+                                                    <strong><i class="fa fa-calendar-alt mr-1"></i> Start Date</strong>
+                                                    <input type="datetime-local" name="dd_waktu_start" id="dd_waktu_start" class="form-control" value="<?= $dd['dd_waktu_start']; ?>">
+                                                </div>
+                                                <div class="col-6 col-sm-3">
+                                                    <strong><i class="fa fa-calendar-alt mr-1"></i> End Date</strong>
+                                                    <input type="datetime-local" name="dd_waktu_end" id="dd_waktu_end" class="form-control" value="<?= $dd['dd_waktu_end']; ?>">
+                                                </div>
+                                                <div class="col-6 col-sm-3">
+                                                    <strong><i class="fa fa-user mr-1"></i> Hak-Akses</strong>
+                                                    <select class="form-control" name="dd_role" id="">
+                                                        <?php foreach ($statusRole as $s) { ?>
+                                                            <option class="form-control" <?= $dd['dd_role'] == $s['id_role'] ? 'selected' : ''; ?> value="<?= $s['id_role']; ?>"><?= $s['nm_role']; ?></option>
+                                                        <?php } ?>
+                                                    </select>
+                                                </div>
+                                                <div class="col-6 col-sm-3">
+                                                    <strong><i class="fa fa-check mr-1"></i> Aksi</strong>
+                                                    <button type="button" id="" class="btn btn-success btn-block btnGenUpdate">Update</button>
+                                                </div>
+                                            </div>
+                                        <?php } ?>
+                                    </form>
+                                    <form id="submit_form" method="POST">
+                                        <div class="row">
+                                            <hr class="mt-3">
+                                            <div class="col-6 col-sm-3">
+                                                <strong><i class="fa fa-calendar-alt mr-1"></i> Start Date</strong>
+                                                <input type="datetime-local" name="dd_waktu_start1" id="dd_waktu_start1" class="form-control" value="">
+                                            </div>
+                                            <div class="col-6 col-sm-3">
+                                                <strong><i class="fa fa-calendar-alt mr-1"></i> End Date</strong>
+                                                <input type="datetime-local" name="dd_waktu_end1" id="dd_waktu_end1" class="form-control" value="">
+                                            </div>
+                                            <div class="col-6 col-sm-3">
+                                                <strong><i class="fa fa-user mr-1"></i> Hak-Akses</strong>
+                                                <select class="form-control" name="dd_role1" id="dd_role1">
+                                                    <?php foreach ($statusRole as $s) { ?>
+                                                        <option class="form-control" value="<?= $s['id_role']; ?>"><?= $s['nm_role']; ?></option>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+                                            <div class="col-6 col-sm-3">
+                                                <strong><i class="fa fa-check mr-1"></i> Aksi</strong>
+                                                <button type="button" id="" class="btn btn-primary btn-block">Submit</button>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -359,7 +398,6 @@
             });
         }
         // get item.tm_nama from item.tm_parent_id
-
 
         // insert data menu
         $(document).on('click', '#btn_add', function() {
@@ -665,17 +703,18 @@
             //     alert('test');
             // });
             event.preventDefault();
-            var form_data = new FormData($('#general_form')[0]);
-            var dd_id = $('#dd_id').val();
-            var dd_waktu = $('#dd_waktu').val();
-            var dd_deskripsi = $('#dd_deskripsi').val();
+            const form_submit = new FormData($('#submit_form')[0]);
+            const dd_waktu_start1 = $('#dd_waktu_start1').val();
+            const dd_waktu_end1 = $('#dd_waktu_end1').val();
+            const dd_role1 = $('#dd_role1').val();
+            // alert(form_data);
 
-            if (dd_waktu != '') {
+            if (dd_waktu_start1 != null || dd_waktu_end1 != null || dd_role1 != null) {
                 $.ajax({
                     type: "POST",
                     url: '<?= site_url('submit_web_general'); ?>',
                     dataType: 'json',
-                    data: form_data,
+                    data: form_submit,
                     processData: false,
                     contentType: false,
                     success: function(res) {
@@ -698,15 +737,18 @@
             }
         });
 
-        $("#btnGenUpdate").click(function(event) {
+        $(".btnGenUpdate").click(function(event) {
             //     alert('test');
             // });
             event.preventDefault();
-            var form_data = new FormData($('#general_form')[0]);
-            var dd_id = $('#dd_id').val();
-            var dd_waktu = $('#dd_waktu').val();
+            const form_data = new FormData($('#update_form')[0]);
+            const dd_id = $('#dd_id').val();
+            const dd_waktu_start = $('#dd_waktu_start').val();
+            const dd_waktu_end = $('#dd_waktu_end').val();
+            const dd_role = $('#dd_role').val();
+            const dd_deskripsi = $('#dd_deskripsi').val();
 
-            if (dd_waktu != '') {
+            if (dd_waktu_start != null || dd_waktu_end != null || dd_role != null) {
                 $.ajax({
                     type: "POST",
                     url: '<?= site_url('update_web_general'); ?>',

@@ -126,11 +126,25 @@ class GenModel extends Model
 
 	function getDeadline()
 	{
+		$role = session()->get('role');
+		$akses1 = 3;
+		$akses2 = 4;
+
 		$builder = $this->db->table('dtks_deadline');
 		// get last row
-
-		$query = $builder->get();
-		return $query->getLastRow();
+		$builder = $builder->select('*');
+		if ($role <= $akses1) {
+			$builder = $builder->join('tb_roles', 'dtks_deadline.dd_role = tb_roles.id_role');
+			$query = $builder->get();
+			return $query->getResultArray();
+		} elseif ($role >= $akses2) {
+			$builder = $builder->join('tb_roles', 'dtks_deadline.dd_role = tb_roles.id_role');
+			$query = $builder->where('dd_role', $akses2)->get();
+			return $query->getResultArray();
+		} else {
+			$query = $builder->where('dd_role', null)->get();
+			return $query->getResultArray();
+		}
 	}
 
 	function submit_general($data)

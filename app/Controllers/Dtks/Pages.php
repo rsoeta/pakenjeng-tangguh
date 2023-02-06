@@ -66,6 +66,15 @@ class Pages extends BaseController
         $Usulan22Model = new Usulan22Model();
         $rekapUsulan = $Usulan22Model->rekapUsulan();
 
+        $deadline = new GenModel();
+        $dd = $deadline->getDeadline();
+        foreach ($dd as $d) {
+            $dd_waktu_start = $d['dd_waktu_start'];
+            $dd_waktu_end = $d['dd_waktu_end'];
+        }
+        $dd_waktu_start = date_create($dd_waktu_start);
+        $dd_waktu_end = date_create($dd_waktu_end);
+
 
         // dd($yatim);
         // $yatims[];
@@ -115,9 +124,11 @@ class Pages extends BaseController
             'user_login' => $this->AuthModel->getUserId(),
             'countStatusBnba' => $this->BnbaModel->countStatusBnba(),
             'capaianAll' => $capaianAll,
+            'dd_waktu_start' => $dd_waktu_start,
+            'dd_waktu_end' => $dd_waktu_end,
         ];
         if (session()->get('status') == 1 && session()->get('role_id') <= 4) {
-            // dd($data['capaianAll']);
+            // dd($data['deadline']);
             return view('dashboard', $data);
             // return view('dash', $data);
         } elseif (session()->get('status') == 1 && session()->get('role_id') == 5) {
