@@ -14,7 +14,7 @@ class Usulan22Model extends Model
     protected $table      = 'dtks_usulan22';
     protected $primaryKey = 'du_id';
 
-    protected $allowedFields = ["du_nik", "program_bansos", "nokk", "nama", "tempat_lahir", "tanggal_lahir", "ibu_kandung", "jenis_kelamin", "jenis_pekerjaan", "status_kawin", "alamat", "rt", "rw", "provinsi", "kabupaten", "kecamatan", "kelurahan", "shdk", "foto_identitas", "foto_rumah", "disabil_status", "disabil_kode", "hamil_status", "hamil_tgl", "du_latitude", "du_longitude", "du_proses", "created_at", "created_at_year", "created_at_month", "created_by", "updated_at", "updated_by"];
+    protected $allowedFields = ["du_nik", "program_bansos", "nokk", "nama", "tempat_lahir", "tanggal_lahir", "ibu_kandung", "jenis_kelamin", "jenis_pekerjaan", "status_kawin", "alamat", "rt", "rw", "provinsi", "kabupaten", "kecamatan", "kelurahan", "shdk", "foto_identitas", "foto_rumah", "disabil_status", "disabil_kode", "hamil_status", "hamil_tgl", "du_latitude", "du_longitude", "sk0", "sk1", "sk2", "sk3", "sk4", "sk5", "sk6", "sk7", "sk8", "du_proses", "created_at", "created_at_year", "created_at_month", "created_by", "updated_at", "updated_by"];
 
     protected $useTimestamps = false;
     protected $createdField  = 'created_at';
@@ -94,7 +94,7 @@ class Usulan22Model extends Model
         if ($_POST['length'] != -1);
         $db = db_connect();
         $builder = $db->table('dtks_usulan22');
-        $query = $builder->select('dtks_usulan22.du_id as idUsulan, tb_villages.name as namaDesa, tb_districts.name as namaKec, nama, nokk, dtks_usulan22.du_nik, jenis_kelamin, tempat_lahir, tanggal_lahir, ibu_kandung, jenis_pekerjaan, JenisPekerjaan, StatusKawin, dbj_nama_bansos, jenis_shdk, status_kawin, alamat, rt, rw, kelurahan, kecamatan, shdk, foto_rumah, dtks_usulan22.created_at, created_at_year, created_at_month, created_by, dtks_users.email, dtks_usulan22.updated_at, dtks_users.nope, dtks_usulan22.foto_identitas, dtks_usulan22.foto_rumah, dtks_users.fullname')
+        $query = $builder->select('dtks_usulan22.du_id as idUsulan, tb_villages.name as namaDesa, tb_districts.name as namaKec, nama, nokk, dtks_usulan22.du_nik, jenis_kelamin, tempat_lahir, tanggal_lahir, ibu_kandung, jenis_pekerjaan, JenisPekerjaan, StatusKawin, dbj_nama_bansos, jenis_shdk, status_kawin, alamat, rt, rw, kelurahan, kecamatan, shdk, foto_rumah, dtks_usulan22.created_at, created_at_year, created_at_month, created_by, dtks_users.email, dtks_usulan22.updated_at, dtks_users.nope, dtks_usulan22.foto_identitas, dtks_usulan22.foto_rumah, dtks_users.fullname, sk0, sk1, sk2, sk3, sk4, sk5, sk6, sk7, sk8')
             ->join('tbl_pekerjaan', 'tbl_pekerjaan.idPekerjaan=dtks_usulan22.jenis_pekerjaan')
             ->join('tb_status_kawin', 'tb_status_kawin.idStatus=dtks_usulan22.status_kawin')
             ->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id=dtks_usulan22.program_bansos')
@@ -245,7 +245,7 @@ class Usulan22Model extends Model
         if ($_POST['length'] != -1);
         $db = db_connect();
         $builder = $db->table('dtks_usulan22');
-        $query = $builder->select('dtks_usulan22.du_id as idUsulan, tb_villages.name as namaDesa, tb_districts.name as namaKec, nama, nokk, dtks_usulan22.du_nik, jenis_kelamin, tempat_lahir, tanggal_lahir, ibu_kandung, jenis_pekerjaan, JenisPekerjaan, StatusKawin, dbj_nama_bansos, jenis_shdk, status_kawin, alamat, rt, rw, kelurahan, kecamatan, shdk, foto_rumah, dtks_usulan22.created_at, created_at_year, created_at_month, created_by, dtks_users.email, dtks_usulan22.updated_at, dtks_users.nope, dtks_usulan22.foto_identitas, dtks_usulan22.foto_rumah, dtks_users.fullname')
+        $query = $builder->select('dtks_usulan22.du_id as idUsulan, tb_villages.name as namaDesa, tb_districts.name as namaKec, nama, nokk, dtks_usulan22.du_nik, jenis_kelamin, tempat_lahir, tanggal_lahir, ibu_kandung, jenis_pekerjaan, JenisPekerjaan, StatusKawin, dbj_nama_bansos, jenis_shdk, status_kawin, alamat, rt, rw, kelurahan, kecamatan, shdk, foto_rumah, dtks_usulan22.created_at, created_at_year, created_at_month, created_by, dtks_users.email, dtks_usulan22.updated_at, dtks_users.nope, dtks_usulan22.foto_identitas, dtks_usulan22.foto_rumah, dtks_users.fullname, sk0, sk1, sk2, sk3, sk4, sk5, sk6, sk7, sk8')
             ->join('tbl_pekerjaan', 'tbl_pekerjaan.idPekerjaan=dtks_usulan22.jenis_pekerjaan')
             ->join('tb_status_kawin', 'tb_status_kawin.idStatus=dtks_usulan22.status_kawin')
             ->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id=dtks_usulan22.program_bansos')

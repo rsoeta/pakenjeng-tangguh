@@ -21,6 +21,12 @@
         // echo deadline_usulan();
         ?>
         <div class="card-body">
+            <!-- start modal dialog multi-step form wizard -->
+            <!-- <div class="container"> -->
+            <!-- <div class="row d-flex justify-content-center"> <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal"> Launch multistep Wizard </button> </div> Modal -->
+            <!-- </div> -->
+
+            <!-- end modal dialog multi-step form wizard -->
             <?php if (session()->get('message')) : ?>
                 <div class="alert alert-danger text-center" role="alert">
                     <?= session()->get('message'); ?>
@@ -305,7 +311,8 @@
     // 'use strict';
     $(document).ready(function() {
         $('body').addClass('sidebar-collapse');
-        $('.displayNone').css('display', 'none')
+        $('.displayNone').css('display', 'none');
+
     });
 
     var save_method; //for save method string
