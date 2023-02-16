@@ -330,7 +330,7 @@
         sk7 = Apakah tempat tinggal sebagian besar berlantai tanah dan/atau plesteran?
         sk8 = Apakah tempat tinggal terdapat jamban sendiri?
 
-        ALTER TABLE `dtks_usulan22` ADD `sk0` INT(3) NOT NULL DEFAULT '0' AFTER `du_longitude`, ADD `sk1` INT(3) NOT NULL DEFAULT '0' AFTER `sk0`, ADD `sk2` INT(3) NOT NULL DEFAULT '0' AFTER `sk1`, ADD `sk3` INT(3) NOT NULL DEFAULT '0' AFTER `sk2`, ADD `sk4` INT(3) NOT NULL DEFAULT '0' AFTER `sk3`, ADD `sk5` INT(3) NOT NULL DEFAULT '0' AFTER `sk4`, ADD `sk6` INT(3) NOT NULL DEFAULT '0' AFTER `sk5`, ADD `sk7` INT(3) NOT NULL DEFAULT '0' AFTER `sk6`, ADD `sk8` INT(3) NOT NULL DEFAULT '0' AFTER `sk7`;
+        ALTER TABLE `dtks_usulan22` ADD `sk0` INT(3) NULL DEFAULT '0' AFTER `du_longitude`, ADD `sk1` INT(3) NULL DEFAULT '0' AFTER `sk0`, ADD `sk2` INT(3) NULL DEFAULT '0' AFTER `sk1`, ADD `sk3` INT(3) NULL DEFAULT '0' AFTER `sk2`, ADD `sk4` INT(3) NULL DEFAULT '0' AFTER `sk3`, ADD `sk5` INT(3) NULL DEFAULT '0' AFTER `sk4`, ADD `sk6` INT(3) NULL DEFAULT '0' AFTER `sk5`, ADD `sk7` INT(3) NULL DEFAULT '0' AFTER `sk6`, ADD `sk8` INT(3) NULL DEFAULT '0' AFTER `sk7`;
 
         <div class="container modaledit-awal">
             <div class="modal" id="exampleModal" aria-labelledby="exampleModalLabel" aria-hidden="true" tabindex="-1">

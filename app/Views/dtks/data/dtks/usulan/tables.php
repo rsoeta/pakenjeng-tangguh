@@ -492,6 +492,9 @@
 
                 } else if (response.sukses) {
                     $('.viewmodal').html(response.sukses).show();
+                    $('#modaledit').on('shown.bs.modal', function(event) {
+                        $('#nik').focus();
+                    });
                     $('#modaledit').modal('show');
                 }
             },

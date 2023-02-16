@@ -123,7 +123,7 @@ $desa_id = session()->get('kode_desa');
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="tanggal_lahir">Tgl Lahir</label>
+                                        <label class="col-4 col-sm-4 col-form-label" for="tanggal_lahir">tanggal lahir</label>
                                         <div class="col-8 col-sm-8">
                                             <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="date" name="tanggal_lahir" id="tanggal_lahir" class="form-control form-control-sm" value="<?= $tanggal_lahir; ?>">
                                             <div class="invalid-feedback errortanggal_lahir"></div>

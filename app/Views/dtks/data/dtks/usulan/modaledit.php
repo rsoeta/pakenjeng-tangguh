@@ -78,9 +78,9 @@ $desa_id = session()->get('kode_desa');
                 <div id="smartwizard">
                     <ul>
                         <li><a href="#step-1">Step 1<br /><small>Data Individu</small></a></li>
-                        <!-- <li><a href="#step-2">Step 2<br /><small>Personal Info</small></a></li>
-                        <li><a href="#step-3">Step 3<br /><small>Payment Info</small></a></li> -->
-                        <li><a href="#step-4">Step 2<br /><small>Survey Kriteria</small></a></li>
+                        <!-- <!-- <li><a href="#step-2">Step 2<br /><small>Personal Info</small></a></li> -->
+                        <li><a href="#step-3">Step 3<br /><small>Survey Kriteria</small></a></li>
+                        <li><a href="#step-4">Step 2<br /><small>Pengusulan Bansos</small></a></li>
                     </ul>
                     <div>
                         <div id="step-1">
@@ -122,7 +122,7 @@ $desa_id = session()->get('kode_desa');
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="tanggal_lahir">Tgl Lahir</label>
+                                        <label class="col-4 col-sm-4 col-form-label" for="tanggal_lahir">tanggal lahir</label>
                                         <div class="col-8 col-sm-8">
                                             <input type="date" name="tanggal_lahir" id="tanggal_lahir" class="form-control form-control-sm" value="<?= $tanggal_lahir; ?>">
                                             <div class="invalid-feedback errortanggal_lahir"></div>
@@ -149,27 +149,9 @@ $desa_id = session()->get('kode_desa');
                                             <div class="invalid-feedback errorjenis_kelamin"></div>
                                         </div>
                                     </div>
-                                    <div class="form-group row nopadding" id="status_hamil_div" style="display: none">
-                                        <label class="col-4 col-sm-4 col-form-label" for="status_hamil">Status Hamil</label>
-                                        <div class="col-8 col-sm-8">
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" id="chk-YaHamil" name="status_hamil" <?= $status_hamil == 1 ? 'checked' : ''; ?> value="1" />
-                                                <label for="chk-YaHamil" class="form-check-label"> Ya </label>
-                                            </div>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" id="chk-TidakHamil" name="status_hamil" <?= $status_hamil == 2 ? 'checked' : ''; ?> value="2" />
-                                                <label for="chk-TidakHamil" class="form-check-label"> Tidak </label>
-                                            </div>
-                                            <div class="invalid-feedback errorstatus_hamil"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding" id="tgl_hamil_div" style="display: none;">
-                                        <label class="col-4 col-sm-4 col-form-label" for="tgl_hamil">Tgl Mulai Hamil</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="date" name="tgl_hamil" id="tgl_hamil" class="form-control form-control-sm" value="<?= $tgl_hamil; ?>">
-                                            <div class="invalid-feedback errortgl_hamil"></div>
-                                        </div>
-                                    </div>
+                                </div>
+
+                                <div class="col-12 col-sm-6">
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="jenis_pekerjaan">Pekerjaan</label>
                                         <div class="col-8 col-sm-8">
@@ -198,8 +180,6 @@ $desa_id = session()->get('kode_desa');
                                             <div class="invalid-feedback errorstatus_kawin"></div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-12 col-sm-6">
                                     <div class="form-group row nopadding" <?php if ($user != 1) {
                                                                                 echo 'hidden';
                                                                             } ?>>
@@ -270,118 +250,11 @@ $desa_id = session()->get('kode_desa');
                                             <div class="invalid-feedback errorShdk"></div>
                                         </div>
                                     </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="databansos">Program</label>
-                                        <div class="col-8 col-sm-8">
-                                            <select id="databansos" name="databansos" class="form-select form-select-sm">
-                                                <option value="">-- Pilih Program --</option>
-                                                <?php foreach ($bansos as $row) { ?>
-                                                    <option <?php if ($databansos == $row['dbj_id']) {
-                                                                echo 'selected';
-                                                            } ?> value="<?= $row['dbj_id'] ?>"> <?php echo $row['dbj_ket_bansos']; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                            <div class="invalid-feedback errordatabansos"></div>
-                                        </div>
-                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                                    <div class="form-group row nopadding">
-                                        <label for="disabil_status" class="col-4 col-form-label">Disabilitas</label>
-                                        <div class="col-8 col-sm-8">
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" id="chk-Yes" name="disabil_status" <?= $disabil_status == 1 ? 'checked' : ''; ?> value="1" />
-                                                <label for="chk-Yes" class="form-check-label"> Ya</label>
-                                            </div>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" id="chk-No" name="disabil_status" <?= $disabil_status == 2 ? 'checked' : ''; ?> value="2" />
-                                                <label for="chk-No" class="form-check-label"> Tidak</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding" id="disabil_jenis_div" style="display: none">
-                                        <label for="disabil_jenis" class="col-4 col-form-label">Jenis Disabilitas</label>
-                                        <div class="col-8 col-sm-8">
-                                            <select id="disabil_jenis" name="disabil_jenis" class="form-select form-select-sm">
-                                                <option value="">-- Pilih Jenis Disabilitas --</option>
-                                                <?php foreach ($DisabilitasJenisModel as $row) { ?>
-                                                    <option <?= $disabil_jenis == $row['dj_id'] ? 'selected' : ''; ?> value="<?= $row['dj_id'] ?>"> <?php echo $row['dj_keterangan']; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-12 col-12 mt-2">
-                                    <label class="label-center mt-2">Dokumen</label>
-                                    <div class="form-group row nopadding">
-                                        <div class="col-6 col-sm-6 mb-2">
-                                            <a download="<?= $du_foto_identitas; ?>" href="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>">
-                                                <img class="img-preview-id" src="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
-                                            </a>
-                                            <br>
-                                            <label for="du_foto_identitas">Foto KTP/KK/KIA/AKL</label>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text"><i class="fas fa-address-card"></i></span>
-                                                </div>
-                                                <input type="file" class="form-control" spellcheck="false" name="du_foto_identitas" id="du_foto_identitas" onchange="previewImgId()" accept="image/*" capture />
-                                            </div>
-                                        </div>
-                                        <div class="invalid-feedback errordu_foto_identitas"></div>
-                                        <div class="col-6 col-sm-6 mb-2">
-                                            <a download="<?= $du_foto_rumah; ?>" href="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>">
-                                                <img class="img-preview-rmh" src="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
-                                            </a>
-                                            <br>
-                                            <label for="du_foto_rumah">Foto Rumah</label>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text"><i class="fa fa-home"></i></span>
-                                                </div>
-                                                <input type="file" class="form-control" spellcheck="false" name="du_foto_rumah" id="du_foto_rumah" onchange="previewImgRmh()" accept="image/*" capture />
-                                            </div>
-                                        </div>
-                                        <div class="invalid-feedback errordu_foto_rumah"></div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-12 col-12 mt-2">
-                                    <label class="label-center mt-2">Titik Koordinat</label>
-                                    <div class="form-group row nopadding">
-                                        <div class="col-sm-2 col-2">
-                                            <button type="button" class="btn btn-primary" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i></button>
-                                        </div>
-                                        <div class="col-sm-5 col-5">
-                                            <input type="text" class="form-control mb-2" placeholder="Latitude" spellcheck="false" id="latitude" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
-                                            <div class="invalid-feedback errordu_latitude"></div>
-                                        </div>
-                                        <div class="col-sm-5 col-5">
-                                            <input type="text" class="form-control mb-2" placeholder="Longitude" spellcheck="false" id="longitude" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
-                                            <div class="invalid-feedback errordu_longitude"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- <div id="step-2">
-                            <div class="row">
-                                <div class="col-md-6"> <input type="text" class="form-control" placeholder="Address" required> </div>
-                                <div class="col-md-6"> <input type="text" class="form-control" placeholder="City" required> </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-md-6"> <input type="text" class="form-control" placeholder="State" required> </div>
-                                <div class="col-md-6"> <input type="text" class="form-control" placeholder="Country" required> </div>
-                            </div>
-                        </div>
                         <div id="step-3" class="">
-                            <div class="row">
-                                <div class="col-md-6"> <input type="text" class="form-control" placeholder="Card Number" required> </div>
-                                <div class="col-md-6"> <input type="text" class="form-control" placeholder="Card Holder Name" required> </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-md-6"> <input type="text" class="form-control" placeholder="CVV" required> </div>
-                                <div class="col-md-6"> <input type="text" class="form-control" placeholder="Mobile Number" required> </div>
-                            </div>
-                        </div> -->
-                        <div id="step-4" class="">
                             <div class="modal-body">
                                 <div class="row">
                                     <div class="col-12">
@@ -458,22 +331,141 @@ $desa_id = session()->get('kode_desa');
                                             </div>
                                         </div>
                                     </div>
-                                    <div <?= $user > 3 ? ' hidden' : ''; ?>>
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-12 d-flex justify-content-center">
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input larger" type="checkbox" id="proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
-                                                </div>
-                                                <label for="proses" class="form-check-label">PADAN </label>
-                                                <div class="invalid-feedback errordu_proses"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div id="step-4" class="">
+                            <div class="row">
+                                <div class="col-12 col-sm-4">
+                                    <div class="form-group row nopadding">
+                                        <label class="col-4 col-sm-3 col-form-label" for="databansos">Program</label>
+                                        <div class="col-8 col-sm-9">
+                                            <select id="databansos" name="databansos" class="form-select form-select-sm">
+                                                <option value="">-- Pilih Program --</option>
+                                                <?php foreach ($bansos as $row) { ?>
+                                                    <option <?php if ($databansos == $row['dbj_id']) {
+                                                                echo 'selected';
+                                                            } ?> value="<?= $row['dbj_id'] ?>"> <?php echo $row['dbj_ket_bansos']; ?></option>
+                                                <?php } ?>
+                                            </select>
+                                            <div class="invalid-feedback errordatabansos"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-4">
+                                    <div class="form-group row nopadding" id="disabil_status_div" style="display: none">
+                                        <label for="disabil_status" class="col-4 col-sm-3 col-form-label">Disabilitas</label>
+                                        <div class="col-8 col-sm-9">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="chk-Yes" name="disabil_status" <?= $disabil_status == 1 ? 'checked' : ''; ?> value="1" />
+                                                <label for="chk-Yes" class="form-check-label"> Ya</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="chk-No" name="disabil_status" <?= $disabil_status == 2 ? 'checked' : ''; ?> value="2" />
+                                                <label for="chk-No" class="form-check-label"> Tidak</label>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="modal-footer mt-3 justify-content-between">
-                                        <input type="datetime-local" name="updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
-                                        <button type="submit" class="btn btn-block btn-warning btnSimpan">Update</button>
+                                    <div class="form-group row nopadding" id="disabil_jenis_div" style="display: none">
+                                        <label for="disabil_jenis" class="col-4 col-sm-3 col-form-label">Jenis</label>
+                                        <div class="col-8 col-sm-9">
+                                            <select id="disabil_jenis" name="disabil_jenis" class="form-select form-select-sm">
+                                                <option value="">-- Pilih Jenis Disabilitas --</option>
+                                                <?php foreach ($DisabilitasJenisModel as $row) { ?>
+                                                    <option <?= $disabil_jenis == $row['dj_id'] ? 'selected' : ''; ?> value="<?= $row['dj_id'] ?>"> <?php echo $row['dj_keterangan']; ?></option>
+                                                <?php } ?>
+                                            </select>
+                                        </div>
                                     </div>
+                                </div>
+                                <div class="col-12 col-sm-4">
+                                    <div class="form-group row nopadding" id="status_hamil_div" style="display: none">
+                                        <label class="col-4 col-sm-3 col-form-label" for="status_hamil">Hamil</label>
+                                        <div class="col-8 col-sm-9">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="chk-YaHamil" name="status_hamil" <?= $status_hamil == 1 ? 'checked' : ''; ?> value="1" />
+                                                <label for="chk-YaHamil" class="form-check-label"> Ya </label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="chk-TidakHamil" name="status_hamil" <?= $status_hamil == 2 ? 'checked' : ''; ?> value="2" />
+                                                <label for="chk-TidakHamil" class="form-check-label"> Tidak </label>
+                                            </div>
+                                            <div class="invalid-feedback errorstatus_hamil"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row nopadding" id="tgl_hamil_div" style="display: none;">
+                                        <label class="col-4 col-sm-2 col-form-label" for="tgl_hamil">Tgl</label>
+                                        <div class="col-8 col-sm-8">
+                                            <input type="date" name="tgl_hamil" id="tgl_hamil" class="form-control form-control-sm" value="<?= $tgl_hamil; ?>">
+                                            <div class="invalid-feedback errortgl_hamil"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-12 mt-2">
+                                    <label class="label-center mt-2">Dokumen</label>
+                                    <div class="form-group row nopadding">
+                                        <div class="col-6 col-sm-6 mb-2">
+                                            <a download="<?= $du_foto_identitas; ?>" href="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>">
+                                                <img class="img-preview-id" src="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                            </a>
+                                            <br>
+                                            <label for="du_foto_identitas">Foto KTP/KK/KIA/AKL</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="fas fa-address-card"></i></span>
+                                                </div>
+                                                <input type="file" class="form-control" spellcheck="false" name="du_foto_identitas" id="du_foto_identitas" onchange="previewImgId()" accept="image/*" capture />
+                                            </div>
+                                        </div>
+                                        <div class="invalid-feedback errordu_foto_identitas"></div>
+                                        <div class="col-6 col-sm-6 mb-2">
+                                            <a download="<?= $du_foto_rumah; ?>" href="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>">
+                                                <img class="img-preview-rmh" src="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                            </a>
+                                            <br>
+                                            <label for="du_foto_rumah">Foto Rumah</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="fa fa-home"></i></span>
+                                                </div>
+                                                <input type="file" class="form-control" spellcheck="false" name="du_foto_rumah" id="du_foto_rumah" onchange="previewImgRmh()" accept="image/*" capture />
+                                            </div>
+                                        </div>
+                                        <div class="invalid-feedback errordu_foto_rumah"></div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-12 mt-2">
+                                    <label class="label-center mt-2">Titik Koordinat</label>
+                                    <div class="form-group row nopadding">
+                                        <div class="col-sm-2 col-2">
+                                            <button type="button" class="btn btn-primary" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i></button>
+                                        </div>
+                                        <div class="col-sm-5 col-5">
+                                            <input type="text" class="form-control mb-2" placeholder="Latitude" spellcheck="false" id="latitude" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
+                                            <div class="invalid-feedback errordu_latitude"></div>
+                                        </div>
+                                        <div class="col-sm-5 col-5">
+                                            <input type="text" class="form-control mb-2" placeholder="Longitude" spellcheck="false" id="longitude" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
+                                            <div class="invalid-feedback errordu_longitude"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div <?= $user > 3 ? ' hidden' : ''; ?>>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-12 d-flex justify-content-center">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input larger" type="checkbox" id="proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
+                                            </div>
+                                            <label for="proses" class="form-check-label">PADAN </label>
+                                            <div class="invalid-feedback errordu_proses"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer mt-3 justify-content-between">
+                                    <input type="datetime-local" name="updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
+                                    <button type="submit" class="btn btn-block btn-warning btnSimpan">Update</button>
                                 </div>
                             </div>
                         </div>
@@ -483,6 +475,7 @@ $desa_id = session()->get('kode_desa');
         </div>
     </div>
 </div>
+
 <?= form_close(); ?>
 
 <script>
@@ -739,6 +732,33 @@ $desa_id = session()->get('kode_desa');
             transitionEffect: 'fade',
             showStepURLhash: false,
         });
+
+        if ($("#chk-Pr").is(":checked")) {
+            $("#status_hamil_div").show();
+        } else {
+            $("#status_hamil_div").hide();
+            $("#tgl_hamil_div").hide();
+        };
+
+        if ($("#chk-YaHamil").is(":checked")) {
+            // $("#tgl_hamil_div").show();
+            $('#tgl_hamil_div').show().find(':input').attr('required', true);
+        } else {
+            $('#tgl_hamil_div').hide().find(':input').attr('required', false);
+            // $("#tgl_hamil_div").hide();
+        };
+
+        if ($("#chk-Yes").is(":checked")) {
+            $("#disabil_jenis_div").show();
+        } else {
+            $("#disabil_jenis_div").hide();
+        };
+
+        if ($("#chk-No").is(":checked")) {
+            $("#disabil_status_div").hide();
+        } else {
+            $("#disabil_status_div").show();
+        };
 
     });
 
