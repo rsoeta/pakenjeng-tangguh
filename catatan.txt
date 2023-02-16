@@ -304,6 +304,7 @@
         GROUP BY dtks_usulan22.du_nik;
 
         SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
+        
         CREATE OR REPLACE VIEW dtks_usulan_caridata AS
         SELECT * FROM dtks_usulan22
         WHERE (du_nik,du_id) 

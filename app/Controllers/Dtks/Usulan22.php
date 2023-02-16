@@ -139,7 +139,14 @@ class Usulan22 extends BaseController
             // $row[] = $key->nama;
             $row[] = $key->nokk;
             $row[] = $key->ibu_kandung;
-            $row[] = $key->tanggal_lahir;
+            if ($key->tanggal_lahir == '0000-00-00') {
+                $row[] = '-';
+            } elseif ($key->tanggal_lahir == null) {
+                $row[] = '-';
+            } else {
+                // date_format
+                $row[] = date('d/m/Y', strtotime($key->tanggal_lahir));
+            }
             $row[] = $key->JenisPekerjaan;
             $row[] = $key->StatusKawin;
             $row[] = $key->dbj_nama_bansos;
@@ -196,7 +203,14 @@ class Usulan22 extends BaseController
             ';
             $row[] = $key->nokk;
             $row[] = $key->ibu_kandung;
-            $row[] = $key->tanggal_lahir;
+            if ($key->tanggal_lahir == '0000-00-00') {
+                $row[] = '-';
+            } elseif ($key->tanggal_lahir == null) {
+                $row[] = '-';
+            } else {
+                // date_format
+                $row[] = date('d/m/Y', strtotime($key->tanggal_lahir));
+            }
             $row[] = $key->JenisPekerjaan;
             $row[] = $key->dbj_nama_bansos;
             $row[] = '<a href="https://wa.me/' . nope($key->nope) . '" target="_blank" style="text-decoration:none;">' . strtoupper($key->fullname) . '</a>';
@@ -582,7 +596,7 @@ class Usulan22 extends BaseController
 
                     // 'foto_rumah' => $nama_foto_rumah,
                 ];
-
+                // dd($data);
                 $this->Usulan22Model->save($data);
 
                 $msg = [

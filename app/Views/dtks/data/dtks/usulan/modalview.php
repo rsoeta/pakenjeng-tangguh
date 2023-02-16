@@ -14,6 +14,11 @@ $desa_id = session()->get('kode_desa');
             15px;
     }
 
+    .foto-dokumen {
+        width: 60px;
+        border-radius: 2px;
+    }
+
     /* start modal dialog multi-step form wizard  */
     body {
         background-color:
@@ -61,6 +66,7 @@ $desa_id = session()->get('kode_desa');
 <link href="<?= base_url('assets/dist/css/smart_wizard.min.css'); ?>" rel="stylesheet" type="text/css" />
 <link href="<?= base_url('assets/dist/css/smart_wizard_theme_dots.min.css'); ?>" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="<?= base_url('assets/dist/js/jquery.smartWizard.min.js'); ?>"></script>
+
 <!-- end modal dialog multi-step form wizard -->
 
 <?= form_open_multipart('', ['class' => 'formsimpan']) ?>
@@ -316,7 +322,7 @@ $desa_id = session()->get('kode_desa');
                                     <div class="form-group row nopadding">
                                         <div class="col-6 col-sm-6 mb-2">
                                             <a download="<?= $du_foto_identitas; ?>" href="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>">
-                                                <img src="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>" style="width: 60px; border-radius: 2px;">
+                                                <img src="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>" class="foto-dokumen">
                                             </a>
                                             <br>
                                             <label for="du_foto_identitas">Foto KTP / KK / KIA / AKL</label>
@@ -329,7 +335,7 @@ $desa_id = session()->get('kode_desa');
                                         </div>
                                         <div class="col-6 col-sm-6 mb-2">
                                             <a download="<?= $du_foto_rumah; ?>" href="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>">
-                                                <img src="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>" style="width: 60px; border-radius: 2px;">
+                                                <img src="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>" class="foto-dokumen">
                                             </a>
                                             <br>
                                             <label for="du_foto_rumah">Foto Rumah</label>

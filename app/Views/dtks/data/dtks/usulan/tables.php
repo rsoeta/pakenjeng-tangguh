@@ -99,14 +99,10 @@
                                             </select>
                                         </div>
                                         <div class="col-sm-2 col-3 mb-2">
-                                            <select <?php if ($user >= 4) {
-                                                        echo 'disabled = "true"';
-                                                    } ?> class="form-control form-control-sm" name="rw" id="rw">
+                                            <select <?= $user >= 4 ? 'disabled = "true"' : ''; ?> class="form-control form-control-sm" name="rw" id="rw">
                                                 <option value="">[ Semua RW ]</option>
                                                 <?php foreach ($datarw as $row) { ?>
-                                                    <option <?php if ($jabatan == $row['no_rw']) {
-                                                                echo 'selected';
-                                                            } ?> value="<?= $row['no_rw']; ?>"><?= $row['no_rw']; ?></option>
+                                                    <option <?= $jabatan == $row['no_rw'] ? 'selected' : ''; ?> value="<?= $row['no_rw']; ?>"><?= $row['no_rw']; ?></option>
                                                 <?php } ?>
                                             </select>
                                         </div>
@@ -130,9 +126,7 @@
                                                 $mulai = 2021;
                                                 $tahun = date('Y');
                                                 for ($i = $mulai; $i < $mulai + 3; $i++) { ?>
-                                                    <option value='<?= $i; ?>' <?php if ($i == $tahun) {
-                                                                                    echo ' selected';
-                                                                                } ?>><?= $i; ?></option>
+                                                    <option value='<?= $i; ?>' <?= $i == $tahun ? ' selected' : ''; ?>><?= $i; ?></option>
                                                 <?php } ?>
                                             </select>
                                         </div>
@@ -149,9 +143,7 @@
                                                     $ValueBulan     = date('n', $AmbilNamaBulan);
                                                     // if ($ValueBulan < $i) continue;
                                                 ?>
-                                                    <option value="<?php echo $ValueBulan; ?>" <?php if ($bulanIni == $ValueBulan) {
-                                                                                                    echo ' selected';
-                                                                                                } ?>><?php echo $LabelBulan; ?></option>
+                                                    <option value="<?= $ValueBulan; ?>" <?= $bulanIni == $ValueBulan ? ' selected' : ''; ?>><?= $LabelBulan; ?></option>
                                                 <?php } ?>
                                             </select>
                                         </div>
@@ -207,9 +199,7 @@
                                             </select>
                                         </div>
                                         <div class="col-sm-2 col-3 mb-2">
-                                            <select <?php if ($user >= 4) {
-                                                        echo 'disabled = "true"';
-                                                    } ?> class="form-control form-control-sm" name="rw01" id="rw01">
+                                            <select <?= $user >= 4 ? 'disabled = "true"' : ''; ?> class="form-control form-control-sm" name="rw01" id="rw01">
                                                 <option value="">[ Semua RW ]</option>
                                                 <?php foreach ($datarw as $row) { ?>
                                                     <option <?php if ($jabatan == $row['no_rw']) {
@@ -535,6 +525,9 @@
 
         // $('body').addClass('sidebar-collapse');
 
+        $('#tabel_data');
+        $('#tabel_padan');
+
         $('.tombolTambah').click(function(e) {
             e.preventDefault();
             $.ajax({
@@ -558,11 +551,6 @@
                 }
             });
         });
-
-
-        $('#tabel_data');
-        $('#tabel_padan');
-
 
         $('#rw').change(function() {
             var desa = $('#desa').val();
@@ -683,7 +671,6 @@
             $('#rt01').val('');
         }
     });
-
 
     $(function() {
         $('#exportExcel').click(function() {

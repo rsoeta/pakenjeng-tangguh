@@ -13,6 +13,12 @@ $desa_id = session()->get('kode_desa');
             15px;
     }
 
+    .foto-dokumen {
+        width: 60px;
+        border-radius: 2px;
+        /* style="width: 30px; height: 40px; border-radius: 2px; */
+    }
+
     /* start modal dialog multi-step form wizard  */
     body {
         background-color:
@@ -172,25 +178,19 @@ $desa_id = session()->get('kode_desa');
                                             <select id="status_kawin" name="status_kawin" class="form-select form-select-sm">
                                                 <option value="">-- Pilih Status Perkawinan --</option>
                                                 <?php foreach ($statusKawin as $row) { ?>
-                                                    <option <?php if ($status_kawin == $row['idStatus']) {
-                                                                echo 'selected';
-                                                            } ?> value="<?= $row['idStatus'] ?>"> <?php echo $row['StatusKawin']; ?></option>
+                                                    <option <?= $status_kawin == $row['idStatus'] ? 'selected' : ''; ?> value="<?= $row['idStatus'] ?>"> <?= $row['StatusKawin']; ?></option>
                                                 <?php } ?>
                                             </select>
                                             <div class="invalid-feedback errorstatus_kawin"></div>
                                         </div>
                                     </div>
-                                    <div class="form-group row nopadding" <?php if ($user != 1) {
-                                                                                echo 'hidden';
-                                                                            } ?>>
-                                        <label class="col-4 col-sm-4 col-form-label" for="kelurahan">Desa/Kelurahan</label>
+                                    <div class="form-group row nopadding">
+                                        <label class="col-4 col-sm-4 col-form-label" for="kelurahan">Desa/Kel.</label>
                                         <div class="col-8 col-sm-8">
-                                            <select id="kelurahan" name="kelurahan" class="form-select form-select-sm">
-                                                <option value="">-- Pilih Desa / Kelurahan --</option>
+                                            <select <?= $user >= 3 ? 'disabled' : ''; ?> id="kelurahan" name="kelurahan" class="form-select form-select-sm">
+                                                <option value="">-- Pilih Desa / Kel. --</option>
                                                 <?php foreach ($desa as $row) { ?>
-                                                    <option <?php if ($desa_id == $row['id']) {
-                                                                echo 'selected';
-                                                            } ?> value="<?= $row['id'] ?>"> <?php echo $row['name']; ?></option>
+                                                    <option <?= $desa_id == $row['id'] ? ' selected' : ''; ?> value="<?= $row['id'] ?>"> <?= $row['name']; ?></option>
                                                 <?php } ?>
                                             </select>
                                             <div class="invalid-feedback errorkelurahan"></div>
@@ -198,24 +198,12 @@ $desa_id = session()->get('kode_desa');
                                     </div>
 
                                     <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="alamat">Alamat</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="text" name="alamat" id="alamat" class="form-control form-control-sm" value="<?= $alamat; ?>">
-                                            <div class="invalid-feedback erroralamat"></div>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row nopadding" <?php if ($user > 3) {
-                                                                                echo 'hidden';
-                                                                            } ?>>
                                         <label class="col-4 col-sm-4 col-form-label" for="datarw">No. RW</label>
                                         <div class="col-8 col-sm-8">
-                                            <select id="datarw" name="datarw" class="form-select form-select-sm">
+                                            <select <?= $user >= 4 ? 'disabled' : ''; ?> id="datarw" name="datarw" class="form-select form-select-sm">
                                                 <option value="">-- Pilih RW --</option>
                                                 <?php foreach ($rw as $row) { ?>
-                                                    <option <?php if ($datarw == $row['no_rw']) {
-                                                                echo 'selected';
-                                                            } ?> value="<?= $row['no_rw'] ?>"> <?php echo $row['no_rw']; ?></option>
+                                                    <option <?= $datarw == $row['no_rw'] ? 'selected' : ''; ?> value="<?= $row['no_rw'] ?>"> <?= $row['no_rw']; ?></option>
                                                 <?php } ?>
                                             </select>
                                             <div class="invalid-feedback errordatarw"></div>
@@ -233,6 +221,14 @@ $desa_id = session()->get('kode_desa');
                                                 <?php } ?>
                                             </select>
                                             <div class="invalid-feedback errordatart"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row nopadding">
+                                        <label class="col-4 col-sm-4 col-form-label" for="alamat">Alamat</label>
+                                        <div class="col-8 col-sm-8">
+                                            <input type="text" name="alamat" id="alamat" class="form-control form-control-sm" value="<?= $alamat; ?>">
+                                            <div class="invalid-feedback erroralamat"></div>
                                         </div>
                                     </div>
 
@@ -359,7 +355,7 @@ $desa_id = session()->get('kode_desa');
                             <div class="row">
                                 <div class="col-12">
                                     <div class="form-group row nopadding">
-                                        <label class="col-12 col-form-label">CPM : <em><?= $nama . ' - ' . $alamat . ' RT ' . $datart . ' RW ' . $datarw; ?></em></label>
+                                        <p class="col-12 col-form-label">CPM : <em><?= $nama . ' - ' . $alamat . ' RT ' . $datart . ' RW ' . $datarw; ?></em></p>
                                     </div>
                                     <hr>
                                 </div>
@@ -380,7 +376,7 @@ $desa_id = session()->get('kode_desa');
                                     </div>
                                 </div>
                                 <div class="col-12 col-sm-4">
-                                    <div class="form-group row nopadding" id="disabil_status_div" style="display: none">
+                                    <div class="form-group row nopadding" id="disabil_status_div">
                                         <label for="disabil_status" class="col-4 col-sm-3 col-form-label">Disabilitas</label>
                                         <div class="col-8 col-sm-9">
                                             <div class="form-check form-check-inline">
@@ -421,7 +417,7 @@ $desa_id = session()->get('kode_desa');
                                             </di v>
                                         </div>
                                         <div class="form-group row nopadding" id="tgl_hamil_div" style="display: none;">
-                                            <label class="col-4 col-sm-2 col-form-label" for="tgl_hamil">Tgl</label>
+                                            <label class="col-4 col-sm-2 col-form-label" for="tgl_hamil">Tanggal</label>
                                             <div class="col-8 col-sm-8">
                                                 <input type="date" name="tgl_hamil" id="tgl_hamil" class="form-control form-control-sm" value="<?= $tgl_hamil; ?>">
                                                 <div class="invalid-feedback errortgl_hamil"></div>
@@ -434,7 +430,7 @@ $desa_id = session()->get('kode_desa');
                                     <div class="form-group row nopadding">
                                         <div class="col-6 col-sm-6 mb-2">
                                             <a download="<?= $du_foto_identitas; ?>" href="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>">
-                                                <img class="img-preview-id" src="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                                <img class="img-preview-id foto-dokumen" src="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>">
                                             </a>
                                             <br>
                                             <label for="du_foto_identitas">Foto KTP/KK/KIA/AKL</label>
@@ -442,13 +438,13 @@ $desa_id = session()->get('kode_desa');
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text"><i class="fas fa-address-card"></i></span>
                                                 </div>
-                                                <input type="file" class="form-control" spellcheck="false" name="du_foto_identitas" id="du_foto_identitas" onchange="previewImgId()" accept="image/*" capture />
+                                                <input type="file" class="form-control form-control-sm" spellcheck="false" name="du_foto_identitas" id="du_foto_identitas" onchange="previewImgId()" accept="image/*" capture />
                                             </div>
                                         </div>
                                         <div class="invalid-feedback errordu_foto_identitas"></div>
                                         <div class="col-6 col-sm-6 mb-2">
                                             <a download="<?= $du_foto_rumah; ?>" href="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>">
-                                                <img class="img-preview-rmh" src="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                                <img class="img-preview-rmh foto-dokumen" src="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>">
                                             </a>
                                             <br>
                                             <label for="du_foto_rumah">Foto Rumah</label>
@@ -456,25 +452,26 @@ $desa_id = session()->get('kode_desa');
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text"><i class="fa fa-home"></i></span>
                                                 </div>
-                                                <input type="file" class="form-control" spellcheck="false" name="du_foto_rumah" id="du_foto_rumah" onchange="previewImgRmh()" accept="image/*" capture />
+                                                <input type="file" class="form-control form-control-sm" spellcheck="false" name="du_foto_rumah" id="du_foto_rumah" onchange="previewImgRmh()" accept="image/*" capture />
                                             </div>
                                         </div>
                                         <div class="invalid-feedback errordu_foto_rumah"></div>
                                     </div>
                                 </div>
                                 <div class="col-sm-12 col-12 mt-2">
-                                    <label class="label-center mt-2">Titik Koordinat</label>
+                                    <label class="label-center mt-2">Koordinat</label>
                                     <div class="form-group row nopadding">
-                                        <div class="col-sm-2 col-2">
-                                            <button type="button" class="btn btn-primary" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i></button>
-                                        </div>
+
                                         <div class="col-sm-5 col-5">
-                                            <input type="text" class="form-control mb-2" placeholder="Latitude" spellcheck="false" id="latitude" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
+                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Lat" spellcheck="false" id="latitude" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
                                             <div class="invalid-feedback errordu_latitude"></div>
                                         </div>
                                         <div class="col-sm-5 col-5">
-                                            <input type="text" class="form-control mb-2" placeholder="Longitude" spellcheck="false" id="longitude" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
+                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Long" spellcheck="false" id="longitude" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
                                             <div class="invalid-feedback errordu_longitude"></div>
+                                        </div>
+                                        <div class="col-sm-2 col-2">
+                                            <button type="button" class="btn btn-outline-primary" onclick="getLocation()"><i class="fas fa-map-marked-alt"></i></button>
                                         </div>
                                     </div>
                                 </div>
@@ -509,6 +506,12 @@ $desa_id = session()->get('kode_desa');
     $(document).ready(function() {
         $('.btnSimpan').click(function(e) {
             e.preventDefault();
+            let $kelurahan = $('#kelurahan').removeAttr('disabled', '');
+            let $datarw = $('#datarw').removeAttr('disabled', '');
+            setTimeout(function() {
+                $kelurahan.attr('disabled', true);
+                $datarw.attr('disabled', true);
+            }, 500);
             let form = $('.formsimpan')[0];
             let data = new FormData(form);
             $.ajax({
@@ -776,16 +779,17 @@ $desa_id = session()->get('kode_desa');
         };
 
         if ($("#chk-Yes").is(":checked")) {
+            $("#disabil_status_div").show();
             $("#disabil_jenis_div").show();
-        } else {
-            $("#disabil_jenis_div").hide();
+            // } else {
+            //     $("#disabil_jenis_div").hide();
         };
 
-        if ($("#chk-No").is(":checked")) {
-            $("#disabil_status_div").hide();
-        } else {
-            $("#disabil_status_div").show();
-        };
+        // if ($("#chk-No").is(":checked")) {
+        //     $("#disabil_status_div").hide();
+        // } else {
+        //     $("#disabil_status_div").show();
+        // };
 
     });
 
