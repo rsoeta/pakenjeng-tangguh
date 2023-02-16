@@ -123,7 +123,7 @@ $desa_id = session()->get('kode_desa');
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="tanggal_lahir">tanggal lahir</label>
+                                        <label class="col-4 col-sm-4 col-form-label" for="tanggal_lahir">Tanggal Lahir</label>
                                         <div class="col-8 col-sm-8">
                                             <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="date" name="tanggal_lahir" id="tanggal_lahir" class="form-control form-control-sm" value="<?= $tanggal_lahir; ?>">
                                             <div class="invalid-feedback errortanggal_lahir"></div>
@@ -279,7 +279,7 @@ $desa_id = session()->get('kode_desa');
                                                 <?php foreach ($bansos as $row) { ?>
                                                     <option <?php if ($databansos == $row['dbj_id']) {
                                                                 echo 'selected';
-                                                            } ?> value="<?= $row['dbj_id'] ?>"> <?php echo $row['dbj_ket_bansos']; ?></option>
+                                                            } ?> value="<?= $row['dbj_id'] ?>"> <?php echo $row['dbj_nama_bansos']; ?></option>
                                                 <?php } ?>
                                             </select>
                                             <div class="invalid-feedback errordatabansos"></div>

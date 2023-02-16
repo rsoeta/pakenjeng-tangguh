@@ -139,6 +139,7 @@ class Usulan22 extends BaseController
             // $row[] = $key->nama;
             $row[] = $key->nokk;
             $row[] = $key->ibu_kandung;
+            $row[] = $key->tanggal_lahir;
             $row[] = $key->JenisPekerjaan;
             $row[] = $key->StatusKawin;
             $row[] = $key->dbj_nama_bansos;
@@ -194,6 +195,8 @@ class Usulan22 extends BaseController
             <a href=' . usulan_foto($key->foto_rumah, 'foto_rumah') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Rumah Depan"></a>
             ';
             $row[] = $key->nokk;
+            $row[] = $key->ibu_kandung;
+            $row[] = $key->tanggal_lahir;
             $row[] = $key->JenisPekerjaan;
             $row[] = $key->dbj_nama_bansos;
             $row[] = '<a href="https://wa.me/' . nope($key->nope) . '" target="_blank" style="text-decoration:none;">' . strtoupper($key->fullname) . '</a>';

@@ -171,6 +171,7 @@
                                                     <th>NAMA</th>
                                                     <th>NO. KK</th>
                                                     <th>IBU KANDUNG</th>
+                                                    <th>TGL LAHIR</th>
                                                     <th>JENIS PEKERJAAN</th>
                                                     <th>STATUS</th>
                                                     <th>PROGRAM</th>
@@ -278,6 +279,8 @@
                                                     <th>NIK</th>
                                                     <th>NAMA</th>
                                                     <th>NO. KK</th>
+                                                    <th>IBU KANDUNG</th>
+                                                    <th>TGL LAHIR</th>
                                                     <th>PEKERJAAN</th>
                                                     <th>PROGRAM</th>
                                                     <th>PENGUSUL</th>

@@ -122,7 +122,7 @@ $desa_id = session()->get('kode_desa');
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="tanggal_lahir">tanggal lahir</label>
+                                        <label class="col-4 col-sm-4 col-form-label" for="tanggal_lahir">Tanggal Lahir</label>
                                         <div class="col-8 col-sm-8">
                                             <input type="date" name="tanggal_lahir" id="tanggal_lahir" class="form-control form-control-sm" value="<?= $tanggal_lahir; ?>">
                                             <div class="invalid-feedback errortanggal_lahir"></div>
@@ -252,6 +252,26 @@ $desa_id = session()->get('kode_desa');
                                     </div>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div <?= $user > 3 ? ' hidden' : ''; ?>>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-12 d-flex justify-content-center">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input larger" type="checkbox" id="proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
+                                                </div>
+                                                <label for="proses" class="form-check-label">PADAN </label>
+                                                <div class="invalid-feedback errordu_proses"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer mt-3 justify-content-between">
+                                        <input type="datetime-local" name="updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
+                                        <button type="submit" class="btn btn-block btn-warning btnSimpan">Update</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div id="step-3" class="">
@@ -262,8 +282,8 @@ $desa_id = session()->get('kode_desa');
                                         <input type="checkbox" onclick="return false" checked /> = Ya
                                         <br />
                                         <input type="checkbox" onclick="return false" /> = Tidak
+                                        <hr>
                                     </div>
-                                    <hr>
                                     <div class="col-12 col-sm-6">
                                         <div class="form-group row">
                                             <label class="col-10 col-form-label" for="sk0">Apakah memiliki tempat tinggal sendiri?</label>
@@ -331,12 +351,18 @@ $desa_id = session()->get('kode_desa');
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
+
                         <div id="step-4" class="">
                             <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group row nopadding">
+                                        <label class="col-12 col-form-label">CPM : <em><?= $nama . ' - ' . $alamat . ' RT ' . $datart . ' RW ' . $datarw; ?></em></label>
+                                    </div>
+                                    <hr>
+                                </div>
                                 <div class="col-12 col-sm-4">
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-3 col-form-label" for="databansos">Program</label>
@@ -346,7 +372,7 @@ $desa_id = session()->get('kode_desa');
                                                 <?php foreach ($bansos as $row) { ?>
                                                     <option <?php if ($databansos == $row['dbj_id']) {
                                                                 echo 'selected';
-                                                            } ?> value="<?= $row['dbj_id'] ?>"> <?php echo $row['dbj_ket_bansos']; ?></option>
+                                                            } ?> value="<?= $row['dbj_id'] ?>"> <?php echo $row['dbj_nama_bansos']; ?></option>
                                                 <?php } ?>
                                             </select>
                                             <div class="invalid-feedback errordatabansos"></div>
@@ -386,19 +412,20 @@ $desa_id = session()->get('kode_desa');
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input" type="radio" id="chk-YaHamil" name="status_hamil" <?= $status_hamil == 1 ? 'checked' : ''; ?> value="1" />
                                                 <label for="chk-YaHamil" class="form-check-label"> Ya </label>
-                                            </div>
+                                            </div v>
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input" type="radio" id="chk-TidakHamil" name="status_hamil" <?= $status_hamil == 2 ? 'checked' : ''; ?> value="2" />
                                                 <label for="chk-TidakHamil" class="form-check-label"> Tidak </label>
-                                            </div>
+                                            </div v>
                                             <div class="invalid-feedback errorstatus_hamil"></div>
+                                            </di v>
                                         </div>
-                                    </div>
-                                    <div class="form-group row nopadding" id="tgl_hamil_div" style="display: none;">
-                                        <label class="col-4 col-sm-2 col-form-label" for="tgl_hamil">Tgl</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="date" name="tgl_hamil" id="tgl_hamil" class="form-control form-control-sm" value="<?= $tgl_hamil; ?>">
-                                            <div class="invalid-feedback errortgl_hamil"></div>
+                                        <div class="form-group row nopadding" id="tgl_hamil_div" style="display: none;">
+                                            <label class="col-4 col-sm-2 col-form-label" for="tgl_hamil">Tgl</label>
+                                            <div class="col-8 col-sm-8">
+                                                <input type="date" name="tgl_hamil" id="tgl_hamil" class="form-control form-control-sm" value="<?= $tgl_hamil; ?>">
+                                                <div class="invalid-feedback errortgl_hamil"></div>
+                                            </div v>
                                         </div>
                                     </div>
                                 </div>
