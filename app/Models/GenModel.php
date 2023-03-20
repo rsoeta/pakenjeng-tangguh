@@ -163,4 +163,12 @@ class GenModel extends Model
 			->set($data)
 			->update();
 	}
+
+	function get_staortu()
+	{
+		$builder = $this->db->table('tb_status_ortu');
+		$query = $builder->select('*')->get();
+
+		return $query->getResultArray();
+	}
 }

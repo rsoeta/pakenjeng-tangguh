@@ -243,6 +243,7 @@ class Usulan22 extends BaseController
             $this->ShdkModel = new ShdkModel();
             $users = new UsersModel();
             $DisabilitasJenisModel = new DisabilitasJenisModel();
+            $GenModel = new GenModel();
 
             $data = [
                 'title' => 'Form. Tambah Data',
@@ -256,6 +257,7 @@ class Usulan22 extends BaseController
                 'shdk' => $this->ShdkModel->findAll(),
                 'users' => $users->findAll(),
                 'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
+                'sta_ortu' => $GenModel->get_staortu(),
             ];
             if (deadline_usulan() === 1) {
 
@@ -587,6 +589,8 @@ class Usulan22 extends BaseController
                     'sk6' => $this->request->getVar('sk6'),
                     'sk7' => $this->request->getVar('sk7'),
                     'sk8' => $this->request->getVar('sk8'),
+                    'sk9' => $this->request->getVar('sk9'),
+                    'du_so_id' => $this->request->getVar('du_so_id'),
                     'created_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                     'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                     'created_at_year' => date('Y'),
@@ -745,6 +749,7 @@ class Usulan22 extends BaseController
             $this->BansosModel = new BansosModel();
             $DisabilitasJenisModel = new DisabilitasJenisModel();
             $users = new UsersModel();
+            $GenModel = new GenModel();
 
             $id = $this->request->getVar('id');
             $model = new Usulan22Model();
@@ -762,6 +767,8 @@ class Usulan22 extends BaseController
                 'users' => $users->findAll(),
                 'jenkel' => $this->GenModel->getDataJenkel(),
                 'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
+                'sta_ortu' => $GenModel->get_staortu(),
+
 
                 'created_by' => session()->get('nik'),
                 'stahub' => $row['shdk'],
@@ -797,6 +804,8 @@ class Usulan22 extends BaseController
                 'sk6' => $row['sk6'],
                 'sk7' => $row['sk7'],
                 'sk8' => $row['sk8'],
+                'sk9' => $row['sk9'],
+                'du_so_id' => $row['du_so_id'],
                 'du_proses' => $row['du_proses'],
                 'updated_at' => $row['updated_at'],
                 // 'foto_rumah' => $nama_foto_rumah,
@@ -830,6 +839,7 @@ class Usulan22 extends BaseController
             $this->BansosModel = new BansosModel();
             $DisabilitasJenisModel = new DisabilitasJenisModel();
             $users = new UsersModel();
+            $GenModel = new GenModel();
 
             $id = $this->request->getVar('id');
             $model = new Usulan22Model();
@@ -847,6 +857,8 @@ class Usulan22 extends BaseController
                 'users' => $users->findAll(),
                 'jenkel' => $this->GenModel->getDataJenkel(),
                 'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
+                'sta_ortu' => $GenModel->get_staortu(),
+
 
                 'created_by' => session()->get('nik'),
                 'stahub' => $row['shdk'],
@@ -882,6 +894,8 @@ class Usulan22 extends BaseController
                 'sk6' => $row['sk6'],
                 'sk7' => $row['sk7'],
                 'sk8' => $row['sk8'],
+                'sk9' => $row['sk9'],
+                'du_so_id' => $row['du_so_id'],
                 'du_proses' => $row['du_proses'],
                 // 'foto_rumah' => $nama_foto_rumah,
             ];
@@ -1184,7 +1198,7 @@ class Usulan22 extends BaseController
                         'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
                         'ibu_kandung' => strtoupper($this->request->getVar("ibu_kandung")),
                         'tanggal_lahir' => $this->request->getVar("tanggal_lahir"),
-                        'tempat_lahir' => $this->request->getVar("tempat_lahir"),
+                        'tempat_lahir' => strtoupper($this->request->getVar("tempat_lahir")),
                         'nama' => strtoupper($this->request->getVar('nama')),
                         'nokk' => $this->request->getVar('nokk'),
                         'program_bansos' => $this->request->getVar('databansos'),
@@ -1206,6 +1220,8 @@ class Usulan22 extends BaseController
                         'sk6' => $this->request->getVar('sk6'),
                         'sk7' => $this->request->getVar('sk7'),
                         'sk8' => $this->request->getVar('sk8'),
+                        'sk9' => $this->request->getVar('sk9'),
+                        'du_so_id' => $this->request->getVar('du_so_id'),
                         'du_proses' => $this->request->getVar('du_proses'),
                         'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                         'updated_by' => session()->get('nik'),
@@ -1238,7 +1254,7 @@ class Usulan22 extends BaseController
                         'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
                         'ibu_kandung' => strtoupper($this->request->getVar("ibu_kandung")),
                         'tanggal_lahir' => $this->request->getVar("tanggal_lahir"),
-                        'tempat_lahir' => $this->request->getVar("tempat_lahir"),
+                        'tempat_lahir' => strtoupper($this->request->getVar("tempat_lahir")),
                         'nama' => strtoupper($this->request->getVar('nama')),
                         'nokk' => $this->request->getVar('nokk'),
                         'program_bansos' => $this->request->getVar('databansos'),
@@ -1260,6 +1276,8 @@ class Usulan22 extends BaseController
                         'sk6' => $this->request->getVar('sk6'),
                         'sk7' => $this->request->getVar('sk7'),
                         'sk8' => $this->request->getVar('sk8'),
+                        'sk9' => $this->request->getVar('sk9'),
+                        'du_so_id' => $this->request->getVar('du_so_id'),
                         'du_proses' => $this->request->getVar('du_proses'),
                         'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                         'updated_by' => session()->get('nik'),

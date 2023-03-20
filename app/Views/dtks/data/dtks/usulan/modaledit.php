@@ -102,7 +102,7 @@ $desa_id = session()->get('kode_desa');
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="nik">NIK</label>
                                         <div class="col-8 col-sm-8">
-                                            <input type="number" name="nik" id="nik" class="form-control form-control-sm" value="<?= $du_nik; ?>" autocomplete="off" <?= $user > 3 ? 'readonly="on"' : ''; ?>>
+                                            <input type="number" name="nik" id="nik" class="form-control form-control-sm" value="<?= $du_nik; ?>" autocomplete="off">
                                             <div class="invalid-feedback errornik"></div>
                                         </div>
                                     </div>
@@ -132,6 +132,13 @@ $desa_id = session()->get('kode_desa');
                                         <div class="col-8 col-sm-8">
                                             <input type="date" name="tanggal_lahir" id="tanggal_lahir" class="form-control form-control-sm" value="<?= $tanggal_lahir; ?>">
                                             <div class="invalid-feedback errortanggal_lahir"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row nopadding" style="display: none;">
+                                        <label class="col-4 col-sm-4 col-form-label" for="du_usia">Usia</label>
+                                        <div class="col-8 col-sm-8">
+                                            <input type="number" name="du_usia" id="du_usia" class="form-control form-control-sm" value="" readonly>
+                                            <div class="invalid-feedback errorusia"></div>
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
@@ -282,42 +289,12 @@ $desa_id = session()->get('kode_desa');
                                     </div>
                                     <div class="col-12 col-sm-6">
                                         <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk0">Apakah memiliki tempat tinggal sendiri?</label>
+                                            <label class="col-10 col-form-label" for="sk0">Apakah memiliki tempat berteduh tetap sehari-hari?</label>
                                             <div class="col-2">
                                                 <input class="form-check-input" type="checkbox" id="sk0" name="sk0" <?= $sk0 == '1' ? 'checked' : ''; ?> value="1" />
                                                 <label for="sk0" class="form-check-label"> Ya</label>
                                             </div>
                                         </div>
-                                        <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk1">Apakah pernah khawatir tidak makan dalam setahun terakhir?</label>
-                                            <div class="col-2">
-                                                <input class="form-check-input" type="checkbox" id="sk1" name="sk1" <?= $sk1 == '1' ? 'checked' : ''; ?> value="1" />
-                                                <label for="sk1" class="form-check-label"> Ya</label>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk2">Apakah ada pengeluaran untuk pakaian selama 1 (satu) tahun terakhir?</label>
-                                            <div class="col-2">
-                                                <input class="form-check-input" type="checkbox" id="sk2" name="sk2" <?= $sk2 == '1' ? 'checked' : ''; ?> value="1" />
-                                                <label for="sk2" class="form-check-label"> Ya</label>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk3">Apakah tempat tinggal sebagian besar berdinding bambu, kawat, papan, kayu, terpal, kardus, tembok tanpa plester, rumbia, atau seng?</label>
-                                            <div class="col-2">
-                                                <input class="form-check-input" type="checkbox" id="sk3" name="sk3" <?= $sk3 == '1' ? 'checked' : ''; ?> value="1" />
-                                                <label for="sk3" class="form-check-label"> Ya</label>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk4">Apakah sumber penerangan berasal dari listrik 450 watt?</label>
-                                            <div class="col-2">
-                                                <input class="form-check-input" type="checkbox" id="sk4" name="sk4" <?= $sk4 == '1' ? 'checked' : ''; ?> value="1" />
-                                                <label for="sk4" class="form-check-label"> Ya</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-sm-6">
                                         <div class="form-group row">
                                             <label class="col-10 col-form-label" for="sk5">Apakah kepala keluarga atau pengurus keluarga masih bekerja?</label>
                                             <div class="col-2">
@@ -326,7 +303,7 @@ $desa_id = session()->get('kode_desa');
                                             </div>
                                         </div>
                                         <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk6">Apakah pengeluaran kebutuhan makan lebih besar dari setengah total pengeluaran?</label>
+                                            <label class="col-10 col-form-label" for="sk6">Apakah pengeluaran pangan lebih besar (>70%) dari total pengeluaran?</label>
                                             <div class="col-2">
                                                 <input class="form-check-input" type="checkbox" id="sk6" name="sk6" <?= $sk6 == '1' ? 'checked' : ''; ?> value="1" />
                                                 <label for="sk6" class="form-check-label"> Ya</label>
@@ -340,10 +317,47 @@ $desa_id = session()->get('kode_desa');
                                             </div>
                                         </div>
                                         <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk8">Apakah tempat tinggal terdapat jamban sendiri?</label>
+                                            <label class="col-10 col-form-label" for="sk8">Apakah tempat tinggal memiliki fasilitas buang air kecil / besar sendiri?</label>
                                             <div class="col-2">
                                                 <input class="form-check-input" type="checkbox" id="sk8" name="sk8" <?= $sk8 == '1' ? 'checked' : ''; ?> value="1" />
                                                 <label for="sk8" class="form-check-label"> Ya</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <div class="form-group row">
+                                            <label class="col-10 col-form-label" for="sk9">Apakah target survey tinggal bersama anggota keluarga yang lain?</label>
+                                            <div class="col-2">
+                                                <input class="form-check-input" type="checkbox" id="sk9" name="sk9" <?= $sk9 == '1' ? 'checked' : ''; ?> value="1" />
+                                                <label for="sk9" class="form-check-label"> Ya</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-10 col-form-label" for="sk1">Apakah pernah khawatir atau pernah tidak makan dalam setahun terakhir?</label>
+                                            <div class="col-2">
+                                                <input class="form-check-input" type="checkbox" id="sk1" name="sk1" <?= $sk1 == '1' ? 'checked' : ''; ?> value="1" />
+                                                <label for="sk1" class="form-check-label"> Ya</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-10 col-form-label" for="sk2">Apakah ada pengeluaran untuk pakaian selama 1 (satu) tahun terakhir?</label>
+                                            <div class="col-2">
+                                                <input class="form-check-input" type="checkbox" id="sk2" name="sk2" <?= $sk2 == '1' ? 'checked' : ''; ?> value="1" />
+                                                <label for="sk2" class="form-check-label"> Ya</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-10 col-form-label" for="sk3">Apakah tempat tinggal sebagian besar berdinding bambu / kawat / kayu?</label>
+                                            <div class="col-2">
+                                                <input class="form-check-input" type="checkbox" id="sk3" name="sk3" <?= $sk3 == '1' ? 'checked' : ''; ?> value="1" />
+                                                <label for="sk3" class="form-check-label"> Ya</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-10 col-form-label" for="sk4">Apakah sumber penerangan berasal dari listrik PLN 450 watt atau bukan listrik?</label>
+                                            <div class="col-2">
+                                                <input class="form-check-input" type="checkbox" id="sk4" name="sk4" <?= $sk4 == '1' ? 'checked' : ''; ?> value="1" />
+                                                <label for="sk4" class="form-check-label"> Ya</label>
                                             </div>
                                         </div>
                                     </div>
@@ -398,6 +412,18 @@ $desa_id = session()->get('kode_desa');
                                                     <option <?= $disabil_jenis == $row['dj_id'] ? 'selected' : ''; ?> value="<?= $row['dj_id'] ?>"> <?php echo $row['dj_keterangan']; ?></option>
                                                 <?php } ?>
                                             </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row nopadding" id="du_so_id_div" style="display: none;">
+                                        <label class="col-4 col-sm-4 col-form-label" for="du_so_id">Status</label>
+                                        <div class="col-8 col-sm-8">
+                                            <select id="du_so_id" name="du_so_id" class="form-select form-select-sm">
+                                                <option value="">-- Status Orangtua --</option>
+                                                <?php foreach ($sta_ortu as $row) { ?>
+                                                    <option <?= $du_so_id == $row['so_id'] ? 'selected' : ''; ?> value="<?= $row['so_id'] ?>"> <?php echo $row['so_desk']; ?></option>
+                                                <?php } ?>
+                                            </select>
+                                            <div class="invalid-feedback errordu_so_id"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -462,7 +488,7 @@ $desa_id = session()->get('kode_desa');
                                     <label class="label-center mt-2">Koordinat</label>
                                     <div class="form-group row nopadding">
 
-                                        <div class="col-sm-5 col-5">
+                                        <div class="col-sm-6 col-6">
                                             <input type="text" class="form-control form-control-sm mb-2" placeholder="Lat" spellcheck="false" id="latitude" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
                                             <div class="invalid-feedback errordu_latitude"></div>
                                         </div>
@@ -470,7 +496,7 @@ $desa_id = session()->get('kode_desa');
                                             <input type="text" class="form-control form-control-sm mb-2" placeholder="Long" spellcheck="false" id="longitude" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
                                             <div class="invalid-feedback errordu_longitude"></div>
                                         </div>
-                                        <div class="col-sm-2 col-2">
+                                        <div class="col-sm-1 col-1">
                                             <button type="button" class="btn btn-outline-primary" onclick="getLocation()"><i class="fas fa-map-marked-alt"></i></button>
                                         </div>
                                     </div>
@@ -791,6 +817,13 @@ $desa_id = session()->get('kode_desa');
         //     $("#disabil_status_div").show();
         // };
 
+        $('#du_usia').val(getAge);
+        if ($('#du_usia').val() < 18) {
+            $('#du_so_id_div').show();
+        } else {
+            $('#du_so_id_div').hide();
+        }
+
     });
 
     $(function() {
@@ -822,6 +855,15 @@ $desa_id = session()->get('kode_desa');
         });
 
     });
+
+    function getAge() {
+        var dob = new Date(document.getElementById('tanggal_lahir').value);
+        var today = new Date();
+        var age = Math.floor((today - dob) / (365.25 * 24 * 60 * 60 * 1000));
+        // var du_usia = document.getElementById('du_usia').value;
+
+        return age;
+    }
 
     var x = document.getElementById("latitude");
     var y = document.getElementById("longitude");
