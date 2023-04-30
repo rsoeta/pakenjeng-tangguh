@@ -795,4 +795,40 @@
 ## v2.13.3 -- Tambah Status Orangtua bagi Usia <= 17
     # tambah tabel tb_status_ortu
     # ubah tabel dtks_usulan22 tambah field sk9 dan du_so_id
-    
+
+---------------------------------------------------------------------------------------------------------------------------------------------------   
+## v2.14.0 -- Tambah Menu PPKS (Program Perlindungan Keluarga Sejahtera)
+    # tambah tabel ppks_deadline duplikasi dari tabel dtks_deadline
+    # tambah tabel ppks_data
+        CREATE TABLE ppks_data (
+            ppks_id int NOT NULL AUTO_INCREMENT,
+            ppks_kategori_id int,
+            ppks_nama varchar(255),
+            ppks_kelurahan varchar(100),
+            ppks_rw varchar(100),
+            ppks_rt varchar(100),
+            ppks_alamat varchar(255),
+            ppks_nik varchar(16),
+            ppks_nokk varchar(16),
+            ppks_jenis_kelamin int,
+            ppks_tempat_lahir varchar(255),
+            ppks_tgl_lahir date,
+            ppks_no_telp varchar(15),
+            ppks_status_keberadaan int,
+            ppks_status_bantuan int,
+            ppks_status_panti int,
+            ppks_tgl_out date,
+            ppks_Foto varchar(255),
+            ppks_created_at datetime,
+            ppks_created_by varchar(16),
+            ppks_updated_at datetime,
+            ppks_updated_by varchar(16),
+            PRIMARY KEY (ppks_id)
+        );
+    # tambah tabel ppks_kategori
+        CREATE TABLE ppks_kategori (
+            pk_id int NOT NULL AUTO_INCREMENT,
+            pk_nama_kategori varchar(255),
+            PRIMARY KEY (pk_id)
+        );
+        INSERT INTO ppks_kategori VALUES (1, 'Anak balita telantar'), (2, 'Anak terlantar'), (3, 'Anak yang berhadapan dengan hukum'), (4, 'Anak jalanan'), (5, 'Anak dengan Kedisabilitasan (ADK)'), (6, 'Anak yang menjadi korban tindak kekerasan atau diperlakukan salah'), (7, 'Anak yang memerlukan perlindungan khusus'), (8, 'Lanjut usia telantar'), (9, 'Penyandang disabilitas'), (10, 'Tuna Susila'), (11, 'Gelandangan'), (12, 'Pengemis'), (13, 'Pemulung'), (14, 'Kelompok Minoritas'), (15, 'Bekas Warga Binaan Lembaga Pemasyarakatan (BWBLP)'), (16, 'Orang dengan HIV/AIDS (ODHA)'), (17, 'Korban Penyalahgunaan NAPZA'), (18, 'Korban trafficking'), (19, 'Korban tindak kekerasan'), (20, 'Pekerja Migran Bermasalah Sosial (PMBS)'), (21, 'Korban bencana alam'), (22, 'Korban bencana sosial'), (23, 'Perempuan rawan sosial ekonomi'), (24, 'Fakir Miskin /Rumah Tangga Miskin'), (25, 'Keluarga bermasalah sosial psikologis'), (26, 'Komunitas Adat Terpencil');

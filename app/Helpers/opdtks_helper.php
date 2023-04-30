@@ -278,6 +278,64 @@ function deadline_usulan()
     // dd($deadline_usulan);
 }
 
+function deadline_ppks()
+{
+    $times = new Time();
+    $db = \Config\Database::connect();
+    $tahun = $times->getYear();
+    $bulan = $times->getMonth();
+    $hari = $times->getDay();       // 12
+    $jam = $times->getHour();           // 16
+    $menit = $times->getMinute();         // 15
+    $bulanNext = $bulan + 1;
+    $hak_akses = session()->get('role_id');
+
+    $builder = $db->table('ppks_deadline');
+    // get last row
+    // $builder = $builder->select('*');
+    $query = $builder->where('dd_role', $hak_akses)->get();
+
+    $data = $query->getRowArray();
+    // dd($data);
+    // foreach ($data as $d) {
+    $tanggal_mulai = $data['dd_waktu_start'];
+    $tanggal_akhir = $data['dd_waktu_end'];
+    // }
+    $tgl_a = date_create($tanggal_mulai);
+    $tgl_b = date_create($tanggal_akhir);
+
+    // $dead = date('Y-m-d H:i') . "<br>";
+    $dead_mulai = ($tahun . '-' . $bulan . '-' . date_format($tgl_a, 'd H:i')); // starting waktu
+    $dead_akhir = ($tahun . '-' . $bulan . '-' . date_format($tgl_b, 'd H:i')); // ending waktu untuk user
+    $dead_akhir2 = ($tahun . '-' . $bulan . '-' . date_format($tgl_b, 'd H:i')); // ending waktu untuk operator
+
+    $strdead1 = (strtotime($dead_mulai));
+    $strdead2 = (strtotime($dead_akhir));
+    $strdead3 = (strtotime($dead_akhir2));
+    // $ini_tanggal = strtotime("14 14:12") . "<br>";
+    // $ini_tanggal = strtotime() . "<br>";
+
+    // $deadline = '141312';
+
+    $hari_ini = $tahun . '-' . $bulan . '-' . $hari . ' ' . $jam . ':' . $menit;
+    $strhari_ini = strtotime($hari_ini);
+
+    // dd($strhari_ini);
+
+    if ($hak_akses <= 3) {
+        $deadline = ($strhari_ini <= $strdead1 || $strhari_ini >= $strdead3) ? 1 : 0;
+    } else {
+        $deadline = ($strhari_ini <= $strdead1 || $strhari_ini >= $strdead2) ? 1 : 0;
+    }
+
+    // return $ini_tanggal;
+    // return $hari_ini > $deadline;
+
+    return $deadline;
+
+    // dd($deadline_usulan);
+}
+
 function dkm_foto_cpm($fileName = '', $dir = '', $defFile = '')
 {
     if ($fileName !== '' && $fileName !== null && file_exists(FCPATH . 'data/dkm/' . $dir . '/' . $fileName)) {
@@ -296,6 +354,20 @@ function usulan_foto($fileName = '', $dir = '', $defFile = '')
 {
     if ($fileName !== '' && $fileName !== null && file_exists(FCPATH . 'data/usulan/' . $dir . '/' . $fileName)) {
         return base_url('data/usulan/' . $dir . '/' . $fileName);
+    } else {
+        if ($defFile == '') {
+            return base_url('assets/images/image_not_available.jpg');
+        } else {
+            return base_url('assets/images/' . $defFile);
+        }
+    }
+    # code...
+}
+
+function ppks_foto($fileName = '', $dir = '', $defFile = '')
+{
+    if ($fileName !== '' && $fileName !== null && file_exists(FCPATH . 'data/ppks_kpm/' . $dir . '/' . $fileName)) {
+        return base_url('data/ppks_kpm/' . $dir . '/' . $fileName);
     } else {
         if ($defFile == '') {
             return base_url('assets/images/image_not_available.jpg');

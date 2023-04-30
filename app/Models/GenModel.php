@@ -164,6 +164,29 @@ class GenModel extends Model
 			->update();
 	}
 
+	function getDeadlinePpks()
+	{
+		$role = session()->get('role');
+		$akses1 = 3;
+		$akses2 = 4;
+
+		$builder = $this->db->table('ppks_deadline');
+		// get last row
+		$builder = $builder->select('*');
+		if ($role <= $akses1) {
+			$builder = $builder->join('tb_roles', 'ppks_deadline.dd_role = tb_roles.id_role');
+			$query = $builder->get();
+			return $query->getResultArray();
+		} elseif ($role >= $akses2) {
+			$builder = $builder->join('tb_roles', 'ppks_deadline.dd_role = tb_roles.id_role');
+			$query = $builder->where('dd_role', $akses2)->get();
+			return $query->getResultArray();
+		} else {
+			$query = $builder->where('dd_role', null)->get();
+			return $query->getResultArray();
+		}
+	}
+
 	function get_staortu()
 	{
 		$builder = $this->db->table('tb_status_ortu');
