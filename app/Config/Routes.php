@@ -108,9 +108,9 @@ $routes->post('tmbUsulPpks', 'Dtks\Ppks::save', ['filter' => 'authfilterdtks', '
 $routes->get('tambahPpks', 'Dtks\Ppks::formtambah', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->post('get_data_penduduk', 'Dtks\Ppks::get_data_penduduk', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->resource('api_usulan', ['controller' => 'Api\Dtks_Usulan', 'filter' => 'menufilterdtks']);
-// $routes->match(['get', 'post'], 'editUsulan', 'Dtks\Ppks::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->match(['get', 'post'], 'editPpks', 'Dtks\Ppks::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->post('viewUsulan', 'Dtks\Ppks::formview', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-// $routes->post('updateUsulan', 'Dtks\Ppks::update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('updatePpks', 'Dtks\Ppks::update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('dltPpks', 'Dtks\Ppks::delete', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tabel_ppks', 'Dtks\Ppks::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->post('tabel_padan', 'Dtks\Ppks::tabel_padan', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);

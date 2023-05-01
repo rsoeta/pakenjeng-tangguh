@@ -114,7 +114,7 @@ class PpksModel extends Model
         if ($_POST['length'] != -1);
         $db = db_connect();
         $builder = $db->table('ppks_data');
-        $query = $builder->select('ppks_data.ppks_id as id_ppks, tb_villages.name as namaDesa, tb_districts.name as namaKec, ppks_nama, ppks_nokk, ppks_data.ppks_nik, ppks_jenis_kelamin, ppks_tempat_lahir, ppks_tgl_lahir, dbj_nama_bansos, ppks_alamat, ppks_rt, ppks_rw, ppks_kelurahan, ppks_kecamatan, ppks_foto, ppks_data.ppks_created_at, ppks_created_at_year, ppks_created_at_month, ppks_created_by, dtks_users.email, ppks_data.ppks_updated_at, dtks_users.nope, dtks_users.fullname')
+        $query = $builder->select('ppks_data.ppks_id as id_ppks, tb_villages.name as namaDesa, tb_districts.name as namaKec, ppks_nama, ppks_nokk, ppks_data.ppks_nik, ppks_jenis_kelamin, ppks_tempat_lahir, ppks_tgl_lahir, dbj_nama_bansos, ppks_alamat, ppks_rt, ppks_rw, ppks_kelurahan, ppks_kecamatan, ppks_status_keberadaan, ppks_status_panti, ppks_foto,  ppks_data.ppks_created_at, ppks_created_at_year, ppks_created_at_month, ppks_created_by, dtks_users.email, ppks_data.ppks_updated_at, dtks_users.nope, dtks_users.fullname')
             ->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id=ppks_data.ppks_status_bantuan')
             ->join('tb_villages', 'tb_villages.id=ppks_data.ppks_kelurahan')
             ->join('tb_districts', 'tb_districts.id=ppks_data.ppks_kecamatan')

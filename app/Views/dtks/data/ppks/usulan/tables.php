@@ -466,7 +466,7 @@
         //Ajax Load data from ajax
         $.ajax({
             type: "POST",
-            url: "<?php echo site_url('editUsulan') ?>",
+            url: "<?php echo site_url('editPpks') ?>",
             data: {
                 id: id
             },
@@ -687,26 +687,13 @@
         });
     });
 
-    function previewImgId() {
-        const du_foto_identitas = document.querySelector('#du_foto_identitas');
-        const imgPreview = document.querySelector('.img-preview-id');
-
-
-        const fileIdentitas = new FileReader();
-        fileIdentitas.readAsDataURL(du_foto_identitas.files[0]);
-
-        fileIdentitas.onload = function(e) {
-            imgPreview.src = e.target.result;
-        }
-    }
-
     function previewImgRmh() {
-        const du_foto_rumah = document.querySelector('#du_foto_rumah');
+        const ppks_foto = document.querySelector('#ppks_foto');
         const imgPreview = document.querySelector('.img-preview-rmh');
 
 
         const fileIdentitas = new FileReader();
-        fileIdentitas.readAsDataURL(du_foto_rumah.files[0]);
+        fileIdentitas.readAsDataURL(ppks_foto.files[0]);
 
         fileIdentitas.onload = function(e) {
             imgPreview.src = e.target.result;

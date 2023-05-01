@@ -184,11 +184,14 @@ $desa_id = session()->get('kode_desa');
                                         <div class="form-group row nopadding">
                                             <label class="col-4 col-sm-4 col-form-label" for="ppks_jenis_kelamin">Jenis Kelamin</label>
                                             <div class="col-8 col-sm-8">
-                                                <select id="ppks_jenis_kelamin" name="ppks_jenis_kelamin" class="form-select form-select-sm">
-                                                    <option value="">-- Pilih Jenis Kelamin --</option>
-                                                    <option value="1">LAKI-LAKI</option>
-                                                    <option value="2">PEREMPUAN</option>
-                                                </select>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" id="chk-Lk" name="ppks_jenis_kelamin" value="1" />
+                                                    <label for="chk-Lk" class="form-check-label"> Laki-Laki </label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" id="chk-Pr" name="ppks_jenis_kelamin" value="2" />
+                                                    <label for="chk-Pr" class="form-check-label"> Perempuan </label>
+                                                </div>
                                                 <div class="invalid-feedback errorppks_jenis_kelamin"></div>
                                             </div>
                                         </div>
@@ -230,7 +233,7 @@ $desa_id = session()->get('kode_desa');
                                     <!-- <label class="label-center mt-2">Dokumen</label> -->
                                     <!-- <div class="form-group row nopadding"> -->
                                     <div class="col-6 col-sm-6 mb-2">
-                                        <img class="img-preview-rmh" src="<?= usulan_foto(null, 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                        <img class="img-preview-rmh" src="<?= ppks_foto(null, ''); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
                                         <br>
                                         <label for="ppks_foto">Foto KPM</label>
                                         <div class="input-group">
@@ -244,12 +247,13 @@ $desa_id = session()->get('kode_desa');
                                     <!-- </div> -->
                                     <!-- <div class="form-group row nopadding"> -->
                                     <div class="col-6 col-sm-6 mb-2">
-                                        <img class="img-preview-rmh" src="<?= usulan_foto(null, 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                        <img class="img-preview-rmh foto-dokumen" src="https://assets.pikiran-rakyat.com/crop/0x0:0x0/x/photo/2020/10/01/4026253578.jpg" style="height: 40px; border-radius: 2px;">
+                                        <!-- <img class="img-preview-rmh" src="<?= ppks_foto(null, ''); ?>" style="width: 30px; height: 40px; border-radius: 2px;"> -->
                                         <br>
-                                        <label for="databansos">Program</label>
+                                        <label for="databansos">Status Bantuan</label>
                                         <div class="input-group">
                                             <select id="databansos" name="databansos" class="form-select form-select-sm">
-                                                <option value="">-- Pilih Program --</option>
+                                                <option value="">-- Pilih --</option>
                                                 <?php foreach ($bansos as $row) { ?>
                                                     <option value="<?= $row['dbj_id'] ?>"> <?php echo $row['dbj_nama_bansos']; ?></option>
                                                 <?php } ?>

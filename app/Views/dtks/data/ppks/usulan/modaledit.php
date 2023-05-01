@@ -83,55 +83,55 @@ $desa_id = session()->get('kode_desa');
             <div class="modal-body">
                 <div id="smartwizard">
                     <ul>
-                        <li><a href="#step-1">Step 1<br /><small>Data Individu</small></a></li>
+                        <li><a href="#step-1">Pendataan<br /><small>Data Individu</small></a></li>
                         <!-- <!-- <li><a href="#step-2">Step 2<br /><small>Personal Info</small></a></li> -->
-                        <li><a href="#step-3">Step 3<br /><small>Survey Kriteria</small></a></li>
-                        <li><a href="#step-4">Step 2<br /><small>Pengusulan Bansos</small></a></li>
+                        <!-- <li><a href="#step-3">Step 3<br /><small>Survey Kriteria</small></a></li> -->
+                        <!-- <li><a href="#step-4">Step 2<br /><small>Pengusulan Bansos</small></a></li> -->
                     </ul>
                     <div>
                         <div id="step-1">
                             <div class="row">
                                 <div class="col-12 col-sm-6">
                                     <div class="form-group row nopadding" hidden>
-                                        <label class="col-4 col-sm-4 col-form-label" for="id">ID</label>
+                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_id">ID</label>
                                         <div class="col-8 col-sm-8">
-                                            <input type="text" name="id" id="id" class="form-control form-control-sm" value="<?= $id; ?>" autofocus>
-                                            <div class="invalid-feedback errorid"></div>
+                                            <input type="text" name="ppks_id" id="ppks_id" class="form-control form-control-sm" value="<?= $ppks_id; ?>" autofocus>
+                                            <div class="invalid-feedback errorppks_id"></div>
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="nik">NIK</label>
+                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_nik">NIK</label>
                                         <div class="col-8 col-sm-8">
-                                            <input type="number" name="nik" id="nik" class="form-control form-control-sm" value="<?= $du_nik; ?>" autocomplete="off">
-                                            <div class="invalid-feedback errornik"></div>
+                                            <input type="number" name="ppks_nik" id="ppks_nik" class="form-control form-control-sm" value="<?= $ppks_nik; ?>" autocomplete="off">
+                                            <div class="invalid-feedback errorppks_nik"></div>
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="nama">Nama</label>
+                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_nama">Nama Lengkap</label>
                                         <div class="col-8 col-sm-8">
-                                            <input type="text" name="nama" id="nama" class="form-control form-control-sm" value="<?= $nama; ?>">
-                                            <div class="invalid-feedback errornama"></div>
+                                            <input type="text" name="ppks_nama" id="ppks_nama" class="form-control form-control-sm" value="<?= $ppks_nama; ?>">
+                                            <div class="invalid-feedback errorppks_nama"></div>
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="nokk">No. KK</label>
+                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_nokk">No. KK</label>
                                         <div class="col-8 col-sm-8">
-                                            <input type="number" name="nokk" id="nokk" class="form-control form-control-sm" value="<?= $nokk; ?>" autocomplete="on">
-                                            <div class="invalid-feedback errornokk"></div>
+                                            <input type="number" name="ppks_nokk" id="ppks_nokk" class="form-control form-control-sm" value="<?= $ppks_nokk; ?>" autocomplete="on">
+                                            <div class="invalid-feedback errorppks_nokk"></div>
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="tempat_lahir">Tempat Lahir</label>
+                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_tempat_lahir">Tempat Lahir</label>
                                         <div class="col-8 col-sm-8">
-                                            <input type="text" name="tempat_lahir" id="tempat_lahir" class="form-control form-control-sm" value="<?= $tempat_lahir; ?>">
-                                            <div class="invalid-feedback errortempat_lahir"></div>
+                                            <input type="text" name="ppks_tempat_lahir" id="ppks_tempat_lahir" class="form-control form-control-sm" value="<?= $ppks_tempat_lahir; ?>">
+                                            <div class="invalid-feedback errorppks_tempat_lahir"></div>
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="tanggal_lahir">Tanggal Lahir</label>
+                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_tgl_lahir">Tanggal Lahir</label>
                                         <div class="col-8 col-sm-8">
-                                            <input type="date" name="tanggal_lahir" id="tanggal_lahir" class="form-control form-control-sm" value="<?= $tanggal_lahir; ?>">
-                                            <div class="invalid-feedback errortanggal_lahir"></div>
+                                            <input type="date" name="ppks_tgl_lahir" id="ppks_tgl_lahir" class="form-control form-control-sm" value="<?= $ppks_tgl_lahir; ?>">
+                                            <div class="invalid-feedback errorppks_tgl_lahir"></div>
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding" style="display: none;">
@@ -142,53 +142,49 @@ $desa_id = session()->get('kode_desa');
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="ibu_kandung">Ibu Kandung</label>
+                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_no_telp">No. Telp/HP</label>
                                         <div class="col-8 col-sm-8">
-                                            <input type="text" name="ibu_kandung" id="ibu_kandung" class="form-control form-control-sm" value="<?= $ibu_kandung; ?>">
-                                            <div class="invalid-feedback erroribu_kandung"></div>
+                                            <input type="text" name="ppks_no_telp" id="ppks_no_telp" class="form-control form-control-sm" value="<?= $ppks_no_telp; ?>">
+                                            <div class="invalid-feedback errorppks_no_telp"></div>
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="jenis_kelamin">Jenis Kelamin</label>
+                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_jenis_kelamin">Jenis Kelamin</label>
                                         <div class="col-8 col-sm-8">
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" id="chk-Lk" name="jenis_kelamin" <?= $jenis_kelamin == '1' ? 'checked' : ''; ?> value="1" />
+                                                <input class="form-check-input" type="radio" id="chk-Lk" name="ppks_jenis_kelamin" <?= $ppks_jenis_kelamin == '1' ? 'checked' : ''; ?> value="1" />
                                                 <label for="chk-Lk" class="form-check-label"> Laki-Laki </label>
                                             </div>
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" id="chk-Pr" name="jenis_kelamin" <?= $jenis_kelamin == '2' ? 'checked' : ''; ?> value="2" />
+                                                <input class="form-check-input" type="radio" id="chk-Pr" name="ppks_jenis_kelamin" <?= $ppks_jenis_kelamin == '2' ? 'checked' : ''; ?> value="2" />
                                                 <label for="chk-Pr" class="form-check-label"> Perempuan </label>
                                             </div>
-                                            <div class="invalid-feedback errorjenis_kelamin"></div>
+                                            <div class="invalid-feedback errorppks_jenis_kelamin"></div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="col-12 col-sm-6">
                                     <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="jenis_pekerjaan">Pekerjaan</label>
+                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_status_keberadaan">Status Keberadaan</label>
                                         <div class="col-8 col-sm-8">
-                                            <select id="jenis_pekerjaan" name="jenis_pekerjaan" class="form-select form-select-sm">
-                                                <option value="">-- Pilih Jenis Pekerjaan --</option>
-                                                <?php foreach ($pekerjaan as $row) { ?>
-                                                    <option <?php if ($jenis_pekerjaan == $row['idPekerjaan']) {
-                                                                echo 'selected';
-                                                            } ?> value="<?= $row['idPekerjaan'] ?>"> <?php echo $row['JenisPekerjaan']; ?></option>
-                                                <?php } ?>
+                                            <select id="ppks_status_keberadaan" name="ppks_status_keberadaan" class="form-select form-select-sm">
+                                                <option value="">-- Pilih --</option>
+                                                <option <?= $ppks_status_keberadaan == 1 ? 'selected' : ''; ?> value="1">PANTI</option>
+                                                <option <?= $ppks_status_keberadaan == 2 ? 'selected' : ''; ?> value="2">MASYARAKAT</option>
                                             </select>
-                                            <div class="invalid-feedback errorjenis_pekerjaan"></div>
+                                            <div class="invalid-feedback errorppks_status_keberadaan"></div>
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="status_kawin">Status</label>
+                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_status_panti">Status Panti</label>
                                         <div class="col-8 col-sm-8">
-                                            <select id="status_kawin" name="status_kawin" class="form-select form-select-sm">
-                                                <option value="">-- Pilih Status Perkawinan --</option>
-                                                <?php foreach ($statusKawin as $row) { ?>
-                                                    <option <?= $status_kawin == $row['idStatus'] ? 'selected' : ''; ?> value="<?= $row['idStatus'] ?>"> <?= $row['StatusKawin']; ?></option>
-                                                <?php } ?>
+                                            <select id="ppks_status_panti" name="ppks_status_panti" class="form-select form-select-sm">
+                                                <option value="">-- Pilih --</option>
+                                                <option <?= $ppks_status_panti == 1 ? 'selected' : ''; ?> value="1">BUTUH</option>
+                                                <option <?= $ppks_status_panti == 2 ? 'selected' : ''; ?> value="2">TIDAK</option>
                                             </select>
-                                            <div class="invalid-feedback errorstatus_kawin"></div>
+                                            <div class="invalid-feedback errorppks_status_panti"></div>
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
@@ -238,283 +234,66 @@ $desa_id = session()->get('kode_desa');
                                             <div class="invalid-feedback erroralamat"></div>
                                         </div>
                                     </div>
-
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="shdk">SHDK</label>
-                                        <div class="col-8 col-sm-8">
-                                            <select id="shdk" name="shdk" class="form-select form-select-sm">
-                                                <option value="">-- Status Hubungan dalam Keluarga --</option>
-                                                <?php foreach ($shdk as $row) { ?>
-                                                    <option <?php if ($stahub == $row['id']) {
-                                                                echo 'selected';
-                                                            } ?> value="<?= $row['id']; ?>"><?= $row['jenis_shdk']; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                            <div class="invalid-feedback errorShdk"></div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-12">
-                                    <div <?= $user > 3 ? ' hidden' : ''; ?>>
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-12 d-flex justify-content-center">
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input larger" type="checkbox" id="proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
-                                                </div>
-                                                <label for="proses" class="form-check-label">PADAN </label>
-                                                <div class="invalid-feedback errordu_proses"></div>
-                                            </div>
+                                <!-- <div class="col-sm-12 col-12 mt-2"> -->
+                                <!-- <label class="label-center mt-2">Dokumen</label> -->
+                                <!-- <div class="form-group row nopadding"> -->
+                                <div class="col-6 col-sm-6 mb-2">
+                                    <a download="<?= $ppks_foto; ?>" href="<?= ppks_foto($ppks_foto, ''); ?>">
+                                        <img class="img-preview-rmh foto-dokumen" src="<?= ppks_foto($ppks_foto, ''); ?>">
+                                    </a>
+                                    <br>
+                                    <label for="ppks_foto">Foto KPM</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="fa fa-home"></i></span>
                                         </div>
-                                    </div>
-                                    <div class="modal-footer mt-3 justify-content-between">
-                                        <input type="datetime-local" name="updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
-                                        <button type="submit" class="btn btn-block btn-warning btnSimpan">Update</button>
+                                        <input type="file" class="form-control form-control-sm" spellcheck="false" name="ppks_foto" id="ppks_foto" onchange="previewImgRmh()" accept="image/*" capture />
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div id="step-3" class="">
-                            <div class="modal-body">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <b><em>*Keterangan :</em></b><br />
-                                        <input type="checkbox" onclick="return false" checked /> = Ya
-                                        <br />
-                                        <input type="checkbox" onclick="return false" /> = Tidak
-                                        <hr>
+                                <div class="invalid-feedback errorppks_foto"></div>
+                                <div class="col-6 col-sm-6 mb-2">
+                                    <!-- <div class="form-group row nopadding"> -->
+                                    <img class="img-preview-rmh foto-dokumen" src="https://assets.pikiran-rakyat.com/crop/0x0:0x0/x/photo/2020/10/01/4026253578.jpg" style="height: 80px; width: auto;">
+                                    <br>
+                                    <label for="databansos">Status Program</label>
+                                    <div class="input-group">
+                                        <select id="databansos" name="databansos" class="form-select form-select-sm">
+                                            <option value="">-- Pilih --</option>
+                                            <?php foreach ($bansos as $row) { ?>
+                                                <option <?php if ($databansos == $row['dbj_id']) {
+                                                            echo 'selected';
+                                                        } ?> value="<?= $row['dbj_id'] ?>"> <?php echo $row['dbj_nama_bansos']; ?>
+                                                </option>
+                                            <?php } ?>
+                                        </select>
+                                        <div class="invalid-feedback errordatabansos"></div>
                                     </div>
-                                    <div class="col-12 col-sm-6">
-                                        <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk0">Apakah memiliki tempat berteduh tetap sehari-hari?</label>
-                                            <div class="col-2">
-                                                <input class="form-check-input" type="checkbox" id="sk0" name="sk0" <?= $sk0 == '1' ? 'checked' : ''; ?> value="1" />
-                                                <label for="sk0" class="form-check-label"> Ya</label>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk5">Apakah kepala keluarga atau pengurus keluarga masih bekerja?</label>
-                                            <div class="col-2">
-                                                <input class="form-check-input" type="checkbox" id="sk5" name="sk5" <?= $sk5 == '1' ? 'checked' : ''; ?> value="1" />
-                                                <label for="sk5" class="form-check-label"> Ya</label>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk6">Apakah pengeluaran pangan lebih besar (>70%) dari total pengeluaran?</label>
-                                            <div class="col-2">
-                                                <input class="form-check-input" type="checkbox" id="sk6" name="sk6" <?= $sk6 == '1' ? 'checked' : ''; ?> value="1" />
-                                                <label for="sk6" class="form-check-label"> Ya</label>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk7">Apakah tempat tinggal sebagian besar berlantai tanah dan/atau plesteran?</label>
-                                            <div class="col-2">
-                                                <input class="form-check-input" type="checkbox" id="sk7" name="sk7" <?= $sk7 == '1' ? 'checked' : ''; ?> value="1" />
-                                                <label for="sk7" class="form-check-label"> Ya</label>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk8">Apakah tempat tinggal memiliki fasilitas buang air kecil / besar sendiri?</label>
-                                            <div class="col-2">
-                                                <input class="form-check-input" type="checkbox" id="sk8" name="sk8" <?= $sk8 == '1' ? 'checked' : ''; ?> value="1" />
-                                                <label for="sk8" class="form-check-label"> Ya</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-sm-6">
-                                        <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk9">Apakah target survey tinggal bersama anggota keluarga yang lain?</label>
-                                            <div class="col-2">
-                                                <input class="form-check-input" type="checkbox" id="sk9" name="sk9" <?= $sk9 == '1' ? 'checked' : ''; ?> value="1" />
-                                                <label for="sk9" class="form-check-label"> Ya</label>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk1">Apakah pernah khawatir atau pernah tidak makan dalam setahun terakhir?</label>
-                                            <div class="col-2">
-                                                <input class="form-check-input" type="checkbox" id="sk1" name="sk1" <?= $sk1 == '1' ? 'checked' : ''; ?> value="1" />
-                                                <label for="sk1" class="form-check-label"> Ya</label>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk2">Apakah ada pengeluaran untuk pakaian selama 1 (satu) tahun terakhir?</label>
-                                            <div class="col-2">
-                                                <input class="form-check-input" type="checkbox" id="sk2" name="sk2" <?= $sk2 == '1' ? 'checked' : ''; ?> value="1" />
-                                                <label for="sk2" class="form-check-label"> Ya</label>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk3">Apakah tempat tinggal sebagian besar berdinding bambu / kawat / kayu?</label>
-                                            <div class="col-2">
-                                                <input class="form-check-input" type="checkbox" id="sk3" name="sk3" <?= $sk3 == '1' ? 'checked' : ''; ?> value="1" />
-                                                <label for="sk3" class="form-check-label"> Ya</label>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk4">Apakah sumber penerangan berasal dari listrik PLN 450 watt atau bukan listrik?</label>
-                                            <div class="col-2">
-                                                <input class="form-check-input" type="checkbox" id="sk4" name="sk4" <?= $sk4 == '1' ? 'checked' : ''; ?> value="1" />
-                                                <label for="sk4" class="form-check-label"> Ya</label>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <!-- </div> -->
                                 </div>
-                            </div>
-                        </div>
-
-                        <div id="step-4" class="">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="form-group row nopadding">
-                                        <p class="col-12 col-form-label">CPM : <em><?= $nama . ' - ' . $alamat . ' RT ' . $datart . ' RW ' . $datarw; ?></em></p>
-                                    </div>
-                                    <hr>
-                                </div>
-                                <div class="col-12 col-sm-4">
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-3 col-form-label" for="databansos">Program</label>
-                                        <div class="col-8 col-sm-9">
-                                            <select id="databansos" name="databansos" class="form-select form-select-sm">
-                                                <option value="">-- Pilih Program --</option>
-                                                <?php foreach ($bansos as $row) { ?>
-                                                    <option <?php if ($databansos == $row['dbj_id']) {
-                                                                echo 'selected';
-                                                            } ?> value="<?= $row['dbj_id'] ?>"> <?php echo $row['dbj_nama_bansos']; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                            <div class="invalid-feedback errordatabansos"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-sm-4">
-                                    <div class="form-group row nopadding" id="disabil_status_div">
-                                        <label for="disabil_status" class="col-4 col-sm-3 col-form-label">Disabilitas</label>
-                                        <div class="col-8 col-sm-9">
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" id="chk-Yes" name="disabil_status" <?= $disabil_status == 1 ? 'checked' : ''; ?> value="1" />
-                                                <label for="chk-Yes" class="form-check-label"> Ya</label>
-                                            </div>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" id="chk-No" name="disabil_status" <?= $disabil_status == 2 ? 'checked' : ''; ?> value="2" />
-                                                <label for="chk-No" class="form-check-label"> Tidak</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding" id="disabil_jenis_div" style="display: none">
-                                        <label for="disabil_jenis" class="col-4 col-sm-3 col-form-label">Jenis</label>
-                                        <div class="col-8 col-sm-9">
-                                            <select id="disabil_jenis" name="disabil_jenis" class="form-select form-select-sm">
-                                                <option value="">-- Pilih Jenis Disabilitas --</option>
-                                                <?php foreach ($DisabilitasJenisModel as $row) { ?>
-                                                    <option <?= $disabil_jenis == $row['dj_id'] ? 'selected' : ''; ?> value="<?= $row['dj_id'] ?>"> <?php echo $row['dj_keterangan']; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding" id="du_so_id_div" style="display: none;">
-                                        <label class="col-4 col-sm-4 col-form-label" for="du_so_id">Status</label>
-                                        <div class="col-8 col-sm-8">
-                                            <select id="du_so_id" name="du_so_id" class="form-select form-select-sm">
-                                                <option value="">-- Status Orangtua --</option>
-                                                <?php foreach ($sta_ortu as $row) { ?>
-                                                    <option <?= $du_so_id == $row['so_id'] ? 'selected' : ''; ?> value="<?= $row['so_id'] ?>"> <?php echo $row['so_desk']; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                            <div class="invalid-feedback errordu_so_id"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-sm-4">
-                                    <div class="form-group row nopadding" id="status_hamil_div" style="display: none">
-                                        <label class="col-4 col-sm-3 col-form-label" for="status_hamil">Hamil</label>
-                                        <div class="col-8 col-sm-9">
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" id="chk-YaHamil" name="status_hamil" <?= $status_hamil == 1 ? 'checked' : ''; ?> value="1" />
-                                                <label for="chk-YaHamil" class="form-check-label"> Ya </label>
-                                            </div v>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" id="chk-TidakHamil" name="status_hamil" <?= $status_hamil == 2 ? 'checked' : ''; ?> value="2" />
-                                                <label for="chk-TidakHamil" class="form-check-label"> Tidak </label>
-                                            </div v>
-                                            <div class="invalid-feedback errorstatus_hamil"></div>
-                                            </di v>
-                                        </div>
-                                        <div class="form-group row nopadding" id="tgl_hamil_div" style="display: none;">
-                                            <label class="col-4 col-sm-2 col-form-label" for="tgl_hamil">Tanggal</label>
-                                            <div class="col-8 col-sm-8">
-                                                <input type="date" name="tgl_hamil" id="tgl_hamil" class="form-control form-control-sm" value="<?= $tgl_hamil; ?>">
-                                                <div class="invalid-feedback errortgl_hamil"></div>
-                                            </div v>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-12 col-12 mt-2">
-                                    <label class="label-center mt-2">Dokumen</label>
-                                    <div class="form-group row nopadding">
-                                        <div class="col-6 col-sm-6 mb-2">
-                                            <a download="<?= $du_foto_identitas; ?>" href="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>">
-                                                <img class="img-preview-id foto-dokumen" src="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>">
-                                            </a>
-                                            <br>
-                                            <label for="du_foto_identitas">Foto KTP/KK/KIA/AKL</label>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text"><i class="fas fa-address-card"></i></span>
-                                                </div>
-                                                <input type="file" class="form-control form-control-sm" spellcheck="false" name="du_foto_identitas" id="du_foto_identitas" onchange="previewImgId()" accept="image/*" capture />
-                                            </div>
-                                        </div>
-                                        <div class="invalid-feedback errordu_foto_identitas"></div>
-                                        <div class="col-6 col-sm-6 mb-2">
-                                            <a download="<?= $du_foto_rumah; ?>" href="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>">
-                                                <img class="img-preview-rmh foto-dokumen" src="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>">
-                                            </a>
-                                            <br>
-                                            <label for="du_foto_rumah">Foto Rumah</label>
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text"><i class="fa fa-home"></i></span>
-                                                </div>
-                                                <input type="file" class="form-control form-control-sm" spellcheck="false" name="du_foto_rumah" id="du_foto_rumah" onchange="previewImgRmh()" accept="image/*" capture />
-                                            </div>
-                                        </div>
-                                        <div class="invalid-feedback errordu_foto_rumah"></div>
-                                    </div>
-                                </div>
+                                <!-- </div> -->
+                                <!-- </div> -->
                                 <div class="col-sm-12 col-12 mt-2">
                                     <label class="label-center mt-2">Koordinat</label>
                                     <div class="form-group row nopadding">
 
                                         <div class="col-sm-6 col-6">
-                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Lat" spellcheck="false" id="latitude" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
+                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Lat" spellcheck="false" id="latitude" name="du_latitude" readonly required>
                                             <div class="invalid-feedback errordu_latitude"></div>
                                         </div>
-                                        <div class="col-sm-5 col-5">
-                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Long" spellcheck="false" id="longitude" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
+                                        <div class="col-sm-6 col-6">
+                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Long" spellcheck="false" id="longitude" name="du_longitude" readonly required>
                                             <div class="invalid-feedback errordu_longitude"></div>
                                         </div>
-                                        <div class="col-sm-1 col-1">
+                                        <div class="col-sm-1 col-1" hidden>
                                             <button type="button" class="btn btn-outline-primary" onclick="getLocation()"><i class="fas fa-map-marked-alt"></i></button>
                                         </div>
                                     </div>
                                 </div>
-                                <div <?= $user > 3 ? ' hidden' : ''; ?>>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-12 d-flex justify-content-center">
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input larger" type="checkbox" id="proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
-                                            </div>
-                                            <label for="proses" class="form-check-label">PADAN </label>
-                                            <div class="invalid-feedback errordu_proses"></div>
-                                        </div>
-                                    </div>
-                                </div>
                                 <div class="modal-footer mt-3 justify-content-between">
-                                    <input type="datetime-local" name="updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
+                                    <input type="datetime-local" name="ppks_updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
                                     <button type="submit" class="btn btn-block btn-warning btnSimpan">Update</button>
                                 </div>
                             </div>
@@ -530,6 +309,7 @@ $desa_id = session()->get('kode_desa');
 
 <script>
     $(document).ready(function() {
+
         $('.btnSimpan').click(function(e) {
             e.preventDefault();
             let $kelurahan = $('#kelurahan').removeAttr('disabled', '');
@@ -542,7 +322,7 @@ $desa_id = session()->get('kode_desa');
             let data = new FormData(form);
             $.ajax({
                 type: "POST",
-                url: '<?= base_url('/updateUsulan') ?>',
+                url: '<?= base_url('/updatePpks') ?>',
                 data: data,
                 enctype: 'multipart/form-data',
                 processData: false,
@@ -560,76 +340,68 @@ $desa_id = session()->get('kode_desa');
                 success: function(response) {
                     if (response.error) {
 
-                        if (response.error.shdk) {
-                            $('#shdk').addClass('is-invalid');
-                            $('.errorShdk').html(response.error.shdk);
+                        if (response.error.ppks_nik) {
+                            $('#ppks_nik').addClass('is-invalid');
+                            $('.errorppks_nik').html(response.error.ppks_nik);
                         } else {
-                            $('#shdk').removeClass('is-invalid');
-                            $('.errorShdk').html('');
+                            $('#ppks_nik').removeClass('is-invalid');
+                            $('.errorppks_nik').html('');
                         }
 
-                        if (response.error.nik) {
-                            $('#nik').addClass('is-invalid');
-                            $('.errornik').html(response.error.nik);
+                        if (response.error.ppks_nokk) {
+                            $('#ppks_nokk').addClass('is-invalid');
+                            $('.errorppks_nokk').html(response.error.ppks_nokk);
                         } else {
-                            $('#nik').removeClass('is-invalid');
-                            $('.errornik').html('');
+                            $('#ppks_nokk').removeClass('is-invalid');
+                            $('.errorppks_nokk').html('');
                         }
 
-                        if (response.error.nokk) {
-                            $('#nokk').addClass('is-invalid');
-                            $('.errornokk').html(response.error.nokk);
+                        if (response.error.ppks_nama) {
+                            $('#ppks_nama').addClass('is-invalid');
+                            $('.errorppks_nama').html(response.error.ppks_nama);
                         } else {
-                            $('#nokk').removeClass('is-invalid');
-                            $('.errornokk').html('');
+                            $('#ppks_nama').removeClass('is-invalid');
+                            $('.errorppks_nama').html('');
                         }
 
-                        if (response.error.nama) {
-                            $('#nama').addClass('is-invalid');
-                            $('.errornama').html(response.error.nama);
+                        if (response.error.ppks_tempat_lahir) {
+                            $('#ppks_tempat_lahir').addClass('is-invalid');
+                            $('.errorppks_tempat_lahir').html(response.error.ppks_tempat_lahir);
                         } else {
-                            $('#nama').removeClass('is-invalid');
-                            $('.errornama').html('');
+                            $('#ppks_tempat_lahir').removeClass('is-invalid');
+                            $('.errorppks_tempat_lahir').html('');
                         }
 
-                        if (response.error.tempat_lahir) {
-                            $('#tempat_lahir').addClass('is-invalid');
-                            $('.errortempat_lahir').html(response.error.tempat_lahir);
+                        if (response.error.ppks_tgl_lahir) {
+                            $('#ppks_tgl_lahir').addClass('is-invalid');
+                            $('.errorppks_tgl_lahir').html(response.error.ppks_tgl_lahir);
                         } else {
-                            $('#tempat_lahir').removeClass('is-invalid');
-                            $('.errortempat_lahir').html('');
+                            $('#ppks_tgl_lahir').removeClass('is-invalid');
+                            $('.errorppks_tgl_lahir').html('');
                         }
 
-                        if (response.error.tanggal_lahir) {
-                            $('#tanggal_lahir').addClass('is-invalid');
-                            $('.errortanggal_lahir').html(response.error.tanggal_lahir);
+                        if (response.error.ppks_jenis_kelamin) {
+                            $('#ppks_jenis_kelamin').addClass('is-invalid');
+                            $('.errorppks_jenis_kelamin').html(response.error.ppks_jenis_kelamin);
                         } else {
-                            $('#tanggal_lahir').removeClass('is-invalid');
-                            $('.errortanggal_lahir').html('');
+                            $('#ppks_jenis_kelamin').removeClass('is-invalid');
+                            $('.errorppks_jenis_kelamin').html('');
                         }
 
-                        if (response.error.jenis_kelamin) {
-                            $('#jenis_kelamin').addClass('is-invalid');
-                            $('.errorjenis_kelamin').html(response.error.jenis_kelamin);
+                        if (response.error.ppks_kategori_id) {
+                            $('#ppks_kategori_id').addClass('is-invalid');
+                            $('.errorppks_kategori_id').html(response.error.ppks_kategori_id);
                         } else {
-                            $('#jenis_kelamin').removeClass('is-invalid');
-                            $('.errorjenis_kelamin').html('');
+                            $('#ppks_kategori_id').removeClass('is-invalid');
+                            $('.errorppks_kategori_id').html('');
                         }
 
-                        if (response.error.jenis_pekerjaan) {
-                            $('#jenis_pekerjaan').addClass('is-invalid');
-                            $('.errorjenis_pekerjaan').html(response.error.jenis_pekerjaan);
+                        if (response.error.ppks_no_telp) {
+                            $('#ppks_no_telp').addClass('is-invalid');
+                            $('.errorppks_no_telp').html(response.error.ppks_no_telp);
                         } else {
-                            $('#jenis_pekerjaan').removeClass('is-invalid');
-                            $('.errorjenis_pekerjaan').html('');
-                        }
-
-                        if (response.error.status_kawin) {
-                            $('#status_kawin').addClass('is-invalid');
-                            $('.errorstatus_kawin').html(response.error.status_kawin);
-                        } else {
-                            $('#status_kawin').removeClass('is-invalid');
-                            $('.errorstatus_kawin').html('');
+                            $('#ppks_no_telp').removeClass('is-invalid');
+                            $('.errorppks_no_telp').html('');
                         }
 
                         if (response.error.kelurahan) {
@@ -664,12 +436,12 @@ $desa_id = session()->get('kode_desa');
                             $('.erroralamat').html('');
                         }
 
-                        if (response.error.ibu_kandung) {
-                            $('#ibu_kandung').addClass('is-invalid');
-                            $('.erroribu_kandung').html(response.error.ibu_kandung);
+                        if (response.error.ppks_status_keberadaan) {
+                            $('#ppks_status_keberadaan').addClass('is-invalid');
+                            $('.errorppks_status_keberadaan').html(response.error.ppks_status_keberadaan);
                         } else {
-                            $('#ibu_kandung').removeClass('is-invalid');
-                            $('.erroribu_kandung').html('');
+                            $('#ppks_status_keberadaan').removeClass('is-invalid');
+                            $('.errorppks_status_keberadaan').html('');
                         }
 
                         if (response.error.databansos) {
@@ -680,28 +452,20 @@ $desa_id = session()->get('kode_desa');
                             $('.errordatabansos').html('');
                         }
 
-                        if (response.error.disabil_status) {
-                            $('#databansos').addClass('is-invalid');
-                            $('.errordatabansos').html(response.error.databansos);
+                        if (response.error.ppks_status_panti) {
+                            $('#ppks_status_panti').addClass('is-invalid');
+                            $('.errorppks_status_panti').html(response.error.ppks_status_panti);
                         } else {
-                            $('#databansos').removeClass('is-invalid');
-                            $('.errordatabansos').html('');
+                            $('#ppks_status_panti').removeClass('is-invalid');
+                            $('.errorppks_status_panti').html('');
                         }
 
-                        if (response.error.du_foto_identitas) {
-                            $('#du_foto_identitas').addClass('is-invalid');
-                            $('.errordu_foto_identitas').html(response.error.du_foto_identitas);
+                        if (response.error.ppks_foto) {
+                            $('#ppks_foto').addClass('is-invalid');
+                            $('.errorppks_foto').html(response.error.ppks_foto);
                         } else {
-                            $('#du_foto_identitas').removeClass('is-invalid');
-                            $('.errordu_foto_identitas').html('');
-                        }
-
-                        if (response.error.du_foto_rumah) {
-                            $('#du_foto_rumah').addClass('is-invalid');
-                            $('.errordu_foto_rumah').html(response.error.du_foto_rumah);
-                        } else {
-                            $('#du_foto_rumah').removeClass('is-invalid');
-                            $('.errordu_foto_rumah').html('');
+                            $('#ppks_foto').removeClass('is-invalid');
+                            $('.errorppks_foto').html('');
                         }
 
                         if (response.error.du_latitude) {
@@ -751,6 +515,7 @@ $desa_id = session()->get('kode_desa');
                 error: function(xhr, ajaxOptions, thrownError) {
                     alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
                 }
+
             });
         })
 
@@ -789,6 +554,13 @@ $desa_id = session()->get('kode_desa');
             showStepURLhash: false,
         });
 
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            // z.innerHTML = "Geolokasi Tidak Didukung oleh Browser Ini";
+            alert("Geolokasi Tidak Didukung oleh Browser Ini");
+        }
+
         if ($("#chk-Pr").is(":checked")) {
             $("#status_hamil_div").show();
         } else {
@@ -817,12 +589,12 @@ $desa_id = session()->get('kode_desa');
         //     $("#disabil_status_div").show();
         // };
 
-        $('#du_usia').val(getAge);
-        if ($('#du_usia').val() < 18) {
-            $('#du_so_id_div').show();
-        } else {
-            $('#du_so_id_div').hide();
-        }
+        // $('#du_usia').val(getAge);
+        // if ($('#du_usia').val() < 18) {
+        //     $('#du_so_id_div').show();
+        // } else {
+        //     $('#du_so_id_div').hide();
+        // }
 
     });
 
@@ -856,14 +628,14 @@ $desa_id = session()->get('kode_desa');
 
     });
 
-    function getAge() {
-        var dob = new Date(document.getElementById('tanggal_lahir').value);
-        var today = new Date();
-        var age = Math.floor((today - dob) / (365.25 * 24 * 60 * 60 * 1000));
-        // var du_usia = document.getElementById('du_usia').value;
+    // function getAge() {
+    //     var dob = new Date(document.getElementById('tanggal_lahir').value);
+    //     var today = new Date();
+    //     var age = Math.floor((today - dob) / (365.25 * 24 * 60 * 60 * 1000));
+    //     // var du_usia = document.getElementById('du_usia').value;
 
-        return age;
-    }
+    //     return age;
+    // }
 
     var x = document.getElementById("latitude");
     var y = document.getElementById("longitude");
