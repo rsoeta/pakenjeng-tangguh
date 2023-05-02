@@ -49,7 +49,6 @@
                     </div>
                 </div>
             </div>
-            <?= form_close() ?>
             <div class="row">
                 <div class="col-12">
                     <div class="card card-primary card-tabs">
@@ -294,7 +293,7 @@
                     </div>
                 </div>
             </div>
-
+            <?= form_close() ?>
         </div>
     </section>
 </div>

@@ -32,7 +32,7 @@
                     <?= session()->get('message'); ?>
                 </div>
             <?php endif; ?>
-            <?= form_open('dtks/usulan22/export', ['target' => 'blank']); ?>
+            <?= form_open('/exportPpks', ['target' => 'blank']); ?>
             <div class="row">
                 <div class="col-12 col-sm-6">
                     <div class="row">
@@ -44,7 +44,6 @@
                     </div>
                 </div>
             </div>
-            <?= form_close() ?>
             <div class="row">
                 <div class="col-12">
                     <div class="card card-success card-tabs">
@@ -286,7 +285,7 @@
                     </div>
                 </div>
             </div>
-
+            <?= form_close() ?>
         </div>
     </section>
 </div>

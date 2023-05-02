@@ -24,6 +24,7 @@ use App\Models\Dtks\LembagaModel;
 use App\Models\Dtks\CsvReportModel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use \PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 class Ppks extends BaseController
 {
@@ -1088,12 +1089,12 @@ class Ppks extends BaseController
         // $model = new Usulan22Model();
         // $tmbExpData = $this->request->getVar('btnExpData');
         // $tmbExpAll = $this->request->getVar('btnExpAll');
-        $filter1 = $this->request->getVar('desa');
-        $filter4 = $this->request->getVar('bansos');
-        $filter5 = $this->request->getVar('data_tahun');
-        $filter6 = $this->request->getVar('data_bulan');
+        $filter1 = $this->request->getPost('desa');
+        $filter4 = $this->request->getPost('bansos');
+        $filter5 = $this->request->getPost('data_tahun');
+        $filter6 = $this->request->getPost('data_bulan');
 
-        // dd($this->WilayahModel);
+        // dd(array($filter1, $filter4, $filter5, $filter6));
         // if (isset($tmbExpData)) {
         // if ($filter4 == null || $filter5 == null || $filter6 == null) {
 
@@ -1102,10 +1103,10 @@ class Ppks extends BaseController
         // } else {
         // dd($filter1, $filter4, $filter5, $filter6);
 
-        $data = $this->Usulan22Model->dataExport($filter1, $filter4, $filter5, $filter6)->getResultArray();
+        $data = $this->PpksModel->dataExport($filter1, $filter4, $filter5, $filter6)->getResultArray();
         // dd($data);
 
-        $this->WilayahModel = $wilayahModel->getVillage($filter1);
+        $wilayahModel = $wilayahModel->getVillage($filter1);
         $bulan = array(
             1 =>   'Januari',
             'Februari',
@@ -1120,34 +1121,37 @@ class Ppks extends BaseController
             'November',
             'Desember'
         );
-        // $file_name = 'TEMPLATE_PENGUSULAN_PAKENJENG - ' . $this->WilayahModel['name'] . ' - ' . $filter4 . '.xlsx';
-        $file_name = 'TEMPLATE_EXCEL_USULAN - PAKENJENG - ' .  $this->WilayahModel['name'] . ' - ' . strtoupper($bulan[$filter6]) . '.xlsx';
+        // $file_name = 'TEMPLATE_PENGUSULAN_PAKENJENG - ' . $wilayahModel['name'] . ' - ' . $filter4 . '.xlsx';
+        $file_name = 'Template-PPKS-Kec-Pakenjeng-' .  ucwords(strtolower($wilayahModel['name'])) . '.xlsx';
+        // $file_name = 'Template-PPKS-Kec.xlsx';
 
         $spreadsheet = new Spreadsheet();
 
+        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+
         $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setCellValue('A1', 'NIK');
-        $sheet->setCellValue('B1', 'PROGRAM BANSOS');
-        $sheet->setCellValue('C1', 'NOKK');
-        $sheet->setCellValue('D1', 'NAMA');
-        $sheet->setCellValue('E1', 'TEMPAT LAHIR');
-        $sheet->setCellValue('F1', "TANGGAL LAHIR\n(31/01/2000)");
-        $sheet->setCellValue('G1', 'IBU KANDUNG');
-        $sheet->setCellValue('H1', 'JENIS KELAMIN');
-        $sheet->setCellValue('I1', 'JENIS PEKERJAAN');
-        $sheet->setCellValue('J1', 'STATUS KAWIN');
-        $sheet->setCellValue('K1', 'ALAMAT');
-        $sheet->setCellValue('L1', 'RT');
-        $sheet->setCellValue('M1', 'RW');
-        $sheet->setCellValue('N1', 'PROVINSI');
-        $sheet->setCellValue('O1', 'KABUPATEN');
-        $sheet->setCellValue('P1', 'KECAMATAN');
-        $sheet->setCellValue('Q1', 'KELURAHAN');
-        $sheet->setCellValue('R1', 'STATUS DISABILITAS');
-        $sheet->setCellValue('S1', 'KODE JENIS DISABILITAS');
-        $sheet->setCellValue('T1', 'STATUS HAMIL');
-        $sheet->setCellValue('U1', "TGL MULAI HAMIL\n(31/12/2021)");
+        $sheet->setCellValue('A1', 'ppkskategori_id');
+        $sheet->setCellValue('B1', 'nama');
+        $sheet->setCellValue('C1', 'alamat');
+        $sheet->setCellValue('D1', 'nik');
+        $sheet->setCellValue('E1', 'nokk');
+        $sheet->setCellValue('F1', 'jenis_kelamin');
+        $sheet->setCellValue('G1', 'tempat_lahir');
+        $sheet->setCellValue('H1', 'tgl_lahir');
+        $sheet->setCellValue('I1', 'no_telp');
+        $sheet->setCellValue('J1', 'status_keberadaan');
+        $sheet->setCellValue('K1', 'status_bantuan');
+        $sheet->setCellValue('L1', 'status_panti');
+        // $sheet->setCellValue('M1', 'tgl_out');
+        $sheet->setCellValue('M1', 'foto');
+        // $sheet->setCellValue('O1', 'KABUPATEN');
+        // $sheet->setCellValue('P1', 'KECAMATAN');
+        // $sheet->setCellValue('Q1', 'KELURAHAN');
+        // $sheet->setCellValue('R1', 'STATUS DISABILITAS');
+        // $sheet->setCellValue('S1', 'KODE JENIS DISABILITAS');
+        // $sheet->setCellValue('T1', 'STATUS HAMIL');
+        // $sheet->setCellValue('U1', "TGL MULAI HAMIL\n(31/12/2021)");
 
         $styleArray = [
             'font' => [
@@ -1174,50 +1178,87 @@ class Ppks extends BaseController
             ],
         ];
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:U1')->applyFromArray($styleArray);
+        $spreadsheet->getActiveSheet()->getStyle('A1:M1')->applyFromArray($styleArray);
 
         $count = 2;
 
         foreach ($data as $row) {
 
-            $tglLahir = date('d/m/Y', strtotime($row['tanggal_lahir']));
-            if ($row['hamil_status'] == 1) {
-                $status_hamil = 'YA';
-            } elseif ($row['hamil_status'] == 2) {
-                $status_hamil = 'TIDAK';
+            // $tglLahir = date('d/m/Y', strtotime($row['tanggal_lahir']));
+            // if ($row['hamil_status'] == 1) {
+            //     $status_hamil = 'YA';
+            // } elseif ($row['hamil_status'] == 2) {
+            //     $status_hamil = 'TIDAK';
+            // } else {
+            //     $status_hamil = '';
+            // }
+
+            // if ($row['hamil_tgl'] > 1) {
+            //     $hamil_tgl = date('d/m/Y', strtotime($row['hamil_tgl']));
+            // } else {
+            //     $hamil_tgl = '';
+            // }
+
+            // $TglBuat = date('m/Y', strtotime($row['created_at']));
+
+            $sheet->setCellValue('A' . $count, $count, $row['ppks_kategori_id']);
+            $sheet->setCellValue('B' . $count, strtoupper($row['ppks_nama']));
+            $sheet->setCellValue('C' . $count, strtoupper($row['ppks_alamat'] . " RT " . $row['ppks_rt'] . " RW " . $row['ppks_rw']));
+            // $sheet->setCellValue('C' . $count, strtoupper($row['ppks_alamat']));
+            $sheet->setCellValueExplicit('D' . $count, $row['ppks_nik'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('E' . $count, $row['ppks_nokk'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('F' . $count, $row['NamaJenKel']);
+            $sheet->setCellValue('G' . $count, strtoupper($row['ppks_tempat_lahir']));
+            $sheet->setCellValue('H' . $count, $row['ppks_tgl_lahir']);
+            $sheet->setCellValue('I' . $count, $row['ppks_no_telp']);
+            $sheet->setCellValue('J' . $count, $row['psk_nama_status']);
+            if ($row['ppks_status_bantuan'] != 4) {
+                $sheet->setCellValue('K' . $count, 'YA');
             } else {
-                $status_hamil = '';
+                $sheet->setCellValue('K' . $count, 'TIDAK');
             }
+            $sheet->setCellValue('L' . $count, $row['pp_status_panti']);
 
-            if ($row['hamil_tgl'] > 1) {
-                $hamil_tgl = date('d/m/Y', strtotime($row['hamil_tgl']));
-            } else {
-                $hamil_tgl = '';
-            }
+            // Set the image data
+            $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+            $drawing->setName($row['ppks_foto']);
+            $drawing->setDescription($row['ppks_foto']);
+            $drawing->setPath('data/ppks_kpm/' . $row['ppks_foto']);
+            // $drawing->setHeight(50);
+            // $drawing->setWidth(50);
 
-            $TglBuat = date('m/Y', strtotime($row['created_at']));
+            // Get the height and width of the image
+            // [$width, $height] = getimagesize('data/ppks_kpm/' . $row['ppks_foto']);
 
-            $sheet->setCellValueExplicit('A' . $count, $row['du_nik'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $sheet->setCellValue('B' . $count, $row['dbj_nama_bansos']);
-            $sheet->setCellValueExplicit('C' . $count, $row['nokk'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $sheet->setCellValue('D' . $count, strtoupper($row['nama']));
-            $sheet->setCellValue('E' . $count, strtoupper($row['tempat_lahir']));
-            $sheet->setCellValue('F' . $count, $tglLahir);
-            $sheet->setCellValue('G' . $count, strtoupper($row['ibu_kandung']));
-            $sheet->setCellValue('H' . $count, $row['NamaJenKel']);
-            $sheet->setCellValue('I' . $count, $row['JenisPekerjaan']);
-            $sheet->setCellValue('J' . $count, $row['StatusKawin']);
-            $sheet->setCellValue('K' . $count, strtoupper($row['alamat']));
-            $sheet->setCellValue('L' . $count, $row['rt']);
-            $sheet->setCellValue('M' . $count, $row['rw']);
-            $sheet->setCellValue('N' . $count, $row['prov']);
-            $sheet->setCellValue('O' . $count, $row['kab']);
-            $sheet->setCellValue('P' . $count, $row['kec']);
-            $sheet->setCellValue('Q' . $count, $row['desa']);
-            $sheet->setCellValue('R' . $count, $row['dc_status']);
-            $sheet->setCellValue('S' . $count, $row['dj_kode']);
-            $sheet->setCellValue('T' . $count, $status_hamil);
-            $sheet->setCellValue('U' . $count, $hamil_tgl);
+            // Get the height and width of the image
+            list($width, $height) = getimagesize('data/ppks_kpm/' . $row['ppks_foto']);
+
+            // Set the desired width (5cm in pixels)
+            $desiredWidth = 189;
+
+            // Calculate the scale factor
+            $scaleFactor = $desiredWidth / $width;
+
+            // Set the height and width of the image using the scale factor
+            $drawing->setHeight($height * $scaleFactor);
+            $drawing->setWidth($width * $scaleFactor);
+            $drawing->setCoordinates('M' . $count);
+
+            $drawing->setWorksheet($spreadsheet->getActiveSheet());
+
+            // Set the height of the row to match the height of the image
+            $spreadsheet->getActiveSheet()->getRowDimension($count)->setRowHeight($height * $scaleFactor);
+
+            // // Set the height of the row to match the height of the image
+            // $spreadsheet->getActiveSheet()->getRowDimension($count)->setRowHeight($height);
+
+            // $drawing->setHeight($height);
+            // $drawing->setWidth($width);
+
+            // $drawing->setCoordinates('M' . $count);
+            // $drawing->setWorksheet($spreadsheet->getActiveSheet());
+            // $sheet->setCellValue('T' . $count, $status_hamil);
+            // $sheet->setCellValue('U' . $count, $hamil_tgl);
 
             $count++;
         }
@@ -1226,7 +1267,7 @@ class Ppks extends BaseController
             $sheet->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
         }
         $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
-        $sheet->setTitle('DATA');
+        $sheet->setTitle('Form Isian');
 
         $writer = new Xlsx($spreadsheet);
         $writer->save($file_name);

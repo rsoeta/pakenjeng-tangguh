@@ -353,31 +353,24 @@ class PpksModel extends Model
 
     public function dataExport($filter1, $filter4, $filter5, $filter6)
     {
-        $builder = $this->db->table('dtks_usulan22');
-        $builder->select('dbj_nama_bansos, tb_villages.name as desa, tb_districts.name as kec, tb_regencies.name as kab, tb_provinces.name as prov, nama, nokk, du_nik, NamaJenKel, tempat_lahir, tanggal_lahir, ibu_kandung, JenisPekerjaan, StatusKawin, jenis_shdk, status_kawin, alamat, rt, rw, kelurahan, kecamatan, dc_status, dj_kode, hamil_status, hamil_tgl, created_at, created_at_year, created_at_month');
-        $builder->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id=dtks_usulan22.program_bansos', 'LEFT');
-        $builder->join('tbl_pekerjaan', 'tbl_pekerjaan.idPekerjaan=dtks_usulan22.jenis_pekerjaan', 'LEFT');
-        $builder->join('tb_status_kawin', 'tb_status_kawin.idStatus=dtks_usulan22.status_kawin', 'LEFT');
-        $builder->join('tb_disabil_jenis', 'tb_disabil_jenis.dj_id=dtks_usulan22.disabil_kode', 'LEFT');
-        $builder->join('tb_disabil_cek', 'tb_disabil_cek.dc_id=dtks_usulan22.disabil_status', 'LEFT');
-        $builder->join('tb_hamil_cek', 'tb_hamil_cek.hc_id=dtks_usulan22.hamil_status', 'LEFT');
-        $builder->join('tbl_jenkel', 'tbl_jenkel.IdJenKel=dtks_usulan22.jenis_kelamin', 'LEFT');
-        $builder->join('tb_districts', 'tb_districts.id=dtks_usulan22.kecamatan', 'LEFT');
-        $builder->join('tb_regencies', 'tb_regencies.id=dtks_usulan22.kabupaten', 'LEFT');
-        $builder->join('tb_provinces', 'tb_provinces.id=dtks_usulan22.provinsi', 'LEFT');
-        $builder->join('tb_villages', 'tb_villages.id=dtks_usulan22.kelurahan', 'LEFT');
-        $builder->join('tb_shdk', 'tb_shdk.id=dtks_usulan22.shdk', 'LEFT');
+        $builder = $this->db->table('ppks_data');
+        $builder->select('ppks_rt, ppks_rw, ppks_kategori_id, ppks_nama, ppks_alamat, ppks_nik, ppks_nokk, NamaJenKel, ppks_tempat_lahir, ppks_tgl_lahir, ppks_no_telp, ppks_status_keberadaan, psk_nama_status, ppks_status_bantuan, dbj_nama_bansos, ppks_status_panti, pp_status_panti, ppks_foto, tb_villages.name as desa, ppks_created_at');
+        $builder->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id=ppks_data.ppks_status_bantuan', 'LEFT');
+        $builder->join('ppks_keberadaan', 'ppks_keberadaan.psk_id=ppks_data.ppks_status_keberadaan', 'LEFT');
+        $builder->join('tbl_jenkel', 'tbl_jenkel.IdJenKel=ppks_data.ppks_jenis_kelamin', 'LEFT');
+        $builder->join('ppks_panti', 'ppks_panti.pp_id=ppks_data.ppks_status_panti', 'LEFT');
+        $builder->join('tb_villages', 'tb_villages.id=ppks_data.ppks_kelurahan', 'LEFT');
         if ($filter1 !== "") {
-            $builder->where('kelurahan', $filter1);
+            $builder->where('ppks_kelurahan', $filter1);
         }
         if ($filter4 !== "") {
-            $builder->where('program_bansos', $filter4);
+            $builder->where('ppks_status_bantuan', $filter4);
         }
         if ($filter5 !== "") {
-            $builder->where('created_at_year', $filter5);
+            $builder->where('ppks_created_at_year', $filter5);
         }
         if ($filter6 !== "") {
-            $builder->where('created_at_month', $filter6);
+            $builder->where('ppks_created_at_month', $filter6);
         }
         // $builder->orderBy('dtks_usulan22.du_id', 'asc');
         $query = $builder->get();

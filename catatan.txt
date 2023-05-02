@@ -832,3 +832,17 @@
             PRIMARY KEY (pk_id)
         );
         INSERT INTO ppks_kategori VALUES (1, 'Anak balita telantar'), (2, 'Anak terlantar'), (3, 'Anak yang berhadapan dengan hukum'), (4, 'Anak jalanan'), (5, 'Anak dengan Kedisabilitasan (ADK)'), (6, 'Anak yang menjadi korban tindak kekerasan atau diperlakukan salah'), (7, 'Anak yang memerlukan perlindungan khusus'), (8, 'Lanjut usia telantar'), (9, 'Penyandang disabilitas'), (10, 'Tuna Susila'), (11, 'Gelandangan'), (12, 'Pengemis'), (13, 'Pemulung'), (14, 'Kelompok Minoritas'), (15, 'Bekas Warga Binaan Lembaga Pemasyarakatan (BWBLP)'), (16, 'Orang dengan HIV/AIDS (ODHA)'), (17, 'Korban Penyalahgunaan NAPZA'), (18, 'Korban trafficking'), (19, 'Korban tindak kekerasan'), (20, 'Pekerja Migran Bermasalah Sosial (PMBS)'), (21, 'Korban bencana alam'), (22, 'Korban bencana sosial'), (23, 'Perempuan rawan sosial ekonomi'), (24, 'Fakir Miskin /Rumah Tangga Miskin'), (25, 'Keluarga bermasalah sosial psikologis'), (26, 'Komunitas Adat Terpencil');
+    # tambah tabel ppks_keberadaan
+        CREATE TABLE ppks_keberadaan (
+            psk_id int NOT NULL AUTO_INCREMENT,
+            psk_nama_status varchar(255),
+            PRIMARY KEY (psk_id)
+        );
+        INSERT INTO ppks_keberadaan VALUES (1, 'DALAM PANTI'), (2, 'MASYARAKAT');
+    # tambah tabel ppks_panti
+        CREATE TABLE ppks_panti (
+            pp_id int NOT NULL AUTO_INCREMENT,
+            pp_status_panti varchar(255),
+            PRIMARY KEY (pp_id)
+        );
+        INSERT INTO ppks_panti VALUES (1, 'BUTUH'), (2, 'TIDAK');
