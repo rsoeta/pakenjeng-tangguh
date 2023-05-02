@@ -1223,15 +1223,15 @@ class Ppks extends BaseController
             $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
             $drawing->setName($row['ppks_foto']);
             $drawing->setDescription($row['ppks_foto']);
-            $drawing->setPath('data/ppks_kpm/' . $row['ppks_foto']);
+            $drawing->setPath(ppks_foto($row['ppks_foto'], ''));
             // $drawing->setHeight(50);
             // $drawing->setWidth(50);
 
             // Get the height and width of the image
-            // [$width, $height] = getimagesize('data/ppks_kpm/' . $row['ppks_foto']);
+            // [$width, $height] = getimagesize(ppks_foto($key->ppks_foto, ''));
 
             // Get the height and width of the image
-            list($width, $height) = getimagesize('data/ppks_kpm/' . $row['ppks_foto']);
+            list($width, $height) = getimagesize(ppks_foto($row['ppks_foto'], ''));
 
             // Set the desired width (5cm in pixels)
             $desiredWidth = 189;
