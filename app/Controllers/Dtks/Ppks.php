@@ -1107,24 +1107,24 @@ class Ppks extends BaseController
         // dd($data);
 
         $wilayahModel = $wilayahModel->getVillage($filter1);
-        $bulan = array(
-            1 =>   'Januari',
-            'Februari',
-            'Maret',
-            'April',
-            'Mei',
-            'Juni',
-            'Juli',
-            'Agustus',
-            'September',
-            'Oktober',
-            'November',
-            'Desember'
-        );
+        // $bulan = array(
+        //     1 =>   'Januari',
+        //     'Februari',
+        //     'Maret',
+        //     'April',
+        //     'Mei',
+        //     'Juni',
+        //     'Juli',
+        //     'Agustus',
+        //     'September',
+        //     'Oktober',
+        //     'November',
+        //     'Desember'
+        // );
         // $file_name = 'TEMPLATE_PENGUSULAN_PAKENJENG - ' . $wilayahModel['name'] . ' - ' . $filter4 . '.xlsx';
         $file_name = 'Template-PPKS-Kec-Pakenjeng-' .  ucwords(strtolower($wilayahModel['name'])) . '.xlsx';
         // $file_name = 'Template-PPKS-Kec.xlsx';
-
+        require '../vendor/autoload.php';
         $spreadsheet = new Spreadsheet();
 
         $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
