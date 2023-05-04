@@ -129,7 +129,7 @@ class Pages extends BaseController
         ];
         if (session()->get('status') == 1 && session()->get('role_id') <= 4) {
             // dd($data['deadline']);
-            return view('dashboard', $data);
+            return view('/dashboard', $data);
             // return view('dash', $data);
         } elseif (session()->get('status') == 1 && session()->get('role_id') == 5) {
 

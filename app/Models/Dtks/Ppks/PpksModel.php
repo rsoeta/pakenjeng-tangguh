@@ -34,6 +34,9 @@ class PpksModel extends Model
         "ppks_status_panti",
         "ppks_tgl_out",
         "ppks_foto",
+        "ppks_proses",
+        "ppks_lat",
+        "ppks_long",
         "ppks_created_at",
         "ppks_created_at_year",
         "ppks_created_at_month",
@@ -54,7 +57,7 @@ class PpksModel extends Model
     var $order = array('ppks_data.ppks_updated_at' => 'asc');
 
 
-    function get_datatables($filter1, $filter2, $filter3, $filter4, $filter5, $filter6)
+    function get_datatables($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7)
     {
         // fil$filter1
         if ($filter1 == "") {
@@ -92,13 +95,19 @@ class PpksModel extends Model
         } else {
             $kondisi_filter6 = " AND ppks_created_at_month = '$filter6'";
         }
+        // ppks_proses
+        if ($filter7 == "") {
+            $kondisi_filter7 = "";
+        } else {
+            $kondisi_filter7 = " AND ppks_proses = '$filter7'";
+        }
 
         // search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "(ppks_nama LIKE '%$search%' OR ppks_nokk LIKE '%$search%' OR ppks_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
+            $kondisi_search = "(ppks_nama LIKE '%$search%' OR ppks_nokk LIKE '%$search%' OR ppks_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
         } else {
-            $kondisi_search = "ppks_data.ppks_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
+            $kondisi_search = "ppks_data.ppks_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
         }
 
         // order
@@ -114,7 +123,7 @@ class PpksModel extends Model
         if ($_POST['length'] != -1);
         $db = db_connect();
         $builder = $db->table('ppks_data');
-        $query = $builder->select('ppks_data.ppks_id as id_ppks, tb_villages.name as namaDesa, tb_districts.name as namaKec, ppks_nama, ppks_nokk, ppks_data.ppks_nik, ppks_jenis_kelamin, ppks_tempat_lahir, ppks_tgl_lahir, dbj_nama_bansos, ppks_alamat, ppks_rt, ppks_rw, ppks_kelurahan, ppks_kecamatan, ppks_status_keberadaan, ppks_status_panti, ppks_foto,  ppks_data.ppks_created_at, ppks_created_at_year, ppks_created_at_month, ppks_created_by, dtks_users.email, ppks_data.ppks_updated_at, dtks_users.nope, dtks_users.fullname')
+        $query = $builder->select('ppks_data.ppks_id as id_ppks, tb_villages.name as namaDesa, tb_districts.name as namaKec, ppks_nama, ppks_nokk, ppks_data.ppks_nik, ppks_jenis_kelamin, ppks_tempat_lahir, ppks_tgl_lahir, dbj_nama_bansos, ppks_alamat, ppks_rt, ppks_rw, ppks_kelurahan, ppks_kecamatan, ppks_status_keberadaan, ppks_status_panti, ppks_foto,  ppks_data.ppks_created_at, ppks_created_at_year, ppks_created_at_month, ppks_created_by, dtks_users.email, ppks_data.ppks_updated_at, dtks_users.nope, dtks_users.fullname, ppks_proses')
             ->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id=ppks_data.ppks_status_bantuan')
             ->join('tb_villages', 'tb_villages.id=ppks_data.ppks_kelurahan')
             ->join('tb_districts', 'tb_districts.id=ppks_data.ppks_kecamatan')
@@ -136,7 +145,7 @@ class PpksModel extends Model
         return $query;
     }
 
-    function jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6)
+    function jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7)
     {
         // fil$filter1
         if ($filter1 == "") {
@@ -174,13 +183,19 @@ class PpksModel extends Model
         } else {
             $kondisi_filter6 = " AND ppks_created_at_month = '$filter6'";
         }
+        // ppks_proses
+        if ($filter7 == "") {
+            $kondisi_filter7 = "";
+        } else {
+            $kondisi_filter7 = " AND ppks_proses = '$filter7'";
+        }
 
         // kondisi search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "AND (ppks_nama LIKE '%$search%' OR ppks_nokk LIKE '%$search%' OR ppks_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
+            $kondisi_search = "AND (ppks_nama LIKE '%$search%' OR ppks_nokk LIKE '%$search%' OR ppks_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
         } else {
-            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
+            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
         }
 
         $sQuery = "SELECT COUNT(ppks_nik) as jml FROM ppks_data WHERE ppks_nik != '' $kondisi_search";
@@ -196,51 +211,51 @@ class PpksModel extends Model
         if ($filter1 == "") {
             $kondisi_filter1 = "";
         } else {
-            $kondisi_filter1 = " AND kelurahan = '$filter1'";
+            $kondisi_filter1 = " AND ppks_kelurahan = '$filter1'";
         }
         // status
         if ($filter2 == "") {
             $kondisi_filter2 = "";
         } else {
-            $kondisi_filter2 = " AND rw = '$filter2'";
+            $kondisi_filter2 = " AND ppks_rw = '$filter2'";
         }
         // rw
         if ($filter3 == "") {
             $kondisi_filter3 = "";
         } else {
-            $kondisi_filter3 = " AND rt = '$filter3'";
+            $kondisi_filter3 = " AND ppks_rt = '$filter3'";
         }
         // rt
         if ($filter4 == "") {
             $kondisi_filter4 = "";
         } else {
-            $kondisi_filter4 = " AND program_bansos = '$filter4'";
+            $kondisi_filter4 = " AND ppks_status_bantuan = '$filter4'";
         }
         // updated_at
         if ($filter5 == "") {
             $kondisi_filter5 = "";
         } else {
-            $kondisi_filter5 = " AND created_at_year = '$filter5'";
+            $kondisi_filter5 = " AND ppks_created_at_year = '$filter5'";
         }
         // updated_at
         if ($filter6 == "") {
             $kondisi_filter6 = "";
         } else {
-            $kondisi_filter6 = " AND created_at_month = '$filter6'";
+            $kondisi_filter6 = " AND ppks_created_at_month = '$filter6'";
         }
-        // du_proses
+        // proses
         if ($filter7 == "") {
             $kondisi_filter7 = "";
         } else {
-            $kondisi_filter7 = " AND du_proses = '$filter7'";
+            $kondisi_filter7 = " AND ppks_proses = '$filter7'";
         }
 
         // search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "(nama LIKE '%$search%' OR nokk LIKE '%$search%' OR du_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
+            $kondisi_search = "(ppks_nama LIKE '%$search%' OR ppks_nokk LIKE '%$search%' OR ppks_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
         } else {
-            $kondisi_search = "dtks_usulan22.du_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
+            $kondisi_search = "ppks_data.ppks_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
         }
 
         // order
@@ -255,15 +270,12 @@ class PpksModel extends Model
 
         if ($_POST['length'] != -1);
         $db = db_connect();
-        $builder = $db->table('dtks_usulan22');
-        $query = $builder->select('dtks_usulan22.du_id as idUsulan, tb_villages.name as namaDesa, tb_districts.name as namaKec, nama, nokk, dtks_usulan22.du_nik, jenis_kelamin, tempat_lahir, tanggal_lahir, ibu_kandung, jenis_pekerjaan, JenisPekerjaan, StatusKawin, dbj_nama_bansos, jenis_shdk, status_kawin, alamat, rt, rw, kelurahan, kecamatan, shdk, foto_rumah, dtks_usulan22.created_at, created_at_year, created_at_month, created_by, dtks_users.email, dtks_usulan22.updated_at, dtks_users.nope, dtks_usulan22.foto_identitas, dtks_usulan22.foto_rumah, dtks_users.fullname, sk0, sk1, sk2, sk3, sk4, sk5, sk6, sk7, sk8, sk9, du_so_id')
-            ->join('tbl_pekerjaan', 'tbl_pekerjaan.idPekerjaan=dtks_usulan22.jenis_pekerjaan')
-            ->join('tb_status_kawin', 'tb_status_kawin.idStatus=dtks_usulan22.status_kawin')
-            ->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id=dtks_usulan22.program_bansos')
-            ->join('tb_shdk', 'tb_shdk.id=dtks_usulan22.shdk')
-            ->join('tb_villages', 'tb_villages.id=dtks_usulan22.kelurahan')
-            ->join('tb_districts', 'tb_districts.id=dtks_usulan22.kecamatan')
-            ->join('dtks_users', 'dtks_users.nik=dtks_usulan22.created_by')
+        $builder = $db->table('ppks_data');
+        $query = $builder->select('ppks_data.ppks_id as id_ppks, tb_villages.name as namaDesa, tb_districts.name as namaKec, ppks_nama, ppks_nokk, ppks_data.ppks_nik, ppks_jenis_kelamin, ppks_tempat_lahir, ppks_tgl_lahir, dbj_nama_bansos, ppks_alamat, ppks_rt, ppks_rw, ppks_kelurahan, ppks_kecamatan, ppks_status_keberadaan, ppks_status_panti, ppks_foto,  ppks_data.ppks_created_at, ppks_created_at_year, ppks_created_at_month, ppks_created_by, dtks_users.email, ppks_data.ppks_updated_at, dtks_users.nope, dtks_users.fullname, ppks_proses')
+            ->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id=ppks_data.ppks_status_bantuan')
+            ->join('tb_villages', 'tb_villages.id=ppks_data.ppks_kelurahan')
+            ->join('tb_districts', 'tb_districts.id=ppks_data.ppks_kecamatan')
+            ->join('dtks_users', 'dtks_users.nik=ppks_data.ppks_created_by')
             ->where($kondisi_search)
             ->orderBy($result_order, $result_dir)
             ->limit($_POST['length'], $_POST['start'])
@@ -274,8 +286,7 @@ class PpksModel extends Model
 
     function jumlah_semua01()
     {
-        // $sQuery = "SELECT COUNT(du_id) as jml FROM dtks_usulan22";
-        $sQuery = "SELECT COUNT(du_id) as jml FROM dtks_usulan22";
+        $sQuery = "SELECT COUNT(ppks_id) as jml FROM ppks_data";
         $db = db_connect();
         $query = $db->query($sQuery)->getRow();
 
@@ -288,54 +299,54 @@ class PpksModel extends Model
         if ($filter1 == "") {
             $kondisi_filter1 = "";
         } else {
-            $kondisi_filter1 = " AND kelurahan = '$filter1'";
+            $kondisi_filter1 = " AND ppks_kelurahan = '$filter1'";
         }
         // status
         if ($filter2 == "") {
             $kondisi_filter2 = "";
         } else {
-            $kondisi_filter2 = " AND rw = '$filter2'";
+            $kondisi_filter2 = " AND ppks_rw = '$filter2'";
         }
         // rw
         if ($filter3 == "") {
             $kondisi_filter3 = "";
         } else {
-            $kondisi_filter3 = " AND rt = '$filter3'";
+            $kondisi_filter3 = " AND ppks_rt = '$filter3'";
         }
         // rt
         if ($filter4 == "") {
             $kondisi_filter4 = "";
         } else {
-            $kondisi_filter4 = " AND program_bansos = '$filter4'";
+            $kondisi_filter4 = " AND ppks_status_bantuan = '$filter4'";
         }
         // rt
         if ($filter5 == "") {
             $kondisi_filter5 = "";
         } else {
-            $kondisi_filter5 = " AND created_at_year = '$filter5'";
+            $kondisi_filter5 = " AND ppks_created_at_year = '$filter5'";
         }
         // updated_at
         if ($filter6 == "") {
             $kondisi_filter6 = "";
         } else {
-            $kondisi_filter6 = " AND created_at_month = '$filter6'";
+            $kondisi_filter6 = " AND ppks_created_at_month = '$filter6'";
         }
-        // du_proses
+        // ppks_proses
         if ($filter7 == "") {
             $kondisi_filter7 = "";
         } else {
-            $kondisi_filter7 = " AND du_proses = '$filter7'";
+            $kondisi_filter7 = " AND ppks_proses = '$filter7'";
         }
 
         // kondisi search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "AND (nama LIKE '%$search%' OR nokk LIKE '%$search%' OR du_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
+            $kondisi_search = "AND (ppks_nama LIKE '%$search%' OR ppks_nokk LIKE '%$search%' OR ppks_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
         } else {
             $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6 $kondisi_filter7";
         }
 
-        $sQuery = "SELECT COUNT(du_id) as jml FROM dtks_usulan22 WHERE du_id != '' $kondisi_search";
+        $sQuery = "SELECT COUNT(ppks_nik) as jml FROM ppks_data WHERE ppks_nik != '' $kondisi_search";
         $db = db_connect();
         $query = $db->query($sQuery)->getRow();
 
@@ -354,7 +365,7 @@ class PpksModel extends Model
     public function dataExport($filter1, $filter4, $filter5, $filter6)
     {
         $builder = $this->db->table('ppks_data');
-        $builder->select('ppks_rt, ppks_rw, ppks_kategori_id, ppks_nama, ppks_alamat, ppks_nik, ppks_nokk, NamaJenKel, ppks_tempat_lahir, ppks_tgl_lahir, ppks_no_telp, ppks_status_keberadaan, psk_nama_status, ppks_status_bantuan, dbj_nama_bansos, ppks_status_panti, pp_status_panti, ppks_foto, tb_villages.name as desa, ppks_created_at');
+        $builder->select('ppks_rt, ppks_rw, ppks_kategori_id, ppks_nama, ppks_alamat, ppks_nik, ppks_nokk, NamaJenKel, ppks_tempat_lahir, ppks_tgl_lahir, ppks_no_telp, ppks_status_keberadaan, psk_nama_status, ppks_status_bantuan, dbj_nama_bansos, ppks_status_panti, pp_status_panti, ppks_foto, tb_villages.name as desa, ppks_created_at, ppks_updated_at, ppks_proses');
         $builder->join('dtks_bansos_jenis', 'dtks_bansos_jenis.dbj_id=ppks_data.ppks_status_bantuan', 'LEFT');
         $builder->join('ppks_keberadaan', 'ppks_keberadaan.psk_id=ppks_data.ppks_status_keberadaan', 'LEFT');
         $builder->join('tbl_jenkel', 'tbl_jenkel.IdJenKel=ppks_data.ppks_jenis_kelamin', 'LEFT');
@@ -373,7 +384,7 @@ class PpksModel extends Model
             $builder->where('ppks_created_at_month', $filter6);
         }
         // $builder->orderBy('dtks_usulan22.du_id', 'asc');
-        $query = $builder->get();
+        $query = $builder->orderBy('ppks_updated_at', 'ASC')->get();
 
         return $query;
     }

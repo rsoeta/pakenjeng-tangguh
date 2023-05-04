@@ -90,211 +90,242 @@ $desa_id = session()->get('kode_desa');
                     </ul>
                     <div>
                         <div id="step-1">
-                            <div class="row">
-                                <div class="col-12 col-sm-6">
-                                    <div class="form-group row nopadding" hidden>
-                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_id">ID</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="text" name="ppks_id" id="ppks_id" class="form-control form-control-sm" value="<?= $ppks_id; ?>" autofocus>
-                                            <div class="invalid-feedback errorppks_id"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_nik">NIK</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="number" name="ppks_nik" id="ppks_nik" class="form-control form-control-sm" value="<?= $ppks_nik; ?>" autocomplete="off">
-                                            <div class="invalid-feedback errorppks_nik"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_nama">Nama Lengkap</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="text" name="ppks_nama" id="ppks_nama" class="form-control form-control-sm" value="<?= $ppks_nama; ?>">
-                                            <div class="invalid-feedback errorppks_nama"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_nokk">No. KK</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="number" name="ppks_nokk" id="ppks_nokk" class="form-control form-control-sm" value="<?= $ppks_nokk; ?>" autocomplete="on">
-                                            <div class="invalid-feedback errorppks_nokk"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_tempat_lahir">Tempat Lahir</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="text" name="ppks_tempat_lahir" id="ppks_tempat_lahir" class="form-control form-control-sm" value="<?= $ppks_tempat_lahir; ?>">
-                                            <div class="invalid-feedback errorppks_tempat_lahir"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_tgl_lahir">Tanggal Lahir</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="date" name="ppks_tgl_lahir" id="ppks_tgl_lahir" class="form-control form-control-sm" value="<?= $ppks_tgl_lahir; ?>">
-                                            <div class="invalid-feedback errorppks_tgl_lahir"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding" style="display: none;">
-                                        <label class="col-4 col-sm-4 col-form-label" for="du_usia">Usia</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="number" name="du_usia" id="du_usia" class="form-control form-control-sm" value="" readonly>
-                                            <div class="invalid-feedback errorusia"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_no_telp">No. Telp/HP</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="text" name="ppks_no_telp" id="ppks_no_telp" class="form-control form-control-sm" value="<?= $ppks_no_telp; ?>">
-                                            <div class="invalid-feedback errorppks_no_telp"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_jenis_kelamin">Jenis Kelamin</label>
-                                        <div class="col-8 col-sm-8">
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" id="chk-Lk" name="ppks_jenis_kelamin" <?= $ppks_jenis_kelamin == '1' ? 'checked' : ''; ?> value="1" />
-                                                <label for="chk-Lk" class="form-check-label"> Laki-Laki </label>
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-12 col-sm-6">
+                                        <div class="form-group row nopadding" hidden>
+                                            <label class="col-4 col-sm-4 col-form-label" for="ppks_id">ID</label>
+                                            <div class="col-8 col-sm-8">
+                                                <input type="text" name="ppks_id" id="ppks_id" class="form-control form-control-sm" value="<?= $ppks_id; ?>">
+                                                <div class="invalid-feedback errorppks_id"></div>
                                             </div>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" id="chk-Pr" name="ppks_jenis_kelamin" <?= $ppks_jenis_kelamin == '2' ? 'checked' : ''; ?> value="2" />
-                                                <label for="chk-Pr" class="form-check-label"> Perempuan </label>
+                                        </div>
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="ppks_kategori_id">Kriteria PPKS</label>
+                                            <div class="col-8 col-sm-8">
+                                                <select id="ppks_kategori_id" name="ppks_kategori_id" class="form-select form-select-sm" autofocus>
+                                                    <option value="">-- Pilih --</option>
+                                                    <?php foreach ($kategori_ppks as $item) { ?>
+                                                        <option <?= $ppks_kategori_id == $item['pk_id'] ? ' selected' : ''; ?> value="<?= $item['pk_id'] ?>"> <?= strtoupper($item['pk_nama_kategori']); ?></option>
+                                                    <?php } ?>
+                                                </select>
+                                                <div class="invalid-feedback errorppks_kategori_id"></div>
                                             </div>
-                                            <div class="invalid-feedback errorppks_jenis_kelamin"></div>
                                         </div>
-                                    </div>
-                                </div>
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="ppks_nama">Nama Lengkap</label>
+                                            <div class="col-8 col-sm-8">
+                                                <input type="text" name="ppks_nama" id="ppks_nama" class="form-control form-control-sm" value="<?= $ppks_nama; ?>">
+                                                <div class="invalid-feedback errorppks_nama"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="ppks_nik">NIK</label>
+                                            <div class="col-8 col-sm-8">
+                                                <input type="number" name="ppks_nik" id="ppks_nik" class="form-control form-control-sm" value="<?= $ppks_nik; ?>" autocomplete="off">
+                                                <div class="invalid-feedback errorppks_nik"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="ppks_nokk">No. KK</label>
+                                            <div class="col-8 col-sm-8">
+                                                <input type="number" name="ppks_nokk" id="ppks_nokk" class="form-control form-control-sm" value="<?= $ppks_nokk; ?>" autocomplete="on">
+                                                <div class="invalid-feedback errorppks_nokk"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="ppks_tempat_lahir">Tempat Lahir</label>
+                                            <div class="col-8 col-sm-8">
+                                                <input type="text" name="ppks_tempat_lahir" id="ppks_tempat_lahir" class="form-control form-control-sm" value="<?= $ppks_tempat_lahir; ?>">
+                                                <div class="invalid-feedback errorppks_tempat_lahir"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="ppks_tgl_lahir">Tanggal Lahir</label>
+                                            <div class="col-8 col-sm-8">
+                                                <input type="date" name="ppks_tgl_lahir" id="ppks_tgl_lahir" class="form-control form-control-sm" value="<?= $ppks_tgl_lahir; ?>">
+                                                <div class="invalid-feedback errorppks_tgl_lahir"></div>
+                                            </div>
+                                        </div>
 
-                                <div class="col-12 col-sm-6">
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_status_keberadaan">Status Keberadaan</label>
-                                        <div class="col-8 col-sm-8">
-                                            <select id="ppks_status_keberadaan" name="ppks_status_keberadaan" class="form-select form-select-sm">
-                                                <option value="">-- Pilih --</option>
-                                                <option <?= $ppks_status_keberadaan == 1 ? 'selected' : ''; ?> value="1">PANTI</option>
-                                                <option <?= $ppks_status_keberadaan == 2 ? 'selected' : ''; ?> value="2">MASYARAKAT</option>
-                                            </select>
-                                            <div class="invalid-feedback errorppks_status_keberadaan"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="ppks_status_panti">Status Panti</label>
-                                        <div class="col-8 col-sm-8">
-                                            <select id="ppks_status_panti" name="ppks_status_panti" class="form-select form-select-sm">
-                                                <option value="">-- Pilih --</option>
-                                                <option <?= $ppks_status_panti == 1 ? 'selected' : ''; ?> value="1">BUTUH</option>
-                                                <option <?= $ppks_status_panti == 2 ? 'selected' : ''; ?> value="2">TIDAK</option>
-                                            </select>
-                                            <div class="invalid-feedback errorppks_status_panti"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="kelurahan">Desa/Kel.</label>
-                                        <div class="col-8 col-sm-8">
-                                            <select <?= $user >= 3 ? 'disabled' : ''; ?> id="kelurahan" name="kelurahan" class="form-select form-select-sm">
-                                                <option value="">-- Pilih Desa / Kel. --</option>
-                                                <?php foreach ($desa as $row) { ?>
-                                                    <option <?= $desa_id == $row['id'] ? ' selected' : ''; ?> value="<?= $row['id'] ?>"> <?= $row['name']; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                            <div class="invalid-feedback errorkelurahan"></div>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="datarw">No. RW</label>
-                                        <div class="col-8 col-sm-8">
-                                            <select <?= $user >= 4 ? 'disabled' : ''; ?> id="datarw" name="datarw" class="form-select form-select-sm">
-                                                <option value="">-- Pilih RW --</option>
-                                                <?php foreach ($rw as $row) { ?>
-                                                    <option <?= $datarw == $row['no_rw'] ? 'selected' : ''; ?> value="<?= $row['no_rw'] ?>"> <?= $row['no_rw']; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                            <div class="invalid-feedback errordatarw"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="datart">No. RT</label>
-                                        <div class="col-8 col-sm-8">
-                                            <select id="datart" name="datart" class="form-select form-select-sm">
-                                                <option value="">-- Pilih RT --</option>
-                                                <?php foreach ($rt as $row) { ?>
-                                                    <option <?php if ($datart == $row['no_rt']) {
-                                                                echo 'selected';
-                                                            } ?> value="<?= $row['no_rt'] ?>"> <?php echo $row['no_rt']; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                            <div class="invalid-feedback errordatart"></div>
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="ppks_jenis_kelamin">Jenis Kelamin</label>
+                                            <div class="col-8 col-sm-8">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" id="chk-Lk" name="ppks_jenis_kelamin" <?= $ppks_jenis_kelamin == '1' ? 'checked' : ''; ?> value="1" />
+                                                    <label for="chk-Lk" class="form-check-label"> Laki-Laki </label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" id="chk-Pr" name="ppks_jenis_kelamin" <?= $ppks_jenis_kelamin == '2' ? 'checked' : ''; ?> value="2" />
+                                                    <label for="chk-Pr" class="form-check-label"> Perempuan </label>
+                                                </div>
+                                                <div class="invalid-feedback errorppks_jenis_kelamin"></div>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="alamat">Alamat</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="text" name="alamat" id="alamat" class="form-control form-control-sm" value="<?= $alamat; ?>">
-                                            <div class="invalid-feedback erroralamat"></div>
+                                    <div class="col-12 col-sm-6">
+                                        <div class="form-group row nopadding" <?= $user >= 3 ? 'hidden="true"' : ''; ?>>
+                                            <label class="col-4 col-sm-4 col-form-label" for="kelurahan">Desa/Kel.</label>
+                                            <div class="col-8 col-sm-8">
+                                                <select <?= $user >= 3 ? 'disabled' : ''; ?> id="kelurahan" name="kelurahan" class="form-select form-select-sm">
+                                                    <option value="">-- Pilih Desa / Kel. --</option>
+                                                    <?php foreach ($desa as $row) { ?>
+                                                        <option <?= $desa_id == $row['id'] ? ' selected' : ''; ?> value="<?= $row['id'] ?>"> <?= $row['name']; ?></option>
+                                                    <?php } ?>
+                                                </select>
+                                                <div class="invalid-feedback errorkelurahan"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="datarw">No. RW</label>
+                                            <div class="col-8 col-sm-8">
+                                                <select <?= $user >= 4 ? 'disabled' : ''; ?> id="datarw" name="datarw" class="form-select form-select-sm">
+                                                    <option value="">-- Pilih RW --</option>
+                                                    <?php foreach ($rw as $row) { ?>
+                                                        <option <?= $datarw == $row['no_rw'] ? 'selected' : ''; ?> value="<?= $row['no_rw'] ?>"> <?= $row['no_rw']; ?></option>
+                                                    <?php } ?>
+                                                </select>
+                                                <div class="invalid-feedback errordatarw"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="datart">No. RT</label>
+                                            <div class="col-8 col-sm-8">
+                                                <select id="datart" name="datart" class="form-select form-select-sm">
+                                                    <option value="">-- Pilih RT --</option>
+                                                    <?php foreach ($rt as $row) { ?>
+                                                        <option <?php if ($datart == $row['no_rt']) {
+                                                                    echo 'selected';
+                                                                } ?> value="<?= $row['no_rt'] ?>"> <?php echo $row['no_rt']; ?></option>
+                                                    <?php } ?>
+                                                </select>
+                                                <div class="invalid-feedback errordatart"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="alamat">Alamat</label>
+                                            <div class="col-8 col-sm-8">
+                                                <input type="text" name="alamat" id="alamat" class="form-control form-control-sm" value="<?= $alamat; ?>">
+                                                <div class="invalid-feedback erroralamat"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row nopadding" <?= $user > 3 ? 'hidden="true"' : ''; ?>>
+                                            <label class="col-4 col-sm-4 col-form-label" for="">Alamat Lengkap</label>
+                                            <div class="col-8 col-sm-8">
+                                                <input type="text" name="" id="" class="form-control form-control-sm" value="<?= $alamat . " RT " . $datart . " RW " . $datarw; ?>">
+                                                <div class="invalid-feedback error"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="ppks_no_telp">No. Telp/HP</label>
+                                            <div class="col-8 col-sm-8">
+                                                <input type="text" name="ppks_no_telp" id="ppks_no_telp" class="form-control form-control-sm" value="<?= $ppks_no_telp; ?>">
+                                                <div class="invalid-feedback errorppks_no_telp"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="ppks_status_keberadaan">Status Keberadaan</label>
+                                            <div class="col-8 col-sm-8">
+                                                <select id="ppks_status_keberadaan" name="ppks_status_keberadaan" class="form-select form-select-sm">
+                                                    <option value="">-- Pilih --</option>
+                                                    <option <?= $ppks_status_keberadaan == 1 ? 'selected' : ''; ?> value="1">DALAM PANTI</option>
+                                                    <option <?= $ppks_status_keberadaan == 2 ? 'selected' : ''; ?> value="2">MASYARAKAT</option>
+                                                </select>
+                                                <div class="invalid-feedback errorppks_status_keberadaan"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="ppks_status_panti">Status Panti</label>
+                                            <div class="col-8 col-sm-8">
+                                                <select id="ppks_status_panti" name="ppks_status_panti" class="form-select form-select-sm">
+                                                    <option value="">-- Pilih --</option>
+                                                    <option <?= $ppks_status_panti == 1 ? 'selected' : ''; ?> value="1">BUTUH</option>
+                                                    <option <?= $ppks_status_panti == 2 ? 'selected' : ''; ?> value="2">TIDAK</option>
+                                                </select>
+                                                <div class="invalid-feedback errorppks_status_panti"></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <!-- <div class="col-sm-12 col-12 mt-2"> -->
-                                <!-- <label class="label-center mt-2">Dokumen</label> -->
-                                <!-- <div class="form-group row nopadding"> -->
-                                <div class="col-6 col-sm-6 mb-2">
-                                    <a download="<?= $ppks_foto; ?>" href="<?= ppks_foto($ppks_foto, ''); ?>">
-                                        <img class="img-preview-rmh foto-dokumen" src="<?= ppks_foto($ppks_foto, ''); ?>">
-                                    </a>
-                                    <br>
-                                    <label for="ppks_foto">Foto KPM</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fa fa-home"></i></span>
-                                        </div>
-                                        <input type="file" class="form-control form-control-sm" spellcheck="false" name="ppks_foto" id="ppks_foto" onchange="previewImgRmh()" accept="image/*" capture />
-                                    </div>
-                                </div>
-                                <div class="invalid-feedback errorppks_foto"></div>
-                                <div class="col-6 col-sm-6 mb-2">
+                            <div class="container">
+                                <div class="row">
+                                    <!-- <div class="col-sm-12 col-12 mt-2"> -->
+                                    <!-- <label class="label-center mt-2">Dokumen</label> -->
                                     <!-- <div class="form-group row nopadding"> -->
-                                    <img class="img-preview-rmh foto-dokumen" src="https://assets.pikiran-rakyat.com/crop/0x0:0x0/x/photo/2020/10/01/4026253578.jpg" style="height: 80px; width: auto;">
-                                    <br>
-                                    <label for="databansos">Status Program</label>
-                                    <div class="input-group">
-                                        <select id="databansos" name="databansos" class="form-select form-select-sm">
-                                            <option value="">-- Pilih --</option>
-                                            <?php foreach ($bansos as $row) { ?>
-                                                <option <?php if ($databansos == $row['dbj_id']) {
-                                                            echo 'selected';
-                                                        } ?> value="<?= $row['dbj_id'] ?>"> <?php echo $row['dbj_nama_bansos']; ?>
-                                                </option>
-                                            <?php } ?>
-                                        </select>
-                                        <div class="invalid-feedback errordatabansos"></div>
+                                    <div class="col-6 col-sm-6 mb-2">
+                                        <a download="<?= $ppks_foto; ?>" href="<?= ppks_foto($ppks_foto, ''); ?>">
+                                            <img class="img-preview-rmh foto-dokumen" src="<?= ppks_foto($ppks_foto, ''); ?>">
+                                        </a>
+                                        <br>
+                                        <label for="ppks_foto">Foto KPM</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fa fa-home"></i></span>
+                                            </div>
+                                            <input type="file" class="form-control form-control-sm" spellcheck="false" name="ppks_foto" id="ppks_foto" onchange="previewImgRmh()" accept="image/*" capture />
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback errorppks_foto"></div>
+                                    <div class="col-6 col-sm-6 mb-2">
+                                        <!-- <div class="form-group row nopadding"> -->
+                                        <img class="img-preview-rmh foto-dokumen" src="https://assets.pikiran-rakyat.com/crop/0x0:0x0/x/photo/2020/10/01/4026253578.jpg" style="height: 80px; width: auto;">
+                                        <br>
+                                        <label for="databansos">Status Program</label>
+                                        <div class="input-group">
+                                            <select id="databansos" name="databansos" class="form-select form-select-sm">
+                                                <option value="">-- Pilih --</option>
+                                                <?php foreach ($bansos as $row) { ?>
+                                                    <option <?php if ($databansos == $row['dbj_id']) {
+                                                                echo 'selected';
+                                                            } ?> value="<?= $row['dbj_id'] ?>"> <?php echo $row['dbj_nama_bansos']; ?>
+                                                    </option>
+                                                <?php } ?>
+                                            </select>
+                                            <div class="invalid-feedback errordatabansos"></div>
+                                        </div>
+                                        <!-- </div> -->
                                     </div>
                                     <!-- </div> -->
-                                </div>
-                                <!-- </div> -->
-                                <!-- </div> -->
-                                <div class="col-sm-12 col-12 mt-2">
-                                    <label class="label-center mt-2">Koordinat</label>
-                                    <div class="form-group row nopadding">
+                                    <!-- </div> -->
+                                    <div class="col-sm-12 col-12 mt-2">
+                                        <label class="label-center mt-2">Koordinat</label>
+                                        <div class="form-group row nopadding">
 
-                                        <div class="col-sm-6 col-6">
-                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Lat" spellcheck="false" id="latitude" name="du_latitude" readonly required>
-                                            <div class="invalid-feedback errordu_latitude"></div>
-                                        </div>
-                                        <div class="col-sm-6 col-6">
-                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Long" spellcheck="false" id="longitude" name="du_longitude" readonly required>
-                                            <div class="invalid-feedback errordu_longitude"></div>
-                                        </div>
-                                        <div class="col-sm-1 col-1" hidden>
-                                            <button type="button" class="btn btn-outline-primary" onclick="getLocation()"><i class="fas fa-map-marked-alt"></i></button>
+                                            <div class="col-sm-6 col-6">
+                                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Lat" spellcheck="false" id="latitude" name="du_latitude" readonly required>
+                                                <div class="invalid-feedback errordu_latitude"></div>
+                                            </div>
+                                            <div class="col-sm-6 col-6">
+                                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Long" spellcheck="false" id="longitude" name="du_longitude" readonly required>
+                                                <div class="invalid-feedback errordu_longitude"></div>
+                                            </div>
+                                            <div class="col-sm-1 col-1" hidden>
+                                                <button type="button" class="btn btn-outline-primary" onclick="getLocation()"><i class="fas fa-map-marked-alt"></i></button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="modal-footer mt-3 justify-content-between">
-                                    <input type="datetime-local" name="ppks_updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
-                                    <button type="submit" class="btn btn-block btn-warning btnSimpan">Update</button>
+                                    <div <?= $user > 3 ? ' hidden' : ''; ?>>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-12 d-flex justify-content-center">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input larger" type="checkbox" id="ppks_proses" name="ppks_proses" <?= $ppks_proses == '1' ? 'checked' : ''; ?> value="1" />
+                                                </div>
+                                                <label for="proses" class="form-check-label">PADAN </label>
+                                                <div class="invalid-feedback errorppks_proses"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer mt-3 justify-content-between">
+                                        <input type="datetime-local" name="ppks_updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
+                                        <button type="submit" class="btn btn-block btn-warning btnSimpan">Update</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

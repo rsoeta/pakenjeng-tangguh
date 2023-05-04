@@ -64,7 +64,7 @@ class Auth extends BaseController
                 if ($user['status'] !== 1) {
                     $session = session();
                     $session->setFlashdata('message', 'User Non-Aktif, Silakan kontak Admin!');
-                    return redirect()->to('login');
+                    return redirect()->to('/login');
                 } else if ($user['status'] == 1 && $user['role_id'] == 5) {
                     return redirect()->to('/operatorsch');
                     // } else if ($user['status'] == 1) {

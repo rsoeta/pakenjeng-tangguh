@@ -207,7 +207,7 @@ $desa_id = session()->get('kode_desa');
                                             <div class="col-8 col-sm-8">
                                                 <select id="ppks_status_keberadaan" name="ppks_status_keberadaan" class="form-select form-select-sm">
                                                     <option value="">-- Pilih --</option>
-                                                    <option value="1">PANTI</option>
+                                                    <option value="1">DALAM PANTI</option>
                                                     <option value="2">MASYARAKAT</option>
                                                 </select>
                                                 <div class="invalid-feedback errorppks_status_keberadaan"></div>

@@ -846,3 +846,12 @@
             PRIMARY KEY (pp_id)
         );
         INSERT INTO ppks_panti VALUES (1, 'BUTUH'), (2, 'TIDAK');
+
+    # update tabel ppks_data : tambah field ppks_proses setelah ppks_foto
+        ALTER TABLE `ppks_data` ADD `ppks_proses` INT NOT NULL DEFAULT '0' AFTER `ppks_foto`;
+    
+    # update tabel ppks_data : tambah field ppks_long dan ppks_lat setelah ppks_proses
+        ALTER TABLE `ppks_data` ADD `ppks_long` VARCHAR(255) NULL DEFAULT NULL AFTER `ppks_proses`, ADD `ppks_lat` VARCHAR(255) NULL DEFAULT NULL AFTER `ppks_long`;
+
+    
+

@@ -24,7 +24,7 @@ use App\Models\Dtks\LembagaModel;
 use App\Models\Dtks\CsvReportModel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use \PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 class Ppks extends BaseController
 {
@@ -112,7 +112,7 @@ class Ppks extends BaseController
         $csrfName = csrf_token();
         $csrfHash = csrf_hash();
 
-        $role = session()->get('role_id');
+        // $role = session()->get('role_id');
 
         $filter1 = $this->request->getPost('desa');
         $filter2 = $this->request->getPost('rw');
@@ -120,11 +120,11 @@ class Ppks extends BaseController
         $filter4 = $this->request->getPost('bansos');
         $filter5 = $this->request->getPost('data_tahun');
         $filter6 = $this->request->getPost('data_bulan');
-        // $filter7 = $this->request->getPost('data_reg');
+        $filter7 = '0';
 
-        $listing = $this->PpksModel->get_datatables($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
+        $listing = $this->PpksModel->get_datatables($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7);
         $jumlah_semua = $this->PpksModel->jumlah_semua();
-        $jumlah_filter = $this->PpksModel->jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
+        $jumlah_filter = $this->PpksModel->jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7);
 
         $data = array();
         $no = $_POST['start'];
@@ -136,7 +136,6 @@ class Ppks extends BaseController
             $row[] = $key->ppks_nik;
             $row[] = '<a href=' . ppks_foto($key->ppks_foto, '') . ' data-lightbox="dataUsulan' . $key->ppks_nik . '"' . ' data-title="Foto Identitas" style="text-decoration:none;">' . $key->ppks_nama . '</a>
             ';
-            // $row[] = $key->nama;
             $row[] = $key->ppks_nokk;
             if ($key->ppks_tgl_lahir == '0000-00-00') {
                 $row[] = '-';
@@ -151,6 +150,65 @@ class Ppks extends BaseController
             $row[] = $key->ppks_updated_at;
             $row[] = '<a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->id_ppks . "'" . ')"><i class="far fa-edit"></i></a> | 
                 <button class="btn btn-sm btn-secondary" data-id="' . $key->id_ppks . '" data-nama="' . $key->ppks_nama . '" id="deleteBtn"><i class="far fa-trash-alt"></i></button>';
+
+            $data[] = $row;
+        }
+
+        $output = array(
+            "draw" => $_POST['draw'],
+            "recordsTotal" => $jumlah_semua->jml,
+            "recordsFiltered" => $jumlah_filter->jml,
+            "data" => $data,
+        );
+        $output[$csrfName] = $csrfHash;
+
+        echo json_encode($output);
+    }
+
+    public function tabel_padan()
+    {
+        // var_dump(deadline_usulan());
+
+        $this->PpksModel = new PpksModel();
+        $csrfName = csrf_token();
+        $csrfHash = csrf_hash();
+
+        $filter1 = $this->request->getPost('desa01');
+        $filter2 = $this->request->getPost('rw01');
+        $filter3 = $this->request->getPost('rt01');
+        $filter4 = $this->request->getPost('bansos01');
+        $filter5 = $this->request->getPost('data_tahun01');
+        $filter6 = $this->request->getPost('data_bulan01');
+        $filter7 = '1';
+
+        $listing = $this->PpksModel->get_datatables01($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7);
+        $jumlah_semua = $this->PpksModel->jumlah_semua01();
+        $jumlah_filter = $this->PpksModel->jumlah_filter01($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7);
+
+        $data = array();
+        $no = $_POST['start'];
+        foreach ($listing as $key) {
+
+            $no++;
+            $row = array();
+            $row[] = $no;
+            $row[] = $key->ppks_nik;
+            $row[] = '<a href=' . ppks_foto($key->ppks_foto, '') . ' data-lightbox="dataUsulan' . $key->ppks_nik . '"' . ' data-title="Foto Identitas" style="text-decoration:none;">' . $key->ppks_nama . '</a>
+            ';
+            $row[] = $key->ppks_nokk;
+            if ($key->ppks_tgl_lahir == '0000-00-00') {
+                $row[] = '-';
+            } elseif ($key->ppks_tgl_lahir == null) {
+                $row[] = '-';
+            } else {
+                // date_format
+                $row[] = date('d/m/Y', strtotime($key->ppks_tgl_lahir));
+            }
+            $row[] = $key->dbj_nama_bansos;
+            $row[] = '<a href="https://wa.me/' . nope($key->nope) . '" target="_blank" style="text-decoration:none;">' . strtoupper($key->fullname) . '</a>';
+            $row[] = $key->ppks_updated_at;
+            $row[] = '<a class="btn btn-sm btn-success" href="javascript:void(0)" title="View" onclick="view_person(' . "'" . $key->id_ppks . "'" . ')"><i class="fas fa-eye"></i></a>';
+
             $data[] = $row;
         }
 
@@ -502,8 +560,9 @@ class Ppks extends BaseController
                     // 'hamil_tgl' => $this->request->getVar('tgl_hamil'),
                     // 'foto_identitas' => $filename_empat,
                     'ppks_foto' => $filename_dua,
-                    'du_latitude' => $this->request->getVar('du_latitude'),
-                    'du_longitude' => $this->request->getVar('du_longitude'),
+                    'ppks_proses' => 0,
+                    'ppks_lat' => $this->request->getVar('du_latitude'),
+                    'ppks_long' => $this->request->getVar('du_longitude'),
                     // 'sk0' => $this->request->getVar('sk0'),
                     // 'sk1' => $this->request->getVar('sk1'),
                     // 'sk2' => $this->request->getVar('sk2'),
@@ -607,8 +666,10 @@ class Ppks extends BaseController
                 'bansos' => $this->BansosModel->findAll(),
                 'users' => $users->findAll(),
                 'jenkel' => $this->GenModel->getDataJenkel(),
+                'kategori_ppks' => $this->PpksKatModel->findAll(),
 
                 'id' => $row['ppks_id'],
+                'ppks_kategori_id' => $row['ppks_kategori_id'],
                 'kelurahan' => $row['ppks_kelurahan'],
                 'datarw' => $row['ppks_rw'],
                 'datart' => $row['ppks_rt'],
@@ -625,6 +686,7 @@ class Ppks extends BaseController
                 'ppks_nik' => $row['ppks_nik'],
                 'ppks_id' => $row['ppks_id'],
                 'ppks_foto' => $row['ppks_foto'],
+                'ppks_proses' => $row['ppks_proses'],
                 'ppks_updated_at' => $row['ppks_updated_at'],
                 'ppks_created_by' => session()->get('ppks_nik'),
                 // 'foto_rumah' => $nama_foto_rumah,
@@ -661,61 +723,41 @@ class Ppks extends BaseController
             $GenModel = new GenModel();
 
             $id = $this->request->getVar('id');
-            $model = new Usulan22Model();
+            $model = new PpksModel();
             $row = $model->find($id);
+            // dd($id);
 
             $data = [
                 'title' => 'Form. View Data',
-                'shdk' => $this->ShdkModel->findAll(),
-                'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
-                'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
                 'rw' => $this->RwModel->noRw(),
                 'rt' => $this->RtModel->noRt(),
                 'bansos' => $this->BansosModel->findAll(),
                 'users' => $users->findAll(),
                 'jenkel' => $this->GenModel->getDataJenkel(),
-                'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
-                'sta_ortu' => $GenModel->get_staortu(),
+                'kategori_ppks' => $this->PpksKatModel->findAll(),
 
-
-                'created_by' => session()->get('nik'),
-                'stahub' => $row['shdk'],
-                'kelurahan' => $row['kelurahan'],
-                'datarw' => $row["rw"],
-                'datart' => $row["rt"],
-                'alamat' => $row['alamat'],
-                'status_kawin' => $row["status_kawin"],
-                'jenis_pekerjaan' => $row["jenis_pekerjaan"],
-                'jenis_kelamin' => $row['jenis_kelamin'],
-                'ibu_kandung' => strtoupper($row["ibu_kandung"]),
-                'tanggal_lahir' => $row["tanggal_lahir"],
-                'tempat_lahir' => $row["tempat_lahir"],
-                'nama' => $row['nama'],
-                'nokk' => $row['nokk'],
-                'databansos' => $row['program_bansos'],
-                'du_nik' => $row['du_nik'],
-                'id' => $row['du_id'],
-                'disabil_status' => $row['disabil_status'],
-                'disabil_jenis' => $row['disabil_kode'],
-                'status_hamil' => $row['hamil_status'],
-                'tgl_hamil' => $row['hamil_tgl'],
-                'du_foto_identitas' => $row['foto_identitas'],
-                'du_foto_rumah' => $row['foto_rumah'],
-                'du_latitude' => $row['du_latitude'],
-                'du_longitude' => $row['du_longitude'],
-                'sk0' => $row['sk0'],
-                'sk1' => $row['sk1'],
-                'sk2' => $row['sk2'],
-                'sk3' => $row['sk3'],
-                'sk4' => $row['sk4'],
-                'sk5' => $row['sk5'],
-                'sk6' => $row['sk6'],
-                'sk7' => $row['sk7'],
-                'sk8' => $row['sk8'],
-                'sk9' => $row['sk9'],
-                'du_so_id' => $row['du_so_id'],
-                'du_proses' => $row['du_proses'],
+                'id' => $row['ppks_id'],
+                'ppks_kategori_id' => $row['ppks_kategori_id'],
+                'kelurahan' => $row['ppks_kelurahan'],
+                'datarw' => $row['ppks_rw'],
+                'datart' => $row['ppks_rt'],
+                'alamat' => $row['ppks_alamat'],
+                'ppks_jenis_kelamin' => $row['ppks_jenis_kelamin'],
+                'ppks_no_telp' => $row['ppks_no_telp'],
+                'ppks_tgl_lahir' => $row['ppks_tgl_lahir'],
+                'ppks_tempat_lahir' => $row['ppks_tempat_lahir'],
+                'ppks_nama' => $row['ppks_nama'],
+                'ppks_nokk' => $row['ppks_nokk'],
+                'ppks_status_keberadaan' => $row['ppks_status_keberadaan'],
+                'ppks_status_panti' => $row['ppks_status_panti'],
+                'databansos' => $row['ppks_status_bantuan'],
+                'ppks_nik' => $row['ppks_nik'],
+                'ppks_id' => $row['ppks_id'],
+                'ppks_foto' => $row['ppks_foto'],
+                'ppks_proses' => $row['ppks_proses'],
+                'ppks_updated_at' => $row['ppks_updated_at'],
+                'ppks_created_by' => session()->get('ppks_nik'),
                 // 'foto_rumah' => $nama_foto_rumah,
             ];
 
@@ -1007,10 +1049,11 @@ class Ppks extends BaseController
                     'ppks_status_bantuan' => $this->request->getVar('databansos'),
                     'ppks_nik' => $this->request->getVar('ppks_nik'),
                     'ppks_foto' => $filename_dua,
-                    'du_latitude' => $this->request->getVar('du_latitude'),
-                    'du_longitude' => $this->request->getVar('du_longitude'),
+                    'ppks_lat' => $this->request->getVar('du_latitude'),
+                    'ppks_long' => $this->request->getVar('du_longitude'),
                     'ppks_updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                     'ppks_updated_by' => session()->get('nik'),
+                    'ppks_proses' => $this->request->getVar('ppks_proses'),
 
                     // 'foto_rumah' => $nama_foto_rumah,
                 ];
@@ -1044,10 +1087,11 @@ class Ppks extends BaseController
                     'ppks_nokk' => $this->request->getVar('ppks_nokk'),
                     'ppks_status_bantuan' => $this->request->getVar('databansos'),
                     'ppks_nik' => $this->request->getVar('ppks_nik'),
-                    'du_latitude' => $this->request->getVar('du_latitude'),
-                    'du_longitude' => $this->request->getVar('du_longitude'),
+                    'ppks_lat' => $this->request->getVar('du_latitude'),
+                    'ppks_long' => $this->request->getVar('du_longitude'),
                     'ppks_updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                     'ppks_updated_by' => session()->get('nik'),
+                    'ppks_proses' => $this->request->getVar('ppks_proses'),
 
                     // 'foto_rumah' => $nama_foto_rumah,
                 ];
@@ -1093,6 +1137,7 @@ class Ppks extends BaseController
         $filter4 = $this->request->getPost('bansos');
         $filter5 = $this->request->getPost('data_tahun');
         $filter6 = $this->request->getPost('data_bulan');
+        // $filter7 = $this->request->getPost('data_row');
 
         // dd(array($filter1, $filter4, $filter5, $filter6));
         // if (isset($tmbExpData)) {
@@ -1154,10 +1199,10 @@ class Ppks extends BaseController
         // $sheet->setCellValue('U1', "TGL MULAI HAMIL\n(31/12/2021)");
 
         $styleArray = [
-            'font' => [
-                'bold' => true,
-                'color' => array('rgb' => 'FFFFFF'),
-            ],
+            // 'font' => [
+            //     'bold' => true,
+            //     'color' => array('rgb' => 'FFFFFF'),
+            // ],
             'alignment' => [
                 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_BOTTOM,
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
@@ -1166,16 +1211,16 @@ class Ppks extends BaseController
             'borders' => [
                 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
             ],
-            'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                // 'rotation' => 90,
-                'startColor' => [
-                    'rgb' => '4472C4',
-                ],
-                'endColor' => [
-                    'rgb' => '4472C4',
-                ],
-            ],
+            // 'fill' => [
+            //     'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            //     // 'rotation' => 90,
+            //     'startColor' => [
+            //         'rgb' => '4472C4',
+            //     ],
+            //     'endColor' => [
+            //         'rgb' => '4472C4',
+            //     ],
+            // ],
         ];
 
         $spreadsheet->getActiveSheet()->getStyle('A1:M1')->applyFromArray($styleArray);
@@ -1201,7 +1246,7 @@ class Ppks extends BaseController
 
             // $TglBuat = date('m/Y', strtotime($row['created_at']));
 
-            $sheet->setCellValue('A' . $count, $count, $row['ppks_kategori_id']);
+            $sheet->setCellValue('A' . $count, $row['ppks_kategori_id']);
             $sheet->setCellValue('B' . $count, strtoupper($row['ppks_nama']));
             $sheet->setCellValue('C' . $count, strtoupper($row['ppks_alamat'] . " RT " . $row['ppks_rt'] . " RW " . $row['ppks_rw']));
             // $sheet->setCellValue('C' . $count, strtoupper($row['ppks_alamat']));
@@ -1248,6 +1293,9 @@ class Ppks extends BaseController
 
             // Set the height of the row to match the height of the image
             $spreadsheet->getActiveSheet()->getRowDimension($count)->setRowHeight($height * $scaleFactor);
+
+            // Mengubah ukuran kolom pada file spreadsheet
+            $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth($width * $scaleFactor);
 
             // // Set the height of the row to match the height of the image
             // $spreadsheet->getActiveSheet()->getRowDimension($count)->setRowHeight($height);

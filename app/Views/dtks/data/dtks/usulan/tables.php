@@ -258,7 +258,6 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <?= form_close() ?>
                                     <div>
                                         <br>
                                         <table class="table" id="tabel_padan" style="width: 100%;">
