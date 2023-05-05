@@ -32,18 +32,7 @@
                     <?= session()->get('message'); ?>
                 </div>
             <?php endif; ?>
-            <?= form_open('/exportPpks', ['target' => 'blank']); ?>
-            <div class="row">
-                <div class="col-12 col-sm-6">
-                    <div class="row">
-                        <div class="col-6 col-sm-3 mb-2" <?= $user > 3 ?  'hidden' :  ''; ?>>
-                            <button type="submit" name="btnExpData" class="btn btn-success btn-block" id="exportExcel">
-                                <i class="fa fa-file-excel"></i> Export Data
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
             <div class="row">
                 <div class="col-12">
                     <div class="card card-success card-tabs">
@@ -69,23 +58,29 @@
                         <div class="card-body">
                             <div class="tab-content" id="custom-tabs-one-tabContent">
                                 <div class="tab-pane fade active show" id="custom-tabs-one-home" role="tabpanel" aria-labelledby="custom-tabs-one-home-tab">
-                                    <div class="row">
-                                        <div class="col-12 col-sm-6">
+                                    <?= form_open('/exportPpks', ['target' => 'blank']); ?>
+
+                                    <div class="row mb-2">
+                                        <div class="col-12 col-sm-12 col-md-4">
                                             <div class="row">
-                                                <div class="col-6 col-sm-3 mb-2">
+                                                <div class="col-6 col-sm-6 col-md-4">
                                                     <button type="button" class="btn btn-info btn-block" data-toggle="modal" onclick="reload_table()">
                                                         <i class="fa fa-sync-alt"></i> Reload
                                                     </button>
                                                 </div>
-                                                <div class="col-6 col-sm-3 mb-2">
+                                                <div class="col-6 col-sm-6 col-md-4">
                                                     <button type="button" class="btn btn-primary btn-block tombolTambah">
                                                         <i class="fa fa-plus"></i> Tambah Data
+                                                    </button>
+                                                </div>
+                                                <div class="col-6 col-sm-6 col-md-4" <?= $user > 3 ? 'hidden' : ''; ?>>
+                                                    <button type="submit" name="btnExpData" class="btn btn-success btn-block" id="exportExcel">
+                                                        <i class="fa fa-file-excel"></i> Export Data
                                                     </button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="row mb-2">
                                         <div class="col-sm-2 col-6 mb-2">
                                             <select <?= $user >= 3 ? 'disabled' : ''; ?> class="form-control form-control-sm" name="desa" id="desa">
@@ -150,6 +145,7 @@
                                             </select>
                                         </div>
                                     </div>
+                                    <?= form_close() ?>
                                     <div>
                                         <br>
                                         <table class="table" id="tabel_data" style="width: 100%;">
@@ -171,12 +167,18 @@
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="custom-tabs-one-messages" role="tabpanel" aria-labelledby="custom-tabs-one-messages-tab">
+                                    <?= form_open('/exportPpks1', ['target' => 'blank']); ?>
                                     <div class="row">
                                         <div class="col-12 col-sm-6">
                                             <div class="row">
                                                 <div class="col-6 col-sm-3 mb-2">
                                                     <button type="button" class="btn btn-info btn-block" data-toggle="modal" onclick="reload_table()">
                                                         <i class="fa fa-sync-alt"></i> Reload
+                                                    </button>
+                                                </div>
+                                                <div class="col-6 col-sm-3" <?= $user > 3 ? 'hidden' : ''; ?>>
+                                                    <button type="submit" name="btnExpData" class="btn btn-success btn-block" id="exportExcel01">
+                                                        <i class="fa fa-file-excel"></i> Export Data
                                                     </button>
                                                 </div>
                                             </div>
@@ -222,9 +224,9 @@
                                                 $mulai = 2021;
                                                 $tahun = date('Y');
                                                 for ($i = $mulai; $i < $mulai + 3; $i++) { ?>
-                                                    <option value='<?= $i; ?>' <?php if ($i == $tahun) {
-                                                                                    echo ' selected';
-                                                                                } ?>><?= $i; ?></option>
+                                                    <option value='<?= $i; ?>' <?= ($i == $tahun) ? ' selected' : ''; ?>>
+                                                        <?= $i; ?>
+                                                    </option>
                                                 <?php } ?>
                                             </select>
                                         </div>
@@ -241,9 +243,8 @@
                                                     $ValueBulan     = date('n', $AmbilNamaBulan);
                                                     // if ($ValueBulan < $i) continue;
                                                 ?>
-                                                    <option value="<?php echo $ValueBulan; ?>" <?php if ($bulanIni == $ValueBulan) {
-                                                                                                    echo ' selected';
-                                                                                                } ?>><?php echo $LabelBulan; ?></option>
+                                                    <option value="<?php echo $ValueBulan; ?>" <?= ($bulanIni == $ValueBulan) ? ' selected' : ''; ?>><?= $LabelBulan; ?>
+                                                    </option>
                                                 <?php } ?>
                                             </select>
                                         </div>
@@ -272,16 +273,13 @@
                                             </table>
                                         </div>
                                     </div>
-                                    <div class="tab-pane fade" id="custom-tabs-one-settings" role="tabpanel" aria-labelledby="custom-tabs-one-settings-tab">
-                                        Pellentesque vestibulum commodo nibh nec blandit. Maecenas neque magna, iaculis tempus turpis ac, ornare sodales tellus. Mauris eget blandit dolor. Quisque tincidunt venenatis vulputate. Morbi euismod molestie tristique. Vestibulum consectetur dolor a vestibulum pharetra. Donec interdum placerat urna nec pharetra. Etiam eget dapibus orci, eget aliquet urna. Nunc at consequat diam. Nunc et felis ut nisl commodo dignissim. In hac habitasse platea dictumst. Praesent imperdiet accumsan ex sit amet facilisis.
-                                    </div>
+                                    <?= form_close(); ?>
                                 </div>
                             </div>
                             <!-- /.card -->
                         </div>
                     </div>
                 </div>
-                <?= form_close() ?>
             </div>
     </section>
 </div>
@@ -662,8 +660,20 @@
     $(function() {
         $('#exportExcel').click(function() {
             var $elt = $('#desa').removeAttr('disabled', '');
+            var $elt1 = $('#desa01').removeAttr('disabled', '');
             setTimeout(function() {
                 $elt.attr('disabled', true);
+                $elt1.attr('disabled', true);
+            }, 500);
+
+        });
+    });
+
+    $(function() {
+        $('#exportExcel01').click(function() {
+            var $elt01 = $('#desa01').removeAttr('disabled', '');
+            setTimeout(function() {
+                $elt01.attr('disabled', true);
             }, 500);
 
         });

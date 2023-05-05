@@ -115,6 +115,7 @@ $routes->post('dltPpks', 'Dtks\Ppks::delete', ['filter' => 'authfilterdtks', 'fi
 $routes->post('tabel_ppks', 'Dtks\Ppks::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tabel_padan_ppks', 'Dtks\Ppks::tabel_padan', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('exportPpks', 'Dtks\Ppks::export', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('exportPpks1', 'Dtks\Ppks::export1', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->match(['get', 'post'], 'exportBa', 'Dtks\Ppks::exportBa', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->get('import_csv', 'Dtks\Ppks::import_csv', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->post('importCsvToDb', 'Dtks\Ppks::importCsvToDb', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);

@@ -362,7 +362,7 @@ class PpksModel extends Model
         return $post;
     }
 
-    public function dataExport($filter1, $filter4, $filter5, $filter6)
+    public function dataExport($filter1, $filter4, $filter5, $filter6, $filter7)
     {
         $builder = $this->db->table('ppks_data');
         $builder->select('ppks_rt, ppks_rw, ppks_kategori_id, ppks_nama, ppks_alamat, ppks_nik, ppks_nokk, NamaJenKel, ppks_tempat_lahir, ppks_tgl_lahir, ppks_no_telp, ppks_status_keberadaan, psk_nama_status, ppks_status_bantuan, dbj_nama_bansos, ppks_status_panti, pp_status_panti, ppks_foto, tb_villages.name as desa, ppks_created_at, ppks_updated_at, ppks_proses');
@@ -382,6 +382,9 @@ class PpksModel extends Model
         }
         if ($filter6 !== "") {
             $builder->where('ppks_created_at_month', $filter6);
+        }
+        if ($filter7 !== "") {
+            $builder->where('ppks_proses', $filter7);
         }
         // $builder->orderBy('dtks_usulan22.du_id', 'asc');
         $query = $builder->orderBy('ppks_updated_at', 'ASC')->get();
