@@ -414,7 +414,7 @@ $desa_id = session()->get('kode_desa');
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="form-group row nopadding" id="du_so_id_div" style="display: none;">
+                                    <div class="form-group row nopadding du_so_id_div" style="display: none;">
                                         <label class="col-4 col-sm-4 col-form-label" for="du_so_id">Status</label>
                                         <div class="col-8 col-sm-8">
                                             <select id="du_so_id" name="du_so_id" class="form-select form-select-sm">
@@ -818,10 +818,11 @@ $desa_id = session()->get('kode_desa');
         // };
 
         $('#du_usia').val(getAge);
-        if ($('#du_usia').val() < 18) {
-            $('#du_so_id_div').show();
+
+        if ($("#du_usia").val() < 18) {
+            $('.du_so_id_div').show();
         } else {
-            $('#du_so_id_div').hide();
+            $('.du_so_id_div').hide();
         }
 
     });

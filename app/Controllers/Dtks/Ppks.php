@@ -25,6 +25,8 @@ use App\Models\Dtks\CsvReportModel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Style\Number;
 
 class Ppks extends BaseController
 {
@@ -1225,11 +1227,17 @@ class Ppks extends BaseController
 
         $spreadsheet->getActiveSheet()->getStyle('A1:M1')->applyFromArray($styleArray);
 
+        // // menetapkan format tanggal pada sel H
+        // $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_DATE_YYYYMMDDSLASH);
+
         $count = 2;
 
         foreach ($data as $row) {
 
-            $tglLahir = date('d/m/Y', strtotime($row['ppks_tgl_lahir']));
+            $formatTgl = date_create($row['ppks_tgl_lahir']);
+            // $tglLahir = date_format($formatTgl, 'Y/m/d');
+            $excelDateValue = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($formatTgl);
+            // $tglLahir = date('Y/m/d', strtotime($row['ppks_tgl_lahir']));
             // if ($row['hamil_status'] == 1) {
             //     $status_hamil = 'YA';
             // } elseif ($row['hamil_status'] == 2) {
@@ -1254,7 +1262,11 @@ class Ppks extends BaseController
             $sheet->setCellValueExplicit('E' . $count, $row['ppks_nokk'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet->setCellValue('F' . $count, $row['NamaJenKel']);
             $sheet->setCellValue('G' . $count, strtoupper($row['ppks_tempat_lahir']));
-            $sheet->setCellValue('H' . $count, $tglLahir);
+            $sheet->setCellValue('H' . $count, $excelDateValue);
+
+            // Apply date format to cell A1
+            $sheet->getStyle('H' . $count)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_DATE_YYYYMMDD);
+
             $sheet->setCellValue('I' . $count, $row['ppks_no_telp']);
             $sheet->setCellValue('J' . $count, $row['psk_nama_status']);
             if ($row['ppks_status_bantuan'] != 4) {
@@ -1435,7 +1447,9 @@ class Ppks extends BaseController
 
         foreach ($data as $row) {
 
-            $tglLahir = date('d/m/Y', strtotime($row['ppks_tgl_lahir']));
+            $formatTgl = date_create($row['ppks_tgl_lahir']);
+            $tglLahir = date_format($formatTgl, 'Y/m/d');
+            // $tglLahir = date('Y/m/d', strtotime($row['ppks_tgl_lahir']));
             // if ($row['hamil_status'] == 1) {
             //     $status_hamil = 'YA';
             // } elseif ($row['hamil_status'] == 2) {

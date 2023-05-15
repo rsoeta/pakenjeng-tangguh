@@ -191,6 +191,12 @@ class Usulan extends BaseController
                     'valid_date' => '{field} tidak valid.'
                 ]
             ],
+            'jenis_kelamin' => [
+                'rules' => 'required',
+                'errors' => [
+                    'required' => '{field} harus dipilih'
+                ]
+            ],
             'rt' => [
                 'rules' => 'required|numeric',
                 'errors' => [

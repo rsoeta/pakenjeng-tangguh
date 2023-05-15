@@ -404,7 +404,7 @@ $desa_id = session()->get('kode_desa');
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-12 col-sm-4" id="du_so_id_div" style="display: none;">
+                                    <div class="col-12 col-sm-4 du_so_id_div" style="display: none;">
                                         <div class="form-group row nopadding">
                                             <label class="col-4 col-sm-4 col-form-label" for="du_so_id">Status</label>
                                             <div class="col-8 col-sm-8">
@@ -524,11 +524,12 @@ $desa_id = session()->get('kode_desa');
             }
             $('#chk-Yes').val(data.disabil_status);
             $('#disabil_jenis').val(data.disabil_kode);
+
             $('#du_usia').val(getAge);
             if ($('#du_usia').val() < 18) {
-                $('#sta_ortu_div').show();
+                $('.du_so_id_div').show();
             } else {
-                $('#sta_ortu_div').hide();
+                $('.du_so_id_div').hide();
             }
         });
     });
@@ -813,9 +814,9 @@ $desa_id = session()->get('kode_desa');
         };
 
         if ($("#du_usia").val() < 18) {
-            $('#du_so_id_div').show();
+            $('.du_so_id_div').show();
         } else {
-            $('#du_so_id_div').hide();
+            $('.du_so_id_div').hide();
         }
 
         if (navigator.geolocation) {

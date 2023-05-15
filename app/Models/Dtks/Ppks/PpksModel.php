@@ -387,7 +387,7 @@ class PpksModel extends Model
             $builder->where('ppks_proses', $filter7);
         }
         // $builder->orderBy('dtks_usulan22.du_id', 'asc');
-        $query = $builder->orderBy('ppks_updated_at', 'ASC')->get();
+        $query = $builder->orderBy('ppks_updated_at', 'ASC')->limit(100)->get();
 
         return $query;
     }
