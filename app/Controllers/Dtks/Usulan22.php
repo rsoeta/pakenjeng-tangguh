@@ -295,8 +295,11 @@ class Usulan22 extends BaseController
         if ($this->request->isAJAX()) {
             // var_dump($this->request->getPost());
             // validasi input
+
+
             $validation = \Config\Services::validation();
 
+            $du_kate = $this->request->getPost('du_kate');
             $valid = $this->validate([
                 'nik' => [
                     'label' => 'NIK',
@@ -443,6 +446,20 @@ class Usulan22 extends BaseController
                         'required' => '{field} harus terisi.'
                     ]
                 ],
+                'du_kate' => [
+                    'label' => 'Kel. Adat Terpencil',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus terisi.'
+                    ]
+                ],
+                'du_nasu' => [
+                    'label' => 'Nama Suku',
+                    'rules' => $du_kate == 1 ? 'required' : 'permit_empty',
+                    'errors' => [
+                        'required' => '{field} harus terisi.'
+                    ]
+                ],
             ]);
             if (!$valid) {
 
@@ -467,6 +484,8 @@ class Usulan22 extends BaseController
                         'du_foto_rumah' => $validation->getError('du_foto_rumah'),
                         'du_latitude' => $validation->getError('du_latitude'),
                         'du_longitude' => $validation->getError('du_longitude'),
+                        'du_kate' => $validation->getError('du_kate'),
+                        'du_nasu' => $validation->getError('du_nasu'),
                         'created_by' => $validation->getError('created_by'),
                     ]
                 ];
@@ -591,6 +610,8 @@ class Usulan22 extends BaseController
                     'sk8' => $this->request->getVar('sk8'),
                     'sk9' => $this->request->getVar('sk9'),
                     'du_so_id' => $this->request->getVar('du_so_id'),
+                    'du_kate' => $this->request->getVar('du_kate'),
+                    'du_nasu' => strtoupper($this->request->getVar('du_nasu')),
                     'created_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                     'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                     'created_at_year' => date('Y'),
@@ -806,6 +827,8 @@ class Usulan22 extends BaseController
                 'sk8' => $row['sk8'],
                 'sk9' => $row['sk9'],
                 'du_so_id' => $row['du_so_id'],
+                'du_kate' => $row['du_kate'],
+                'du_nasu' => $row['du_nasu'],
                 'du_proses' => $row['du_proses'],
                 'updated_at' => $row['updated_at'],
                 // 'foto_rumah' => $nama_foto_rumah,
@@ -917,6 +940,8 @@ class Usulan22 extends BaseController
             //cek nik
             $id = $this->request->getVar('id');
             $validation = \Config\Services::validation();
+            $du_kate = $this->request->getPost('du_kate');
+
             $valid = $this->validate([
                 'nik' => [
                     'label' => 'NIK',
@@ -1061,6 +1086,20 @@ class Usulan22 extends BaseController
                         'required' => '{field} harus terisi.'
                     ]
                 ],
+                'du_kate' => [
+                    'label' => 'Kel. Adat Terpencil',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus terisi.'
+                    ]
+                ],
+                'du_nasu' => [
+                    'label' => 'Nama Suku',
+                    'rules' => $du_kate == 1 ? 'required' : 'permit_empty',
+                    'errors' => [
+                        'required' => '{field} harus terisi.'
+                    ]
+                ],
             ]);
             if (!$valid) {
                 $msg = [
@@ -1084,6 +1123,8 @@ class Usulan22 extends BaseController
                         'du_foto_rumah' => $validation->getError('du_foto_rumah'),
                         'du_latitude' => $validation->getError('du_latitude'),
                         'du_longitude' => $validation->getError('du_longitude'),
+                        'du_kate' => $validation->getError('du_kate'),
+                        'du_nasu' => $validation->getError('du_nasu'),
                         'created_by' => $validation->getError('created_by'),
                     ]
                 ];
@@ -1222,6 +1263,8 @@ class Usulan22 extends BaseController
                         'sk8' => $this->request->getVar('sk8'),
                         'sk9' => $this->request->getVar('sk9'),
                         'du_so_id' => $this->request->getVar('du_so_id'),
+                        'du_kate' => $this->request->getVar('du_kate'),
+                        'du_nasu' => strtoupper($this->request->getVar('du_nasu')),
                         'du_proses' => $this->request->getVar('du_proses'),
                         'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                         'updated_by' => session()->get('nik'),
@@ -1278,6 +1321,8 @@ class Usulan22 extends BaseController
                         'sk8' => $this->request->getVar('sk8'),
                         'sk9' => $this->request->getVar('sk9'),
                         'du_so_id' => $this->request->getVar('du_so_id'),
+                        'du_kate' => $this->request->getVar('du_kate'),
+                        'du_nasu' => strtoupper($this->request->getVar('du_nasu')),
                         'du_proses' => $this->request->getVar('du_proses'),
                         'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                         'updated_by' => session()->get('nik'),

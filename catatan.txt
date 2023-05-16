@@ -298,6 +298,7 @@
         3205336606740001
 
         SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
+        
         CREATE OR REPLACE VIEW dtks_usulan_caridata AS
         SELECT COUNT(dtks_usulan22.du_nik) AS rc, dtks_usulan22.du_id, dtks_usulan22.du_nik, dtks_usulan22.program_bansos, dtks_usulan22.nokk, dtks_usulan22.nama, dtks_usulan22.tempat_lahir, dtks_usulan22.tanggal_lahir, dtks_usulan22.ibu_kandung, dtks_usulan22.jenis_kelamin, dtks_usulan22.jenis_pekerjaan, dtks_usulan22.status_kawin, dtks_usulan22.alamat, dtks_usulan22.rt, dtks_usulan22.rw, dtks_usulan22.provinsi, dtks_usulan22.kabupaten, dtks_usulan22.kecamatan, dtks_usulan22.kelurahan, dtks_usulan22.shdk, dtks_usulan22.foto_identitas, dtks_usulan22.foto_rumah, dtks_usulan22.disabil_status, dtks_usulan22.disabil_kode, dtks_usulan22.hamil_status, dtks_usulan22.hamil_tgl, dtks_usulan22.du_latitude, dtks_usulan22.du_longitude, dtks_usulan22.du_proses, dtks_usulan22.created_at, dtks_usulan22.created_at_year, dtks_usulan22.created_at_month, dtks_usulan22.created_by, dtks_usulan22.updated_at, dtks_usulan22.updated_by
         FROM dtks_usulan22
@@ -853,5 +854,8 @@
     # update tabel ppks_data : tambah field ppks_long dan ppks_lat setelah ppks_proses
         ALTER TABLE `ppks_data` ADD `ppks_long` VARCHAR(255) NULL DEFAULT NULL AFTER `ppks_proses`, ADD `ppks_lat` VARCHAR(255) NULL DEFAULT NULL AFTER `ppks_long`;
 
-    
+---------------------------------------------------------------------------------------------------------------------------------------------------   
+## v2.15.0 -- Penyesuaian versi SIKS 1.0.27
+    # tambah kolom kelompok adat terpencil dan nama suku
 
+    ALTER TABLE `dtks_usulan22` ADD `du_kate` INT NOT NULL DEFAULT '0' AFTER `du_proses`, ADD `du_nasu` VARCHAR(255) NULL DEFAULT NULL AFTER `du_kate`;

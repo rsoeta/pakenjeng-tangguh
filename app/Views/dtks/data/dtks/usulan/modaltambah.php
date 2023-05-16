@@ -378,6 +378,7 @@ $desa_id = session()->get('kode_desa');
                                             </div>
                                         </div>
                                     </div>
+
                                     <div class="col-12 col-sm-4">
                                         <div class="form-group row nopadding">
                                             <label class="col-4 col-form-label" for="disabil_status">Disabilitas</label>
@@ -415,6 +416,27 @@ $desa_id = session()->get('kode_desa');
                                                     <?php } ?>
                                                 </select>
                                                 <div class="invalid-feedback errordu_so_id"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-6 col-form-label" for="du_kate">Kel. Adat Terpencil</label>
+                                            <div class="col-8 col-sm-6">
+                                                <select id="du_kate" name="du_kate" class="form-select form-select-sm">
+                                                    <option value="0">Tidak</option>
+                                                    <option value="1">Ya</option>
+                                                </select>
+                                                <div class="invalid-feedback errordu_kate"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-4 du_nasu_div">
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="du_nasu">Nama Suku</label>
+                                            <div class="col-8 col-sm-8">
+                                                <input type="text" name="du_nasu" id="du_nasu" class="form-control form-control-sm" value="">
+                                                <div class="invalid-feedback errordu_nasu"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -469,6 +491,7 @@ $desa_id = session()->get('kode_desa');
                                     </div>
 
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -744,6 +767,14 @@ $desa_id = session()->get('kode_desa');
                             $('.errordu_longitude').html('');
                         }
 
+                        if (response.error.du_nasu) {
+                            $('#du_nasu').addClass('is-invalid');
+                            $('.errordu_nasu').html(response.error.du_nasu);
+                        } else {
+                            $('#du_nasu').removeClass('is-invalid');
+                            $('.errordu_nasu').html('');
+                        }
+
                     } else {
                         if (response.sukses) {
                             const Toast = Swal.mixin({
@@ -813,14 +844,14 @@ $desa_id = session()->get('kode_desa');
             $("#disabil_status_div").show();
         };
 
-        if ($("#du_usia").val() < 18) {
+        if ($('#du_usia').val() < 18) {
             $('.du_so_id_div').show();
         } else {
             $('.du_so_id_div').hide();
         }
 
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, showError);
+            navigator.geolocation.watchPosition(showPosition, showError);
         } else {
             // z.innerHTML = "Geolokasi Tidak Didukung oleh Browser Ini";
             alert("Geolokasi Tidak Didukung oleh Browser Ini");
@@ -832,6 +863,15 @@ $desa_id = session()->get('kode_desa');
             var age = Math.floor((today - dob) / (365.25 * 24 * 60 * 60 * 1000));
             document.getElementById('du_usia').value = age;
         });
+
+        var dropdown = document.getElementById("du_kate");
+        var input = document.getElementById("du_nasu");
+
+        if (dropdown.value === "1") {
+            input.readOnly = false;
+        } else {
+            input.readOnly = true;
+        }
 
     });
 
@@ -901,13 +941,24 @@ $desa_id = session()->get('kode_desa');
         return age;
     }
 
+    var dropdown = document.getElementById("du_kate");
+    var input = document.getElementById("du_nasu");
+
+    dropdown.addEventListener("change", function() {
+        if (dropdown.value === "1") {
+            input.readOnly = false;
+        } else {
+            input.readOnly = true;
+        }
+    });
+
     var x = document.getElementById("latitude");
     var y = document.getElementById("longitude");
     var z = document.getElementById("z");
 
     function getLocation() {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, showError);
+            navigator.geolocation.watchPosition(showPosition, showError);
         } else {
             // z.innerHTML = "Geolokasi Tidak Didukung oleh Browser Ini";
             alert("Geolokasi Tidak Didukung oleh Browser Ini");

@@ -451,6 +451,28 @@ $desa_id = session()->get('kode_desa');
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-12 col-sm-6">
+                                    <div class="form-group row nopadding">
+                                        <label class="col-4 col-sm-4 col-form-label" for="du_kate">Kel. Adat Terpencil</label>
+                                        <div class="col-8 col-sm-8">
+                                            <select id="du_kate" name="du_kate" class="form-select form-select-sm">
+                                                <option <?= $du_kate == 0 ? ' selected' : ''; ?> value="0">Tidak</option>
+                                                <option <?= $du_kate == 1 ? ' selected' : ''; ?> value="1">Ya</option>
+                                            </select>
+                                            <div class="invalid-feedback errordu_kate"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6 du_nasu_div">
+                                    <div class="form-group row nopadding">
+                                        <label class="col-4 col-sm-4 col-form-label" for="du_nasu">Nama Suku</label>
+                                        <div class="col-8 col-sm-8">
+                                            <input type="text" name="du_nasu" id="du_nasu" class="form-control form-control-sm" value="<?= $du_nasu; ?>">
+                                            <div class="invalid-feedback errordu_nasu"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="col-sm-12 col-12 mt-2">
                                     <label class="label-center mt-2">Dokumen</label>
                                     <div class="form-group row nopadding">
@@ -492,11 +514,11 @@ $desa_id = session()->get('kode_desa');
                                             <input type="text" class="form-control form-control-sm mb-2" placeholder="Lat" spellcheck="false" id="latitude" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
                                             <div class="invalid-feedback errordu_latitude"></div>
                                         </div>
-                                        <div class="col-sm-5 col-5">
+                                        <div class="col-sm-6 col-6">
                                             <input type="text" class="form-control form-control-sm mb-2" placeholder="Long" spellcheck="false" id="longitude" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
                                             <div class="invalid-feedback errordu_longitude"></div>
                                         </div>
-                                        <div class="col-sm-1 col-1">
+                                        <div class="col-sm-1 col-1" hidden>
                                             <button type="button" class="btn btn-outline-primary" onclick="getLocation()"><i class="fas fa-map-marked-alt"></i></button>
                                         </div>
                                     </div>
@@ -720,6 +742,14 @@ $desa_id = session()->get('kode_desa');
                             $('.errordu_longitude').html('');
                         }
 
+                        if (response.error.du_nasu) {
+                            $('#du_nasu').addClass('is-invalid');
+                            $('.errordu_nasu').html(response.error.du_nasu);
+                        } else {
+                            $('#du_nasu').removeClass('is-invalid');
+                            $('.errordu_nasu').html('');
+                        }
+
                     } else {
                         if (response.sukses) {
                             const Toast = Swal.mixin({
@@ -752,6 +782,7 @@ $desa_id = session()->get('kode_desa');
                     alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
                 }
             });
+
         })
 
         $('#datarw').change(function() {
@@ -825,6 +856,15 @@ $desa_id = session()->get('kode_desa');
             $('.du_so_id_div').hide();
         }
 
+        var dropdown = document.getElementById("du_kate");
+        var input = document.getElementById("du_nasu");
+
+        if (dropdown.value === "1") {
+            input.readOnly = false;
+        } else {
+            input.readOnly = true;
+        }
+
     });
 
     $(function() {
@@ -866,13 +906,24 @@ $desa_id = session()->get('kode_desa');
         return age;
     }
 
+    var dropdown = document.getElementById("du_kate");
+    var input = document.getElementById("du_nasu");
+
+    dropdown.addEventListener("change", function() {
+        if (dropdown.value === "1") {
+            input.readOnly = false;
+        } else {
+            input.readOnly = true;
+        }
+    });
+
     var x = document.getElementById("latitude");
     var y = document.getElementById("longitude");
     var z = document.getElementById("z");
 
     function getLocation() {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, showError);
+            navigator.geolocation.watchPosition(showPosition, showError);
         } else {
             // z.innerHTML = "Geolokasi Tidak Didukung oleh Browser Ini";
             alert("Geolokasi Tidak Didukung oleh Browser Ini");
