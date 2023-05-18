@@ -2,6 +2,22 @@
 
 <?= $this->section('content'); ?>
 
+<!-- captha -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://www.google.com/recaptcha/api.js"></script>
+
+<script src="https://www.google.com/recaptcha/api.js?render=reCAPTCHA_site_key"></script>
+<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
+
+<style>
+    .error {
+        color: red;
+    }
+</style>
+<!-- captha -->
+
+
 <div class="login-box">
     <!-- /.login-logo -->
     <div class="card card-outline card-primary">
@@ -47,14 +63,15 @@
                     <label class="custom-control-label" for="checkbox"> Tampilkan kata sandi</label>
                 </div>
             </div>
-            <div class="row mt-5">
+            <div class="g-recaptcha" data-sitekey="6LctvBomAAAAAGjg0x7rNMuW9c5BOZfP-ev4E6b5"></div>
+            <div class="row mt-3">
                 <div class="col-8">
-                    <div class="icheck-primary">
+                    <!-- <div class="icheck-primary">
                         <input type="checkbox" id="remember">
                         <label for="remember">
                             Remember Me
                         </label>
-                    </div>
+                    </div> -->
                 </div>
                 <!-- /.col -->
                 <div class="col-4">
@@ -100,6 +117,11 @@
             }
         });
     });
+
+    // captha
+    // var onloadCallback = function() {
+    //     alert("grecaptcha is ready!");
+    // };
 </script>
 
 <?= $this->endSection(); ?>

@@ -37,15 +37,16 @@ $routes->setAutoRoute(true);
 
 // AUTH
 // $routes->match(['get', 'post'], 'lockscreen', 'Lockscreen::index', ['filter' => 'authfilterdtks']);
-$routes->match(['get', 'post'], 'login', 'Dtks\Auth::login', ['filter' => 'noauthfilterdtks']);
-// $routes->match(['get', 'post'], 'register', 'Dtks\Auth::register', ['filter' => 'noauthfilterdtks']);
-$routes->match(['get', 'post'], 'register', 'Dtks\Auth::regOpSek', ['filter' => 'noauthfilterdtks']);
-// $routes->get('/', 'Dtks\Pages::home', ['filter' => 'noauthfilterdtks']);
+$routes->match(['get', 'post'], 'login', 'Auth\Auth::login', ['filter' => 'noauthfilterdtks']);
+// $routes->match(['get', 'post'], 'register', 'Auth\Auth::register', ['filter' => 'noauthfilterdtks']);
+$routes->match(['get', 'post'], 'register', 'Auth\Auth::regOpSek', ['filter' => 'noauthfilterdtks']);
+// $routes->get('/', 'Auth\Pages::home', ['filter' => 'noauthfilterdtks']);
 $routes->get('/', 'Landing::index');
 $routes->post('cek_usulan', 'Landing::cek_usulan');
 
-$routes->get('dashboard', 'Dtks\Pages::home', ['filter' => 'noauthfilterdtks']);
-$routes->get('pages', 'Dtks\Pages::index', ['filter' => 'authfilterdtks']);
+$routes->get('dashboard', 'Auth\Pages::home', ['filter' => 'noauthfilterdtks']);
+$routes->get('pages', 'Auth\Pages::index', ['filter' => 'authfilterdtks']);
+$routes->get('logout', 'Auth\Auth::logout');
 
 // CHATTING
 $routes->match(['get', 'post'], 'chatt', 'Chat::index', ['filter' => 'authfilterdtks']);
@@ -241,7 +242,6 @@ $routes->post('submit_web_general', 'Profil\Profil_Web::submit_general', ['filte
 $routes->post('update_web_general', 'Profil\Profil_Web::update_general', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 
-$routes->get('logout', 'Dtks\Auth::logout');
 /*
  * --------------------------------------------------------------------
  * Additional Routing
