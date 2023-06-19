@@ -123,6 +123,24 @@ $routes->post('exportPpks1', 'Dtks\Ppks::export1', ['filter' => 'authfilterdtks'
 // $routes->post('tb_csv', 'Dtks\Ppks::tbCsv', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->post('downIden', 'Dtks\Ppks::downIden');
 
+// FAMANTAMA
+$routes->get('famantama', 'Dtks\Famantama::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->get('tambahFamantama', 'Dtks\Famantama::formtambah', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('tmbFamantama', 'Dtks\Famantama::save', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+// $routes->post('get_data_penduduk', 'Dtks\Famantama::get_data_penduduk', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+// $routes->resource('api_usulan', ['controller' => 'Api\Dtks_Usulan', 'filter' => 'menufilterdtks']);
+$routes->match(['get', 'post'], 'editFamantama', 'Dtks\Famantama::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('dltFamantama', 'Dtks\Famantama::delete', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('updFamantama', 'Dtks\Famantama::update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('viewFamantama', 'Dtks\Famantama::formview', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('tbFamantama', 'Dtks\Famantama::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('tbPadanFamantama', 'Dtks\Famantama::tabel_padan', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('exportFamantama', 'Dtks\Famantama::export', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('exportFamantama1', 'Dtks\Famantama::export1', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+// $routes->match(['get', 'post'], 'exportBa', 'Dtks\Famantama::exportBa', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+// $routes->get('import_csv', 'Dtks\Famantama::import_csv', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+// $routes->post('importCsvToDb', 'Dtks\Famantama::importCsvToDb', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+// $routes->post('tb_csv', 'Dtks\Famantama::tbCsv', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 // WILAYAH
 $routes->post('action', 'Dtks\Wil::action', ['filter' => 'authfilterdtks']);

@@ -2,6 +2,30 @@
 
 <?= $this->section('content'); ?>
 
+<style>
+    .add-button {
+        position: fixed;
+        bottom: 4%;
+        left: 4%;
+        /* Nilai z-index yang tinggi */
+        z-index: 5;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #007bff;
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .plus-icon {
+        font-weight: bold;
+    }
+</style>
 <div class="content-wrapper mt-1">
     <section class="content-header">
         <div class="container-fluid">
@@ -32,7 +56,7 @@
                     <?= session()->get('message'); ?>
                 </div>
             <?php endif; ?>
-            <?= form_open('dtks/usulan22/export', ['target' => 'blank']); ?>
+            <?= form_open('/exportFamantama', ['target' => 'blank']); ?>
             <div class="row">
                 <div class="col-12 col-sm-6">
                     <div class="row">
@@ -51,15 +75,15 @@
             </div>
             <div class="row">
                 <div class="col-12">
-                    <div class="card card-primary card-tabs">
+                    <div class="card card-dark card-tabs">
                         <div class="card-header p-0 pt-1">
                             <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
                                 <li class="nav-item">
                                     <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill" href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home" aria-selected="true">Tabel Pendataan</a>
                                 </li>
-                                <li class="nav-item">
+                                <!-- <li class="nav-item">
                                     <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill" href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile" aria-selected="false">Tabel Pemadanan</a>
-                                </li>
+                                </li> -->
                                 <!-- <li class="nav-item">
                                     <a class="nav-link" id="custom-tabs-one-messages-tab" data-toggle="pill" href="#custom-tabs-one-messages" role="tab" aria-controls="custom-tabs-one-messages" aria-selected="false">Messages</a>
                                 </li>
@@ -75,14 +99,18 @@
                                         <div class="col-12 col-sm-6">
                                             <div class="row">
                                                 <div class="col-6 col-sm-3 mb-2">
-                                                    <button type="button" class="btn btn-info btn-block" data-toggle="modal" onclick="reload_table()">
+                                                    <!-- <button type="button" class="btn btn-info btn-block" data-toggle="modal" onclick="reload_table()">
                                                         <i class="fa fa-sync-alt"></i> Reload
-                                                    </button>
+                                                    </button> -->
                                                 </div>
                                                 <div class="col-6 col-sm-3 mb-2">
-                                                    <button type="button" class="btn btn-primary btn-block tombolTambah">
+                                                    <!-- <button type="button" class="btn btn-success btn-block tombolTambah">
                                                         <i class="fa fa-plus"></i> Tambah Data
+                                                    </button> -->
+                                                    <button type="button" class="add-button tombolTambah">
+                                                        <span class="plus-icon"><i class="fas fa-user-plus"></i></span>
                                                     </button>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -146,29 +174,27 @@
                                                 <?php } ?>
                                             </select>
                                         </div>
+                                        <?= form_close() ?>
                                         <div class="col-sm-2 col-3 mb-2" hidden>
                                             <select class="form-control form-control-sm" name="data_reg" id="data_reg">
                                                 <option value="0"></option>
                                             </select>
                                         </div>
                                     </div>
-                                    <?= form_close() ?>
                                     <div>
                                         <br>
                                         <table class="table" id="tabel_data" style="width: 100%;">
-                                            <thead class="text-primary">
+                                            <thead class="text-dark">
                                                 <tr>
                                                     <th>NO</th>
-                                                    <th>NIK</th>
                                                     <th>NAMA</th>
+                                                    <th>NIK</th>
                                                     <th>NO. KK</th>
-                                                    <th>IBU KANDUNG</th>
-                                                    <th>TGL LAHIR</th>
-                                                    <th>JENIS PEKERJAAN</th>
-                                                    <th>STATUS</th>
+                                                    <th>ALAMAT</th>
+                                                    <th>NO. RT</th>
+                                                    <th>NO. RW</th>
                                                     <th>SHDK</th>
-                                                    <th>PROGRAM</th>
-                                                    <th>PENGUSUL</th>
+                                                    <th>PENDATA</th>
                                                     <th>UPDATE PADA</th>
                                                     <th>AKSI</th>
                                                 </tr>
@@ -250,7 +276,8 @@
                                                 ?>
                                                     <option value="<?php echo $ValueBulan; ?>" <?php if ($bulanIni == $ValueBulan) {
                                                                                                     echo ' selected';
-                                                                                                } ?>><?php echo $LabelBulan; ?></option>
+                                                                                                } ?>><?php echo $LabelBulan; ?>
+                                                    </option>
                                                 <?php } ?>
                                             </select>
                                         </div>
@@ -259,27 +286,6 @@
                                                 <option value="1"></option>
                                             </select>
                                         </div>
-                                    </div>
-                                    <div>
-                                        <br>
-                                        <table class="table" id="tabel_padan" style="width: 100%;">
-                                            <thead class="text-primary">
-                                                <tr>
-                                                    <th>NO</th>
-                                                    <th>NIK</th>
-                                                    <th>NAMA</th>
-                                                    <th>NO. KK</th>
-                                                    <th>IBU KANDUNG</th>
-                                                    <th>TGL LAHIR</th>
-                                                    <th>PEKERJAAN</th>
-                                                    <th>PROGRAM</th>
-                                                    <th>PENGUSUL</th>
-                                                    <th>UPDATE PADA</th>
-                                                    <th>AKSI</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody></tbody>
-                                        </table>
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="custom-tabs-one-messages" role="tabpanel" aria-labelledby="custom-tabs-one-messages-tab">
@@ -309,7 +315,6 @@
 
     var save_method; //for save method string
     var table;
-    var tabel_padan;
 
     table = $('#tabel_data').DataTable({
         'order': [],
@@ -320,7 +325,7 @@
         'processing': true,
         'serverSide': true,
         "ajax": {
-            "url": "<?= site_url('tabel_data'); ?>",
+            "url": "<?= site_url('tbFamantama'); ?>",
             "type": "POST",
             "data": {
                 "csrf_test_name": $('input[name=csrf_test_name]').val()
@@ -369,64 +374,6 @@
         table.draw();
     });
 
-    tabel_padan = $('#tabel_padan').DataTable({
-        'order': [],
-        'fixedHeader': true,
-        'searching': true,
-        'paging': true,
-        'responsive': true,
-        'processing': true,
-        'serverSide': true,
-        "ajax": {
-            "url": "<?= site_url('tabel_padan'); ?>",
-            "type": "POST",
-            "data": {
-                "csrf_test_name": $('input[name=csrf_test_name]').val()
-            },
-            "data": function(data) {
-                data.csrf_test_name = $('input[name=csrf_test_name]').val();
-                data.desa01 = $('#desa01').val();
-                data.rw01 = $('#rw01').val();
-                data.rt01 = $('#rt01').val();
-                data.bansos01 = $('#bansos01').val();
-                data.data_tahun01 = $('#data_tahun01').val();
-                data.data_bulan01 = $('#data_bulan01').val();
-                data.data_reg01 = $('#data_reg01').val();
-            },
-            "dataSrc": function(response) {
-                $('input[name=csrf_test_name]').val(response.csrf_test_name);
-                return response.data;
-            }
-        },
-
-        "columnDefs": [{
-            "targets": [0],
-            "orderable": false
-        }]
-    });
-
-    $('#desa01').change(function() {
-        tabel_padan.draw();
-    });
-    $('#rw01').change(function() {
-        tabel_padan.draw();
-    });
-    $('#rt01').change(function() {
-        tabel_padan.draw();
-    });
-    $('#bansos01').change(function() {
-        tabel_padan.draw();
-    });
-    $('#data_tahun01').change(function() {
-        tabel_padan.draw();
-    });
-    $('#data_bulan01').change(function() {
-        tabel_padan.draw();
-    });
-    $('#data_reg01').change(function() {
-        tabel_padan.draw();
-    });
-
     $(document).on('click', '#deleteBtn', function() {
         var id = $(this).data('id');
         var nama = $(this).data('nama');
@@ -436,7 +383,7 @@
         if (tanya == true) {
             $.ajax({
                 type: "POST",
-                url: "<?= site_url('dltUsul'); ?>",
+                url: "<?= site_url('/dltFamantama'); ?>",
                 data: {
                     id: id
                 },
@@ -462,7 +409,6 @@
                         });
                         // window.location.reload();
                         table.draw();
-                        tabel_padan.draw();
                     }
                 }
             });
@@ -473,7 +419,7 @@
         //Ajax Load data from ajax
         $.ajax({
             type: "POST",
-            url: "<?php echo site_url('editUsulan') ?>",
+            url: "<?php echo site_url('/editFamantama') ?>",
             data: {
                 id: id
             },
@@ -525,12 +471,11 @@
         // $('body').addClass('sidebar-collapse');
 
         $('#tabel_data');
-        $('#tabel_padan');
 
         $('.tombolTambah').click(function(e) {
             e.preventDefault();
             $.ajax({
-                url: "<?= site_url('tambah') ?>",
+                url: "<?= site_url('tambahFamantama') ?>",
                 dataType: "json",
                 success: function(response) {
                     $('.viewmodal').html(response.data).show();
@@ -578,33 +523,6 @@
             }
         });
 
-        $('#rw01').change(function() {
-            var desa = $('#desa').val();
-            var no_rw = $('#rw01').val();
-            var action = 'get_rt';
-            if (no_rw != '') {
-                $.ajax({
-                    url: "<?php echo base_url('action'); ?>",
-                    method: "POST",
-                    data: {
-                        desa: desa,
-                        no_rw: no_rw,
-                        action: action
-                    },
-                    dataType: "JSON",
-                    success: function(data) {
-                        var html = '<option value="">-Pilih-</option>';
-                        for (var count = 0; count < data.length; count++) {
-                            html += '<option value="' + data[count].no_rt + '">' + data[count].no_rt + '</option>';
-                        }
-                        $('#rt01').html(html);
-                    }
-                });
-            } else {
-                $('#rt01').val('');
-            }
-        });
-
         window.setTimeout(function() {
             $(".alert").fadeTo(500, 0).slideUp(500, function() {
                 $(this).remove();
@@ -614,7 +532,6 @@
 
     function reload_table() {
         table.ajax.reload(null, false); //reload datatable ajax 
-        tabel_padan.ajax.reload(null, false); //reload datatable ajax 
     }
 
     $('#rw').ready(function() {

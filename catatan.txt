@@ -859,3 +859,35 @@
     # tambah kolom kelompok adat terpencil dan nama suku
 
     ALTER TABLE `dtks_usulan22` ADD `du_kate` INT NOT NULL DEFAULT '0' AFTER `du_proses`, ADD `du_nasu` VARCHAR(255) NULL DEFAULT NULL AFTER `du_kate`;
+    
+---------------------------------------------------------------------------------------------------------------------------------------------------   
+## v2.16.0 -- tambah Menu Famantama Kab. Garut
+    # tambah kolom tabel_shdk_famantama (tsf_id) tabel tb_shdk
+
+        ALTER TABLE `tb_shdk` ADD `tsf_id` INT(3) NULL DEFAULT NULL AFTER `jenis_shdk`;
+        UPDATE `tb_shdk` SET `tsf_id` = '1' WHERE `tb_shdk`.`id` = 1;
+        UPDATE `tb_shdk` SET `tsf_id` = '2' WHERE `tb_shdk`.`id` = 3;
+        UPDATE `tb_shdk` SET `tsf_id` = '3' WHERE `tb_shdk`.`id` = 4;
+
+    # tambah tabel tb_sta_bangteti
+    # tambah tabel tb_sta_lahteti
+    # tambah tabel tb_jenlai
+    # tambah tabel tb_jendin
+    # tambah tabel tb_jentap
+    # tambah tabel tb_kondisi
+    # tambah tabel tb_penghasilan
+    # tambah tabel tb_pengeluaran
+    # tambah tabel tb_jml_tanggungan
+    # tambah tabel tb_roda_dua
+    # tambah tabel tb_sumber_minum
+    # tambah tabel tb_cara_minum
+    # tambah tabel tb_penerangan_utama
+    # tambah tabel tb_daya_listrik
+    # tambah tabel tb_bahan_masak
+    # tambah tabel tb_tempat_bab
+    # tambah tabel tb_jenis_kloset
+    # tambah tabel tb_tempat_tinja
+    # tambah kolom famantama_penduduk_pekerjaan (fpp_id) tabel tb_penduduk_pekerjaan
+    # tambah tabel tb_jenis_pekerjaan
+    # tambah tabel famantama_data
+        

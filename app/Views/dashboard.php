@@ -41,9 +41,10 @@
     </section>
     <!-- Content Header (Page header) -->
     <!-- Main content -->
-    <section class="content mt-2 displayNone">
+    <!-- displayNone -->
+    <section class="content mt-2">
         <div class="row">
-            <div class="col-12 col-sm-6 col-md-3">
+            <div class="col-12 col-sm-6 col-md-3 displayNone">
                 <a href="/dkm">
                     <div class="info-box heart">
                         <span class="info-box-icon bg-gradient elevation-1"><i class="fas fa-hand-holding-heart fa-1x mr-2"></i></span>
@@ -54,17 +55,24 @@
                     </div>
                 </a>
             </div>
-        </div>
-    </section>
-    <section class="content mt-2">
-        <div class="row">
-            <div class="col-12 col-sm-6 col-md-3">
+            <div class="col-12 col-sm-6 col-md-3 displayNone">
                 <a href="/ppks">
                     <div class="info-box heart">
                         <span class="info-box-icon bg-gradient elevation-1"><i class="fas fa-star-of-life fa-1x mr-2"></i></span>
                         <div class="info-box-content">
                             <!-- <span class="info-box-number">10<small>%</small></span> -->
                             <span class="info-box-text">Pendataan PPKS</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <a href="/famantama">
+                    <div class="info-box heart">
+                        <span class="info-box-icon bg-gradient elevation-1"><i class="fas fa-donate fa-1x mr-2"></i></span>
+                        <div class="info-box-content">
+                            <!-- <span class="info-box-number">10<small>%</small></span> -->
+                            <span class="info-box-text">Pendataan Fakir Miskin dan<br>Orang Tidak Mampu</span>
                         </div>
                     </div>
                 </a>

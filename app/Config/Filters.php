@@ -12,6 +12,8 @@ use App\Filters\AdminFilter;
 use App\Filters\SchFilterKip;
 use App\Filters\TimeFilter;
 use App\Filters\MenuFilterDtks;
+// Add to the use statements
+// use App\Filters\TrimFilter;
 
 class Filters extends BaseConfig
 {
@@ -32,6 +34,7 @@ class Filters extends BaseConfig
 		'schfilterkip' => SchFilterKip::class,
 		'timeFilter' => TimeFilter::class,
 		'menufilterdtks' => MenuFilterDtks::class,
+		// 'trim' => TrimFilter::class,
 	];
 
 	/**
@@ -61,7 +64,9 @@ class Filters extends BaseConfig
 	 *
 	 * @var array
 	 */
-	public $methods = [];
+	public $methods = [
+		// 'post' => ['trim']
+	];
 
 	/**
 	 * List of filter aliases that should run on any

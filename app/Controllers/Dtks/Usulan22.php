@@ -64,7 +64,7 @@ class Usulan22 extends BaseController
                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
                 'datarw' => $this->RwModel->noRw(),
                 'bansos' => $this->BansosModel->findAll(),
-                'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
+                'pekerjaan' => $this->PekerjaanModel->orderBy('pk_nama', 'asc')->findAll(),
                 'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
                 'shdk' => $this->ShdkModel->findAll(),
                 'percentages' => $this->VervalPbiModel->jml_persentase(),
@@ -90,7 +90,7 @@ class Usulan22 extends BaseController
                 'datarw' => $this->RwModel->noRw(),
                 'datart' => $this->RtModel->noRt(),
                 'bansos' => $this->BansosModel->findAll(),
-                'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
+                'pekerjaan' => $this->PekerjaanModel->orderBy('pk_nama', 'asc')->findAll(),
                 'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
                 'shdk' => $this->ShdkModel->findAll(),
                 'percentages' => $this->VervalPbiModel->jml_persentase(),
@@ -147,8 +147,9 @@ class Usulan22 extends BaseController
                 // date_format
                 $row[] = date('d/m/Y', strtotime($key->tanggal_lahir));
             }
-            $row[] = $key->JenisPekerjaan;
+            $row[] = $key->pk_nama;
             $row[] = $key->StatusKawin;
+            $row[] = $key->jenis_shdk;
             $row[] = $key->dbj_nama_bansos;
             $row[] = '<a href="https://wa.me/' . nope($key->nope) . '" target="_blank" style="text-decoration:none;">' . strtoupper($key->fullname) . '</a>';
             $row[] = $key->updated_at;
@@ -211,7 +212,7 @@ class Usulan22 extends BaseController
                 // date_format
                 $row[] = date('d/m/Y', strtotime($key->tanggal_lahir));
             }
-            $row[] = $key->JenisPekerjaan;
+            $row[] = $key->pk_nama;
             $row[] = $key->dbj_nama_bansos;
             $row[] = '<a href="https://wa.me/' . nope($key->nope) . '" target="_blank" style="text-decoration:none;">' . strtoupper($key->fullname) . '</a>';
             $row[] = $key->updated_at;
@@ -252,7 +253,7 @@ class Usulan22 extends BaseController
                 'datarw' => $this->RwModel->noRw(),
                 'datart' => $this->RtModel->noRt(),
                 'bansos' => $this->BansosModel->findAll(),
-                'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
+                'pekerjaan' => $this->PekerjaanModel->orderBy('pk_nama', 'asc')->findAll(),
                 'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
                 'shdk' => $this->ShdkModel->findAll(),
                 'users' => $users->findAll(),
@@ -779,7 +780,7 @@ class Usulan22 extends BaseController
             $data = [
                 'title' => 'Form. Edit Data',
                 'shdk' => $this->ShdkModel->findAll(),
-                'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
+                'pekerjaan' => $this->PekerjaanModel->orderBy('pk_nama', 'asc')->findAll(),
                 'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
                 'rw' => $this->RwModel->noRw(),
@@ -871,7 +872,7 @@ class Usulan22 extends BaseController
             $data = [
                 'title' => 'Form. View Data',
                 'shdk' => $this->ShdkModel->findAll(),
-                'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
+                'pekerjaan' => $this->PekerjaanModel->orderBy('pk_nama', 'asc')->findAll(),
                 'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
                 'rw' => $this->RwModel->noRw(),
@@ -1484,7 +1485,7 @@ class Usulan22 extends BaseController
             $sheet->setCellValue('F' . $count, $tglLahir);
             $sheet->setCellValue('G' . $count, strtoupper($row['ibu_kandung']));
             $sheet->setCellValue('H' . $count, $row['NamaJenKel']);
-            $sheet->setCellValue('I' . $count, $row['JenisPekerjaan']);
+            $sheet->setCellValue('I' . $count, $row['pk_nama']);
             $sheet->setCellValue('J' . $count, $row['StatusKawin']);
             $sheet->setCellValue('K' . $count, strtoupper($row['alamat']));
             $sheet->setCellValue('L' . $count, $row['rt']);

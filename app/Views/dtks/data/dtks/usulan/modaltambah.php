@@ -220,7 +220,7 @@ $desa_id = session()->get('kode_desa');
                                                 <select id="jenis_pekerjaan" name="jenis_pekerjaan" class="form-select form-select-sm">
                                                     <option value="">-- Pilih Jenis Pekerjaan --</option>
                                                     <?php foreach ($pekerjaan as $row) { ?>
-                                                        <option value="<?= $row['idPekerjaan'] ?>"> <?= $row['JenisPekerjaan']; ?></option>
+                                                        <option value="<?= $row['pk_id'] ?>"> <?= $row['pk_nama']; ?></option>
                                                     <?php } ?>
                                                 </select>
                                                 <div class="invalid-feedback errorjenis_pekerjaan"></div>
@@ -289,36 +289,36 @@ $desa_id = session()->get('kode_desa');
                                             <div class="form-group row">
                                                 <label class="col-10 col-form-label" for="sk0">Apakah memiliki tempat berteduh tetap sehari-hari?</label>
                                                 <div class="col-2">
-                                                    <input class="form-check-input" type="checkbox" id="sk0" name="sk0" value="1" />
-                                                    <label for="sk0" class="form-check-label"> Ya</label>
+                                                    <input class="form-check-input" type="checkbox" id="sk0" name="sk0" value="1" onchange="tampilkanLabel('sk0', 'label0')" />
+                                                    <label for="sk0" id="label0" class="form-check-label"></label>
                                                 </div>
                                             </div>
                                             <div class="form-group row">
                                                 <label class="col-10 col-form-label" for="sk5">Apakah kepala keluarga atau pengurus keluarga masih bekerja?</label>
                                                 <div class="col-2">
-                                                    <input class="form-check-input" type="checkbox" id="sk5" name="sk5" value="1" />
-                                                    <label for="sk5" class="form-check-label"> Ya</label>
+                                                    <input class="form-check-input" type="checkbox" id="sk5" name="sk5" value="1" onchange="tampilkanLabel('sk5', 'label5')" />
+                                                    <label for="sk5" id="label5" class="form-check-label"></label>
                                                 </div>
                                             </div>
                                             <div class="form-group row">
                                                 <label class="col-10 col-form-label" for="sk6">Apakah pengeluaran pangan lebih besar (>70%) dari total pengeluaran?</label>
                                                 <div class="col-2">
-                                                    <input class="form-check-input" type="checkbox" id="sk6" name="sk6" value="1" />
-                                                    <label for="sk6" class="form-check-label"> Ya</label>
+                                                    <input class="form-check-input" type="checkbox" id="sk6" name="sk6" value="1" onchange="tampilkanLabel('sk6', 'label6')" />
+                                                    <label for="sk6" id="label6" class="form-check-label"></label>
                                                 </div>
                                             </div>
                                             <div class="form-group row">
                                                 <label class="col-10 col-form-label" for="sk7">Apakah tempat tinggal sebagian besar berlantai tanah dan/atau plesteran?</label>
                                                 <div class="col-2">
-                                                    <input class="form-check-input" type="checkbox" id="sk7" name="sk7" value="1" />
-                                                    <label for="sk7" class="form-check-label"> Ya</label>
+                                                    <input class="form-check-input" type="checkbox" id="sk7" name="sk7" value="1" onchange="tampilkanLabel('sk7', 'label7')" />
+                                                    <label for="sk7" id="label7" class="form-check-label"></label>
                                                 </div>
                                             </div>
                                             <div class="form-group row">
                                                 <label class="col-10 col-form-label" for="sk8">Apakah tempat tinggal memiliki fasilitas buang air kecil / besar sendiri?</label>
                                                 <div class="col-2">
-                                                    <input class="form-check-input" type="checkbox" id="sk8" name="sk8" value="1" />
-                                                    <label for="sk8" class="form-check-label"> Ya</label>
+                                                    <input class="form-check-input" type="checkbox" id="sk8" name="sk8" value="1" onchange="tampilkanLabel('sk8', 'label8')" />
+                                                    <label for="sk8" id="label8" class="form-check-label"></label>
                                                 </div>
                                             </div>
                                         </div>
@@ -326,36 +326,36 @@ $desa_id = session()->get('kode_desa');
                                             <div class="form-group row">
                                                 <label class="col-10 col-form-label" for="sk9">Apakah target survey tinggal bersama anggota keluarga yang lain?</label>
                                                 <div class="col-2">
-                                                    <input class="form-check-input" type="checkbox" id="sk9" name="sk9" value="1" />
-                                                    <label for="sk9" class="form-check-label"> Ya</label>
+                                                    <input class="form-check-input" type="checkbox" id="sk9" name="sk9" value="1" onchange="tampilkanLabel('sk9', 'label9')" />
+                                                    <label for="sk9" id="label9" class="form-check-label"></label>
                                                 </div>
                                             </div>
                                             <div class="form-group row">
                                                 <label class="col-10 col-form-label" for="sk1">Apakah pernah khawatir atau pernah tidak makan dalam setahun terakhir?</label>
                                                 <div class="col-2">
-                                                    <input class="form-check-input" type="checkbox" id="sk1" name="sk1" value="1" />
-                                                    <label for="sk1" class="form-check-label"> Ya</label>
+                                                    <input class="form-check-input" type="checkbox" id="sk1" name="sk1" value="1" onchange="tampilkanLabel('sk1', 'label1')" />
+                                                    <label for="sk1" id="label1" class="form-check-label"></label>
                                                 </div>
                                             </div>
                                             <div class="form-group row">
                                                 <label class="col-10 col-form-label" for="sk2">Apakah ada pengeluaran untuk pakaian selama 1 (satu) tahun terakhir?</label>
                                                 <div class="col-2">
-                                                    <input class="form-check-input" type="checkbox" id="sk2" name="sk2" value="1" />
-                                                    <label for="sk2" class="form-check-label"> Ya</label>
+                                                    <input class="form-check-input" type="checkbox" id="sk2" name="sk2" value="1" onchange="tampilkanLabel('sk2', 'label2')" />
+                                                    <label for="sk2" id="label2" class="form-check-label"></label>
                                                 </div>
                                             </div>
                                             <div class="form-group row">
                                                 <label class="col-10 col-form-label" for="sk3">Apakah tempat tinggal sebagian besar berdinding bambu / kawat / kayu?</label>
                                                 <div class="col-2">
-                                                    <input class="form-check-input" type="checkbox" id="sk3" name="sk3" value="1" />
-                                                    <label for="sk3" class="form-check-label"> Ya</label>
+                                                    <input class="form-check-input" type="checkbox" id="sk3" name="sk3" value="1" onchange="tampilkanLabel('sk3', 'label3')" />
+                                                    <label for="sk3" id="label3" class="form-check-label"></label>
                                                 </div>
                                             </div>
                                             <div class="form-group row">
                                                 <label class="col-10 col-form-label" for="sk4">Apakah sumber penerangan berasal dari listrik PLN 450 watt atau bukan listrik?</label>
                                                 <div class="col-2">
-                                                    <input class="form-check-input" type="checkbox" id="sk4" name="sk4" value="1" />
-                                                    <label for="sk4" class="form-check-label"> Ya</label>
+                                                    <input class="form-check-input" type="checkbox" id="sk4" name="sk4" value="1" onchange="tampilkanLabel('sk4', 'label4')" />
+                                                    <label for="sk4" id="label4" class="form-check-label"></label>
                                                 </div>
                                             </div>
                                         </div>
@@ -986,6 +986,17 @@ $desa_id = session()->get('kode_desa');
             case error.UNKNOWN_ERROR:
                 alert("Terjadi kesalahan yang tidak diketahui.");
                 break;
+        }
+    }
+
+    function tampilkanLabel(checkboxId, labelId) {
+        var checkbox = document.getElementById(checkboxId);
+        var label = document.getElementById(labelId);
+
+        if (checkbox.checked) {
+            label.innerHTML = " Ya";
+        } else {
+            label.innerHTML = " Tidak";
         }
     }
 </script>
