@@ -63,9 +63,9 @@ class FamantamaModel extends Model
 
     protected $skipValidation     = false;
 
-    var $column_order = array('', 'fd_nama_lengkap', 'fd_nik', 'fd_nkk', 'fd_alamat', 'fd_rt',  'fd_rw', 'fd_updated_at');
+    var $column_order = array('', 'fd_nama_lengkap', 'fd_nik', 'fd_nkk', 'fd_alamat', 'fd_rt',  'fd_rw', 'fd_shdk', 'fd_pekerjaan_kk', 'fd_created_by', 'fd_created_at');
 
-    var $order = array('famantama_data.fd_id' => 'asc');
+    var $order = array('famantama_data.fd_updated_at' => 'desc');
 
 
     function get_datatables($filter1, $filter2, $filter3)
