@@ -27,6 +27,7 @@ class FamantamaModel extends Model
         "fd_kab",
         "fd_prov",
         "fd_shdk",
+        "fd_jenkel",
         "fd_sta_bangteti",
         "fd_sta_lahteti",
         "fd_jenlai",

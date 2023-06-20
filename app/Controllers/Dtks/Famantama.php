@@ -142,7 +142,7 @@ class Famantama extends BaseController
             $row[] = $key->jenis_shdk;
             $row[] = $key->pk_nama;
             $row[] = '<a href="https://wa.me/' . nope($key->nope) . '" target="_blank" style="text-decoration:none;">' . strtoupper($key->fullname) . '</a>';
-            $row[] = $key->fd_updated_at;
+            $row[] = $key->fd_created_at;
             $row[] = '<a class="btn btn-sm btn-success" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->fd_id . "'" . ')"><i class="far fa-edit"></i></a> | 
                 <button class="btn btn-sm btn-secondary" data-id="' . $key->fd_id . '" data-nama="' . $key->fd_nama_lengkap . '" id="deleteBtn"><i class="far fa-trash-alt"></i></button>';
 
@@ -287,6 +287,14 @@ class Famantama extends BaseController
                 ],
                 'fd_shdk' => [
                     'label' => 'Status Hubungan dalam Keluarga',
+                    'rules' => 'required|numeric',
+                    'errors' => [
+                        'required' => '{field} harus dipilih.',
+                        'numeric' => '{field} harus berisi angka.'
+                    ]
+                ],
+                'fd_jenkel' => [
+                    'label' => 'Jenis Kelamin',
                     'rules' => 'required|numeric',
                     'errors' => [
                         'required' => '{field} harus dipilih.',
@@ -467,6 +475,7 @@ class Famantama extends BaseController
                         'fd_desa' => $validation->getError('fd_desa'),
                         'fd_kecamatan' => $validation->getError('fd_kecamatan'),
                         'fd_shdk' => $validation->getError('fd_shdk'),
+                        'fd_jenkel' => $validation->getError('fd_jenkel'),
                         'fd_sta_bangteti' => $validation->getError('fd_sta_bangteti'),
                         'fd_sta_lahteti' => $validation->getError('fd_sta_lahteti'),
                         'fd_jenlai' => $validation->getError('fd_jenlai'),
@@ -508,6 +517,7 @@ class Famantama extends BaseController
                     'fd_kab' => '32.05',
                     'fd_prov' => '32',
                     'fd_shdk' => $this->request->getVar('fd_shdk'),
+                    'fd_jenkel' => $this->request->getVar('fd_jenkel'),
                     'fd_sta_bangteti' => $this->request->getVar("fd_sta_bangteti"),
                     'fd_sta_lahteti' => $this->request->getVar("fd_sta_lahteti"),
                     'fd_jenlai' => $this->request->getVar("fd_jenlai"),
@@ -652,6 +662,7 @@ class Famantama extends BaseController
                 'datarw' => $row['fd_rw'],
                 'fd_desa' => $row['fd_desa'],
                 'fd_shdk' => $row['fd_shdk'],
+                'fd_jenkel' => $row['fd_jenkel'],
                 'fd_sta_bangteti' => $row['fd_sta_bangteti'],
                 'fd_sta_lahteti' => $row['fd_sta_lahteti'],
                 'fd_jenlai' => $row['fd_jenlai'],
@@ -842,7 +853,14 @@ class Famantama extends BaseController
                         'numeric' => '{field} harus berisi angka.'
                     ]
                 ],
-                'fd_sta_bangteti' => [
+                'fd_jenkel' => [
+                    'label' => 'Jenis Kelamin',
+                    'rules' => 'required|numeric',
+                    'errors' => [
+                        'required' => '{field} harus dipilih.',
+                        'numeric' => '{field} harus berisi angka.'
+                    ]
+                ],                'fd_sta_bangteti' => [
                     'label' => 'Status Bangunan Tempat Tinggal',
                     'rules' => 'required|numeric',
                     'errors' => [
@@ -1016,6 +1034,7 @@ class Famantama extends BaseController
                         'fd_desa' => $validation->getError('fd_desa'),
                         'fd_kecamatan' => $validation->getError('fd_kecamatan'),
                         'fd_shdk' => $validation->getError('fd_shdk'),
+                        'fd_jenkel' => $validation->getError('fd_jenkel'),
                         'fd_sta_bangteti' => $validation->getError('fd_sta_bangteti'),
                         'fd_sta_lahteti' => $validation->getError('fd_sta_lahteti'),
                         'fd_jenlai' => $validation->getError('fd_jenlai'),
@@ -1057,6 +1076,7 @@ class Famantama extends BaseController
                     'fd_kab' => '32.05',
                     'fd_prov' => '32',
                     'fd_shdk' => $this->request->getVar('fd_shdk'),
+                    'fd_jenkel' => $this->request->getVar('fd_jenkel'),
                     'fd_sta_bangteti' => $this->request->getVar("fd_sta_bangteti"),
                     'fd_sta_lahteti' => $this->request->getVar("fd_sta_lahteti"),
                     'fd_jenlai' => $this->request->getVar("fd_jenlai"),

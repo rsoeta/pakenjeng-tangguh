@@ -5,7 +5,7 @@
 <style>
     .add-button {
         position: fixed;
-        bottom: 4%;
+        bottom: 5%;
         right: 4%;
         /* Nilai z-index yang tinggi */
         z-index: 5;
@@ -185,7 +185,7 @@
                                                     <th>SHDK</th>
                                                     <th>PEKERJAAN</th>
                                                     <th>PENDATA</th>
-                                                    <th>UPDATE PADA</th>
+                                                    <th>WAKTU UPLOAD</th>
                                                     <th>AKSI</th>
                                                 </tr>
                                             </thead>

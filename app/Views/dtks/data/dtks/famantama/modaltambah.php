@@ -156,7 +156,21 @@ $desa_id = session()->get('kode_desa');
                                             </div>
                                         </div>
                                         <div class="form-group row nopadding">
-                                            <label class="col-4 col-sm-2 col-form-label" for="fd_shdk">6. SHDK</label>
+                                            <label class="col-4 col-sm-2 col-form-label" for="fd_jenkel">6. Jenis Kelamin</label>
+                                            <div class="col-8 col-sm-10">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" id="chk-Lk" name="fd_jenkel" value="1" />
+                                                    <label for="chk-Lk" class="form-check-label"> Laki-Laki </label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" id="chk-Pr" name="fd_jenkel" value="2" />
+                                                    <label for="chk-Pr" class="form-check-label"> Perempuan </label>
+                                                </div>
+                                                <div class="invalid-feedback errorfd_jenkel"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-2 col-form-label" for="fd_shdk">7. SHDK</label>
                                             <div class="col-8 col-sm-10">
                                                 <select id="fd_shdk" name="fd_shdk" class="form-select form-select-sm">
                                                     <option value="">-- Status Hubungan dalam Keluarga --</option>
@@ -167,6 +181,7 @@ $desa_id = session()->get('kode_desa');
                                                 <div class="invalid-feedback errorfd_shdk"></div>
                                             </div>
                                         </div>
+
                                         <input type="datetime-local" name="updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
                                     </div>
                                 </div>
@@ -462,7 +477,13 @@ $desa_id = session()->get('kode_desa');
             $('#fd_nama_lengkap').val(data.nama);
             $('#fd_nik').val(data.du_nik);
             $('#fd_pekerjaan_kk').val(data.jenis_pekerjaan);
-            // $('#fd_shdk').val(data.shdk);
+            if (data.jenis_kelamin == '1') {
+                $('#chk-Lk').prop('checked', true);
+            }
+            if (data.jenis_kelamin == '2') {
+                $('#chk-Pr').prop('checked', true);
+                // $('#tgl_hamil_div').show();
+            } // $('#fd_shdk').val(data.shdk);
         });
     });
 
@@ -578,6 +599,14 @@ $desa_id = session()->get('kode_desa');
                         } else {
                             $('#fd_shdk').removeClass('is-invalid');
                             $('.errorfd_shdk').html('');
+                        }
+
+                        if (response.error.fd_jenkel) {
+                            $('#fd_jenkel').addClass('is-invalid');
+                            $('.errorfd_jenkel').html(response.error.fd_jenkel);
+                        } else {
+                            $('#fd_jenkel').removeClass('is-invalid');
+                            $('.errorfd_jenkel').html('');
                         }
 
                         if (response.error.fd_sta_bangteti) {
@@ -823,7 +852,7 @@ $desa_id = session()->get('kode_desa');
     });
 
     $('#datarw').change(function() {
-        var desa = $('#kelurahan').val();
+        var desa = $('#fd_desa').val();
         var no_rw = $('#datarw').val();
         var action = 'get_rt';
         if (no_rw != '') {
