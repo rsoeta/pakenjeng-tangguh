@@ -50,6 +50,12 @@ class Famantama extends BaseController
     {
         // var_dump(deadline_ppks());
         // die;
+
+        // Mengambil data dari view
+        $db = \Config\Database::connect();
+        $query = $db->query('SELECT rw_rt, fd_rw, fd_rt, jml_rkp FROM vw_famantama_rkp ORDER BY fd_rw ASC');
+        $chartData = $query->getResultArray();
+
         if (session()->get('role_id') == 1) {
             $this->FamantamaModel = new FamantamaModel();
             $this->WilayahModel = new WilayahModel();
@@ -72,6 +78,7 @@ class Famantama extends BaseController
                 'percentages' => $this->VervalPbiModel->jml_persentase(),
                 'statusRole' => $this->GenModel->getStatusRole(),
                 'kerja_famantama' => $this->GenModel->get_jenis_pekerjaan(),
+                'chartData' => $chartData,
             ];
 
             return view('dtks/data/dtks/famantama/tables', $data);
@@ -96,13 +103,18 @@ class Famantama extends BaseController
                 'percentages' => $this->VervalPbiModel->jml_persentase(),
                 'statusRole' => $this->GenModel->getStatusRole(),
                 'kerja_famantama' => $this->GenModel->get_jenis_pekerjaan(),
+                'chartData' => $chartData,
+
             ];
+
+            // dd($data['chartData']);
 
             return view('dtks/data/dtks/famantama/tables', $data);
         } else {
             return redirect()->to('lockscreen');
         }
     }
+
 
     public function tabel_data()
     {

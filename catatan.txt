@@ -891,13 +891,12 @@
     # tambah tabel tb_jenis_pekerjaan
     # tambah tabel famantama_data
     # tambah view rekap_rw_rt 
-        
+    # tambah kolom fd_jenkel
+        ALTER TABLE `famantama_data` ADD `fd_jenkel` INT NULL DEFAULT NULL AFTER `fd_shdk`;
+
         CREATE OR REPLACE VIEW vw_famantama_rkp AS
         SELECT CONCAT(fd_rw, '/', fd_rt) AS rw_rt, fd_desa, fd_rw, fd_rt,  
             COUNT(*) AS jml_rkp
         FROM famantama_data
         GROUP BY fd_desa, fd_rw, fd_rt
         ORDER BY fd_desa, fd_rw, fd_rt ASC;
-
-    # tambah kolom fd_jenkel
-        ALTER TABLE `famantama_data` ADD `fd_jenkel` INT NULL DEFAULT NULL AFTER `fd_shdk`;

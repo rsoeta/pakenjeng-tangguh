@@ -125,6 +125,7 @@ $routes->post('exportPpks1', 'Dtks\Ppks::export1', ['filter' => 'authfilterdtks'
 
 // FAMANTAMA
 $routes->get('famantama', 'Dtks\Famantama::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->get('getDiagram', 'Dtks\Famantama::getDiagram', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->get('tambahFamantama', 'Dtks\Famantama::formtambah', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tmbFamantama', 'Dtks\Famantama::save', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->post('get_data_penduduk', 'Dtks\Famantama::get_data_penduduk', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);

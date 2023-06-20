@@ -1,11 +1,17 @@
 <?= $this->extend('templates/index'); ?>
 
 <?= $this->section('content'); ?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+    canvas {
+        max-width: 600px;
+        margin: 20px auto;
+    }
+
     .add-button {
         position: fixed;
-        bottom: 5%;
+        bottom: 6%;
         right: 4%;
         /* Nilai z-index yang tinggi */
         z-index: 5;
@@ -64,11 +70,11 @@
                         <div class="card-header p-0 pt-1">
                             <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill" href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home" aria-selected="true">Tabel Pendataan</a>
+                                    <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill" href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home" aria-selected="true">Pendataan</a>
                                 </li>
-                                <!-- <li class="nav-item">
-                                    <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill" href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile" aria-selected="false">Tabel Pemadanan</a>
-                                </li> -->
+                                <li class="nav-item">
+                                    <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill" href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile" aria-selected="false">Diagram</a>
+                                </li>
                                 <!-- <li class="nav-item">
                                     <a class="nav-link" id="custom-tabs-one-messages-tab" data-toggle="pill" href="#custom-tabs-one-messages" role="tab" aria-controls="custom-tabs-one-messages" aria-selected="false">Messages</a>
                                 </li>
@@ -194,87 +200,83 @@
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
-                                    <div class="row">
-                                        <div class="col-12 col-sm-6">
+                                    <div class="col-sm-9 col-md-9 col-12">
+                                        <div class="card-header">
+                                            <h3 class="card-title"><strong>Capaian Per/RT</strong></h3>
+
+                                            <div class="card-tools">
+                                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <!-- /.col -->
+                                        <div class="card-body">
                                             <div class="row">
-                                                <div class="col-6 col-sm-3 mb-2">
-                                                    <button type="button" class="btn btn-info btn-block" data-toggle="modal" onclick="reload_table()">
-                                                        <i class="fa fa-sync-alt"></i> Reload
-                                                    </button>
+                                                <div class="col-12 col-sm-9 col-md-9 mb-4">
+                                                    <h4>Diagram</h4>
+                                                    <?php foreach ($chartData as $row) { ?>
+                                                        <?php
+                                                        $persentase = $row['jml_rkp'];
+                                                        ?>
+                                                        <div class="progress-group">
+                                                            <b><?php echo ucfirst(strtolower($row['rw_rt'])); ?></b>
+                                                            <span class="float-right"><b><?= number_format($row['jml_rkp'], '0', ',', '.'); ?></b></span>
+                                                            <div class="progress progress-sm">
+                                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: <?= number_format($persentase, 2); ?>%"></div>
+                                                            </div>
+                                                        </div>
+                                                    <?php } ?>
+                                                </div>
+
+
+                                                <div class="col-12 col-sm-3 col-md-3">
+                                                    <h4>Rincian</h4>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-bordered">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>NO.</th>
+                                                                    <th>RW/RT</th>
+                                                                    <th>JUMLAH</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <?php $no = 1 ?>
+                                                                <?php foreach ($chartData as $row) :
+                                                                ?>
+                                                                    <tr style="text-align: right;">
+                                                                        <td style="text-align: center;"><?= $no; ?></td>
+                                                                        <td style="text-align: left;"><?= $row['rw_rt']; ?></td>
+                                                                        <td style="text-align: right;"><?= number_format($row['jml_rkp'], '0', ',', '.'); ?></td>
+                                                                    </tr>
+                                                                    <?php $no++ ?>
+                                                                <?php endforeach; ?>
+                                                            </tbody>
+                                                            <tfoot>
+                                                                <tr>
+                                                                    <?php
+                                                                    $nilai_array = $chartData;
+                                                                    $total = 0;
+
+                                                                    foreach ($nilai_array as $nilai) {
+                                                                        $total += $nilai['jml_rkp'];
+                                                                    } ?>
+
+                                                                    <th colspan="2" style="text-align: center;">TOTAL</th>
+                                                                    <th style="text-align: right;"><?= number_format($total, '0', ',', '.'); ?></th>
+                                                                </tr>
+                                                            </tfoot>
+                                                        </table>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="row mb-2">
-                                        <div class="col-sm-2 col-6 mb-2">
-                                            <select <?= $user >= 3 ? 'disabled' : ''; ?> class="form-control form-control-sm" name="desa01" id="desa01">
-                                                <option value="">[ Semua Desa ]</option>
-                                                <?php foreach ($desa as $row) { ?>
-                                                    <option <?= $desa_id == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id']; ?>"><?= $row['name']; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-2 col-3 mb-2">
-                                            <select <?= $user >= 4 ? 'disabled = "true"' : ''; ?> class="form-control form-control-sm" name="rw01" id="rw01">
-                                                <option value="">[ Semua RW ]</option>
-                                                <?php foreach ($datarw as $row) { ?>
-                                                    <option <?php if ($jabatan == $row['no_rw']) {
-                                                                echo 'selected';
-                                                            } ?> value="<?= $row['no_rw']; ?>"><?= $row['no_rw']; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-2 col-3 mb-2">
-                                            <select class="form-control form-control-sm" name="rt01" id="rt01">
-                                                <option value="">[ Semua RT ]</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-2 col-6 mb-2">
-                                            <select class="form-control form-control-sm" name="bansos01" id="bansos01">
-                                                <option value="">[ Semua Bansos ]</option>
-                                                <?php foreach ($bansos as $row) { ?>
-                                                    <option value="<?= $row['dbj_id']; ?>"><?= $row['dbj_ket_bansos']; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-2 col-3 mb-2">
-                                            <select class="form-control form-control-sm" name="data_tahun01" id="data_tahun01">
-                                                <option value="">[ Semua Tahun ]</option>
-                                                <?php
-                                                $mulai = 2021;
-                                                $tahun = date('Y');
-                                                for ($i = $mulai; $i < $mulai + 3; $i++) { ?>
-                                                    <option value='<?= $i; ?>' <?php if ($i == $tahun) {
-                                                                                    echo ' selected';
-                                                                                } ?>><?= $i; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-2 col-3 mb-2">
-                                            <select class="form-control form-control-sm" name="data_bulan01" id="data_bulan01">
-                                                <option value="">[ Semua Bulan ]</option>
-                                                <?php
-
-                                                $bulan = [1 => "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-                                                $bulanIni = date('n');
-                                                for ($i = 0; $i < 12; $i++) {
-                                                    $AmbilNamaBulan = strtotime(sprintf('%d months', $i));
-                                                    $LabelBulan     = $bulan[date('n', $AmbilNamaBulan)];
-                                                    $ValueBulan     = date('n', $AmbilNamaBulan);
-                                                    // if ($ValueBulan < $i) continue;
-                                                ?>
-                                                    <option value="<?php echo $ValueBulan; ?>" <?php if ($bulanIni == $ValueBulan) {
-                                                                                                    echo ' selected';
-                                                                                                } ?>><?php echo $LabelBulan; ?>
-                                                    </option>
-                                                <?php } ?>
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-2 col-3 mb-2" hidden>
-                                            <select class="form-control form-control-sm" name="data_reg01" id="data_reg01">
-                                                <option value="1"></option>
-                                            </select>
+                                        <div class="card-footer clearfix">
+                                            <a href="/famantama" class="btn btn-sm btn-secondary float-right">Rincian</a>
                                         </div>
                                     </div>
                                 </div>
