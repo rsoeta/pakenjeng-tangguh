@@ -92,7 +92,7 @@ $desa_id = session()->get('kode_desa');
                         <div id="step-1">
                             <div class="modal-body">
                                 <div class="row">
-                                    <div class="col-12 col-sm-6">
+                                    <div class="col-12">
                                         <div class="form-group row nopadding" hidden>
                                             <label class="col-4 col-sm-4 col-form-label" for="fd_id">ID</label>
                                             <div class="col-8 col-sm-8">
@@ -430,7 +430,7 @@ $desa_id = session()->get('kode_desa');
                                                 <select id="fd_pekerjaan_kk" name="fd_pekerjaan_kk" class="form-select form-select-sm">
                                                     <option value="">-- Pilih Jenis Pekerjaan --</option>
                                                     <?php foreach ($pekerjaan as $row) { ?>
-                                                        <option <?= $fd_pekerjaan_kk == $row['fpp_id'] ? 'selected' : ''; ?> value="<?= $row['fpp_id'] ?>"> <?= $row['pk_nama']; ?></option>
+                                                        <option <?= $fd_pekerjaan_kk == $row['pk_id'] ? 'selected' : ''; ?> value="<?= $row['pk_id'] ?>"> <?= ucwords(strtolower($row['pk_nama'])); ?></option>
                                                     <?php } ?>
                                                 </select>
                                                 <div class="invalid-feedback errorfd_pekerjaan_kk"></div>

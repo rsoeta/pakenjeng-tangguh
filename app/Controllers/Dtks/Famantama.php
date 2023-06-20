@@ -71,6 +71,7 @@ class Famantama extends BaseController
                 'shdk' => $this->ShdkModel->findAll(),
                 'percentages' => $this->VervalPbiModel->jml_persentase(),
                 'statusRole' => $this->GenModel->getStatusRole(),
+                'kerja_famantama' => $this->GenModel->get_jenis_pekerjaan(),
             ];
 
             return view('dtks/data/dtks/famantama/tables', $data);
@@ -94,6 +95,7 @@ class Famantama extends BaseController
                 'shdk' => $this->ShdkModel->findAll(),
                 'percentages' => $this->VervalPbiModel->jml_persentase(),
                 'statusRole' => $this->GenModel->getStatusRole(),
+                'kerja_famantama' => $this->GenModel->get_jenis_pekerjaan(),
             ];
 
             return view('dtks/data/dtks/famantama/tables', $data);
@@ -115,7 +117,7 @@ class Famantama extends BaseController
         $filter1 = $this->request->getPost('desa');
         $filter2 = $this->request->getPost('rw');
         $filter3 = $this->request->getPost('rt');
-        // $filter4 = $this->request->getPost('bansos');
+        // $filter4 = $this->request->getPost('kerja_famantama');
         // $filter5 = $this->request->getPost('data_tahun');
         // $filter6 = $this->request->getPost('data_bulan');
         // $filter7 = '0';
@@ -138,6 +140,7 @@ class Famantama extends BaseController
             $row[] = $key->fd_rt;
             $row[] = $key->fd_rw;
             $row[] = $key->jenis_shdk;
+            $row[] = $key->pk_nama;
             $row[] = '<a href="https://wa.me/' . nope($key->nope) . '" target="_blank" style="text-decoration:none;">' . strtoupper($key->fullname) . '</a>';
             $row[] = $key->fd_updated_at;
             $row[] = '<a class="btn btn-sm btn-success" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->fd_id . "'" . ')"><i class="far fa-edit"></i></a> | 
@@ -199,14 +202,6 @@ class Famantama extends BaseController
                 'jenis_pekerjaan' => $this->GenModel->get_jenis_pekerjaan(),
             ];
             if (deadline_ppks() === 1) {
-
-                // alert(\'Mohon Maaf, Batas waktu untuk Tambah Data Telah Habis!!\');
-                // Swal.fire({
-                //     icon: "error",
-                //     title: "Oops...",
-                //     text: "Something went wrong!",
-                //     footer: "<a href="">Why do I have this issue?</a>"
-                // })
                 $msg = [
                     'data' =>
                     '<script>
@@ -573,11 +568,26 @@ class Famantama extends BaseController
             $id = $this->request->getVar('id');
 
             $this->FamantamaModel->delete($id);
-            $msg = [
-                'sukses' => 'Data berhasil dihapus'
-            ];
-            // }
-            echo json_encode($msg);
+
+            if (deadline_ppks() === 1) {
+                $msg = [
+                    'data' =>
+                    '<script>
+                            Swal.fire({
+                                icon: "error",
+                                title: "Ops...",
+                                text: "Akses Tidak Sesuai!",
+                                })
+                        </script>'
+                ];
+                echo json_encode($msg);
+            } else {
+                $msg = [
+                    'sukses' => 'Data berhasil dihapus'
+                ];
+                // }
+                echo json_encode($msg);
+            }
             // } else {
             //     $data = [
             //         'title' => 'Access denied',
@@ -590,14 +600,6 @@ class Famantama extends BaseController
     public function formedit()
     {
         if ($this->request->isAJAX()) {
-            // var_dump($this->request->getVar());
-
-            // if (deadline_ppks() == 1) {
-            //     $msg = [
-            //         'informasi' => 'Mohon Maaf, Batas waktu untuk Perubahan Data Telah Habis!!'
-            //     ];
-            //     echo json_encode($msg);
-            // } else {
 
             $this->FamantamaModel = new FamantamaModel();
             $this->WilayahModel = new WilayahModel();
@@ -675,12 +677,24 @@ class Famantama extends BaseController
                 // 'foto_rumah' => $nama_foto_rumah,
             ];
             // var_dump($data['datarw2']);
-
-            $msg = [
-                'sukses' => view('dtks/data/dtks/famantama/modaledit', $data)
-            ];
-            echo json_encode($msg);
-            // }
+            if (deadline_ppks() === 1) {
+                $msg = [
+                    'data' =>
+                    '<script>
+                            Swal.fire({
+                                icon: "error",
+                                title: "Ops...",
+                                text: "Akses Tidak Sesuai!",
+                                })
+                        </script>'
+                ];
+                echo json_encode($msg);
+            } else {
+                $msg = [
+                    'sukses' => view('dtks/data/dtks/famantama/modaledit', $data)
+                ];
+                echo json_encode($msg);
+            }
         } else {
             return redirect()->to('lockscreen');
         }
@@ -1127,67 +1141,67 @@ class Famantama extends BaseController
 
         $sheet->setCellValue('A1', 'No');
         $sheet->setCellValue('B1', 'Nama Lengkap');
-        $sheet->setCellValue('F1', 'NIK');
-        $sheet->setCellValue('G1', 'KK');
-        $sheet->setCellValue('H1', 'Jln/Kampung/Dusun');
-        $sheet->setCellValue('I1', 'RT');
-        $sheet->setCellValue('J1', 'RW');
-        $sheet->setCellValue('K1', 'Desa/Kel');
-        $sheet->setCellValue('L1', 'Kecamatan');
-        $sheet->setCellValue('M1', 'Status Hubungan');
-        $sheet->setCellValue('N1', 'Status Bangunan
+        $sheet->setCellValue('C1', 'NIK');
+        $sheet->setCellValue('D1', 'KK');
+        $sheet->setCellValue('E1', 'Jln/Kampung/Dusun');
+        $sheet->setCellValue('F1', 'RT');
+        $sheet->setCellValue('G1', 'RW');
+        $sheet->setCellValue('H1', 'Desa/Kel');
+        $sheet->setCellValue('I1', 'Kecamatan');
+        $sheet->setCellValue('J1', 'Status Hubungan');
+        $sheet->setCellValue('K1', 'Status Bangunan
 Tempat Tinggal
 Yang Ditempati');
-        $sheet->setCellValue('O1', 'Status Lahan
+        $sheet->setCellValue('L1', 'Status Lahan
 Tempat Tinggal
 Yang Ditempati');
-        $sheet->setCellValue('P1', 'Jenis
+        $sheet->setCellValue('M1', 'Jenis
 Lantai');
-        $sheet->setCellValue('Q1', 'Jenis
+        $sheet->setCellValue('N1', 'Jenis
 Dinding');
-        $sheet->setCellValue('R1', 'Kondisi
+        $sheet->setCellValue('O1', 'Kondisi
 Dinding');
-        $sheet->setCellValue('S1', 'Jenis
+        $sheet->setCellValue('P1', 'Jenis
 Atap');
-        $sheet->setCellValue('T1', 'Kondisi
+        $sheet->setCellValue('Q1', 'Kondisi
 Atap');
-        $sheet->setCellValue('U1', 'Penghasilan
+        $sheet->setCellValue('R1', 'Penghasilan
 Rata-Rata/Bulan');
-        $sheet->setCellValue('V1', 'Pengeluaran
+        $sheet->setCellValue('S1', 'Pengeluaran
 Rata-Rata/bulan');
-        $sheet->setCellValue('W1', 'Jumlah
+        $sheet->setCellValue('T1', 'Jumlah
 Tanggungan
 Keluarga');
-        $sheet->setCellValue('X1', 'Kepemilikan
+        $sheet->setCellValue('U1', 'Kepemilikan
 Kendaraan
 Roda 2');
-        $sheet->setCellValue('Y1', 'Sumber
+        $sheet->setCellValue('V1', 'Sumber
 Air Minum');
-        $sheet->setCellValue('Z1', 'Cara
+        $sheet->setCellValue('W1', 'Cara
 Memperoleh
 Air Minum');
-        $sheet->setCellValue('AA1', 'Sumber
+        $sheet->setCellValue('X1', 'Sumber
 Penerangan
 Utama');
-        $sheet->setCellValue('AB1', 'Daya
+        $sheet->setCellValue('Y1', 'Daya
 Listrik
 Terpasang');
-        $sheet->setCellValue('AC1', 'Bahan
+        $sheet->setCellValue('Z1', 'Bahan
 Bakar/Energi
 Utama Untuk
 Memasak');
-        $sheet->setCellValue('AD1', 'Penggunaan
+        $sheet->setCellValue('AA1', 'Penggunaan
 Fasilitas
 Tempat
 Buang Air
 Besar');
-        $sheet->setCellValue('AE1', 'Jenis
+        $sheet->setCellValue('AB1', 'Jenis
 Kloset');
-        $sheet->setCellValue('AF1', 'Tempat
+        $sheet->setCellValue('AC1', 'Tempat
 Pembuangan
 Akhir
 Tinja');
-        $sheet->setCellValue('AG1', 'Pekerjaan
+        $sheet->setCellValue('AD1', 'Pekerjaan
 Kepala
 Keluarga');
 
@@ -1216,8 +1230,8 @@ Keluarga');
             // ],
         ];
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:AG1')->applyFromArray($styleArray);
-        $spreadsheet->getActiveSheet()->getStyle('A1:AG1')->getAlignment()->setWrapText(true);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AD1')->applyFromArray($styleArray);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AD1')->getAlignment()->setWrapText(true);
 
         // // menetapkan format tanggal pada sel H
         // $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_DATE_YYYYMMDDSLASH);
@@ -1228,34 +1242,34 @@ Keluarga');
 
             $sheet->setCellValue('A' . $count, $count - 1);
             $sheet->setCellValue('B' . $count, strtoupper($row['fd_nama_lengkap']));
-            $sheet->setCellValueExplicit('F' . $count, $row['fd_nik'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $sheet->setCellValueExplicit('G' . $count, $row['fd_nkk'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $sheet->setCellValue('H' . $count, strtoupper($row['fd_alamat']));
-            $sheet->setCellValue('I' . $count, strtoupper($row['fd_rt']));
-            $sheet->setCellValue('J' . $count, strtoupper($row['fd_rw']));
-            $sheet->setCellValue('K' . $count, strtoupper($row['namaDesa']));
-            $sheet->setCellValue('L' . $count, 'PAKENJENG');
-            $sheet->setCellValue('M' . $count, $row['fd_shdk']);
-            $sheet->setCellValue('N' . $count, $row['fd_sta_bangteti']);
-            $sheet->setCellValue('O' . $count, $row['fd_sta_lahteti']);
-            $sheet->setCellValue('P' . $count, $row['fd_jenlai']);
-            $sheet->setCellValue('Q' . $count, $row['fd_jendin']);
-            $sheet->setCellValue('R' . $count, $row['fd_kondin']);
-            $sheet->setCellValue('S' . $count, $row['fd_jentap']);
-            $sheet->setCellValue('T' . $count, $row['fd_kontap']);
-            $sheet->setCellValue('U' . $count, $row['fd_penghasilan']);
-            $sheet->setCellValue('V' . $count, $row['fd_pengeluaran']);
-            $sheet->setCellValue('W' . $count, $row['fd_jml_tanggungan']);
-            $sheet->setCellValue('X' . $count, $row['fd_roda_dua']);
-            $sheet->setCellValue('Y' . $count, $row['fd_sumber_minum']);
-            $sheet->setCellValue('Z' . $count, $row['fd_cara_minum']);
-            $sheet->setCellValue('AA' . $count, $row['fd_penerangan_utama']);
-            $sheet->setCellValue('AB' . $count, $row['fd_daya_listrik']);
-            $sheet->setCellValue('AC' . $count, $row['fd_bahan_masak']);
-            $sheet->setCellValue('AD' . $count, $row['fd_tempat_bab']);
-            $sheet->setCellValue('AE' . $count, $row['fd_jenis_kloset']);
-            $sheet->setCellValue('AF' . $count, $row['fd_tempat_tinja']);
-            $sheet->setCellValue('AG' . $count, $row['fd_pekerjaan_kk']);
+            $sheet->setCellValueExplicit('C' . $count, $row['fd_nik'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('D' . $count, $row['fd_nkk'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('E' . $count, strtoupper($row['fd_alamat']));
+            $sheet->setCellValue('F' . $count, strtoupper($row['fd_rt']));
+            $sheet->setCellValue('G' . $count, strtoupper($row['fd_rw']));
+            $sheet->setCellValue('H' . $count, strtoupper($row['namaDesa']));
+            $sheet->setCellValue('I' . $count, 'PAKENJENG');
+            $sheet->setCellValue('J' . $count, $row['fd_shdk']);
+            $sheet->setCellValue('K' . $count, $row['fd_sta_bangteti']);
+            $sheet->setCellValue('L' . $count, $row['fd_sta_lahteti']);
+            $sheet->setCellValue('M' . $count, $row['fd_jenlai']);
+            $sheet->setCellValue('N' . $count, $row['fd_jendin']);
+            $sheet->setCellValue('O' . $count, $row['fd_kondin']);
+            $sheet->setCellValue('P' . $count, $row['fd_jentap']);
+            $sheet->setCellValue('Q' . $count, $row['fd_kontap']);
+            $sheet->setCellValue('R' . $count, $row['fd_penghasilan']);
+            $sheet->setCellValue('S' . $count, $row['fd_pengeluaran']);
+            $sheet->setCellValue('T' . $count, $row['fd_jml_tanggungan']);
+            $sheet->setCellValue('U' . $count, $row['fd_roda_dua']);
+            $sheet->setCellValue('V' . $count, $row['fd_sumber_minum']);
+            $sheet->setCellValue('W' . $count, $row['fd_cara_minum']);
+            $sheet->setCellValue('X' . $count, $row['fd_penerangan_utama']);
+            $sheet->setCellValue('Y' . $count, $row['fd_daya_listrik']);
+            $sheet->setCellValue('Z' . $count, $row['fd_bahan_masak']);
+            $sheet->setCellValue('AA' . $count, $row['fd_tempat_bab']);
+            $sheet->setCellValue('AB' . $count, $row['fd_jenis_kloset']);
+            $sheet->setCellValue('AC' . $count, $row['fd_tempat_tinja']);
+            $sheet->setCellValue('AD' . $count, $row['fpp_id']);
 
             $count++;
         }

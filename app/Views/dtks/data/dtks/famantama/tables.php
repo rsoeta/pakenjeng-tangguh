@@ -6,7 +6,7 @@
     .add-button {
         position: fixed;
         bottom: 4%;
-        left: 4%;
+        right: 4%;
         /* Nilai z-index yang tinggi */
         z-index: 5;
         width: 60px;
@@ -56,23 +56,8 @@
                     <?= session()->get('message'); ?>
                 </div>
             <?php endif; ?>
-            <?= form_open('/exportFamantama', ['target' => 'blank']); ?>
-            <div class="row">
-                <div class="col-12 col-sm-6">
-                    <div class="row">
-                        <div class="col-6 col-sm-3 mb-2" <?= $user != 3 ?  'hidden' :  ''; ?>>
-                            <a href="exportBa" type="submit" name="btnExpBA" class="btn btn-primary btn-block" id="exportBA">
-                                <i class="fas fa-file-word"></i> Export B.A
-                            </a>
-                        </div>
-                        <div class="col-6 col-sm-3 mb-2" <?= $user > 3 ?  'hidden' :  ''; ?>>
-                            <button type="submit" name="btnExpData" class="btn btn-success btn-block" id="exportExcel">
-                                <i class="fa fa-file-excel"></i> Export Data
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+
             <div class="row">
                 <div class="col-12">
                     <div class="card card-dark card-tabs">
@@ -99,11 +84,6 @@
                                         <div class="col-12 col-sm-6">
                                             <div class="row">
                                                 <div class="col-6 col-sm-3 mb-2">
-                                                    <!-- <button type="button" class="btn btn-info btn-block" data-toggle="modal" onclick="reload_table()">
-                                                        <i class="fa fa-sync-alt"></i> Reload
-                                                    </button> -->
-                                                </div>
-                                                <div class="col-6 col-sm-3 mb-2">
                                                     <!-- <button type="button" class="btn btn-success btn-block tombolTambah">
                                                         <i class="fa fa-plus"></i> Tambah Data
                                                     </button> -->
@@ -115,7 +95,23 @@
                                             </div>
                                         </div>
                                     </div>
-
+                                    <?= form_open('/exportFamantama', ['target' => 'blank']); ?>
+                                    <div class="row">
+                                        <div class="col-12 col-sm-6">
+                                            <div class="row">
+                                                <div class="col-6 col-sm-3 mb-2" <?= $user != 3 ?  'hidden' :  ''; ?>>
+                                                    <button type="button" class="btn btn-info btn-block" data-toggle="modal" onclick="reload_table()">
+                                                        <i class="fa fa-sync-alt"></i> Reload
+                                                    </button>
+                                                </div>
+                                                <div class="col-6 col-sm-3 mb-2" <?= $user > 3 ?  'hidden' :  ''; ?>>
+                                                    <button type="submit" name="btnExpData" class="btn btn-success btn-block" id="exportExcel">
+                                                        <i class="fa fa-file-excel"></i> Export Data
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="row mb-2">
                                         <div class="col-sm-2 col-6 mb-2">
                                             <select <?= $user >= 3 ? 'disabled' : ''; ?> class="form-control form-control-sm" name="desa" id="desa">
@@ -136,14 +132,6 @@
                                         <div class="col-sm-2 col-3 mb-2">
                                             <select class="form-control form-control-sm" name="rt" id="rt">
                                                 <option value="">[ Semua RT ]</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-2 col-6 mb-2">
-                                            <select class="form-control form-control-sm" name="bansos" id="bansos">
-                                                <option value="">[ Semua Bansos ]</option>
-                                                <?php foreach ($bansos as $row) { ?>
-                                                    <option value="<?= $row['dbj_id']; ?>"><?= $row['dbj_ket_bansos']; ?></option>
-                                                <?php } ?>
                                             </select>
                                         </div>
                                         <div class="col-sm-2 col-3 mb-2">
@@ -174,12 +162,13 @@
                                                 <?php } ?>
                                             </select>
                                         </div>
-                                        <?= form_close() ?>
                                         <div class="col-sm-2 col-3 mb-2" hidden>
                                             <select class="form-control form-control-sm" name="data_reg" id="data_reg">
                                                 <option value="0"></option>
                                             </select>
                                         </div>
+                                        <?= form_close() ?>
+
                                     </div>
                                     <div>
                                         <br>
@@ -194,6 +183,7 @@
                                                     <th>NO. RT</th>
                                                     <th>NO. RW</th>
                                                     <th>SHDK</th>
+                                                    <th>PEKERJAAN</th>
                                                     <th>PENDATA</th>
                                                     <th>UPDATE PADA</th>
                                                     <th>AKSI</th>
@@ -335,7 +325,7 @@
                 data.desa = $('#desa').val();
                 data.rw = $('#rw').val();
                 data.rt = $('#rt').val();
-                data.bansos = $('#bansos').val();
+                // data.kerja_famantama = $('#kerja_famantama').val();
                 data.data_tahun = $('#data_tahun').val();
                 data.data_bulan = $('#data_bulan').val();
                 data.data_reg = $('#data_reg').val();
@@ -361,9 +351,9 @@
     $('#rt').change(function() {
         table.draw();
     });
-    $('#bansos').change(function() {
-        table.draw();
-    });
+    // $('#kerja_famantama').change(function() {
+    //     table.draw();
+    // });
     $('#data_tahun').change(function() {
         table.draw();
     });
@@ -434,30 +424,6 @@
                         $('#nik').focus();
                     });
                     $('#modaledit').modal('show');
-                }
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
-            }
-        });
-    }
-
-    function view_person(id) {
-        //Ajax Load data from ajax
-        $.ajax({
-            type: "POST",
-            url: "<?php echo site_url('viewUsulan') ?>",
-            data: {
-                id: id
-            },
-            dataType: "JSON",
-            success: function(response) {
-                if (response.informasi) {
-                    alert(response.informasi);
-
-                } else if (response.sukses) {
-                    $('.viewmodal').html(response.sukses).show();
-                    $('#modalview').modal('show');
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {

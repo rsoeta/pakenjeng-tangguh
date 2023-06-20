@@ -428,7 +428,7 @@ $desa_id = session()->get('kode_desa');
                                                     <select id="fd_pekerjaan_kk" name="fd_pekerjaan_kk" class="form-select form-select-sm">
                                                         <option value="">-- Pilih Jenis Pekerjaan --</option>
                                                         <?php foreach ($pekerjaan as $row) { ?>
-                                                            <option value="<?= $row['fpp_id'] ?>"> <?= $row['pk_nama']; ?></option>
+                                                            <option value="<?= $row['pk_id'] ?>"> <?= ucwords(strtolower($row['pk_nama'])); ?></option>
                                                         <?php } ?>
                                                     </select>
                                                     <div class="invalid-feedback errorfd_pekerjaan_kk"></div>

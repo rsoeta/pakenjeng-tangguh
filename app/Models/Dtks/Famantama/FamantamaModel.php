@@ -87,6 +87,12 @@ class FamantamaModel extends Model
         } else {
             $kondisi_filter3 = " AND fd_rt = '$filter3'";
         }
+        // kerja_famantama
+        // if ($filter4 == "") {
+        //     $kondisi_filter4 = "";
+        // } else {
+        //     $kondisi_filter4 = " AND fd_pekerjaan_kk = '$filter4'";
+        // }
 
         // search
         if ($_POST['search']['value']) {
@@ -109,11 +115,12 @@ class FamantamaModel extends Model
         if ($_POST['length'] != -1);
         $db = db_connect();
         $builder = $db->table('famantama_data');
-        $query = $builder->select('famantama_data.fd_id, tb_villages.name as namaDesa, tb_districts.name as namaKec, fd_nama_lengkap, fd_nkk, famantama_data.fd_nik, fd_alamat, fd_rt, fd_rw, fd_desa, fd_kec, famantama_data.fd_created_at, fd_created_at_year, fd_created_at_month, fd_created_by, dtks_users.email, famantama_data.fd_updated_at, dtks_users.nope, dtks_users.fullname, jenis_shdk')
+        $query = $builder->select('famantama_data.fd_id, tb_villages.name as namaDesa, tb_districts.name as namaKec, fd_nama_lengkap, fd_nkk, famantama_data.fd_nik, fd_alamat, fd_rt, fd_rw, fd_desa, fd_kec, famantama_data.fd_created_at, fd_created_at_year, fd_created_at_month, fd_created_by, dtks_users.email, famantama_data.fd_updated_at, dtks_users.nope, dtks_users.fullname, jenis_shdk, fd_pekerjaan_kk, tb_penduduk_pekerjaan.pk_nama, fpp_id')
             ->join('tb_villages', 'tb_villages.id=famantama_data.fd_desa')
             ->join('tb_districts', 'tb_districts.id=famantama_data.fd_kec')
             ->join('dtks_users', 'dtks_users.nik=famantama_data.fd_created_by')
             ->join('tb_shdk', 'tb_shdk.tsf_id=famantama_data.fd_shdk')
+            ->join('tb_penduduk_pekerjaan', 'tb_penduduk_pekerjaan.pk_id=famantama_data.fd_pekerjaan_kk')
             ->where($kondisi_search)
             ->orderBy($result_order, $result_dir)
             ->limit($_POST['length'], $_POST['start'])
@@ -151,29 +158,11 @@ class FamantamaModel extends Model
         } else {
             $kondisi_filter3 = " AND fd_rt = '$filter3'";
         }
-        // rt
+        // kerja_famantama
         // if ($filter4 == "") {
         //     $kondisi_filter4 = "";
         // } else {
-        //     $kondisi_filter4 = " AND fd_status_bantuan = '$filter4'";
-        // }
-        // // rt
-        // if ($filter5 == "") {
-        //     $kondisi_filter5 = "";
-        // } else {
-        //     $kondisi_filter5 = " AND fd_created_at_year = '$filter5'";
-        // }
-        // // updated_at
-        // if ($filter6 == "") {
-        //     $kondisi_filter6 = "";
-        // } else {
-        //     $kondisi_filter6 = " AND fd_created_at_month = '$filter6'";
-        // }
-        // // fd_proses
-        // if ($filter7 == "") {
-        //     $kondisi_filter7 = "";
-        // } else {
-        //     $kondisi_filter7 = " AND fd_proses = '$filter7'";
+        //     $kondisi_filter4 = " AND fd_pekerjaan_kk = '$filter4'";
         // }
 
         // kondisi search
@@ -194,8 +183,9 @@ class FamantamaModel extends Model
     public function dataExport($filter1, $filter5, $filter6)
     {
         $builder = $this->db->table('famantama_data');
-        $builder->select('fd_nama_lengkap, fd_nik, fd_nkk, fd_alamat, fd_rt, fd_rw, fd_desa, fd_kec, fd_kab, fd_prov, fd_shdk, fd_sta_bangteti, fd_sta_lahteti, fd_jenlai, fd_jendin, fd_kondin, fd_jentap, fd_kontap, fd_penghasilan, fd_pengeluaran, fd_jml_tanggungan, fd_roda_dua, fd_sumber_minum, fd_cara_minum, fd_penerangan_utama, fd_daya_listrik, fd_bahan_masak, fd_tempat_bab, fd_jenis_kloset, fd_tempat_tinja, fd_pekerjaan_kk, fd_created_at_year, fd_created_at_month, fd_created_by, fd_created_at, fd_updated_by, fd_updated_at, tb_villages.name as namaDesa');
+        $builder->select('fd_nama_lengkap, fd_nik, fd_nkk, fd_alamat, fd_rt, fd_rw, fd_desa, fd_kec, fd_kab, fd_prov, fd_shdk, fd_sta_bangteti, fd_sta_lahteti, fd_jenlai, fd_jendin, fd_kondin, fd_jentap, fd_kontap, fd_penghasilan, fd_pengeluaran, fd_jml_tanggungan, fd_roda_dua, fd_sumber_minum, fd_cara_minum, fd_penerangan_utama, fd_daya_listrik, fd_bahan_masak, fd_tempat_bab, fd_jenis_kloset, fd_tempat_tinja, fd_pekerjaan_kk, fd_created_at_year, fd_created_at_month, fd_created_by, fd_created_at, fd_updated_by, fd_updated_at, tb_villages.name as namaDesa, fpp_id');
         $builder->join('tb_villages', 'tb_villages.id=famantama_data.fd_desa', 'LEFT');
+        $builder->join('tb_penduduk_pekerjaan', 'tb_penduduk_pekerjaan.pk_id=famantama_data.fd_pekerjaan_kk', 'LEFT');
         if ($filter1 !== "") {
             $builder->where('fd_desa', $filter1);
         }
