@@ -53,7 +53,7 @@ class Famantama extends BaseController
 
         // Mengambil data dari view
         $db = \Config\Database::connect();
-        $query = $db->query('SELECT rw_rt, fd_rw, fd_rt, jml_rkp FROM vw_famantama_rkp ORDER BY fd_rw ASC');
+        $query = $db->query('SELECT rw_rt, fd_rw, fd_rt, jml_rkp FROM vw_famantama_rkp');
         $chartData = $query->getResultArray();
 
         if (session()->get('role_id') == 1) {
@@ -129,14 +129,14 @@ class Famantama extends BaseController
         $filter1 = $this->request->getPost('desa');
         $filter2 = $this->request->getPost('rw');
         $filter3 = $this->request->getPost('rt');
-        // $filter4 = $this->request->getPost('kerja_famantama');
+        $filter4 = $this->request->getPost('shdk');
         // $filter5 = $this->request->getPost('data_tahun');
         // $filter6 = $this->request->getPost('data_bulan');
         // $filter7 = '0';
 
-        $listing = $this->FamantamaModel->get_datatables($filter1, $filter2, $filter3);
+        $listing = $this->FamantamaModel->get_datatables($filter1, $filter2, $filter3, $filter4);
         $jumlah_semua = $this->FamantamaModel->jumlah_semua();
-        $jumlah_filter = $this->FamantamaModel->jumlah_filter($filter1, $filter2, $filter3);
+        $jumlah_filter = $this->FamantamaModel->jumlah_filter($filter1, $filter2, $filter3, $filter4);
 
         $data = array();
         $no = $_POST['start'];

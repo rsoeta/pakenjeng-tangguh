@@ -168,9 +168,12 @@
                                                 <?php } ?>
                                             </select>
                                         </div>
-                                        <div class="col-sm-2 col-3 mb-2" hidden>
-                                            <select class="form-control form-control-sm" name="data_reg" id="data_reg">
-                                                <option value="0"></option>
+                                        <div class="col-sm-2 col-6 mb-2">
+                                            <select class="form-control form-control-sm" name="shdk" id="shdk">
+                                                <option value="">[ SHDK ]</option>
+                                                <?php foreach ($shdk as $row) { ?>
+                                                    <option value="<?= $row['id']; ?>"><?= $row['jenis_shdk']; ?></option>
+                                                <?php } ?>
                                             </select>
                                         </div>
                                         <?= form_close() ?>
@@ -330,7 +333,7 @@
                 // data.kerja_famantama = $('#kerja_famantama').val();
                 data.data_tahun = $('#data_tahun').val();
                 data.data_bulan = $('#data_bulan').val();
-                data.data_reg = $('#data_reg').val();
+                data.shdk = $('#shdk').val();
             },
             "dataSrc": function(response) {
                 $('input[name=csrf_test_name]').val(response.csrf_test_name);
@@ -362,7 +365,7 @@
     $('#data_bulan').change(function() {
         table.draw();
     });
-    $('#data_reg').change(function() {
+    $('#shdk').change(function() {
         table.draw();
     });
 

@@ -68,7 +68,7 @@ class FamantamaModel extends Model
     var $order = array('famantama_data.fd_updated_at' => 'desc');
 
 
-    function get_datatables($filter1, $filter2, $filter3)
+    function get_datatables($filter1, $filter2, $filter3, $filter4)
     {
         // fil$filter1
         if ($filter1 == "") {
@@ -88,19 +88,19 @@ class FamantamaModel extends Model
         } else {
             $kondisi_filter3 = " AND fd_rt = '$filter3'";
         }
-        // kerja_famantama
-        // if ($filter4 == "") {
-        //     $kondisi_filter4 = "";
-        // } else {
-        //     $kondisi_filter4 = " AND fd_pekerjaan_kk = '$filter4'";
-        // }
+        // shdk
+        if ($filter4 == "") {
+            $kondisi_filter4 = "";
+        } else {
+            $kondisi_filter4 = " AND fd_shdk = '$filter4'";
+        }
 
         // search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "(fd_nama_lengkap LIKE '%$search%' OR fd_nkk LIKE '%$search%' OR fd_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
+            $kondisi_search = "(fd_nama_lengkap LIKE '%$search%' OR fd_nkk LIKE '%$search%' OR fd_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
         } else {
-            $kondisi_search = "famantama_data.fd_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
+            $kondisi_search = "famantama_data.fd_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
         }
 
         // order
@@ -139,7 +139,7 @@ class FamantamaModel extends Model
         return $query;
     }
 
-    function jumlah_filter($filter1, $filter2, $filter3)
+    function jumlah_filter($filter1, $filter2, $filter3, $filter4)
     {
         // fil$filter1
         if ($filter1 == "") {
@@ -159,19 +159,19 @@ class FamantamaModel extends Model
         } else {
             $kondisi_filter3 = " AND fd_rt = '$filter3'";
         }
-        // kerja_famantama
-        // if ($filter4 == "") {
-        //     $kondisi_filter4 = "";
-        // } else {
-        //     $kondisi_filter4 = " AND fd_pekerjaan_kk = '$filter4'";
-        // }
+        // shdk
+        if ($filter4 == "") {
+            $kondisi_filter4 = "";
+        } else {
+            $kondisi_filter4 = " AND fd_shdk = '$filter4'";
+        }
 
         // kondisi search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "AND (fd_nama_lengkap LIKE '%$search%' OR fd_nkk LIKE '%$search%' OR fd_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
+            $kondisi_search = "AND (fd_nama_lengkap LIKE '%$search%' OR fd_nkk LIKE '%$search%' OR fd_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
         } else {
-            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3";
+            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
         }
 
         $sQuery = "SELECT COUNT(fd_nik) as jml FROM famantama_data WHERE fd_nik != '' $kondisi_search";

@@ -899,4 +899,4 @@
             COUNT(*) AS jml_rkp
         FROM famantama_data
         GROUP BY fd_desa, fd_rw, fd_rt
-        ORDER BY fd_desa, fd_rw, fd_rt ASC;
+        ORDER BY rw_rt;

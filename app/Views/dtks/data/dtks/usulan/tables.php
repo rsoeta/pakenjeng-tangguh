@@ -32,23 +32,7 @@
                     <?= session()->get('message'); ?>
                 </div>
             <?php endif; ?>
-            <?= form_open('dtks/usulan22/export', ['target' => 'blank']); ?>
-            <div class="row">
-                <div class="col-12 col-sm-6">
-                    <div class="row">
-                        <div class="col-6 col-sm-3 mb-2" <?= $user != 3 ?  'hidden' :  ''; ?>>
-                            <a href="exportBa" type="submit" name="btnExpBA" class="btn btn-primary btn-block" id="exportBA">
-                                <i class="fas fa-file-word"></i> Export B.A
-                            </a>
-                        </div>
-                        <div class="col-6 col-sm-3 mb-2" <?= $user > 3 ?  'hidden' :  ''; ?>>
-                            <button type="submit" name="btnExpData" class="btn btn-success btn-block" id="exportExcel">
-                                <i class="fa fa-file-excel"></i> Export Data
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
             <div class="row">
                 <div class="col-12">
                     <div class="card card-primary card-tabs">
@@ -71,9 +55,20 @@
                         <div class="card-body">
                             <div class="tab-content" id="custom-tabs-one-tabContent">
                                 <div class="tab-pane fade active show" id="custom-tabs-one-home" role="tabpanel" aria-labelledby="custom-tabs-one-home-tab">
+                                    <?= form_open('dtks/usulan22/export', ['target' => 'blank']); ?>
                                     <div class="row">
                                         <div class="col-12 col-sm-6">
                                             <div class="row">
+                                                <div class="col-6 col-sm-3 mb-2" <?= $user != 3 ?  'hidden' :  ''; ?>>
+                                                    <a href="exportBa" type="submit" name="btnExpBA" class="btn btn-primary btn-block" id="exportBA">
+                                                        <i class="fas fa-file-word"></i> Export B.A
+                                                    </a>
+                                                </div>
+                                                <div class="col-6 col-sm-3 mb-2" <?= $user > 3 ?  'hidden' :  ''; ?>>
+                                                    <button type="submit" name="btnExpData" class="btn btn-success btn-block" id="exportExcel">
+                                                        <i class="fa fa-file-excel"></i> Export Data
+                                                    </button>
+                                                </div>
                                                 <div class="col-6 col-sm-3 mb-2">
                                                     <button type="button" class="btn btn-info btn-block" data-toggle="modal" onclick="reload_table()">
                                                         <i class="fa fa-sync-alt"></i> Reload
