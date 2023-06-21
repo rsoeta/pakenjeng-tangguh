@@ -120,7 +120,7 @@ class FamantamaModel extends Model
             ->join('tb_villages', 'tb_villages.id=famantama_data.fd_desa')
             ->join('tb_districts', 'tb_districts.id=famantama_data.fd_kec')
             ->join('dtks_users', 'dtks_users.nik=famantama_data.fd_created_by')
-            ->join('tb_shdk', 'tb_shdk.tsf_id=famantama_data.fd_shdk')
+            ->join('tb_shdk', 'tb_shdk.id=famantama_data.fd_shdk')
             ->join('tb_penduduk_pekerjaan', 'tb_penduduk_pekerjaan.pk_id=famantama_data.fd_pekerjaan_kk')
             ->where($kondisi_search)
             ->orderBy($result_order, $result_dir)
@@ -184,9 +184,10 @@ class FamantamaModel extends Model
     public function dataExport($filter1, $filter5, $filter6)
     {
         $builder = $this->db->table('famantama_data');
-        $builder->select('fd_nama_lengkap, fd_nik, fd_nkk, fd_alamat, fd_rt, fd_rw, fd_desa, fd_kec, fd_kab, fd_prov, fd_shdk, fd_sta_bangteti, fd_sta_lahteti, fd_jenlai, fd_jendin, fd_kondin, fd_jentap, fd_kontap, fd_penghasilan, fd_pengeluaran, fd_jml_tanggungan, fd_roda_dua, fd_sumber_minum, fd_cara_minum, fd_penerangan_utama, fd_daya_listrik, fd_bahan_masak, fd_tempat_bab, fd_jenis_kloset, fd_tempat_tinja, fd_pekerjaan_kk, fd_created_at_year, fd_created_at_month, fd_created_by, fd_created_at, fd_updated_by, fd_updated_at, tb_villages.name as namaDesa, fpp_id');
+        $builder->select('fd_nama_lengkap, fd_nik, fd_nkk, fd_alamat, fd_rt, fd_rw, fd_desa, fd_kec, fd_kab, fd_prov, fd_shdk, fd_sta_bangteti, fd_sta_lahteti, fd_jenlai, fd_jendin, fd_kondin, fd_jentap, fd_kontap, fd_penghasilan, fd_pengeluaran, fd_jml_tanggungan, fd_roda_dua, fd_sumber_minum, fd_cara_minum, fd_penerangan_utama, fd_daya_listrik, fd_bahan_masak, fd_tempat_bab, fd_jenis_kloset, fd_tempat_tinja, fd_pekerjaan_kk, fd_created_at_year, fd_created_at_month, fd_created_by, fd_created_at, fd_updated_by, fd_updated_at, tb_villages.name as namaDesa, fpp_id, tsf_id');
         $builder->join('tb_villages', 'tb_villages.id=famantama_data.fd_desa', 'LEFT');
         $builder->join('tb_penduduk_pekerjaan', 'tb_penduduk_pekerjaan.pk_id=famantama_data.fd_pekerjaan_kk', 'LEFT');
+        $builder->join('tb_shdk', 'tb_shdk.id=famantama_data.fd_shdk', 'LEFT');
         if ($filter1 !== "") {
             $builder->where('fd_desa', $filter1);
         }

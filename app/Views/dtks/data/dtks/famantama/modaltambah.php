@@ -175,7 +175,7 @@ $desa_id = session()->get('kode_desa');
                                                 <select id="fd_shdk" name="fd_shdk" class="form-select form-select-sm">
                                                     <option value="">-- Status Hubungan dalam Keluarga --</option>
                                                     <?php foreach ($shdk as $row) { ?>
-                                                        <option value="<?= $row['tsf_id']; ?>"><?= $row['jenis_shdk']; ?></option>
+                                                        <option value="<?= $row['id']; ?>"><?= $row['jenis_shdk']; ?></option>
                                                     <?php } ?>
                                                 </select>
                                                 <div class="invalid-feedback errorfd_shdk"></div>

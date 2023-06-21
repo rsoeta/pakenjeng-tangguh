@@ -1281,7 +1281,7 @@ Keluarga');
             $sheet->setCellValue('G' . $count, strtoupper($row['fd_rw']));
             $sheet->setCellValue('H' . $count, strtoupper($row['namaDesa']));
             $sheet->setCellValue('I' . $count, 'PAKENJENG');
-            $sheet->setCellValue('J' . $count, $row['fd_shdk']);
+            $sheet->setCellValue('J' . $count, $row['tsf_id']);
             $sheet->setCellValue('K' . $count, $row['fd_sta_bangteti']);
             $sheet->setCellValue('L' . $count, $row['fd_sta_lahteti']);
             $sheet->setCellValue('M' . $count, $row['fd_jenlai']);
