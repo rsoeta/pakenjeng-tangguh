@@ -203,7 +203,7 @@
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
-                                    <div class="col-sm-9 col-md-9 col-12">
+                                    <div class="col-12">
                                         <div class="card-header">
                                             <h3 class="card-title"><strong>Capaian Per/RT</strong></h3>
 
@@ -219,7 +219,7 @@
                                         <!-- /.col -->
                                         <div class="card-body">
                                             <div class="row">
-                                                <div class="col-12 col-sm-9 col-md-9 mb-4">
+                                                <div class="col-12 col-sm-9 mb-4">
                                                     <h5>Persentase</h5>
                                                     <?php $no = 1 ?>
                                                     <?php foreach ($chartData as $row) { ?>
@@ -227,7 +227,7 @@
                                                             <span class="float-right"><b><?= number_format($row['jml_rkp'] / $totalFamantama * 100, 2, ',', '.'); ?>%</b></span>
                                                             <div class="progress" style="height: 20px;">
                                                                 <?php $persentase = $row['jml_rkp'] / $totalFamantama * 100; ?>
-                                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-dark" style="width: <?= number_format($persentase, 2); ?>%">
+                                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-dark" style="width: <?= number_format($persentase * 2, 2); ?>%">
                                                                     <div style="text-align: left; font-size: smaller;"><?= $no; ?>. <?= ucfirst(strtolower($row['fd_rt'])); ?> / <?= $row['fd_rw']; ?></div>
                                                                 </div>
                                                             </div>
@@ -236,7 +236,7 @@
                                                     <?php } ?>
                                                 </div>
 
-                                                <div class="col-12 col-sm-3 col-md-3">
+                                                <div class="col-12 col-sm-3">
                                                     <h5>Tabel</h5>
                                                     <div class="table-responsive">
                                                         <table class="table table-bordered">
