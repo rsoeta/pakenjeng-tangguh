@@ -53,8 +53,13 @@ class Famantama extends BaseController
 
         // Mengambil data dari view
         $db = \Config\Database::connect();
-        $query = $db->query('SELECT rw_rt, fd_rw, fd_rt, jml_rkp FROM vw_famantama_rkp');
+        $query = $db->query('SELECT * FROM vw_famantama_rkp');
         $chartData = $query->getResultArray();
+        $total = 0;
+        foreach ($chartData as $nilai) {
+            $total += $nilai['jml_rkp'];
+        }
+        $totalFamantama = $total;
 
         if (session()->get('role_id') == 1) {
             $this->FamantamaModel = new FamantamaModel();
@@ -72,13 +77,14 @@ class Famantama extends BaseController
                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
                 'datarw' => $this->RwModel->noRw(),
                 'bansos' => $this->BansosModel->findAll(),
-                'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
+                'pekerjaan' => $this->PekerjaanModel->orderBy('pk_nama', 'asc')->findAll(),
                 'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
                 'shdk' => $this->ShdkModel->findAll(),
                 'percentages' => $this->VervalPbiModel->jml_persentase(),
                 'statusRole' => $this->GenModel->getStatusRole(),
                 'kerja_famantama' => $this->GenModel->get_jenis_pekerjaan(),
                 'chartData' => $chartData,
+                'totalFamantama' => $totalFamantama,
             ];
 
             return view('dtks/data/dtks/famantama/tables', $data);
@@ -104,7 +110,7 @@ class Famantama extends BaseController
                 'statusRole' => $this->GenModel->getStatusRole(),
                 'kerja_famantama' => $this->GenModel->get_jenis_pekerjaan(),
                 'chartData' => $chartData,
-
+                'totalFamantama' => $totalFamantama,
             ];
 
             // dd($data['chartData']);

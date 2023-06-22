@@ -220,40 +220,43 @@
                                         <div class="card-body">
                                             <div class="row">
                                                 <div class="col-12 col-sm-9 col-md-9 mb-4">
-                                                    <h4>Diagram</h4>
+                                                    <h5>Persentase</h5>
+                                                    <?php $no = 1 ?>
                                                     <?php foreach ($chartData as $row) { ?>
-                                                        <?php
-                                                        $persentase = $row['jml_rkp'];
-                                                        ?>
                                                         <div class="progress-group">
-                                                            <b><?php echo ucfirst(strtolower($row['rw_rt'])); ?></b>
-                                                            <span class="float-right"><b><?= number_format($row['jml_rkp'], '0', ',', '.'); ?></b></span>
-                                                            <div class="progress progress-sm">
-                                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: <?= number_format($persentase, 2); ?>%"></div>
+                                                            <span class="float-right"><b><?= number_format($row['jml_rkp'] / $totalFamantama * 100, 2, ',', '.'); ?>%</b></span>
+                                                            <div class="progress" style="height: 20px;">
+                                                                <?php $persentase = $row['jml_rkp'] / $totalFamantama * 100; ?>
+                                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-dark" style="width: <?= number_format($persentase, 2); ?>%">
+                                                                    <div style="text-align: left; font-size: smaller;"><?= $no; ?>. <?= ucfirst(strtolower($row['fd_rt'])); ?> / <?= $row['fd_rw']; ?></div>
+                                                                </div>
                                                             </div>
                                                         </div>
+                                                        <?php $no++ ?>
                                                     <?php } ?>
                                                 </div>
 
-
                                                 <div class="col-12 col-sm-3 col-md-3">
-                                                    <h4>Rincian</h4>
+                                                    <h5>Tabel</h5>
                                                     <div class="table-responsive">
                                                         <table class="table table-bordered">
                                                             <thead>
                                                                 <tr>
                                                                     <th>NO.</th>
-                                                                    <th>RW/RT</th>
+                                                                    <th>DESA</th>
+                                                                    <th>RT</th>
+                                                                    <th>RW</th>
                                                                     <th>JUMLAH</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
                                                                 <?php $no = 1 ?>
-                                                                <?php foreach ($chartData as $row) :
-                                                                ?>
+                                                                <?php foreach ($chartData as $row) : ?>
                                                                     <tr style="text-align: right;">
                                                                         <td style="text-align: center;"><?= $no; ?></td>
-                                                                        <td style="text-align: left;"><?= $row['rw_rt']; ?></td>
+                                                                        <td style="text-align: left;"><?= $row['name']; ?></td>
+                                                                        <td style="text-align: left;"><?= $row['fd_rt']; ?></td>
+                                                                        <td style="text-align: left;"><?= $row['fd_rw']; ?></td>
                                                                         <td style="text-align: right;"><?= number_format($row['jml_rkp'], '0', ',', '.'); ?></td>
                                                                     </tr>
                                                                     <?php $no++ ?>
@@ -261,16 +264,8 @@
                                                             </tbody>
                                                             <tfoot>
                                                                 <tr>
-                                                                    <?php
-                                                                    $nilai_array = $chartData;
-                                                                    $total = 0;
-
-                                                                    foreach ($nilai_array as $nilai) {
-                                                                        $total += $nilai['jml_rkp'];
-                                                                    } ?>
-
-                                                                    <th colspan="2" style="text-align: center;">TOTAL</th>
-                                                                    <th style="text-align: right;"><?= number_format($total, '0', ',', '.'); ?></th>
+                                                                    <th colspan="4" style="text-align: center;">TOTAL</th>
+                                                                    <th style="text-align: right;"><?= number_format($totalFamantama, '0', ',', '.'); ?></th>
                                                                 </tr>
                                                             </tfoot>
                                                         </table>

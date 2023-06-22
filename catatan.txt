@@ -895,8 +895,8 @@
         ALTER TABLE `famantama_data` ADD `fd_jenkel` INT NULL DEFAULT NULL AFTER `fd_shdk`;
 
         CREATE OR REPLACE VIEW vw_famantama_rkp AS
-        SELECT CONCAT(fd_rw, '/', fd_rt) AS rw_rt, fd_desa, fd_rw, fd_rt,  
-            COUNT(*) AS jml_rkp
+        SELECT CONCAT(fd_rw, '/', fd_rt) AS rw_rt, tb_villages.id, tb_villages.name, fd_rw, fd_rt, COUNT(*) AS jml_rkp
         FROM famantama_data
-        GROUP BY fd_desa, fd_rw, fd_rt
-        ORDER BY rw_rt;
+        JOIN tb_villages ON famantama_data.fd_desa = tb_villages.id
+        GROUP BY tb_villages.id, fd_rw, fd_rt
+        ORDER BY tb_villages.id, rw_rt;
