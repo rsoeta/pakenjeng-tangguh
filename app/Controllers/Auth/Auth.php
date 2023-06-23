@@ -55,11 +55,6 @@ class Auth extends BaseController
 
                 $user = $model->where('email', $this->request->getVar('email'))->first();
 
-                // captha
-                $recaptchaResponse = trim($this->request->getVar('g-recaptcha-response'));
-
-                // $userIp = $this->request->ip_address();
-
                 $secret = '6LctvBomAAAAAF900Ud_B6iOfcKX2R9ZvAGPg2bo';
 
                 $credential = array(
@@ -81,6 +76,7 @@ class Auth extends BaseController
                     // tanpa captha
                     // dd($user);
                     $this->setUserSession($user);
+
                     $UsersLogin = new UsersLoginModel();
                     $data_login = [
                         'dul_du_id' => $user['id'],
@@ -99,10 +95,23 @@ class Auth extends BaseController
                         $session = session();
                         $session->setFlashdata('message', 'User Non-Aktif, Silakan kontak Admin!');
                         return redirect()->to('/login');
-                    } else if ($user['status'] == 1 && $user['role_id'] == 5) {
-                        return redirect()->to('/operatorsch');
-                        // } else if ($user['status'] == 1) {
-                        //     return redirect()->to('/pages');
+                    }
+
+                    // } else if ($user['status'] == 1 && $user['role_id'] == 5) {
+                    //     return redirect()->to('/operatorsch');
+                    // } else if ($user['status'] == 1) {
+                    //     return redirect()->to('/pages');
+                    // Redirecting to the previous URL
+                    // Get the redirect URL from the session if available
+                    $redirectUrl = session()->get('redirectUrl');
+
+                    if ($redirectUrl) {
+                        // Clear the redirect URL from the session
+                        session()->remove('redirectUrl');
+                        return redirect()->to($redirectUrl);
+                    } else {
+                        // Redirect to a default page if no redirect URL is set
+                        return redirect()->to('/pages');
                     }
                     // tanpa captha
                 }
@@ -116,8 +125,23 @@ class Auth extends BaseController
         return view('dtks/auth/login', $data);
     }
 
+    public function redirectToExternalLink()
+    {
+        // Get the external link from the request
+        $externalLink = $this->request->getVar('external_link');
+
+        if ($externalLink) {
+            // Store the external link in the session
+            session()->set('redirectUrl', $externalLink);
+        }
+
+        // Redirect to the login page
+        return redirect()->to('/login');
+    }
+
     private function setUserSession($user)
     {
+        // $previousPage = previous_url();
         $data = [
             'id' => $user['id'],
             'nik' => $user['nik'],
@@ -134,6 +158,7 @@ class Auth extends BaseController
             'user_image' => $user['user_image'],
             'user_lembaga_id' => $user['user_lembaga_id'],
             'logDtks' => true,
+            // 'previousPage' => $previousPage,
         ];
 
         session()->set($data);

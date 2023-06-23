@@ -140,7 +140,7 @@
                                                 <option value="">[ Semua RT ]</option>
                                             </select>
                                         </div>
-                                        <div class="col-sm-2 col-3 mb-2">
+                                        <div class="col-sm-2 col-3 mb-2" hidden>
                                             <select class="form-control form-control-sm" name="data_tahun" id="data_tahun">
                                                 <option value="">[ Semua Tahun ]</option>
                                                 <?php
@@ -151,7 +151,7 @@
                                                 <?php } ?>
                                             </select>
                                         </div>
-                                        <div class="col-sm-2 col-3 mb-2">
+                                        <div class="col-sm-2 col-3 mb-2" hidden>
                                             <select class="form-control form-control-sm" name="data_bulan" id="data_bulan">
                                                 <option value="">[ Semua Bulan ]</option>
                                                 <?php
@@ -172,13 +172,20 @@
                                             <select class="form-control form-control-sm" name="shdk" id="shdk">
                                                 <option value="">[ SHDK ]</option>
                                                 <?php foreach ($shdk as $row) { ?>
-                                                    <option value="<?= $row['id']; ?>"><?= $row['jenis_shdk']; ?></option>
+                                                    <option value="<?= $row['id']; ?>"><?= ucfirst(strtolower($row['jenis_shdk'])); ?></option>
                                                 <?php } ?>
                                             </select>
                                         </div>
-                                        <?= form_close() ?>
-
+                                        <div class="col-sm-4 col-6 mb-2">
+                                            <select class="form-control form-control-sm" name="pekerjaan" id="pekerjaan">
+                                                <option value="">[ Pekerjaan ]</option>
+                                                <?php foreach ($pekerjaan as $row) { ?>
+                                                    <option value="<?= $row['pk_id']; ?>"><?= ucfirst(strtolower($row['pk_nama'])); ?></option>
+                                                <?php } ?>
+                                            </select>
+                                        </div>
                                     </div>
+                                    <?= form_close() ?>
                                     <div>
                                         <br>
                                         <table class="table" id="tabel_data" style="width: 100%;">
@@ -193,7 +200,7 @@
                                                     <th>NO. RW</th>
                                                     <th>SHDK</th>
                                                     <th>PEKERJAAN KEPALA KELUARGA</th>
-                                                    <th>PENDATA</th>
+                                                    <th>CREATOR</th>
                                                     <th>UPLOAD PADA</th>
                                                     <th>AKSI</th>
                                                 </tr>
@@ -216,7 +223,7 @@
                                                     <span class="float-right"><b><?= number_format($row['jml_rkp'] / $totalFamantama * 100, 2, ',', '.'); ?>%</b></span>
                                                     <div class="progress" style="height: 20px;">
                                                         <?php $persentase = $row['jml_rkp'] / $totalFamantama * 100; ?>
-                                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-dark" style="width: <?= number_format($persentase * 2, 2); ?>%">
+                                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-dark" style="width: <?= number_format($persentase * 2.5, 2); ?>%">
                                                             <div style="text-align: left; font-size: smaller;"><?= $no; ?>. <?= ucfirst(strtolower($row['fd_rt'])); ?> / <?= $row['fd_rw']; ?></div>
                                                         </div>
                                                     </div>
@@ -316,6 +323,7 @@
                 data.data_tahun = $('#data_tahun').val();
                 data.data_bulan = $('#data_bulan').val();
                 data.shdk = $('#shdk').val();
+                data.pekerjaan = $('#pekerjaan').val();
             },
             "dataSrc": function(response) {
                 $('input[name=csrf_test_name]').val(response.csrf_test_name);
@@ -348,6 +356,9 @@
         table.draw();
     });
     $('#shdk').change(function() {
+        table.draw();
+    });
+    $('#pekerjaan').change(function() {
         table.draw();
     });
 

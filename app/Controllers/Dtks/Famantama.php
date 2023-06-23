@@ -136,13 +136,14 @@ class Famantama extends BaseController
         $filter2 = $this->request->getPost('rw');
         $filter3 = $this->request->getPost('rt');
         $filter4 = $this->request->getPost('shdk');
-        // $filter5 = $this->request->getPost('data_tahun');
+        $filter5 = $this->request->getPost('pekerjaan');
         // $filter6 = $this->request->getPost('data_bulan');
         // $filter7 = '0';
 
-        $listing = $this->FamantamaModel->get_datatables($filter1, $filter2, $filter3, $filter4);
+        $listing = $this->FamantamaModel->get_datatables($filter1, $filter2, $filter3, $filter4, $filter5);
         $jumlah_semua = $this->FamantamaModel->jumlah_semua();
-        $jumlah_filter = $this->FamantamaModel->jumlah_filter($filter1, $filter2, $filter3, $filter4);
+        $jumlah_filter = $this->FamantamaModel->jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter5);
+
 
         $data = array();
         $no = $_POST['start'];
@@ -159,7 +160,7 @@ class Famantama extends BaseController
             $row[] = $key->fd_rw;
             $row[] = $key->jenis_shdk;
             $row[] = $key->pk_nama;
-            $row[] = '<a href="https://wa.me/' . nope($key->nope) . '" target="_blank" style="text-decoration:none;">' . strtoupper($key->fullname) . '</a>';
+            $row[] = '<a href="https://wa.me/' . nope($key->nope) . '" target="_blank" style="text-decoration:none;">' . strtoupper($key->namaCreator) . '</a>';
             $row[] = $key->fd_updated_at;
             $row[] = '<a class="btn btn-sm btn-success" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->fd_id . "'" . ')"><i class="far fa-edit"></i></a> | 
                 <button class="btn btn-sm btn-secondary" data-id="' . $key->fd_id . '" data-nama="' . $key->fd_nama_lengkap . '" id="deleteBtn"><i class="far fa-trash-alt"></i></button>';
@@ -173,6 +174,7 @@ class Famantama extends BaseController
             "recordsFiltered" => $jumlah_filter->jml,
             "data" => $data,
         );
+
         $output[$csrfName] = $csrfHash;
 
         echo json_encode($output);

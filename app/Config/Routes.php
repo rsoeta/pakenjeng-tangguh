@@ -44,9 +44,11 @@ $routes->match(['get', 'post'], 'register', 'Auth\Auth::regOpSek', ['filter' => 
 $routes->get('/', 'Landing::index');
 $routes->post('cek_usulan', 'Landing::cek_usulan');
 
-$routes->get('dashboard', 'Auth\Pages::home', ['filter' => 'noauthfilterdtks']);
+// $routes->get('dashboard', 'Auth\Pages::home', ['filter' => 'noauthfilterdtks']);
 $routes->get('pages', 'Auth\Pages::index', ['filter' => 'authfilterdtks']);
 $routes->get('logout', 'Auth\Auth::logout');
+
+$routes->get('redirect', 'Auth\Auth::redirectToExternalLink');
 
 // CHATTING
 $routes->match(['get', 'post'], 'chatt', 'Chat::index', ['filter' => 'authfilterdtks']);

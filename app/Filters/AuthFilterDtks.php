@@ -12,6 +12,7 @@ class AuthFilterDtks implements FilterInterface
     {
         // Do something here
         if (!session()->get('logDtks')) {
+            // Setelah login berhasil, arahkan pengguna ke halaman sebelumnya
             return redirect()->to(base_url('login'));
         }
     }
@@ -21,8 +22,10 @@ class AuthFilterDtks implements FilterInterface
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
         // Do something here
-        // if (session()->get('log') == true) {
-        //     return redirect()->to(base_url('pbb/user'));
+        // if (session()->get('logDtks') == true) {
+        //     //     return redirect()->to(base_url('pbb/user'));
+        //     $previousPage = session()->get('previousPage');
+        //     return redirect()->to($previousPage);
         // }
     }
 }

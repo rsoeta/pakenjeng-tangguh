@@ -68,7 +68,7 @@ class FamantamaModel extends Model
     var $order = array('famantama_data.fd_updated_at' => 'desc');
 
 
-    function get_datatables($filter1, $filter2, $filter3, $filter4)
+    function get_datatables($filter1, $filter2, $filter3, $filter4, $filter5)
     {
         // fil$filter1
         if ($filter1 == "") {
@@ -94,13 +94,19 @@ class FamantamaModel extends Model
         } else {
             $kondisi_filter4 = " AND fd_shdk = '$filter4'";
         }
+        // filter5
+        if ($filter5 == "") {
+            $kondisi_filter5 = "";
+        } else {
+            $kondisi_filter5 = " AND fd_pekerjaan_kk = '$filter5'";
+        }
 
         // search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "(fd_nama_lengkap LIKE '%$search%' OR fd_nkk LIKE '%$search%' OR fd_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "(fd_nama_lengkap LIKE '%$search%' OR fd_nkk LIKE '%$search%' OR fd_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5";
         } else {
-            $kondisi_search = "famantama_data.fd_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "famantama_data.fd_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5";
         }
 
         // order
@@ -116,7 +122,7 @@ class FamantamaModel extends Model
         if ($_POST['length'] != -1);
         $db = db_connect();
         $builder = $db->table('famantama_data');
-        $query = $builder->select('famantama_data.fd_id, tb_villages.name as namaDesa, tb_districts.name as namaKec, fd_nama_lengkap, fd_nkk, famantama_data.fd_nik, fd_alamat, fd_rt, fd_rw, fd_desa, fd_kec, famantama_data.fd_created_at, fd_created_at_year, fd_created_at_month, fd_created_by, dtks_users.email, famantama_data.fd_updated_at, dtks_users.nope, dtks_users.fullname, jenis_shdk, fd_pekerjaan_kk, tb_penduduk_pekerjaan.pk_nama, fpp_id')
+        $query = $builder->select('famantama_data.fd_id, tb_villages.name as namaDesa, tb_districts.name as namaKec, fd_nama_lengkap, fd_nkk, famantama_data.fd_nik, fd_alamat, fd_rt, fd_rw, fd_desa, fd_kec, famantama_data.fd_created_at, fd_created_at_year, fd_created_at_month, fd_created_by, dtks_users.email, famantama_data.fd_updated_at, dtks_users.nope, dtks_users.fullname as namaCreator, dtks_users.fullname as namaEditor, jenis_shdk, fd_pekerjaan_kk, tb_penduduk_pekerjaan.pk_nama, fpp_id')
             ->join('tb_villages', 'tb_villages.id=famantama_data.fd_desa')
             ->join('tb_districts', 'tb_districts.id=famantama_data.fd_kec')
             ->join('dtks_users', 'dtks_users.nik=famantama_data.fd_created_by')
@@ -139,7 +145,7 @@ class FamantamaModel extends Model
         return $query;
     }
 
-    function jumlah_filter($filter1, $filter2, $filter3, $filter4)
+    function jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter5)
     {
         // fil$filter1
         if ($filter1 == "") {
@@ -165,13 +171,20 @@ class FamantamaModel extends Model
         } else {
             $kondisi_filter4 = " AND fd_shdk = '$filter4'";
         }
-
+        // filter5
+        if (
+            $filter5 == ""
+        ) {
+            $kondisi_filter5 = "";
+        } else {
+            $kondisi_filter5 = " AND fd_pekerjaan_kk = '$filter5'";
+        }
         // kondisi search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "AND (fd_nama_lengkap LIKE '%$search%' OR fd_nkk LIKE '%$search%' OR fd_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "AND (fd_nama_lengkap LIKE '%$search%' OR fd_nkk LIKE '%$search%' OR fd_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5";
         } else {
-            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5";
         }
 
         $sQuery = "SELECT COUNT(fd_nik) as jml FROM famantama_data WHERE fd_nik != '' $kondisi_search";
