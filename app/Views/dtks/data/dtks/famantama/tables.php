@@ -192,9 +192,9 @@
                                                     <th>NO. RT</th>
                                                     <th>NO. RW</th>
                                                     <th>SHDK</th>
-                                                    <th>PEKERJAAN</th>
+                                                    <th>PEKERJAAN KEPALA KELUARGA</th>
                                                     <th>PENDATA</th>
-                                                    <th>WAKTU UPLOAD</th>
+                                                    <th>UPLOAD PADA</th>
                                                     <th>AKSI</th>
                                                 </tr>
                                             </thead>
@@ -203,77 +203,64 @@
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
-                                    <div class="col-12">
-                                        <div class="card-header">
-                                            <h3 class="card-title"><strong>Capaian Per/RT</strong></h3>
-
-                                            <div class="card-tools">
-                                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                                    <i class="fas fa-minus"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-tool" data-card-widget="remove">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <!-- /.col -->
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-12 col-sm-9 mb-4">
-                                                    <h5>Persentase</h5>
-                                                    <?php $no = 1 ?>
-                                                    <?php foreach ($chartData as $row) { ?>
-                                                        <div class="progress-group">
-                                                            <span class="float-right"><b><?= number_format($row['jml_rkp'] / $totalFamantama * 100, 2, ',', '.'); ?>%</b></span>
-                                                            <div class="progress" style="height: 20px;">
-                                                                <?php $persentase = $row['jml_rkp'] / $totalFamantama * 100; ?>
-                                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-dark" style="width: <?= number_format($persentase * 2, 2); ?>%">
-                                                                    <div style="text-align: left; font-size: smaller;"><?= $no; ?>. <?= ucfirst(strtolower($row['fd_rt'])); ?> / <?= $row['fd_rw']; ?></div>
-                                                                </div>
-                                                            </div>
+                                    <div class="row">
+                                        <h3><strong>Capaian Per/RT</strong></h3>
+                                    </div>
+                                    <!-- /.col -->
+                                    <div class="row">
+                                        <div class="col-12 col-sm-8 mb-4">
+                                            <h5>Persentase</h5>
+                                            <?php $no = 1 ?>
+                                            <?php foreach ($chartData as $row) { ?>
+                                                <div class="progress-group">
+                                                    <span class="float-right"><b><?= number_format($row['jml_rkp'] / $totalFamantama * 100, 2, ',', '.'); ?>%</b></span>
+                                                    <div class="progress" style="height: 20px;">
+                                                        <?php $persentase = $row['jml_rkp'] / $totalFamantama * 100; ?>
+                                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-dark" style="width: <?= number_format($persentase * 2, 2); ?>%">
+                                                            <div style="text-align: left; font-size: smaller;"><?= $no; ?>. <?= ucfirst(strtolower($row['fd_rt'])); ?> / <?= $row['fd_rw']; ?></div>
                                                         </div>
-                                                        <?php $no++ ?>
-                                                    <?php } ?>
-                                                </div>
-
-                                                <div class="col-12 col-sm-3">
-                                                    <h5>Tabel</h5>
-                                                    <div class="table-responsive">
-                                                        <table class="table table-bordered">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>NO.</th>
-                                                                    <th>DESA</th>
-                                                                    <th>RT</th>
-                                                                    <th>RW</th>
-                                                                    <th>JUMLAH</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <?php $no = 1 ?>
-                                                                <?php foreach ($chartData as $row) : ?>
-                                                                    <tr style="text-align: right;">
-                                                                        <td style="text-align: center;"><?= $no; ?></td>
-                                                                        <td style="text-align: left;"><?= $row['name']; ?></td>
-                                                                        <td style="text-align: left;"><?= $row['fd_rt']; ?></td>
-                                                                        <td style="text-align: left;"><?= $row['fd_rw']; ?></td>
-                                                                        <td style="text-align: right;"><?= number_format($row['jml_rkp'], '0', ',', '.'); ?></td>
-                                                                    </tr>
-                                                                    <?php $no++ ?>
-                                                                <?php endforeach; ?>
-                                                            </tbody>
-                                                            <tfoot>
-                                                                <tr>
-                                                                    <th colspan="4" style="text-align: center;">TOTAL</th>
-                                                                    <th style="text-align: right;"><?= number_format($totalFamantama, '0', ',', '.'); ?></th>
-                                                                </tr>
-                                                            </tfoot>
-                                                        </table>
                                                     </div>
                                                 </div>
-                                            </div>
+                                                <?php $no++ ?>
+                                            <?php } ?>
                                         </div>
-                                        <div class="card-footer clearfix">
+
+                                        <div class="col-12 col-sm-4">
+                                            <h5>Tabel</h5>
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>NO.</th>
+                                                            <th>DESA</th>
+                                                            <th>RT</th>
+                                                            <th>RW</th>
+                                                            <th>JUMLAH</th>
+                                                            <th>PERSENTASE</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php $no = 1 ?>
+                                                        <?php foreach ($chartData as $row) : ?>
+                                                            <tr style="text-align: right;">
+                                                                <td style="text-align: center;"><?= $no; ?></td>
+                                                                <td style="text-align: left;"><?= $row['name']; ?></td>
+                                                                <td style="text-align: left;"><?= $row['fd_rt']; ?></td>
+                                                                <td style="text-align: left;"><?= $row['fd_rw']; ?></td>
+                                                                <td style="text-align: right;"><?= number_format($row['jml_rkp'], '0', ',', '.'); ?></td>
+                                                                <td style="text-align: right;"><?= number_format($row['jml_rkp'] / $totalFamantama * 100, 2, ',', '.'); ?>%</td>
+                                                            </tr>
+                                                            <?php $no++ ?>
+                                                        <?php endforeach; ?>
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th colspan="4" style="text-align: center;">TOTAL</th>
+                                                            <th style="text-align: right;"><?= number_format($totalFamantama, '0', ',', '.'); ?></th>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
                                             <a href="/famantama" class="btn btn-sm btn-secondary float-right">Rincian</a>
                                         </div>
                                     </div>

@@ -160,7 +160,7 @@ class Famantama extends BaseController
             $row[] = $key->jenis_shdk;
             $row[] = $key->pk_nama;
             $row[] = '<a href="https://wa.me/' . nope($key->nope) . '" target="_blank" style="text-decoration:none;">' . strtoupper($key->fullname) . '</a>';
-            $row[] = $key->fd_created_at;
+            $row[] = $key->fd_updated_at;
             $row[] = '<a class="btn btn-sm btn-success" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->fd_id . "'" . ')"><i class="far fa-edit"></i></a> | 
                 <button class="btn btn-sm btn-secondary" data-id="' . $key->fd_id . '" data-nama="' . $key->fd_nama_lengkap . '" id="deleteBtn"><i class="far fa-trash-alt"></i></button>';
 
