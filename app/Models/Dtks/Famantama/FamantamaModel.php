@@ -104,7 +104,7 @@ class FamantamaModel extends Model
         // search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "(fd_nama_lengkap LIKE '%$search%' OR fd_nkk LIKE '%$search%' OR fd_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5";
+            $kondisi_search = "(fd_nama_lengkap LIKE '%$search%' OR fd_nkk LIKE '%$search%' OR fd_nik LIKE '%$search%' OR fd_alamat LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5";
         } else {
             $kondisi_search = "famantama_data.fd_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5";
         }
@@ -182,7 +182,7 @@ class FamantamaModel extends Model
         // kondisi search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "AND (fd_nama_lengkap LIKE '%$search%' OR fd_nkk LIKE '%$search%' OR fd_nik LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5";
+            $kondisi_search = "AND (fd_nama_lengkap LIKE '%$search%' OR fd_nkk LIKE '%$search%' OR fd_nik LIKE '%$search%' OR fd_alamat LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5";
         } else {
             $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5";
         }
