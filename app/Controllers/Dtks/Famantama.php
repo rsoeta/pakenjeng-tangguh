@@ -85,6 +85,7 @@ class Famantama extends BaseController
                 'kerja_famantama' => $this->GenModel->get_jenis_pekerjaan(),
                 'chartData' => $chartData,
                 'totalFamantama' => $totalFamantama,
+                'data_jenkel' => $this->GenModel->getDataJenkel(),
             ];
 
             return view('dtks/data/dtks/famantama/tables', $data);
@@ -111,6 +112,7 @@ class Famantama extends BaseController
                 'kerja_famantama' => $this->GenModel->get_jenis_pekerjaan(),
                 'chartData' => $chartData,
                 'totalFamantama' => $totalFamantama,
+                'data_jenkel' => $this->GenModel->getDataJenkel(),
             ];
 
             // dd($data['chartData']);
@@ -137,12 +139,12 @@ class Famantama extends BaseController
         $filter3 = $this->request->getPost('rt');
         $filter4 = $this->request->getPost('shdk');
         $filter5 = $this->request->getPost('pekerjaan');
-        // $filter6 = $this->request->getPost('data_bulan');
+        $filter6 = $this->request->getPost('data_jenkel');
         // $filter7 = '0';
 
-        $listing = $this->FamantamaModel->get_datatables($filter1, $filter2, $filter3, $filter4, $filter5);
+        $listing = $this->FamantamaModel->get_datatables($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
         $jumlah_semua = $this->FamantamaModel->jumlah_semua();
-        $jumlah_filter = $this->FamantamaModel->jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter5);
+        $jumlah_filter = $this->FamantamaModel->jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
 
 
         $data = array();

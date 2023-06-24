@@ -169,6 +169,14 @@
                                             </select>
                                         </div>
                                         <div class="col-sm-2 col-6 mb-2">
+                                            <select class="form-control form-control-sm" name="pekerjaan" id="pekerjaan">
+                                                <option value="">[ Pekerjaan ]</option>
+                                                <?php foreach ($pekerjaan as $row) { ?>
+                                                    <option value="<?= $row['pk_id']; ?>"><?= ucfirst(strtolower($row['pk_nama'])); ?></option>
+                                                <?php } ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-2 col-3 mb-2">
                                             <select class="form-control form-control-sm" name="shdk" id="shdk">
                                                 <option value="">[ SHDK ]</option>
                                                 <?php foreach ($shdk as $row) { ?>
@@ -176,11 +184,12 @@
                                                 <?php } ?>
                                             </select>
                                         </div>
-                                        <div class="col-sm-4 col-6 mb-2">
-                                            <select class="form-control form-control-sm" name="pekerjaan" id="pekerjaan">
-                                                <option value="">[ Pekerjaan ]</option>
-                                                <?php foreach ($pekerjaan as $row) { ?>
-                                                    <option value="<?= $row['pk_id']; ?>"><?= ucfirst(strtolower($row['pk_nama'])); ?></option>
+
+                                        <div class="col-sm-2 col-3 mb-2">
+                                            <select class="form-control form-control-sm" name="data_jenkel" id="data_jenkel">
+                                                <option value="">[ J/K ]</option>
+                                                <?php foreach ($data_jenkel as $row) { ?>
+                                                    <option value="<?= $row['IdJenKel']; ?>"><?= ucfirst(strtolower($row['NamaJenKel'])); ?></option>
                                                 <?php } ?>
                                             </select>
                                         </div>
@@ -324,6 +333,7 @@
                 data.data_bulan = $('#data_bulan').val();
                 data.shdk = $('#shdk').val();
                 data.pekerjaan = $('#pekerjaan').val();
+                data.data_jenkel = $('#data_jenkel').val();
             },
             "dataSrc": function(response) {
                 $('input[name=csrf_test_name]').val(response.csrf_test_name);
@@ -359,6 +369,9 @@
         table.draw();
     });
     $('#pekerjaan').change(function() {
+        table.draw();
+    });
+    $('#data_jenkel').change(function() {
         table.draw();
     });
 
