@@ -103,15 +103,21 @@ class Auth extends BaseController
                     //     return redirect()->to('/pages');
                     // Redirecting to the previous URL
                     // Get the redirect URL from the session if available
+                    // Check if there is a redirect URL stored in the session
                     $redirectUrl = session()->get('redirectUrl');
 
                     if ($redirectUrl) {
-                        // Clear the redirect URL from the session
+                        // Remove the redirect URL from the session
                         session()->remove('redirectUrl');
-                        return redirect()->to($redirectUrl);
-                    } else {
-                        // Redirect to a default page if no redirect URL is set
-                        return redirect()->to('/pages');
+
+                        // Temporarily disable the "before" filters
+                        $this->filter->disable('before');
+
+                        // Redirect to the stored redirect URL
+                        return redirect()->to(base_url($redirectUrl));
+                        // } else {
+                        //     // Redirect to a default page if no redirect URL is set
+                        //     return redirect()->to('/pages');
                     }
                     // tanpa captha
                 }
@@ -125,15 +131,15 @@ class Auth extends BaseController
         return view('dtks/auth/login', $data);
     }
 
-    public function redirectToExternalLink()
+    public function redirectToExternalLink($externalLink = null)
     {
-        // Get the external link from the request
-        $externalLink = $this->request->getVar('external_link');
-
         if ($externalLink) {
             // Store the external link in the session
             session()->set('redirectUrl', $externalLink);
         }
+
+        // Temporarily disable the "before" filters
+        $this->filter->disable('before');
 
         // Redirect to the login page
         return redirect()->to('/login');

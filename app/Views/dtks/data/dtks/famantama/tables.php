@@ -232,8 +232,8 @@
                                                     <span class="float-right"><b><?= number_format($row['jml_rkp'] / $totalFamantama * 100, 2, ',', '.'); ?>%</b></span>
                                                     <div class="progress" style="height: 20px;">
                                                         <?php $persentase = $row['jml_rkp'] / $totalFamantama * 100; ?>
-                                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-dark" style="width: <?= number_format($persentase * 2.5, 2); ?>%">
-                                                            <div style="text-align: left; font-size: smaller;"><?= $no; ?>. <?= ucfirst(strtolower($row['fd_rt'])); ?> / <?= $row['fd_rw']; ?></div>
+                                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-dark" style="width: <?= number_format($persentase, 2); ?>%">
+                                                            <div style="text-align: left; font-size: smaller;"><?= $no; ?>. <?= $row['name']; ?> - <?= $row['fd_rw']; ?></div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -249,7 +249,6 @@
                                                         <tr>
                                                             <th>NO.</th>
                                                             <th>DESA</th>
-                                                            <th>RT</th>
                                                             <th>RW</th>
                                                             <th>JUMLAH</th>
                                                             <th>PERSENTASE</th>
@@ -261,7 +260,6 @@
                                                             <tr style="text-align: right;">
                                                                 <td style="text-align: center;"><?= $no; ?></td>
                                                                 <td style="text-align: left;"><?= $row['name']; ?></td>
-                                                                <td style="text-align: left;"><?= $row['fd_rt']; ?></td>
                                                                 <td style="text-align: left;"><?= $row['fd_rw']; ?></td>
                                                                 <td style="text-align: right;"><?= number_format($row['jml_rkp'], '0', ',', '.'); ?></td>
                                                                 <td style="text-align: right;"><?= number_format($row['jml_rkp'] / $totalFamantama * 100, 2, ',', '.'); ?>%</td>

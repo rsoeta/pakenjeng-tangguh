@@ -44,6 +44,7 @@ class Famantama extends BaseController
         $this->PekerjaanModel = new PekerjaanModel();
         $this->StatusKawinModel = new StatusKawinModel();
         $this->CsvReportModel = new CsvReportModel();
+        $this->users = new UsersModel();
     }
 
     public function index()
@@ -223,6 +224,7 @@ class Famantama extends BaseController
                 'tempat_tinja' => $this->GenModel->get_tempat_tinja(),
                 'jenis_pekerjaan' => $this->GenModel->get_jenis_pekerjaan(),
             ];
+
             if (deadline_ppks() === 1) {
                 $msg = [
                     'data' =>
@@ -236,9 +238,21 @@ class Famantama extends BaseController
                 ];
                 echo json_encode($msg);
             } else {
+                // Skrip JavaScript untuk menghapus modal
+                $removeModalScript = '<script>removeModal();</script>';
+
+                // Gabungkan data dan skrip JavaScript menjadi satu array
+                $responseData = array_merge($data, ['remove_modal_script' => $removeModalScript]);
+
+                // Kembalikan respons dalam format JSON
+                // return $this->response->setJSON($responseData);
                 $msg = [
                     'data' => view('dtks/data/dtks/famantama/modaltambah', $data),
+                    // 'removeModalScript' => $removeModalScript,
+                    // 'responseData' => $responseData,
+                    // 'data' => view('dtks/data/dtks/famantama/modaltambah'),
                 ];
+
                 echo json_encode($msg);
             }
         } else {
@@ -728,74 +742,6 @@ class Famantama extends BaseController
                 ];
                 echo json_encode($msg);
             }
-        } else {
-            return redirect()->to('lockscreen');
-        }
-    }
-
-    public function formview()
-    {
-        if ($this->request->isAJAX()) {
-            // var_dump($this->request->getVar());
-
-            // if (deadline_ppks() == 1) {
-            //     $msg = [
-            //         'informasi' => 'Mohon Maaf, Batas waktu untuk Perubahan Data Telah Habis!!'
-            //     ];
-            //     echo json_encode($msg);
-            // } else {
-            $this->PekerjaanModel = new PekerjaanModel();
-            $this->ShdkModel = new ShdkModel();
-            $this->StatusKawinModel = new StatusKawinModel();
-            $this->WilayahModel = new WilayahModel();
-            $this->BansosModel = new BansosModel();
-            $DisabilitasJenisModel = new DisabilitasJenisModel();
-            $users = new UsersModel();
-            $GenModel = new GenModel();
-
-            $id = $this->request->getVar('id');
-            $model = new FamantamaModel();
-            $row = $model->find($id);
-            // dd($id);
-
-            $data = [
-                'title' => 'Form. View Data',
-                'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
-                'rw' => $this->RwModel->noRw(),
-                'rt' => $this->RtModel->noRt(),
-                'bansos' => $this->BansosModel->findAll(),
-                'users' => $users->findAll(),
-                'jenkel' => $this->GenModel->getDataJenkel(),
-
-                'id' => $row['fd_id'],
-                'fd_kategori_id' => $row['fd_kategori_id'],
-                'kelurahan' => $row['fd_kelurahan'],
-                'datarw' => $row['fd_rw'],
-                'datart' => $row['fd_rt'],
-                'alamat' => $row['fd_alamat'],
-                'fd_jenis_kelamin' => $row['fd_jenis_kelamin'],
-                'fd_no_telp' => $row['fd_no_telp'],
-                'fd_tgl_lahir' => $row['fd_tgl_lahir'],
-                'fd_tempat_lahir' => $row['fd_tempat_lahir'],
-                'fd_nama' => $row['fd_nama'],
-                'fd_nkk' => $row['fd_nkk'],
-                'fd_status_keberadaan' => $row['fd_status_keberadaan'],
-                'fd_status_panti' => $row['fd_status_panti'],
-                'databansos' => $row['fd_status_bantuan'],
-                'fd_nik' => $row['fd_nik'],
-                'fd_id' => $row['fd_id'],
-                'fd_foto' => $row['fd_foto'],
-                'fd_proses' => $row['fd_proses'],
-                'fd_updated_at' => $row['fd_updated_at'],
-                'fd_created_by' => session()->get('fd_nik'),
-                // 'foto_rumah' => $nama_foto_rumah,
-            ];
-
-            $msg = [
-                'sukses' => view('dtks/data/dtks/famantama/modalview', $data)
-            ];
-            echo json_encode($msg);
-            // }
         } else {
             return redirect()->to('lockscreen');
         }
@@ -1337,318 +1283,116 @@ Keluarga');
         exit;
     }
 
-    public function exportBa()
+    public function getRespondenData()
     {
+        $this->ShdkModel = new ShdkModel();
 
-        $wilayahModel = new WilayahModel();
-        $user_login = $this->AuthModel->getUserId();
-        // dd($user_login);
-        if (!isset($user_login['lp_sekretariat']) && !isset($user_login['user_lembaga_id'])) {
-            $str = '<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
-               <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-               <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-               <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.35.1/js/bootstrap-dialog.min.js"></script>
-               <script type="text/javascript">
-                   setTimeout(function() { 
-                      BootstrapDialog.alert(\'Silahkan isi profil Anda dan Lembaga terlebih dahulu!!\') 
-                      window.location.href = \'/profil_user\';
-                    },10000);
-               </script>';
-            echo $str;
-            // echo "<script>
-            //     alert('Some text');
-            //     window.location.href = '/usulan';// your redirect path here
-            //     </script>";
-        } else {
+        $nomorKK = $this->request->getPost('fd_nkk');
 
-            $rekapUsulan = $this->Usulan22Model->rekapUsulanBa();
-            foreach ($rekapUsulan as $row) {
-                $nonbansos = $row['nonbansos'];
-                $bpnt = $row['bpnt'];
-                $pkh = $row['pkh'];
-                $pbi = $row['pbi'];
-                $bst = $row['bst'];
-                $total_usulan = $row['total_usulan'];
-            }
+        $model = new FamantamaModel();
+        $responden = $model->getByNomorKK($nomorKK);
 
-            // dd($rekapUsulan);
-            // dd(session()->get('kode_desa'));
-
-            $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor('data/templates/template_usulan.docx');
-
-            $kode_desa = session()->get('kode_desa');
-            $kode_tanggal = date('d');
-            $kode_bulan = date('n');
-            $kode_tahun = date('Y');
-
-            $this->WilayahModel = $wilayahModel->getVillage($kode_desa);
-            // dd($this->WilayahModel);
-            if (is_array($this->WilayahModel)) {
-                $this->WilayahModelUpper = strtoupper($this->WilayahModel['name']);
-                $this->WilayahModelPropper = ucwords(strtolower($this->WilayahModel['name']));
-            } else {
-                $this->WilayahModelUpper = strtoupper($this->WilayahModel);
-                $this->WilayahModelPropper = ucwords(strtolower($this->WilayahModel));
-            }
-
-
-            // dd($this->WilayahModelUpper);
-            $bulan = array(
-                1 =>   'Januari',
-                'Februari',
-                'Maret',
-                'April',
-                'Mei',
-                'Juni',
-                'Juli',
-                'Agustus',
-                'September',
-                'Oktober',
-                'November',
-                'Desember'
-            );
-            $bulanUpper = strtoupper($bulan[$kode_bulan]);
-
-            $hari = date("D");
-            switch ($hari) {
-                case 'Sun':
-                    $hari_ini = "Minggu";
-                    break;
-
-                case 'Mon':
-                    $hari_ini = "Senin";
-                    break;
-
-                case 'Tue':
-                    $hari_ini = "Selasa";
-                    break;
-
-                case 'Wed':
-                    $hari_ini = "Rabu";
-                    break;
-
-                case 'Thu':
-                    $hari_ini = "Kamis";
-                    break;
-
-                case 'Fri':
-                    $hari_ini = "Jumat";
-                    break;
-
-                case 'Sat':
-                    $hari_ini = "Sabtu";
-                    break;
-
-                default:
-                    $hari_ini = "Tidak di ketahui";
-                    break;
-            }
-
-            $templateProcessor->setValues([
-                'desaUpper' => $this->WilayahModelUpper,
-                'desaPropper' => $this->WilayahModelPropper,
-                'sekretariat' => $user_login['lp_sekretariat'],
-                'email' => $user_login['lp_email'],
-                'kode_pos' => $user_login['lp_kode_pos'],
-                'hari' => $hari_ini,
-                'tanggal' => $kode_tanggal,
-                'bulan' => $bulan[$kode_bulan],
-                'bulanUpper' => strtoupper($bulan[$kode_bulan]),
-                'tahun' => $kode_tahun,
-                'nonbansos' => $nonbansos,
-                'bpnt' => $bpnt,
-                'pkh' => $pkh,
-                'pbi' => $pbi,
-                'bst' => $bst,
-                // 'disabilitas' => $rekapUsulan['disabilitas'],
-                'total_usulan' => $total_usulan,
-                'nama_petugas' => strtoupper($user_login['fullname']),
-                'nama_pimpinan' => strtoupper($user_login['lp_kepala']),
-            ]);
-
-            $filename = 'BA_PENGUSULAN – PAKENJENG – ' . $this->WilayahModel['name'] . ' – ' . strtoupper($bulan[$kode_bulan]) . '.docx';
-
-            header("Content-Description: File Transfer");
-            header('Content-Disposition: attachment; filename="' . $filename . '"');
-            header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-            header('Content-Transfer-Encoding: binary');
-            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-            header('Expires: 0');
-
-            $templateProcessor->saveAs('php://output');
-        }
-    }
-
-    public function import_csv()
-    {
-        $data = [
-            'namaApp' => 'Opr NewDTKS',
-            'title' => 'Import CSV Report',
-            'user_login' => $this->AuthModel->getUserId(),
-            'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
-            'datarw' => $this->RwModel->noRw(),
-            'bansos' => $this->BansosModel->findAll(),
-            'statusRole' => $this->GenModel->getStatusRole(),
-            'csv_ket' => $this->CsvReportModel->getCsvKet(),
-        ];
-        // dd($data['csv_ket']);
-        return view('dtks/data/dtks/famantama/impor_csv', $data);
-    }
-
-    public function tbCsv()
-    {
-        $this->CsvReportModel = new CsvReportModel();
-        $csrfName = csrf_token();
-        $csrfHash = csrf_hash();
-
-        $filter1 = $this->request->getPost('desa');
-        $filter2 = $this->request->getPost('rw');
-        $filter3 = $this->request->getPost('rt');
-        $filter4 = $this->request->getPost('namaFile');
-        // $filter5 = '';
-        // $filter6 = '';
-        $filter5 = $this->request->getPost('data_tahun');
-        $filter6 = $this->request->getPost('data_bulan');
-
-        $listing = $this->CsvReportModel->getDataTabel($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
-        $jumlah_semua = $this->CsvReportModel->semua();
-        $jumlah_filter = $this->CsvReportModel->filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6);
-
-        $data = array();
-        $no = $_POST['start'];
-        foreach ($listing as $key) {
-
-            $no++;
-            $row = array();
-            $row[] = $no;
-            $row[] = $key->du_nik;
-            $row[] = $key->nama;
-            $row[] = $key->cr_nama_lgkp;
-            $row[] = $key->nokk;
-            $row[] = $key->alamat;
-            $row[] = $key->rt;
-            $row[] = $key->rw;
-            $row[] = $key->cr_nama_desa;
-            $row[] = $key->kelurahan;
-            $row[] = $key->cr_nama_kec;
-            $row[] = $key->kecamatan;
-            // $row[] = $key->program_bansos;
-            $row[] = $key->cr_program_bansos;
-            $row[] = $key->cr_hasil;
-            $row[] = $key->cr_padan;
-            $row[] = $key->cr_ket_vali;
-            $row[] = $key->cr_ck_id;
-            $data[] = $row;
-        }
-
-        $output = array(
-            "draw" => $_POST['draw'],
-            "recordsTotal" => $jumlah_semua->jml,
-            "recordsFiltered" => $jumlah_filter->jml,
-            "data" => $data,
-        );
-        $output[$csrfName] = $csrfHash;
-
-        echo json_encode($output);
-    }
-
-    public function importCsvToDb()
-    {
-        $input = $this->validate([
-            'file' => 'uploaded[file]|max_size[file,2048]|ext_in[file,csv]'
-        ]);
-        $namaFile = $this->request->getPost('ck_id');
-
-        // dd($namaFile);
-
-        if (!$input && ($namaFile = '' || $namaFile == null)) {
+        if ($responden) {
             $data = [
-                'namaApp' => 'Opr NewDTKS',
-                'title' => 'Import CSV Report',
-                'user_login' => $this->AuthModel->getUserId(),
+                'title' => 'Form. Edit Data',
                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
-                'datarw' => $this->RwModel->noRw(),
-                'bansos' => $this->BansosModel->findAll(),
-                'statusRole' => $this->GenModel->getStatusRole(),
-                'session' => session()->get(),
-                'csv_ket' => $this->CsvReportModel->getCsvKet(),
-                'validation' => $this->validator,
+                'data2rw' => $this->RwModel->noRw(),
+                'data2rt' => $this->RtModel->noRt(),
+                'users' => $this->users->findAll(),
+                'pekerjaan' => $this->PekerjaanModel->orderBy('pk_nama')->findAll(),
+                'shdk' => $this->ShdkModel->findAll(),
+                'sta_bangteti' => $this->GenModel->get_sta_bangteti(),
+                'sta_lahteti' => $this->GenModel->get_sta_lahteti(),
+                'jenlai' => $this->GenModel->get_jenlai(),
+                'jenlai' => $this->GenModel->get_jenlai(),
+                'jendin' => $this->GenModel->get_jendin(),
+                'jentap' => $this->GenModel->get_jentap(),
+                'kondisi' => $this->GenModel->get_kondisi(),
+                'penghasilan' => $this->GenModel->get_penghasilan(),
+                'pengeluaran' => $this->GenModel->get_pengeluaran(),
+                'jml_tanggungan' => $this->GenModel->get_jml_tanggungan(),
+                'roda_dua' => $this->GenModel->get_roda_dua(),
+                'sumber_minum' => $this->GenModel->get_sumber_minum(),
+                'cara_minum' => $this->GenModel->get_cara_minum(),
+                'penerangan_utama' => $this->GenModel->get_penerangan_utama(),
+                'daya_listrik' => $this->GenModel->get_daya_listrik(),
+                'bahan_masak' => $this->GenModel->get_bahan_masak(),
+                'tempat_bab' => $this->GenModel->get_tempat_bab(),
+                'jenis_kloset' => $this->GenModel->get_jenis_kloset(),
+                'tempat_tinja' => $this->GenModel->get_tempat_tinja(),
+                'jenis_pekerjaan' => $this->GenModel->get_jenis_pekerjaan(),
+
+                'fd_id' => $responden['fd_id'],
+                'fd_nama_lengkap' => $responden['fd_nama_lengkap'],
+                'fd_nik' => $responden['fd_nik'],
+                'fd_nkk' => $responden['fd_nkk'],
+                'fd_alamat' => $responden['fd_alamat'],
+                'datart' => $responden['fd_rt'],
+                'datarw' => $responden['fd_rw'],
+                'fd_desa' => $responden['fd_desa'],
+                'fd_shdk' => $responden['fd_shdk'],
+                'fd_jenkel' => $responden['fd_jenkel'],
+                'fd_sta_bangteti' => $responden['fd_sta_bangteti'],
+                'fd_sta_lahteti' => $responden['fd_sta_lahteti'],
+                'fd_jenlai' => $responden['fd_jenlai'],
+                'fd_jendin' => $responden['fd_jendin'],
+                'kondisi_dinding' => $responden['fd_kondin'],
+                'fd_jentap' => $responden['fd_jentap'],
+                'kondisi_atap' => $responden['fd_kontap'],
+                'fd_penghasilan' => $responden['fd_penghasilan'],
+                'fd_pengeluaran' => $responden['fd_pengeluaran'],
+                'fd_jml_tanggungan' => $responden['fd_jml_tanggungan'],
+                'fd_roda_dua' => $responden['fd_roda_dua'],
+                'fd_sumber_minum' => $responden['fd_sumber_minum'],
+                'fd_cara_minum' => $responden['fd_cara_minum'],
+                'fd_penerangan_utama' => $responden['fd_penerangan_utama'],
+                'fd_daya_listrik' => $responden['fd_daya_listrik'],
+                'fd_bahan_masak' => $responden['fd_bahan_masak'],
+                'fd_tempat_bab' => $responden['fd_tempat_bab'],
+                'fd_jenis_kloset' => $responden['fd_jenis_kloset'],
+                'fd_tempat_tinja' => $responden['fd_tempat_tinja'],
+                'fd_pekerjaan_kk' => $responden['fd_pekerjaan_kk'],
+                'fd_updated_at' => $responden['fd_updated_at'],
+                'fd_created_by' => session()->get('nik'),
+                // 'foto_rumah' => $nama_foto_rumah,
             ];
-            // dd($data['validation']);
-            // $data['validation'] = $this->validator;
-            return view('dtks/data/dtks/famantama/impor_csv', $data);
         } else {
-            if ($file = $this->request->getFile('file')) {
-                if ($file->isValid() && !$file->hasMoved()) {
-
-                    // Get random file name
-                    $newName = $file->getRandomName();
-
-                    // Store file in public/csvfile/ folder
-                    $file->move('../public/data/csvfile', $newName);
-
-                    // Reading file
-                    $file = fopen("../public/data/csvfile/" . $newName, "r");
-                    $i = 0;
-                    $numberOfFields = 8; // Total number of fields
-
-                    $csvArr = array();
-
-                    // Initialize $importData_arr Array
-                    while (($filedata = fgetcsv($file, 1000, ",")) !== FALSE) {
-                        $num = count($filedata);
-                        // Skip first row & check number of fields
-                        if ($i > 0 && $num == $numberOfFields) {
-
-                            // $namaFile = $this->request->getPost('ck_id');
-                            // Key names are the insert table field names - name, email, city, and status
-                            $csvArr[$i]['cr_nama_kec'] = $filedata[0];
-                            $csvArr[$i]['cr_nama_desa'] = $filedata[1];
-                            $csvArr[$i]['cr_nik_usulan'] = $filedata[2];
-                            $csvArr[$i]['cr_program_bansos'] = $filedata[3];
-                            $csvArr[$i]['cr_hasil'] = $filedata[4];
-                            $csvArr[$i]['cr_padan'] = $filedata[5];
-                            $csvArr[$i]['cr_nama_lgkp'] = $filedata[6];
-                            $csvArr[$i]['cr_ket_vali'] = $filedata[7];
-                            $csvArr[$i]['cr_ck_id'] = $namaFile;
-                            $csvArr[$i]['cr_created_by'] = session()->get('nik');
-                        }
-                        $i++;
-                    }
-                    fclose($file);
-
-                    // Insert data
-                    $count = 0;
-                    foreach ($csvArr as $userdata) {
-                        $this->CsvReportModel = new CsvReportModel();
-
-                        // Check record
-                        $findRecord = $this->CsvReportModel->where('cr_nik_usulan', $userdata['cr_nik_usulan'])->countAllResults();
-
-                        if ($findRecord == 0) {
-
-                            ## Insert Record
-                            if ($this->CsvReportModel->insert($userdata)) {
-                                $count++;
-                            }
-                        }
-                    }
-
-                    // Set Session
-                    session()->setFlashdata('message', $count . ' rows successfully added.');
-                    session()->setFlashdata('alert-class', 'alert-success');
-                } else {
-                    // Set Session
-                    session()->setFlashdata('message', 'CSV file coud not be imported.');
-                    session()->setFlashdata('alert-class', 'alert-danger');
-                }
-            } else {
-
-                // Set Session
-                session()->setFlashdata('message', 'CSV file coud not be imported.');
-                session()->setFlashdata('alert-class', 'alert-danger');
-            }
+            $data = [
+                'fd_id' => '',
+                'fd_nama_lengkap' => '',
+                'fd_nik' => '',
+                'fd_nkk' => '',
+                'fd_alamat' => '',
+                'datart' => '',
+                'datarw' => '',
+                'fd_desa' => '',
+                'fd_shdk' => '',
+                'fd_jenkel' => '',
+                'fd_sta_bangteti' => '',
+                'fd_sta_lahteti' => '',
+                'fd_jenlai' => '',
+                'fd_jendin' => '',
+                'kondisi_dinding' => '',
+                'fd_jentap' => '',
+                'kondisi_atap' => '',
+                'fd_penghasilan' => '',
+                'fd_pengeluaran' => '',
+                'fd_jml_tanggungan' => '',
+                'fd_roda_dua' => '',
+                'fd_sumber_minum' => '',
+                'fd_cara_minum' => '',
+                'fd_penerangan_utama' => '',
+                'fd_daya_listrik' => '',
+                'fd_bahan_masak' => '',
+                'fd_tempat_bab' => '',
+                'fd_jenis_kloset' => '',
+                'fd_tempat_tinja' => '',
+                'fd_pekerjaan_kk' => '',
+                'fd_updated_at' => '',
+                'fd_created_by' => '',
+            ];
         }
-        return redirect()->route('import_csv');
+
+        return $this->response->setJSON($data);
     }
 }

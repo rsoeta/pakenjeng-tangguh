@@ -50,11 +50,12 @@ $desa_id = session()->get('kode_desa');
             200px
     }
 </style>
-
 <link href="<?= base_url('assets/dist/css/smart_wizard.min.css'); ?>" rel="stylesheet" type="text/css" />
 <link href="<?= base_url('assets/dist/css/smart_wizard_theme_dots.min.css'); ?>" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="<?= base_url('assets/dist/js/jquery.smartWizard.min.js'); ?>"></script>
 <!-- end modal dialog multi-step form wizard -->
+
+<!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
 
 <!-- Modal -->
 <?= form_open_multipart('', ['class' => 'formsimpan']) ?>
@@ -80,11 +81,11 @@ $desa_id = session()->get('kode_desa');
                             <div id="step-1">
                                 <div class="modal-body">
                                     <div class="row">
-                                        <div class="form-group row nopadding nopadding mb-2">
+                                        <div class="form-group row nopadding nopadding mb-2" hidden>
                                             <label class="col-4 col-sm-2 col-form-label" for="dataCari">Cari Data</label>
                                             <div class="col-8 col-sm-10">
                                                 <select name="dataCari" id="dataCari" class="form-control select2" style="width: 100%;">
-                                                    <option value='0'>-- Pilih --</option>
+                                                    <option value="">-- Pilih --</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -93,7 +94,7 @@ $desa_id = session()->get('kode_desa');
                                         <div class="form-group row nopadding">
                                             <label class="col-4 col-sm-2 col-form-label" for="fd_nkk">1. No. KK</label>
                                             <div class="col-8 col-sm-10">
-                                                <input type="number" name="fd_nkk" id="fd_nkk" class="form-control form-control-sm" autocomplete="on" autofocus>
+                                                <input type="number" name="fd_nkk" id="fd_nkk" class="form-control form-control-sm" autocomplete="on" onchange="getRespondenData()">
                                                 <div class="invalid-feedback errorfd_nkk"></div>
                                             </div>
                                         </div>
@@ -926,5 +927,43 @@ $desa_id = session()->get('kode_desa');
         } else {
             label.innerHTML = " Tidak";
         }
+    }
+
+    function getRespondenData() {
+        var nomorKK = $('#fd_nkk').val();
+
+        $.ajax({
+            url: '<?= base_url('/getRespondenData') ?>',
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                fd_nkk: nomorKK
+            },
+            success: function(response) {
+                $('#fd_alamat').val(response.fd_alamat);
+                $('#datarw').val(response.datarw);
+                $('#datart').val(response.datart);
+                $('#fd_sta_bangteti').val(response.fd_sta_bangteti);
+                $('#fd_sta_lahteti').val(response.fd_sta_lahteti);
+                $('#fd_jenlai').val(response.fd_jenlai);
+                $('#fd_jendin').val(response.fd_jendin);
+                $('#kondisi_dinding').val(response.kondisi_dinding);
+                $('#fd_jentap').val(response.fd_jentap);
+                $('#kondisi_atap').val(response.kondisi_atap);
+                $('#fd_penghasilan').val(response.fd_penghasilan);
+                $('#fd_pengeluaran').val(response.fd_pengeluaran);
+                $('#fd_jml_tanggungan').val(response.fd_jml_tanggungan);
+                $('#fd_roda_dua').val(response.fd_roda_dua);
+                $('#fd_sumber_minum').val(response.fd_sumber_minum);
+                $('#fd_cara_minum').val(response.fd_cara_minum);
+                $('#fd_penerangan_utama').val(response.fd_penerangan_utama);
+                $('#fd_daya_listrik').val(response.fd_daya_listrik);
+                $('#fd_bahan_masak').val(response.fd_bahan_masak);
+                $('#fd_tempat_bab').val(response.fd_tempat_bab);
+                $('#fd_jenis_kloset').val(response.fd_jenis_kloset);
+                $('#fd_tempat_tinja').val(response.fd_tempat_tinja);
+                $('#fd_pekerjaan_kk').val(response.fd_pekerjaan_kk);
+            }
+        });
     }
 </script>
