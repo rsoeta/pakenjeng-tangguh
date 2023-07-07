@@ -70,7 +70,7 @@ https://templatemo.com/tm-575-leadership-event
 
       <a href="<?= base_url(); ?>" class="navbar-brand mx-auto mx-lg-0">
         <!-- <i class="bi-bullseye brand-logo"></i> -->
-        <img src="<?= base_url('icon-dtks.png'); ?>" alt="Logo" class="img-circle" style="width: 50px; height: 50px;">
+        <img src="<?= base_url('icon-dtks.png'); ?>" alt="Logo" class="img-circle" style="height: 50px;">
         <!-- <span class="brand-text" style="height:fit-content;"><?= nameApp(); ?></span> -->
       </a>
 

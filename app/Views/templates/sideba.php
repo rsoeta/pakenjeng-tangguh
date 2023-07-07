@@ -13,7 +13,8 @@ $menus = menu()
     <!-- Brand Logo -->
     <a href="/pages" class="brand-link">
         <img src="<?= logoApp(); ?>" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-        <span class="brand-text font-weight-light"><?= nameApp() . ' ' . ucwords(strtolower(Profil_Admin()['namaKec'])); ?></span>
+        <!-- <span class="brand-text font-weight-light"><?php //nameApp() . ' ' . ucwords(strtolower(Profil_Admin()['namaKec'])); 
+                                                        ?></span> -->
     </a>
 
     <!-- Sidebar -->

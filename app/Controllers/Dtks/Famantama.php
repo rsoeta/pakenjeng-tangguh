@@ -89,7 +89,7 @@ class Famantama extends BaseController
                 'data_jenkel' => $this->GenModel->getDataJenkel(),
             ];
 
-            return view('dtks/data/dtks/famantama/tables', $data);
+            return view('dtks/data/famantama/tables', $data);
         } else if (session()->get('role_id') >= 1) {
             $this->FamantamaModel = new FamantamaModel();
             $this->WilayahModel = new WilayahModel();
@@ -118,7 +118,7 @@ class Famantama extends BaseController
 
             // dd($data['chartData']);
 
-            return view('dtks/data/dtks/famantama/tables', $data);
+            return view('dtks/data/famantama/tables', $data);
         } else {
             return redirect()->to('lockscreen');
         }
@@ -247,10 +247,10 @@ class Famantama extends BaseController
                 // Kembalikan respons dalam format JSON
                 // return $this->response->setJSON($responseData);
                 $msg = [
-                    'data' => view('dtks/data/dtks/famantama/modaltambah', $data),
+                    'data' => view('dtks/data/famantama/modaltambah', $data),
                     // 'removeModalScript' => $removeModalScript,
                     // 'responseData' => $responseData,
-                    // 'data' => view('dtks/data/dtks/famantama/modaltambah'),
+                    // 'data' => view('dtks/data/famantama/modaltambah'),
                 ];
 
                 echo json_encode($msg);
@@ -738,7 +738,7 @@ class Famantama extends BaseController
                 echo json_encode($msg);
             } else {
                 $msg = [
-                    'sukses' => view('dtks/data/dtks/famantama/modaledit', $data)
+                    'sukses' => view('dtks/data/famantama/modaledit', $data)
                 ];
                 echo json_encode($msg);
             }
