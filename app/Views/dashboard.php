@@ -82,6 +82,7 @@
     <section class="content mt-2">
         <div class="row">
             <div class="col-12">
+                <!-- displayNone -->
                 <div class="card displayNone">
                     <div class="card-header">
                         <h3 class="card-title">
@@ -308,8 +309,8 @@
                                                 <div class="row">
                                                     <div class="col mt-4">
                                                         <div class="inner">
-                                                            <h6><?= $row->namaDesa; ?></h6>
-                                                            <h3><?php echo number_format($row->Capaian, '0', ',', '.'); ?></h3>
+                                                            <h6 id="desa<?= $row->namaDesa; ?>"><?= $row->namaDesa; ?></h6>
+                                                            <h3 id="jumlah<?= $row->namaDesa; ?>"><?php echo number_format($row->Capaian, '0', ',', '.'); ?></h3>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -330,15 +331,16 @@
                                 <?php
                                 $total = $capaianAll;
                                 foreach ($rekapUsulan as $row) {
+                                    $id = $row->id;
                                     $nama_desa = $row->namaDesa;
                                     $capaian = $row->Capaian;
                                     $persentase = ($capaian / $total) * 100;
                                 ?>
                                     <div class="progress-group">
                                         <span class="progress-text"><b><?= $nama_desa; ?></b></span>
-                                        <span class="progress-number float-right"><?php echo number_format($persentase, 2); ?>%</span>
-                                        <div class="progress sm">
-                                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: <?php echo number_format($persentase, 2); ?>%"></div>
+                                        <span class="persentase<?= $nama_desa; ?> progress-number float-right"><?php echo number_format($persentase, 2); ?>%</span>
+                                        <div class="progress">
+                                            <div class="persentase<?= $nama_desa; ?> progress-bar progress-bar-striped progress-bar-animated" style="width: <?php echo number_format($persentase, 2); ?>%"></div>
                                         </div>
                                     </div>
                                 <?php } ?>
@@ -387,123 +389,6 @@
                         <a href="/usulan" class="btn btn-sm btn-primary float-right">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
-                <!-- <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title"><strong>Rekap VeriVali Bansos BPNT</strong></h3>
-
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <button type="button" class="btn btn-tool" data-card-widget="remove">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div> -->
-                <!-- /.col -->
-                <!-- <div class="card-body">
-                            <div class="row">
-                                <div class="col-sm-8 col-12">
-                                    <div class="row"> -->
-                <?php // foreach ($getDataGrup as $row) : 
-                ?>
-                <!-- <div class="col-sm-3 col-6"> -->
-                <?php
-                //                                                if ($row['jenis_keterangan'] == 'Belum Cek') {
-                //                                                  $background = 'bg-warning';
-                //                                                $icon = 'ion-load-a';
-                // } else if ($row['jenis_keterangan'] == 'Invalid') {
-                //     $background = 'bg-danger';
-                //     $icon = 'ion-close-round';
-                // } else if ($row['jenis_keterangan'] == 'NIK Padan Beda Nama') {
-                //     $background = 'bg-info';
-                //     $icon = 'ion-alert';
-                // } else if ($row['jenis_keterangan'] == 'Valid') {
-                //     $background = 'bg-success';
-                //     $icon = 'ion-ion-checkmark-round';
-                // } else if ($row['jenis_keterangan'] == 'Di Hapus - Meninggal') {
-                //     $background = 'bg-warning';
-                //     $icon = 'ion-minus-circled';
-                // } else if ($row['jenis_keterangan'] == 'Di Hapus - NIK Sudah Terdaftar') {
-                //     $background = 'bg-warning';
-                //     $icon = 'ion-minus-circled';
-                // } else if ($row['jenis_keterangan'] == 'Tidak Memiliki E-KTP') {
-                //     $background = 'bg-secondary';
-                //     $icon = 'ion-help';
-                // }
-                // 
-                ?>
-                <!-- <div class="small-box">  -->
-                <?php // echo $background 
-                ?>
-                <!-- <div class="inner"> -->
-                <!-- <h3><sup>%</sup></h3> -->
-                <!-- <h3> -->
-                <?php // echo  number_format($row['total_data']);
-                ?>
-                <!-- </h3> -->
-
-                <!-- <p> -->
-                <?php // echo  $row['jenis_keterangan']; 
-                ?>
-                <!-- </p> -->
-                <!-- </div> -->
-                <!-- <div class="icon"> -->
-                <!-- <i class="ion">  -->
-                <?php
-                //echo  $icon;
-                ?>
-                <!-- </i> -->
-                <!-- </div> -->
-                <!-- <a href="#" class="small-box-footer">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a> -->
-                <!-- </div> -->
-                <!-- </div> -->
-                <?php // endforeach; 
-                ?>
-                <!-- </div>
-                                </div> -->
-                <!-- <div class="col-sm-4 col-12">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th rowspan="2">NO.</th>
-                                                    <th rowspan="2">NAMA DESA</th>
-                                                    <th>JENIS USULAN</th>
-                                                    <th rowspan="2">JUMLAH TOTAL</th>
-
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php // $no = 1 
-                                                ?>
-                                                <?php // foreach ($rekapUsulan as $row) :
-                                                ?>
-                                                    <tr style="text-align: right;">
-                                                        <td style="text-align: center;"><?php // $no; 
-                                                                                        ?></td>
-                                                        <td style="text-align: left;"><?php // $row['NamaDesa']; 
-                                                                                        ?></td>
-                                                        <td style="text-align: left;"><?php // $row['NamaBansos']; 
-                                                                                        ?></td>
-                                                        <td><?php // $row['Total']; 
-                                                            ?></td>
-                                                    </tr>
-                                                    <?php // $no++ 
-                                                    ?>
-                                                <?php // endforeach; 
-                                                ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div> -->
-                <!-- </div>
-                        </div>
-                        <div class="card-footer clearfix">
-                            <a href="#" class="btn btn-sm btn-secondary float-right">Rincian</a>
-                        </div> -->
-                <!-- </div> -->
-
             </div>
         </div>
         <div class="row">
@@ -716,8 +601,46 @@
     'use strict';
     $(document).ready(function() {
         $('body').addClass('sidebar-collapse');
-        $('.displayNone').css('display', 'none')
+        $('.displayNone').css('display', 'none');
+
+        function updateNilaiJumlah() {
+            $.ajax({
+                url: '/getNilaiJumlah',
+                method: 'GET',
+                success: function(response) {
+                    let total = 0; // Inisialisasi total
+
+                    response.forEach(function(item) {
+                        let id = item.id;
+                        let namaDesa = item.namaDesa;
+                        let capaian = item.Capaian;
+
+                        $('#desa' + id).text(namaDesa);
+                        $('#jumlah' + id).text(capaian);
+
+                        total += parseInt(capaian); // Akumulasi capaian ke total
+                    });
+                    // console.log(total);
+                    response.forEach(function(item) {
+                        let id = item.id;
+                        let namaDesa = item.namaDesa;
+                        let capaian = item.Capaian;
+
+                        let persentase = (capaian / total) * 100;
+                        $('.persentase' + id).text(persentase.toFixed(2) + '%');
+                    });
+                },
+                error: function() {
+                    console.log('Terjadi kesalahan saat mengambil data.');
+                }
+            });
+        }
+
+        setInterval(function() {
+            updateNilaiJumlah();
+        }, 1000);
     });
+
 
     const ctx = document.getElementById('chart_bnba').getContext('2d');
     const chart_bnba = new Chart(ctx, {

@@ -1,6 +1,6 @@
 <?= $this->include('templates/header'); ?>
 
-<?= $this->include('chats'); ?>
+<!-- // $this->include('chats');  -->
 
 <?= $this->include('templates/navbar'); ?>
 

@@ -437,7 +437,7 @@ class Usulan22Model extends Model
         $year = date('Y');
         $month = date('n');
 
-        $sql = 'SELECT tb_villages.name as namaDesa, kelurahan, created_at_year, created_at_month,
+        $sql = 'SELECT tb_villages.id, tb_villages.name as namaDesa, kelurahan, created_at_year, created_at_month,
                     SUM(IF(`program_bansos` >= 0,1,0)) DataTarget,
                     SUM(IF(`program_bansos` > 0,1,0)) Capaian,
                     SUM(IF(`program_bansos` = 1,1,0)) PKH,

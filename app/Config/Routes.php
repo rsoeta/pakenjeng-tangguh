@@ -46,6 +46,8 @@ $routes->post('cek_usulan', 'Landing::cek_usulan');
 
 // $routes->get('dashboard', 'Auth\Pages::home', ['filter' => 'noauthfilterdtks']);
 $routes->get('pages', 'Auth\Pages::index', ['filter' => 'authfilterdtks']);
+$routes->get('getNilaiJumlah', 'Auth\Pages::getNilaiJumlah');
+
 $routes->get('logout', 'Auth\Auth::logout');
 
 $routes->get('redirect', 'Auth\Auth::redirectToExternalLink');

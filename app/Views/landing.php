@@ -116,7 +116,7 @@ https://templatemo.com/tm-575-leadership-event
   </nav>
 
   <main>
-
+    <!-- home -->
     <section class="hero" id="section_1">
       <div class="container">
         <div class="row">
@@ -146,23 +146,10 @@ https://templatemo.com/tm-575-leadership-event
         </video>
       </div>
     </section>
-
+    <!-- cek usulan -->
     <section class="about section-padding" id="section_2">
       <div class="container">
         <div class="row">
-
-          <div class="col-lg-6 col-12">
-            <h3 class="mb-2">Sejarah </h3>
-            <p>Awal Maret tahun 2020 pada saat merebaknya Covid-19 di Negara tercinta kita ini, dan mendapat lonjakan pada bulan Mei 2020 sebagaimana dikutip dari CNN Indonesia “Lonjakan Drastis Kasus Corona pada Mei 2020”.
-            </p>
-
-            <!-- <a class="custom-btn custom-border-btn btn custom-link mt-3 me-3" href="#section_3">Meet Speakers</a> -->
-
-            <a class="custom-btn btn custom-link mt-3" href="">Read more...</a>
-          </div>
-
-          <div class="col-lg-2 col-0"></div>
-
           <div class="col-lg-4 col-12 mt-5 mt-lg-0">
             <h3 class="mb-2">Cek Status Usulan Anda dibawah ini</h3>
 
@@ -328,7 +315,7 @@ https://templatemo.com/tm-575-leadership-event
       </div>
     </section> -->
 
-
+    <!-- galeri kegiatan -->
     <section class="schedule section-padding" id="section_4">
       <div class="container">
         <div class="row">
@@ -425,13 +412,13 @@ https://templatemo.com/tm-575-leadership-event
       </div>
     </section>
 
+    <!-- tentang kami -->
     <section class="venue section-padding" id="section_5">
       <div class="container">
         <div class="row">
 
           <div class="col-lg-12 col-12">
             <h2 class="mb-5 text-center">Tentang Kami</h2>
-
 
             <div class="tab-content mt-5" id="nav-tabContent">
               <div class="tab-pane fade show active" id="nav-DayOne" role="tabpanel" aria-labelledby="nav-DayOne-tab">
@@ -477,6 +464,8 @@ https://templatemo.com/tm-575-leadership-event
         </div>
       </div>
     </section>
+
+    <!-- peta lokasi -->
     <section class="venue section-padding" id="section_6">
       <div class="container">
         <div class="row" id="">
@@ -521,6 +510,7 @@ https://templatemo.com/tm-575-leadership-event
       </div>
     </section>
 
+    <!-- please say hi -->
     <section class="contact section-padding" id="section_7">
       <div class="container">
         <div class="row">

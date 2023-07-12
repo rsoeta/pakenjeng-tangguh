@@ -145,6 +145,21 @@ class Pages extends BaseController
         }
     }
 
+    public function getNilaiJumlah()
+    {
+        $rekapUsulan = $this->Usulan22Model->rekapUsulan();
+        $rekapUsulanArray = json_decode(json_encode($rekapUsulan), true);
+
+        foreach ($rekapUsulanArray as &$item) {
+            // Tambahkan 'id' ke setiap elemen array
+            $item['id'] = $item['namaDesa'];
+        }
+
+        return $this->response->setJSON($rekapUsulanArray);
+    }
+
+
+
     public function tables()
     {
         if (session()->get('level') == 1) {
