@@ -258,9 +258,7 @@ $desa_id = session()->get('kode_desa');
                                                 <div class="invalid-feedback erroribu_kandung"></div>
                                             </div>
                                         </div>
-
                                     </div>
-
                                     <input type="datetime-local" name="updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
                                 </div>
                             </div>

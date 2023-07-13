@@ -147,22 +147,13 @@ class GenModel extends Model
 		}
 	}
 
-	function submit_general($data)
+	public function update_batch($data, $primaryKey)
 	{
-		return $this->db
-			->table('dtks_deadline')
-			->set($data)
-			->insert();
+		$builder = $this->db->table('dtks_deadline');
+
+		$builder->updateBatch($data, $primaryKey);
 	}
 
-	function update_general($id, $data)
-	{
-		return $this->db
-			->table('dtks_deadline')
-			->where('dd_id', $id)
-			->set($data)
-			->update();
-	}
 
 	function getDeadlinePpks()
 	{

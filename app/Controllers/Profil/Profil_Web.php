@@ -5,6 +5,7 @@ namespace App\Controllers\Profil;
 use App\Models\Dtks\AuthModel;
 use App\Models\WilayahModel;
 use App\Models\GenModel;
+use App\Models\DeadlineModel;
 use App\Models\Dtks\LembagaModel;
 use App\Models\Dtks\MenuModel;
 
@@ -17,6 +18,7 @@ class Profil_Web extends BaseController
     {
         $this->AuthModel = new AuthModel();
         $this->GenModel = new GenModel();
+        $this->DeadlineModel = new DeadlineModel();
         $this->LembagaModel = new LembagaModel();
         $this->WilayahModel = new WilayahModel();
         $this->MenuModel = new MenuModel();
@@ -284,26 +286,67 @@ class Profil_Web extends BaseController
 
             // var_dump($data);
             // die;
-            $data = $this->GenModel->submit_general($data);
+            $data = $this->DeadlineModel->submit_general($data);
             echo json_encode($data);
         }
     }
 
-    function update_general()
-    {
-        if ($this->request->isAJAX()) {
-            $id = $this->request->getPost('dd_id');
-            // dd($id);
+    // function update_general()
+    // {
+    //     if ($this->request->isAJAX()) {
 
-            $data = [
+    //         $dataArr = $this->request->getPost();
+    //         // var_dump($dataArr);
+    //         // die;
+
+    //         $id = $this->request->getPost('dd_id');
+    //         // dd($id);
+
+    //         $data = [
+    //             'dd_id' => $id,
+    //             'dd_waktu_start' => $this->request->getPost('dd_waktu_start'),
+    //             'dd_waktu_end' => $this->request->getPost('dd_waktu_end'),
+    //             'dd_role' => $this->request->getPost('dd_role'),
+    //             'dd_deskripsi' => $this->request->getPost('dd_deskripsi'),
+    //         ];
+    //         $data = $this->GenModel->update_general($id, $data);
+    //         echo json_encode($data);
+    //     }
+    // }
+    public function update_general()
+    {
+        $dataArr = $this->request->getPost();
+
+        // Tangkap data dari form
+        $ids = $dataArr['dd_id'];
+        $waktuStarts = $dataArr['dd_waktu_start'];
+        $waktuEnds = $dataArr['dd_waktu_end'];
+        $roles = $dataArr['dd_role'];
+
+        // Memformat data menjadi array batch
+        $data = [];
+        foreach ($ids as $index => $id) {
+            $data[] = [
                 'dd_id' => $id,
-                'dd_waktu_start' => $this->request->getPost('dd_waktu_start'),
-                'dd_waktu_end' => $this->request->getPost('dd_waktu_end'),
-                'dd_role' => $this->request->getPost('dd_role'),
-                'dd_deskripsi' => $this->request->getPost('dd_deskripsi'),
+                'dd_waktu_start' => $waktuStarts[$index],
+                'dd_waktu_end' => $waktuEnds[$index],
+                'dd_role' => $roles[$index],
+                'success' => 'Data updated successfully',
+
+                'title' => 'Setting Web',
+                'statusRole' => $this->GenModel->getStatusRole(),
+                'user_login' => $this->AuthModel->getUserId(),
+                'menu' => $this->MenuModel->orderBy('tm_parent_id', 'asc')->findAll(),
+                'deadline' => $this->GenModel->getDeadline(),
             ];
-            $data = $this->GenModel->update_general($id, $data);
-            echo json_encode($data);
         }
+
+        // Panggil model dan lakukan operasi updateBatch
+        $model = new DeadlineModel();
+        $model->updateBatch($data, 'dd_id');
+
+        // Tampilkan pesan atau lakukan tindakan lain
+        // echo "Data updated successfully";
+        return view('profil/web', $data);
     }
 }

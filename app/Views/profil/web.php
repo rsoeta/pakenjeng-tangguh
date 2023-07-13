@@ -8,13 +8,15 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1><?= $title; ?></h1>
+                    <?php if (isset($title)) { ?>
+                        <h1><?= $title; ?></h1>
+                    <?php } ?>
                 </div>
                 <div class="col-sm-6">
                     <!-- get breadcrumb from menu -->
                     <ol class="breadcrumb float-right">
                         <li class="breadcrumb-item"><a href="<?= base_url('/dashboard'); ?>">Home</a></li>
-                        <li class="breadcrumb-item active"><?= $title; ?></li>
+                        <li class="breadcrumb-item active"><?= $title ?? ''; ?></li>
                     </ol>
                 </div>
             </div>
@@ -87,7 +89,7 @@
                                 <li class="list-group-item"><i class="fas fa-archive mr-1"></i> Kode Pos
                                     <b class="float-right"><?= isset($user_login['lp_kode_pos']) ? $user_login['lp_kode_pos'] : ''; ?></b>
                                 <li class="list-group-item"><i class="fas fa-image mr-1"></i> Logo Kabupaten
-                                    <img class="img-fluid float-right" src=" <?= base_url() ?>/landing-page/images/logo-garut.png" alt="Logo Kab. Garut" style="width: 100px;">
+                                    <img class="img-fluid float-right" src=" <?= base_url('/landing-page/images/logo-garut.png') ?>" alt="Logo Kab. Garut" style="width: 100px;">
                                 </li>
                             </ul>
                         </div>
@@ -119,6 +121,7 @@
                         <div class="card-body">
                             <div class="alert alert-dismissible alert-success" id="personalMsg" style="display: none;"></div>
                             <div class="alert alert-dismissible alert-success" id="lembagaMsg" style="display: none;"></div>
+                            <div class="alert alert-dismissible alert-success" id="success" style="display: none;"></div>
                             <div class="tab-content" id="custom-tabs-three-tabContent">
                                 <div class="tab-pane fade active show" id="custom-tabs-three-home" role="tabpanel" aria-labelledby="custom-tabs-three-home-tab">
                                     <div class="col-12 col-md-4 col-lg-4 col-4">
@@ -264,33 +267,31 @@
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="custom-tabs-three-general" role="tabpanel" aria-labelledby="cuxtom-tab-three-general-tab" <?= $user_login['role_id'] > 2 ? 'hidden' : ''; ?>>
-                                    <form id="update_form" method="POST">
+                                    <form method="post" action="<?= site_url('/update_web_general'); ?>">
                                         <?php foreach ($deadline as $dd) { ?>
                                             <div class="row">
                                                 <div class="col-6 col-sm-3">
-                                                    <input type="hidden" name="dd_id" id="dd_id" value="<?= $dd['dd_id']; ?>">
+                                                    <input type="hidden" name="dd_id[]" value="<?= $dd['dd_id']; ?>">
                                                     <strong><i class="fa fa-calendar-alt mr-1"></i> Start Date</strong>
-                                                    <input type="datetime-local" name="dd_waktu_start" id="dd_waktu_start" class="form-control" value="<?= $dd['dd_waktu_start']; ?>">
+                                                    <input type="datetime-local" name="dd_waktu_start[]" class="form-control" value="<?= $dd['dd_waktu_start']; ?>">
                                                 </div>
                                                 <div class="col-6 col-sm-3">
                                                     <strong><i class="fa fa-calendar-alt mr-1"></i> End Date</strong>
-                                                    <input type="datetime-local" name="dd_waktu_end" id="dd_waktu_end" class="form-control" value="<?= $dd['dd_waktu_end']; ?>">
+                                                    <input type="datetime-local" name="dd_waktu_end[]" class="form-control" value="<?= $dd['dd_waktu_end']; ?>">
                                                 </div>
                                                 <div class="col-6 col-sm-3">
                                                     <strong><i class="fa fa-user mr-1"></i> Hak-Akses</strong>
-                                                    <select class="form-control" name="dd_role" id="">
+                                                    <select class="form-control" name="dd_role[]">
                                                         <?php foreach ($statusRole as $s) { ?>
-                                                            <option class="form-control" <?= $dd['dd_role'] == $s['id_role'] ? 'selected' : ''; ?> value="<?= $s['id_role']; ?>"><?= $s['nm_role']; ?></option>
+                                                            <option <?= $dd['dd_role'] == $s['id_role'] ? 'selected' : ''; ?> value="<?= $s['id_role']; ?>"><?= $s['nm_role']; ?></option>
                                                         <?php } ?>
                                                     </select>
                                                 </div>
-                                                <div class="col-6 col-sm-3">
-                                                    <strong><i class="fa fa-check mr-1"></i> Aksi</strong>
-                                                    <button type="button" id="" class="btn btn-success btn-block btnGenUpdate">Update</button>
-                                                </div>
                                             </div>
                                         <?php } ?>
+                                        <button type="submit" class="btn btn-primary btn-block">Update</button>
                                     </form>
+
                                     <form id="submit_form" method="POST">
                                         <div class="row">
                                             <hr class="mt-3">
@@ -737,44 +738,75 @@
             }
         });
 
-        $(".btnGenUpdate").click(function(event) {
-            //     alert('test');
-            // });
-            event.preventDefault();
-            const form_data = new FormData($('#update_form')[0]);
-            const dd_id = $('#dd_id').val();
-            const dd_waktu_start = $('#dd_waktu_start').val();
-            const dd_waktu_end = $('#dd_waktu_end').val();
-            const dd_role = $('#dd_role').val();
-            const dd_deskripsi = $('#dd_deskripsi').val();
+        // $(".btnGenUpdate").click(function(event) {
+        //     //     alert('test');
+        //     // });
+        //     event.preventDefault();
+        //     const form_data = new FormData($('#update_form')[0]);
+        //     const dd_id = $('#dd_id').val();
+        //     const dd_waktu_start = $('#dd_waktu_start').val();
+        //     const dd_waktu_end = $('#dd_waktu_end').val();
+        //     const dd_role = $('#dd_role').val();
+        //     const dd_deskripsi = $('#dd_deskripsi').val();
 
-            if (dd_waktu_start != null || dd_waktu_end != null || dd_role != null) {
-                $.ajax({
-                    type: "POST",
-                    url: '<?= site_url('update_web_general'); ?>',
-                    dataType: 'json',
-                    data: form_data,
-                    processData: false,
-                    contentType: false,
-                    success: function(res) {
-                        // alert(res);
-                        if (res) {
-                            $("#lembagaMsg").show();
-                            $("#lembagaMsg").html('Data berhasil diupdate.');
-                            setTimeout(function() {
-                                $("#lembagaMsg").hide();
-                            }, 2000);
-                            setTimeout(function() {
-                                location.reload();
-                            }, 2010);
-                            // alert (res)
-                        }
+        //     if (dd_waktu_start != null || dd_waktu_end != null || dd_role != null) {
+        //         $.ajax({
+        //             type: "POST",
+        //             url: '<?= site_url('update_web_general'); ?>',
+        //             dataType: 'json',
+        //             data: form_data,
+        //             processData: false,
+        //             contentType: false,
+        //             success: function(res) {
+        //                 // alert(res);
+        //                 if (res) {
+        //                     $("#lembagaMsg").show();
+        //                     $("#lembagaMsg").html('Data berhasil diupdate.');
+        //                     setTimeout(function() {
+        //                         $("#lembagaMsg").hide();
+        //                     }, 2000);
+        //                     setTimeout(function() {
+        //                         location.reload();
+        //                     }, 2010);
+        //                     // alert (res)
+        //                 }
+        //             }
+        //         });
+        //     } else {
+        //         alert('Isi dengan lengkap!');
+        //     }
+        // });
+        $(".btnGenUpdate").click(function(event) {
+            event.preventDefault();
+
+            const dd_id = $(this).data('id');
+            const dd_waktu_start = $('#dd_waktu_start_' + dd_id).val();
+            const dd_waktu_end = $('#dd_waktu_end_' + dd_id).val();
+            const dd_role = $('#dd_role_' + dd_id).val();
+
+            const data = {
+                dd_id: dd_id,
+                dd_waktu_start: dd_waktu_start,
+                dd_waktu_end: dd_waktu_end,
+                dd_role: dd_role
+            };
+
+            $.ajax({
+                type: "POST",
+                url: '<?= site_url('update_web_general'); ?>',
+                dataType: 'json',
+                data: {
+                    data: JSON.stringify(data)
+                },
+                success: function(res) {
+                    if (res) {
+                        console.log(res.message);
+                        // Lakukan tindakan lain setelah berhasil diupdate
                     }
-                });
-            } else {
-                alert('Isi dengan lengkap!');
-            }
+                }
+            });
         });
+
 
         $(function() {
             $('#personalUpdate').click(function() {
