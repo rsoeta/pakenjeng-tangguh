@@ -25,7 +25,7 @@
     <meta name="twitter:description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng" />
     <meta name="twitter:image" content="<?= base_url('icon-dtks.png'); ?>" />
 
-    <title><?= nameApp(); ?> | <?= $title; ?></title>
+    <title><?= $title; ?> | <?= nameApp(); ?></title>
 
 
 

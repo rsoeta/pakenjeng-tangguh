@@ -121,7 +121,12 @@
                         <div class="card-body">
                             <div class="alert alert-dismissible alert-success" id="personalMsg" style="display: none;"></div>
                             <div class="alert alert-dismissible alert-success" id="lembagaMsg" style="display: none;"></div>
-                            <div class="alert alert-dismissible alert-success" id="success" style="display: none;"></div>
+                            <?php if (session()->has('success')) : ?>
+                                <div class="alert alert-success">
+                                    <?= session('success') ?>
+                                </div>
+                            <?php endif; ?>
+
                             <div class="tab-content" id="custom-tabs-three-tabContent">
                                 <div class="tab-pane fade active show" id="custom-tabs-three-home" role="tabpanel" aria-labelledby="custom-tabs-three-home-tab">
                                     <div class="col-12 col-md-4 col-lg-4 col-4">
@@ -267,19 +272,10 @@
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="custom-tabs-three-general" role="tabpanel" aria-labelledby="cuxtom-tab-three-general-tab" <?= $user_login['role_id'] > 2 ? 'hidden' : ''; ?>>
-                                    <form method="post" action="<?= site_url('/update_web_general'); ?>">
+                                    <form id="updateForm" method="post" action="">
                                         <?php foreach ($deadline as $dd) { ?>
                                             <div class="row">
-                                                <div class="col-6 col-sm-3">
-                                                    <input type="hidden" name="dd_id[]" value="<?= $dd['dd_id']; ?>">
-                                                    <strong><i class="fa fa-calendar-alt mr-1"></i> Start Date</strong>
-                                                    <input type="datetime-local" name="dd_waktu_start[]" class="form-control" value="<?= $dd['dd_waktu_start']; ?>">
-                                                </div>
-                                                <div class="col-6 col-sm-3">
-                                                    <strong><i class="fa fa-calendar-alt mr-1"></i> End Date</strong>
-                                                    <input type="datetime-local" name="dd_waktu_end[]" class="form-control" value="<?= $dd['dd_waktu_end']; ?>">
-                                                </div>
-                                                <div class="col-6 col-sm-3">
+                                                <div class="col-4 col-sm-3">
                                                     <strong><i class="fa fa-user mr-1"></i> Hak-Akses</strong>
                                                     <select class="form-control" name="dd_role[]">
                                                         <?php foreach ($statusRole as $s) { ?>
@@ -287,33 +283,21 @@
                                                         <?php } ?>
                                                     </select>
                                                 </div>
+                                                <div class="col-4 col-sm-3">
+                                                    <input type="hidden" name="dd_id[]" id="" value="<?= $dd['dd_id']; ?>">
+                                                    <strong><i class="fa fa-calendar-alt mr-1"></i> Start Date</strong>
+                                                    <input type="datetime-local" name="dd_waktu_start[]" id="" class="form-control" value="<?= $dd['dd_waktu_start']; ?>">
+                                                </div>
+                                                <div class="col-4 col-sm-3">
+                                                    <strong><i class="fa fa-calendar-alt mr-1"></i> End Date</strong>
+                                                    <input type="datetime-local" name="dd_waktu_end[]" id="" class="form-control" value="<?= $dd['dd_waktu_end']; ?>">
+                                                </div>
+
                                             </div>
                                         <?php } ?>
-                                        <button type="submit" class="btn btn-primary btn-block">Update</button>
-                                    </form>
-
-                                    <form id="submit_form" method="POST">
                                         <div class="row">
-                                            <hr class="mt-3">
-                                            <div class="col-6 col-sm-3">
-                                                <strong><i class="fa fa-calendar-alt mr-1"></i> Start Date</strong>
-                                                <input type="datetime-local" name="dd_waktu_start1" id="dd_waktu_start1" class="form-control" value="">
-                                            </div>
-                                            <div class="col-6 col-sm-3">
-                                                <strong><i class="fa fa-calendar-alt mr-1"></i> End Date</strong>
-                                                <input type="datetime-local" name="dd_waktu_end1" id="dd_waktu_end1" class="form-control" value="">
-                                            </div>
-                                            <div class="col-6 col-sm-3">
-                                                <strong><i class="fa fa-user mr-1"></i> Hak-Akses</strong>
-                                                <select class="form-control" name="dd_role1" id="dd_role1">
-                                                    <?php foreach ($statusRole as $s) { ?>
-                                                        <option class="form-control" value="<?= $s['id_role']; ?>"><?= $s['nm_role']; ?></option>
-                                                    <?php } ?>
-                                                </select>
-                                            </div>
-                                            <div class="col-6 col-sm-3">
-                                                <strong><i class="fa fa-check mr-1"></i> Aksi</strong>
-                                                <button type="button" id="" class="btn btn-primary btn-block">Submit</button>
+                                            <div class="col-12 col-md-9 col-sm-9 text-right mt-2">
+                                                <button type="submit" class="btn btn-success btnGenUpdate">Update</button>
                                             </div>
                                         </div>
                                     </form>
@@ -776,33 +760,29 @@
         //         alert('Isi dengan lengkap!');
         //     }
         // });
-        $(".btnGenUpdate").click(function(event) {
-            event.preventDefault();
 
-            const dd_id = $(this).data('id');
-            const dd_waktu_start = $('#dd_waktu_start_' + dd_id).val();
-            const dd_waktu_end = $('#dd_waktu_end_' + dd_id).val();
-            const dd_role = $('#dd_role_' + dd_id).val();
+        $('#updateForm').on('submit', function(e) {
+            e.preventDefault(); // Mencegah formulir dikirimkan secara default
 
-            const data = {
-                dd_id: dd_id,
-                dd_waktu_start: dd_waktu_start,
-                dd_waktu_end: dd_waktu_end,
-                dd_role: dd_role
-            };
+            var formData = $(this).serialize(); // Mengambil data formulir
 
             $.ajax({
-                type: "POST",
-                url: '<?= site_url('update_web_general'); ?>',
-                dataType: 'json',
-                data: {
-                    data: JSON.stringify(data)
+                url: '/updateBatch', // Ganti dengan URL yang sesuai dengan controller dan method Anda
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    // Tanggapan dari server setelah proses update berhasil
+                    // console.log(response);
+                    // Tampilkan SweetAlert sukses
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sukses',
+                        text: 'Update deadline usulan berhasil!',
+                    });
                 },
-                success: function(res) {
-                    if (res) {
-                        console.log(res.message);
-                        // Lakukan tindakan lain setelah berhasil diupdate
-                    }
+                error: function(xhr, status, error) {
+                    // Penanganan kesalahan jika terjadi
+                    console.error(xhr.responseText);
                 }
             });
         });
@@ -824,5 +804,9 @@
         // select2
         $('.select2').select2();
     });
+
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
 </script>
 <?= $this->endSection(); ?>

@@ -183,9 +183,9 @@ $desa_id = session()->get('kode_desa');
                                             <select <?= $user > 3 ? ' disabled="on' : ''; ?> id="jenis_pekerjaan" name="jenis_pekerjaan" class="form-select form-select-sm">
                                                 <option value="">-- Pilih Jenis Pekerjaan --</option>
                                                 <?php foreach ($pekerjaan as $row) { ?>
-                                                    <option <?php if ($jenis_pekerjaan == $row['idPekerjaan']) {
+                                                    <option <?php if ($jenis_pekerjaan == $row['pk_id']) {
                                                                 echo 'selected';
-                                                            } ?> value="<?= $row['idPekerjaan'] ?>"> <?php echo $row['JenisPekerjaan']; ?></option>
+                                                            } ?> value="<?= $row['pk_id'] ?>"> <?php echo $row['pk_nama']; ?></option>
                                                 <?php } ?>
                                             </select>
                                             <div class="invalid-feedback errorjenis_pekerjaan"></div>
@@ -381,35 +381,35 @@ $desa_id = session()->get('kode_desa');
                                             <label class="col-10 col-form-label" for="sk0">Apakah memiliki tempat berteduh tetap sehari-hari?</label>
                                             <div class="col-2">
                                                 <input class="form-check-input" type="checkbox" id="sk0" name="sk0" <?= $sk0 == '1' ? 'checked' : ''; ?> value="1" <?= $user > 3 ? ' onclick="return false"' : ''; ?> />
-                                                <label for="sk0" class="form-check-label"> Ya</label>
+                                                <label for="sk0" class="form-check-label"><?= $sk0 == '1' ? 'Ya' : 'Tidak'; ?></label>
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label class="col-10 col-form-label" for="sk5">Apakah kepala keluarga atau pengurus keluarga masih bekerja?</label>
                                             <div class="col-2">
                                                 <input class="form-check-input" type="checkbox" id="sk5" name="sk5" <?= $sk5 == '1' ? 'checked' : ''; ?> value="1" <?= $user > 3 ? ' onclick="return false"' : ''; ?> />
-                                                <label for="sk5" class="form-check-label"> Ya</label>
+                                                <label for="sk5" class="form-check-label"><?= $sk5 == '1' ? 'Ya' : 'Tidak'; ?></label>
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label class="col-10 col-form-label" for="sk6">Apakah pengeluaran pangan lebih besar (>70%) dari total pengeluaran?</label>
                                             <div class="col-2">
                                                 <input class="form-check-input" type="checkbox" id="sk6" name="sk6" <?= $sk6 == '1' ? 'checked' : ''; ?> value="1" <?= $user > 3 ? ' onclick="return false"' : ''; ?> />
-                                                <label for="sk6" class="form-check-label"> Ya</label>
+                                                <label for="sk6" class="form-check-label"><?= $sk6 == '1' ? 'Ya' : 'Tidak'; ?></label>
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label class="col-10 col-form-label" for="sk7">Apakah tempat tinggal sebagian besar berlantai tanah dan/atau plesteran?</label>
                                             <div class="col-2">
                                                 <input class="form-check-input" type="checkbox" id="sk7" name="sk7" <?= $sk7 == '1' ? 'checked' : ''; ?> value="1" <?= $user > 3 ? ' onclick="return false"' : ''; ?> />
-                                                <label for="sk7" class="form-check-label"> Ya</label>
+                                                <label for="sk7" class="form-check-label"><?= $sk7 == '1' ? 'Ya' : 'Tidak'; ?></label>
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label class="col-10 col-form-label" for="sk8">Apakah tempat tinggal memiliki fasilitas buang air kecil / besar sendiri?</label>
                                             <div class="col-2">
                                                 <input class="form-check-input" type="checkbox" id="sk8" name="sk8" <?= $sk8 == '1' ? 'checked' : ''; ?> value="1" <?= $user > 3 ? ' onclick="return false"' : ''; ?> />
-                                                <label for="sk8" class="form-check-label"> Ya</label>
+                                                <label for="sk8" class="form-check-label"><?= $sk8 == '1' ? 'Ya' : 'Tidak'; ?></label>
                                             </div>
                                         </div>
                                     </div>
@@ -418,35 +418,35 @@ $desa_id = session()->get('kode_desa');
                                             <label class="col-10 col-form-label" for="sk9">Apakah target survey tinggal bersama anggota keluarga yang lain?</label>
                                             <div class="col-2">
                                                 <input class="form-check-input" type="checkbox" id="sk9" name="sk9" <?= $sk9 == '1' ? 'checked' : ''; ?> value="1" <?= $user > 3 ? ' onclick="return false"' : ''; ?> />
-                                                <label for="sk9" class="form-check-label"> Ya</label>
+                                                <label for="sk9" class="form-check-label"><?= $sk9 == '1' ? 'Ya' : 'Tidak'; ?></label>
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label class="col-10 col-form-label" for="sk1">Apakah pernah khawatir atau pernah tidak makan dalam setahun terakhir?</label>
                                             <div class="col-2">
                                                 <input class="form-check-input" type="checkbox" id="sk1" name="sk1" <?= $sk1 == '1' ? 'checked' : ''; ?> value="1" <?= $user > 3 ? ' onclick="return false"' : ''; ?> />
-                                                <label for="sk1" class="form-check-label"> Ya</label>
+                                                <label for="sk1" class="form-check-label"><?= $sk1 == '1' ? 'Ya' : 'Tidak'; ?></label>
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label class="col-10 col-form-label" for="sk2">Apakah ada pengeluaran untuk pakaian selama 1 (satu) tahun terakhir?</label>
                                             <div class="col-2">
                                                 <input class="form-check-input" type="checkbox" id="sk2" name="sk2" <?= $sk2 == '1' ? 'checked' : ''; ?> value="1" <?= $user > 3 ? ' onclick="return false"' : ''; ?> />
-                                                <label for="sk2" class="form-check-label"> Ya</label>
+                                                <label for="sk2" class="form-check-label"><?= $sk2 == '1' ? 'Ya' : 'Tidak'; ?></label>
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label class="col-10 col-form-label" for="sk3">Apakah tempat tinggal sebagian besar berdinding bambu / kawat / kayu?</label>
                                             <div class="col-2">
                                                 <input class="form-check-input" type="checkbox" id="sk3" name="sk3" <?= $sk3 == '1' ? 'checked' : ''; ?> value="1" <?= $user > 3 ? ' onclick="return false"' : ''; ?> />
-                                                <label for="sk3" class="form-check-label"> Ya</label>
+                                                <label for="sk3" class="form-check-label"><?= $sk3 == '1' ? 'Ya' : 'Tidak'; ?></label>
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label class="col-10 col-form-label" for="sk4">Apakah sumber penerangan berasal dari listrik PLN 450 watt atau bukan listrik?</label>
                                             <div class="col-2">
                                                 <input class="form-check-input" type="checkbox" id="sk4" name="sk4" <?= $sk4 == '1' ? 'checked' : ''; ?> value="1" <?= $user > 3 ? ' onclick="return false"' : ''; ?> />
-                                                <label for="sk4" class="form-check-label"> Ya</label>
+                                                <label for="sk4" class="form-check-label"><?= $sk4 == '1' ? 'Ya' : 'Tidak'; ?></label>
                                             </div>
                                         </div>
 
@@ -482,6 +482,12 @@ $desa_id = session()->get('kode_desa');
     $(document).ready(function() {
         $('.btnSimpan').click(function(e) {
             e.preventDefault();
+            let $kelurahan = $('#kelurahan').removeAttr('disabled', '');
+            let $datarw = $('#datarw').removeAttr('disabled', '');
+            setTimeout(function() {
+                $kelurahan.attr('disabled', true);
+                $datarw.attr('disabled', true);
+            }, 500);
             let form = $('.formsimpan')[0];
             let data = new FormData(form);
             $.ajax({
@@ -664,6 +670,14 @@ $desa_id = session()->get('kode_desa');
                             $('.errordu_longitude').html('');
                         }
 
+                        if (response.error.du_nasu) {
+                            $('#du_nasu').addClass('is-invalid');
+                            $('.errordu_nasu').html(response.error.du_nasu);
+                        } else {
+                            $('#du_nasu').removeClass('is-invalid');
+                            $('.errordu_nasu').html('');
+                        }
+
                     } else {
                         if (response.sukses) {
                             const Toast = Swal.mixin({
@@ -683,21 +697,32 @@ $desa_id = session()->get('kode_desa');
                                 title: response.sukses,
                             });
                             // window.location.reload();
+                            $('#modaledit').modal('hide');
                             table.draw();
                             tabel_padan.draw();
-
                         }
-
-                        $('#modalview').modal('hide');
+                        $('#modaledit').modal('hide');
                         table.draw();
-
+                        tabel_padan.draw();
                     }
                 },
                 error: function(xhr, ajaxOptions, thrownError) {
                     alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
                 }
             });
-        })
+
+            function tampilkanLabel(checkboxId, labelId) {
+                var checkbox = document.getElementById(checkboxId);
+                var label = document.getElementById(labelId);
+
+                if (checkbox.checked) {
+                    label.innerHTML = " Ya";
+                } else {
+                    label.innerHTML = " Tidak";
+                }
+            }
+
+        });
 
         $('#datarw').change(function() {
             var desa = $('#kelurahan').val();

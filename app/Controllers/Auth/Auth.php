@@ -393,21 +393,29 @@ class Auth extends BaseController
             } else {
                 //strore the user to database
                 $model = new AuthModel();
+                $nik = htmlentities(strip_tags(trim($this->request->getVar('nik'))));
+                $fullname = htmlentities(strip_tags(trim(strtoupper($this->request->getVar('fullname')))));
+                $email = htmlentities(strip_tags(trim($this->request->getVar('email'))));
+                $kode_desa = htmlentities(strip_tags(trim($this->request->getVar('kelurahan'))));
+                $level = htmlentities(strip_tags(trim($this->request->getVar('no_rw'))));
+                $opr_sch = htmlentities(strip_tags(trim(strtoupper($this->request->getVar('opr_sch')))));
+                $nope = htmlentities(strip_tags(trim($this->request->getVar('nope'))));
+                $password = htmlentities(strip_tags(trim($this->request->getVar('password'))));
 
                 $newData = [
-                    'nik' => $this->request->getVar('nik'),
+                    'nik' => $nik,
                     // 'username' => $this->request->getVar('username'),
-                    'fullname' => strtoupper($this->request->getVar('fullname')),
-                    'email' => $this->request->getVar('email'),
-                    'kode_desa' => $this->request->getVar('kelurahan'),
+                    'fullname' => $fullname,
+                    'email' => $email,
+                    'kode_desa' => $kode_desa,
                     'kode_kec' => $kode_kec,
                     'kode_kab' => $kode_kab,
-                    'level' => $this->request->getVar('no_rw'),
+                    'level' => $level,
                     'status' => 0,
-                    'opr_sch' => strtoupper($this->request->getVar('opr_sch')),
-                    'nope' => $this->request->getVar('nope'),
+                    'opr_sch' => $opr_sch,
+                    'nope' => $nope,
                     'role_id' => 5,
-                    'password' => $this->request->getVar('password'),
+                    'password' => $password,
                     'created_at' => date('Y-m-d H:i:s'),
                 ];
                 // dd($newData);

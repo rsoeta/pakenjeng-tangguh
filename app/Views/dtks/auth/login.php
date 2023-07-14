@@ -53,14 +53,8 @@
                 <input type="password" class="form-control" placeholder="Password" id="password" name="password" value="<?= set_value('password'); ?>">
                 <div class="input-group-append">
                     <div class="input-group-text">
-                        <i class="fas fa-eye"></i>
+                        <i class="fas fa-eye" id="checkbox"></i>
                     </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="custom-control custom-checkbox small">
-                    <input type="checkbox" class="custom-control-input" id="checkbox">
-                    <label class="custom-control-label" for="checkbox"> Tampilkan kata sandi</label>
                 </div>
             </div>
             <div class="g-recaptcha" data-sitekey="6LctvBomAAAAAGjg0x7rNMuW9c5BOZfP-ev4E6b5"></div>
@@ -74,21 +68,17 @@
                     </div> -->
                 </div>
                 <!-- /.col -->
-                <div class="col-4">
-                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
-                </div>
                 <!-- /.col -->
             </div>
+            <hr>
+            <div class="social-auth-links mt-2 mb-3">
+                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                <a href="register" class="btn btn-sm btn-block btn-danger">
+                    <i class="fab fa-google-plus mr-2"></i>
+                </a>
+            </div>
         </form>
-        <hr>
-        <div class="social-auth-links mt-2 mb-3">
-            <a href="register" class="btn btn-sm btn-block btn-primary">
-                <i class="fab fa-facebook mr-2"></i>
-            </a>
-            <a href="register" class="btn btn-sm btn-block btn-danger">
-                <i class="fab fa-google-plus mr-2"></i>
-            </a>
-        </div>
+
         <!-- /.social-auth-links -->
 
         <hr>
@@ -108,15 +98,32 @@
     }, 3000);
 
     // show hide password
-    $(document).ready(function() {
-        $('#checkbox').click(function() {
-            if ($(this).is(':checked')) {
-                $('#password').attr('type', 'text');
-            } else {
-                $('#password').attr('type', 'password');
-            }
-        });
+    // $(document).ready(function() {
+    //     $('#checkbox').click(function() {
+    //         if ($(this).is(':checked')) {
+    //             $('#password').attr('type', 'text');
+    //         } else {
+    //             $('#password').attr('type', 'password');
+    //         }
+    //     });
+    // });
+    // Mendapatkan referensi ke elemen-elemen yang diperlukan
+    var passwordInput = document.getElementById("password");
+    var checkbox = document.getElementById("checkbox");
+
+    // Menambahkan event listener untuk mengubah tipe input saat kotak centang diklik
+    checkbox.addEventListener("click", function() {
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            checkbox.classList.remove("fa-eye");
+            checkbox.classList.add("fa-eye-slash");
+        } else {
+            passwordInput.type = "password";
+            checkbox.classList.remove("fa-eye-slash");
+            checkbox.classList.add("fa-eye");
+        }
     });
+
 
     // captha
     // var onloadCallback = function() {

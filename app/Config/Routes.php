@@ -44,8 +44,8 @@ $routes->match(['get', 'post'], 'register', 'Auth\Auth::regOpSek', ['filter' => 
 $routes->get('/', 'Landing::index');
 $routes->post('cek_usulan', 'Landing::cek_usulan');
 
-// $routes->get('dashboard', 'Auth\Pages::home', ['filter' => 'noauthfilterdtks']);
-$routes->get('pages', 'Auth\Pages::index', ['filter' => 'authfilterdtks']);
+$routes->get('dashboard', 'Auth\Pages::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->get('pages', 'Auth\Pages::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->get('getNilaiJumlah', 'Auth\Pages::getNilaiJumlah');
 
 $routes->get('logout', 'Auth\Auth::logout');
@@ -264,6 +264,7 @@ $routes->post('delete_data_menu', 'Profil\Profil_Web::delete_data_menu', ['filte
 $routes->post('get_nama_menu', 'Profil\Profil_Web::get_nama_menu', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('submit_web_general', 'Profil\Profil_Web::submit_general', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('update_web_general', 'Profil\Profil_Web::update_general', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('updateBatch', 'Profil\Profil_Web::updateBatch', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 
 /*

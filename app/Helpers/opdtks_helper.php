@@ -226,6 +226,7 @@ function deadline_usulan()
 {
     $times = new Time();
     $db = \Config\Database::connect();
+
     $tahun = $times->getYear();
     $bulan = $times->getMonth();
     $hari = $times->getDay();       // 12
@@ -235,48 +236,71 @@ function deadline_usulan()
     $hak_akses = session()->get('role_id');
 
     $builder = $db->table('dtks_deadline');
-    // get last row
-    // $builder = $builder->select('*');
-    $query = $builder->where('dd_role', $hak_akses)->get();
+    $builder->select('*');
+    $builder->where('dd_role', $hak_akses);
+    $dataWaktu = $builder->get()->getResultArray();
+    // var_dump($data);
+    // die;
 
-    $data = $query->getRowArray();
-    // dd($data);
-    // foreach ($data as $d) {
-    $tanggal_mulai = $data['dd_waktu_start'];
-    $tanggal_akhir = $data['dd_waktu_end'];
-    // }
-    $tgl_a = date_create($tanggal_mulai);
-    $tgl_b = date_create($tanggal_akhir);
-
-    // $dead = date('Y-m-d H:i') . "<br>";
-    $dead_mulai = ($tahun . '-' . $bulan . '-' . date_format($tgl_a, 'd H:i')); // starting waktu
-    $dead_akhir = ($tahun . '-' . $bulan . '-' . date_format($tgl_b, 'd H:i')); // ending waktu untuk user
-    $dead_akhir2 = ($tahun . '-' . $bulan . '-' . date_format($tgl_b, 'd H:i')); // ending waktu untuk operator
-
-    $strdead1 = (strtotime($dead_mulai));
-    $strdead2 = (strtotime($dead_akhir));
-    $strdead3 = (strtotime($dead_akhir2));
-    // $ini_tanggal = strtotime("14 14:12") . "<br>";
-    // $ini_tanggal = strtotime() . "<br>";
-
-    // $deadline = '141312';
-
-    $hari_ini = $tahun . '-' . $bulan . '-' . $hari . ' ' . $jam . ':' . $menit;
-    $strhari_ini = strtotime($hari_ini);
-
-    if ($hak_akses <= 3) {
-        $deadline = ($strhari_ini <= $strdead1 || $strhari_ini >= $strdead3) ? 1 : 0;
-    } else {
-        $deadline = ($strhari_ini <= $strdead1 || $strhari_ini >= $strdead2) ? 1 : 0;
+    foreach ($dataWaktu as $d) {
+        $startDatetimeColumn = $d['dd_waktu_start'];
+        $endDatetimeColumn = $d['dd_waktu_end'];
     }
 
-    // return $ini_tanggal;
-    // return $hari_ini > $deadline;
+    // dari chatgpt
+    // Ambil nilai $startDatetime, $endDatetime, $allowedStartHour, dan $allowedEndHour dari database berdasarkan nama kolom
+    $startDatetime      = $startDatetimeColumn;
+    $endDatetime        = $endDatetimeColumn;
+    $allowedStartHour   = $startDatetimeColumn;
+    $allowedEndHour     = $endDatetimeColumn;
 
-    return $deadline;
+    // Mengubah tanggal dan waktu menjadi objek DateTime
+    $hari_ini = $tahun . '-' . $bulan . '-' . $hari . ' ' . $jam . ':' . $menit;
+    // $currentDatetime = strtotime($hari_ini);
+    $currentDatetime = $hari_ini;
 
-    // dd($deadline_usulan);
+    $startDateTimeObj = new DateTime($startDatetime);
+    $endDateTimeObj = new DateTime($endDatetime);
+    $currentDateTimeObj = new DateTime($currentDatetime);
+
+    // var_dump([$currentDateTimeObj, $startDateTimeObj, $endDateTimeObj]);
+    // die;
+
+    // Memeriksa apakah tanggal dan waktu saat ini berada dalam rentang tanggal deadline
+    if (($currentDateTimeObj >= $startDateTimeObj && $currentDateTimeObj <= $endDateTimeObj) || ($currentDateTimeObj <= $startDateTimeObj && $currentDateTimeObj >= $endDateTimeObj)) {
+        // Mengambil jam, menit, dan detik saat ini
+        $currentHour = intval($currentDateTimeObj->format('H'));
+        $currentMinute = intval($currentDateTimeObj->format('i'));
+        $currentSecond = intval($currentDateTimeObj->format('s'));
+
+        // Mengambil jam, menit, dan detik mulai dan akhir akses yang diizinkan
+        $allowedStartHour = intval($startDateTimeObj->format('H'));
+        $allowedStartMinute = intval($startDateTimeObj->format('i'));
+        $allowedStartSecond = intval($startDateTimeObj->format('s'));
+        $allowedEndHour = intval($endDateTimeObj->format('H'));
+        $allowedEndMinute = intval($endDateTimeObj->format('i'));
+        $allowedEndSecond = intval($endDateTimeObj->format('s'));
+
+        // Memeriksa apakah waktu saat ini berada dalam rentang waktu akses yang diizinkan
+        if (($currentHour > $allowedStartHour && $currentHour < $allowedEndHour) ||
+            ($currentHour === $allowedStartHour && $currentMinute >= $allowedStartMinute && $currentSecond >= $allowedStartSecond) ||
+            ($currentHour === $allowedEndHour && $currentMinute <= $allowedEndMinute && $currentSecond <= $allowedEndSecond)
+        ) {
+            return true; // Akses diizinkan
+        }
+    }
+
+    return false; // Akses ditolak
 }
+// return $ini_tanggal;
+// return $hari_ini > $deadline;
+
+// return $deadline;
+
+// dd($deadline_usulan);
+
+// buat helper deadline
+// alur
 
 function deadline_ppks()
 {

@@ -234,41 +234,39 @@ class Usulan22 extends BaseController
     public function formtambah()
     {
         if ($this->request->isAJAX()) {
+            if (deadline_usulan() === true) {
 
-            $this->Usulan22Model = new Usulan22Model();
-            $this->WilayahModel = new WilayahModel();
-            $rw = new RwModel();
-            $this->BansosModel = new BansosModel();
-            $this->PekerjaanModel = new PekerjaanModel();
-            $this->StatusKawinModel = new StatusKawinModel();
-            $this->ShdkModel = new ShdkModel();
-            $users = new UsersModel();
-            $DisabilitasJenisModel = new DisabilitasJenisModel();
-            $GenModel = new GenModel();
+                $this->Usulan22Model = new Usulan22Model();
+                $this->WilayahModel = new WilayahModel();
+                $rw = new RwModel();
+                $this->BansosModel = new BansosModel();
+                $this->PekerjaanModel = new PekerjaanModel();
+                $this->StatusKawinModel = new StatusKawinModel();
+                $this->ShdkModel = new ShdkModel();
+                $users = new UsersModel();
+                $DisabilitasJenisModel = new DisabilitasJenisModel();
+                $GenModel = new GenModel();
 
-            $data = [
-                'title' => 'Form. Tambah Data',
-                'dtks' => $this->Usulan22Model->getDtks(),
-                'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
-                'datarw' => $this->RwModel->noRw(),
-                'datart' => $this->RtModel->noRt(),
-                'bansos' => $this->BansosModel->findAll(),
-                'pekerjaan' => $this->PekerjaanModel->orderBy('pk_nama', 'asc')->findAll(),
-                'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
-                'shdk' => $this->ShdkModel->findAll(),
-                'users' => $users->findAll(),
-                'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
-                'sta_ortu' => $GenModel->get_staortu(),
-            ];
-            if (deadline_usulan() === 1) {
+                $data = [
+                    'title' => 'Form. Tambah Data',
+                    'dtks' => $this->Usulan22Model->getDtks(),
+                    'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+                    'datarw' => $this->RwModel->noRw(),
+                    'datart' => $this->RtModel->noRt(),
+                    'bansos' => $this->BansosModel->findAll(),
+                    'pekerjaan' => $this->PekerjaanModel->orderBy('pk_nama', 'asc')->findAll(),
+                    'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
+                    'shdk' => $this->ShdkModel->findAll(),
+                    'users' => $users->findAll(),
+                    'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
+                    'sta_ortu' => $GenModel->get_staortu(),
+                ];
 
-                // alert(\'Mohon Maaf, Batas waktu untuk Tambah Data Telah Habis!!\');
-                // Swal.fire({
-                //     icon: "error",
-                //     title: "Oops...",
-                //     text: "Something went wrong!",
-                //     footer: "<a href="">Why do I have this issue?</a>"
-                // })
+                $msg = [
+                    'data' => view('dtks/data/dtks/usulan/modaltambah', $data),
+                ];
+                echo json_encode($msg);
+            } else {
                 $msg = [
                     'data' =>
                     '<script>
@@ -278,11 +276,6 @@ class Usulan22 extends BaseController
                                 text: "Akses Tidak Sesuai!",
                                 })
                         </script>'
-                ];
-                echo json_encode($msg);
-            } else {
-                $msg = [
-                    'data' => view('dtks/data/dtks/usulan/modaltambah', $data),
                 ];
                 echo json_encode($msg);
             }
@@ -581,14 +574,14 @@ class Usulan22 extends BaseController
                     'kelurahan' => $this->request->getVar('kelurahan'),
                     'rw' => $this->request->getVar("datarw"),
                     'rt' => $this->request->getVar("datart"),
-                    'alamat' => strtoupper($this->request->getVar('alamat')),
+                    'alamat' => strtoupper(trim($this->request->getVar('alamat'))),
                     'status_kawin' => $this->request->getVar("status_kawin"),
                     'jenis_pekerjaan' => $this->request->getVar("jenis_pekerjaan"),
                     'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
-                    'ibu_kandung' => strtoupper($this->request->getVar("ibu_kandung")),
+                    'ibu_kandung' => strtoupper(trim($this->request->getVar("ibu_kandung"))),
                     'tanggal_lahir' => $this->request->getVar("tanggal_lahir"),
-                    'tempat_lahir' => strtoupper($this->request->getVar("tempat_lahir")),
-                    'nama' => strtoupper($this->request->getVar('nama')),
+                    'tempat_lahir' => strtoupper(trim($this->request->getVar("tempat_lahir"))),
+                    'nama' => strtoupper(trim($this->request->getVar('nama'))),
                     'nokk' => $this->request->getVar('nokk'),
                     'program_bansos' => $this->request->getVar('databansos'),
                     'du_nik' => $this->request->getVar('nik'),
@@ -612,7 +605,7 @@ class Usulan22 extends BaseController
                     'sk9' => $this->request->getVar('sk9'),
                     'du_so_id' => $this->request->getVar('du_so_id'),
                     'du_kate' => $this->request->getVar('du_kate'),
-                    'du_nasu' => strtoupper($this->request->getVar('du_nasu')),
+                    'du_nasu' => strtoupper(trim($this->request->getVar('du_nasu'))),
                     'created_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                     'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                     'created_at_year' => date('Y'),
@@ -1234,14 +1227,14 @@ class Usulan22 extends BaseController
                         'kelurahan' => $this->request->getVar('kelurahan'),
                         'rw' => $this->request->getVar("datarw"),
                         'rt' => $this->request->getVar("datart"),
-                        'alamat' => strtoupper($this->request->getVar('alamat')),
+                        'alamat' => strtoupper(trim($this->request->getVar('alamat'))),
                         'status_kawin' => $this->request->getVar("status_kawin"),
                         'jenis_pekerjaan' => $this->request->getVar("jenis_pekerjaan"),
                         'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
-                        'ibu_kandung' => strtoupper($this->request->getVar("ibu_kandung")),
+                        'ibu_kandung' => strtoupper(trim($this->request->getVar("ibu_kandung"))),
                         'tanggal_lahir' => $this->request->getVar("tanggal_lahir"),
-                        'tempat_lahir' => strtoupper($this->request->getVar("tempat_lahir")),
-                        'nama' => strtoupper($this->request->getVar('nama')),
+                        'tempat_lahir' => strtoupper(trim($this->request->getVar("tempat_lahir"))),
+                        'nama' => strtoupper(trim($this->request->getVar('nama'))),
                         'nokk' => $this->request->getVar('nokk'),
                         'program_bansos' => $this->request->getVar('databansos'),
                         'du_nik' => $this->request->getVar('nik'),
@@ -1265,7 +1258,7 @@ class Usulan22 extends BaseController
                         'sk9' => $this->request->getVar('sk9'),
                         'du_so_id' => $this->request->getVar('du_so_id'),
                         'du_kate' => $this->request->getVar('du_kate'),
-                        'du_nasu' => strtoupper($this->request->getVar('du_nasu')),
+                        'du_nasu' => strtoupper(trim($this->request->getVar('du_nasu'))),
                         'du_proses' => $this->request->getVar('du_proses'),
                         'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                         'updated_by' => session()->get('nik'),
@@ -1292,14 +1285,14 @@ class Usulan22 extends BaseController
                         'kelurahan' => $this->request->getVar('kelurahan'),
                         'rw' => $this->request->getVar("datarw"),
                         'rt' => $this->request->getVar("datart"),
-                        'alamat' => strtoupper($this->request->getVar('alamat')),
+                        'alamat' => strtoupper(trim($this->request->getVar('alamat'))),
                         'status_kawin' => $this->request->getVar("status_kawin"),
                         'jenis_pekerjaan' => $this->request->getVar("jenis_pekerjaan"),
                         'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
-                        'ibu_kandung' => strtoupper($this->request->getVar("ibu_kandung")),
+                        'ibu_kandung' => strtoupper(trim($this->request->getVar("ibu_kandung"))),
                         'tanggal_lahir' => $this->request->getVar("tanggal_lahir"),
-                        'tempat_lahir' => strtoupper($this->request->getVar("tempat_lahir")),
-                        'nama' => strtoupper($this->request->getVar('nama')),
+                        'tempat_lahir' => strtoupper(trim($this->request->getVar("tempat_lahir"))),
+                        'nama' => strtoupper(trim($this->request->getVar('nama'))),
                         'nokk' => $this->request->getVar('nokk'),
                         'program_bansos' => $this->request->getVar('databansos'),
                         'du_nik' => $this->request->getVar('nik'),
@@ -1323,7 +1316,7 @@ class Usulan22 extends BaseController
                         'sk9' => $this->request->getVar('sk9'),
                         'du_so_id' => $this->request->getVar('du_so_id'),
                         'du_kate' => $this->request->getVar('du_kate'),
-                        'du_nasu' => strtoupper($this->request->getVar('du_nasu')),
+                        'du_nasu' => strtoupper(trim($this->request->getVar('du_nasu'))),
                         'du_proses' => $this->request->getVar('du_proses'),
                         'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
                         'updated_by' => session()->get('nik'),

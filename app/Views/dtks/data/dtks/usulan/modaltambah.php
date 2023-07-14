@@ -449,7 +449,7 @@ $desa_id = session()->get('kode_desa');
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text"><i class="fas fa-address-card"></i></span>
                                                     </div>
-                                                    <input type="file" class="form-control form-control-sm" spellcheck="false" name="du_foto_identitas" id="du_foto_identitas" onchange="previewImgId()" accept="image/*" capture required />
+                                                    <input type="file" class="form-control form-control-sm" spellcheck="false" name="du_foto_identitas" id="du_foto_identitas" onchange="previewImgId()" accept="image/*" capture="camera" capture required />
                                                 </div>
                                             </div>
                                             <div class="invalid-feedback errordu_foto_identitas"></div>
@@ -461,7 +461,7 @@ $desa_id = session()->get('kode_desa');
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text"><i class="fa fa-home"></i></span>
                                                     </div>
-                                                    <input type="file" class="form-control form-control-sm" spellcheck="false" name="du_foto_rumah" id="du_foto_rumah" onchange="previewImgRmh()" accept="image/*" capture required />
+                                                    <input type="file" class="form-control form-control-sm" spellcheck="false" name="du_foto_rumah" id="du_foto_rumah" onchange="previewImgRmh()" accept="image/*" capture="camera" capture required />
                                                 </div>
                                             </div>
                                             <div class="invalid-feedback errordu_foto_rumah"></div>

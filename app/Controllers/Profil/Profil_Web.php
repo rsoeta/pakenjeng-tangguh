@@ -349,4 +349,37 @@ class Profil_Web extends BaseController
         // echo "Data updated successfully";
         return view('profil/web', $data);
     }
+
+    public function updateBatch()
+    {
+        $model = new DeadlineModel();
+
+        // Ambil data dari form
+        $dd_role = $this->request->getPost('dd_role');
+        $dd_waktu_start = $this->request->getPost('dd_waktu_start');
+        $dd_waktu_end = $this->request->getPost('dd_waktu_end');
+        $dd_id = $this->request->getPost('dd_id');
+
+        // Buat array untuk menyimpan data yang akan diupdate
+        $data = [];
+        foreach ($dd_id as $key => $value) {
+            $data[] = [
+                'dd_id' => $value,
+                'dd_role' => $dd_role[$key],
+                'dd_waktu_start' => $dd_waktu_start[$key],
+                'dd_waktu_end' => $dd_waktu_end[$key]
+            ];
+        }
+
+        // var_dump($data);
+        // die;
+        // Tambahkan pesan flash
+        session()->setFlashdata('success', 'Update batch berhasil');
+
+        // Simpan data ke dalam database menggunakan method updateBatch()
+        $model->updateData($data, 'dd_id'); // Ganti 'id' dengan primary key yang sesuai
+
+        // Redirect atau lakukan tindakan lainnya
+        return redirect()->to('/settings');
+    }
 }

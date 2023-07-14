@@ -794,7 +794,7 @@ $desa_id = session()->get('kode_desa');
                 }
             }
 
-        })
+        });
 
         $('#datarw').change(function() {
             var desa = $('#kelurahan').val();
