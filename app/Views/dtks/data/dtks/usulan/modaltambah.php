@@ -848,13 +848,6 @@ $desa_id = session()->get('kode_desa');
             $('.du_so_id_div').hide();
         }
 
-        if (navigator.geolocation) {
-            navigator.geolocation.watchPosition(showPosition, showError);
-        } else {
-            // z.innerHTML = "Geolokasi Tidak Didukung oleh Browser Ini";
-            alert("Geolokasi Tidak Didukung oleh Browser Ini");
-        }
-
         $('#tanggal_lahir').change(function() {
             var dob = new Date(document.getElementById('tanggal_lahir').value);
             var today = new Date();
@@ -950,42 +943,6 @@ $desa_id = session()->get('kode_desa');
         }
     });
 
-    var x = document.getElementById("latitude");
-    var y = document.getElementById("longitude");
-    var z = document.getElementById("z");
-
-    function getLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.watchPosition(showPosition, showError);
-        } else {
-            // z.innerHTML = "Geolokasi Tidak Didukung oleh Browser Ini";
-            alert("Geolokasi Tidak Didukung oleh Browser Ini");
-        }
-    }
-
-    function showPosition(position) {
-        $("#latitude").val(`${position.coords.latitude}`);
-        $("#longitude").val(`${position.coords.longitude}`);
-        // x.innerHTML = position.coords.latitude;
-        // y.innerHTML = position.coords.longitude;
-    }
-
-    function showError(error) {
-        switch (error.code) {
-            case error.PERMISSION_DENIED:
-                alert("Pengguna menolak permintaan geolokasi.");
-                break;
-            case error.POSITION_UNAVAILABLE:
-                alert("Informasi lokasi tidak tersedia.");
-                break;
-            case error.TIMEOUT:
-                alert("Permintaan untuk menghitung waktu lokasi pengguna.");
-                break;
-            case error.UNKNOWN_ERROR:
-                alert("Terjadi kesalahan yang tidak diketahui.");
-                break;
-        }
-    }
 
     function tampilkanLabel(checkboxId, labelId) {
         var checkbox = document.getElementById(checkboxId);
