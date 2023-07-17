@@ -173,7 +173,7 @@ $desa_id = session()->get('kode_desa');
                                                 <?php foreach ($pekerjaan as $row) { ?>
                                                     <option <?php if ($jenis_pekerjaan == $row['pk_id']) {
                                                                 echo 'selected';
-                                                            } ?> value="<?= $row['pk_id'] ?>"> <?php echo $row['pk_nama']; ?></option>
+                                                            } ?> value="<?= $row['pk_id'] ?>"> <?= $row['pk_nama']; ?></option>
                                                 <?php } ?>
                                             </select>
                                             <div class="invalid-feedback errorjenis_pekerjaan"></div>
@@ -223,7 +223,7 @@ $desa_id = session()->get('kode_desa');
                                             <select id="datart" name="datart" class="form-select form-select-sm">
                                                 <option value="">-- Pilih RT --</option>
                                                 <?php foreach ($rt as $row) { ?>
-                                                    <option <?= $datart == $row['no_rt'] ? 'selected' : ''; ?> value="<?= $row['no_rt'] ?>"> <?php echo $row['no_rt']; ?>
+                                                    <option <?= $datart == $row['no_rt'] ? 'selected' : ''; ?> value="<?= $row['no_rt'] ?>"> <?= $row['no_rt']; ?>
                                                     </option>
                                                 <?php } ?>
                                             </select>
@@ -262,7 +262,7 @@ $desa_id = session()->get('kode_desa');
                                         <div class="row">
                                             <div class="col-12 d-flex justify-content-center">
                                                 <div class="form-check form-check-inline">
-                                                    <input class="form-check-input larger" type="checkbox" id="proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
+                                                    <input class="form-check-input larger proses" type="checkbox" id="" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
                                                 </div>
                                                 <label for="proses" class="form-check-label">PADAN </label>
                                                 <div class="invalid-feedback errordu_proses"></div>
@@ -382,7 +382,7 @@ $desa_id = session()->get('kode_desa');
                                                 <?php foreach ($bansos as $row) { ?>
                                                     <option <?php if ($databansos == $row['dbj_id']) {
                                                                 echo 'selected';
-                                                            } ?> value="<?= $row['dbj_id'] ?>"> <?php echo $row['dbj_nama_bansos']; ?></option>
+                                                            } ?> value="<?= $row['dbj_id'] ?>"> <?= $row['dbj_nama_bansos']; ?></option>
                                                 <?php } ?>
                                             </select>
                                             <div class="invalid-feedback errordatabansos"></div>
@@ -409,7 +409,7 @@ $desa_id = session()->get('kode_desa');
                                             <select id="disabil_jenis" name="disabil_jenis" class="form-select form-select-sm">
                                                 <option value="">-- Pilih Jenis Disabilitas --</option>
                                                 <?php foreach ($DisabilitasJenisModel as $row) { ?>
-                                                    <option <?= $disabil_jenis == $row['dj_id'] ? 'selected' : ''; ?> value="<?= $row['dj_id'] ?>"> <?php echo $row['dj_keterangan']; ?></option>
+                                                    <option <?= $disabil_jenis == $row['dj_id'] ? 'selected' : ''; ?> value="<?= $row['dj_id'] ?>"> <?= $row['dj_keterangan']; ?></option>
                                                 <?php } ?>
                                             </select>
                                         </div>
@@ -420,7 +420,7 @@ $desa_id = session()->get('kode_desa');
                                             <select id="du_so_id" name="du_so_id" class="form-select form-select-sm">
                                                 <option value="">-- Status Orangtua --</option>
                                                 <?php foreach ($sta_ortu as $row) { ?>
-                                                    <option <?= $du_so_id == $row['so_id'] ? 'selected' : ''; ?> value="<?= $row['so_id'] ?>"> <?php echo $row['so_desk']; ?></option>
+                                                    <option <?= $du_so_id == $row['so_id'] ? 'selected' : ''; ?> value="<?= $row['so_id'] ?>"> <?= ucwords(strtolower($row['so_desk'])); ?></option>
                                                 <?php } ?>
                                             </select>
                                             <div class="invalid-feedback errordu_so_id"></div>
@@ -528,7 +528,7 @@ $desa_id = session()->get('kode_desa');
                                     <div class="row">
                                         <div class="col-12 d-flex justify-content-center">
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input larger" type="checkbox" id="proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
+                                                <input class="form-check-input larger proses" type="checkbox" id="" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
                                             </div>
                                             <label for="proses" class="form-check-label">PADAN </label>
                                             <div class="invalid-feedback errordu_proses"></div>
@@ -802,7 +802,7 @@ $desa_id = session()->get('kode_desa');
             var action = 'get_rt';
             if (no_rw != '') {
                 $.ajax({
-                    url: "<?php echo base_url('action'); ?>",
+                    url: "<?= base_url('action'); ?>",
                     method: "POST",
                     data: {
                         desa: desa,
@@ -867,6 +867,17 @@ $desa_id = session()->get('kode_desa');
             $('.du_so_id_div').hide();
         }
 
+        $(".proses").change(function() {
+            // Memeriksa apakah checkbox pertama atau kedua dicentang
+            if ($(this).is(':checked')) {
+                // Mencari semua checkbox dengan name dan value yang sama
+                $('[name="du_proses"][value="1"]').prop('checked', true);
+            } else {
+                // Jika checkbox saat ini di-uncheck, maka uncheck juga checkbox yang lain
+                $('[name="du_proses"][value="1"]').prop('checked', false);
+            }
+        });
+
         var dropdown = document.getElementById("du_kate");
         var input = document.getElementById("du_nasu");
 
@@ -886,6 +897,7 @@ $desa_id = session()->get('kode_desa');
                 label.innerHTML = " Tidak";
             }
         }
+
     });
 
     $(function() {

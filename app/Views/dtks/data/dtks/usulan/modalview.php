@@ -177,6 +177,8 @@ $desa_id = session()->get('kode_desa');
                                             <div class="invalid-feedback errortgl_hamil"></div>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="col-12 col-sm-6">
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="jenis_pekerjaan">Pekerjaan</label>
                                         <div class="col-8 col-sm-8">
@@ -191,8 +193,6 @@ $desa_id = session()->get('kode_desa');
                                             <div class="invalid-feedback errorjenis_pekerjaan"></div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-12 col-sm-6">
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="status_kawin">Status</label>
                                         <div class="col-8 col-sm-8">
@@ -759,6 +759,28 @@ $desa_id = session()->get('kode_desa');
             showStepURLhash: false,
         });
 
+        // Cek status radio button saat halaman dimuat
+        if ($("#chk-Pr").is(":checked")) {
+            $("#status_hamil_div").show(); // Menggunakan metode show() untuk menampilkan div
+        } else {
+            $("#status_hamil_div").hide(); // Menggunakan metode hide() untuk menyembunyikan div
+            $("#tgl_hamil_div").hide();
+        }
+
+        if ($("#chk-YaHamil").is(":checked")) {
+            $("#tgl_hamil_div").show();
+            $('#tgl_hamil_div').show().find(':input').attr('required', true);
+        } else {
+            $('#tgl_hamil_div').hide().find(':input').attr('required', false);
+            $("#tgl_hamil_div").hide();
+        }
+
+        if ($("#chk-Yes").is(":checked")) {
+            $("#disabil_jenis_div").show();
+        } else {
+            $("#disabil_jenis_div").hide();
+        }
+
     });
 
     $(function() {
@@ -773,11 +795,11 @@ $desa_id = session()->get('kode_desa');
 
         $("input[name='status_hamil']").click(function() {
             if ($("#chk-YaHamil").is(":checked")) {
-                // $("#tgl_hamil_div").show();
+                $("#tgl_hamil_div").show();
                 $('#tgl_hamil_div').show().find(':input').attr('required', true);
             } else {
                 $('#tgl_hamil_div').hide().find(':input').attr('required', false);
-                // $("#tgl_hamil_div").hide();
+                $("#tgl_hamil_div").hide();
             }
         });
 
@@ -790,41 +812,4 @@ $desa_id = session()->get('kode_desa');
         });
 
     });
-
-    var x = document.getElementById("latitude");
-    var y = document.getElementById("longitude");
-    var z = document.getElementById("z");
-
-    function getLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, showError);
-        } else {
-            // z.innerHTML = "Geolokasi Tidak Didukung oleh Browser Ini";
-            alert("Geolokasi Tidak Didukung oleh Browser Ini");
-        }
-    }
-
-    function showPosition(position) {
-        $("#latitude").val(`${position.coords.latitude}`);
-        $("#longitude").val(`${position.coords.longitude}`);
-        // x.innerHTML = position.coords.latitude;
-        // y.innerHTML = position.coords.longitude;
-    }
-
-    function showError(error) {
-        switch (error.code) {
-            case error.PERMISSION_DENIED:
-                alert("Pengguna menolak permintaan geolokasi.");
-                break;
-            case error.POSITION_UNAVAILABLE:
-                alert("Informasi lokasi tidak tersedia.");
-                break;
-            case error.TIMEOUT:
-                alert("Permintaan untuk menghitung waktu lokasi pengguna.");
-                break;
-            case error.UNKNOWN_ERROR:
-                alert("Terjadi kesalahan yang tidak diketahui.");
-                break;
-        }
-    }
 </script>

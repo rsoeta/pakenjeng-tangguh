@@ -294,7 +294,7 @@
                                 <h5><i>Informasi</i></h5>
                                 <ul>
                                     <li>Data Usulan berdasarkan <b>Pemadanan Data Kependudukan</b> pada SIKS-NG</li>
-                                    <li>Usulan DTKS dibuka pada <b>tanggal <?= date_format($dd_waktu_start, 'd'); ?> jam <?= date_format($dd_waktu_start, 'H:i:s'); ?> s.d tanggal <?= date_format($dd_waktu_end, 'd'); ?> jam <?= date_format($dd_waktu_end, 'H:i:s'); ?></b> setiap Bulannya</li>
+                                    <li>Usulan DTKS dibuka pada <b>tanggal <?= date_format($dd_waktu_start, 'd'); ?> s.d <?= date_format($dd_waktu_end, 'd'); ?> pada jam <?= date_format($dd_waktu_start, 'H:i:s'); ?> s.d <?= date_format($dd_waktu_end, 'H:i:s'); ?></b> setiap Bulannya</li>
                                     <li>Penandatanganan <b>Berita Acara dilaksanakan pada H+1 akhir tanggal usulan</b> di Periode tersebut</li>
                                 </ul>
                             </div>

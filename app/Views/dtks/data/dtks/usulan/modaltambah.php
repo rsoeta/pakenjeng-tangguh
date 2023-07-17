@@ -83,7 +83,7 @@ $desa_id = session()->get('kode_desa');
                                         <label class="col-4 col-sm-2 col-form-label" for="dataCari">Cari Data</label>
                                         <div class="col-8 col-sm-10">
                                             <select name="dataCari" id="dataCari" class="form-control form-control-sm select2" style="width: 100%;">
-                                                <option value='0'>-- Pilih --</option>
+                                                <option value='0'>-- Berdasarkan NIK --</option>
                                             </select>
                                         </div>
                                     </div>
@@ -369,7 +369,7 @@ $desa_id = session()->get('kode_desa');
                                                 <select id="databansos" name="databansos" class="form-select form-select-sm">
                                                     <option value="">-- Pilih Program --</option>
                                                     <?php foreach ($bansos as $row) { ?>
-                                                        <option value="<?= $row['dbj_id'] ?>"> <?php echo $row['dbj_nama_bansos']; ?></option>
+                                                        <option value="<?= $row['dbj_id'] ?>"> <?= $row['dbj_nama_bansos']; ?></option>
                                                     <?php } ?>
                                                 </select>
                                                 <div class="invalid-feedback errordatabansos"></div>
@@ -410,7 +410,7 @@ $desa_id = session()->get('kode_desa');
                                                 <select id="du_so_id" name="du_so_id" class="form-select form-select-sm">
                                                     <option value="">-- Status Orangtua --</option>
                                                     <?php foreach ($sta_ortu as $row) { ?>
-                                                        <option value="<?= $row['so_id'] ?>"> <?php echo $row['so_desk']; ?></option>
+                                                        <option value="<?= $row['so_id'] ?>"> <?= ucwords(strtolower($row['so_desk'])); ?></option>
                                                     <?php } ?>
                                                 </select>
                                                 <div class="invalid-feedback errordu_so_id"></div>
