@@ -23,7 +23,8 @@ class Usulan22Model extends Model
 
     protected $skipValidation     = false;
 
-    var $column_order = array('', 'nama', 'nokk', 'du_nik', 'jenis_kelamin',  'alamat', 'shdk');
+    var $column_order = array('', 'du_nik', 'nama', 'nokk', 'ibu_kandung', 'tanggal_lahir', 'jenis_pekerjaan', 'status_kawin', 'shdk', 'program_bansos', 'created_by', 'updated_at', '');
+    var $column_order01 = array('', 'du_nik', 'nama', 'nokk', 'ibu_kandung', 'tanggal_lahir', 'jenis_pekerjaan', 'program_bansos', 'created_by', 'updated_at', '');
 
     var $order = array('dtks_usulan22.updated_at' => 'asc');
 
@@ -234,7 +235,7 @@ class Usulan22Model extends Model
 
         // order
         if (isset($_POST['order'])) {
-            $result_order = $this->column_order[$_POST['order']['0']['column']];
+            $result_order = $this->column_order01[$_POST['order']['0']['column']];
             $result_dir = $_POST['order']['0']['dir'];
         } else if ($this->order) {
             $order = $this->order;

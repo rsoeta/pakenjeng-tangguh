@@ -257,18 +257,18 @@ $desa_id = session()->get('kode_desa');
                             </div>
                             <div class="row">
                                 <div class="col-12">
-                                    <div <?= $user > 3 ? ' hidden' : ''; ?>>
+                                    <?php if ($user < 4) : ?>
                                         <hr>
                                         <div class="row">
                                             <div class="col-12 d-flex justify-content-center">
+                                                <label for="du_proses" class="form-check-label mr-2">PADAN </label>
                                                 <div class="form-check form-check-inline">
-                                                    <input class="form-check-input larger proses" type="checkbox" id="" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
+                                                    <input class="form-check-input larger proses" type="checkbox" id="du_proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
                                                 </div>
-                                                <label for="proses" class="form-check-label">PADAN </label>
                                                 <div class="invalid-feedback errordu_proses"></div>
                                             </div>
                                         </div>
-                                    </div>
+                                    <?php endif; ?>
                                     <div class="modal-footer mt-3 justify-content-between">
                                         <input type="datetime-local" name="updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
                                         <button type="submit" class="btn btn-block btn-warning btnSimpan">Update</button>
@@ -523,18 +523,20 @@ $desa_id = session()->get('kode_desa');
                                         </div>
                                     </div>
                                 </div>
-                                <div <?= $user > 3 ? ' hidden' : ''; ?>>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-12 d-flex justify-content-center">
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input larger proses" type="checkbox" id="" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
+                                <?php if ($user < 4) : ?>
+                                    <div>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-12 d-flex justify-content-center">
+                                                <label for="du_proses" class="form-check-label mr-2">PADAN </label>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input larger proses" type="checkbox" id="du_proses" name="du_proses" <?= $du_proses == '1' ? 'checked' : ''; ?> value="1" />
+                                                </div>
+                                                <div class="invalid-feedback errordu_proses"></div>
                                             </div>
-                                            <label for="proses" class="form-check-label">PADAN </label>
-                                            <div class="invalid-feedback errordu_proses"></div>
                                         </div>
                                     </div>
-                                </div>
+                                <?php endif; ?>
                                 <div class="modal-footer mt-3 justify-content-between">
                                     <input type="datetime-local" name="updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
                                     <button type="submit" class="btn btn-block btn-warning btnSimpan">Update</button>
