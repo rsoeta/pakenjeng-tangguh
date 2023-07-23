@@ -23,8 +23,8 @@ class Usulan22Model extends Model
 
     protected $skipValidation     = false;
 
-    var $column_order = array('', 'du_nik', 'nama', 'nokk', 'ibu_kandung', 'tanggal_lahir', 'jenis_pekerjaan', 'status_kawin', 'shdk', 'program_bansos', 'created_by', 'updated_at', '');
-    var $column_order01 = array('', 'du_nik', 'nama', 'nokk', 'ibu_kandung', 'tanggal_lahir', 'jenis_pekerjaan', 'program_bansos', 'created_by', 'updated_at', '');
+    var $column_order = array('', 'du_nik', 'nama', 'nokk', 'ibu_kandung', 'tempat_lahir','tanggal_lahir', 'jenis_pekerjaan', 'status_kawin', 'shdk', 'program_bansos', 'created_by', 'updated_at', '');
+    var $column_order01 = array('', 'du_nik', 'nama', 'nokk', 'ibu_kandung', 'tempat_lahir','tanggal_lahir', 'jenis_pekerjaan', 'program_bansos', 'created_by', 'updated_at', '');
 
     var $order = array('dtks_usulan22.updated_at' => 'asc');
 

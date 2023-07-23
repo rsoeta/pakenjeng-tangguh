@@ -210,7 +210,7 @@ $desa_id = session()->get('kode_desa');
                                             <label class="col-4 col-sm-4 col-form-label" for="du_usia">Usia</label>
                                             <div class="col-8 col-sm-8">
                                                 <input type="number" name="du_usia" id="du_usia" class="form-control form-control-sm" value="" readonly>
-                                                <div class="invalid-feedback errorusia"></div>
+                                                <div class="invalid-feedback errordu_usia"></div>
                                             </div>
                                         </div>
 
@@ -400,10 +400,11 @@ $desa_id = session()->get('kode_desa');
                                                         <option value="<?= $row['dj_id'] ?>"> <?php echo $row['dj_keterangan']; ?></option>
                                                     <?php } ?>
                                                 </select>
+                                                <div class="invalid-feedback errordisabil_jenis"></div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-12 col-sm-4 du_so_id_div" style="display: none;">
+                                    <div class="col-12 col-sm-4" id="du_so_id_div" style="display: none;">
                                         <div class="form-group row nopadding">
                                             <label class="col-4 col-sm-4 col-form-label" for="du_so_id">Status</label>
                                             <div class="col-8 col-sm-8">
@@ -501,67 +502,6 @@ $desa_id = session()->get('kode_desa');
 <?php echo form_close(); ?>
 
 <script>
-    $('#dataCari').on('change', (event) => {
-        // console.log(event.target.value);
-        getData(event.target.value).then(data => {
-            $('#nokk').val(data.nokk);
-            $('#kelurahan').val(data.kelurahan);
-            $('#datarw').val(data.rw);
-            $('#datart').val(data.rt);
-            $('#alamat').val(data.alamat);
-            $('#nama').val(data.nama);
-            $('#nik').val(data.du_nik);
-            $('#tempat_lahir').val(data.tempat_lahir);
-            $('#tanggal_lahir').val(data.tanggal_lahir);
-            if (data.jenis_kelamin == '1') {
-                $('#chk-Lk').prop('checked', true);
-            }
-            if (data.jenis_kelamin == '2') {
-                $('#chk-Pr').prop('checked', true);
-                $("#status_hamil_div").show();
-                // $('#tgl_hamil_div').show();
-            }
-            if (data.hamil_status == '1') {
-                $('#chk-YaHamil').prop('checked', true);
-                $('#tgl_hamil_div').show();
-                $('#tgl_hamil').val(data.tgl_hamil);
-            } else {
-                $('#chk-TidakHamil').prop('checked', true);
-                $('#tgl_hamil_div').hide();
-                $('#tgl_hamil').val('');
-            }
-            $('#jenis_pekerjaan').val(data.jenis_pekerjaan);
-            $('#status_kawin').val(data.status_kawin);
-            $('#shdk').val(data.shdk);
-            $('#databansos').val(data.program_bansos);
-            $('#ibu_kandung').val(data.ibu_kandung);
-            if (data.disabil_status == '1') {
-                $('#chk-Yes').prop('checked', true);
-                $('#disabil_jenis_div').show();
-                $('#disabil_jenis').val(data.disabil_jenis);
-            } else {
-                $('#chk-No').prop('checked', true);
-                $('#disabil_jenis_div').hide();
-            }
-            $('#chk-Yes').val(data.disabil_status);
-            $('#disabil_jenis').val(data.disabil_kode);
-
-            $('#du_usia').val(getAge);
-            if ($('#du_usia').val() < 18) {
-                $('.du_so_id_div').show();
-            } else {
-                $('.du_so_id_div').hide();
-            }
-        });
-    });
-
-    async function getData(id) {
-        let response = await fetch('/api_usulan/' + id);
-        let data = await response.json();
-
-        return data;
-    }
-
     $(document).ready(function() {
         $('#dataCari').select2({
             dropdownParent: $('#modaltambah'),
@@ -842,17 +782,33 @@ $desa_id = session()->get('kode_desa');
             $("#disabil_status_div").show();
         };
 
-        if ($('#du_usia').val() < 18) {
-            $('.du_so_id_div').show();
-        } else {
-            $('.du_so_id_div').hide();
-        }
-
         $('#tanggal_lahir').change(function() {
             var dob = new Date(document.getElementById('tanggal_lahir').value);
             var today = new Date();
             var age = Math.floor((today - dob) / (365.25 * 24 * 60 * 60 * 1000));
             document.getElementById('du_usia').value = age;
+            // $("#du_usia").change(function() {
+            let usia = parseInt($("#du_usia").val(), 10);
+
+            if (usia < 18) {
+                $("#du_so_id_div").show();
+                $("#du_so_id").prop("required", true).addClass("is-invalid");
+                // $(".errordu_so_id").html("Status Orangtua Harus di Pilih");
+            } else {
+                $("#du_so_id_div").hide();
+                $("#du_so_id").val("").prop("required", false).removeClass("is-invalid");
+            }
+            // });
+        });
+
+        $("#du_so_id").prop("required", false).removeClass("is-invalid");
+        $("#du_so_id").change(function() {
+            if ($(this).val() !== "") {
+                $(this).removeClass("is-invalid");
+            } else {
+                $(this).prop("required", true).addClass("is-invalid");
+                $(".errordu_so_id").html("Status Orangtua Harus di Pilih");
+            }
         });
 
         var dropdown = document.getElementById("du_kate");
@@ -864,7 +820,96 @@ $desa_id = session()->get('kode_desa');
             input.readOnly = true;
         }
 
+        // Awalnya, dropdown tidak wajib diisi
+        // $("#disabil_jenis").prop("required", false).removeClass("is-invalid");
+        $("#disabil_jenis").val("").prop("required", false).removeClass("is-invalid");
+        // Mendengarkan perubahan pada radio button
+        $("input[type='radio']").change(function() {
+            if ($("#chk-Yes").val() === "1") {
+                // Jika yang dipilih adalah "Ya", dropdown menjadi wajib diisi
+                $("#disabil_jenis").prop("required", true).addClass("is-invalid");
+                // $(".errordisabil_jenis").html("Jenis Disabilitas Harus di Pilih");
+            } else {
+                // } else if ($("#chk-No").val() === "2") {
+                // Jika yang dipilih adalah "Tidak", dropdown tidak wajib diisi
+                $("#disabil_jenis").val("").prop("required", false).removeClass("is-invalid");
+            }
+        });
+
+        // $("#disabil_jenis").val("").prop("required", false).removeClass("is-invalid");
+
+        // Mendengarkan perubahan pada dropdown
+        $("#disabil_jenis").change(function() {
+            // Jika dropdown memiliki nilai yang dipilih, hapus class "is-invalid"
+            if ($("#disabil_jenis").val() !== "") {
+                $("#disabil_jenis").removeClass("is-invalid");
+            } else {
+                $("#disabil_jenis").prop("required", true).addClass("is-invalid");
+                $(".errordisabil_jenis").html("Jenis Disabilitas Harus di Pilih");
+            }
+        });
     });
+
+    $('#dataCari').on('change', (event) => {
+        // console.log(event.target.value);
+        getData(event.target.value).then(data => {
+            $('#nokk').val(data.nokk);
+            $('#kelurahan').val(data.kelurahan);
+            $('#datarw').val(data.rw);
+            $('#datart').val(data.rt);
+            $('#alamat').val(data.alamat);
+            $('#nama').val(data.nama);
+            $('#nik').val(data.du_nik);
+            $('#tempat_lahir').val(data.tempat_lahir);
+            $('#tanggal_lahir').val(data.tanggal_lahir);
+            if (data.jenis_kelamin == '1') {
+                $('#chk-Lk').prop('checked', true);
+            }
+            if (data.jenis_kelamin == '2') {
+                $('#chk-Pr').prop('checked', true);
+                $("#status_hamil_div").show();
+                // $('#tgl_hamil_div').show();
+            }
+            if (data.hamil_status == '1') {
+                $('#chk-YaHamil').prop('checked', true);
+                $('#tgl_hamil_div').show();
+                $('#tgl_hamil').val(data.tgl_hamil);
+            } else {
+                $('#chk-TidakHamil').prop('checked', true);
+                $('#tgl_hamil_div').hide();
+                $('#tgl_hamil').val('');
+            }
+            $('#jenis_pekerjaan').val(data.jenis_pekerjaan);
+            $('#status_kawin').val(data.status_kawin);
+            $('#shdk').val(data.shdk);
+            $('#databansos').val(data.program_bansos);
+            $('#ibu_kandung').val(data.ibu_kandung);
+            if (data.disabil_status == '1') {
+                $('#chk-Yes').prop('checked', true);
+                $('#disabil_jenis_div').show();
+                $('#disabil_jenis').val(data.disabil_jenis);
+            } else {
+                $('#chk-No').prop('checked', true);
+                $('#disabil_jenis_div').hide();
+            }
+            $('#chk-Yes').val(data.disabil_status);
+            $('#disabil_jenis').val(data.disabil_kode);
+
+            $('#du_usia').val(getAge);
+            if ($('#du_usia').val() < 18) {
+                $('.du_so_id_div').show();
+            } else {
+                $('.du_so_id_div').hide();
+            }
+        });
+    });
+
+    async function getData(id) {
+        let response = await fetch('/api_usulan/' + id);
+        let data = await response.json();
+
+        return data;
+    }
 
     $('#datarw').change(function() {
         var desa = $('#kelurahan').val();

@@ -355,11 +355,11 @@ $desa_id = session()->get('kode_desa');
                                 <button type="button" class="btn btn-primary" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i></button>
                             </div> -->
                                         <div class="col-sm-6 col-6">
-                                            <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" class="form-control mb-2" placeholder="Latitude" spellcheck="false" id="latitude" name="du_latitude" value="<?= $du_latitude; ?>" required>
+                                            <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" class="form-control mb-2" placeholder="Latitude" spellcheck="false" id="" name="du_latitude" value="<?= $du_latitude; ?>" required>
                                             <div class="invalid-feedback errordu_latitude"></div>
                                         </div>
                                         <div class="col-sm-6 col-6">
-                                            <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" class="form-control mb-2" placeholder="Longitude" spellcheck="false" id="longitude" name="du_longitude" value="<?= $du_longitude; ?>" required>
+                                            <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" class="form-control mb-2" placeholder="Longitude" spellcheck="false" id="" name="du_longitude" value="<?= $du_longitude; ?>" required>
                                             <div class="invalid-feedback errordu_longitude"></div>
                                         </div>
                                     </div>

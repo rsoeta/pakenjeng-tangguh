@@ -511,11 +511,11 @@ $desa_id = session()->get('kode_desa');
                                     <div class="form-group row nopadding">
 
                                         <div class="col-sm-6 col-6">
-                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Lat" spellcheck="false" id="latitude" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
+                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Lat" spellcheck="false" id="" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
                                             <div class="invalid-feedback errordu_latitude"></div>
                                         </div>
                                         <div class="col-sm-6 col-6">
-                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Long" spellcheck="false" id="longitude" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
+                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Long" spellcheck="false" id="" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
                                             <div class="invalid-feedback errordu_longitude"></div>
                                         </div>
                                         <div class="col-sm-1 col-1" hidden>

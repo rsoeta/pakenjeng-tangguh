@@ -161,6 +161,7 @@
                                                     <th>NAMA</th>
                                                     <th>NO. KK</th>
                                                     <th>IBU KANDUNG</th>
+                                                    <th>TMP LAHIR</th>
                                                     <th>TGL LAHIR</th>
                                                     <th>JENIS PEKERJAAN</th>
                                                     <th>STATUS</th>
@@ -268,6 +269,7 @@
                                                     <th>NAMA</th>
                                                     <th>NO. KK</th>
                                                     <th>IBU KANDUNG</th>
+                                                    <th>TMP LAHIR</th>
                                                     <th>TGL LAHIR</th>
                                                     <th>PEKERJAAN</th>
                                                     <th>PROGRAM</th>

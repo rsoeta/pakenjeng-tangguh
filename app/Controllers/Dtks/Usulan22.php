@@ -139,6 +139,7 @@ class Usulan22 extends BaseController
             // $row[] = $key->nama;
             $row[] = $key->nokk;
             $row[] = $key->ibu_kandung;
+            $row[] = $key->tempat_lahir;
             if ($key->tanggal_lahir == '0000-00-00') {
                 $row[] = '-';
             } elseif ($key->tanggal_lahir == null) {
@@ -204,6 +205,7 @@ class Usulan22 extends BaseController
             ';
             $row[] = $key->nokk;
             $row[] = $key->ibu_kandung;
+            $row[] = $key->tempat_lahir;
             if ($key->tanggal_lahir == '0000-00-00') {
                 $row[] = '-';
             } elseif ($key->tanggal_lahir == null) {
@@ -1645,7 +1647,7 @@ class Usulan22 extends BaseController
                 'nama_pimpinan' => strtoupper($user_login['lp_kepala']),
             ]);
 
-            $filename = 'BA_PENGUSULAN – PAKENJENG – ' . $this->WilayahModel['name'] . ' – ' . strtoupper($bulan[$kode_bulan]) . '.docx';
+            $filename = 'BA_PENGUSULAN – PAKENJENG – ' . $this->WilayahModel['name'] . ' – ' . $kode_tahun . ' - ' . strtoupper($bulan[$kode_bulan]) . '.docx';
 
             header("Content-Description: File Transfer");
             header('Content-Disposition: attachment; filename="' . $filename . '"');
