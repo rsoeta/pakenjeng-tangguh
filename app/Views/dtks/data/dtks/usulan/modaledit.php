@@ -100,6 +100,13 @@ $desa_id = session()->get('kode_desa');
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
+                                        <label class="col-4 col-sm-4 col-form-label" for="nokk">No. KK</label>
+                                        <div class="col-8 col-sm-8">
+                                            <input type="number" name="nokk" id="nokk" class="form-control form-control-sm" value="<?= $nokk; ?>" autocomplete="on">
+                                            <div class="invalid-feedback errornokk"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="nik">NIK</label>
                                         <div class="col-8 col-sm-8">
                                             <input type="number" name="nik" id="nik" class="form-control form-control-sm" value="<?= $du_nik; ?>" autocomplete="off" <?= $user >= 4 ? ' readonly="readonly"' : ''; ?>>
@@ -113,13 +120,7 @@ $desa_id = session()->get('kode_desa');
                                             <div class="invalid-feedback errornama"></div>
                                         </div>
                                     </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="nokk">No. KK</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="number" name="nokk" id="nokk" class="form-control form-control-sm" value="<?= $nokk; ?>" autocomplete="on">
-                                            <div class="invalid-feedback errornokk"></div>
-                                        </div>
-                                    </div>
+
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="tempat_lahir">Tempat Lahir</label>
                                         <div class="col-8 col-sm-8">

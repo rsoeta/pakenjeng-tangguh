@@ -6,7 +6,7 @@ use App\Models\GenModel;
 
 function nameApp()
 {
-    return 'Opt NewDTKS';
+    return 'DTKS';
 }
 
 function logoApp()
@@ -292,15 +292,6 @@ function deadline_usulan()
 
     return false; // Akses ditolak
 }
-// return $ini_tanggal;
-// return $hari_ini > $deadline;
-
-// return $deadline;
-
-// dd($deadline_usulan);
-
-// buat helper deadline
-// alur
 
 function deadline_ppks()
 {
