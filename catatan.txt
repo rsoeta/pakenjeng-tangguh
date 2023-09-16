@@ -900,3 +900,7 @@
         JOIN tb_villages ON famantama_data.fd_desa = tb_villages.id
         GROUP BY tb_villages.id, fd_rw
         ORDER BY tb_villages.id, fd_rw;
+---------------------------------------------------------------------------------------------------------------------------------------------------   
+## v2.16.8 -- Update tabel dtks_usulan22
+    # tambah kolom dtks_usulan22 (du_pendidikan_id INT 3 NULL) tabel pendidikan_kk (pk_id)
+    # upload / import tabel pendidikan_kk

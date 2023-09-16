@@ -299,13 +299,61 @@
 </div>
 <!-- /.container-fluid -->
 <div class="viewmodal" style="display: none;"></div>
+
 <script>
     // 'use strict';
     $(document).ready(function() {
         $('body').addClass('sidebar-collapse');
         $('.displayNone').css('display', 'none');
 
+        // start script kordinat
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(showPosition, showError);
+        } else {
+            // z.innerHTML = "Geolokasi Tidak Didukung oleh Browser Ini";
+            alert("Geolokasi Tidak Didukung oleh Browser Ini");
+        }
+        // end script kordinat
+
     });
+
+
+    var x = document.getElementById("latitude");
+    var y = document.getElementById("longitude");
+    var z = document.getElementById("z");
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(showPosition, showError);
+        } else {
+            // z.innerHTML = "Geolokasi Tidak Didukung oleh Browser Ini";
+            alert("Geolokasi Tidak Didukung oleh Browser Ini");
+        }
+    }
+
+    function showPosition(position) {
+        $("#latitude").val(`${position.coords.latitude}`);
+        $("#longitude").val(`${position.coords.longitude}`);
+        // x.innerHTML = position.coords.latitude;
+        // y.innerHTML = position.coords.longitude;
+    }
+
+    function showError(error) {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                alert("Pengguna menolak permintaan geolokasi.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("Informasi lokasi tidak tersedia.");
+                break;
+            case error.TIMEOUT:
+                alert("Permintaan untuk menghitung waktu lokasi pengguna.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("Terjadi kesalahan yang tidak diketahui.");
+                break;
+        }
+    }
 
     var save_method; //for save method string
     var table;

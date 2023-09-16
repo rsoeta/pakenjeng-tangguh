@@ -24,7 +24,7 @@
     <meta name="twitter:description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng" />
     <meta name="twitter:image" content="<?= base_url('icon-dtks.png'); ?>" />
 
-    <title><?= $title; ?> | <?= nameApp(); ?></title>
+    <title><?= $title; ?> | <?= nameApp() . ' Kec. ' . ucwords(strtolower(Profil_Admin()['namaKec'])); ?></title>
 
 
     <!-- Google Font: Source Sans Pro -->

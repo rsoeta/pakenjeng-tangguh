@@ -163,9 +163,6 @@ $desa_id = session()->get('kode_desa');
                                             <div class="invalid-feedback errorjenis_kelamin"></div>
                                         </div>
                                     </div>
-                                </div>
-
-                                <div class="col-12 col-sm-6">
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="jenis_pekerjaan">Pekerjaan</label>
                                         <div class="col-8 col-sm-8">
@@ -178,6 +175,37 @@ $desa_id = session()->get('kode_desa');
                                                 <?php } ?>
                                             </select>
                                             <div class="invalid-feedback errorjenis_pekerjaan"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-sm-6">
+                                    <div class="form-group row nopadding">
+                                        <label class="col-4 col-sm-4 col-form-label" for="shdk">SHDK</label>
+                                        <div class="col-8 col-sm-8">
+                                            <select id="shdk" name="shdk" class="form-select form-select-sm">
+                                                <option value="">-- Status Hubungan dalam Keluarga --</option>
+                                                <?php foreach ($shdk as $row) { ?>
+                                                    <option <?php if ($stahub == $row['id']) {
+                                                                echo 'selected';
+                                                            } ?> value="<?= $row['id']; ?>"><?= $row['jenis_shdk']; ?></option>
+                                                <?php } ?>
+                                            </select>
+                                            <div class="invalid-feedback errorShdk"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row nopadding">
+                                        <label class="col-4 col-sm-4 col-form-label" for="jenis_pendidikan">Pendidikan</label>
+                                        <div class="col-8 col-sm-8">
+                                            <select id="jenis_pendidikan" name="jenis_pendidikan" class="form-select form-select-sm">
+                                                <option value="">-- Pilih Status Pekerjaan --</option>
+                                                <?php foreach ($pendidikan_kk as $row) { ?>
+                                                    <option <?php if ($jenis_pendidikan == $row['pk_id']) {
+                                                                echo 'selected';
+                                                            } ?> value="<?= $row['pk_id'] ?>"> <?= $row['pk_nama']; ?></option>
+                                                <?php } ?>
+                                            </select>
+                                            <div class="invalid-feedback errorjenis_pendidikan"></div>
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
@@ -240,20 +268,6 @@ $desa_id = session()->get('kode_desa');
                                         </div>
                                     </div>
 
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="shdk">SHDK</label>
-                                        <div class="col-8 col-sm-8">
-                                            <select id="shdk" name="shdk" class="form-select form-select-sm">
-                                                <option value="">-- Status Hubungan dalam Keluarga --</option>
-                                                <?php foreach ($shdk as $row) { ?>
-                                                    <option <?php if ($stahub == $row['id']) {
-                                                                echo 'selected';
-                                                            } ?> value="<?= $row['id']; ?>"><?= $row['jenis_shdk']; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                            <div class="invalid-feedback errorShdk"></div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                             <div class="row">
@@ -555,6 +569,17 @@ $desa_id = session()->get('kode_desa');
 
 <script>
     $(document).ready(function() {
+
+        // start dropdown kel adat terpencil
+        // Tangkap perubahan pada dropdown
+        $('#du_kate').change(function() {
+            if ($(this).val() === '0') {
+                // Jika nilainya 0, hapus nilai Nama Suku
+                $('#du_nasu').val('');
+            }
+        });
+        // end dropdown kel adat terpencil
+
         $('.btnSimpan').click(function(e) {
             e.preventDefault();
             let $kelurahan = $('#kelurahan').removeAttr('disabled', '');
@@ -639,6 +664,14 @@ $desa_id = session()->get('kode_desa');
                         } else {
                             $('#jenis_kelamin').removeClass('is-invalid');
                             $('.errorjenis_kelamin').html('');
+                        }
+
+                        if (response.error.jenis_pendidikan) {
+                            $('#jenis_pendidikan').addClass('is-invalid');
+                            $('.errorjenis_pendidikan').html(response.error.jenis_pendidikan);
+                        } else {
+                            $('#jenis_pendidikan').removeClass('is-invalid');
+                            $('.errorjenis_pendidikan').html('');
                         }
 
                         if (response.error.jenis_pekerjaan) {

@@ -262,6 +262,7 @@ class Usulan22 extends BaseController
                     'users' => $users->findAll(),
                     'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
                     'sta_ortu' => $GenModel->get_staortu(),
+                    'pendidikan_kk' => $GenModel->get_pendidikan(),
                 ];
 
                 $msg = [
@@ -359,6 +360,13 @@ class Usulan22 extends BaseController
                 ],
                 'jenis_kelamin' => [
                     'label' => 'Jenis Kelamin',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus dipilih.'
+                    ]
+                ],
+                'jenis_pendidikan' => [
+                    'label' => 'Status Pendidikan',
                     'rules' => 'required',
                     'errors' => [
                         'required' => '{field} harus dipilih.'
@@ -469,6 +477,7 @@ class Usulan22 extends BaseController
                         'tanggal_lahir' => $validation->getError('tanggal_lahir'),
                         'ibu_kandung' => $validation->getError('ibu_kandung'),
                         'jenis_kelamin' => $validation->getError('jenis_kelamin'),
+                        'jenis_pendidikan' => $validation->getError('jenis_pendidikan'),
                         'jenis_pekerjaan' => $validation->getError('jenis_pekerjaan'),
                         'status_kawin' => $validation->getError('status_kawin'),
                         'alamat' => $validation->getError('alamat'),
@@ -578,6 +587,7 @@ class Usulan22 extends BaseController
                     'rt' => $this->request->getVar("datart"),
                     'alamat' => strtoupper(trim($this->request->getVar('alamat'))),
                     'status_kawin' => $this->request->getVar("status_kawin"),
+                    'du_pendidikan_id' => $this->request->getVar("jenis_pendidikan"),
                     'jenis_pekerjaan' => $this->request->getVar("jenis_pekerjaan"),
                     'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
                     'ibu_kandung' => strtoupper(trim($this->request->getVar("ibu_kandung"))),
@@ -785,6 +795,7 @@ class Usulan22 extends BaseController
                 'jenkel' => $this->GenModel->getDataJenkel(),
                 'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
                 'sta_ortu' => $GenModel->get_staortu(),
+                'pendidikan_kk' => $GenModel->get_pendidikan(),
 
 
                 'created_by' => session()->get('nik'),
@@ -794,6 +805,7 @@ class Usulan22 extends BaseController
                 'datart' => $row["rt"],
                 'alamat' => $row['alamat'],
                 'status_kawin' => $row["status_kawin"],
+                'jenis_pendidikan' => $row["du_pendidikan_id"],
                 'jenis_pekerjaan' => $row["jenis_pekerjaan"],
                 'jenis_kelamin' => $row['jenis_kelamin'],
                 'ibu_kandung' => strtoupper($row["ibu_kandung"]),
@@ -877,7 +889,7 @@ class Usulan22 extends BaseController
                 'jenkel' => $this->GenModel->getDataJenkel(),
                 'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
                 'sta_ortu' => $GenModel->get_staortu(),
-
+                'pendidikan_kk' => $GenModel->get_pendidikan(),
 
                 'created_by' => session()->get('nik'),
                 'stahub' => $row['shdk'],
@@ -886,6 +898,7 @@ class Usulan22 extends BaseController
                 'datart' => $row["rt"],
                 'alamat' => $row['alamat'],
                 'status_kawin' => $row["status_kawin"],
+                'jenis_pendidikan' => $row["du_pendidikan_id"],
                 'jenis_pekerjaan' => $row["jenis_pekerjaan"],
                 'jenis_kelamin' => $row['jenis_kelamin'],
                 'ibu_kandung' => strtoupper($row["ibu_kandung"]),
@@ -1006,6 +1019,13 @@ class Usulan22 extends BaseController
                         'required' => '{field} harus dipilih.'
                     ]
                 ],
+                'jenis_pendidikan' => [
+                    'label' => 'Status Pendidikan',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus dipilih.'
+                    ]
+                ],
                 'jenis_pekerjaan' => [
                     'label' => 'Jenis Pekerjaan',
                     'rules' => 'required',
@@ -1108,6 +1128,7 @@ class Usulan22 extends BaseController
                         'tanggal_lahir' => $validation->getError('tanggal_lahir'),
                         'ibu_kandung' => $validation->getError('ibu_kandung'),
                         'jenis_kelamin' => $validation->getError('jenis_kelamin'),
+                        'jenis_pendidikan' => $validation->getError('jenis_pendidikan'),
                         'jenis_pekerjaan' => $validation->getError('jenis_pekerjaan'),
                         'status_kawin' => $validation->getError('status_kawin'),
                         'alamat' => $validation->getError('alamat'),
@@ -1231,7 +1252,8 @@ class Usulan22 extends BaseController
                         'rt' => $this->request->getVar("datart"),
                         'alamat' => strtoupper(trim($this->request->getVar('alamat'))),
                         'status_kawin' => $this->request->getVar("status_kawin"),
-                        'jenis_pekerjaan' => $this->request->getVar("jenis_pekerjaan"),
+                        'jenis_pendidikan' => $this->request->getVar("jenis_pendidikan"),
+                        'du_pendidikan_id' => $this->request->getVar("jenis_pekerjaan"),
                         'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
                         'ibu_kandung' => strtoupper(trim($this->request->getVar("ibu_kandung"))),
                         'tanggal_lahir' => $this->request->getVar("tanggal_lahir"),
@@ -1289,6 +1311,7 @@ class Usulan22 extends BaseController
                         'rt' => $this->request->getVar("datart"),
                         'alamat' => strtoupper(trim($this->request->getVar('alamat'))),
                         'status_kawin' => $this->request->getVar("status_kawin"),
+                        'du_pendidikan_id' => $this->request->getVar("jenis_pendidikan"),
                         'jenis_pekerjaan' => $this->request->getVar("jenis_pekerjaan"),
                         'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
                         'ibu_kandung' => strtoupper(trim($this->request->getVar("ibu_kandung"))),

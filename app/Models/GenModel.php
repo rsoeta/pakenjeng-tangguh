@@ -337,4 +337,12 @@ class GenModel extends Model
 
 		return $query->getResultArray();
 	}
+
+	function get_pendidikan()
+	{
+		$builder = $this->db->table('pendidikan_kk');
+		$query = $builder->select('*')->get();
+
+		return $query->getResultArray();
+	}
 }

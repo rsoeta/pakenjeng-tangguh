@@ -14,7 +14,7 @@ class Usulan22Model extends Model
     protected $table      = 'dtks_usulan22';
     protected $primaryKey = 'du_id';
 
-    protected $allowedFields = ["du_nik", "program_bansos", "nokk", "nama", "tempat_lahir", "tanggal_lahir", "ibu_kandung", "jenis_kelamin", "jenis_pekerjaan", "status_kawin", "alamat", "rt", "rw", "provinsi", "kabupaten", "kecamatan", "kelurahan", "shdk", "foto_identitas", "foto_rumah", "disabil_status", "disabil_kode", "hamil_status", "hamil_tgl", "du_latitude", "du_longitude", "sk0", "sk1", "sk2", "sk3", "sk4", "sk5", "sk6", "sk7", "sk8", "sk9", "du_so_id", "du_kate", "du_nasu", "du_proses", "created_at", "created_at_year", "created_at_month", "created_by", "updated_at", "updated_by"];
+    protected $allowedFields = ["du_nik", "program_bansos", "nokk", "nama", "tempat_lahir", "tanggal_lahir", "ibu_kandung", "jenis_kelamin", "du_pendidikan_id", "jenis_pekerjaan", "status_kawin", "alamat", "rt", "rw", "provinsi", "kabupaten", "kecamatan", "kelurahan", "shdk", "foto_identitas", "foto_rumah", "disabil_status", "disabil_kode", "hamil_status", "hamil_tgl", "du_latitude", "du_longitude", "sk0", "sk1", "sk2", "sk3", "sk4", "sk5", "sk6", "sk7", "sk8", "sk9", "du_so_id", "du_kate", "du_nasu", "du_proses", "created_at", "created_at_year", "created_at_month", "created_by", "updated_at", "updated_by"];
 
     protected $useTimestamps = false;
     protected $createdField  = 'created_at';
@@ -23,8 +23,8 @@ class Usulan22Model extends Model
 
     protected $skipValidation     = false;
 
-    var $column_order = array('', 'du_nik', 'nama', 'nokk', 'ibu_kandung', 'tempat_lahir','tanggal_lahir', 'jenis_pekerjaan', 'status_kawin', 'shdk', 'program_bansos', 'created_by', 'updated_at', '');
-    var $column_order01 = array('', 'du_nik', 'nama', 'nokk', 'ibu_kandung', 'tempat_lahir','tanggal_lahir', 'jenis_pekerjaan', 'program_bansos', 'created_by', 'updated_at', '');
+    var $column_order = array('', 'du_nik', 'nama', 'nokk', 'ibu_kandung', 'tempat_lahir', 'tanggal_lahir', 'jenis_pekerjaan', 'status_kawin', 'shdk', 'program_bansos', 'created_by', 'updated_at', '');
+    var $column_order01 = array('', 'du_nik', 'nama', 'nokk', 'ibu_kandung', 'tempat_lahir', 'tanggal_lahir', 'jenis_pekerjaan', 'program_bansos', 'created_by', 'updated_at', '');
 
     var $order = array('dtks_usulan22.updated_at' => 'asc');
 

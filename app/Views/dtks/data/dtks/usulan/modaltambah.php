@@ -215,6 +215,19 @@ $desa_id = session()->get('kode_desa');
                                         </div>
 
                                         <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="jenis_pendidikan">Pendidikan</label>
+                                            <div class="col-8 col-sm-8">
+                                                <select id="jenis_pendidikan" name="jenis_pendidikan" class="form-select form-select-sm">
+                                                    <option value="">-- Pilih Status Pendidikan --</option>
+                                                    <?php foreach ($pendidikan_kk as $row) { ?>
+                                                        <option value="<?= $row['pk_id'] ?>"> <?= $row['pk_nama']; ?></option>
+                                                    <?php } ?>
+                                                </select>
+                                                <div class="invalid-feedback errorjenis_pendidikan"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row nopadding">
                                             <label class="col-4 col-sm-4 col-form-label" for="jenis_pekerjaan">Pekerjaan</label>
                                             <div class="col-8 col-sm-8">
                                                 <select id="jenis_pekerjaan" name="jenis_pekerjaan" class="form-select form-select-sm">
@@ -524,6 +537,16 @@ $desa_id = session()->get('kode_desa');
             }
         });
 
+        // start dropdown kel adat terpencil
+        // Tangkap perubahan pada dropdown
+        $('#du_kate').change(function() {
+            if ($(this).val() === '0') {
+                // Jika nilainya 0, hapus nilai Nama Suku
+                $('#du_nasu').val('');
+            }
+        });
+        // end dropdown kel adat terpencil
+
         $('.btnSimpan').click(function(e) {
             e.preventDefault();
             let $kelurahan = $('#kelurahan').removeAttr('disabled', '');
@@ -607,6 +630,14 @@ $desa_id = session()->get('kode_desa');
                         } else {
                             $('#jenis_kelamin').removeClass('is-invalid');
                             $('.errorjenis_kelamin').html('');
+                        }
+
+                        if (response.error.jenis_pendidikan) {
+                            $('#jenis_pendidikan').addClass('is-invalid');
+                            $('.errorjenis_pendidikan').html(response.error.jenis_pendidikan);
+                        } else {
+                            $('#jenis_pendidikan').removeClass('is-invalid');
+                            $('.errorjenis_pendidikan').html('');
                         }
 
                         if (response.error.jenis_pekerjaan) {

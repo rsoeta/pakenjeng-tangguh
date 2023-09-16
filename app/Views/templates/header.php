@@ -12,7 +12,7 @@
     <meta name="keywords" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng">
     <meta name="description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng">
 
-    <meta property="og:title" content="<?= nameApp(); ?> | <?= $title; ?>" />
+    <meta property="og:title" content="<?= nameApp() . ' Kec. ' . ucwords(strtolower(Profil_Admin()['namaKec'])); ?> | <?= $title; ?>" />
     <meta property="og:description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="<?= base_url(); ?>" />
@@ -21,11 +21,11 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@sutarsarian" />
     <meta name="twitter:creator" content="@sutarsarian" />
-    <meta name="twitter:title" content="<?= nameApp(); ?> | <?= $title; ?>" />
+    <meta name="twitter:title" content="<?= nameApp() . ' Kec. ' . ucwords(strtolower(Profil_Admin()['namaKec'])); ?> | <?= $title; ?>" />
     <meta name="twitter:description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng" />
     <meta name="twitter:image" content="<?= base_url('icon-dtks.png'); ?>" />
 
-    <title><?= $title; ?> | <?= nameApp(); ?></title>
+    <title><?= $title; ?> | <?= nameApp() . ' Kec. ' . ucwords(strtolower(Profil_Admin()['namaKec'])); ?></title>
 
 
 
