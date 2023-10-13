@@ -14,7 +14,7 @@ class KipModel extends Model
     protected $table      = 'dtks_kip';
     protected $primaryKey = 'dk_id';
 
-    protected $allowedFields = ["dk_kks", "dk_nisn", "dk_kip", "dk_nama_siswa", "dk_jenkel", "dk_nik", "dk_tmp_lahir", "dk_tgl_lahir", "dk_alamat", "dk_rt", "dk_rw", "dk_desa", "dk_kecamatan", "dk_nama_ibu", "dk_nama_ayah", "dk_nama_sekolah", "dk_jenjang", "dk_kelas", "dk_partisipasi", "dk_foto_identitas", "dk_created_at", "dk_created_by", "dk_updated_at", "dk_updated_by"];
+    protected $allowedFields = ["dk_nkk", "dk_nisn", "dk_kip", "dk_nama_siswa", "dk_jenkel", "dk_nik", "dk_tmp_lahir", "dk_tgl_lahir", "dk_alamat", "dk_rt", "dk_rw", "dk_desa", "dk_kecamatan", "dk_nama_ibu", "dk_nama_ayah", "dk_nama_sekolah", "dk_jenjang", "dk_kelas", "dk_partisipasi", "dk_foto_identitas", "dk_created_at", "dk_created_by", "dk_updated_at", "dk_updated_by"];
 
     protected $useTimestamps = false;
     protected $createdField  = 'dk_created_at';
@@ -23,7 +23,7 @@ class KipModel extends Model
 
     protected $skipValidation     = false;
 
-    var $column_order = array("", "dk_nama_siswa", "dk_nisn", "dk_kks", "dk_alamat", "dk_rt", "dk_rw", "dk_kelas");
+    var $column_order = array("", "dk_nama_siswa", "dk_nisn", "dk_nkk", "dk_alamat", "dk_rt", "dk_rw", "dk_kelas");
 
     var $order = array('dtks_kip.dk_updated_at' => 'asc');
 
@@ -74,7 +74,7 @@ class KipModel extends Model
         // search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "(dk_nama_siswa LIKE '%$search%' OR dk_nik LIKE '%$search%' OR dk_kks LIKE '%$search%' OR dk_kip LIKE '%$search%' OR dk_nama_ibu LIKE '%$search%' OR dk_nama_ayah LIKE '%$search%' OR dk_nama_sekolah LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
+            $kondisi_search = "(dk_nama_siswa LIKE '%$search%' OR dk_nik LIKE '%$search%' OR dk_nkk LIKE '%$search%' OR dk_kip LIKE '%$search%' OR dk_nama_ibu LIKE '%$search%' OR dk_nama_ayah LIKE '%$search%' OR dk_nama_sekolah LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
         } else {
             $kondisi_search = "dtks_kip.dk_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
         }
@@ -92,7 +92,7 @@ class KipModel extends Model
         if ($_POST['length'] != -1);
         $db = db_connect();
         $builder = $db->table('dtks_kip');
-        $query = $builder->select('dk_id, dk_kks, dk_nisn, dk_kip, dk_nik, dk_nama_siswa, dk_tmp_lahir, dk_tgl_lahir, dk_alamat, dk_rt, dk_rw, dk_nama_sekolah, dk_desa, name, dk_jenjang, dk_kelas, dk_partisipasi, dk_foto_identitas')
+        $query = $builder->select('dk_id, dk_nkk, dk_nisn, dk_kip, dk_nik, dk_nama_siswa, dk_tmp_lahir, dk_tgl_lahir, dk_alamat, dk_rt, dk_rw, dk_nama_sekolah, dk_desa, name, dk_jenjang, dk_kelas, dk_partisipasi, dk_foto_identitas')
             ->join('tb_villages', 'tb_villages.id=dtks_kip.dk_desa')
             // ->join('tb_sekolah_jenjang', 'tb_sekolah_jenjang.sj_id=dtks_kip.dk_jenjang')
             // ->join('tb_sekolah_partisipasi', 'tb_sekolah_partisipasi.ps_id=dtks_kip.dk_partisipasi')
@@ -158,7 +158,7 @@ class KipModel extends Model
         // kondisi search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "AND (dk_nama_siswa LIKE '%$search%' OR dk_nik LIKE '%$search%' OR dk_kks LIKE '%$search%' OR dk_kip LIKE '%$search%' OR dk_nama_ibu LIKE '%$search%' OR dk_nama_ayah LIKE '%$search%' OR dk_nama_sekolah LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
+            $kondisi_search = "AND (dk_nama_siswa LIKE '%$search%' OR dk_nik LIKE '%$search%' OR dk_nkk LIKE '%$search%' OR dk_kip LIKE '%$search%' OR dk_nama_ibu LIKE '%$search%' OR dk_nama_ayah LIKE '%$search%' OR dk_nama_sekolah LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
         } else {
             $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
         }

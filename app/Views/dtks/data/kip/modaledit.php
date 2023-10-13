@@ -39,10 +39,10 @@ $kec_id = '32.05.33';
                         </div>
                         <!-- NO. KKS -->
                         <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="dk_kks">No. KKS</label>
+                            <label class="col-4 col-sm-4 col-form-label" for="dk_nkk">No. KKS</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dk_kks" id="dk_kks" class="form-control form-control-sm" style="text-transform:uppercase" autocomplete="off" value="<?= set_value('dk_kks', $dk_kks); ?>">
-                                <div class="invalid-feedback errordk_kks"></div>
+                                <input type="text" name="dk_nkk" id="dk_nkk" class="form-control form-control-sm" style="text-transform:uppercase" autocomplete="off" value="<?= set_value('dk_nkk', $dk_nkk); ?>">
+                                <div class="invalid-feedback errordk_nkk"></div>
                             </div>
                         </div>
                         <!-- NO. KIP -->
@@ -212,12 +212,12 @@ $kec_id = '32.05.33';
                 },
                 success: function(response) {
                     if (response.error) {
-                        if (response.error.dk_kks) {
-                            $('#dk_kks').addClass('is-invalid');
-                            $('.errordk_kks').html(response.error.dk_kks);
+                        if (response.error.dk_nkk) {
+                            $('#dk_nkk').addClass('is-invalid');
+                            $('.errordk_nkk').html(response.error.dk_nkk);
                         } else {
-                            $('#dk_kks').removeClass('is-invalid');
-                            $('.errordk_kks').html('');
+                            $('#dk_nkk').removeClass('is-invalid');
+                            $('.errordk_nkk').html('');
                         }
 
                         if (response.error.dk_kip) {

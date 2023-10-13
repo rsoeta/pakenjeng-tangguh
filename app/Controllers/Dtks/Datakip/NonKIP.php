@@ -105,7 +105,7 @@ class NonKIP extends BaseController
             $row[] = $no;
             $row[] = $key->dk_nama_siswa;
             $row[] = $key->dk_nisn;
-            $row[] = $key->dk_kks;
+            $row[] = $key->dk_nkk;
             $row[] = $key->dk_alamat;
             $row[] = str_pad($key->dk_rt, 3, '0', STR_PAD_LEFT);
             $row[] = str_pad($key->dk_rw, 3, '0', STR_PAD_LEFT);
@@ -189,6 +189,16 @@ class NonKIP extends BaseController
 
             $du_kate = $this->request->getPost('du_kate');
             $valid = $this->validate([
+                'dk_nkk' => [
+                    'label' => 'No. KK',
+                    'rules' => 'required|numeric|min_length[16]|max_length[16]',
+                    'errors' => [
+                        'required' => '{field} harus diisi.',
+                        'numeric' => '{field} harus berisi angka.',
+                        'min_length' => '{field} terlalu pendek',
+                        'max_length' => '{field} terlalu panjang',
+                    ]
+                ],
                 'dk_nik' => [
                     'label' => 'NIK',
                     'rules' => 'required|numeric|is_unique[dtks_kip.dk_nik,dk_id,{dk_id}]|min_length[16]|max_length[16]',
@@ -297,7 +307,7 @@ class NonKIP extends BaseController
                 $msg = [
                     'error' => [
                         'dk_nisn' => $validation->getError('dk_nisn'),
-                        'dk_kks' => $validation->getError('dk_kks'),
+                        'dk_nkk' => $validation->getError('dk_nkk'),
                         'dk_kip' => $validation->getError('dk_kip'),
                         'dk_nik' => $validation->getError('dk_nik'),
                         'dk_nama_siswa' => $validation->getError('dk_nama_siswa'),
@@ -359,7 +369,7 @@ class NonKIP extends BaseController
                 // die;
 
                 $data = [
-                    'dk_kks' => $this->request->getVar("dk_kks"),
+                    'dk_nkk' => $this->request->getVar("dk_nkk"),
                     'dk_nisn' => $this->request->getVar("dk_nisn"),
                     'dk_kip' => $this->request->getVar("dk_kip"),
                     'dk_nik' => $this->request->getVar('dk_nik'),
@@ -427,7 +437,7 @@ class NonKIP extends BaseController
 
                 'dk_id' => $row['dk_id'],
                 'dk_nisn' => $row['dk_nisn'],
-                'dk_kks' => $row['dk_kks'],
+                'dk_nkk' => $row['dk_nkk'],
                 'dk_kip' => $row['dk_kip'],
                 'dk_nik' => $row['dk_nik'],
                 'dk_nama_siswa' => $row['dk_nama_siswa'],

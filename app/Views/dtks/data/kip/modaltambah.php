@@ -29,22 +29,6 @@ $kec_id = '32.05.33';
                     </div>
                     <hr>
                     <div class="col-md-6">
-                        <!-- NISN -->
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="dk_nisn">NISN</label>
-                            <div class="col-8 col-sm-8">
-                                <input type="text" name="dk_nisn" id="dk_nisn" class="form-control form-control-sm" style="text-transform:uppercase" autocomplete="off">
-                                <div class="invalid-feedback errordk_nisn"></div>
-                            </div>
-                        </div>
-                        <!-- No. KKS -->
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="dk_kks">No. KKS</label>
-                            <div class="col-8 col-sm-8">
-                                <input type="text" name="dk_kks" id="dk_kks" class="form-control form-control-sm" style="text-transform:uppercase" autocomplete="off">
-                                <div class="invalid-feedback errordk_kks"></div>
-                            </div>
-                        </div>
                         <!-- No. KIP -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_kip">No. KIP</label>
@@ -53,20 +37,36 @@ $kec_id = '32.05.33';
                                 <div class="invalid-feedback errordk_kip"></div>
                             </div>
                         </div>
-                        <!-- NIK -->
+                        <!-- NISN -->
                         <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="dk_nik">NIK</label>
+                            <label class="col-4 col-sm-4 col-form-label" for="dk_nisn">NISN</label>
                             <div class="col-8 col-sm-8">
-                                <input type="number" name="dk_nik" id="dk_nik" class="form-control form-control-sm" autocomplete="off" readonly>
-                                <div class="invalid-feedback errordk_nik"></div>
+                                <input type="text" name="dk_nisn" id="dk_nisn" class="form-control form-control-sm" style="text-transform:uppercase" autocomplete="off">
+                                <div class="invalid-feedback errordk_nisn"></div>
+                            </div>
+                        </div>
+                        <!-- No. KK -->
+                        <div class="form-group row nopadding">
+                            <label class="col-4 col-sm-4 col-form-label" for="dk_nkk">No. KK</label>
+                            <div class="col-8 col-sm-8">
+                                <input type="text" name="dk_nkk" id="dk_nkk" class="form-control form-control-sm" style="text-transform:uppercase" autocomplete="off">
+                                <div class="invalid-feedback errordk_nkk"></div>
                             </div>
                         </div>
                         <!-- Nama Siswa -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_nama_siswa">Nama Siswa</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dk_nama_siswa" id="dk_nama_siswa" class="form-control form-control-sm" style="text-transform:uppercase" readonly>
+                                <input type="text" name="dk_nama_siswa" id="dk_nama_siswa" class="form-control form-control-sm" style="text-transform:uppercase">
                                 <div class="invalid-feedback errordk_nama_siswa"></div>
+                            </div>
+                        </div>
+                        <!-- NIK -->
+                        <div class="form-group row nopadding">
+                            <label class="col-4 col-sm-4 col-form-label" for="dk_nik">NIK</label>
+                            <div class="col-8 col-sm-8">
+                                <input type="number" name="dk_nik" id="dk_nik" class="form-control form-control-sm" autocomplete="off">
+                                <div class="invalid-feedback errordk_nik"></div>
                             </div>
                         </div>
                         <!-- Jenis Kelamin -->
@@ -92,7 +92,7 @@ $kec_id = '32.05.33';
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_tmp_lahir">Tempat Lahir</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dk_tmp_lahir" id="dk_tmp_lahir" class="form-control form-control-sm" style="text-transform:uppercase" readonly>
+                                <input type="text" name="dk_tmp_lahir" id="dk_tmp_lahir" class="form-control form-control-sm" style="text-transform:uppercase">
                                 <div class="invalid-feedback errordk_tmp_lahir"></div>
                             </div>
                         </div>
@@ -100,7 +100,7 @@ $kec_id = '32.05.33';
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_tgl_lahir">Tgl Lahir</label>
                             <div class="col-8 col-sm-8">
-                                <input type="date" name="dk_tgl_lahir" id="dk_tgl_lahir" class="form-control form-control-sm" readonly>
+                                <input type="date" name="dk_tgl_lahir" id="dk_tgl_lahir" class="form-control form-control-sm">
                                 <div class="invalid-feedback errordk_tgl_lahir"></div>
                             </div>
                         </div>
@@ -108,7 +108,7 @@ $kec_id = '32.05.33';
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_alamat">Alamat</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dk_alamat" id="dk_alamat" class="form-control form-control-sm" style="text-transform:uppercase;" readonly>
+                                <input type="text" name="dk_alamat" id="dk_alamat" class="form-control form-control-sm" style="text-transform:uppercase;">
                                 <div class="invalid-feedback errordk_alamat"></div>
                             </div>
                         </div>
@@ -116,12 +116,12 @@ $kec_id = '32.05.33';
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_rt">No.RT</label>
                             <div class="col-3 col-sm-3">
-                                <input type="number" name="dk_rt" id="dk_rt" class="form-control form-control-sm" style="text-transform:uppercase;" readonly>
+                                <input type="number" name="dk_rt" id="dk_rt" class="form-control form-control-sm" style="text-transform:uppercase;">
                                 <div class="invalid-feedback errordk_rt"></div>
                             </div>
                             <label class="col-2 col-sm-2 col-form-label" for="dk_rw">No.RW</label>
                             <div class="col-3 col-sm-3">
-                                <input type="number" name="dk_rw" id="dk_rw" class="form-control form-control-sm" style="text-transform:uppercase;" readonly>
+                                <input type="number" name="dk_rw" id="dk_rw" class="form-control form-control-sm" style="text-transform:uppercase;" <?php echo $user >= 4  ? 'readonly="readonly" tabindex="-1" aria-disabled="true"' : '' ?>>
                                 <div class="invalid-feedback errordk_rw"></div>
                             </div>
                         </div>
@@ -146,7 +146,7 @@ $kec_id = '32.05.33';
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_nama_ibu">Nama Ibu</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dk_nama_ibu" id="dk_nama_ibu" class="form-control form-control-sm" style="text-transform:uppercase" readonly>
+                                <input type="text" name="dk_nama_ibu" id="dk_nama_ibu" class="form-control form-control-sm" style="text-transform:uppercase">
                                 <div class="invalid-feedback errordk_nama_ibu"></div>
                             </div>
                         </div>
@@ -170,7 +170,13 @@ $kec_id = '32.05.33';
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_kelas">Kelas</label>
                             <div class="col-8 col-sm-8">
-                                <input type="number" name="dk_kelas" id="dk_kelas" class="form-control form-control-sm" value="">
+                                <select name="dk_kelas" id="dk_kelas" class="form-select form-select-sm">
+                                    <option value="">Pilih Kelas</option>
+                                    <?php for ($i = 1; $i <= 12; $i++) { ?>
+                                        <option value="<?= $i; ?>"><?= $i; ?></option>
+                                    <?php } ?>
+                                </select>
+                                <div class="invalid-feedback errordk_kelas"></div>
                             </div>
                         </div>
                         <!-- Dokumen -->
@@ -223,6 +229,7 @@ $kec_id = '32.05.33';
             $('#dk_alamat').val(data.alamat);
             $('#dk_nama_siswa').val(data.nama);
             $('#dk_nik').val(data.du_nik);
+            $('#dk_nkk').val(data.nokk);
             $('#dk_pekerjaan_kk').val(data.jenis_pekerjaan);
             if (data.jenis_kelamin == '1') {
                 $('#dk_jenkel1').prop('checked', true);
@@ -304,12 +311,12 @@ $kec_id = '32.05.33';
                             $('.errordk_nisn').html('');
                         }
 
-                        if (response.error.dk_kks) {
-                            $('#dk_kks').addClass('is-invalid');
-                            $('.errordk_kks').html(response.error.dk_kks);
+                        if (response.error.dk_nkk) {
+                            $('#dk_nkk').addClass('is-invalid');
+                            $('.errordk_nkk').html(response.error.dk_nkk);
                         } else {
-                            $('#dk_kks').removeClass('is-invalid');
-                            $('.errordk_kks').html('');
+                            $('#dk_nkk').removeClass('is-invalid');
+                            $('.errordk_nkk').html('');
                         }
 
                         if (response.error.dk_kip) {

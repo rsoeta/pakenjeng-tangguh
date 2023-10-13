@@ -56,16 +56,16 @@ $desa_id = session()->get('kode_desa');
         <!-- <div class="container-fluid"> -->
         <div class="card-body">
             <div class="row">
+                <div class="col-12 col-sm-4 mb-2" <?= $user > 3 ?  'hidden' :  ''; ?>>
+                    <a href="/expKip" type="button" class="btn btn-outline-success shadow btn-block">
+                        <i class="fa fa-file-excel"></i> Export Data
+                    </a>
+                </div>
                 <div class="col-6 col-sm-4 mb-2">
                     <button type="button" class="btn add-button tombolTambah">
                         <span class="plus-icon"><i class="fas fa-user-plus fa-sm" style="color: white;"></i></span>
                         <!-- <i class="fa fa-plus"></i> Tambah Data -->
                     </button>
-                </div>
-                <div class="col-12 col-sm-4 mb-2" <?= $user > 3 ?  'hidden' :  ''; ?>>
-                    <a href="/expKip" type="button" class="btn btn-outline-success shadow btn-block">
-                        <i class="fa fa-file-excel"></i> Export Data
-                    </a>
                 </div>
                 <div class="row mb-2">
                     <div class="col-sm-3 col-6 mb-2">
@@ -125,7 +125,7 @@ $desa_id = session()->get('kode_desa');
                                 <th>No</th>
                                 <th>Nama Siswa</th>
                                 <th>NISN</th>
-                                <th>KKS</th>
+                                <th>No. KK</th>
                                 <th>Alamat</th>
                                 <th>No. RT</th>
                                 <th>No. RW</th>
