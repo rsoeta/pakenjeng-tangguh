@@ -189,26 +189,6 @@ class NonKIP extends BaseController
 
             $du_kate = $this->request->getPost('du_kate');
             $valid = $this->validate([
-                'dk_nisn' => [
-                    'label' => 'NISN',
-                    'rules' => 'numeric|is_unique[dtks_kip.dk_nisn,dk_id,{dk_id}]|min_length[10]|max_length[10]',
-                    'errors' => [
-                        'numeric' => '{field} harus berisi angka.',
-                        'is_unique' => '{field} sudah terdaftar.',
-                        'min_length' => '{field} terlalu pendek',
-                        'max_length' => '{field} terlalu panjang',
-                    ]
-                ],
-                'dk_kks' => [
-                    'label' => 'No. KKS',
-                    'rules' => 'numeric|is_unique[dtks_kip.dk_kks,dk_id,{dk_id}]|min_length[16]|max_length[16]',
-                    'errors' => [
-                        'numeric' => '{field} harus berisi angka.',
-                        'is_unique' => '{field} sudah terdaftar.',
-                        'min_length' => '{field} terlalu pendek',
-                        'max_length' => '{field} terlalu panjang',
-                    ]
-                ],
                 'dk_nik' => [
                     'label' => 'NIK',
                     'rules' => 'required|numeric|is_unique[dtks_kip.dk_nik,dk_id,{dk_id}]|min_length[16]|max_length[16]',

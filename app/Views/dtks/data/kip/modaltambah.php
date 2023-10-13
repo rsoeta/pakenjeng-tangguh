@@ -162,7 +162,7 @@ $kec_id = '32.05.33';
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_nama_sekolah">Nama Sekolah</label>
                             <div class="col-8 col-sm-8">
-                                <input type="text" name="dk_nama_sekolah" id="dk_nama_sekolah" class="form-control form-control-sm">
+                                <input type="text" name="dk_nama_sekolah" id="dk_nama_sekolah" class="form-control form-control-sm" style="text-transform:uppercase">
                                 <div class="invalid-feedback errordk_nama_sekolah"></div>
                             </div>
                         </div>
