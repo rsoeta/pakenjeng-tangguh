@@ -98,13 +98,6 @@ $desa_id = session()->get('kode_desa');
                                             </div>
                                         </div>
                                         <div class="form-group row nopadding">
-                                            <label class="col-4 col-sm-4 col-form-label" for="alamat">Alamat</label>
-                                            <div class="col-8 col-sm-8">
-                                                <input type="text" name="alamat" id="alamat" class="form-control form-control-sm" value="">
-                                                <div class="invalid-feedback erroralamat"></div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row nopadding">
                                             <label class="col-4 col-sm-4 col-form-label" for="kelurahan">Desa/Kel.</label>
                                             <div class="col-8 col-sm-8">
                                                 <select <?= $user >= 3 ? 'disabled' : ''; ?> id="kelurahan" name="kelurahan" class="form-select form-select-sm">
@@ -140,7 +133,13 @@ $desa_id = session()->get('kode_desa');
                                                 <div class="invalid-feedback errordatart"></div>
                                             </div>
                                         </div>
-
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="alamat">Alamat</label>
+                                            <div class="col-8 col-sm-8">
+                                                <input type="text" name="alamat" id="alamat" class="form-control form-control-sm" value="">
+                                                <div class="invalid-feedback erroralamat"></div>
+                                            </div>
+                                        </div>
                                         <div class="form-group row nopadding">
                                             <label class="col-4 col-sm-4 col-form-label" for="nama">Nama</label>
                                             <div class="col-8 col-sm-8">
@@ -499,7 +498,7 @@ $desa_id = session()->get('kode_desa');
                                         </div>
                                     </div>
                                     <div class="modal-footer mt-3 justify-content-between">
-                                        <button type="submit" class="btn btn-block btn-primary btnSimpan" id="btnSimpan">Simpan</button>
+                                        <button type="submit" class="btn btn-block btn-primary btnSimpan">Simpan</button>
                                     </div>
 
                                 </div>
@@ -519,7 +518,7 @@ $desa_id = session()->get('kode_desa');
         $('#dataCari').select2({
             dropdownParent: $('#modaltambah'),
             ajax: {
-                url: "<?php echo base_url('get_data_penduduk'); ?>",
+                url: "<?= base_url('get_data_penduduk'); ?>",
                 type: "POST",
                 dataType: 'json',
                 delay: 250,

@@ -77,6 +77,17 @@
                     </div>
                 </a>
             </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <a href="/non-kip">
+                    <div class="info-box heart">
+                        <span class="info-box-icon bg-gradient elevation-1"><i class="fas fa-users fa-1x mr-2"></i></span>
+                        <div class="info-box-content">
+                            <!-- <span class="info-box-number">10<small>%</small></span> -->
+                            <span class="info-box-text"><strong>Pendataan<br>Siswa-Siswi Non-KIP</strong></span>
+                        </div>
+                    </div>
+                </a>
+            </div>
         </div>
     </section>
     <section class="content mt-2">
@@ -600,7 +611,7 @@
 <script>
     'use strict';
     $(document).ready(function() {
-        $('body').addClass('sidebar-collapse');
+        // $('body').addClass('sidebar-collapse');
         $('.displayNone').css('display', 'none');
 
         function updateNilaiJumlah() {

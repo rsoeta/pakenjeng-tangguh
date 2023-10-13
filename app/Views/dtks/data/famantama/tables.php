@@ -32,6 +32,16 @@
         font-weight: bold;
     }
 </style>
+
+<?php
+$user = session()->get('role_id');
+$nik = session()->get('nik');
+$jabatan = session()->get('level');
+$desa_id = $user_login['kode_desa'];
+// echo deadline_usulan();
+?>
+
+
 <div class="content-wrapper mt-1">
     <section class="content-header">
         <div class="container-fluid">
@@ -43,13 +53,6 @@
     </section>
 
     <section class="content">
-        <?php
-        $user = session()->get('role_id');
-        $nik = session()->get('nik');
-        $jabatan = session()->get('level');
-        $desa_id = $user_login['kode_desa'];
-        // echo deadline_usulan();
-        ?>
         <div class="card-body">
             <!-- start modal dialog multi-step form wizard -->
             <!-- <div class="container"> -->
@@ -303,7 +306,7 @@
 <script>
     // 'use strict';
     $(document).ready(function() {
-        $('body').addClass('sidebar-collapse');
+        // $('body').addClass('sidebar-collapse');
         $('.displayNone').css('display', 'none');
 
     });

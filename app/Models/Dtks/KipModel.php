@@ -14,7 +14,7 @@ class KipModel extends Model
     protected $table      = 'dtks_kip';
     protected $primaryKey = 'dk_id';
 
-    protected $allowedFields = ["dk_kks", "dk_kip", "dk_nama_siswa", "dk_jenkel", "dk_nik", "dk_tmp_lahir", "dk_tgl_lahir", "dk_alamat", "dk_rt", "dk_rw", "dk_desa", "dk_kecamatan", "dk_nama_ibu", "dk_nama_ayah", "dk_nama_sekolah", "dk_jenjang", "dk_kelas", "dk_partisipasi", "dk_created_at", "dk_created_by", "dk_updated_at", "dk_updated_by"];
+    protected $allowedFields = ["dk_kks", "dk_nisn", "dk_kip", "dk_nama_siswa", "dk_jenkel", "dk_nik", "dk_tmp_lahir", "dk_tgl_lahir", "dk_alamat", "dk_rt", "dk_rw", "dk_desa", "dk_kecamatan", "dk_nama_ibu", "dk_nama_ayah", "dk_nama_sekolah", "dk_jenjang", "dk_kelas", "dk_partisipasi", "dk_foto_identitas", "dk_created_at", "dk_created_by", "dk_updated_at", "dk_updated_by"];
 
     protected $useTimestamps = false;
     protected $createdField  = 'dk_created_at';
@@ -23,44 +23,60 @@ class KipModel extends Model
 
     protected $skipValidation     = false;
 
-    var $column_order = array("", "dk_kks", "dk_kip", "dk_nama_siswa", "dk_alamat", "dk_rt", "dk_rw", "dk_jenjang", "dk_kelas", "dk_partisipasi");
+    var $column_order = array("", "dk_nama_siswa", "dk_nisn", "dk_kks", "dk_alamat", "dk_rt", "dk_rw", "dk_kelas");
 
-    var $order = array('dtks_kip.dk_id' => 'asc');
+    var $order = array('dtks_kip.dk_updated_at' => 'asc');
 
-    function get_datatables($filter1, $filter2, $filter3, $filter4)
+    function get_datatables($filter1, $filter2, $filter3, $filter4, $filter5, $filter6)
     {
-        // fil$filter1
+        // filter1
         if ($filter1 == "") {
             $kondisi_filter1 = "";
         } else {
             $kondisi_filter1 = " AND dk_desa = '$filter1'";
         }
 
-        // status
+        // filter2
         if ($filter2 == "") {
             $kondisi_filter2 = "";
         } else {
-            $kondisi_filter2 = " AND dk_nama_sekolah = '$filter2'";
+            $kondisi_filter2 = " AND dk_rw = '$filter2'";
         }
-        // rw
+
+        // filter3
         if ($filter3 == "") {
             $kondisi_filter3 = "";
         } else {
-            $kondisi_filter3 = " AND dk_jenjang = '$filter3'";
+            $kondisi_filter3 = " AND dk_rt = '$filter3'";
         }
-        // rt
+
+        // filter4
         if ($filter4 == "") {
             $kondisi_filter4 = "";
         } else {
-            $kondisi_filter4 = " AND dk_kelas = '$filter4'";
+            $kondisi_filter4 = " AND dk_nama_sekolah = '$filter4'";
+        }
+
+        // filter5
+        if ($filter5 == "") {
+            $kondisi_filter5 = "";
+        } else {
+            $kondisi_filter5 = " AND dk_jenjang = '$filter5'";
+        }
+
+        // filter6
+        if ($filter6 == "") {
+            $kondisi_filter6 = "";
+        } else {
+            $kondisi_filter6 = " AND dk_kelas = '$filter6'";
         }
 
         // search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "(dk_nama_siswa LIKE '%$search%' OR dk_nik LIKE '%$search%' OR dk_kks LIKE '%$search%' OR dk_kip LIKE '%$search%' OR dk_nama_ibu LIKE '%$search%' OR dk_nama_ayah LIKE '%$search%' OR dk_nama_sekolah LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "(dk_nama_siswa LIKE '%$search%' OR dk_nik LIKE '%$search%' OR dk_kks LIKE '%$search%' OR dk_kip LIKE '%$search%' OR dk_nama_ibu LIKE '%$search%' OR dk_nama_ayah LIKE '%$search%' OR dk_nama_sekolah LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
         } else {
-            $kondisi_search = "dtks_kip.dk_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "dtks_kip.dk_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
         }
 
         // order
@@ -76,10 +92,10 @@ class KipModel extends Model
         if ($_POST['length'] != -1);
         $db = db_connect();
         $builder = $db->table('dtks_kip');
-        $query = $builder->select('dk_id, dk_kks, dk_kip, dk_nik, dk_nama_siswa, dk_tmp_lahir, dk_tgl_lahir, dk_alamat, dk_rt, dk_rw, dk_nama_sekolah, dk_desa, name, dk_jenjang, sj_nama, dk_kelas, dk_partisipasi, ps_nama')
+        $query = $builder->select('dk_id, dk_kks, dk_nisn, dk_kip, dk_nik, dk_nama_siswa, dk_tmp_lahir, dk_tgl_lahir, dk_alamat, dk_rt, dk_rw, dk_nama_sekolah, dk_desa, name, dk_jenjang, dk_kelas, dk_partisipasi, dk_foto_identitas')
             ->join('tb_villages', 'tb_villages.id=dtks_kip.dk_desa')
-            ->join('tb_sekolah_jenjang', 'tb_sekolah_jenjang.sj_id=dtks_kip.dk_jenjang')
-            ->join('tb_sekolah_partisipasi', 'tb_sekolah_partisipasi.ps_id=dtks_kip.dk_partisipasi')
+            // ->join('tb_sekolah_jenjang', 'tb_sekolah_jenjang.sj_id=dtks_kip.dk_jenjang')
+            // ->join('tb_sekolah_partisipasi', 'tb_sekolah_partisipasi.ps_id=dtks_kip.dk_partisipasi')
             // ->join('tb_shdk', 'tb_shdk.id=dtks_kip.shdk')
             // ->join('tb_districts', 'tb_districts.id=dtks_kip.kecamatan')
             ->where($kondisi_search)
@@ -99,40 +115,52 @@ class KipModel extends Model
         return $query;
     }
 
-    function jumlah_filter($filter1, $filter2, $filter3, $filter4)
+    function jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter5, $filter6)
     {
-        // fil$filter1
+        // filter1
         if ($filter1 == "") {
             $kondisi_filter1 = "";
         } else {
             $kondisi_filter1 = " AND dk_desa = '$filter1'";
         }
-
-        // status
+        // filter2
         if ($filter2 == "") {
             $kondisi_filter2 = "";
         } else {
-            $kondisi_filter2 = " AND dk_nama_sekolah = '$filter2'";
+            $kondisi_filter2 = " AND dk_rw = '$filter2'";
         }
-        // rw
+        // filter3
         if ($filter3 == "") {
             $kondisi_filter3 = "";
         } else {
-            $kondisi_filter3 = " AND dk_jenjang = '$filter3'";
+            $kondisi_filter3 = " AND dk_rt = '$filter3'";
         }
-        // rt
+
+        // filter4
         if ($filter4 == "") {
             $kondisi_filter4 = "";
         } else {
-            $kondisi_filter4 = " AND dk_kelas = '$filter4'";
+            $kondisi_filter4 = " AND dk_nama_sekolah = '$filter4'";
+        }
+        // filter5
+        if ($filter5 == "") {
+            $kondisi_filter5 = "";
+        } else {
+            $kondisi_filter5 = " AND dk_jenjang = '$filter5'";
+        }
+        // filter6
+        if ($filter6 == "") {
+            $kondisi_filter6 = "";
+        } else {
+            $kondisi_filter6 = " AND dk_kelas = '$filter6'";
         }
 
         // kondisi search
         if ($_POST['search']['value']) {
             $search = $_POST['search']['value'];
-            $kondisi_search = "AND (dk_nama_siswa LIKE '%$search%' OR dk_nik LIKE '%$search%' OR dk_kks LIKE '%$search%' OR dk_kip LIKE '%$search%' OR dk_nama_ibu LIKE '%$search%' OR dk_nama_ayah LIKE '%$search%' OR dk_nama_sekolah LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "AND (dk_nama_siswa LIKE '%$search%' OR dk_nik LIKE '%$search%' OR dk_kks LIKE '%$search%' OR dk_kip LIKE '%$search%' OR dk_nama_ibu LIKE '%$search%' OR dk_nama_ayah LIKE '%$search%' OR dk_nama_sekolah LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
         } else {
-            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4";
+            $kondisi_search = "$kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter5 $kondisi_filter6";
         }
 
         $sQuery = "SELECT COUNT(dk_id) as jml FROM dtks_kip WHERE dk_id != '' $kondisi_search";

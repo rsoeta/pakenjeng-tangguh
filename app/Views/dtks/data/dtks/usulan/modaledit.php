@@ -198,7 +198,7 @@ $desa_id = session()->get('kode_desa');
                                         <label class="col-4 col-sm-4 col-form-label" for="jenis_pendidikan">Pendidikan</label>
                                         <div class="col-8 col-sm-8">
                                             <select id="jenis_pendidikan" name="jenis_pendidikan" class="form-select form-select-sm">
-                                                <option value="">-- Pilih Status Pekerjaan --</option>
+                                                <option value="">-- Pilih Status Pendidikan --</option>
                                                 <?php foreach ($pendidikan_kk as $row) { ?>
                                                     <option <?php if ($jenis_pendidikan == $row['pk_id']) {
                                                                 echo 'selected';

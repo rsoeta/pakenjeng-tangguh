@@ -6,6 +6,7 @@ use App\Models\Dtks\AuthModel;
 use App\Models\WilayahModel;
 use App\Models\GenModel;
 use App\Models\DeadlineModel;
+use App\Models\DeadlineGenModel;
 use App\Models\Dtks\LembagaModel;
 use App\Models\Dtks\MenuModel;
 
@@ -19,6 +20,7 @@ class Profil_Web extends BaseController
         $this->AuthModel = new AuthModel();
         $this->GenModel = new GenModel();
         $this->DeadlineModel = new DeadlineModel();
+        $this->DeadlineGenModel = new DeadlineGenModel();
         $this->LembagaModel = new LembagaModel();
         $this->WilayahModel = new WilayahModel();
         $this->MenuModel = new MenuModel();
@@ -59,6 +61,7 @@ class Profil_Web extends BaseController
             'nama_pemerintah' => $nama_pemerintah,
             'menu' => $this->MenuModel->orderBy('tm_parent_id', 'asc')->findAll(),
             'deadline' => $this->GenModel->getDeadline(),
+            'deadline_general' => $this->GenModel->getDeadlinePpks(),
 
         ];
         // dd($data);
@@ -353,6 +356,39 @@ class Profil_Web extends BaseController
     public function updateBatch()
     {
         $model = new DeadlineModel();
+
+        // Ambil data dari form
+        $dd_role = $this->request->getPost('dd_role');
+        $dd_waktu_start = $this->request->getPost('dd_waktu_start');
+        $dd_waktu_end = $this->request->getPost('dd_waktu_end');
+        $dd_id = $this->request->getPost('dd_id');
+
+        // Buat array untuk menyimpan data yang akan diupdate
+        $data = [];
+        foreach ($dd_id as $key => $value) {
+            $data[] = [
+                'dd_id' => $value,
+                'dd_role' => $dd_role[$key],
+                'dd_waktu_start' => $dd_waktu_start[$key],
+                'dd_waktu_end' => $dd_waktu_end[$key]
+            ];
+        }
+
+        // var_dump($data);
+        // die;
+        // Tambahkan pesan flash
+        session()->setFlashdata('success', 'Update batch berhasil');
+
+        // Simpan data ke dalam database menggunakan method updateBatch()
+        $model->updateData($data, 'dd_id'); // Ganti 'id' dengan primary key yang sesuai
+
+        // Redirect atau lakukan tindakan lainnya
+        return redirect()->to('/settings');
+    }
+
+    public function updateBatchGen()
+    {
+        $model = new DeadlineGenModel();
 
         // Ambil data dari form
         $dd_role = $this->request->getPost('dd_role');

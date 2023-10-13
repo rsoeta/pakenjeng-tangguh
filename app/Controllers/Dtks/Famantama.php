@@ -124,7 +124,6 @@ class Famantama extends BaseController
         }
     }
 
-
     public function tabel_data()
     {
         // var_dump(deadline_ppks());

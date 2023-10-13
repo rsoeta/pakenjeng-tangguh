@@ -196,14 +196,22 @@ $routes->post('lockBnba', 'Dtks\VervalBnba::lockBnba', ['filter' => 'authfilterd
 $routes->post('unlockBnba', 'Dtks\VervalBnba::unlockBnba', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 // OPERATOR KIP
-$routes->get('/operatorsch', 'Dtks\DataKip::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->get('datakip', 'Dtks\DataKip::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('tabel_kip', 'Dtks\DataKip::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->get('formTmbKip', 'Dtks\DataKip::formtambah', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('TmbKip', 'Dtks\DataKip::save', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('dltKip', 'Dtks\DataKip::delete', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('editKip', 'Dtks\DataKip::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('updateKip', 'Dtks\DataKip::update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->get('/operatorsch', 'Dtks\Datakip\DataKip::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->get('datakip\DataKip', 'Dtks\Datakip\DataKip::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('tabel_kip', 'Dtks\Datakip\DataKip::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->get('formTmbKip', 'Dtks\Datakip\DataKip::formtambah', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('TmbKip', 'Dtks\Datakip\DataKip::save', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('dltKip', 'Dtks\Datakip\DataKip::delete', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('editKip', 'Dtks\Datakip\DataKip::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('updateKip', 'Dtks\Datakip\DataKip::update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->get('non-kip', 'Dtks\Datakip\NonKIP::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->get('formTmbNonKip', 'Dtks\Datakip\NonKIP::formtambah', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('tabel_nonkip', 'Dtks\Datakip\NonKIP::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('tmbNonKip', 'Dtks\Datakip\NonKIP::save', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('editNonKip', 'Dtks\Datakip\NonKIP::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('dltNonKip', 'Dtks\Datakip\NonKIP::delete', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+
+
 
 // OPERATOR BPNT
 $routes->get('bpnt', 'Dtks\BpntGanti::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -265,6 +273,7 @@ $routes->post('get_nama_menu', 'Profil\Profil_Web::get_nama_menu', ['filter' => 
 $routes->post('submit_web_general', 'Profil\Profil_Web::submit_general', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('update_web_general', 'Profil\Profil_Web::update_general', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updateBatch', 'Profil\Profil_Web::updateBatch', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('updateBatchGen', 'Profil\Profil_Web::updateBatchGen', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 
 /*

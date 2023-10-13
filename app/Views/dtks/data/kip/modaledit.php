@@ -1,7 +1,7 @@
 <?php
 $user = session()->get('role_id');
 $nik = session()->get('nik');
-$jabatan = session()->get('opr_sch');
+// $jabatan = session()->get('opr_sch');
 $desa_id = session()->get('kode_desa');
 $kec_id = '32.05.33';
 ?>
@@ -11,23 +11,33 @@ $kec_id = '32.05.33';
 <div class="modal fade" id="modaledit" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modaleditLabel">Form. Edit Data</h5>
+            <div class="modal-header" style="background-color: var(--purple);">
+                <img src="<?= logoApp(); ?>" alt="<?= nameApp(); ?> Logo" class="brand-image" style="width:30px; margin-right: auto">
+                <h5 class="modal-title" id="exampleModalLabel" style="color: white;"><?= $title; ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-
-            <?php echo form_open('updateKip', ['class' => 'formsimpan']) ?>
+            <?php echo form_open_multipart('', ['class' => 'formsimpan']) ?>
             <div class="modal-body">
                 <?= csrf_field(); ?>
                 <div class="row">
+                    <!-- ID -->
                     <div class="form-group row nopadding" hidden>
                         <label class="col-4 col-sm-4 col-form-label" for="dk_id">dk_id</label>
                         <div class="col-8 col-sm-8">
-                            <input type="text" name="dk_id" dk_id="dk_id" class="form-control form-control-sm" value="<?= $dk_id; ?>">
+                            <input type="text" name="dk_id" dk_id="dk_id" class="form-control form-control-sm" value="<?= set_value('dk_id', $dk_id); ?>">
                             <div class="invalid-feedback errordk_id"></div>
                         </div>
                     </div>
                     <div class="col-md-6">
+                        <!-- NISN -->
+                        <div class="form-group row nopadding">
+                            <label class="col-4 col-sm-4 col-form-label" for="dk_nisn">NISN</label>
+                            <div class="col-8 col-sm-8">
+                                <input type="text" name="dk_nisn" id="dk_nisn" class="form-control form-control-sm" style="text-transform:uppercase" autocomplete="off" value="<?= set_value('dk_nisn', $dk_nisn); ?>">
+                                <div class="invalid-feedback errordk_nisn"></div>
+                            </div>
+                        </div>
+                        <!-- NO. KKS -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_kks">No. KKS</label>
                             <div class="col-8 col-sm-8">
@@ -35,6 +45,7 @@ $kec_id = '32.05.33';
                                 <div class="invalid-feedback errordk_kks"></div>
                             </div>
                         </div>
+                        <!-- NO. KIP -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_kip">No. KIP</label>
                             <div class="col-8 col-sm-8">
@@ -42,6 +53,7 @@ $kec_id = '32.05.33';
                                 <div class="invalid-feedback errordk_kip"></div>
                             </div>
                         </div>
+                        <!-- NIK -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_nik">NIK</label>
                             <div class="col-8 col-sm-8">
@@ -49,6 +61,7 @@ $kec_id = '32.05.33';
                                 <div class="invalid-feedback errordk_nik"></div>
                             </div>
                         </div>
+                        <!-- Nama Siswa -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_nama_siswa">Nama Siswa</label>
                             <div class="col-8 col-sm-8">
@@ -56,6 +69,7 @@ $kec_id = '32.05.33';
                                 <div class="invalid-feedback errordk_nama_siswa"></div>
                             </div>
                         </div>
+                        <!-- Jenis Kelamin -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_jenkel">Jenis Kelamin</label>
                             <div class="col-8 col-sm-8">
@@ -74,6 +88,7 @@ $kec_id = '32.05.33';
                                 <div class="invalid-feedback errordk_jenkel"></div>
                             </div>
                         </div>
+                        <!-- Tempat Lahir -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_tmp_lahir">Tempat Lahir</label>
                             <div class="col-8 col-sm-8">
@@ -81,6 +96,7 @@ $kec_id = '32.05.33';
                                 <div class="invalid-feedback errordk_tmp_lahir"></div>
                             </div>
                         </div>
+                        <!-- Tanggal Lahir -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_tgl_lahir">Tgl Lahir</label>
                             <div class="col-8 col-sm-8">
@@ -88,6 +104,7 @@ $kec_id = '32.05.33';
                                 <div class="invalid-feedback errordk_tgl_lahir"></div>
                             </div>
                         </div>
+                        <!-- Alamat -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_alamat">Alamat</label>
                             <div class="col-8 col-sm-8">
@@ -95,6 +112,7 @@ $kec_id = '32.05.33';
                                 <div class="invalid-feedback errordk_alamat"></div>
                             </div>
                         </div>
+                        <!-- No. RT/RW -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_rt">No.RT</label>
                             <div class="col-3 col-sm-3">
@@ -109,6 +127,7 @@ $kec_id = '32.05.33';
                         </div>
                     </div>
                     <div class="col-md-6">
+                        <!-- Desa/Kelurahan -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_desa">Desa/Kelurahan</label>
                             <div class="col-8 col-sm-8">
@@ -121,20 +140,7 @@ $kec_id = '32.05.33';
                                 <div class="invalid-feedback errordk_desa"></div>
                             </div>
                         </div>
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="dk_kecamatan">Kecamatan</label>
-                            <div class="col-8 col-sm-8">
-                                <select <?php echo $user >= 4  ? 'readonly="readonly" tabindex="-1" aria-disabled="true"' : '' ?> id="dk_kecamatan" name="dk_kecamatan" class="form-select form-select-sm">
-                                    <option value="">-- Pilih Kecamatan --</option>
-                                    <?php foreach ($kecamatan as $row) { ?>
-                                        <option <?php if ($kec_id == $row['id']) {
-                                                    echo 'selected';
-                                                } ?> value="<?= $row['id'] ?>"> <?php echo $row['name']; ?></option>
-                                    <?php } ?>
-                                </select>
-                                <div class="invalid-feedback errordk_kecamatan"></div>
-                            </div>
-                        </div>
+                        <!-- Nama Ibu -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_nama_ibu">Nama Ibu</label>
                             <div class="col-8 col-sm-8">
@@ -142,6 +148,7 @@ $kec_id = '32.05.33';
                                 <div class="invalid-feedback errordk_nama_ibu"></div>
                             </div>
                         </div>
+                        <!-- Nama Ayah -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_nama_ayah">Nama Ayah</label>
                             <div class="col-8 col-sm-8">
@@ -149,56 +156,19 @@ $kec_id = '32.05.33';
                                 <div class="invalid-feedback errordk_nama_ayah"></div>
                             </div>
                         </div>
+                        <!-- Nama Sekolah -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_nama_sekolah">Nama Sekolah</label>
                             <div class="col-8 col-sm-8">
-                                <select <?php echo $user > 2 ? 'readonly="readonly" tabindex="-1" aria-disabled="true"' : ''; ?> id="dk_nama_sekolah" name="dk_nama_sekolah" class="form-select form-select-sm">
-                                    <?php foreach ($nama_sekolah as $row) { ?>
-                                        <option <?php echo $jabatan == $row['opr_sch'] ? 'selected' : ''; ?> value="<?= $row['opr_sch']; ?>"><?= $row['opr_sch']; ?></option>
-                                    <?php } ?>
-                                </select>
+                                <input type="text" name="dk_nama_sekolah" id="dk_nama_sekolah" class="form-control form-control-sm" value="<?= set_value('dk_nama_sekolah', $dk_nama_sekolah); ?>">
                                 <div class="invalid-feedback errordk_nama_sekolah"></div>
                             </div>
                         </div>
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="dk_jenjang">Jenjang</label>
-                            <div class="col-8 col-sm-8">
-                                <select id="dk_jenjang" name="dk_jenjang" class="form-select form-select-sm">
-                                    <?php foreach ($jenjang_sekolah as $row) { ?>
-                                        <option <?php echo $dk_jenjang == $row['sj_id'] ? 'selected' : ''; ?> value="<?= $row['sj_id']; ?>"><?= $row['sj_nama']; ?></option>
-                                    <?php } ?>
-                                </select>
-                                <div class="invalid-feedback errordk_jenjang"></div>
-                            </div>
-                        </div>
+                        <!-- Kelas -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_kelas">Kelas</label>
                             <div class="col-8 col-sm-8">
                                 <input type="number" name="dk_kelas" id="dk_kelas" class="form-control form-control-sm" value="<?= set_value('dk_kelas', $dk_kelas); ?>">
-                            </div>
-                        </div>
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="dk_partisipasi">Partisipasi</label>
-                            <div class="col-8 col-sm-8">
-                                <select id="dk_partisipasi" name="dk_partisipasi" class="form-select form-select-sm">
-                                    <option value="">[ Kosong ]</option>
-                                    <?php foreach ($partisipasi_sekolah as $row) { ?>
-                                        <option <?php echo $dk_partisipasi == $row['ps_id'] ? 'selected' : '' ?> value="<?= $row['ps_id']; ?>"><?= $row['ps_nama']; ?></option>
-                                    <?php } ?>
-                                </select>
-                                <div class="invalid-feedback errordk_partisipasi"></div>
-                            </div>
-                        </div>
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="dk_created_by">Editor</label>
-                            <div class="col-8 col-sm-8">
-                                <select <?php echo $user > 2 ? 'readonly="readonly" tabindex="-1" aria-disabled="true"' : ''; ?> id="dk_created_by" name="dk_created_by" class="form-select form-select-sm">
-                                    <option value="">[ Kosong ]</option>
-                                    <?php foreach ($users as $row) { ?>
-                                        <option <?php echo $nik == $row['nik'] ? 'selected' : ''; ?> value="<?= $row['nik']; ?>"><?= strtoupper($row['fullname']); ?></option>
-                                    <?php } ?>
-                                </select>
-                                <div class="invalid-feedback errordk_created_by"></div>
                             </div>
                         </div>
                     </div>
@@ -207,16 +177,17 @@ $kec_id = '32.05.33';
             <div class="modal-footer">
                 <div class="card-body row">
                     <div class="col-md-6 mt-1">
-                        <button type="button" class="btn btn-secondary btn-block" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary btn-block" data-bs-dismiss="modal">Tutup</button>
                     </div>
-                    <div class="col-md-6 mt-1">
-                        <button type="submit" class="btn btn-primary btn-block btnsimpan">Update</button>
-                    </div>
+                    <?php if ($user < 4) {; ?>
+                        <div class="col-md-6 mt-1">
+                            <button type="submit" class="btn btn-primary btn-block btnsimpan">Update</button>
+                        </div>
+                    <?php } ?>
                 </div>
             </div>
             <!-- </form> -->
-            <?php echo form_close();
-            ?>
+            <?php echo form_close(); ?>
         </div>
     </div>
 </div>

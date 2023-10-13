@@ -65,7 +65,7 @@ class Usulan22 extends BaseController
                 'datarw' => $this->RwModel->noRw(),
                 'bansos' => $this->BansosModel->findAll(),
                 'pekerjaan' => $this->PekerjaanModel->orderBy('pk_nama', 'asc')->findAll(),
-                'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
+                'statusKawin' => $this->StatusKawinModel->findAll(),
                 'shdk' => $this->ShdkModel->findAll(),
                 'percentages' => $this->VervalPbiModel->jml_persentase(),
                 'statusRole' => $this->GenModel->getStatusRole(),
@@ -91,7 +91,7 @@ class Usulan22 extends BaseController
                 'datart' => $this->RtModel->noRt(),
                 'bansos' => $this->BansosModel->findAll(),
                 'pekerjaan' => $this->PekerjaanModel->orderBy('pk_nama', 'asc')->findAll(),
-                'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
+                'statusKawin' => $this->StatusKawinModel->findAll(),
                 'shdk' => $this->ShdkModel->findAll(),
                 'percentages' => $this->VervalPbiModel->jml_persentase(),
                 'statusRole' => $this->GenModel->getStatusRole(),
@@ -257,7 +257,7 @@ class Usulan22 extends BaseController
                     'datart' => $this->RtModel->noRt(),
                     'bansos' => $this->BansosModel->findAll(),
                     'pekerjaan' => $this->PekerjaanModel->orderBy('pk_nama', 'asc')->findAll(),
-                    'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
+                    'statusKawin' => $this->StatusKawinModel->findAll(),
                     'shdk' => $this->ShdkModel->findAll(),
                     'users' => $users->findAll(),
                     'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
@@ -689,32 +689,6 @@ class Usulan22 extends BaseController
             } else {
                 $data = [];
             }
-            // } else {
-            //     if ($role === '1') {
-            //         $builder->select('*');
-            //         $query = $builder->get();
-            //         $data = $query->getResult();
-            //     } elseif ($role === '2') {
-            //         $builder->select('*');
-            //         $builder->distinct('du_nik');
-            //         $query = $builder->get();
-            //         $data = $query->getResult();
-            //     } elseif ($role === '3') {
-            //         $builder->select('*');
-            //         $builder->where('kelurahan', $kode_desa);
-            //         $builder->distinct('du_nik');
-            //         $query = $builder->get();
-            //         $data = $query->getResult();
-            //     } elseif ($role === '4') {
-            //         $builder->select('*');
-            //         $builder->where('kelurahan', $kode_desa);
-            //         $builder->where('rw', $kode_rw);
-            //         $builder->distinct('du_nik');
-            //         $query = $builder->get();
-            //         $data = $query->getResult();
-            //     } else {
-            //         $data = [];
-            //     }
         }
         foreach ($data as $pdk) {
             $penduduk[] = array(
@@ -786,7 +760,7 @@ class Usulan22 extends BaseController
                 'title' => 'Form. Edit Data',
                 'shdk' => $this->ShdkModel->findAll(),
                 'pekerjaan' => $this->PekerjaanModel->orderBy('pk_nama', 'asc')->findAll(),
-                'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
+                'statusKawin' => $this->StatusKawinModel->findAll(),
                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
                 'rw' => $this->RwModel->noRw(),
                 'rt' => $this->RtModel->noRt(),
@@ -880,7 +854,7 @@ class Usulan22 extends BaseController
                 'title' => 'Form. View Data',
                 'shdk' => $this->ShdkModel->findAll(),
                 'pekerjaan' => $this->PekerjaanModel->orderBy('pk_nama', 'asc')->findAll(),
-                'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
+                'statusKawin' => $this->StatusKawinModel->findAll(),
                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
                 'rw' => $this->RwModel->noRw(),
                 'rt' => $this->RtModel->noRt(),
