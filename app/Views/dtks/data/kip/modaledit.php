@@ -29,6 +29,14 @@ $kec_id = '32.05.33';
                         </div>
                     </div>
                     <div class="col-md-6">
+                        <!-- NO. KIP -->
+                        <div class="form-group row nopadding">
+                            <label class="col-4 col-sm-4 col-form-label" for="dk_kip">No. KIP</label>
+                            <div class="col-8 col-sm-8">
+                                <input type="text" name="dk_kip" id="dk_kip" class="form-control form-control-sm" style="text-transform:uppercase" autocomplete="off" value="<?= set_value('dk_kip', $dk_kip); ?>">
+                                <div class="invalid-feedback errordk_kip"></div>
+                            </div>
+                        </div>
                         <!-- NISN -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_nisn">NISN</label>
@@ -37,20 +45,12 @@ $kec_id = '32.05.33';
                                 <div class="invalid-feedback errordk_nisn"></div>
                             </div>
                         </div>
-                        <!-- NO. KKS -->
+                        <!-- NO. KK -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_nkk">No. KKS</label>
                             <div class="col-8 col-sm-8">
                                 <input type="text" name="dk_nkk" id="dk_nkk" class="form-control form-control-sm" style="text-transform:uppercase" autocomplete="off" value="<?= set_value('dk_nkk', $dk_nkk); ?>">
                                 <div class="invalid-feedback errordk_nkk"></div>
-                            </div>
-                        </div>
-                        <!-- NO. KIP -->
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="dk_kip">No. KIP</label>
-                            <div class="col-8 col-sm-8">
-                                <input type="text" name="dk_kip" id="dk_kip" class="form-control form-control-sm" style="text-transform:uppercase" autocomplete="off" value="<?= set_value('dk_kip', $dk_kip); ?>">
-                                <div class="invalid-feedback errordk_kip"></div>
                             </div>
                         </div>
                         <!-- NIK -->
@@ -104,6 +104,21 @@ $kec_id = '32.05.33';
                                 <div class="invalid-feedback errordk_tgl_lahir"></div>
                             </div>
                         </div>
+                        <!-- Desa/Kelurahan -->
+                        <div class="form-group row nopadding">
+                            <label class="col-4 col-sm-4 col-form-label" for="dk_desa">Desa/Kelurahan</label>
+                            <div class="col-8 col-sm-8">
+                                <select <?php echo $user >= 4  ? 'readonly="readonly" tabindex="-1" aria-disabled="true"' : '' ?> id="dk_desa" name="dk_desa" class="form-select form-select-sm">
+                                    <option value="">-- Pilih Desa / Kelurahan --</option>
+                                    <?php foreach ($desa as $row) { ?>
+                                        <option <?php echo $desa_id == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id'] ?>"> <?php echo $row['name']; ?></option>
+                                    <?php } ?>
+                                </select>
+                                <div class="invalid-feedback errordk_desa"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
                         <!-- Alamat -->
                         <div class="form-group row nopadding">
                             <label class="col-4 col-sm-4 col-form-label" for="dk_alamat">Alamat</label>
@@ -121,23 +136,8 @@ $kec_id = '32.05.33';
                             </div>
                             <label class="col-2 col-sm-2 col-form-label" for="dk_rw">No.RW</label>
                             <div class="col-3 col-sm-3">
-                                <input type="number" name="dk_rw" id="dk_rw" class="form-control form-control-sm" style="text-transform:uppercase;" value="<?= set_value('dk_rw', $dk_rw); ?>">
+                                <input <?= $user >= 4 ? 'disabled = "true"' : ''; ?> type="number" name="dk_rw" id="dk_rw" class="form-control form-control-sm" style="text-transform:uppercase;" value="<?= set_value('dk_rw', $dk_rw); ?>">
                                 <div class="invalid-feedback errordk_rw"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <!-- Desa/Kelurahan -->
-                        <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="dk_desa">Desa/Kelurahan</label>
-                            <div class="col-8 col-sm-8">
-                                <select <?php echo $user >= 4  ? 'readonly="readonly" tabindex="-1" aria-disabled="true"' : '' ?> id="dk_desa" name="dk_desa" class="form-select form-select-sm">
-                                    <option value="">-- Pilih Desa / Kelurahan --</option>
-                                    <?php foreach ($desa as $row) { ?>
-                                        <option <?php echo $desa_id == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id'] ?>"> <?php echo $row['name']; ?></option>
-                                    <?php } ?>
-                                </select>
-                                <div class="invalid-feedback errordk_desa"></div>
                             </div>
                         </div>
                         <!-- Nama Ibu -->
@@ -171,19 +171,40 @@ $kec_id = '32.05.33';
                                 <input type="number" name="dk_kelas" id="dk_kelas" class="form-control form-control-sm" value="<?= set_value('dk_kelas', $dk_kelas); ?>">
                             </div>
                         </div>
+                        <!-- Dokumen -->
+                        <div class="col-sm-12 col-12 mt-2">
+                            <label class="label-center mt-2">Foto KK</label>
+                            <div class="form-group row nopadding">
+                                <div class="col-10 mt-2">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="fas fa-address-card"></i></span>
+                                        </div>
+                                        <input type="file" class="form-control form-control-sm" spellcheck="false" name="dk_foto_identitas" id="dk_foto_identitas" onchange="previewImgId()" accept="image/*" capture />
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <a download="<?= $dk_foto_identitas; ?>" href="<?= kip_foto($dk_foto_identitas, 'nonkip_foto_kk'); ?>">
+                                        <img class="img-preview-id" src="<?= kip_foto($dk_foto_identitas, 'nonkip_foto_kk'); ?>" style="height: 30px; width: 40px; border-radius: 2px;">
+                                    </a>
+                                    <br>
+                                    <p for="dk_foto_identitas">Preview</p>
+                                    <div class="invalid-feedback errordk_foto_identitas"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <div class="card-body row">
-                    <div class="col-md-6 mt-1">
+                    <div class="col-6">
                         <button type="button" class="btn btn-secondary btn-block" data-bs-dismiss="modal">Tutup</button>
                     </div>
-                    <?php if ($user < 4) {; ?>
-                        <div class="col-md-6 mt-1">
-                            <button type="submit" class="btn btn-primary btn-block btnsimpan">Update</button>
-                        </div>
-                    <?php } ?>
+                    <div class="col-6">
+                        <input type="datetime-local" name="updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
+                        <button type="submit" class="btn btn-primary btn-block btnSimpan">Update</button>
+                    </div>
                 </div>
             </div>
             <!-- </form> -->
@@ -194,24 +215,43 @@ $kec_id = '32.05.33';
 
 <script>
     $(document).ready(function() {
-        $('.formsimpan').submit(function(e) {
+        $('.btnSimpan').click(function(e) {
             e.preventDefault();
-
+            let $kelurahan = $('#dk_desa').removeAttr('disabled', '');
+            let $datarw = $('#dk_rw').removeAttr('disabled', '');
+            setTimeout(function() {
+                $kelurahan.attr('disabled', true);
+                $datarw.attr('disabled', true);
+            }, 500);
+            let form = $('.formsimpan')[0];
+            let data = new FormData(form);
             $.ajax({
                 type: "POST",
-                url: $(this).attr('action'),
-                data: $(this).serialize(),
+                url: "<?= site_url('/upNonKip'); ?>",
+                data: data,
+                enctype: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                cache: false,
                 dataType: "json",
                 beforeSend: function() {
-                    $('.btnsimpan').attr('disable', 'disabled');
-                    $('.btnsimpan').html('<i class="fa fa-spin fa-spinner"></i>');
+                    $('.btnSimpan').attr('disable', 'disabled');
+                    $('.btnSimpan').html('<i class="fa fa-spin fa-spinner"></i>');
                 },
                 complete: function() {
-                    $('.btnsimpan').removeAttr('disable');
-                    $('.btnsimpan').html('Update');
+                    $('.btnSimpan').removeAttr('disable');
+                    $('.btnSimpan').html('Update');
                 },
                 success: function(response) {
                     if (response.error) {
+                        if (response.error.dk_nisn) {
+                            $('#dk_nisn').addClass('is-invalid');
+                            $('.errordk_nisn').html(response.error.dk_nisn);
+                        } else {
+                            $('#dk_nisn').removeClass('is-invalid');
+                            $('.errordk_nisn').html('');
+                        }
+
                         if (response.error.dk_nkk) {
                             $('#dk_nkk').addClass('is-invalid');
                             $('.errordk_nkk').html(response.error.dk_nkk);
@@ -276,6 +316,38 @@ $kec_id = '32.05.33';
                             $('.errordk_alamat').html('');
                         }
 
+                        if (response.error.dk_rt) {
+                            $('#dk_rt').addClass('is-invalid');
+                            $('.errordk_rt').html(response.error.dk_rt);
+                        } else {
+                            $('#dk_rt').removeClass('is-invalid');
+                            $('.errordk_rt').html('');
+                        }
+
+                        if (response.error.dk_rw) {
+                            $('#dk_rw').addClass('is-invalid');
+                            $('.errordk_rw').html(response.error.dk_rw);
+                        } else {
+                            $('#dk_rw').removeClass('is-invalid');
+                            $('.errordk_rw').html('');
+                        }
+
+                        if (response.error.dk_desa) {
+                            $('#dk_desa').addClass('is-invalid');
+                            $('.errordk_desa').html(response.error.dk_desa);
+                        } else {
+                            $('#dk_desa').removeClass('is-invalid');
+                            $('.errordk_desa').html('');
+                        }
+
+                        if (response.error.dk_nama_sekolah) {
+                            $('#dk_nama_sekolah').addClass('is-invalid');
+                            $('.errordk_nama_sekolah').html(response.error.dk_nama_sekolah);
+                        } else {
+                            $('#dk_nama_sekolah').removeClass('is-invalid');
+                            $('.errordk_nama_sekolah').html('');
+                        }
+
                         if (response.error.dk_nama_ibu) {
                             $('#dk_nama_ibu').addClass('is-invalid');
                             $('.errordk_nama_ibu').html(response.error.dk_nama_ibu);
@@ -292,22 +364,6 @@ $kec_id = '32.05.33';
                             $('.errordk_nama_ayah').html('');
                         }
 
-                        if (response.error.dk_nama_sekolah) {
-                            $('#dk_nama_sekolah').addClass('is-invalid');
-                            $('.errordk_nama_sekolah').html(response.error.dk_nama_sekolah);
-                        } else {
-                            $('#dk_nama_sekolah').removeClass('is-invalid');
-                            $('.errordk_nama_sekolah').html('');
-                        }
-
-                        if (response.error.dk_jenjang) {
-                            $('#dk_jenjang').addClass('is-invalid');
-                            $('.errordk_jenjang').html(response.error.dk_jenjang);
-                        } else {
-                            $('#dk_jenjang').removeClass('is-invalid');
-                            $('.errordk_jenjang').html('');
-                        }
-
                         if (response.error.dk_kelas) {
                             $('#dk_kelas').addClass('is-invalid');
                             $('.errordk_kelas').html(response.error.dk_kelas);
@@ -316,12 +372,12 @@ $kec_id = '32.05.33';
                             $('.errordk_kelas').html('');
                         }
 
-                        if (response.error.dk_partisipasi) {
-                            $('#dk_partisipasi').addClass('is-invalid');
-                            $('.errordk_partisipasi').html(response.error.dk_partisipasi);
+                        if (response.error.dk_foto_identitas) {
+                            $('#dk_foto_identitas').addClass('is-invalid');
+                            $('.errordk_foto_identitas').html(response.error.dk_foto_identitas);
                         } else {
-                            $('#dk_partisipasi').removeClass('is-invalid');
-                            $('.errordk_partisipasi').html('');
+                            $('#dk_foto_identitas').removeClass('is-invalid');
+                            $('.errordk_foto_identitas').html('');
                         }
 
                     } else {
@@ -343,20 +399,18 @@ $kec_id = '32.05.33';
                                 title: response.sukses,
                             });
                             // window.location.reload();
+                            $('#modaledit').modal('hide');
                             table.draw();
-
                         }
-
                         $('#modaledit').modal('hide');
                         table.draw();
-
                     }
                 },
                 error: function(xhr, ajaxOptions, thrownError) {
                     alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
                 }
             });
-        })
+        });
 
         $('#datarw').change(function() {
             var desa = $('#kelurahan').val();

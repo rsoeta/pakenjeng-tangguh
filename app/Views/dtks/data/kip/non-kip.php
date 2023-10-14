@@ -56,16 +56,19 @@ $desa_id = session()->get('kode_desa');
         <!-- <div class="container-fluid"> -->
         <div class="card-body">
             <div class="row">
-                <div class="col-12 col-sm-4 mb-2" <?= $user > 3 ?  'hidden' :  ''; ?>>
-                    <a href="/expKip" type="button" class="btn btn-outline-success shadow btn-block">
-                        <i class="fa fa-file-excel"></i> Export Data
-                    </a>
-                </div>
-                <div class="col-6 col-sm-4 mb-2">
-                    <button type="button" class="btn add-button tombolTambah">
-                        <span class="plus-icon"><i class="fas fa-user-plus fa-sm" style="color: white;"></i></span>
-                        <!-- <i class="fa fa-plus"></i> Tambah Data -->
-                    </button>
+                <?= form_open('exportNonKip', ['target' => 'blank']); ?>
+                <div class="col-12">
+                    <div class="col-6 col-sm-3 mb-2 ml-auto" <?= $user > 3 ?  'hidden' :  ''; ?>>
+                        <button type="submit" name="btnExpData" class="btn btn-outline-success shadow btn-block" id="exportExcel">
+                            <i class="fa fa-file-excel"></i> Export Data
+                        </button>
+                    </div>
+                    <div class="col-6 col-sm-4 mb-2">
+                        <button type="button" class="btn add-button tombolTambah">
+                            <span class="plus-icon"><i class="fas fa-user-plus fa-sm" style="color: white;"></i></span>
+                            <!-- <i class="fa fa-plus"></i> Tambah Data -->
+                        </button>
+                    </div>
                 </div>
                 <div class="row mb-2">
                     <div class="col-sm-3 col-6 mb-2">
@@ -118,6 +121,7 @@ $desa_id = session()->get('kode_desa');
                             <?php } ?>
                         </select>
                     </div>
+                    <?= form_close(); ?>
                     <br>
                     <table class="table" id="tabel_data" style="width: 100%;">
                         <thead class="text-white bg-gradient-purple">
@@ -271,7 +275,6 @@ $desa_id = session()->get('kode_desa');
 
     });
 
-
     function edit_person(dk_id) {
         //Ajax Load data from ajax
         $.ajax({
@@ -335,6 +338,16 @@ $desa_id = session()->get('kode_desa');
             imgPreview.src = e.target.result;
         }
     }
+
+    $(function() {
+        $('#exportExcel').click(function() {
+            var $elt = $('#desa').removeAttr('disabled', '');
+            setTimeout(function() {
+                $elt.attr('disabled', true);
+            }, 500);
+
+        });
+    });
 </script>
 
 <?= $this->endSection(); ?>

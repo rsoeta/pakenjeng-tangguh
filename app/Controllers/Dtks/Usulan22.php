@@ -5,7 +5,6 @@ namespace App\Controllers\Dtks;
 
 use App\Controllers\BaseController;
 use App\Models\Dtks\AuthModel;
-use App\Models\Dtks\DtksModel;
 use App\Models\Dtks\Usulan22Model;
 use App\Models\WilayahModel;
 use App\Models\RwModel;
@@ -19,7 +18,6 @@ use App\Models\Dtks\UsersModel;
 use App\Models\Dtks\VeriVali09Model;
 use App\Models\Dtks\VervalPbiModel;
 use App\Models\Dtks\DisabilitasJenisModel;
-use App\Models\Dtks\LembagaModel;
 use App\Models\Dtks\CsvReportModel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -1119,6 +1117,7 @@ class Usulan22 extends BaseController
                         'created_by' => $validation->getError('created_by'),
                     ]
                 ];
+                echo json_encode($msg);
             } else {
 
                 $duFotoIdentitas = $_FILES['du_foto_identitas']['name'];

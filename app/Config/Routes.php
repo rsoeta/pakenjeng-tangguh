@@ -209,7 +209,9 @@ $routes->get('formTmbNonKip', 'Dtks\Datakip\NonKIP::formtambah', ['filter' => 'a
 $routes->post('tabel_nonkip', 'Dtks\Datakip\NonKIP::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tmbNonKip', 'Dtks\Datakip\NonKIP::save', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('editNonKip', 'Dtks\Datakip\NonKIP::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('upNonKip', 'Dtks\Datakip\NonKIP::update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('dltNonKip', 'Dtks\Datakip\NonKIP::delete', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('exportNonKip', 'Dtks\Datakip\NonKIP::export', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 
 

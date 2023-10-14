@@ -379,6 +379,20 @@ function usulan_foto($fileName = '', $dir = '', $defFile = '')
     # code...
 }
 
+function kip_foto($fileName = '', $dir = '', $defFile = '')
+{
+    if ($fileName !== '' && $fileName !== null && file_exists(FCPATH . 'data/kip_foto/' . $dir . '/' . $fileName)) {
+        return base_url('data/kip_foto/' . $dir . '/' . $fileName);
+    } else {
+        if ($defFile == '') {
+            return base_url('assets/images/image_not_available.jpg');
+        } else {
+            return base_url('assets/images/' . $defFile);
+        }
+    }
+    # code...
+}
+
 function ppks_foto($fileName = '', $dir = '', $defFile = '')
 {
     if ($fileName !== '' && $fileName !== null && file_exists(FCPATH . 'data/ppks_kpm/' . $dir . '/' . $fileName)) {

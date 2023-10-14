@@ -1,9 +1,8 @@
 <?php
 $user = session()->get('role_id');
 $nik = session()->get('nik');
-$jabatan = session()->get('opr_sch');
+$jabatan = session()->get('level');
 $desa_id = session()->get('kode_desa');
-$kec_id = '32.05.33';
 ?>
 
 <!-- Modal -->
@@ -121,7 +120,12 @@ $kec_id = '32.05.33';
                             </div>
                             <label class="col-2 col-sm-2 col-form-label" for="dk_rw">No.RW</label>
                             <div class="col-3 col-sm-3">
-                                <input type="number" name="dk_rw" id="dk_rw" class="form-control form-control-sm" style="text-transform:uppercase;" <?php echo $user >= 4  ? 'readonly="readonly" tabindex="-1" aria-disabled="true"' : '' ?>>
+                                <select <?= $user >= 4 ? 'disabled = "true"' : ''; ?> class="form-control form-control-sm" name="dk_rw" id="dk_rw">
+                                    <option value="">[ Semua RW ]</option>
+                                    <?php foreach ($datarw as $row) { ?>
+                                        <option <?= $jabatan == $row['no_rw'] ? 'selected' : ''; ?> value="<?= $row['no_rw']; ?>"><?= $row['no_rw']; ?></option>
+                                    <?php } ?>
+                                </select>
                                 <div class="invalid-feedback errordk_rw"></div>
                             </div>
                         </div>
@@ -181,7 +185,7 @@ $kec_id = '32.05.33';
                         </div>
                         <!-- Dokumen -->
                         <div class="col-sm-12 col-12 mt-2">
-                            <label class="label-center mt-2">Dokumen</label>
+                            <label class="label-center mt-2">Foto KK</label>
                             <div class="form-group row nopadding">
                                 <div class="col-10 mt-2">
                                     <div class="input-group">
@@ -189,13 +193,13 @@ $kec_id = '32.05.33';
                                             <span class="input-group-text"><i class="fas fa-address-card"></i></span>
                                         </div>
                                         <input type="file" class="form-control form-control-sm" spellcheck="false" name="dk_foto_identitas" id="dk_foto_identitas" onchange="previewImgId()" accept="image/*" capture="camera" capture required />
+                                        <div class="invalid-feedback errordk_foto_identitas"></div>
                                     </div>
                                 </div>
                                 <div class="col-2">
-                                    <img class="img-preview-id" src="<?= usulan_foto(null, 'foto_identitas'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                    <img class="img-preview-id" src="<?= usulan_foto(null, 'foto_identitas'); ?>" style="height: 30px; width: 40px; border-radius: 2px;">
                                     <br>
-                                    <label for="dk_foto_identitas">Foto KK</label>
-                                    <div class="invalid-feedback errordk_foto_identitas"></div>
+                                    <p for="dk_foto_identitas">Preview</p>
                                 </div>
                             </div>
                         </div>
@@ -207,6 +211,7 @@ $kec_id = '32.05.33';
                             <button type="button" class="btn btn-secondary btn-block" data-bs-dismiss="modal">Tutup</button>
                         </div>
                         <div class="col-6">
+                            <input type="datetime-local" name="updated_at" id="" value="<?= date('Y-m-d H:i:s'); ?>" hidden>
                             <button type="submit" class="btn btn-primary btn-block btnSimpan">Simpan</button>
                         </div>
                     </div>
@@ -276,8 +281,8 @@ $kec_id = '32.05.33';
 
         $('.btnSimpan').click(function(e) {
             e.preventDefault();
-            let $kelurahan = $('#desa').removeAttr('disabled', '');
-            let $datarw = $('#rw').removeAttr('disabled', '');
+            let $kelurahan = $('#dk_desa').removeAttr('disabled', '');
+            let $datarw = $('#dk_rw').removeAttr('disabled', '');
             setTimeout(function() {
                 $kelurahan.attr('disabled', true);
                 $datarw.attr('disabled', true);

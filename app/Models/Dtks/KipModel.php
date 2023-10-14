@@ -181,6 +181,7 @@ class KipModel extends Model
 
         return $sQuery;
     }
+
     function index()
     {
         $this->db->setDatabase('db_bend');
@@ -198,66 +199,25 @@ class KipModel extends Model
         return $log;
     }
 
-    public function getDtks()
+    public function dataExport($filter1, $filter2, $filter3)
     {
-        return $this->db->table('dtks_usulan21')->get()->getResultArray();
-    }
-    public function getData()
-    {
-        $jbt = (session()->get('jabatan'));
-        return $this->db->table('dtks_usulan21')
-            ->where(['rw' => $jbt])
-            ->where(['status' => 1])
-            ->get()
-            ->getResultArray();
-    }
-    public function getIdDtks($id = false)
-    {
-        if ($id == false) {
-            return $this->findAll();
+        $builder = $this->db->table('dtks_kip');
+        $builder->select('dk_nkk, dk_nisn, dk_kip, dk_nama_siswa, dk_jenkel, dk_nik, dk_tmp_lahir, dk_tgl_lahir, dk_alamat, dk_rt, dk_rw, dk_desa, dk_kecamatan, dk_nama_ibu, dk_nama_ayah, dk_nama_sekolah, dk_jenjang, dk_kelas, dk_partisipasi, dk_foto_identitas, NamaJenKel, tb_villages.name as namaDesa, tb_districts.name as namaKec');
+        $builder->join('tbl_jenkel', 'tbl_jenkel.IdJenKel=dtks_kip.dk_jenkel', 'LEFT');
+        $builder->join('tb_districts', 'tb_districts.id=dtks_kip.dk_kecamatan', 'LEFT');
+        $builder->join('tb_villages', 'tb_villages.id=dtks_kip.dk_desa', 'LEFT');
+        if ($filter1 !== "") {
+            $builder->where('dk_desa', $filter1);
         }
-        return $this->where(['id' => $id])->first();
-    }
-
-    public function rekapUsulan()
-    {
-        $builder = $this->db->table('dtks_usulan21');
-        // $builder->groupStart()
-        //     ->where(['program_bansos' => '1', 'program_bansos' => '2'])
-        //     ->groupEnd();
-        // ->orWhere('kecamatan', '32.05.33');
-        // $builder->select('tb_villages.name as NamaDesa, COUNT(*) AS Total');
-        // $builder->select('dtks_usulan21.id as idUsul, tb_villages.name as NamaDesa, NamaBansos');
-        // $builder->select('COUNT( program_bansos = 1 ) AS PKH, COUNT( program_bansos = 2 ) AS BPNT, COUNT( program_bansos = 3 ) AS BST, COUNT( program_bansos = 4 ) AS NONBANSOS, COUNT( program_bansos = 5 ) AS KIS, COUNT( program_bansos = 3 ) AS KIP, program_bansos');
-        // $builder->where('kelurahan')
-        // $builder->selectCount('dtks_usulan21.id', 'total_data');
-        $builder->select('tb_villages.name as NamaDesa, NamaBansos, COUNT(NamaBansos) as Total');
-        // $builder->selectCount('program_bansos');
-        // $builder->selectCount('NamaBansos');
-        // $builder->selectCount('dtks_usulan21.program_bansos');
-        $builder->join('tb_villages', 'tb_villages.id=dtks_usulan21.kelurahan');
-        $builder->join('dtks_bansos', 'dtks_bansos.Id=dtks_usulan21.program_bansos');
-        // $builder->distinct('NamaDesa');
-        $builder->groupBy('NamaDesa, NamaBansos');
-        $builder->orderBy('NamaDesa');
-        // $builder->groupBy('kelurahan');
-
-
-        $query = $builder->get()->getResultArray();
-        // $query = 'SELECT kelurahan, SUM( status = 2 ) AS active, SUM( status = 3 ) AS disabled, SUM( status = 5 ) AS archived
-        // FROM geo
-        // WHERE userId = 1 
-        // GROUP BY typeId';
+        if ($filter2 !== "") {
+            $builder->where('dk_rw', $filter2);
+        }
+        if ($filter3 !== "") {
+            $builder->where('dk_kelas', $filter3);
+        }
+        $builder->orderBy('dtks_kip.dk_nkk', 'asc');
+        $query = $builder->get();
 
         return $query;
-
-        // $sql = 'SELECT kelurahan, COUNT(*) AS "Total" FROM `dtks_usulan21` GROUP BY kelurahan';
-        // $query = $this->db->query($sql);
-        // $arr = $query->getResultArray();
-        // $arr = explode(',', $arr['Program']);
-
-        // dd($arr);
-        // print_r($arr);
-        // return $arr;
     }
 }
