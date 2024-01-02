@@ -47,7 +47,7 @@ $kec_id = '32.05.33';
                         </div>
                         <!-- NO. KK -->
                         <div class="form-group row nopadding">
-                            <label class="col-4 col-sm-4 col-form-label" for="dk_nkk">No. KKS</label>
+                            <label class="col-4 col-sm-4 col-form-label" for="dk_nkk">No. KK</label>
                             <div class="col-8 col-sm-8">
                                 <input type="text" name="dk_nkk" id="dk_nkk" class="form-control form-control-sm" style="text-transform:uppercase" autocomplete="off" value="<?= set_value('dk_nkk', $dk_nkk); ?>">
                                 <div class="invalid-feedback errordk_nkk"></div>

@@ -60,7 +60,7 @@ $desa_id = session()->get('kode_desa');
 <?= form_open_multipart('', ['class' => 'formsimpan']) ?>
 <?= csrf_field(); ?>
 <div class="container">
-    <div class="modal" id="modaltambah" aria-labelledby="modaltambahLabel" aria-hidden="true">
+    <div class="modal fade" id="modaltambah" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header modal-header-primary">
@@ -95,6 +95,13 @@ $desa_id = session()->get('kode_desa');
                                             <div class="col-8 col-sm-8">
                                                 <input type="number" name="nokk" id="nokk" class="form-control form-control-sm" autocomplete="on" autofocus>
                                                 <div class="invalid-feedback errornokk"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="kecamatan">Kecamatan</label>
+                                            <div class="col-8 col-sm-8">
+                                                <input type="text" name="kecamatan" id="kecamatan" class="form-control form-control-sm" value="<?= Profil_Admin()['namaKec']; ?>" readonly>
+                                                <div class="invalid-feedback errorkecamatan"></div>
                                             </div>
                                         </div>
                                         <div class="form-group row nopadding">

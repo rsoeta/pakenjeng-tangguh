@@ -27,6 +27,7 @@ class Usulan22Model extends Model
     var $column_order01 = array('', 'du_nik', 'nama', 'nokk', 'ibu_kandung', 'tempat_lahir', 'tanggal_lahir', 'jenis_pekerjaan', 'program_bansos', 'created_by', 'updated_at', '');
 
     var $order = array('dtks_usulan22.updated_at' => 'asc');
+    var $order1 = array('dtks_usulan22.updated_at' => 'desc');
 
 
     function get_datatables($filter1, $filter2, $filter3, $filter4, $filter5, $filter6, $filter7)
@@ -237,8 +238,8 @@ class Usulan22Model extends Model
         if (isset($_POST['order'])) {
             $result_order = $this->column_order01[$_POST['order']['0']['column']];
             $result_dir = $_POST['order']['0']['dir'];
-        } else if ($this->order) {
-            $order = $this->order;
+        } else if ($this->order1) {
+            $order = $this->order1;
             $result_order = key($order);
             $result_dir = $order[key($order)];
         }

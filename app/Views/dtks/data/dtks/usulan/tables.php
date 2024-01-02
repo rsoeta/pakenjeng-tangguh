@@ -122,7 +122,7 @@
                                                 <?php
                                                 $mulai = 2021;
                                                 $tahun = date('Y');
-                                                for ($i = $mulai; $i < $mulai + 3; $i++) { ?>
+                                                for ($i = $mulai; $i < $tahun + 1; $i++) { ?>
                                                     <option value='<?= $i; ?>' <?= $i == $tahun ? ' selected' : ''; ?>><?= $i; ?></option>
                                                 <?php } ?>
                                             </select>
@@ -227,7 +227,7 @@
                                                 <?php
                                                 $mulai = 2021;
                                                 $tahun = date('Y');
-                                                for ($i = $mulai; $i < $mulai + 3; $i++) { ?>
+                                                for ($i = $mulai; $i < $tahun + 1; $i++) { ?>
                                                     <option value='<?= $i; ?>' <?php if ($i == $tahun) {
                                                                                     echo ' selected';
                                                                                 } ?>><?= $i; ?></option>

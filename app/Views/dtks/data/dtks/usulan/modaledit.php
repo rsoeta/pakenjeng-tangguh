@@ -72,7 +72,7 @@ $desa_id = session()->get('kode_desa');
 <!-- Modal -->
 <?= form_open_multipart('', ['class' => 'formsimpan']) ?>
 <?= csrf_field(); ?>
-<div class="modal fade" id="modaledit" tabindex="-1" role="dialog" aria-labelledby="modaleditLabel" aria-hidden="true">
+<div class="modal fade" id="modaledit" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="modaleditLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header modal-header-warning">
@@ -221,6 +221,13 @@ $desa_id = session()->get('kode_desa');
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
+                                        <label class="col-4 col-sm-4 col-form-label" for="kecamatan">Kecamatan</label>
+                                        <div class="col-8 col-sm-8">
+                                            <input type="text" name="kecamatan" id="kecamatan" class="form-control form-control-sm" value="<?= Profil_Admin()['namaKec']; ?>" readonly>
+                                            <div class="invalid-feedback errorkecamatan"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="kelurahan">Desa/Kel.</label>
                                         <div class="col-8 col-sm-8">
                                             <select <?= $user >= 3 ? 'disabled' : ''; ?> id="kelurahan" name="kelurahan" class="form-select form-select-sm">
@@ -232,7 +239,6 @@ $desa_id = session()->get('kode_desa');
                                             <div class="invalid-feedback errorkelurahan"></div>
                                         </div>
                                     </div>
-
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="datarw">No. RW</label>
                                         <div class="col-8 col-sm-8">

@@ -72,7 +72,7 @@ $desa_id = session()->get('kode_desa');
 <?= form_open_multipart('', ['class' => 'formsimpan']) ?>
 <?= csrf_field(); ?>
 <!-- Modal -->
-<div class="modal fade" id="modalview" tabindex="-1" aria-labelledby="modalviewLabel" aria-hidden="true">
+<div class="modal fade" id="modalview" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalviewLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header modal-header-info">
@@ -101,6 +101,13 @@ $desa_id = session()->get('kode_desa');
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
+                                        <label class="col-4 col-sm-4 col-form-label" for="nokk">No. KK</label>
+                                        <div class="col-8 col-sm-8">
+                                            <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="number" name="nokk" id="nokk" class="form-control form-control-sm" value="<?= $nokk; ?>" autocomplete="on">
+                                            <div class="invalid-feedback errornokk"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="nik">NIK</label>
                                         <div class="col-8 col-sm-8">
                                             <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="number" name="nik" id="nik" class="form-control form-control-sm" value="<?= $du_nik; ?>" autocomplete="off">
@@ -112,13 +119,6 @@ $desa_id = session()->get('kode_desa');
                                         <div class="col-8 col-sm-8">
                                             <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" name="nama" id="nama" class="form-control form-control-sm" value="<?= $nama; ?>">
                                             <div class="invalid-feedback errornama"></div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="nokk">No. KK</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="number" name="nokk" id="nokk" class="form-control form-control-sm" value="<?= $nokk; ?>" autocomplete="on">
-                                            <div class="invalid-feedback errornokk"></div>
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
@@ -177,8 +177,6 @@ $desa_id = session()->get('kode_desa');
                                             <div class="invalid-feedback errortgl_hamil"></div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-12 col-sm-6">
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="jenis_pekerjaan">Pekerjaan</label>
                                         <div class="col-8 col-sm-8">
@@ -191,6 +189,36 @@ $desa_id = session()->get('kode_desa');
                                                 <?php } ?>
                                             </select>
                                             <div class="invalid-feedback errorjenis_pekerjaan"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row nopadding">
+                                        <label class="col-4 col-sm-4 col-form-label" for="shdk">SHDK</label>
+                                        <div class="col-8 col-sm-8">
+                                            <select <?= $user > 3 ? ' disabled="on' : ''; ?> id="shdk" name="shdk" class="form-select form-select-sm">
+                                                <option value="">-- Status Hubungan dalam Keluarga --</option>
+                                                <?php foreach ($shdk as $row) { ?>
+                                                    <option <?php if ($stahub == $row['id']) {
+                                                                echo 'selected';
+                                                            } ?> value="<?= $row['id']; ?>"><?= $row['jenis_shdk']; ?></option>
+                                                <?php } ?>
+                                            </select>
+                                            <div class="invalid-feedback errorShdk"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <div class="form-group row nopadding">
+                                        <label class="col-4 col-sm-4 col-form-label" for="jenis_pendidikan">Pendidikan</label>
+                                        <div class="col-8 col-sm-8">
+                                            <select <?= $user > 3 ? ' disabled="on' : ''; ?> id="jenis_pendidikan" name="jenis_pendidikan" class="form-select form-select-sm">
+                                                <option value="">-- Pilih Status Pendidikan --</option>
+                                                <?php foreach ($pendidikan_kk as $row) { ?>
+                                                    <option <?php if ($jenis_pendidikan == $row['pk_id']) {
+                                                                echo 'selected';
+                                                            } ?> value="<?= $row['pk_id'] ?>"> <?= $row['pk_nama']; ?></option>
+                                                <?php } ?>
+                                            </select>
+                                            <div class="invalid-feedback errorjenis_pendidikan"></div>
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
@@ -207,10 +235,14 @@ $desa_id = session()->get('kode_desa');
                                             <div class="invalid-feedback errorstatus_kawin"></div>
                                         </div>
                                     </div>
-
-                                    <div class="form-group row nopadding" <?php if ($user != 1) {
-                                                                                echo 'hidden';
-                                                                            } ?>>
+                                    <div class="form-group row nopadding">
+                                        <label class="col-4 col-sm-4 col-form-label" for="kecamatan">Kecamatan</label>
+                                        <div class="col-8 col-sm-8">
+                                            <input type="text" name="kecamatan" id="kecamatan" class="form-control form-control-sm" value="<?= Profil_Admin()['namaKec']; ?>" readonly>
+                                            <div class="invalid-feedback errorkecamatan"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="kelurahan">Desa/Kelurahan</label>
                                         <div class="col-8 col-sm-8">
                                             <select <?= $user > 3 ? ' disabled="on' : ''; ?> id="kelurahan" name="kelurahan" class="form-select form-select-sm">
@@ -224,9 +256,7 @@ $desa_id = session()->get('kode_desa');
                                             <div class="invalid-feedback errorkelurahan"></div>
                                         </div>
                                     </div>
-                                    <div class="form-group row nopadding" <?php if ($user > 3) {
-                                                                                echo 'hidden';
-                                                                            } ?>>
+                                    <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="datarw">No. RW</label>
                                         <div class="col-8 col-sm-8">
                                             <select <?= $user > 3 ? ' disabled="on' : ''; ?> id="datarw" name="datarw" class="form-select form-select-sm">
@@ -263,20 +293,6 @@ $desa_id = session()->get('kode_desa');
                                         </div>
                                     </div>
 
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="shdk">SHDK</label>
-                                        <div class="col-8 col-sm-8">
-                                            <select <?= $user > 3 ? ' disabled="on' : ''; ?> id="shdk" name="shdk" class="form-select form-select-sm">
-                                                <option value="">-- Status Hubungan dalam Keluarga --</option>
-                                                <?php foreach ($shdk as $row) { ?>
-                                                    <option <?php if ($stahub == $row['id']) {
-                                                                echo 'selected';
-                                                            } ?> value="<?= $row['id']; ?>"><?= $row['jenis_shdk']; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                            <div class="invalid-feedback errorShdk"></div>
-                                        </div>
-                                    </div>
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="databansos">Program</label>
                                         <div class="col-8 col-sm-8">
