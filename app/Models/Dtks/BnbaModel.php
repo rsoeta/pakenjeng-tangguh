@@ -18,8 +18,8 @@ class BnbaModel extends Model
     protected $updatedField  = 'db_modified';
 
 
-    var $column_order = array('', '', 'db_nama', 'db_jenkel_id', 'db_nkk', 'db_nik', 'db_tmp_lahir', 'db_tgl_lahir', 'db_shdk_id');
-    var $column_order1 = array('', '', 'db_nama', 'db_jenkel_id', 'db_nkk', 'db_nik', 'db_tmp_lahir', 'db_tgl_lahir', 'db_modified');
+    var $column_order = array('', '', 'db_nama', 'db_nkk', 'db_nik', 'db_jenkel_id', 'db_tmp_lahir', 'db_tgl_lahir', 'db_shdk_id');
+    var $column_order1 = array('', '', 'db_nama', 'db_nkk', 'db_nik', 'db_jenkel_id', 'db_tmp_lahir', 'db_tgl_lahir', 'db_modified');
 
     var $order = array('db_nama' => 'asc');
     var $order1 = array('db_modified' => 'asc');

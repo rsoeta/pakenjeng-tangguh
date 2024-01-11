@@ -77,7 +77,7 @@
                     </div>
                 </a>
             </div>
-            <div class="col-12 col-sm-6 col-md-3">
+            <div class="col-12 col-sm-6 col-md-3 displayNone">
                 <a href="/non-kip">
                     <div class="info-box heart">
                         <span class="info-box-icon bg-gradient elevation-1"><i class="fas fa-users fa-1x mr-2"></i></span>

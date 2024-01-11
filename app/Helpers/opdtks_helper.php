@@ -76,18 +76,61 @@ function menu_child_child_child($menu_child_child)
     return $query->getResultArray();
 }
 
-function FOTO_DOKUMEN($fileName = '', $dir = '', $defFile = '')
+// function FOTO_DOKUMEN($fileName = '', $dir = '', $defFile = '')
+// {
+//     if ($fileName !== '' && $fileName !== null && file_exists(FCPATH . 'data/bnba/' . $dir . '/' . $fileName)) {
+//         return base_url('data/bnba/' . $dir . '/' . $fileName);
+//     } else {
+//         if ($defFile == '') {
+//             return base_url('assets/images/image_not_available.jpg');
+//         } else {
+//             return base_url('assets/images/' . $defFile);
+//         }
+//     }
+// }
+
+function FOTO_KPM($fileName = '', $dir = '', $defFile = '')
 {
-    if ($fileName !== '' && $fileName !== null && file_exists(FCPATH . 'data/bnba/' . $dir . '/' . $fileName)) {
-        return base_url('data/bnba/' . $dir . '/' . $fileName);
-    } else {
-        if ($defFile == '') {
-            return base_url('assets/images/image_not_available.jpg');
+    $firstDir = FCPATH . 'data/bnba/' . $dir . '/';
+    $secondDir = FCPATH . 'data/dkm/' . $dir . '/'; // Ganti dengan nama direktori kedua
+
+    if ($fileName !== '' && $fileName !== null) {
+        if (file_exists($firstDir . $fileName) || file_exists($secondDir . $fileName)) {
+            // Jika file ditemukan di direktori pertama atau kedua, kembalikan URL-nya
+            $filePath = file_exists($firstDir . $fileName) ? $firstDir : $secondDir;
+            return base_url($filePath . $fileName);
         } else {
-            return base_url('assets/images/' . $defFile);
+            if ($defFile == '') {
+                return base_url('assets/images/image_not_available.jpg');
+            } else {
+                return base_url('assets/images/' . $defFile);
+            }
         }
+    } else {
+        return base_url('assets/images/image_not_available.jpg');
     }
-    # code...
+}
+
+function FOTO_RUMAH($fileName = '', $dir = '', $defFile = '')
+{
+    $firstDir = FCPATH . 'data/bnba/' . $dir . '/';
+    $secondDir = FCPATH . 'data/usulan/' . $dir . '/'; // Ganti dengan nama direktori kedua
+
+    if ($fileName !== '' && $fileName !== null) {
+        if (file_exists($firstDir . $fileName) || file_exists($secondDir . $fileName)) {
+            // Jika file ditemukan di direktori pertama atau kedua, kembalikan URL-nya
+            $filePath = file_exists($firstDir . $fileName) ? $firstDir : $secondDir;
+            return base_url($filePath . $fileName);
+        } else {
+            if ($defFile == '') {
+                return base_url('assets/images/image_not_available.jpg');
+            } else {
+                return base_url('assets/images/' . $defFile);
+            }
+        }
+    } else {
+        return base_url('assets/images/image_not_available.jpg');
+    }
 }
 
 function Foto_Profil($fileName = '', $dir = '', $defFile = '')

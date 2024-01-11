@@ -198,20 +198,21 @@ class Usulan22 extends BaseController
             $row = array();
             $row[] = $no;
             $row[] = $key->du_nik;
-            $row[] = '<a href=' . usulan_foto($key->foto_identitas, 'foto_identitas') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Identitas" style="text-decoration:none;">' . $key->nama . '</a>
+            $row[] = '
+            <a href=' . usulan_foto($key->foto_identitas, 'foto_identitas') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Identitas" style="text-decoration:none;">' . $key->nama . '</a>
             <a href=' . usulan_foto($key->foto_rumah, 'foto_rumah') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Rumah Depan"></a>
             ';
             $row[] = $key->nokk;
             $row[] = $key->ibu_kandung;
             $row[] = $key->tempat_lahir;
-            if ($key->tanggal_lahir == '0000-00-00') {
+            if ($key->tanggal_lahir == '0000-00-00') :
                 $row[] = '-';
-            } elseif ($key->tanggal_lahir == null) {
+            elseif ($key->tanggal_lahir == null) :
                 $row[] = '-';
-            } else {
+            else :
                 // date_format
                 $row[] = date('d/m/Y', strtotime($key->tanggal_lahir));
-            }
+            endif;
             $row[] = $key->pk_nama;
             $row[] = $key->dbj_nama_bansos;
             $row[] = '<a href="https://wa.me/' . nope($key->nope) . '" target="_blank" style="text-decoration:none;">' . strtoupper($key->fullname) . '</a>';

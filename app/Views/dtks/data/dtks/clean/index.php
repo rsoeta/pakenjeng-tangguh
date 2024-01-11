@@ -3,12 +3,21 @@
 <?= $this->section('content'); ?>
 
 <div class="content-wrapper mt-1">
+    <section class="content-header">
+        <div class="container-fluid">
+            <ol class="breadcrumb float-right">
+                <li class="breadcrumb-item"><a href="<?= base_url('/pages'); ?>">Home</a></li>
+                <li class="breadcrumb-item active"><?= $title; ?></li>
+            </ol>
+        </div><!-- /.container-fluid -->
+    </section>
+    <br>
 
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
             <div class="card text-center">
-                <div class="card-header bg-primary">
+                <div class="card-header bg-danger">
                     <strong><?= $title; ?></strong>
                 </div>
             </div>
@@ -18,6 +27,86 @@
             $ops = session()->get('jabatan');
             $level = session()->get('level');
             ?>
+
+            <?php
+            // $filenames = [
+            //     'BNT32050147088100121.jpg',
+            //     'KPM_BNT3205014708810012A.jpg',
+            //     'DUD_ID3202330202970002_2023_02_02_22_45_15.jpg',
+            //     'DUD_FH3202330202970002_2023_02_02_22_45_15.jpg'
+            // ];
+
+            // foreach ($filenames as $filename) {
+            //     preg_match('/\d{16}/', $filename, $matches);
+            //     if (!empty($matches)) {
+            //         $sixteenDigitNumber = $matches[0];
+            //         $filenameParts = explode($sixteenDigitNumber, $filename);
+
+            //         echo "Nama File: {$filenameParts[0]} <br>";
+            //         echo "16 digit angka: $sixteenDigitNumber <br>";
+            //         echo "Ekstensi File: {$filenameParts[1]} <br><br>";
+            //     } else {
+            //         echo "Tidak ditemukan 16 digit angka pada $filename<br>";
+            //     }
+            // }
+
+            // $foundFile = ''; // variabel untuk menyimpan nama file dengan 16 digit angka
+
+            // $dirPath = FCPATH . 'data/bnba/foto-kpm'; // Ganti dengan path direktori foto Anda
+            // $files = scandir($dirPath);
+
+            // $filenames = [];
+            // foreach ($files as $file) {
+            //     if (!in_array($file, array(".", ".."))) {
+            //         $filenames[] = $file;
+            //     }
+            // }
+            // Sekarang $filenames berisi daftar file dalam direktori tersebut
+
+            // $filenames = [
+            //     'BNT32050147088100121.jpg',
+            //     'KPM_BNT3205014708810012A.jpg',
+            //     'DUD_ID3202330202970002_2023_02_02_22_45_15.jpg',
+            //     'DUD_FH3202330202970002_2023_02_02_22_45_15.jpg'
+            // ];
+
+            // $no = 1;
+            // foreach ($filenames as $filename) {
+            //     echo $no . ". " . $filename . "<br>";
+            //     $no++;
+            // };
+            // $nik_kpm = "3205314902730004";
+            // foreach ($filenames as $filename) {
+            //     // preg_match('/\d{16}/', $filename, $matches);
+            //     preg_match('/' . $nik_kpm . '/', $filename, $matches);
+            //     if (!empty($matches)) {
+            //         $sixteenDigitNumber = $matches[0];
+            //         $filenameParts = explode($sixteenDigitNumber, $filename);
+
+            //         echo "Nama File: {$filenameParts[0]} <br>";
+            //         echo "16 digit angka: $sixteenDigitNumber <br>";
+            //         echo "Ekstensi File: {$filenameParts[1]} <br>";
+
+            //         // Mencoba mendapatkan URL foto
+            //         $fotoURL = FOTO_KPM($filename, 'direktori_pertama');
+            //         if ($fotoURL === base_url('assets/images/image_not_available.jpg')) {
+            //             // Jika tidak ditemukan di direktori pertama, coba di direktori kedua
+            //             $fotoURL = FOTO_KPM($filename, 'direktori_kedua');
+            //         }
+
+            //         echo "URL Foto: $fotoURL <br><br>";
+
+            //         // Simpan nama file dengan 16 digit angka yang ditemukan
+            //         $foundFile = $filename;
+            //         break; // Hentikan loop setelah menemukan file
+            //     } else {
+            //         echo "Tidak ditemukan 16 digit angka pada $filename<br>";
+            //     }
+            // }
+
+            // echo "Nama File dengan 16 digit angka: $foundFile"; // Menampilkan nama file yang ditemukan
+            ?>
+
             <div class="row my-2">
                 <div class="col">
                     <div class="row">
@@ -81,18 +170,19 @@
                     </div>
                 </div>
             </div>
-            <table id="tabel_data" class="table table-hover table-sm compact">
+            <table id="tabel_data" class="table table-hover" style="width: 100%;">
                 <thead>
                     <tr>
                         <th>No</th>
                         <th>Foto</th>
-                        <th>ID DTKS</th>
                         <th>Nama</th>
                         <th>No. KK</th>
                         <th>NIK</th>
+                        <th>Jenis Kelamin</th>
                         <th>Tempat Lahir</th>
                         <th>Tanggal Lahir</th>
                         <th>SHDK</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -104,6 +194,7 @@
 <div class="viewmodal" style="display: none;"></div>
 <script>
     $(document).ready(function() {
+        $('body').addClass('sidebar-collapse');
 
         // $('body').addClass('sidebar-collapse');
 
@@ -166,12 +257,6 @@
             "targets": [0],
             "orderable": false
         }],
-
-        <?php if ($user > 3) { ?> "columnDefs": [{
-                "targets": [2],
-                "visible": false
-            }],
-        <?php } ?>
     });
 
 
