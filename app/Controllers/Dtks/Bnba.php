@@ -440,16 +440,26 @@ class Bnba extends BaseController
             $baseURL = base_url();
 
             // URL statis yang ingin diganti
-            $staticURL = 'http://localhost:8080/C:%5Claragon%5Cwww%5Cdtks.pakenjeng-tangg%5Cpublic%5C';
-            if (!$staticURL) {
-                // Mengganti bagian awal URL dengan base_url dari CodeIgniter
-                $fotoKpmURL = str_replace(base_url(), '', $fotoKpmURL);
-                $fotoRmhURL = str_replace(base_url(), '', $fotoRmhURL);
-            } else {
-                // Mengganti bagian awal URL dengan base_url dari CodeIgniter
-                $fotoKpmURL = str_replace($staticURL, $baseURL . '/', $fotoKpmURL);
-                $fotoRmhURL = str_replace($staticURL, $baseURL . '/', $fotoRmhURL);
-            }
+            $staticURLLocal = 'http://localhost:8080/C:%5Claragon%5Cwww%5Cdtks.pakenjeng-tangg%5Cpublic%5C';
+            $staticURLHosting = 'https://dtks.pakenjeng-tangguh.id/home/pakenjen/repositories/pakenjeng-tangguh/public';
+
+            // Pilih URL statis berdasarkan lingkungan
+            $staticURL = ENVIRONMENT === 'production' ? $staticURLHosting : $staticURLLocal;
+
+            // Mengganti bagian awal URL dengan base_url dari CodeIgniter
+            $fotoKpmURL = str_replace($staticURL, $baseURL . '/', $fotoKpmURL);
+            $fotoRmhURL = str_replace($staticURL, $baseURL . '/', $fotoRmhURL);
+
+
+            // if (!$staticURLLocal || !$staticURLHosting) {
+            //     // Mengganti bagian awal URL dengan base_url dari CodeIgniter
+            //     $fotoKpmURL = str_replace(base_url(), '', $fotoKpmURL);
+            //     $fotoRmhURL = str_replace(base_url(), '', $fotoRmhURL);
+            // } else {
+            //     // Mengganti bagian awal URL dengan base_url dari CodeIgniter
+            //     $fotoKpmURL = str_replace($staticURL, $baseURL . '/', $fotoKpmURL);
+            //     $fotoRmhURL = str_replace($staticURL, $baseURL . '/', $fotoRmhURL);
+            // }
 
 
             $no++;

@@ -21,7 +21,7 @@ class BnbaModel extends Model
     var $column_order = array('', '', 'db_nama', 'db_nkk', 'db_nik', 'db_jenkel_id', 'db_tmp_lahir', 'db_tgl_lahir', 'db_shdk_id');
     var $column_order1 = array('', '', 'db_nama', 'db_nkk', 'db_nik', 'db_jenkel_id', 'db_tmp_lahir', 'db_tgl_lahir', 'db_modified');
 
-    var $order = array('db_nama' => 'asc');
+    var $order = array('db_shdk_id' => 'asc', 'db_nkk' => 'asc');
     var $order1 = array('db_modified' => 'asc');
 
     function get_datatables($filter1, $filter2, $filter3, $filter4, $filter0)
