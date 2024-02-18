@@ -21,7 +21,7 @@ class BnbaModel extends Model
     var $column_order = array('', '', 'db_nama', 'db_nkk', 'db_nik', 'db_jenkel_id', 'db_tmp_lahir', 'db_tgl_lahir', 'db_shdk_id');
     var $column_order1 = array('', '', 'db_nama', 'db_nkk', 'db_nik', 'db_jenkel_id', 'db_tmp_lahir', 'db_tgl_lahir', 'db_modified');
 
-    var $order = array('db_shdk_id' => 'asc', 'db_nkk' => 'asc');
+    var $order = array('db_nkk' => 'asc', 'db_shdk_id' => 'asc');
     var $order1 = array('db_modified' => 'asc');
 
     function get_datatables($filter1, $filter2, $filter3, $filter4, $filter0)
@@ -67,13 +67,23 @@ class BnbaModel extends Model
 
         // order
         if (isset($_POST['order'])) {
-            $result_order = $this->column_order[$_POST['order']['0']['column']];
+            $result_order = $this->column_order1[$_POST['order']['0']['column']];
             $result_dir = $_POST['order']['0']['dir'];
-        } else if ($this->order) {
-            $order = $this->order;
+        } else if ($this->order1) {
+            $order = $this->order1;
             $result_order = key($order);
             $result_dir = $order[key($order)];
         }
+
+        // // order
+        // if (isset($_POST['order'])) {
+        //     $result_order = $this->column_order[$_POST['order']['0']['column']];
+        //     $result_dir = $_POST['order']['0']['dir'];
+        // } else if ($this->order) {
+        //     $result_order = key($this->order);
+        //     $result_dir = $this->order[key($this->order)];
+        // }
+
 
         if ($_POST['length'] != -1);
         $db = db_connect();
@@ -87,7 +97,11 @@ class BnbaModel extends Model
             ->orderBy($result_order, $result_dir)
             ->limit($_POST['length'], $_POST['start'])
             ->get();
-
+        if (!$query) {
+            die($db->getError()); // Tampilkan pesan kesalahan jika terjadi
+        }
+        // var_dump($result_order, $result_dir);
+        // die;
         return $query->getResult();
     }
 

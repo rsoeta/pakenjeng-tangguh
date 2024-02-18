@@ -61,6 +61,26 @@ $desa_id = session()->get('kode_desa');
         margin-top:
             200px
     }
+
+    /* CSS untuk pesan sementara */
+    #temporary-message {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+        display: none;
+        z-index: 9999;
+        text-align: center;
+        /* Teks berada di tengah */
+        width: 50%;
+        max-width: 300px;
+        overflow: auto;
+        /* Aktifkan overflow jika pesan melebihi ukuran maksimum */
+    }
 </style>
 
 <link href="<?= base_url('assets/dist/css/smart_wizard.min.css'); ?>" rel="stylesheet" type="text/css" />
@@ -531,17 +551,22 @@ $desa_id = session()->get('kode_desa');
                                     <label class="label-center mt-2">Koordinat</label>
                                     <div class="form-group row nopadding">
 
-                                        <div class="col-sm-6 col-6">
-                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Lat" spellcheck="false" id="" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
+                                        <div class="col-sm-5 col-5">
+                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Lat" spellcheck="false" id="du_latitude" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
                                             <div class="invalid-feedback errordu_latitude"></div>
                                         </div>
-                                        <div class="col-sm-6 col-6">
-                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Long" spellcheck="false" id="" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
+                                        <div class="col-sm-5 col-5">
+                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Long" spellcheck="false" id="du_longitude" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
                                             <div class="invalid-feedback errordu_longitude"></div>
                                         </div>
-                                        <div class="col-sm-1 col-1" hidden>
+                                        <div class="col-sm-2 col-2" hidden>
                                             <button type="button" class="btn btn-outline-primary" onclick="getLocation()"><i class="fas fa-map-marked-alt"></i></button>
                                         </div>
+                                        <div class="col-sm-2 col-2">
+                                            <button type="button" class="btn btn-outline-primary" onclick="copyText()"><i class="fas fa-map-marked-alt"></i></button>
+                                        </div>
+                                        <!-- Elemen untuk menampilkan pesan sementara -->
+                                        <div id="temporary-message"><span id="message-content"></span></div>
                                     </div>
                                 </div>
                                 <?php if ($user < 4) : ?>
@@ -1002,4 +1027,31 @@ $desa_id = session()->get('kode_desa');
             label.innerHTML = " Tidak";
         }
     }
+
+    function copyText() {
+        var text1 = document.getElementById("du_latitude").value;
+        var text2 = document.getElementById("du_longitude").value;
+
+        var textToCopy = text1 + ", " + text2; // Menggabungkan teks dari kedua textbox
+
+        navigator.clipboard.writeText(textToCopy).then(function() {
+            // Menampilkan pesan sementara
+            var temporaryMessage = document.getElementById('temporary-message');
+            temporaryMessage.textContent = "Tikor: " + textToCopy + " disalin ke clipboard";
+            temporaryMessage.style.display = 'block';
+
+            // Menghilangkan pesan sementara setelah 2 detik
+            setTimeout(function() {
+                temporaryMessage.style.display = 'none';
+            }, 2000);
+        }, function(err) {
+            console.error('Gagal menyalin teks: ', err);
+        });
+    }
+    // Menangani operasi paste
+    document.addEventListener('paste', function(event) {
+        var pasteData = (event.clipboardData || window.clipboardData).getData('text');
+        // Di sini Anda dapat menangani data yang dipaste sesuai kebutuhan aplikasi Anda
+        console.log("Teks yang ditempel:", pasteData);
+    });
 </script>

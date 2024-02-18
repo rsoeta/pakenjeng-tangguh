@@ -491,25 +491,26 @@ $desa_id = session()->get('kode_desa');
                                         <label class="label-center mt-2">Koordinat</label>
                                         <div class="form-group row nopadding">
 
-                                            <div class="col-sm-6 col-6">
+                                            <div class="col-sm-5 col-5">
                                                 <input type="text" class="form-control form-control-sm mb-2" placeholder="Lat" spellcheck="false" id="latitude" name="du_latitude" readonly required>
                                                 <div class="invalid-feedback errordu_latitude"></div>
                                             </div>
-                                            <div class="col-sm-6 col-6">
+                                            <div class="col-sm-5 col-5">
                                                 <input type="text" class="form-control form-control-sm mb-2" placeholder="Long" spellcheck="false" id="longitude" name="du_longitude" readonly required>
                                                 <div class="invalid-feedback errordu_longitude"></div>
                                             </div>
-                                            <div class="col-sm-1 col-1" hidden>
+                                            <div class="col-sm-2 col-2" hidden>
                                                 <button type="button" class="btn btn-outline-primary" onclick="getLocation()"><i class="fas fa-map-marked-alt"></i></button>
+                                            </div>
+                                            <div class="col-sm-2 col-2">
+                                                <button type="button" class="btn btn-outline-primary" onclick="openGoogleMaps()"><i class="fas fa-location-arrow"></i> Cek Tikor</button>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="modal-footer mt-3 justify-content-between">
                                         <button type="submit" class="btn btn-block btn-primary btnSimpan">Simpan</button>
                                     </div>
-
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -1035,5 +1036,16 @@ $desa_id = session()->get('kode_desa');
         } else {
             label.innerHTML = " Tidak";
         }
+    }
+
+    function openGoogleMaps() {
+        var latitude = document.getElementById("latitude").value;
+        var longitude = document.getElementById("longitude").value;
+
+        // Membangun URL untuk Google Maps dengan koordinat yang dimasukkan
+        var googleMapsURL = "https://www.google.com/maps?q=" + latitude + "," + longitude;
+
+        // Membuka Google Maps di tab atau jendela baru
+        window.open(googleMapsURL, "_blank");
     }
 </script>
