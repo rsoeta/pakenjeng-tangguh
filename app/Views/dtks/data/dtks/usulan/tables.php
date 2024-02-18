@@ -2,6 +2,8 @@
 
 <?= $this->section('content'); ?>
 
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
+
 <div class="content-wrapper mt-1">
     <section class="content-header">
         <div class="container-fluid">
@@ -332,10 +334,8 @@
     }
 
     function showPosition(position) {
-        $("#latitude").val(`${position.coords.latitude}`);
-        $("#longitude").val(`${position.coords.longitude}`);
-        // x.innerHTML = position.coords.latitude;
-        // y.innerHTML = position.coords.longitude;
+        $("#latitude").val(position.coords.latitude);
+        $("#longitude").val(position.coords.longitude);
     }
 
     function showError(error) {
