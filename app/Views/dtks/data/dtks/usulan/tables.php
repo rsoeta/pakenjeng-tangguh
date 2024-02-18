@@ -308,7 +308,7 @@
 
         // start script kordinat
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, showError, {
+            navigator.geolocation.watchPosition(showPosition, showError, {
                 timeout: 10000
             });
         } else {
