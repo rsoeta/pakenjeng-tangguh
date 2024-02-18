@@ -398,8 +398,8 @@ $desa_id = session()->get('kode_desa');
                                             <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" class="form-control mb-2" placeholder="Longitude" spellcheck="false" id="du_longitude" name="du_longitude" value="<?= $du_longitude; ?>" required>
                                             <div class="invalid-feedback errordu_longitude"></div>
                                         </div>
-                                        <div class="col-sm-2 col-2">
-                                            <button type="button" class="btn btn-outline-primary" onclick="copyText()"><i class="fas fa-map-marked-alt"></i></button>
+                                        <div class="col-sm-2 col-2 nopadding">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="copyText()"><i class="fas fa-map-marked-alt"></i></button>
                                         </div>
                                         <!-- Elemen untuk menampilkan pesan sementara -->
                                         <div id="temporary-message"><span id="message-content"></span></div>
@@ -863,7 +863,7 @@ $desa_id = session()->get('kode_desa');
         navigator.clipboard.writeText(textToCopy).then(function() {
             // Menampilkan pesan sementara
             var temporaryMessage = document.getElementById('temporary-message');
-            temporaryMessage.textContent = "Tikor: " + textToCopy + " disalin ke clipboard";
+            temporaryMessage.textContent = "Lokasi: " + textToCopy + " disalin ke clipboard";
             temporaryMessage.style.display = 'block';
 
             // Menghilangkan pesan sementara setelah 2 detik

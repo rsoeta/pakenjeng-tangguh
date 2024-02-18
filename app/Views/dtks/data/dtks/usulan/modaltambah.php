@@ -490,20 +490,19 @@ $desa_id = session()->get('kode_desa');
                                     <div class="col-sm-12 col-12 mt-2">
                                         <label class="label-center mt-2">Koordinat</label>
                                         <div class="form-group row nopadding">
-
-                                            <div class="col-sm-5 col-5">
+                                            <div class="col-4">
                                                 <input type="text" class="form-control form-control-sm mb-2" placeholder="Lat" spellcheck="false" id="latitude" name="du_latitude" readonly required>
                                                 <div class="invalid-feedback errordu_latitude"></div>
                                             </div>
-                                            <div class="col-sm-5 col-5">
+                                            <div class="col-4">
                                                 <input type="text" class="form-control form-control-sm mb-2" placeholder="Long" spellcheck="false" id="longitude" name="du_longitude" readonly required>
                                                 <div class="invalid-feedback errordu_longitude"></div>
                                             </div>
-                                            <div class="col-sm-2 col-2" hidden>
-                                                <button type="button" class="btn btn-outline-primary" onclick="getLocation()"><i class="fas fa-map-marked-alt"></i></button>
+                                            <div class="col-2 nopadding">
+                                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i> Get</button>
                                             </div>
-                                            <div class="col-sm-2 col-2">
-                                                <button type="button" class="btn btn-outline-primary" onclick="openGoogleMaps()"><i class="fas fa-location-arrow"></i> Cek Tikor</button>
+                                            <div class="col-2 nopadding">
+                                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="openGoogleMaps()"><i class="fas fa-location-arrow"></i> Cek</button>
                                             </div>
                                         </div>
                                     </div>

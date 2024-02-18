@@ -324,7 +324,7 @@
 
     function getLocation() {
         if (navigator.geolocation) {
-            navigator.geolocation.watchPosition(showPosition, showError);
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
         } else {
             // z.innerHTML = "Geolokasi Tidak Didukung oleh Browser Ini";
             alert("Geolokasi Tidak Didukung oleh Browser Ini");
