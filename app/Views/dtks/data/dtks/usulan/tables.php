@@ -308,11 +308,8 @@
 
         // start script kordinat
         if (navigator.geolocation) {
-            navigator.geolocation.watchPosition(showPosition, showError, {
-                timeout: 10000
-            });
+            navigator.geolocation.watchPosition(showPosition, showError);
         } else {
-            // z.innerHTML = "Geolokasi Tidak Didukung oleh Browser Ini";
             alert("Geolokasi Tidak Didukung oleh Browser Ini");
         }
         // end script kordinat
