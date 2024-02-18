@@ -2,8 +2,6 @@
 
 <?= $this->section('content'); ?>
 
-<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
-
 <div class="content-wrapper mt-1">
     <section class="content-header">
         <div class="container-fluid">
@@ -310,7 +308,9 @@
 
         // start script kordinat
         if (navigator.geolocation) {
-            navigator.geolocation.watchPosition(showPosition, showError);
+            navigator.geolocation.getCurrentPosition(showPosition, showError, {
+                timeout: 10000
+            });
         } else {
             // z.innerHTML = "Geolokasi Tidak Didukung oleh Browser Ini";
             alert("Geolokasi Tidak Didukung oleh Browser Ini");
@@ -326,7 +326,9 @@
 
     function getLocation() {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, showError);
+            navigator.geolocation.getCurrentPosition(showPosition, showError, {
+                timeout: 10000
+            });
         } else {
             // z.innerHTML = "Geolokasi Tidak Didukung oleh Browser Ini";
             alert("Geolokasi Tidak Didukung oleh Browser Ini");
