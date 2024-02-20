@@ -1086,13 +1086,6 @@ class Usulan22 extends BaseController
                         'required' => '{field} harus terisi.'
                     ]
                 ],
-                'du_accuracy' => [
-                    'label' => 'Accuracy',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus terisi.'
-                    ]
-                ],
                 'du_kate' => [
                     'label' => 'Kel. Adat Terpencil',
                     'rules' => 'required',
