@@ -560,8 +560,7 @@ $desa_id = session()->get('kode_desa');
                                             <div class="invalid-feedback errordu_longitude"></div>
                                         </div>
                                         <div class="col-2 col-sm-4">
-                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Accuracy" spellcheck="false" id="accuracy" name="du_longitude" readonly required>
-                                            <div class="invalid-feedback errordu_longitude"></div>
+                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Accuracy" spellcheck="false" id="accuracy" name="du_longitude" readonly>
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">

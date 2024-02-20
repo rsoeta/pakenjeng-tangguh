@@ -500,7 +500,7 @@ $desa_id = session()->get('kode_desa');
                                             </div>
                                             <div class="col-2 col-sm-4">
                                                 <input type="text" class="form-control form-control-sm mb-2" placeholder="Accuracy" spellcheck="false" id="accuracy" name="du_longitude" readonly required>
-                                                <div class="invalid-feedback errordu_longitude"></div>
+                                                <div class="invalid-feedback errordu_accuracy"></div>
                                             </div>
                                         </div>
                                         <div class="form-group row nopadding">
@@ -750,11 +750,19 @@ $desa_id = session()->get('kode_desa');
                         }
 
                         if (response.error.du_longitude) {
-                            $('#du_longitude').addClass('is-invalid');
+                            $('#longitude').addClass('is-invalid');
                             $('.errordu_longitude').html(response.error.du_longitude);
                         } else {
-                            $('#du_longitude').removeClass('is-invalid');
+                            $('#longitude').removeClass('is-invalid');
                             $('.errordu_longitude').html('');
+                        }
+
+                        if (response.error.du_accuracy) {
+                            $('#accuracy').addClass('is-invalid');
+                            $('.errordu_accuracy').html(response.error.du_accuracy);
+                        } else {
+                            $('#accuracy').removeClass('is-invalid');
+                            $('.errordu_accuracy').html('');
                         }
 
                         if (response.error.du_nasu) {
