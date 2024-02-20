@@ -104,7 +104,7 @@ $desa_id = session()->get('kode_desa');
                 <div id="smartwizard">
                     <ul>
                         <li><a href="#step-1">Step 1<br /><small>Data Individu</small></a></li>
-                        <!-- <!-- <li><a href="#step-2">Step 2<br /><small>Personal Info</small></a></li> -->
+                        <!-- <li><a href="#step-2">Step 2<br /><small>Personal Info</small></a></li> -->
                         <li><a href="#step-3">Step 3<br /><small>Survey Kriteria</small></a></li>
                         <li><a href="#step-4">Step 2<br /><small>Pengusulan Bansos</small></a></li>
                     </ul>
@@ -551,19 +551,28 @@ $desa_id = session()->get('kode_desa');
                                     <label class="label-center mt-2">Koordinat</label>
                                     <div class="form-group row nopadding">
 
-                                        <div class="col-sm-5 col-5">
+                                        <div class="col-5 col-sm-4">
                                             <input type="text" class="form-control form-control-sm mb-2" placeholder="Lat" spellcheck="false" id="du_latitude" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
                                             <div class="invalid-feedback errordu_latitude"></div>
                                         </div>
-                                        <div class="col-sm-5 col-5">
+                                        <div class="col-5 col-sm-4">
                                             <input type="text" class="form-control form-control-sm mb-2" placeholder="Long" spellcheck="false" id="du_longitude" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
                                             <div class="invalid-feedback errordu_longitude"></div>
                                         </div>
-                                        <div class="col-sm-2 col-2" hidden>
-                                            <button type="button" class="btn btn-outline-primary" onclick="getLocation()"><i class="fas fa-map-marked-alt"></i></button>
+                                        <div class="col-2 col-sm-4">
+                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Accuracy" spellcheck="false" id="accuracy" name="du_longitude" readonly required>
+                                            <div class="invalid-feedback errordu_longitude"></div>
                                         </div>
-                                        <div class="col-sm-2 col-2 nopadding">
-                                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="copyText()"><i class="fas fa-map-marked-alt"></i></button>
+                                    </div>
+                                    <div class="form-group row nopadding">
+                                        <div class="col-sm-4 col-4">
+                                            <button type="button" class="btn btn-outline-primary btn-sm btn-block" onclick="getLokasi()"><i class="fas fa-map-marker-alt"></i> Get</button>
+                                        </div>
+                                        <div class="col-4 col-sm-4">
+                                            <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="openGoogleMaps()"><i class="fas fa-location-arrow"></i> Cek</button>
+                                        </div>
+                                        <div class="col-sm-4 col-4">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm btn-block" onclick="copyText()"><i class="fas fa-clone"></i> Copy</button>
                                         </div>
                                         <!-- Elemen untuk menampilkan pesan sementara -->
                                         <div id="temporary-message"><span id="message-content"></span></div>
@@ -1048,10 +1057,46 @@ $desa_id = session()->get('kode_desa');
             console.error('Gagal menyalin teks: ', err);
         });
     }
+
     // Menangani operasi paste
     document.addEventListener('paste', function(event) {
         var pasteData = (event.clipboardData || window.clipboardData).getData('text');
         // Di sini Anda dapat menangani data yang dipaste sesuai kebutuhan aplikasi Anda
         console.log("Teks yang ditempel:", pasteData);
     });
+
+    function getLokasi() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            alert("Geolokasi Tidak Didukung oleh Browser Ini.");
+        }
+    }
+
+    function showPosition(position) {
+        var latitude = position.coords.latitude;
+        var longitude = position.coords.longitude;
+        var accuracy = position.coords.accuracy;
+
+        document.getElementById("du_latitude").value = latitude;
+        document.getElementById("du_longitude").value = longitude;
+        document.getElementById("accuracy").value = accuracy + " Meter";
+    }
+
+    function showError(error) {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                alert("Pengguna menolak permintaan geolokasi.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("Informasi lokasi tidak tersedia.");
+                break;
+            case error.TIMEOUT:
+                alert("Permintaan untuk menghitung waktu lokasi pengguna.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("Terjadi kesalahan yang tidak diketahui.");
+                break;
+        }
+    }
 </script>
