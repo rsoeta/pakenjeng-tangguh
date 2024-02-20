@@ -491,15 +491,15 @@ $desa_id = session()->get('kode_desa');
                                         <label class="label-center mt-2">Koordinat</label>
                                         <div class="form-group row nopadding">
                                             <div class="col-5 col-sm-4">
-                                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Latitude" spellcheck="false" id="latitude" name="du_latitude" readonly required>
+                                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Latitude" spellcheck="false" id="du_latitude" name="du_latitude" readonly required>
                                                 <div class="invalid-feedback errordu_latitude"></div>
                                             </div>
                                             <div class="col-5 col-sm-4">
-                                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Longitude" spellcheck="false" id="longitude" name="du_longitude" readonly required>
+                                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Longitude" spellcheck="false" id="du_longitude" name="du_longitude" readonly required>
                                                 <div class="invalid-feedback errordu_longitude"></div>
                                             </div>
                                             <div class="col-2 col-sm-4">
-                                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Accuracy" spellcheck="false" id="accuracy" name="du_longitude" readonly required>
+                                                <input type="text" class="form-control form-control-sm mb-2" placeholder="Accuracy" spellcheck="false" id="du_accuracy" name="du_accuracy" readonly required>
                                                 <div class="invalid-feedback errordu_accuracy"></div>
                                             </div>
                                         </div>
@@ -1061,8 +1061,8 @@ $desa_id = session()->get('kode_desa');
     }
 
     function openGoogleMaps() {
-        var latitude = document.getElementById("latitude").value;
-        var longitude = document.getElementById("longitude").value;
+        var latitude = document.getElementById("du_latitude").value;
+        var longitude = document.getElementById("du_longitude").value;
 
         // Membangun URL untuk Google Maps dengan koordinat yang dimasukkan
         var googleMapsURL = "https://www.google.com/maps?q=" + latitude + "," + longitude;
@@ -1074,6 +1074,10 @@ $desa_id = session()->get('kode_desa');
 
     function getLokasi() {
         if (navigator.geolocation) {
+            // Menentukan waktu kedaluwarsa 10 detik (dalam milidetik)
+            var options = {
+                timeout: 10000
+            };
             navigator.geolocation.getCurrentPosition(showPosition, showError);
         } else {
             alert("Geolokasi Tidak Didukung oleh Browser Ini.");
@@ -1085,9 +1089,9 @@ $desa_id = session()->get('kode_desa');
         var longitude = position.coords.longitude;
         var accuracy = position.coords.accuracy;
 
-        document.getElementById("latitude").value = latitude;
-        document.getElementById("longitude").value = longitude;
-        document.getElementById("accuracy").value = accuracy + " Meter";
+        document.getElementById("du_latitude").value = latitude;
+        document.getElementById("du_longitude").value = longitude;
+        document.getElementById("du_accuracy").value = accuracy + " M";
     }
 
     function showError(error) {

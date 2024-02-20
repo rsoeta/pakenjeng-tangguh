@@ -436,14 +436,21 @@ class Usulan22 extends BaseController
                     ]
                 ],
                 'du_latitude' => [
-                    'label' => 'Garis Lintang',
+                    'label' => 'Latitude',
                     'rules' => 'required',
                     'errors' => [
                         'required' => '{field} harus terisi.'
                     ]
                 ],
                 'du_longitude' => [
-                    'label' => 'Garis Bujur',
+                    'label' => 'Longitude',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus terisi.'
+                    ]
+                ],
+                'du_accuracy' => [
+                    'label' => 'Accuracy',
                     'rules' => 'required',
                     'errors' => [
                         'required' => '{field} harus terisi.'
@@ -488,6 +495,7 @@ class Usulan22 extends BaseController
                         'du_foto_rumah' => $validation->getError('du_foto_rumah'),
                         'du_latitude' => $validation->getError('du_latitude'),
                         'du_longitude' => $validation->getError('du_longitude'),
+                        'du_accuracy' => $validation->getError('du_accuracy'),
                         'du_kate' => $validation->getError('du_kate'),
                         'du_nasu' => $validation->getError('du_nasu'),
                         'created_by' => $validation->getError('created_by'),
@@ -604,6 +612,7 @@ class Usulan22 extends BaseController
                     'foto_rumah' => $filename_dua,
                     'du_latitude' => $this->request->getVar('du_latitude'),
                     'du_longitude' => $this->request->getVar('du_longitude'),
+                    'du_accuracy' => $this->request->getVar('du_accuracy'),
                     'sk0' => $this->request->getVar('sk0'),
                     'sk1' => $this->request->getVar('sk1'),
                     'sk2' => $this->request->getVar('sk2'),
@@ -797,6 +806,7 @@ class Usulan22 extends BaseController
                 'du_foto_rumah' => $row['foto_rumah'],
                 'du_latitude' => $row['du_latitude'],
                 'du_longitude' => $row['du_longitude'],
+                'du_accuracy' => $row['du_accuracy'],
                 'sk0' => $row['sk0'],
                 'sk1' => $row['sk1'],
                 'sk2' => $row['sk2'],
@@ -890,6 +900,7 @@ class Usulan22 extends BaseController
                 'du_foto_rumah' => $row['foto_rumah'],
                 'du_latitude' => $row['du_latitude'],
                 'du_longitude' => $row['du_longitude'],
+                'du_accuracy' => $row['du_accuracy'],
                 'sk0' => $row['sk0'],
                 'sk1' => $row['sk1'],
                 'sk2' => $row['sk2'],
@@ -1062,14 +1073,21 @@ class Usulan22 extends BaseController
                     ]
                 ],
                 'du_latitude' => [
-                    'label' => 'Garis Lintang',
+                    'label' => 'Latitude',
                     'rules' => 'required',
                     'errors' => [
                         'required' => '{field} harus terisi.'
                     ]
                 ],
                 'du_longitude' => [
-                    'label' => 'Garis Bujur',
+                    'label' => 'Longitude',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus terisi.'
+                    ]
+                ],
+                'du_accuracy' => [
+                    'label' => 'Accuracy',
                     'rules' => 'required',
                     'errors' => [
                         'required' => '{field} harus terisi.'
@@ -1244,6 +1262,7 @@ class Usulan22 extends BaseController
                         'foto_rumah' => $filename_dua,
                         'du_latitude' => $this->request->getVar('du_latitude'),
                         'du_longitude' => $this->request->getVar('du_longitude'),
+                        'du_accuracy' => $this->request->getVar('du_accuracy'),
                         'sk0' => $this->request->getVar('sk0'),
                         'sk1' => $this->request->getVar('sk1'),
                         'sk2' => $this->request->getVar('sk2'),
@@ -1303,6 +1322,7 @@ class Usulan22 extends BaseController
                         // 'foto_identitas' => $filename_empat,
                         'du_latitude' => $this->request->getVar('du_latitude'),
                         'du_longitude' => $this->request->getVar('du_longitude'),
+                        'du_accuracy' => $this->request->getVar('du_accuracy'),
                         'sk0' => $this->request->getVar('sk0'),
                         'sk1' => $this->request->getVar('sk1'),
                         'sk2' => $this->request->getVar('sk2'),

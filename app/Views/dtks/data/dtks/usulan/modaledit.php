@@ -552,15 +552,15 @@ $desa_id = session()->get('kode_desa');
                                     <div class="form-group row nopadding">
 
                                         <div class="col-5 col-sm-4">
-                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Lat" spellcheck="false" id="du_latitude" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
+                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Latitude" spellcheck="false" id="du_latitude" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
                                             <div class="invalid-feedback errordu_latitude"></div>
                                         </div>
                                         <div class="col-5 col-sm-4">
-                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Long" spellcheck="false" id="du_longitude" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
+                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Longitude" spellcheck="false" id="du_longitude" name="du_longitude" value="<?= $du_longitude; ?>" readonly required>
                                             <div class="invalid-feedback errordu_longitude"></div>
                                         </div>
                                         <div class="col-2 col-sm-4">
-                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Accuracy" spellcheck="false" id="accuracy" name="du_longitude" readonly>
+                                            <input type="text" class="form-control form-control-sm mb-2" placeholder="Accuracy" spellcheck="false" id="du_accuracy" name="du_accuracy" value="<?= $du_accuracy; ?>" readonly>
                                         </div>
                                     </div>
                                     <div class="form-group row nopadding">
@@ -1066,7 +1066,10 @@ $desa_id = session()->get('kode_desa');
 
     function getLokasi() {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, showError);
+            var options = {
+                timeout: 1000
+            };
+            navigator.geolocation.getCurrentPosition(showPosition, showError, options);
         } else {
             alert("Geolokasi Tidak Didukung oleh Browser Ini.");
         }
@@ -1079,7 +1082,7 @@ $desa_id = session()->get('kode_desa');
 
         document.getElementById("du_latitude").value = latitude;
         document.getElementById("du_longitude").value = longitude;
-        document.getElementById("accuracy").value = accuracy + " Meter";
+        document.getElementById("du_accuracy").value = accuracy + " M";
     }
 
     function showError(error) {
@@ -1097,5 +1100,16 @@ $desa_id = session()->get('kode_desa');
                 alert("Terjadi kesalahan yang tidak diketahui.");
                 break;
         }
+    }
+
+    function openGoogleMaps() {
+        var latitude = document.getElementById("du_latitude").value;
+        var longitude = document.getElementById("du_longitude").value;
+
+        // Membangun URL untuk Google Maps dengan koordinat yang dimasukkan
+        var googleMapsURL = "https://www.google.com/maps?q=" + latitude + "," + longitude;
+
+        // Membuka Google Maps di tab atau jendela baru
+        window.open(googleMapsURL, "_blank");
     }
 </script>
