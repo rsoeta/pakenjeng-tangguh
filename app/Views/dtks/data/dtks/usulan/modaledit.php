@@ -517,12 +517,12 @@ $desa_id = session()->get('kode_desa');
                                 <div class="col-sm-12 col-12 mt-2">
                                     <label class="label-center mt-2">Dokumen</label>
                                     <div class="form-group row nopadding">
-                                        <div class="col-6 col-sm-6 mb-2">
+                                        <div class="col-4 mb-2">
                                             <a download="<?= $du_foto_identitas; ?>" href="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>">
                                                 <img class="img-preview-id foto-dokumen" src="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>">
                                             </a>
                                             <br>
-                                            <label for="du_foto_identitas">Foto KTP/KK/KIA/AKL</label>
+                                            <label for="du_foto_identitas">Foto KTP/KK</label>
                                             <div class="input-group">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text"><i class="fas fa-address-card"></i></span>
@@ -531,12 +531,12 @@ $desa_id = session()->get('kode_desa');
                                             </div>
                                         </div>
                                         <div class="invalid-feedback errordu_foto_identitas"></div>
-                                        <div class="col-6 col-sm-6 mb-2">
+                                        <div class="col-4 mb-2">
                                             <a download="<?= $du_foto_rumah; ?>" href="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>">
                                                 <img class="img-preview-rmh foto-dokumen" src="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>">
                                             </a>
                                             <br>
-                                            <label for="du_foto_rumah">Foto Rumah</label>
+                                            <label for="du_foto_rumah">Foto Rumah Depan</label>
                                             <div class="input-group">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text"><i class="fa fa-home"></i></span>
@@ -545,12 +545,25 @@ $desa_id = session()->get('kode_desa');
                                             </div>
                                         </div>
                                         <div class="invalid-feedback errordu_foto_rumah"></div>
+                                        <div class="col-4 mb-2">
+                                            <a download="<?= $du_foto_rumah_dalam; ?>" href="<?= usulan_foto($du_foto_rumah_dalam, 'foto_rumah_dalam'); ?>">
+                                                <img class="img-preview-rmh-dlm foto-dokumen" src="<?= usulan_foto($du_foto_rumah_dalam, 'foto_rumah_dalam'); ?>">
+                                            </a>
+                                            <br>
+                                            <label for="du_foto_rumah_dalam">Foto Rumah Dalam</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="fa fa-home"></i></span>
+                                                </div>
+                                                <input type="file" class="form-control form-control-sm" spellcheck="false" name="du_foto_rumah_dalam" id="du_foto_rumah_dalam" onchange="previewImgRmhDlm()" accept="image/*" capture />
+                                            </div>
+                                        </div>
+                                        <div class="invalid-feedback errordu_foto_rumah_dalam"></div>
                                     </div>
                                 </div>
                                 <div class="col-sm-12 col-12 mt-2">
                                     <label class="label-center mt-2">Koordinat</label>
                                     <div class="form-group row nopadding">
-
                                         <div class="col-5 col-sm-4">
                                             <input type="text" class="form-control form-control-sm mb-2" placeholder="Latitude" spellcheck="false" id="du_latitude" name="du_latitude" value="<?= $du_latitude; ?>" readonly required>
                                             <div class="invalid-feedback errordu_latitude"></div>
@@ -567,7 +580,7 @@ $desa_id = session()->get('kode_desa');
                                         <div class="col-sm-4 col-4">
                                             <button type="button" class="btn btn-outline-primary btn-sm btn-block" onclick="getLokasi()"><i class="fas fa-map-marker-alt"></i> Get</button>
                                         </div>
-                                        <div class="col-4 col-sm-4">
+                                        <div class="col-sm-4 col-4">
                                             <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="openGoogleMaps()"><i class="fas fa-location-arrow"></i> Cek</button>
                                         </div>
                                         <div class="col-sm-4 col-4">
@@ -630,14 +643,14 @@ $desa_id = session()->get('kode_desa');
             let form = $('.formsimpan')[0];
             let data = new FormData(form);
             $.ajax({
-                type: "POST",
+                type: 'POST',
                 url: '<?= base_url('/updateUsulan') ?>',
                 data: data,
                 enctype: 'multipart/form-data',
                 processData: false,
                 contentType: false,
                 cache: false,
-                dataType: "json",
+                dataType: 'json',
                 beforeSend: function() {
                     $('.btnSimpan').attr('disable', 'disabled');
                     $('.btnSimpan').html('<i class="fa fa-spin fa-spinner"></i>');
@@ -647,6 +660,8 @@ $desa_id = session()->get('kode_desa');
                     $('.btnSimpan').html('Update');
                 },
                 success: function(response) {
+                    // console.log(success);
+
                     if (response.error) {
 
                         if (response.error.shdk) {
@@ -799,6 +814,14 @@ $desa_id = session()->get('kode_desa');
                         } else {
                             $('#du_foto_rumah').removeClass('is-invalid');
                             $('.errordu_foto_rumah').html('');
+                        }
+
+                        if (response.error.du_foto_rumah_dalam) {
+                            $('#du_foto_rumah_dalam').addClass('is-invalid');
+                            $('.errordu_foto_rumah_dalam').html(response.error.du_foto_rumah_dalam);
+                        } else {
+                            $('#du_foto_rumah_dalam').removeClass('is-invalid');
+                            $('.errordu_foto_rumah_dalam').html('');
                         }
 
                         if (response.error.du_latitude) {

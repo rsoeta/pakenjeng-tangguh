@@ -98,6 +98,20 @@ $desa_id = session()->get('kode_desa');
                                             </div>
                                         </div>
                                         <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="nik">NIK</label>
+                                            <div class="col-8 col-sm-8">
+                                                <input type="number" name="nik" id="nik" class="form-control form-control-sm" autocomplete="off">
+                                                <div class="invalid-feedback errornik"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row nopadding">
+                                            <label class="col-4 col-sm-4 col-form-label" for="nama">Nama</label>
+                                            <div class="col-8 col-sm-8">
+                                                <input type="text" name="nama" id="nama" class="form-control form-control-sm">
+                                                <div class="invalid-feedback errornama"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row nopadding">
                                             <label class="col-4 col-sm-4 col-form-label" for="kecamatan">Kecamatan</label>
                                             <div class="col-8 col-sm-8">
                                                 <input type="text" name="kecamatan" id="kecamatan" class="form-control form-control-sm" value="<?= Profil_Admin()['namaKec']; ?>" readonly>
@@ -145,20 +159,6 @@ $desa_id = session()->get('kode_desa');
                                             <div class="col-8 col-sm-8">
                                                 <input type="text" name="alamat" id="alamat" class="form-control form-control-sm" value="">
                                                 <div class="invalid-feedback erroralamat"></div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row nopadding">
-                                            <label class="col-4 col-sm-4 col-form-label" for="nama">Nama</label>
-                                            <div class="col-8 col-sm-8">
-                                                <input type="text" name="nama" id="nama" class="form-control form-control-sm">
-                                                <div class="invalid-feedback errornama"></div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group row nopadding">
-                                            <label class="col-4 col-sm-4 col-form-label" for="nik">NIK</label>
-                                            <div class="col-8 col-sm-8">
-                                                <input type="number" name="nik" id="nik" class="form-control form-control-sm" autocomplete="off">
-                                                <div class="invalid-feedback errornik"></div>
                                             </div>
                                         </div>
                                         <div class="form-group row nopadding">
@@ -423,7 +423,7 @@ $desa_id = session()->get('kode_desa');
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-12 col-sm-4" id="du_so_id_div" style="display: none;">
+                                    <div class="col-12 col-sm-4 du_so_id_div" style="display: none;">
                                         <div class="form-group row nopadding">
                                             <label class="col-4 col-sm-4 col-form-label" for="du_so_id">Status</label>
                                             <div class="col-8 col-sm-8">
@@ -461,10 +461,10 @@ $desa_id = session()->get('kode_desa');
                                     <div class="col-sm-12 col-12 mt-2">
                                         <label class="label-center mt-2">Dokumen</label>
                                         <div class="form-group row nopadding">
-                                            <div class="col-6 col-sm-6 mb-2">
+                                            <div class="col-4 mb-2">
                                                 <img class="img-preview-id" src="<?= usulan_foto(null, 'foto_identitas'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
                                                 <br>
-                                                <label for="du_foto_identitas">Foto KTP/KK/KIA/AKL</label>
+                                                <label for="du_foto_identitas">Foto KTP/KK</label>
                                                 <div class="input-group">
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text"><i class="fas fa-address-card"></i></span>
@@ -473,10 +473,10 @@ $desa_id = session()->get('kode_desa');
                                                 </div>
                                             </div>
                                             <div class="invalid-feedback errordu_foto_identitas"></div>
-                                            <div class="col-6 col-sm-6 mb-2">
+                                            <div class="col-4 mb-2">
                                                 <img class="img-preview-rmh" src="<?= usulan_foto(null, 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
                                                 <br>
-                                                <label for="du_foto_rumah">Foto Rumah</label>
+                                                <label for="du_foto_rumah">Foto Rumah Depan</label>
                                                 <div class="input-group">
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text"><i class="fa fa-home"></i></span>
@@ -484,7 +484,19 @@ $desa_id = session()->get('kode_desa');
                                                     <input type="file" class="form-control form-control-sm" spellcheck="false" name="du_foto_rumah" id="du_foto_rumah" onchange="previewImgRmh()" accept="image/*" capture="camera" capture required />
                                                 </div>
                                             </div>
-                                            <div class="invalid-feedback errordu_foto_rumah"></div>
+                                            <div class="invalid-feedback errordu_foto_rumah_dalam"></div>
+                                            <div class="col-4 mb-2">
+                                                <img class="img-preview-rmh-dlm" src="<?= usulan_foto(null, 'foto_rumah'); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
+                                                <br>
+                                                <label for="du_foto_rumah_dalam">Foto Rumah Dalam</label>
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text"><i class="fa fa-home"></i></span>
+                                                    </div>
+                                                    <input type="file" class="form-control form-control-sm" spellcheck="false" name="du_foto_rumah_dalam" id="du_foto_rumah_dalam" onchange="previewImgRmhDlm()" accept="image/*" capture="camera" capture required />
+                                                </div>
+                                            </div>
+                                            <div class="invalid-feedback errordu_foto_rumah_dalam"></div>
                                         </div>
                                     </div>
                                     <div class="col-sm-12 col-12 mt-2">
@@ -741,6 +753,14 @@ $desa_id = session()->get('kode_desa');
                             $('.errordu_foto_rumah').html('');
                         }
 
+                        if (response.error.du_foto_rumah_dalam) {
+                            $('#du_foto_rumah_dalam').addClass('is-invalid');
+                            $('.errordu_foto_rumah_dalam').html(response.error.du_foto_rumah_dalam);
+                        } else {
+                            $('#du_foto_rumah_dalam').removeClass('is-invalid');
+                            $('.errordu_foto_rumah_dalam').html('');
+                        }
+
                         if (response.error.du_latitude) {
                             $('#du_latitude').addClass('is-invalid');
                             $('.errordu_latitude').html(response.error.du_latitude);
@@ -750,18 +770,18 @@ $desa_id = session()->get('kode_desa');
                         }
 
                         if (response.error.du_longitude) {
-                            $('#longitude').addClass('is-invalid');
+                            $('#du_longitude').addClass('is-invalid');
                             $('.errordu_longitude').html(response.error.du_longitude);
                         } else {
-                            $('#longitude').removeClass('is-invalid');
+                            $('#du_longitude').removeClass('is-invalid');
                             $('.errordu_longitude').html('');
                         }
 
                         if (response.error.du_accuracy) {
-                            $('#accuracy').addClass('is-invalid');
+                            $('#du_accuracy').addClass('is-invalid');
                             $('.errordu_accuracy').html(response.error.du_accuracy);
                         } else {
-                            $('#accuracy').removeClass('is-invalid');
+                            $('#du_accuracy').removeClass('is-invalid');
                             $('.errordu_accuracy').html('');
                         }
 
@@ -908,6 +928,13 @@ $desa_id = session()->get('kode_desa');
                 $(".errordisabil_jenis").html("Jenis Disabilitas Harus di Pilih");
             }
         });
+
+        $('#du_usia').val(getAge);
+        if ($('#du_usia').val() < 18) {
+            $('.du_so_id_div').show();
+        } else {
+            $('.du_so_id_div').hide();
+        }
     });
 
     $('#dataCari').on('change', (event) => {
@@ -939,6 +966,7 @@ $desa_id = session()->get('kode_desa');
                 $('#tgl_hamil_div').hide();
                 $('#tgl_hamil').val('');
             }
+            $('#jenis_pendidikan').val(data.du_pendidikan_id);
             $('#jenis_pekerjaan').val(data.jenis_pekerjaan);
             $('#status_kawin').val(data.status_kawin);
             $('#shdk').val(data.shdk);

@@ -29,7 +29,7 @@ final class TcpConnector implements ConnectorInterface
         if (!$parts || !isset($parts['scheme'], $parts['host'], $parts['port']) || $parts['scheme'] !== 'tcp') {
             return Promise\reject(new \InvalidArgumentException(
                 'Given URI "' . $uri . '" is invalid (EINVAL)',
-                \defined('SOCKET_EINVAL') ? \SOCKET_EINVAL : 22
+                \defined('SOCKET_EINVAL') ? \SOCKET_EINVAL : (\defined('PCNTL_EINVAL') ? \PCNTL_EINVAL : 22)
             ));
         }
 
@@ -37,7 +37,7 @@ final class TcpConnector implements ConnectorInterface
         if (@\inet_pton($ip) === false) {
             return Promise\reject(new \InvalidArgumentException(
                 'Given URI "' . $uri . '" does not contain a valid host IP (EINVAL)',
-                \defined('SOCKET_EINVAL') ? \SOCKET_EINVAL : 22
+                \defined('SOCKET_EINVAL') ? \SOCKET_EINVAL : (\defined('PCNTL_EINVAL') ? \PCNTL_EINVAL : 22)
             ));
         }
 
@@ -116,13 +116,19 @@ final class TcpConnector implements ConnectorInterface
                         // Linux reports socket errno and errstr again when trying to write to the dead socket.
                         // Suppress error reporting to get error message below and close dead socket before rejecting.
                         // This is only known to work on Linux, Mac and Windows are known to not support this.
-                        @\fwrite($stream, \PHP_EOL);
-                        $error = \error_get_last();
+                        $errno = 0;
+                        $errstr = '';
+                        \set_error_handler(function ($_, $error) use (&$errno, &$errstr) {
+                            // Match errstr from PHP's warning message.
+                            // fwrite(): send of 1 bytes failed with errno=111 Connection refused
+                            \preg_match('/errno=(\d+) (.+)/', $error, $m);
+                            $errno = isset($m[1]) ? (int) $m[1] : 0;
+                            $errstr = isset($m[2]) ? $m[2] : $error;
+                        });
 
-                        // fwrite(): send of 2 bytes failed with errno=111 Connection refused
-                        \preg_match('/errno=(\d+) (.+)/', $error['message'], $m);
-                        $errno = isset($m[1]) ? (int) $m[1] : 0;
-                        $errstr = isset($m[2]) ? $m[2] : $error['message'];
+                        \fwrite($stream, \PHP_EOL);
+
+                        \restore_error_handler();
                     } else {
                         // Not on Linux and ext-sockets not available? Too bad.
                         $errno = \defined('SOCKET_ECONNREFUSED') ? \SOCKET_ECONNREFUSED : 111;

@@ -5,6 +5,7 @@
 	"homepage": "https://codeigniter.com",
 	"license": "MIT",
 	"require": {
+		"codeigniter4/framework": "^4.4",
 		"php": "^7.3||^8.0",
 		"ext-curl": "*",
 		"ext-intl": "*",
@@ -18,7 +19,7 @@
 		"cboden/ratchet": "^0.4.4"
 	},
 	"require-dev": {
-		"codeigniter4/codeigniter4-standard": "^1.0",
+		"codeigniter/coding-standard": "^1.0",
 		"fakerphp/faker": "^1.9",
 		"mikey179/vfsstream": "^1.6",
 		"phpunit/phpunit": "^9.1",

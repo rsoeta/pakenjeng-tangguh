@@ -4,7 +4,7 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\Squiz\Sniffs\WhiteSpace;
@@ -67,7 +67,8 @@ class MemberVarSpacingSniff extends AbstractVariableSniff
             if ($tokens[$prev]['code'] === T_ATTRIBUTE_END
                 && isset($tokens[$prev]['attribute_opener']) === true
             ) {
-                $prev = $tokens[$prev]['attribute_opener'];
+                $prev  = $tokens[$prev]['attribute_opener'];
+                $start = $prev;
                 continue;
             }
 
@@ -107,8 +108,8 @@ class MemberVarSpacingSniff extends AbstractVariableSniff
 
                                     // Remove the newline after the docblock, and any entirely
                                     // empty lines before the member var.
-                                    if ($tokens[$i]['code'] === T_WHITESPACE
-                                        && $tokens[$i]['line'] === $tokens[$prev]['line']
+                                    if (($tokens[$i]['code'] === T_WHITESPACE
+                                        && $tokens[$i]['line'] === $tokens[$prev]['line'])
                                         || ($tokens[$i]['column'] === 1
                                         && $tokens[$i]['line'] !== $tokens[($i + 1)]['line'])
                                     ) {
@@ -140,7 +141,7 @@ class MemberVarSpacingSniff extends AbstractVariableSniff
             $first = $tokens[$start]['comment_opener'];
         } else {
             $first = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($start - 1), null, true);
-            $first = $phpcsFile->findNext(Tokens::$commentTokens, ($first + 1));
+            $first = $phpcsFile->findNext(array_merge(Tokens::$commentTokens, [T_ATTRIBUTE]), ($first + 1));
         }
 
         // Determine if this is the first member var.
@@ -210,8 +211,6 @@ class MemberVarSpacingSniff extends AbstractVariableSniff
         if ($endOfStatement !== false) {
             return $endOfStatement;
         }
-
-        return;
 
     }//end processMemberVar()
 

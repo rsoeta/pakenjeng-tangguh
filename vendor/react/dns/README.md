@@ -1,6 +1,7 @@
 # DNS
 
-[![CI status](https://github.com/reactphp/dns/workflows/CI/badge.svg)](https://github.com/reactphp/dns/actions)
+[![CI status](https://github.com/reactphp/dns/actions/workflows/ci.yml/badge.svg)](https://github.com/reactphp/dns/actions)
+[![installs on Packagist](https://img.shields.io/packagist/dt/react/dns?color=blue&label=installs%20on%20Packagist)](https://packagist.org/packages/react/dns)
 
 Async DNS resolver for [ReactPHP](https://reactphp.org/).
 
@@ -114,7 +115,7 @@ See also the wiki for possible [cache implementations](https://github.com/reactp
 
 ### resolve()
 
-The `resolve(string $domain): PromiseInterface<string,Exception>` method can be used to
+The `resolve(string $domain): PromiseInterface<string>` method can be used to
 resolve the given $domain name to a single IPv4 address (type `A` query).
 
 ```php
@@ -150,7 +151,7 @@ $promise->cancel();
 
 ### resolveAll()
 
-The `resolveAll(string $host, int $type): PromiseInterface<array,Exception>` method can be used to
+The `resolveAll(string $host, int $type): PromiseInterface<array>` method can be used to
 resolve all record values for the given $domain name and query $type.
 
 ```php
@@ -409,7 +410,7 @@ This project follows [SemVer](https://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require react/dns:^1.9
+composer require react/dns:^1.12
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
@@ -425,13 +426,13 @@ To run the test suite, you first need to clone this repo and then install all
 dependencies [through Composer](https://getcomposer.org/):
 
 ```bash
-$ composer install
+composer install
 ```
 
 To run the test suite, go to the project root and run:
 
 ```bash
-$ vendor/bin/phpunit
+vendor/bin/phpunit
 ```
 
 The test suite also contains a number of functional integration tests that rely
@@ -439,7 +440,7 @@ on a stable internet connection.
 If you do not want to run these, they can simply be skipped like this:
 
 ```bash
-$ vendor/bin/phpunit --exclude-group internet
+vendor/bin/phpunit --exclude-group internet
 ```
 
 ## License

@@ -36,13 +36,14 @@ final class SecureConnector implements ConnectorInterface
         if (!$parts || !isset($parts['scheme']) || $parts['scheme'] !== 'tls') {
             return Promise\reject(new \InvalidArgumentException(
                 'Given URI "' . $uri . '" is invalid (EINVAL)',
-                \defined('SOCKET_EINVAL') ? \SOCKET_EINVAL : 22
+                \defined('SOCKET_EINVAL') ? \SOCKET_EINVAL : (\defined('PCNTL_EINVAL') ? \PCNTL_EINVAL : 22)
             ));
         }
 
         $context = $this->context;
         $encryption = $this->streamEncryption;
         $connected = false;
+        /** @var \React\Promise\PromiseInterface<ConnectionInterface> $promise */
         $promise = $this->connector->connect(
             \str_replace('tls://', '', $uri)
         )->then(function (ConnectionInterface $connection) use ($context, $encryption, $uri, &$promise, &$connected) {
@@ -86,11 +87,11 @@ final class SecureConnector implements ConnectorInterface
 
                 // Exception trace arguments are not available on some PHP 7.4 installs
                 // @codeCoverageIgnoreStart
-                foreach ($trace as &$one) {
+                foreach ($trace as $ti => $one) {
                     if (isset($one['args'])) {
-                        foreach ($one['args'] as &$arg) {
+                        foreach ($one['args'] as $ai => $arg) {
                             if ($arg instanceof \Closure) {
-                                $arg = 'Object(' . \get_class($arg) . ')';
+                                $trace[$ti]['args'][$ai] = 'Object(' . \get_class($arg) . ')';
                             }
                         }
                     }

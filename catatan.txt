@@ -904,3 +904,27 @@
 ## v2.16.8 -- Update tabel dtks_usulan22
     # tambah kolom dtks_usulan22 (du_pendidikan_id INT 3 NULL) tabel pendidikan_kk (pk_id)
     # upload / import tabel pendidikan_kk
+
+
+## Update sistem CI4 (chat.openai.com = https://chat.openai.com/c/4fb4f18b-3f4c-4d01-9eb4-47d7d49a50fd)
+    Pesan "Package codeigniter4/codeigniter4-standard is abandoned, you should avoid using it. Use codeigniter/coding-standard instead." menunjukkan bahwa paket `codeigniter4/codeigniter4-standard` telah ditinggalkan (abandoned) dan Anda sebaiknya menghindari penggunaannya. Sebagai gantinya, Anda disarankan untuk menggunakan `codeigniter/coding-standard`.
+
+    Untuk memperbarui paket CodeIgniter Anda dan mengatasi pesan tersebut, Anda bisa melakukan langkah-langkah berikut:
+
+    1. **Update `composer.json`**: Buka file `composer.json` di proyek CodeIgniter Anda dan cari baris yang mencantumkan `codeigniter4/codeigniter4-standard`. Gantilah ini dengan `codeigniter/coding-standard`.
+
+    2. **Jalankan Composer Update**: Simpan perubahan pada `composer.json` dan kemudian jalankan perintah `composer update` di terminal atau command prompt Anda. Ini akan memperbarui paket-paket yang ada sesuai dengan spesifikasi yang baru di `composer.json`.
+
+    3. **Verifikasi**: Setelah proses pembaruan selesai, pastikan tidak ada pesan kesalahan terkait paket yang ditinggalkan. Juga, pastikan bahwa aplikasi Anda masih berjalan dengan baik dan tidak ada perubahan yang memengaruhi fungsionalitas yang ada.
+
+    Setelah Anda melakukan langkah-langkah di atas, Anda seharusnya dapat memperbarui aplikasi CodeIgniter Anda dengan menggunakan `codeigniter/coding-standard` tanpa lagi mendapatkan pesan bahwa paket `codeigniter4/codeigniter4-standard` telah ditinggalkan.
+
+    # "codeigniter4/codeigniter4-standard": "^1.0",
+    "codeigniter/coding-standard": "^1.0",
+	// "name": "codeigniter4/framework",
+
+## v2.16.9 -- tambah foto rumah tampak dalam
+    # Ubah tabel
+        ALTER TABLE `dtks_usulan22` ADD `foto_rumah_dalam` VARCHAR(255) NULL DEFAULT NULL AFTER `foto_rumah`;
+        UPDATE `dtks_usulan22` SET foto_rumah_dalam=foto_rumah
+    # tambah folder foto_rumah_dalam pada public/data/usulan

@@ -719,6 +719,19 @@
             imgPreview.src = e.target.result;
         }
     }
+
+    function previewImgRmhDlm() {
+        const du_foto_rumah_dalam = document.querySelector('#du_foto_rumah_dalam');
+        const imgPreview = document.querySelector('.img-preview-rmh-dlm');
+
+
+        const fileIdentitas = new FileReader();
+        fileIdentitas.readAsDataURL(du_foto_rumah_dalam.files[0]);
+
+        fileIdentitas.onload = function(e) {
+            imgPreview.src = e.target.result;
+        }
+    }
 </script>
 
 <?= $this->endSection(); ?>

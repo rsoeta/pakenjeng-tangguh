@@ -56,7 +56,7 @@ class Usulan22 extends BaseController
 
             $data = [
                 'namaApp' => 'Opr NewDTKS',
-                'title' => 'Daftar Usulan DTKS',
+                'title' => 'Daftar Usulan',
                 'user_login' => $this->AuthModel->getUserId(),
                 'dtks' => $this->Usulan22Model->getDtks(),
                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
@@ -81,7 +81,7 @@ class Usulan22 extends BaseController
 
             $data = [
                 'namaApp' => 'Opr NewDTKS',
-                'title' => 'Daftar Usulan DTKS',
+                'title' => 'Daftar Usulan',
                 'user_login' => $this->AuthModel->getUserId(),
                 'dtks' => $this->Usulan22Model->getDtks(),
                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
@@ -131,8 +131,10 @@ class Usulan22 extends BaseController
             $row = array();
             $row[] = $no;
             $row[] = $key->du_nik;
-            $row[] = '<a href=' . usulan_foto($key->foto_identitas, 'foto_identitas') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Identitas" style="text-decoration:none;">' . $key->nama . '</a>
-            <a href=' . usulan_foto($key->foto_rumah, 'foto_rumah') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Rumah Depan"></a>
+            $row[] = '
+            <a href=' . usulan_foto($key->foto_identitas, 'foto_identitas') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Identitas" style="text-decoration:none;">' . $key->nama . '</a>
+            <a href=' . usulan_foto($key->foto_rumah, 'foto_rumah') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Rumah Tampak Depan"></a>
+            <a href=' . usulan_foto($key->foto_rumah_dalam, 'foto_rumah_dalam') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Rumah Tampak Dalam"></a>
             ';
             // $row[] = $key->nama;
             $row[] = $key->nokk;
@@ -201,6 +203,7 @@ class Usulan22 extends BaseController
             $row[] = '
             <a href=' . usulan_foto($key->foto_identitas, 'foto_identitas') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Identitas" style="text-decoration:none;">' . $key->nama . '</a>
             <a href=' . usulan_foto($key->foto_rumah, 'foto_rumah') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Rumah Depan"></a>
+            <a href=' . usulan_foto($key->foto_rumah_dalam, 'foto_rumah_dalam') . ' data-lightbox="dataUsulan' . $key->du_nik . '"' . ' data-title="Foto Rumah Tampak Dalam"></a>
             ';
             $row[] = $key->nokk;
             $row[] = $key->ibu_kandung;
@@ -426,8 +429,18 @@ class Usulan22 extends BaseController
                     ]
                 ],
                 'du_foto_rumah' => [
-                    'label' => 'Foto Depan Rumah',
+                    'label' => 'Foto Rumah Tampak Depan',
                     'rules' => 'uploaded[du_foto_rumah]|is_image[du_foto_rumah]|mime_in[du_foto_rumah,image/jpg,image/jpeg,image/png]',
+                    'errors' => [
+                        'uploaded' => '{field} harus ada.',
+                        'is_image' => '{field} harus berupa gambar.',
+                        'mime_in' => '{field} harus berupa gambar.',
+                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
+                    ]
+                ],
+                'du_foto_rumah_dalam' => [
+                    'label' => 'Foto Rumah Tampak Dalam',
+                    'rules' => 'uploaded[du_foto_rumah_dalam]|is_image[du_foto_rumah_dalam]|mime_in[du_foto_rumah_dalam,image/jpg,image/jpeg,image/png]',
                     'errors' => [
                         'uploaded' => '{field} harus ada.',
                         'is_image' => '{field} harus berupa gambar.',
@@ -493,6 +506,7 @@ class Usulan22 extends BaseController
                         'shdk' => $validation->getError('shdk'),
                         'du_foto_identitas' => $validation->getError('du_foto_identitas'),
                         'du_foto_rumah' => $validation->getError('du_foto_rumah'),
+                        'du_foto_rumah_dalam' => $validation->getError('du_foto_rumah_dalam'),
                         'du_latitude' => $validation->getError('du_latitude'),
                         'du_longitude' => $validation->getError('du_longitude'),
                         'du_accuracy' => $validation->getError('du_accuracy'),
@@ -508,23 +522,29 @@ class Usulan22 extends BaseController
                 $desaNama = $namaDesa['name'];
 
                 $du_foto_rumah = $this->request->getFile('du_foto_rumah');
+                $du_foto_rumah_dalam = $this->request->getFile('du_foto_rumah_dalam');
                 $du_foto_identitas = $this->request->getFile('du_foto_identitas');
 
                 // var_dump($dd_foto_cpm);
                 // die;
                 $buat_tanggal = date_create($this->request->getVar('updated_at'));
                 $filename_dua = 'DUDFH_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
+                $filename_tiga = 'DUDIH_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
                 $filename_empat = 'DUDID_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
                 // var_dump($filename_dua);
                 // die;
 
                 $img_dua = imagecreatefromjpeg($du_foto_rumah);
+                $img_tiga = imagecreatefromjpeg($du_foto_rumah_dalam);
                 $img_empat = imagecreatefromjpeg($du_foto_identitas);
 
                 // get width and height of image
 
                 $width_dua = imagesx($img_dua);
                 $height_dua = imagesy($img_dua);
+
+                $width_tiga = imagesx($img_tiga);
+                $height_tiga = imagesy($img_tiga);
 
                 $width_empat = imagesx($img_empat);
                 $height_empat = imagesy($img_empat);
@@ -533,11 +553,15 @@ class Usulan22 extends BaseController
                 if ($width_dua > $height_dua) {
                     $img_dua = imagerotate($img_dua, -90, 0);
                 }
+                if ($width_tiga > $height_tiga) {
+                    $img_tiga = imagerotate($img_tiga, -90, 0);
+                }
                 if ($width_empat > $height_empat) {
                     $img_empat = imagerotate($img_empat, -90, 0);
                 }
                 // resize image
                 $img_dua = imagescale($img_dua, 480, 640);
+                $img_tiga = imagescale($img_tiga, 480, 640);
                 $img_empat = imagescale($img_empat, 480, 640);
 
                 $txtNik = $this->request->getPost('nik');
@@ -565,12 +589,22 @@ class Usulan22 extends BaseController
                 $posXdua = 0.02 * imagesx($img_dua);
                 $posYdua = 0.80 * imagesy($img_dua);
 
+                $fontSizeTiga = 0.020 * imagesx($img_tiga);
+                $whiteTiga = imagecolorallocate($img_tiga, 255, 255, 255);
+                // $strokeColortiga = imagecolorallocate($img_tiga, 0, 0, 0);
+                $strokeColorTiga = imagecolorallocate($img_tiga, 26, 36, 33);
+
+                // pos x from left, pos y from bottom
+                $posXtiga = 0.02 * imagesx($img_tiga);
+                $posYtiga = 0.80 * imagesy($img_tiga);
+
                 // $posX = 10;
                 // $posY = 830;
                 $angle = 0;
 
                 // stroke watermark image
                 imagettfstroketext($img_dua, $fontSizeDua, $angle, $posXdua, $posYdua, $whiteDua, $strokeColorDua, $fontFile, $txt, 1);
+                imagettfstroketext($img_tiga, $fontSizeTiga, $angle, $posXtiga, $posYtiga, $whiteTiga, $strokeColorTiga, $fontFile, $txt, 1);
 
 
                 header("Content-type: image/jpg");
@@ -580,6 +614,7 @@ class Usulan22 extends BaseController
                 // die;
 
                 imagejpeg($img_dua, 'data/usulan/foto_rumah/' . $filename_dua, $quality);
+                imagejpeg($img_tiga, 'data/usulan/foto_rumah_dalam/' . $filename_tiga, $quality);
                 imagejpeg($img_empat, 'data/usulan/foto_identitas/' . $filename_empat, $quality);
                 // var_dump($img_satu);
                 // die;
@@ -610,6 +645,7 @@ class Usulan22 extends BaseController
                     'hamil_tgl' => $this->request->getVar('tgl_hamil'),
                     'foto_identitas' => $filename_empat,
                     'foto_rumah' => $filename_dua,
+                    'foto_rumah_dalam' => $filename_tiga,
                     'du_latitude' => $this->request->getVar('du_latitude'),
                     'du_longitude' => $this->request->getVar('du_longitude'),
                     'du_accuracy' => $this->request->getVar('du_accuracy'),
@@ -708,35 +744,31 @@ class Usulan22 extends BaseController
 
         return $this->response->setJSON($response);
     }
-
     public function delete()
     {
         if ($this->request->isAJAX()) {
-
-
-            // if (deadline_usulan() == 1) {
-            //     $msg = [
-            //         'informasi' => 'Mohon Maaf, Batas waktu untuk Perubahan Data, Telah Habis!!'
-            //     ];
-            // } else {
             $id = $this->request->getVar('id');
-
             $usulan = $this->Usulan22Model->find($id);
-            unlink('data/usulan/foto_identitas/' . $usulan['foto_identitas']);
-            unlink('data/usulan/foto_rumah/' . $usulan['foto_rumah']);
 
+            // Menghapus file foto_identitas jika ada
+            $foto_identitas_path = 'data/usulan/foto_identitas/' . $usulan['foto_identitas'];
+            if (file_exists($foto_identitas_path)) {
+                unlink($foto_identitas_path);
+            }
+
+            // Menghapus file foto_rumah jika ada
+            $foto_rumah_path = 'data/usulan/foto_rumah/' . $usulan['foto_rumah'];
+            if (file_exists($foto_rumah_path)) {
+                unlink($foto_rumah_path);
+            }
+
+            // Menghapus data dari database
             $this->Usulan22Model->delete($id);
+
             $msg = [
                 'sukses' => 'Data berhasil dihapus'
             ];
-            // }
             echo json_encode($msg);
-            // } else {
-            //     $data = [
-            //         'title' => 'Access denied',
-            //     ];
-
-            //     return redirect()->to('lockscreen');
         }
     }
 
@@ -804,6 +836,7 @@ class Usulan22 extends BaseController
                 'tgl_hamil' => $row['hamil_tgl'],
                 'du_foto_identitas' => $row['foto_identitas'],
                 'du_foto_rumah' => $row['foto_rumah'],
+                'du_foto_rumah_dalam' => $row['foto_rumah_dalam'],
                 'du_latitude' => $row['du_latitude'],
                 'du_longitude' => $row['du_longitude'],
                 'du_accuracy' => $row['du_accuracy'],
@@ -935,6 +968,9 @@ class Usulan22 extends BaseController
             $validation = \Config\Services::validation();
             $du_kate = $this->request->getPost('du_kate');
 
+            // Add error logging for debugging
+            error_log("Starting validation");
+
             $valid = $this->validate([
                 'nik' => [
                     'label' => 'NIK',
@@ -1056,7 +1092,7 @@ class Usulan22 extends BaseController
                 ],
                 'du_foto_identitas' => [
                     'label' => 'Foto Identitas',
-                    'rules' => 'is_image[du_foto_identitas]|mime_in[du_foto_identitas,image/jpg,image/jpeg,image/png]',
+                    'rules' => 'is_image[du_foto_identitas]|mime_in[du_foto_identitas,image/jpg,image/jpeg,image/png]|max_size[du_foto_identitas,2048]',
                     'errors' => [
                         'is_image' => '{field} harus berupa gambar.',
                         'mime_in' => '{field} harus berekstensi gambar.',
@@ -1064,8 +1100,17 @@ class Usulan22 extends BaseController
                     ]
                 ],
                 'du_foto_rumah' => [
-                    'label' => 'Foto Depan Rumah',
-                    'rules' => 'is_image[du_foto_rumah]|mime_in[du_foto_rumah,image/jpg,image/jpeg,image/png]',
+                    'label' => 'Foto Rumah Tampak Depan',
+                    'rules' => 'is_image[du_foto_rumah]|mime_in[du_foto_rumah,image/jpg,image/jpeg,image/png]|max_size[du_foto_rumah,2048]',
+                    'errors' => [
+                        'is_image' => '{field} harus berupa gambar.',
+                        'mime_in' => '{field} harus berekstensi gambar.',
+                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
+                    ]
+                ],
+                'du_foto_rumah_dalam' => [
+                    'label' => 'Foto Rumah Tampak Dalam',
+                    'rules' => 'is_image[du_foto_rumah_dalam]|mime_in[du_foto_rumah_dalam,image/jpg,image/jpeg,image/png]|max_size[du_foto_rumah_dalam,2048]',
                     'errors' => [
                         'is_image' => '{field} harus berupa gambar.',
                         'mime_in' => '{field} harus berekstensi gambar.',
@@ -1101,6 +1146,7 @@ class Usulan22 extends BaseController
                     ]
                 ],
             ]);
+
             if (!$valid) {
                 $msg = [
                     'error' => [
@@ -1118,235 +1164,203 @@ class Usulan22 extends BaseController
                         'alamat' => $validation->getError('alamat'),
                         'datart' => $validation->getError('datart'),
                         'datarw' => $validation->getError('datarw'),
-                        'kelurahan' => $validation->getError('kelurahan'),
                         'shdk' => $validation->getError('shdk'),
                         'du_foto_identitas' => $validation->getError('du_foto_identitas'),
                         'du_foto_rumah' => $validation->getError('du_foto_rumah'),
+                        'du_foto_rumah_dalam' => $validation->getError('du_foto_rumah_dalam'),
                         'du_latitude' => $validation->getError('du_latitude'),
                         'du_longitude' => $validation->getError('du_longitude'),
                         'du_kate' => $validation->getError('du_kate'),
-                        'du_nasu' => $validation->getError('du_nasu'),
-                        'created_by' => $validation->getError('created_by'),
+                        'du_nasu' => $validation->getError('du_nasu')
                     ]
                 ];
                 echo json_encode($msg);
             } else {
+                // Handle file upload
+                $duFotoIdentitas = $this->request->getFile('du_foto_identitas');
+                $duFotoRumah = $this->request->getFile('du_foto_rumah');
+                $duFotoRumahDalam = $this->request->getFile('du_foto_rumah_dalam');
 
-                $duFotoIdentitas = $_FILES['du_foto_identitas']['name'];
-                $duFotoRumah = $_FILES['du_foto_rumah']['name'];
+                $usulan = $this->Usulan22Model->find($id);
+                $buat_tanggal = date_create($this->request->getVar('updated_at'));
 
-                if (($duFotoRumah || $duFotoIdentitas) != NULL) {
+                // Initialize filenames
+                $filename_empat = $usulan['foto_identitas'];
+                $filename_dua = $usulan['foto_rumah'];
+                $filename_tiga = $usulan['foto_rumah_dalam'];
 
-                    $usulan = $this->Usulan22Model->find($id);
+                if ($duFotoIdentitas || $duFotoRumah || $duFotoRumahDalam) {
 
-                    $du_fotoid_old = $usulan['foto_identitas'];
-                    $du_fotorumah_old = $usulan['foto_rumah'];
-
-                    $dir_identintas = 'data/usulan/foto_identitas/' . $du_fotoid_old;
-                    $dir_rumah = 'data/usulan/foto_rumah/' . $du_fotorumah_old;
-
-                    unlink($dir_identintas);
-                    unlink($dir_rumah);
-
-                    $kode_desa = session()->get('kode_desa');
-                    $namaDesa = $this->WilayahModel->getVillage($kode_desa);
-                    $desaNama = $namaDesa['name'];
-
-                    $du_foto_rumah = $this->request->getFile('du_foto_rumah');
-                    $du_foto_identitas = $this->request->getFile('du_foto_identitas');
-
-                    // var_dump($dd_foto_cpm);
-                    // die;
-                    $buat_tanggal = date_create($this->request->getVar('updated_at'));
-                    $filename_dua = 'DUDFH_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
-                    $filename_empat = 'DUDID_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
-
-                    $img_dua = imagecreatefromjpeg($du_foto_rumah);
-                    $img_empat = imagecreatefromjpeg($du_foto_identitas);
-
-                    // get width and height of image
-
-                    $width_dua = imagesx($img_dua);
-                    $height_dua = imagesy($img_dua);
-
-                    $width_empat = imagesx($img_empat);
-                    $height_empat = imagesy($img_empat);
-
-                    // reorient image if width is greater than height
-                    if ($width_dua > $height_dua) {
-                        $img_dua = imagerotate($img_dua, -90, 0);
+                    // Process foto identitas
+                    if ($duFotoIdentitas && $duFotoIdentitas->isValid() && !$duFotoIdentitas->hasMoved()) {
+                        $dir_identintas = 'data/usulan/foto_identitas/' . $filename_empat;
+                        if (is_file($dir_identintas)) {
+                            unlink($dir_identintas);
+                        }
+                        $filename_empat = 'DUDID_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
+                        $duFotoIdentitas->move('data/usulan/foto_identitas', $filename_empat, true);
+                        $this->processImage('data/usulan/foto_identitas/' . $filename_empat, $buat_tanggal);
                     }
-                    if ($width_empat > $height_empat) {
-                        $img_empat = imagerotate($img_empat, -90, 0);
+
+                    // Process foto rumah
+                    if ($duFotoRumah && $duFotoRumah->isValid() && !$duFotoRumah->hasMoved()) {
+                        $dir_rumah = 'data/usulan/foto_rumah/' . $filename_dua;
+                        if (is_file($dir_rumah)) {
+                            unlink($dir_rumah);
+                        }
+                        $filename_dua = 'DUDFH_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
+                        $duFotoRumah->move('data/usulan/foto_rumah', $filename_dua, true);
+                        $this->processImage('data/usulan/foto_rumah/' . $filename_dua, $buat_tanggal);
                     }
-                    // resize image
-                    $img_dua = imagescale($img_dua, 480, 640);
-                    $img_empat = imagescale($img_empat, 480, 640);
 
-                    $txtNik = $this->request->getPost('nik');
-                    $txtNama = strtoupper($this->request->getPost('nama'));
-                    $txtAlamat = strtoupper($this->request->getPost('alamat') . ' RT/RW ' . $this->request->getPost('datart') . "/" . $this->request->getPost('datarw'));
-                    $txtKelurahan = $desaNama;
-                    $txtKecamatan = 'PAKENJENG';
-                    $txtKabupaten = 'GARUT';
-                    $txtProvinsi = 'JAWA BARAT';
-                    $txtLat = $this->request->getPost('du_latitude');
-                    $txtLang = $this->request->getPost('du_longitude');
-                    date_default_timezone_set('Asia/Jakarta');
-                    $txtTimestap = date("d M Y H:i:s");
-
-                    $txt = "NIK : " . $txtNik . "\nNama : " . $txtNama . "\nAlamat : " . $txtAlamat . "\n"  . $txtKelurahan . ", " . $txtKecamatan . ", " . $txtKabupaten . ", " . $txtProvinsi . "\nLokasi : " . $txtLat . ", " . $txtLang . "\nDibuat pada : " . $txtTimestap . "
-                \n@" . nameApp() . " Kec. " . ucwords(strtolower(Profil_Admin()['namaKec']));
-                    $fontFile = FCPATH . 'assets/fonts/Futura Bk BT Book.ttf';
-
-                    $fontSizeDua = 0.020 * imagesx($img_dua);
-                    $whiteDua = imagecolorallocate($img_dua, 255, 255, 255);
-                    // $strokeColorDua = imagecolorallocate($img_dua, 0, 0, 0);
-                    $strokeColorDua = imagecolorallocate($img_dua, 26, 36, 33);
-
-                    // pos x from left, pos y from bottom
-                    $posXdua = 0.02 * imagesx($img_dua);
-                    $posYdua = 0.80 * imagesy($img_dua);
-
-                    // $posX = 10;
-                    // $posY = 830;
-                    $angle = 0;
-
-                    // stroke watermark image
-                    imagettfstroketext($img_dua, $fontSizeDua, $angle, $posXdua, $posYdua, $whiteDua, $strokeColorDua, $fontFile, $txt, 1);
-
-
-                    header("Content-type: image/jpg");
-                    $quality = 90; // 0 to 100
-
-                    // var_dump($img_satu);
-                    // die;
-
-                    imagejpeg($img_dua, 'data/usulan/foto_rumah/' . $filename_dua, $quality);
-                    imagejpeg($img_empat, 'data/usulan/foto_identitas/' . $filename_empat, $quality);
-                    // var_dump($img_satu);
-                    // die;
-
-                    $data = [
-                        'provinsi' => '32',
-                        'kabupaten' => '32.05',
-                        'kecamatan' => '32.05.33',
-                        'shdk' => $this->request->getVar('shdk'),
-                        'kelurahan' => $this->request->getVar('kelurahan'),
-                        'rw' => $this->request->getVar("datarw"),
-                        'rt' => $this->request->getVar("datart"),
-                        'alamat' => strtoupper(trim($this->request->getVar('alamat'))),
-                        'status_kawin' => $this->request->getVar("status_kawin"),
-                        'jenis_pendidikan' => $this->request->getVar("jenis_pendidikan"),
-                        'du_pendidikan_id' => $this->request->getVar("jenis_pekerjaan"),
-                        'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
-                        'ibu_kandung' => strtoupper(trim($this->request->getVar("ibu_kandung"))),
-                        'tanggal_lahir' => $this->request->getVar("tanggal_lahir"),
-                        'tempat_lahir' => strtoupper(trim($this->request->getVar("tempat_lahir"))),
-                        'nama' => strtoupper(trim($this->request->getVar('nama'))),
-                        'nokk' => $this->request->getVar('nokk'),
-                        'program_bansos' => $this->request->getVar('databansos'),
-                        'du_nik' => $this->request->getVar('nik'),
-                        'disabil_status' => $this->request->getVar('disabil_status'),
-                        'disabil_kode' => $this->request->getVar('disabil_jenis'),
-                        'hamil_status' => $this->request->getVar('status_hamil'),
-                        'hamil_tgl' => $this->request->getVar('tgl_hamil'),
-                        'foto_identitas' => $filename_empat,
-                        'foto_rumah' => $filename_dua,
-                        'du_latitude' => $this->request->getVar('du_latitude'),
-                        'du_longitude' => $this->request->getVar('du_longitude'),
-                        'du_accuracy' => $this->request->getVar('du_accuracy'),
-                        'sk0' => $this->request->getVar('sk0'),
-                        'sk1' => $this->request->getVar('sk1'),
-                        'sk2' => $this->request->getVar('sk2'),
-                        'sk3' => $this->request->getVar('sk3'),
-                        'sk4' => $this->request->getVar('sk4'),
-                        'sk5' => $this->request->getVar('sk5'),
-                        'sk6' => $this->request->getVar('sk6'),
-                        'sk7' => $this->request->getVar('sk7'),
-                        'sk8' => $this->request->getVar('sk8'),
-                        'sk9' => $this->request->getVar('sk9'),
-                        'du_so_id' => $this->request->getVar('du_so_id'),
-                        'du_kate' => $this->request->getVar('du_kate'),
-                        'du_nasu' => strtoupper(trim($this->request->getVar('du_nasu'))),
-                        'du_proses' => $this->request->getVar('du_proses'),
-                        'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
-                        'updated_by' => session()->get('nik'),
-
-                        // 'foto_rumah' => $nama_foto_rumah,
-                    ];
-
-                    $this->Usulan22Model->update($id, $data);
-
-                    $msg = [
-                        'sukses' => 'Data berhasil diubah',
-                    ];
+                    // Process foto rumah dalam
+                    if ($duFotoRumahDalam && $duFotoRumahDalam->isValid() && !$duFotoRumahDalam->hasMoved()) {
+                        $dir_rumah_dalam = 'data/usulan/foto_rumah_dalam/' . $filename_tiga;
+                        if (is_file($dir_rumah_dalam)) {
+                            unlink($dir_rumah_dalam);
+                        }
+                        $filename_tiga = 'DUDIH_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
+                        $duFotoRumahDalam->move('data/usulan/foto_rumah_dalam', $filename_tiga, true);
+                        $this->processImage('data/usulan/foto_rumah_dalam/' . $filename_tiga, $buat_tanggal);
+                    }
                 } else {
-
-                    $buat_tanggal = date_create($this->request->getVar('updated_at'));
-                    // $filename_dua = 'DUDFH_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
-                    // $filename_empat = 'DUDID_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
-
-                    $data = [
-                        'provinsi' => '32',
-                        'kabupaten' => '32.05',
-                        'kecamatan' => '32.05.33',
-                        'shdk' => $this->request->getVar('shdk'),
-                        'kelurahan' => $this->request->getVar('kelurahan'),
-                        'rw' => $this->request->getVar("datarw"),
-                        'rt' => $this->request->getVar("datart"),
-                        'alamat' => strtoupper(trim($this->request->getVar('alamat'))),
-                        'status_kawin' => $this->request->getVar("status_kawin"),
-                        'du_pendidikan_id' => $this->request->getVar("jenis_pendidikan"),
-                        'jenis_pekerjaan' => $this->request->getVar("jenis_pekerjaan"),
-                        'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
-                        'ibu_kandung' => strtoupper(trim($this->request->getVar("ibu_kandung"))),
-                        'tanggal_lahir' => $this->request->getVar("tanggal_lahir"),
-                        'tempat_lahir' => strtoupper(trim($this->request->getVar("tempat_lahir"))),
-                        'nama' => strtoupper(trim($this->request->getVar('nama'))),
-                        'nokk' => $this->request->getVar('nokk'),
-                        'program_bansos' => $this->request->getVar('databansos'),
-                        'du_nik' => $this->request->getVar('nik'),
-                        'disabil_status' => $this->request->getVar('disabil_status'),
-                        'disabil_kode' => $this->request->getVar('disabil_jenis'),
-                        'hamil_status' => $this->request->getVar('status_hamil'),
-                        'hamil_tgl' => $this->request->getVar('tgl_hamil'),
-                        // 'foto_rumah' => $filename_dua,
-                        // 'foto_identitas' => $filename_empat,
-                        'du_latitude' => $this->request->getVar('du_latitude'),
-                        'du_longitude' => $this->request->getVar('du_longitude'),
-                        'du_accuracy' => $this->request->getVar('du_accuracy'),
-                        'sk0' => $this->request->getVar('sk0'),
-                        'sk1' => $this->request->getVar('sk1'),
-                        'sk2' => $this->request->getVar('sk2'),
-                        'sk3' => $this->request->getVar('sk3'),
-                        'sk4' => $this->request->getVar('sk4'),
-                        'sk5' => $this->request->getVar('sk5'),
-                        'sk6' => $this->request->getVar('sk6'),
-                        'sk7' => $this->request->getVar('sk7'),
-                        'sk8' => $this->request->getVar('sk8'),
-                        'sk9' => $this->request->getVar('sk9'),
-                        'du_so_id' => $this->request->getVar('du_so_id'),
-                        'du_kate' => $this->request->getVar('du_kate'),
-                        'du_nasu' => strtoupper(trim($this->request->getVar('du_nasu'))),
-                        'du_proses' => $this->request->getVar('du_proses'),
-                        'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
-                        'updated_by' => session()->get('nik'),
-
-                        // 'foto_rumah' => $nama_foto_rumah,
-                    ];
-
-                    $this->Usulan22Model->update($id, $data);
-
-                    $msg = [
-                        'sukses' => 'Data berhasil diubah',
-                    ];
+                    $filename_dua = $usulan['foto_rumah'];
+                    $filename_tiga = $usulan['foto_rumah_dalam'];
+                    $filename_empat = $usulan['foto_identitas'];
                 }
+
+                // Add error logging for debugging
+                error_log("Filenames: $filename_empat, $filename_dua, $filename_tiga");
+
+                $data = [
+                    'provinsi' => '32',
+                    'kabupaten' => '32.05',
+                    'kecamatan' => '32.05.33',
+                    'kelurahan' => $this->request->getPost('kelurahan'),
+                    'alamat' => $this->request->getPost('alamat'),
+                    'rt' => $this->request->getPost('datart'),
+                    'rw' => $this->request->getPost('datarw'),
+                    'shdk' => $this->request->getPost('shdk'),
+                    'status_kawin' => $this->request->getPost('status_kawin'),
+                    'du_pendidikan_id' => $this->request->getPost('jenis_pendidikan'),
+                    'jenis_pekerjaan' => $this->request->getPost('jenis_pekerjaan'),
+                    'jenis_kelamin' => $this->request->getPost('jenis_kelamin'),
+                    'ibu_kandung' => $this->request->getPost('ibu_kandung'),
+                    'tanggal_lahir' => $this->request->getPost('tanggal_lahir'),
+                    'tempat_lahir' => $this->request->getPost('tempat_lahir'),
+                    'program_bansos' => $this->request->getPost('databansos'),
+                    'du_nik' => $this->request->getPost('nik'),
+                    'nokk' => $this->request->getPost('nokk'),
+                    'nama' => $this->request->getPost('nama'),
+                    'disabil_status' => $this->request->getPost('disabil_status'),
+                    'disabil_kode' => $this->request->getPost('disabil_jenis'),
+                    'hamil_status' => $this->request->getPost('status_hamil'),
+                    'hamil_tgl' => $this->request->getPost('tgl_hamil'),
+                    'du_proses' => $this->request->getPost('du_proses'),
+                    'du_so_id' => $this->request->getPost('du_so_id'),
+                    'du_kate' => $this->request->getPost('du_kate'),
+                    'du_nasu' => $this->request->getPost('du_nasu'),
+                    'du_latitude' => $this->request->getPost('du_latitude'),
+                    'du_longitude' => $this->request->getPost('du_longitude'),
+                    'du_accuracy' => $this->request->getPost('du_accuracy'),
+                    'sk0' => $this->request->getPost('sk0'),
+                    'sk1' => $this->request->getPost('sk1'),
+                    'sk2' => $this->request->getPost('sk2'),
+                    'sk3' => $this->request->getPost('sk3'),
+                    'sk4' => $this->request->getPost('sk4'),
+                    'sk5' => $this->request->getPost('sk5'),
+                    'sk6' => $this->request->getPost('sk6'),
+                    'sk7' => $this->request->getPost('sk7'),
+                    'sk8' => $this->request->getPost('sk8'),
+                    'sk9' => $this->request->getPost('sk9'),
+                    'nik' => $this->request->getPost('nik'),
+                    'foto_rumah' => $filename_dua,
+                    'foto_rumah_dalam' => $filename_tiga,
+                    'foto_identitas' => $filename_empat,
+                    'updated_by' => session()->get('nik'),
+                    'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s')
+                ];
+
+                // Add error logging for debugging
+                error_log("Data: " . json_encode($data));
+
+                $this->Usulan22Model->update($id, $data);
+                $msg = [
+                    'sukses' => 'Data berhasil diubah'
+                ];
                 echo json_encode($msg);
             }
         } else {
             return redirect()->to('lockscreen');
         }
+    }
+    private function processImage($filePath, $buat_tanggal)
+    {
+        // Load image
+        $image = imagecreatefromjpeg($filePath);
+        if (!$image) {
+            error_log("Failed to load image: $filePath");
+            return;
+        }
+
+        // Get dimensions
+        $width = imagesx($image);
+        $height = imagesy($image);
+
+        // Rotate image if needed
+        if ($width > $height) {
+            $image = imagerotate($image, -90, 0);
+        }
+
+        // Resize image
+        $image = imagescale($image, 480, 640);
+
+        // Apply watermark
+        $this->applyWatermark($image, $filePath, $buat_tanggal);
+
+        // Save output
+        imagejpeg($image, $filePath, 90);
+
+        // Clean up
+        imagedestroy($image);
+    }
+
+    private function applyWatermark($image, $filePath, $buat_tanggal)
+    {
+        // Prepare text
+
+        $kode_desa = session()->get('kode_desa');
+        $namaDesa = $this->WilayahModel->getVillage($kode_desa);
+        $desaNama = $namaDesa['name'];
+
+        $txtNik = $this->request->getPost('nik');
+        $txtNama = strtoupper($this->request->getPost('nama'));
+        $txtAlamat = strtoupper($this->request->getPost('alamat') . ' RT/RW ' . $this->request->getPost('datart') . "/" . $this->request->getPost('datarw'));
+        $txtKelurahan = $desaNama; // replace with actual value
+        $txtKecamatan = 'PAKENJENG';
+        $txtKabupaten = 'GARUT';
+        $txtProvinsi = 'JAWA BARAT';
+        $txtLat = $this->request->getPost('du_latitude');
+        $txtLang = $this->request->getPost('du_longitude');
+        date_default_timezone_set('Asia/Jakarta');
+        $txtTimestap = date_format($buat_tanggal, 'Y-m-d H:i:s');
+
+        // $txt = "NIK : " . $txtNik . "\nNama : " . $txtNama . "\nAlamat : " . $txtAlamat . "\n" . $txtKelurahan . ", " . $txtKecamatan . ", " . $txtKabupaten . ", " . $txtProvinsi . "\nLokasi : " . $txtLat . ", " . $txtLang . "\nDibuat pada : " . $txtTimestap . "\n@nameApp Kec. PAKENJENG";
+        $txt = "NIK : " . $txtNik . "\nNama : " . $txtNama . "\nAlamat : " . $txtAlamat . "\n"  . $txtKelurahan . ", " . $txtKecamatan . ", " . $txtKabupaten . ", " . $txtProvinsi . "\nLokasi : " . $txtLat . ", " . $txtLang . "\nDibuat pada : " . $txtTimestap . "\n@" . nameApp() . " Kec. " . ucwords(strtolower(Profil_Admin()['namaKec']));
+
+        // Load font
+        $fontFile = FCPATH . 'assets/fonts/Futura Bk BT Book.ttf';
+
+        // Add watermark
+        $fontSize = 0.020 * imagesx($image);
+        $white = imagecolorallocate($image, 255, 255, 255);
+        $strokeColor = imagecolorallocate($image, 26, 36, 33);
+        $posX = 0.02 * imagesx($image);
+        $posY = 0.80 * imagesy($image);
+        $angle = 0;
+
+        // Add text to image
+        imagettfstroketext($image, $fontSize, $angle, $posX, $posY, $white, $strokeColor, $fontFile, $txt, 1);
     }
 
     function downIden($id)
@@ -1417,7 +1431,7 @@ class Usulan22 extends BaseController
         $sheet->setCellValue('C1', 'NOKK');
         $sheet->setCellValue('D1', 'NAMA');
         $sheet->setCellValue('E1', 'TEMPAT LAHIR');
-        $sheet->setCellValue('F1', "TANGGAL LAHIR\n(31/01/2000)");
+        $sheet->setCellValue('F1', 'TANGGAL LAHIR\n(31/01/2000)');
         $sheet->setCellValue('G1', 'IBU KANDUNG');
         $sheet->setCellValue('H1', 'JENIS KELAMIN');
         $sheet->setCellValue('I1', 'JENIS PEKERJAAN');

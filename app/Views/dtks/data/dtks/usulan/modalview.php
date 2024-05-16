@@ -387,19 +387,24 @@ $desa_id = session()->get('kode_desa');
                                 <div class="col-sm-12 col-12 mt-2">
                                     <label class="label-center mt-2">Titik Koordinat</label>
                                     <div class="form-group row nopadding">
-                                        <!-- <div class="col-sm-2 col-2">
-                                <button type="button" class="btn btn-primary" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i></button>
-                            </div> -->
-                                        <div class="col-sm-5 col-5">
-                                            <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" class="form-control mb-2" placeholder="Latitude" spellcheck="false" id="du_latitude" name="du_latitude" value="<?= $du_latitude; ?>" required>
+                                        <div class="col-5 col-sm-4">
+                                            <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" class="form-control <form-control-sm></form-control-sm> mb-2" placeholder="Latitude" spellcheck="false" id="du_latitude" name="du_latitude" value="<?= $du_latitude; ?>" required>
                                             <div class="invalid-feedback errordu_latitude"></div>
                                         </div>
-                                        <div class="col-sm-5 col-5">
-                                            <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" class="form-control mb-2" placeholder="Longitude" spellcheck="false" id="du_longitude" name="du_longitude" value="<?= $du_longitude; ?>" required>
+                                        <div class="col-5 col-sm-4">
+                                            <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" class="form-control <form-control-sm></form-control-sm> mb-2" placeholder="Longitude" spellcheck="false" id="du_longitude" name="du_longitude" value="<?= $du_longitude; ?>" required>
                                             <div class="invalid-feedback errordu_longitude"></div>
                                         </div>
-                                        <div class="col-sm-2 col-2 nopadding">
-                                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="copyText()"><i class="fas fa-map-marked-alt"></i></button>
+                                        <div class="col-2 col-sm-4">
+                                            <input <?= $user > 3 ? ' readonly="on"' : ''; ?> type="text" class="form-control form-control-sm mb-2" placeholder="Accuracy" spellcheck="false" id="du_accuracy" name="du_accuracy" value="<?= $du_accuracy; ?>" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row nopadding">
+                                        <div class="col-sm-6 col-6">
+                                            <button type="button" class="btn btn-outline-info btn-sm btn-block" onclick="openGoogleMaps()"><i class="fas fa-location-arrow"></i> Cek</button>
+                                        </div>
+                                        <div class="col-sm-6 col-6">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm btn-block" onclick="copyText()"><i class="fas fa-clone"></i> Copy</button>
                                         </div>
                                         <!-- Elemen untuk menampilkan pesan sementara -->
                                         <div id="temporary-message"><span id="message-content"></span></div>
@@ -880,4 +885,15 @@ $desa_id = session()->get('kode_desa');
         // Di sini Anda dapat menangani data yang dipaste sesuai kebutuhan aplikasi Anda
         console.log("Teks yang ditempel:", pasteData);
     });
+
+    function openGoogleMaps() {
+        var latitude = document.getElementById("du_latitude").value;
+        var longitude = document.getElementById("du_longitude").value;
+
+        // Membangun URL untuk Google Maps dengan koordinat yang dimasukkan
+        var googleMapsURL = "https://www.google.com/maps?q=" + latitude + "," + longitude;
+
+        // Membuka Google Maps di tab atau jendela baru
+        window.open(googleMapsURL, "_blank");
+    }
 </script>

@@ -11,7 +11,7 @@ function nameApp()
 
 function logoApp()
 {
-    return base_url('icon-dtks.png');
+    return base_url('icon-dtks8.png');
 }
 
 // function version app from database
