@@ -928,3 +928,5 @@
         ALTER TABLE `dtks_usulan22` ADD `foto_rumah_dalam` VARCHAR(255) NULL DEFAULT NULL AFTER `foto_rumah`;
         UPDATE `dtks_usulan22` SET foto_rumah_dalam=foto_rumah
     # tambah folder foto_rumah_dalam pada public/data/usulan
+
+## v2.16.10 -- hapus validasi max_size

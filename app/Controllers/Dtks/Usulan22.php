@@ -1092,29 +1092,26 @@ class Usulan22 extends BaseController
                 ],
                 'du_foto_identitas' => [
                     'label' => 'Foto Identitas',
-                    'rules' => 'is_image[du_foto_identitas]|mime_in[du_foto_identitas,image/jpg,image/jpeg,image/png]|max_size[du_foto_identitas,2048]',
+                    'rules' => 'is_image[du_foto_identitas]|mime_in[du_foto_identitas,image/jpg,image/jpeg,image/png]',
                     'errors' => [
                         'is_image' => '{field} harus berupa gambar.',
                         'mime_in' => '{field} harus berekstensi gambar.',
-                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
                     ]
                 ],
                 'du_foto_rumah' => [
                     'label' => 'Foto Rumah Tampak Depan',
-                    'rules' => 'is_image[du_foto_rumah]|mime_in[du_foto_rumah,image/jpg,image/jpeg,image/png]|max_size[du_foto_rumah,2048]',
+                    'rules' => 'is_image[du_foto_rumah]|mime_in[du_foto_rumah,image/jpg,image/jpeg,image/png]',
                     'errors' => [
                         'is_image' => '{field} harus berupa gambar.',
                         'mime_in' => '{field} harus berekstensi gambar.',
-                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
                     ]
                 ],
                 'du_foto_rumah_dalam' => [
                     'label' => 'Foto Rumah Tampak Dalam',
-                    'rules' => 'is_image[du_foto_rumah_dalam]|mime_in[du_foto_rumah_dalam,image/jpg,image/jpeg,image/png]|max_size[du_foto_rumah_dalam,2048]',
+                    'rules' => 'is_image[du_foto_rumah_dalam]|mime_in[du_foto_rumah_dalam,image/jpg,image/jpeg,image/png]',
                     'errors' => [
                         'is_image' => '{field} harus berupa gambar.',
                         'mime_in' => '{field} harus berekstensi gambar.',
-                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
                     ]
                 ],
                 'du_latitude' => [
@@ -1328,7 +1325,6 @@ class Usulan22 extends BaseController
     private function applyWatermark($image, $filePath, $buat_tanggal)
     {
         // Prepare text
-
         $kode_desa = session()->get('kode_desa');
         $namaDesa = $this->WilayahModel->getVillage($kode_desa);
         $desaNama = $namaDesa['name'];
