@@ -931,6 +931,7 @@ class Usulan22 extends BaseController
                 'tgl_hamil' => $row['hamil_tgl'],
                 'du_foto_identitas' => $row['foto_identitas'],
                 'du_foto_rumah' => $row['foto_rumah'],
+                'du_foto_rumah_dalam' => $row['foto_rumah_dalam'],
                 'du_latitude' => $row['du_latitude'],
                 'du_longitude' => $row['du_longitude'],
                 'du_accuracy' => $row['du_accuracy'],
@@ -945,6 +946,7 @@ class Usulan22 extends BaseController
                 'sk8' => $row['sk8'],
                 'sk9' => $row['sk9'],
                 'du_so_id' => $row['du_so_id'],
+                'du_kate' => $row['du_kate'],
                 'du_proses' => $row['du_proses'],
                 // 'foto_rumah' => $nama_foto_rumah,
             ];

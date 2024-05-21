@@ -930,3 +930,4 @@
     # tambah folder foto_rumah_dalam pada public/data/usulan
 
 ## v2.16.10 -- hapus validasi max_size
+## v2.16.11 -- tampilkan foto_rumah_dalam di view data

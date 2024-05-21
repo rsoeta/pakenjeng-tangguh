@@ -352,11 +352,21 @@ $desa_id = session()->get('kode_desa');
                                             </select>
                                         </div>
                                     </div>
+                                    <div class="form-group row nopadding">
+                                        <label class="col-4 col-sm-4 col-form-label" for="du_kate">Kel. Adat Terpencil</label>
+                                        <div class="col-8 col-sm-8">
+                                            <select id="du_kate" name="du_kate" class="form-select form-select-sm">
+                                                <option <?= $du_kate == 0 ? ' selected' : ''; ?> value="0">Tidak</option>
+                                                <option <?= $du_kate == 1 ? ' selected' : ''; ?> value="1">Ya</option>
+                                            </select>
+                                            <div class="invalid-feedback errordu_kate"></div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-sm-12 col-12 mt-2">
                                     <label class="label-center mt-2">Dokumen</label>
                                     <div class="form-group row nopadding">
-                                        <div class="col-6 col-sm-6 mb-2">
+                                        <div class="col-4 mb-2">
                                             <a download="<?= $du_foto_identitas; ?>" href="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>">
                                                 <img src="<?= usulan_foto($du_foto_identitas, 'foto_identitas'); ?>" class="foto-dokumen">
                                             </a>
@@ -369,7 +379,7 @@ $desa_id = session()->get('kode_desa');
                                                 <input type="file" class="form-control" spellcheck="false" name="du_foto_identitas" id="du_foto_identitas" onchange="previewImgId()" accept="image/*" capture />
                                             </div>
                                         </div>
-                                        <div class="col-6 col-sm-6 mb-2">
+                                        <div class="col-4 mb-2">
                                             <a download="<?= $du_foto_rumah; ?>" href="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>">
                                                 <img src="<?= usulan_foto($du_foto_rumah, 'foto_rumah'); ?>" class="foto-dokumen">
                                             </a>
@@ -380,6 +390,19 @@ $desa_id = session()->get('kode_desa');
                                                     <span class="input-group-text"><i class="fa fa-home"></i></span>
                                                 </div>
                                                 <input type="file" class="form-control" spellcheck="false" name="du_foto_rumah" id="du_foto_rumah" onchange="previewImgRmh()" accept="image/*" capture />
+                                            </div>
+                                        </div>
+                                        <div class="col-4 mb-2">
+                                            <a download="<?= $du_foto_rumah_dalam; ?>" href="<?= usulan_foto($du_foto_rumah_dalam, 'foto_rumah_dalam'); ?>">
+                                                <img src="<?= usulan_foto($du_foto_rumah_dalam, 'foto_rumah_dalam'); ?>" class="foto-dokumen">
+                                            </a>
+                                            <br>
+                                            <label for="du_foto_rumah">Foto Rumah Dalam</label>
+                                            <div class="input-group" hidden>
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="fa fa-home"></i></span>
+                                                </div>
+                                                <input type="file" class="form-control" spellcheck="false" name="du_foto_rumah_dalam" id="du_foto_rumah_dalam" onchange="previewImgRmhDlm()" accept="image/*" capture />
                                             </div>
                                         </div>
                                     </div>
@@ -526,6 +549,16 @@ $desa_id = session()->get('kode_desa');
 
 <script>
     $(document).ready(function() {
+        // start dropdown kel adat terpencil
+        // Tangkap perubahan pada dropdown
+        $('#du_kate').change(function() {
+            if ($(this).val() === '0') {
+                // Jika nilainya 0, hapus nilai Nama Suku
+                $('#du_nasu').val('');
+            }
+        });
+        // end dropdown kel adat terpencil
+
         $('.btnSimpan').click(function(e) {
             e.preventDefault();
             let $kelurahan = $('#kelurahan').removeAttr('disabled', '');
@@ -743,11 +776,11 @@ $desa_id = session()->get('kode_desa');
                                 title: response.sukses,
                             });
                             // window.location.reload();
-                            $('#modaledit').modal('hide');
+                            $('#modalview').modal('hide');
                             table.draw();
                             tabel_padan.draw();
                         }
-                        $('#modaledit').modal('hide');
+                        $('#modalview').modal('hide');
                         table.draw();
                         tabel_padan.draw();
                     }
