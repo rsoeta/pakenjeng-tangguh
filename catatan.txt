@@ -931,3 +931,28 @@
 
 ## v2.16.10 -- hapus validasi max_size
 ## v2.16.11 -- tampilkan foto_rumah_dalam di view data
+## v2.16.12 -- validasi akurasi <50 pada tambah data
+    $valid = $this->validate([
+                'du_latitude' => [
+                    'label' => 'Latitude',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus terisi.'
+                    ]
+                ],
+                'du_longitude' => [
+                    'label' => 'Longitude',
+                    'rules' => 'required',
+                    'errors' => [
+                        'required' => '{field} harus terisi.'
+                    ]
+                ],
+                'du_accuracy' => [
+                    'label' => 'Accuracy',
+                    'rules' => 'required|less_than_equal_to[50]',
+                    'errors' => [
+                        'required' => '{field} harus terisi.',
+                        'less_than_equal_to' => '{field} harus kurang dari atau sama dengan 50.'
+                    ]
+                ],
+            ]);

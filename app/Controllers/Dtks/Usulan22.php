@@ -463,10 +463,11 @@ class Usulan22 extends BaseController
                     ]
                 ],
                 'du_accuracy' => [
-                    'label' => 'Accuracy',
-                    'rules' => 'required',
+                    'label' => 'Akurasi',
+                    'rules' => 'required|less_than_equal_to[50]',
                     'errors' => [
-                        'required' => '{field} harus terisi.'
+                        'required' => '{field} harus terisi.',
+                        'less_than_equal_to' => '{field} harus kurang dari atau sama dengan 50.'
                     ]
                 ],
                 'du_kate' => [
