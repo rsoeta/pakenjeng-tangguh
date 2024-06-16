@@ -1119,7 +1119,7 @@ $desa_id = session()->get('kode_desa');
 
         document.getElementById("du_latitude").value = latitude;
         document.getElementById("du_longitude").value = longitude;
-        document.getElementById("du_accuracy").value = accuracy + " M";
+        document.getElementById("du_accuracy").value = accuracy;
     }
 
     function showError(error) {
