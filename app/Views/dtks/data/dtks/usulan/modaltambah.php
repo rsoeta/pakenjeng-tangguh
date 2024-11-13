@@ -541,13 +541,19 @@ $desa_id = session()->get('kode_desa');
 <script>
     $(document).ready(function() {
 
-        // start script kordinat
+        // Start script kordinat
         if (navigator.geolocation) {
-            navigator.geolocation.watchPosition(showPosition, showError);
+            var options = {
+                enableHighAccuracy: true, // Mengaktifkan akurasi tinggi
+                timeout: 10000, // Batas waktu menunggu lokasi dalam milidetik
+                maximumAge: 0 // Tidak menggunakan data cache
+            };
+
+            navigator.geolocation.watchPosition(showPosition, showError, options);
         } else {
             alert("Geolokasi Tidak Didukung oleh Browser Ini");
         }
-        // end script kordinat
+        // End script kordinat
 
         $('#dataCari').select2({
             dropdownParent: $('#modaltambah'),
@@ -1101,19 +1107,18 @@ $desa_id = session()->get('kode_desa');
 
 
     function getLokasi() {
-     if (navigator.geolocation) {
-                // Menentukan waktu kedaluwarsa 10 detik dan akurasi tinggi
-                var options = {
-                    timeout: 10000,
-                    enableHighAccuracy: true,
-                    maximumAge: 0 // Menghindari penggunaan cache
-                };
-               navigator.geolocation.getCurrentPosition(showPosition, showError, options);
-           } else {
-               alert("Geolokasi Tidak Didukung oleh Browser Ini.");
-           }
+        if (navigator.geolocation) {
+            // Menentukan waktu kedaluwarsa 10 detik dan akurasi tinggi
+            var options = {
+                timeout: 10000,
+                enableHighAccuracy: true,
+                maximumAge: 0 // Menghindari penggunaan cache
+            };
+            navigator.geolocation.getCurrentPosition(showPosition, showError, options);
+        } else {
+            alert("Geolokasi Tidak Didukung oleh Browser Ini.");
+        }
     }
-
 
     function showPosition(position) {
         var latitude = position.coords.latitude;
