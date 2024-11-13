@@ -1101,16 +1101,19 @@ $desa_id = session()->get('kode_desa');
 
 
     function getLokasi() {
-        if (navigator.geolocation) {
-            // Menentukan waktu kedaluwarsa 10 detik (dalam milidetik)
-            var options = {
-                timeout: 10000
-            };
-            navigator.geolocation.getCurrentPosition(showPosition, showError);
-        } else {
-            alert("Geolokasi Tidak Didukung oleh Browser Ini.");
-        }
+     if (navigator.geolocation) {
+                // Menentukan waktu kedaluwarsa 10 detik dan akurasi tinggi
+                var options = {
+                    timeout: 10000,
+                    enableHighAccuracy: true,
+                    maximumAge: 0 // Menghindari penggunaan cache
+                };
+               navigator.geolocation.getCurrentPosition(showPosition, showError, options);
+           } else {
+               alert("Geolokasi Tidak Didukung oleh Browser Ini.");
+           }
     }
+
 
     function showPosition(position) {
         var latitude = position.coords.latitude;
