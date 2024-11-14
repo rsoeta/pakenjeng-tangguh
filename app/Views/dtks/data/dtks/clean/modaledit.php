@@ -234,7 +234,7 @@ $level = session()->get('role_id');
                     <div class="modal-footer mt-3">
                         <footer class="blockquote-footer">
                             <small>
-                                Presented by: <cite title="Opr NewDTKS"><small>Opr NewDTKS</small></cite>
+                                Presented by: <cite title="<?= nameApp(); ?>"><small><?= nameApp(); ?></small></cite>
                             </small>
                         </footer>
                         <!-- <small class="text-muted">-Opr NewDTKS-</small> -->
@@ -243,197 +243,198 @@ $level = session()->get('role_id');
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        $(document).ready(function() {
+<script>
+    $(document).ready(function() {
 
-            $('.formsimpan').submit(function(e) {
-                e.preventDefault();
+        $('.formsimpan').submit(function(e) {
+            e.preventDefault();
 
-                $.ajax({
-                    type: "POST",
-                    url: $(this).attr('action'),
-                    data: $(this).serialize(),
-                    dataType: "json",
-                    beforeSend: function() {
-                        $('.btnsimpan').attr('disable', 'disabled');
-                        $('.btnsimpan').html('<i class="fa fa-spin fa-spinner"></i>');
-                    },
-                    complete: function() {
-                        $('.btnsimpan').removeAttr('disable');
-                        $('.btnsimpan').html('Update');
-                    },
-                    success: function(response) {
-                        if (response.error) {
+            $.ajax({
+                type: "POST",
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                dataType: "json",
+                beforeSend: function() {
+                    $('.btnsimpan').attr('disable', 'disabled');
+                    $('.btnsimpan').html('<i class="fa fa-spin fa-spinner"></i>');
+                },
+                complete: function() {
+                    $('.btnsimpan').removeAttr('disable');
+                    $('.btnsimpan').html('Update');
+                },
+                success: function(response) {
+                    if (response.error) {
 
-                            if (response.error.province_id) {
-                                $('#province_id').addClass('is-invalid');
-                                $('.errorprovince_id').html(response.error.province_id);
-                            } else {
-                                $('#province_id').removeClass('is-invalid');
-                                $('.errorprovince_id').html('');
-                            }
-
-                            if (response.error.regency_id) {
-                                $('#regency_id').addClass('is-invalid');
-                                $('.errorregency_id').html(response.error.regency_id);
-                            } else {
-                                $('#regency_id').removeClass('is-invalid');
-                                $('.errorregency_id').html('');
-                            }
-
-                            if (response.error.district_id) {
-                                $('#district_id').addClass('is-invalid');
-                                $('.errordistrict_id').html(response.error.district_id);
-                            } else {
-                                $('#district_id').removeClass('is-invalid');
-                                $('.errordistrict_id').html('');
-                            }
-
-                            if (response.error.village_id) {
-                                $('#village_id').addClass('is-invalid');
-                                $('.errorvillage_id').html(response.error.village_id);
-                            } else {
-                                $('#village_id').removeClass('is-invalid');
-                                $('.errorvillage_id').html('');
-                            }
-
-                            if (response.error.alamat) {
-                                $('#alamat').addClass('is-invalid');
-                                $('.erroralamat').html(response.error.alamat);
-                            } else {
-                                $('#alamat').removeClass('is-invalid');
-                                $('.erroralamat').html('');
-                            }
-
-                            if (response.error.dusun) {
-                                $('#dusun').addClass('is-invalid');
-                                $('.errordusun').html(response.error.dusun);
-                            } else {
-                                $('#dusun').removeClass('is-invalid');
-                                $('.errordusun').html('');
-                            }
-
-                            if (response.error.no_rw) {
-                                $('#no_rw').addClass('is-invalid');
-                                $('.errorno_rw').html(response.error.no_rw);
-                            } else {
-                                $('#no_rw').removeClass('is-invalid');
-                                $('.errorno_rw').html('');
-                            }
-
-                            if (response.error.no_rt) {
-                                $('#no_rt').addClass('is-invalid');
-                                $('.errorno_rt').html(response.error.no_rt);
-                            } else {
-                                $('#no_rt').removeClass('is-invalid');
-                                $('.errorno_rt').html('');
-                            }
-
-                            if (response.error.nomor_kk) {
-                                $('#nomor_kk').addClass('is-invalid');
-                                $('.errornomor_kk').html(response.error.nomor_kk);
-                            } else {
-                                $('#nomor_kk').removeClass('is-invalid');
-                                $('.errornomor_kk').html('');
-                            }
-
-                            if (response.error.nomor_nik) {
-                                $('#nomor_nik').addClass('is-invalid');
-                                $('.errornomor_nik').html(response.error.nomor_nik);
-                            } else {
-                                $('#nomor_nik').removeClass('is-invalid');
-                                $('.errornomor_nik').html('');
-                            }
-
-                            if (response.error.nama) {
-                                $('#nama').addClass('is-invalid');
-                                $('.errornama').html(response.error.nama);
-                            } else {
-                                $('#nama').removeClass('is-invalid');
-                                $('.errornama').html('');
-                            }
-
-                            if (response.error.tempat_lahir) {
-                                $('#tempat_lahir').addClass('is-invalid');
-                                $('.errortempat_lahir').html(response.error.tempat_lahir);
-                            } else {
-                                $('#tempat_lahir').removeClass('is-invalid');
-                                $('.errortempat_lahir').html('');
-                            }
-
-                            if (response.error.tanggal_lahir) {
-                                $('#tanggal_lahir').addClass('is-invalid');
-                                $('.errortanggal_lahir').html(response.error.tanggal_lahir);
-                            } else {
-                                $('#tanggal_lahir').removeClass('is-invalid');
-                                $('.errortanggal_lahir').html('');
-                            }
-
-                            if (response.error.jenis_kelamin) {
-                                $('#jenis_kelamin').addClass('is-invalid');
-                                $('.errorjenis_kelamin').html(response.error.jenis_kelamin);
-                            } else {
-                                $('#jenis_kelamin').removeClass('is-invalid');
-                                $('.errorjenis_kelamin').html('');
-                            }
-
-                            if (response.error.nama_ibu_kandung) {
-                                $('#nama_ibu_kandung').addClass('is-invalid');
-                                $('.errornama_ibu_kandung').html(response.error.nama_ibu_kandung);
-                            } else {
-                                $('#nama_ibu_kandung').removeClass('is-invalid');
-                                $('.errornama_ibu_kandung').html('');
-                            }
-
-                            if (response.error.hubungan_keluarga) {
-                                $('#hubungan_keluarga').addClass('is-invalid');
-                                $('.errorhubungan_keluarga').html(response.error.hubungan_keluarga);
-                            } else {
-                                $('#hubungan_keluarga').removeClass('is-invalid');
-                                $('.errorhubungan_keluarga').html('');
-                            }
-
-                            if (response.error.status) {
-                                $('#status').addClass('is-invalid');
-                                $('.errorstatus').html(response.error.status);
-                            } else {
-                                $('#status').removeClass('is-invalid');
-                                $('.errorstatus').html('');
-                            }
-
+                        if (response.error.province_id) {
+                            $('#province_id').addClass('is-invalid');
+                            $('.errorprovince_id').html(response.error.province_id);
                         } else {
-                            if (response.sukses) {
-                                const Toast = Swal.mixin({
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 3000,
-                                    timerProgressBar: true,
-                                    didOpen: (toast) => {
-                                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                                    }
-                                })
+                            $('#province_id').removeClass('is-invalid');
+                            $('.errorprovince_id').html('');
+                        }
 
-                                Toast.fire({
-                                    icon: 'success',
-                                    title: response.sukses,
-                                });
-                                // window.location.reload();
-                                table.draw();
+                        if (response.error.regency_id) {
+                            $('#regency_id').addClass('is-invalid');
+                            $('.errorregency_id').html(response.error.regency_id);
+                        } else {
+                            $('#regency_id').removeClass('is-invalid');
+                            $('.errorregency_id').html('');
+                        }
 
-                            }
+                        if (response.error.district_id) {
+                            $('#district_id').addClass('is-invalid');
+                            $('.errordistrict_id').html(response.error.district_id);
+                        } else {
+                            $('#district_id').removeClass('is-invalid');
+                            $('.errordistrict_id').html('');
+                        }
 
-                            $('#modaledit').modal('hide');
+                        if (response.error.village_id) {
+                            $('#village_id').addClass('is-invalid');
+                            $('.errorvillage_id').html(response.error.village_id);
+                        } else {
+                            $('#village_id').removeClass('is-invalid');
+                            $('.errorvillage_id').html('');
+                        }
+
+                        if (response.error.alamat) {
+                            $('#alamat').addClass('is-invalid');
+                            $('.erroralamat').html(response.error.alamat);
+                        } else {
+                            $('#alamat').removeClass('is-invalid');
+                            $('.erroralamat').html('');
+                        }
+
+                        if (response.error.dusun) {
+                            $('#dusun').addClass('is-invalid');
+                            $('.errordusun').html(response.error.dusun);
+                        } else {
+                            $('#dusun').removeClass('is-invalid');
+                            $('.errordusun').html('');
+                        }
+
+                        if (response.error.no_rw) {
+                            $('#no_rw').addClass('is-invalid');
+                            $('.errorno_rw').html(response.error.no_rw);
+                        } else {
+                            $('#no_rw').removeClass('is-invalid');
+                            $('.errorno_rw').html('');
+                        }
+
+                        if (response.error.no_rt) {
+                            $('#no_rt').addClass('is-invalid');
+                            $('.errorno_rt').html(response.error.no_rt);
+                        } else {
+                            $('#no_rt').removeClass('is-invalid');
+                            $('.errorno_rt').html('');
+                        }
+
+                        if (response.error.nomor_kk) {
+                            $('#nomor_kk').addClass('is-invalid');
+                            $('.errornomor_kk').html(response.error.nomor_kk);
+                        } else {
+                            $('#nomor_kk').removeClass('is-invalid');
+                            $('.errornomor_kk').html('');
+                        }
+
+                        if (response.error.nomor_nik) {
+                            $('#nomor_nik').addClass('is-invalid');
+                            $('.errornomor_nik').html(response.error.nomor_nik);
+                        } else {
+                            $('#nomor_nik').removeClass('is-invalid');
+                            $('.errornomor_nik').html('');
+                        }
+
+                        if (response.error.nama) {
+                            $('#nama').addClass('is-invalid');
+                            $('.errornama').html(response.error.nama);
+                        } else {
+                            $('#nama').removeClass('is-invalid');
+                            $('.errornama').html('');
+                        }
+
+                        if (response.error.tempat_lahir) {
+                            $('#tempat_lahir').addClass('is-invalid');
+                            $('.errortempat_lahir').html(response.error.tempat_lahir);
+                        } else {
+                            $('#tempat_lahir').removeClass('is-invalid');
+                            $('.errortempat_lahir').html('');
+                        }
+
+                        if (response.error.tanggal_lahir) {
+                            $('#tanggal_lahir').addClass('is-invalid');
+                            $('.errortanggal_lahir').html(response.error.tanggal_lahir);
+                        } else {
+                            $('#tanggal_lahir').removeClass('is-invalid');
+                            $('.errortanggal_lahir').html('');
+                        }
+
+                        if (response.error.jenis_kelamin) {
+                            $('#jenis_kelamin').addClass('is-invalid');
+                            $('.errorjenis_kelamin').html(response.error.jenis_kelamin);
+                        } else {
+                            $('#jenis_kelamin').removeClass('is-invalid');
+                            $('.errorjenis_kelamin').html('');
+                        }
+
+                        if (response.error.nama_ibu_kandung) {
+                            $('#nama_ibu_kandung').addClass('is-invalid');
+                            $('.errornama_ibu_kandung').html(response.error.nama_ibu_kandung);
+                        } else {
+                            $('#nama_ibu_kandung').removeClass('is-invalid');
+                            $('.errornama_ibu_kandung').html('');
+                        }
+
+                        if (response.error.hubungan_keluarga) {
+                            $('#hubungan_keluarga').addClass('is-invalid');
+                            $('.errorhubungan_keluarga').html(response.error.hubungan_keluarga);
+                        } else {
+                            $('#hubungan_keluarga').removeClass('is-invalid');
+                            $('.errorhubungan_keluarga').html('');
+                        }
+
+                        if (response.error.status) {
+                            $('#status').addClass('is-invalid');
+                            $('.errorstatus').html(response.error.status);
+                        } else {
+                            $('#status').removeClass('is-invalid');
+                            $('.errorstatus').html('');
+                        }
+
+                    } else {
+                        if (response.sukses) {
+                            const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                }
+                            })
+
+                            Toast.fire({
+                                icon: 'success',
+                                title: response.sukses,
+                            });
+                            // window.location.reload();
                             table.draw();
 
                         }
-                    },
-                    error: function(xhr, thrownError) {
-                        alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
+
+                        $('#modaledit').modal('hide');
+                        table.draw();
+
                     }
-                });
-            })
-        });
-    </script>
+                },
+                error: function(xhr, thrownError) {
+                    alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
+                }
+            });
+        })
+    });
+</script>

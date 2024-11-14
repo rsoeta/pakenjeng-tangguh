@@ -612,11 +612,12 @@ class Bnba extends BaseController
 
     public function formedit()
     {
+
         if ($this->request->isAJAX()) {
 
             // var_dump($this->request->getPost());
 
-            $id = $this->request->getVar('id_data');
+            $id = $this->request->getPost('id');
 
             $model = new BnbaModel();
             $row = $model->find($id);
@@ -640,15 +641,6 @@ class Bnba extends BaseController
 
                 'db_id' => $row['db_id'],
                 'db_id_dtks' => $row['db_id_dtks'],
-                'province_id' => $row['db_province'],
-                'regency_id' => $row['db_regency'],
-                'district_id' => $row['db_district'],
-                'village_id' => $row['db_village'],
-                'alamat' => $row['db_alamat'],
-                'dusun' => $row['db_dusun'],
-                'no_rw' => $row['db_rw'],
-                'no_rt' => $row['db_rt'],
-                'nomor_kk' => $row['db_nkk'],
                 'nomor_nik' => $row['db_nik'],
                 'nama' => $row['db_nama'],
                 'tempat_lahir' => $row['db_tmp_lahir'],
@@ -656,6 +648,15 @@ class Bnba extends BaseController
                 'jenis_kelamin' => $row['db_jenkel_id'],
                 'nama_ibu_kandung' => $row['db_ibu_kandung'],
                 'hubungan_keluarga' => $row['db_shdk_id'],
+                'nomor_kk' => $row['db_nkk'],
+                'no_rt' => $row['db_rt'],
+                'no_rw' => $row['db_rw'],
+                'dusun' => $row['db_dusun'],
+                'alamat' => $row['db_alamat'],
+                'village_id' => $row['db_village'],
+                'district_id' => $row['db_district'],
+                'regency_id' => $row['db_regency'],
+                'province_id' => $row['db_province'],
                 'created_by' => $row['db_creator'],
                 'db_status' => $row['db_status'],
             ];
@@ -663,10 +664,8 @@ class Bnba extends BaseController
 
             // dd($data);
             $msg = [
-                'sukses' => view('dtks/data/dtks/clean/modalMati', $data)
-
+                'sukses' => view('dtks/data/dtks/clean/modaledit', $data)
             ];
-
             echo json_encode($msg);
         }
     }

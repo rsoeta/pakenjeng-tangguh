@@ -6,7 +6,7 @@ use App\Models\GenModel;
 
 function nameApp()
 {
-    return 'DTKS';
+    return 'DTKS Kec. Pakenjeng';
 }
 
 function logoApp()
@@ -76,18 +76,18 @@ function menu_child_child_child($menu_child_child)
     return $query->getResultArray();
 }
 
-// function FOTO_DOKUMEN($fileName = '', $dir = '', $defFile = '')
-// {
-//     if ($fileName !== '' && $fileName !== null && file_exists(FCPATH . 'data/bnba/' . $dir . '/' . $fileName)) {
-//         return base_url('data/bnba/' . $dir . '/' . $fileName);
-//     } else {
-//         if ($defFile == '') {
-//             return base_url('assets/images/image_not_available.jpg');
-//         } else {
-//             return base_url('assets/images/' . $defFile);
-//         }
-//     }
-// }
+function FOTO_DOKUMEN($fileName = '', $dir = '', $defFile = '')
+{
+    if ($fileName !== '' && $fileName !== null && file_exists(FCPATH . 'data/bnba/' . $dir . '/' . $fileName)) {
+        return base_url('data/bnba/' . $dir . '/' . $fileName);
+    } else {
+        if ($defFile == '') {
+            return base_url('assets/images/image_not_available.jpg');
+        } else {
+            return base_url('assets/images/' . $defFile);
+        }
+    }
+}
 
 function FOTO_KPM($fileName = '', $dir = '', $defFile = '')
 {

@@ -60,11 +60,11 @@
                                         <div class="col-12 col-sm-6">
                                             <div class="row">
                                                 <?php if ($user <= 3) : ?>
-                                                    <div class="col-6 col-sm-3 mb-2">
+                                                    <!-- <div class="col-6 col-sm-3 mb-2">
                                                         <a href="exportBa" type="submit" name="btnExpBA" class="btn btn-primary btn-block" id="exportBA">
                                                             <i class="fas fa-file-word"></i> Export B.A
                                                         </a>
-                                                    </div>
+                                                    </div> -->
                                                 <?php elseif ($user <= 2) : ?>
                                                     <div class="col-6 col-sm-3 mb-2">
                                                         <button type="submit" name="btnExpData" class="btn btn-success btn-block" id="exportExcel">

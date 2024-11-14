@@ -250,6 +250,12 @@
             "dataSrc": function(response) {
                 $('input[name=csrf_test_name]').val(response.csrf_test_name);
                 return response.data;
+            },
+            "error": function(xhr, status, error) {
+                console.error("Error Status:", status);
+                console.error("XHR Response:", xhr.responseText);
+                console.error("Error Thrown:", error);
+                alert("Error loading data. Check console for details.");
             }
         },
 
@@ -396,6 +402,64 @@
             }
         });
     }
+
+    $('#datarw').ready(function() {
+        var desa = $('#datadesa').val();
+        var no_rw = $('#datarw').val();
+        var action = 'get_rt';
+        if (no_rw != '') {
+            $.ajax({
+                url: "<?php echo base_url('action'); ?>",
+                method: "POST",
+                data: {
+                    desa: desa,
+                    no_rw: no_rw,
+                    action: action
+                },
+                dataType: "JSON",
+                success: function(data) {
+                    var html = '<option value="">-Pilih-</option>';
+                    for (var count = 0; count < data.length; count++) {
+                        html += '<option value="' + data[count].no_rt + '">' + data[count].no_rt + '</option>';
+                    }
+                    $('#datart').html(html);
+                }
+            });
+        } else {
+            $('#datart').val('');
+        }
+    });
+
+    function edit_person(id) {
+        //Ajax Load data from ajax
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('editBnba') ?>",
+            data: {
+                id: id
+            },
+            dataType: "JSON",
+            success: function(response) {
+                if (response.informasi) {
+                    alert(response.informasi);
+
+                } else if (response.sukses) {
+                    $('.viewmodal').html(response.sukses).show();
+                    $('#modaledit').modal('show');
+                }
+            },
+            "error": function(xhr, status, error) {
+                console.error("Error Status:", status);
+                console.error("XHR Response:", xhr.responseText);
+                console.error("Error Thrown:", error);
+                alert("Error loading data. Check console for details.");
+            }
+            // error: function(xhr, ajaxOptions, thrownError) {
+            //     alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
+            // }
+        });
+    }
+    console.log();
 </script>
 
 <?= $this->endSection(); ?>

@@ -62,6 +62,8 @@ $routes->post('updateLastActivity', 'Chat::updateLastActivity', ['filter' => 'au
 $routes->get('bnba', 'Dtks\Bnba::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tabel_bnba', 'Dtks\Bnba::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('detailBnba', 'Dtks\Bnba::formview', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->match(['get', 'post'], 'editBnba', 'Dtks\Bnba::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+
 
 // VERVAL PBI
 $routes->get('verval', 'Dtks\VeriVali09::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);

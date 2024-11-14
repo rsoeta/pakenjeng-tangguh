@@ -171,7 +171,6 @@ class Auth extends BaseController
         return true;
     }
 
-
     public function register()
     {
         $this->WilayahModel = new WilayahModel();

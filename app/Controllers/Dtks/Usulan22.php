@@ -464,10 +464,10 @@ class Usulan22 extends BaseController
                 ],
                 'du_accuracy' => [
                     'label' => 'Akurasi',
-                    'rules' => 'required|less_than_equal_to[50]',
+                    'rules' => 'required|less_than_equal_to[10]',
                     'errors' => [
                         'required' => '{field} harus terisi.',
-                        'less_than_equal_to' => '{field} harus kurang dari atau sama dengan 50.'
+                        'less_than_equal_to' => '{field} harus kurang dari atau sama dengan 10.'
                     ]
                 ],
                 'du_kate' => [
@@ -863,7 +863,7 @@ class Usulan22 extends BaseController
                 'sukses' => view('dtks/data/dtks/usulan/modaledit', $data)
             ];
             echo json_encode($msg);
-            // }
+            
         } else {
             return redirect()->to('lockscreen');
         }
