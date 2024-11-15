@@ -24,6 +24,20 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class Usulan22 extends BaseController
 {
+    protected $AuthModel;
+    protected $Usulan22Model;
+    protected $VeriVali09Model;
+    protected $DisabilitasJenisModel;
+    protected $VervalPbiModel;
+    protected $RwModel;
+    protected $RtModel;
+    protected $GenModel;
+    protected $WilayahModel;
+    protected $BansosModel;
+    protected $PekerjaanModel;
+    protected $StatusKawinModel;
+    protected $CsvReportModel;
+
     public function __construct()
     {
         $this->AuthModel = new AuthModel();
@@ -863,7 +877,6 @@ class Usulan22 extends BaseController
                 'sukses' => view('dtks/data/dtks/usulan/modaledit', $data)
             ];
             echo json_encode($msg);
-            
         } else {
             return redirect()->to('lockscreen');
         }

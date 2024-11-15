@@ -1,5 +1,5 @@
 {
-	"name": "codeigniter4/framework",
+	"name": "dtks/pakta",
 	"type": "project",
 	"description": "The CodeIgniter framework v4",
 	"homepage": "https://codeigniter.com",
@@ -16,7 +16,10 @@
 		"psr/log": "^1.1",
 		"phpoffice/phpspreadsheet": "^1.18",
 		"phpoffice/phpword": "dev-master",
-		"cboden/ratchet": "^0.4.4"
+		"cboden/ratchet": "^0.4.4",
+		"phpmailer/phpmailer": "^6.9",
+		"mailgun/mailgun-php": "^4.3",
+		"php-http/guzzle7-adapter": "^1.0"
 	},
 	"require-dev": {
 		"codeigniter/coding-standard": "^1.0",
@@ -47,5 +50,10 @@
 		"forum": "http://forum.codeigniter.com/",
 		"source": "https://github.com/codeigniter4/CodeIgniter4",
 		"slack": "https://codeigniterchat.slack.com"
+	},
+	"config": {
+		"allow-plugins": {
+			"php-http/discovery": true
+		}
 	}
 }

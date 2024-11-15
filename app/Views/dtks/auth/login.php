@@ -27,64 +27,62 @@
             </a>
         </div>
         <div class="card-body">
-            <p class="login-box-msg">
-                <?php if (session()->get('success')) : ?>
-            <div class="alert alert-success text-center" role="alert">
-                <?= session()->get('success'); ?>
-            </div>
-        <?php endif; ?>
-        <?php if (session()->get('message')) : ?>
-            <div class="alert alert-warning text-center" role="alert">
-                <?= session()->get('message'); ?>
-            </div>
-        <?php endif; ?>
-        </p>
-        <br>
-        <form action="/login" method="post">
-            <div class="input-group mb-3">
-                <input type="email" class="form-control" placeholder="Email" id="email" name="email" value="<?= set_value('email'); ?>">
-                <div class="input-group-append">
-                    <div class="input-group-text">
-                        <span class="fas fa-envelope"></span>
+            <!-- <p class="login-box-msg"> -->
+            <?php if (session()->get('success')) : ?>
+                <div class="alert alert-success text-center" role="alert">
+                    <?= session()->get('success'); ?>
+                </div>
+            <?php endif; ?>
+            <?php if (session()->getFlashdata('message') && is_array(session()->getFlashdata('message'))) : ?>
+                <div class="alert alert-warning text-center" role="alert">
+                    <?= session()->getFlashdata('message')['text']; ?>
+                </div>
+            <?php endif; ?>
+            <!-- </p> -->
+            <br>
+            <form action="/login" method="post">
+                <div class="input-group mb-3">
+                    <input type="email" class="form-control" placeholder="Email" id="email" name="email" value="<?= set_value('email'); ?>">
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-envelope"></span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="input-group mb-3">
-                <input type="password" class="form-control" placeholder="Password" id="password" name="password" value="<?= set_value('password'); ?>">
-                <div class="input-group-append">
-                    <div class="input-group-text">
-                        <i class="fas fa-eye" id="checkbox"></i>
+                <div class="input-group mb-3">
+                    <input type="password" class="form-control" placeholder="Password" id="password" name="password" value="<?= set_value('password'); ?>">
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <i class="fas fa-eye" id="checkbox"></i>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="g-recaptcha" data-sitekey="6LctvBomAAAAAGjg0x7rNMuW9c5BOZfP-ev4E6b5"></div>
-            <div class="row mt-3">
-                <div class="col-8">
-                    <!-- <div class="icheck-primary">
+                <div class="g-recaptcha" data-sitekey="6LctvBomAAAAAGjg0x7rNMuW9c5BOZfP-ev4E6b5"></div>
+                <div class="row mt-3">
+                    <div class="col-8">
+                        <!-- <div class="icheck-primary">
                         <input type="checkbox" id="remember">
                         <label for="remember">
                             Remember Me
                         </label>
                     </div> -->
+                    </div>
+                    <!-- /.col -->
+                    <!-- /.col -->
                 </div>
-                <!-- /.col -->
-                <!-- /.col -->
-            </div>
+                <hr>
+                <div class="social-auth-links mt-2 mb-3">
+                    <button type="submit" class="btn btn-primary btn-block">Masuk</button>
+                    <a href="lupa-password" class="btn btn-sm btn-block btn-danger">Lupa Password</a>
+                </div>
+            </form>
+
+            <!-- /.social-auth-links -->
+
             <hr>
-            <div class="social-auth-links mt-2 mb-3">
-                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
-                <a href="register" class="btn btn-sm btn-block btn-danger">
-                    <i class="fab fa-google-plus mr-2"></i>
-                </a>
-            </div>
-        </form>
-
-        <!-- /.social-auth-links -->
-
-        <hr>
-        <p class="mb-0">
-            <a href="/register" class="text-center small">Register a new membership</a>
-        </p>
+            <p class="mb-0">
+                <a href="/register" class="text-center small">Register a new membership</a>
+            </p>
         </div>
         <!-- /.card-body -->
     </div>
@@ -123,12 +121,29 @@
             checkbox.classList.add("fa-eye");
         }
     });
-
-
-    // captha
-    // var onloadCallback = function() {
-    //     alert("grecaptcha is ready!");
-    // };
 </script>
+<?php if (session()->getFlashdata('message')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const message = <?= json_encode(session()->getFlashdata('message')) ?>;
+
+            // Tampilkan SweetAlert2 untuk pesan
+            Swal.fire({
+                icon: message.type,
+                title: message.type === 'success' ? 'Berhasil' : 'Gagal',
+                text: message.text,
+                timer: 3000,
+                showConfirmButton: false
+            });
+
+            // Redirect ke Gmail hanya jika context adalah 'requestReset'
+            if (message.type === 'success' && message.context === 'requestReset') {
+                setTimeout(function() {
+                    window.location.href = 'https://mail.google.com/';
+                }, 3000); // Redirect setelah 3 detik
+            }
+        });
+    </script>
+<?php endif; ?>
 
 <?= $this->endSection(); ?>

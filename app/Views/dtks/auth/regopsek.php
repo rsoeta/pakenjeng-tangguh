@@ -26,9 +26,9 @@
                                         <?= session()->get('success'); ?>
                                     </div>
                                 <?php endif; ?>
-                                <?php if (session()->get('message')) : ?>
+                                <?php if (session()->getFlashdata('message') && is_array(session()->getFlashdata('message'))) : ?>
                                     <div class="alert alert-warning text-center" role="alert">
-                                        <?= session()->get('message'); ?>
+                                        <?= session()->getFlashdata('message')['text']; ?>
                                     </div>
                                 <?php endif; ?>
                                 <?php if (isset($validation)) : ?>
@@ -101,7 +101,7 @@
                                     <hr>
                                 </form>
                                 <div class="text-center">
-                                    <a class="small" href="/login" style="color: black; font-weight:bold">Already have an Account!</a>
+                                    <a class="small" href="<?= base_url('login'); ?>" style="color: black; font-weight:bold">Sudah punya Akun!</a>
                                 </div>
                                 </d3v>
                             </div>

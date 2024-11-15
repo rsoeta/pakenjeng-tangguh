@@ -9,11 +9,25 @@ use App\Models\Dtks\AuthModel;
 use App\Models\WilayahModel;
 use App\Models\Dtks\UsersLoginModel;
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 use App\Controllers\BaseController;
 
+use App\Libraries\MailgunService;
+
 class Auth extends BaseController
 {
+    protected $AuthModel;
+    protected $WilayahModel;
+    protected $UsersLoginModel;
+
+    public function __construct()
+    {
+        $this->AuthModel = new AuthModel();
+        $this->WilayahModel = new WilayahModel();
+        $this->UsersLoginModel = new UsersLoginModel();
+    }
 
     public function login()
     {
@@ -44,7 +58,10 @@ class Auth extends BaseController
 
             if (!$this->validate($rules, $errors)) {
                 $session = session();
-                $session->setFlashdata('message', 'User atau Password tidak sesuai!');
+                $session->setFlashdata('message', [
+                    'type' => 'error', // Tambahkan tipe pesan jika perlu
+                    'text' => 'User atau Password tidak sesuai!'
+                ]);
                 return view('dtks/auth/login', [
                     "validation" => $this->validator,
                     "title" => 'Login',
@@ -93,7 +110,10 @@ class Auth extends BaseController
                     // Redirecting to dashboard after login
                     if ($user['status'] !== 1) {
                         $session = session();
-                        $session->setFlashdata('message', 'User Non-Aktif, Silakan kontak Admin!');
+                        $session->setFlashdata('message', [
+                            'type' => 'error',
+                            'text' => 'User Non-Aktif, Silakan hubungi Admin!'
+                        ]);
                         return redirect()->to('/login');
                     }
 
@@ -287,7 +307,10 @@ class Auth extends BaseController
                 // dd($newData);
                 $model->save($newData);
                 $session = session();
-                $session->setFlashdata('success', 'Registrasi Berhasil, silahkan hubungi Admin untuk aktivasi');
+                $session->setFlashdata('message', [
+                    'type' => 'success',
+                    'text' => 'Registrasi Berhasil, silahkan hubungi Admin untuk aktivasi'
+                ]);
                 return redirect()->to('/login');
             }
         }
@@ -432,5 +455,173 @@ class Auth extends BaseController
     {
         session()->destroy();
         return redirect()->to('login');
+    }
+
+    public function lupaPassword()
+    {
+        $data = [
+            'title' => 'Form. Reset Password'
+        ];
+        return view('dtks/auth/lupa-password', $data);
+    }
+
+    public function requestReset()
+    {
+        // Aktifkan error reporting untuk debugging
+        error_reporting(E_ALL);
+        ini_set('display_errors', 1);
+
+        // Load helper tambahan jika diperlukan
+        helper('opdtks_helper');
+
+        $email = $this->request->getPost('email');
+        $nik = $this->request->getPost('nik');
+
+        // Cari user berdasarkan email dan NIK
+        $user = $this->AuthModel->where('email', $email)
+            ->where('nik', $nik)
+            ->first();
+
+        if ($user) {
+            try {
+                // Buat token unik
+                $token = bin2hex(random_bytes(32));
+
+                // Simpan token dan waktu kedaluwarsa di database
+                $this->AuthModel->save([
+                    'id' => $user['id'],
+                    'reset_token' => $token,
+                    'reset_expiry' => date('Y-m-d H:i:s', strtotime('+1 hour'))
+                ]);
+
+                // Buat link reset password
+                $resetLink = base_url("reset-password?token=$token");
+
+                // Konfigurasi dan kirim email
+                $emailService = \Config\Services::email();
+                $emailService->setTo($user['email']);
+                $emailService->setFrom(
+                    'admin@pakenjeng-tangguh.id', // Ganti dengan alamat email domain Anda
+                    nameApp() // Ambil nama aplikasi dari helper
+                );
+                $emailService->setSubject('Reset Password');
+                $emailService->setMessage("
+                <p>Halo, {$user['fullname']}!</p>
+                <p>Untuk mereset password Anda, silakan klik link berikut:</p>
+                <p><a href='{$resetLink}'>Reset Password</a></p>
+                <p>Link ini akan kedaluwarsa dalam waktu 1 jam.</p>
+            ");
+
+                // Kirim email dan tangani respon
+                if ($emailService->send()) {
+                    // Set flashdata untuk menampilkan pesan sukses di halaman login
+                    session()->setFlashdata('message', [
+                        'type' => 'success',
+                        'text' => 'Email reset password telah dikirim.',
+                        'context' => 'requestReset' // Identifikasi konteks
+                    ]);
+                    return redirect()->to(base_url('login'));
+                } else {
+                    // Tangani kesalahan pengiriman email
+                    $error = $emailService->printDebugger(['headers']);
+                    log_message('error', 'Error sending email: ' . $error);
+                    session()->setFlashdata('message', [
+                        'type' => 'error',
+                        'text' => 'Terjadi kesalahan dalam pengiriman email.'
+                    ]);
+                    return redirect()->back();
+                }
+            } catch (\Exception $e) {
+                // Tangani kesalahan lain (misalnya, random_bytes gagal)
+                log_message('error', 'Error in requestReset: ' . $e->getMessage());
+                session()->setFlashdata('message', [
+                    'type' => 'error',
+                    'text' => 'Terjadi kesalahan dalam proses reset password.'
+                ]);
+                return redirect()->back();
+            }
+        } else {
+            // Jika user tidak ditemukan
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => 'Data tidak ditemukan.'
+            ]);
+            return redirect()->back();
+        }
+    }
+
+    public function resetPassword()
+    {
+        $title = 'Reset Password';
+        $token = $this->request->getVar('token');
+        log_message('debug', 'Token from URL: ' . $token); // Debug log untuk token dari URL
+
+        $user = $this->AuthModel->where('reset_token', $token)
+            ->where('reset_expiry >=', date('Y-m-d H:i:s'))
+            ->first();
+
+        if (!$user) {
+            log_message('error', 'Token not valid or expired: ' . $token);
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => 'Token tidak valid atau telah kedaluwarsa.'
+            ]);
+            return redirect()->to(base_url('login'));
+        }
+
+        return view('dtks/auth/reset_password', ['token' => $token, 'title' => $title]);
+    }
+
+    public function processResetPassword()
+    {
+        $token = $this->request->getPost('token');
+        $password = $this->request->getPost('password');
+        $passwordConfirm = $this->request->getPost('password_confirm');
+
+        // Validasi token
+        $user = $this->AuthModel->where('reset_token', $token)
+            ->where('reset_expiry >=', date('Y-m-d H:i:s'))
+            ->first();
+
+        if (!$user) {
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => 'Token tidak valid atau telah kedaluwarsa.'
+            ]);
+            return redirect()->to(base_url('login'));
+        }
+
+        // Validasi password
+        if ($password !== $passwordConfirm) {
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => 'Password dan konfirmasi password tidak sama.'
+            ]);
+            return redirect()->back();
+        }
+
+        if (strlen($password) < 6) {
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => 'Password harus terdiri dari minimal 6 karakter.'
+            ]);
+            return redirect()->back();
+        }
+
+        // Update password di database
+        $this->AuthModel->save([
+            'id' => $user['id'],
+            'password' => password_hash($password, PASSWORD_DEFAULT),
+            'reset_token' => null,
+            'reset_expiry' => null
+        ]);
+
+        session()->setFlashdata('message', [
+            'type' => 'success',
+            'text' => 'Password berhasil diubah. Silakan login dengan password baru Anda.',
+            'context' => 'processResetPassword' // Identifikasi konteks
+        ]);
+
+        return redirect()->to(base_url('login'));
     }
 }

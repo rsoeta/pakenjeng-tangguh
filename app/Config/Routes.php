@@ -40,6 +40,12 @@ $routes->setAutoRoute(true);
 $routes->match(['get', 'post'], 'login', 'Auth\Auth::login', ['filter' => 'noauthfilterdtks']);
 // $routes->match(['get', 'post'], 'register', 'Auth\Auth::register', ['filter' => 'noauthfilterdtks']);
 $routes->match(['get', 'post'], 'register', 'Auth\Auth::regOpSek', ['filter' => 'noauthfilterdtks']);
+$routes->match(['get', 'post'], 'lupa-password', 'Auth\Auth::lupaPassword', ['filter' => 'noauthfilterdtks']);
+$routes->match(['get', 'post'], 'requestReset', 'Auth\Auth::requestReset', ['filter' => 'noauthfilterdtks']);
+$routes->get('reset-password', 'Auth\Auth::resetPassword', ['filter' => 'noauthfilterdtks']);
+$routes->post('reset-password', 'Auth\Auth::processResetPassword', ['filter' => 'noauthfilterdtks']);
+
+
 // $routes->get('/', 'Auth\Pages::home', ['filter' => 'noauthfilterdtks']);
 $routes->get('/', 'Landing::index');
 $routes->post('cek_usulan', 'Landing::cek_usulan');

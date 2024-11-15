@@ -956,3 +956,9 @@
                     ]
                 ],
             ]);
+
+    ## v2.17.0 -- fitur ubah password
+        # ubah tabel dtks_users
+        ALTER TABLE `dtks_users` ADD `reset_token` VARCHAR(255) NULL DEFAULT NULL AFTER `updated_at`, ADD `reset_expiry` DATETIME NULL DEFAULT NULL AFTER `reset_token`;
+
+        ALTER TABLE `dtks_users` CHANGE `id` `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, add PRIMARY KEY (`id`);

@@ -16,7 +16,25 @@ class AuthModel extends Model
     protected $protectFields        = true;
 
     protected $allowedFields        = [
-        'nik', 'username', 'fullname', 'email', 'password', 'status', 'level', 'role_id', 'kode_desa', 'kode_kec', 'kode_kab', 'nope', 'opr_sch', 'jabatan_id', 'user_image', 'created_at', 'updated_at'
+        'nik',
+        'username',
+        'fullname',
+        'email',
+        'password',
+        'status',
+        'level',
+        'role_id',
+        'kode_desa',
+        'kode_kec',
+        'kode_kab',
+        'nope',
+        'opr_sch',
+        'jabatan_id',
+        'user_image',
+        'created_at',
+        'updated_at',
+        'reset_token',
+        'reset_expiry'
     ];
 
     protected $useTimestamps        = true;

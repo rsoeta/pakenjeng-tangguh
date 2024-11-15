@@ -14,7 +14,7 @@
                         <div class="col">
                             <div class="p-5">
                                 <div class="text-center">
-                                    <h1 class="h4 text-gray-900">-- Opr NewDTKS --</h1>
+                                    <h1 class="h4 text-gray-900"><?= nameApp(); ?></h1>
                                     <h2 class="h4 text-gray-900"><?= $title; ?></h2>
                                 </div>
                                 <hr>
@@ -94,16 +94,12 @@
                                         </div>
                                     </div>
                                     <button type="submit" class="btn btn-primary btn-block">
-                                        Sign Up
+                                        Daftar
                                     </button>
-                                    <hr>
-                                    <a href="" class="btn btn-google btn-user btn-block">
-                                        <i class="fab fa-google fa-fw"></i> Sign up with Google
-                                    </a>
                                 </form>
                                 <hr>
                                 <div class="text-center">
-                                    <a class="small" href="/dtks/auth/login">Already have an Account!</a>
+                                    <a class="small" href="<?= base_url('login'); ?>">Sudah punya Akun!</a>
                                 </div>
                             </div>
                         </div>
