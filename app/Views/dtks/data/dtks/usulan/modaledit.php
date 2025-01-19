@@ -86,6 +86,7 @@ $desa_id = session()->get('kode_desa');
 <link href="<?= base_url('assets/dist/css/smart_wizard.min.css'); ?>" rel="stylesheet" type="text/css" />
 <link href="<?= base_url('assets/dist/css/smart_wizard_theme_dots.min.css'); ?>" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="<?= base_url('assets/dist/js/jquery.smartWizard.min.js'); ?>"></script>
+
 <!-- end modal dialog multi-step form wizard -->
 
 
@@ -119,6 +120,9 @@ $desa_id = session()->get('kode_desa');
                                             <div class="invalid-feedback errorid"></div>
                                         </div>
                                     </div>
+                                    <br>
+                                    <?= $tanggal_lahir; ?>
+                                    <br>
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="nokk">No. KK</label>
                                         <div class="col-8 col-sm-8">
@@ -151,11 +155,11 @@ $desa_id = session()->get('kode_desa');
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="tanggal_lahir">Tanggal Lahir</label>
                                         <div class="col-8 col-sm-8">
-                                            <input type="date" name="tanggal_lahir" id="tanggal_lahir" class="form-control form-control-sm" value="<?= $tanggal_lahir; ?>">
+                                            <input type="text" name="tanggal_lahir" id="tanggal_lahir" class="form-control form-control-sm datepicker" value="<?= $tanggal_lahir === '0000-00-00' ? '' : $tanggal_lahir; ?>" placeholder="dd/mm/yyyy">
                                             <div class="invalid-feedback errortanggal_lahir"></div>
                                         </div>
                                     </div>
-                                    <div class="form-group row nopadding" style="display: none;">
+                                    <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="du_usia">Usia</label>
                                         <div class="col-8 col-sm-8">
                                             <input type="number" name="du_usia" id="du_usia" class="form-control form-control-sm" value="" readonly>
@@ -486,7 +490,7 @@ $desa_id = session()->get('kode_desa');
                                         <div class="form-group row nopadding" id="tgl_hamil_div" style="display: none;">
                                             <label class="col-4 col-sm-2 col-form-label" for="tgl_hamil">Tanggal</label>
                                             <div class="col-8 col-sm-8">
-                                                <input type="date" name="tgl_hamil" id="tgl_hamil" class="form-control form-control-sm" value="<?= $tgl_hamil; ?>">
+                                                <input type="text" name="tgl_hamil" id="tgl_hamil" class="form-control form-control-sm datepicker" value="<?= $tgl_hamil === '0000-00-00' ? '' : $tgl_hamil; ?>">
                                                 <div class="invalid-feedback errortgl_hamil"></div>
                                             </div v>
                                         </div>
@@ -620,7 +624,28 @@ $desa_id = session()->get('kode_desa');
 <?= form_close(); ?>
 
 <script>
+    const moment = require('moment');
+
+    $('#modaledit').on('show.bs.modal', function() {
+        const datepickers = document.querySelectorAll(".datepicker");
+
+        datepickers.forEach((datepicker) => {
+            // Parsing manual jika diperlukan
+            const originalDate = datepicker.value; // Nilai dari input
+            const parsedDate = moment(originalDate, "YYYY-MM-DD", true).isValid() ?
+                originalDate :
+                null; // Gunakan null jika tidak valid
+            console.log("Nilai Default Date Sebelum Flatpickr:", datepicker.value);
+
+            flatpickr(datepicker, {
+                dateFormat: "d/m/Y",
+                defaultDate: parsedDate, // Terapkan parsedDate
+                locale: "id",
+            });
+        });
+    });
     $(document).ready(function() {
+        // Inisialisasi Flatpickr ketika modal ditampilkan
 
         // start dropdown kel adat terpencil
         // Tangkap perubahan pada dropdown
@@ -951,12 +976,6 @@ $desa_id = session()->get('kode_desa');
             //     $("#disabil_jenis_div").hide();
         };
 
-        // if ($("#chk-No").is(":checked")) {
-        //     $("#disabil_status_div").hide();
-        // } else {
-        //     $("#disabil_status_div").show();
-        // };
-
         $('#du_usia').val(getAge);
 
         if ($("#du_usia").val() < 18) {
@@ -997,6 +1016,24 @@ $desa_id = session()->get('kode_desa');
         }
 
     });
+
+    function initDatepickers() {
+        const datepickers = document.querySelectorAll(".datepicker");
+
+        datepickers.forEach((datepicker) => {
+            if (!datepicker._flatpickr) {
+                // Hanya inisialisasi jika Flatpickr belum diterapkan
+                flatpickr(datepicker, {
+                    dateFormat: "d/m/Y",
+                    defaultDate: datepicker.value || null,
+                    locale: "id",
+                });
+            }
+        });
+    }
+
+    // Panggil initDatepickers setelah elemen baru dimuat
+    initDatepickers();
 
     $(function() {
         $("input[name='jenis_kelamin']").click(function() {
