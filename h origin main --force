@@ -1,0 +1,188 @@
+[33m8afad8f2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mrev_dateFormat[m[33m)[m add fitur ubah-password
+[33m25c5b8dd[m v2.16.12-rev01 -- validasi akurasi =<10
+[33maa0b616b[m rev fungsi getLokasi-2
+[33mdd7a1cff[m rev fungsi getLokasi
+[33mf6afe9cb[m v2.16.12-rev01 -- validasi akurasi <50 pada tambah data
+[33m019859a7[m v2.16.12 -- validasi akurasi <50 pada tambah data
+[33m15cb3897[m v2.16.11 -- tampilkan foto_rumah_dalam di view data
+[33mc6e9f913[m v2.16.10 -- hapus validasi max_size
+[33mb2348555[m v2.16.9 -- tambah foto rumah tampak dalam
+[33m1bafce1e[m V2.16.11-rev07
+[33mdede7dee[m V2.16.11-rev07
+[33m474652ed[m V2.16.11-rev06
+[33m5ee02ed3[m V2.16.11-rev06
+[33m4b21f6ea[m V2.16.11-rev05
+[33mcf963a86[m V2.16.11-rev04
+[33m36d5886b[m V2.16.11-rev04
+[33mab123bc3[m V2.16.11-rev04
+[33m67f5e572[m V2.16.11-rev04
+[33mbb7b2281[m V2.16.11-rev03
+[33m5188d281[m V2.16.11-rev02
+[33m1a8b35e4[m V2.16.11-rev02
+[33m3abcdf1c[m V2.16.11
+[33m44306818[m V2.16.10
+[33m4b823ac3[m Pendataan Siswa Non-KIP #4
+[33m5aae7350[m v2.16.9 - Pendataan Siswa Non-KIP #3
+[33m1391cbe6[m v2.16.9 - Pendataan Siswa Non-KIP #3
+[33m527b51af[m v2.16.9 - Pendataan Siswa Non-KIP #2
+[33mcd453e71[m V2.16.9 - Pendataan Siswa Non-KIP
+[33m0060f377[m v2.16.8 - tambah menu pendidikan di usulan
+[33mf47c06d1[m v2.16.8 - pindah urutan no. kk jadi teratasv2.16.8 - pindah urutan no. kk jadi teratas + autofocus
+[33me6fc6ccd[m v2.16.8 - pindah urutan no. kk jadi teratas
+[33mfbb1f06a[m v2.16.7 - perbaikan bugs #3
+[33md277d65f[m perbaikan bugs 20230720#2
+[33m8fffbf4c[m perbaikan bugs 20230720
+[33mfd85590a[m v2.16.7 - perbaikan umum
+[33mc1de63f8[m v2.16.6 - fefaktori kordinat
+[33mca2a4380[m v2.16.7 - refaktori deadline usulan #3
+[33m728291e2[m v2.16.7 - refaktori deadline usulan #2
+[33mcce607cb[m v2.16.7 - refaktori deadline usulan
+[33md7588be1[m v2.16.7 - update repo
+[33m791b6675[m pindahkan pakenjeng-tangguh-2_5_0.sql
+[33mccbb9d0d[m 2.16.6-public: tampilkan rekap usulan secara dinamis dan un-include fitur chat
+[33mcc53243d[m modifikasi logo
+[33mcbbd811a[m modifikasi logo
+[33mfa715c1e[m v2.16.6 - isi survey otomatis
+[33m4fc8e51e[m v2.16.5 - perbaikan filter tabel famantama #3
+[33m835e9276[m v2.16.5 - perbaikan filter tabel famantama #2
+[33mce14cc2a[m v2.16.5 - perbaikan filter tabel famantama
+[33mfefbc083[m v2.16.5 - perbaikan tampilan persentase capaian #3
+[33m6022c52a[m v2.16.5 - perbaikan tampilan persentase capaian #2
+[33m6b443dea[m v2.16.5 - perbaikan tampilan persentase capaian
+[33meb7536a0[m v2.16.4 - perbaikan bug shdk
+[33mb837beab[m v2.16.4 - bug tampilan karena join tsf_id
+[33m6aeb6550[m v2.16.4 - order by fd_updated_at desc
+[33ma8262d06[m v2.16.3 - tambah diagram capaian
+[33m1bfe8251[m v2.16.2 - tambah jenis kelamin
+[33mc648f59d[m v2.16.0 perbaikan pekerjaan
+[33m00da9e99[m v2.16.0 -- tambah Menu Famantama Kab. Garut
+[33m6acc9738[m tambah Google reCAPTCHA di halaman login v2
+[33m8f16f044[m tambah Google reCAPTCHA di halaman login
+[33mf40c4f41[m Penyesuaian versi SIKS 1.0.27
+[33m6e208a71[m modifikasi modaltambah dan modaledit di dtks usulan, dropdown status orangtua
+[33m9e4c48a2[m menu ppks: modifikasi fitur export
+[33m60f3c215[m menu ppks: tambah fitur tabel unggah dan modalview
+[33m78f196ae[m modifikasi Controller/Dtks/Ppks require autoload.php
+[33m881774fd[m tambah php.ini
+[33m0238bca9[m modifikasi export menu ppks
+[33m53e9fb1d[m tambah fitur export-excel di menu ppks
+[33mc445efbf[m menu ppks modaledit
+[33m1ecb1b6c[m new version menu ppks from pintu juara dinsos jabar
+[33mdd3f8cee[m new version menu ppks from pintu juara dinsos jabar
+[33m912c3d64[m perbaikan survey kriteria dan status orangtua
+[33m0cb64448[m modifikasi usulan/modal penysuaian ke siks #3
+[33m81f981be[m modifikasi usulan/modaledit utk mempermudah upload ke siks #2
+[33m3aee706a[m modifikasi usulan/modaledit utk mempermudah upload ke siks
+[33md936d399[m tambah file css dan js modal multi step
+[33m093a5c1c[m update aplikasi menyesuaikan ke siks versi 0.8.74 - tambah form survey kriteria
+[33m6dcbeb4f[m solving error ceklis padan modalview tidak berfungsi karena ada field terhapus
+[33mda5c90b0[m akses tanggal deadline ditampilkan di web admin dan di informasikan di dashboard
+[33m5896377c[m perbaikan tanggal deadline
+[33me97e0380[m perbaikan tampilan kolom foto dokumen
+[33m1cf53175[m perbaikan nama, preview,  unlink foto usulan
+[33mc51a65b7[m perbaikan sistem, tampilan, pada menu-fitur usulan
+[33ma08da936[m perbaikan filename foto dokumen #2
+[33m5796e247[m perbaikan caridata #1
+[33m5d9669ad[m perbaikan tampilan kotak desa di dashboard
+[33mbdb38509[m modifikasi tabel usulan dan informasi dashboard
+[33mfc4309b0[m perbaikan form modaledit di usulan #3
+[33m51a28b30[m perbaikan form modaledit di usulan #2
+[33mfd801ef6[m perbaikan form modaledit di usulan
+[33m29ffd36f[m perbaikan fitur user dan spinner
+[33m929ce9b0[m update aplikasi menyesuaikan siks versi 0.8.25 (tambah foto ktp dan rumah)
+[33m4cb4e79e[m modifikasi dashboard -tambah informasi usulan-
+[33m2b93884a[m modifikasi deadline
+[33mf84edf08[m modifikasi font ke opensans (2)
+[33m3e1283c4[m modifikasi font ke opensans
+[33maf7f4617[m ubah font
+[33m4c93e0a8[m modifikasi tombol edit di mode-deadline
+[33m2e641432[m modifikasi deadline tanggal tambahanan
+[33mfbcc59fa[m update deadline usulan
+[33m05d1e129[m repair tombol hapus
+[33m77e3acc3[m unhide tombol tambah data
+[33mee94c467[m update tabel pemadanana
+[33m1c55c238[m modifikasi tabel pemadanan
+[33m612dceb9[m ubah nama tabel
+[33md01b41ae[m hidden tombol tambah data
+[33m2c5fa397[m modifikasi sorting-tabel-usulan
+[33mf39983bf[m modifikasi panel usulan
+[33mafcfe589[m modifikasi tabel usulan
+[33mc7e321ad[m upper nama-alamat dan tambahan rt/rw di capture
+[33m6e4f8a78[m perbaikan bug pencarian tb_dkm dan tambah fitur export data dengan foto dokumentasi
+[33mfc518203[m fixing-2 bug new fitur dkm
+[33mfcd75664[m fitur geolocation di modaledit
+[33m8c6c1c11[m fixing-1 bug new menu
+[33m07aa3916[m coba bug validasi tambah data
+[33m06e02654[m tambah fitur daftar keluarga miskin
+[33mc2d233ee[m perbaikan nonaktif/modaledit
+[33mb9054612[m ubah warna dan persentase animasi usulan
+[33m3d566e2e[m bug pencarian dan merapikan controller pbi-nonaktif
+[33me44b08f9[m perbaikan tampilan dashboard.php
+[33m4c0289a1[m modif usulan/modaltambah
+[33mac7d4669[m ubah usulan/modaltambah
+[33m76669a5f[m tambah file data pbi nonaktif
+[33m26c5a2a7[m tambah data pbi nonaktif
+[33m6865d9dd[m tambah file dalam folder vendor/phpunit terignore
+[33medb12175[m modifikasi file app/Models/WilayahModel.php
+[33m6f88f1f5[m file Chat.php status A
+[33m2e746b9e[m tambah fitur chatting
+[33m57812044[m perbaikan bug di tabel dtks_bnba
+[33ma5ede6e2[m tambah menu verivali kkpm, versi aplikasi
+[33mc2ef2619[m tambah fitur tambah data dari data yang telah di entri/re-entri
+[33mbd5848b2[m tambah fitur cek usulan dan export b.a dan data per-kondisi
+[33m927bfe73[m fitur ekspor BA pdtt
+[33md0a6c6ad[m perbaikan datatables code
+[33mdecce704[m tambah tabel admin
+[33m026af5c8[m perbaiki controller vervalpbi
+[33m88246775[m update controller geo di filter dataStatus
+[33m09b17de4[m review modaledit di file_bpk
+[33mcbf418e8[m tambah file dist dan update controller geotagging ajax_update
+[33mb3622403[m constraints-deviceId:
+[33mdfef7de5[m tambah facingMode: environment di webcam.set
+[33m963bcd0e[m sisa commit
+[33m44808b42[m percobaan tambah fitur verivali geo
+[33mfbc4b269[m hapus file file_bpk tidak digunakan
+[33m148c6fc5[m[33m ([m[1;31morigin/geolocation[m[33m)[m tambah file_bpk
+[33m85b0d063[m update style.css tidak terload
+[33m4c2849a7[m update table_data db_rw jadi va_rw
+[33m24e3a83f[m perbaikan model GenModel.php tabel dtks_status
+[33md0e0289a[m visible: false column 7 tabel_data
+[33m39db148c[m visible: false column 9 tabel_data
+[33m7773ef19[m tambah class status
+[33m4215c116[m perbaikan filter status pm
+[33m2f05f50f[m perbaikan bug tambah kolom status pm
+[33mc8ecde34[m tambahan greeting di dashboard tab verivali anomali
+[33mc8263e13[m tambah fitur perbaikan anomali oleh user rw
+[33m404fc4c4[m perbaiki bug upload file csv_report
+[33m95db943c[m hilangkan sidebar-collapse di impor_csv.php
+[33mb195ca22[m Merge branch 'main' of https://github.com/rsoeta/pakenjeng-tangguh
+[33mbfee0257[m revisi controller usulan22
+[33m455e8152[m hapus file zip dan ubah controller usulan22 bagi view impor_csv
+[33m7ef9c613[m file impor_csv tidak bisa di push
+[33mc92c61ab[m[33m ([m[1;33mtag: [m[1;33mv2.6.0[m[33m)[m Menambah fitur import file csv report siks online
+[33m1d9d6e9b[m[33m ([m[1;33mtag: [m[1;33mv2.5.2[m[33m)[m tambah export ba bst
+[33m1148dbcd[m merapikan catatan.txt
+[33m13ddb14d[m update database 2.5.0
+[33m55754ba6[m tambah mode autofocus di modaltambah usulan
+[33m455476bb[m Merge branch 'export-ba'
+[33m16b93867[m tambah phpword & berita acara
+[33mad378fff[m tambah catatan.txt
+[33m30b0b075[m update controller profil_user
+[33m274c97e5[m tambah view profil user
+[33ma8aaad12[m hidden kolom id dtks
+[33m3cc830b0[m[33m ([m[1;33mtag: [m[1;33mv2.5.1[m[33m)[m update foto bnba di front
+[33m8a277b7d[m menambah more info bnba
+[33m36b2c35e[m[33m ([m[1;33mtag: [m[1;33mv2.5.0[m[33m, [m[1;33mtag: [m[1;33mv2.4.0[m[33m, [m[1;33mtag: [m[1;33mOp-DTKS_v2.4.0[m[33m)[m banyak revisi baik bnba dan tampilan menu
+[33m7afb6c3e[m update database.sql
+[33m2d6eab01[m revisi readme & perbaikan bug di usulan22.php
+[33m857b3ea8[m update readme ke versi aplikasi
+[33m3fca2479[m menambahkan readme dgn template v.4
+[33m7987ffd8[m update validasi
+[33md1fdc696[m update view dtks_usulan_view
+[33m67bc1e40[m update bugs versi 2.4.0
+[33mfc9c1244[m update validasi is_unique
+[33me9098308[m contoh db pakenjeng-tangguh 2.4.0
+[33m09742f82[m Merge branch 'main' of https://github.com/rsoeta/pakenjeng-tangguh
+[33ma6e73a22[m hapus folder data
+[33me430d738[m Update README.md
+[33m904a8795[m coba commit

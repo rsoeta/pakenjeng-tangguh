@@ -92,6 +92,7 @@ $desa_id = session()->get('kode_desa');
 
 <!-- Modal -->
 <?= form_open_multipart('', ['class' => 'formsimpan']) ?>
+
 <?= csrf_field(); ?>
 <div class="modal fade" id="modaledit" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="modaleditLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
@@ -624,26 +625,26 @@ $desa_id = session()->get('kode_desa');
 <?= form_close(); ?>
 
 <script>
-    const moment = require('moment');
+    // const moment = require('moment');
 
-    $('#modaledit').on('show.bs.modal', function() {
-        const datepickers = document.querySelectorAll(".datepicker");
+    // $('#modaledit').on('show.bs.modal', function() {
+    //     const datepickers = document.querySelectorAll(".datepicker");
 
-        datepickers.forEach((datepicker) => {
-            // Parsing manual jika diperlukan
-            const originalDate = datepicker.value; // Nilai dari input
-            const parsedDate = moment(originalDate, "YYYY-MM-DD", true).isValid() ?
-                originalDate :
-                null; // Gunakan null jika tidak valid
-            console.log("Nilai Default Date Sebelum Flatpickr:", datepicker.value);
+    //     datepickers.forEach((datepicker) => {
+    //         // Parsing manual jika diperlukan
+    //         const originalDate = datepicker.value; // Nilai dari input
+    //         const parsedDate = moment(originalDate, "YYYY-MM-DD", true).isValid() ?
+    //             originalDate :
+    //             null; // Gunakan null jika tidak valid
+    //         console.log("Nilai Default Date Sebelum Flatpickr:", datepicker.value);
 
-            flatpickr(datepicker, {
-                dateFormat: "d/m/Y",
-                defaultDate: parsedDate, // Terapkan parsedDate
-                locale: "id",
-            });
-        });
-    });
+    //         flatpickr(datepicker, {
+    //             dateFormat: "d/m/Y",
+    //             defaultDate: parsedDate, // Terapkan parsedDate
+    //             locale: "id",
+    //         });
+    //     });
+    // });
     $(document).ready(function() {
         // Inisialisasi Flatpickr ketika modal ditampilkan
 
