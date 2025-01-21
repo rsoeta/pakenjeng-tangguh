@@ -121,9 +121,6 @@ $desa_id = session()->get('kode_desa');
                                             <div class="invalid-feedback errorid"></div>
                                         </div>
                                     </div>
-                                    <br>
-                                    <?= $tanggal_lahir; ?>
-                                    <br>
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="nokk">No. KK</label>
                                         <div class="col-8 col-sm-8">
@@ -156,7 +153,7 @@ $desa_id = session()->get('kode_desa');
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="tanggal_lahir">Tanggal Lahir</label>
                                         <div class="col-8 col-sm-8">
-                                            <input type="text" name="tanggal_lahir" id="tanggal_lahir" class="form-control form-control-sm datepicker" value="<?= $tanggal_lahir === '0000-00-00' ? '' : $tanggal_lahir; ?>" placeholder="dd/mm/yyyy">
+                                            <input type="text" name="tanggal_lahir" id="tanggal_lahir" class="form-control form-control-sm" value="<?= $tanggal_lahir; ?>">
                                             <div class="invalid-feedback errortanggal_lahir"></div>
                                         </div>
                                     </div>
