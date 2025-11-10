@@ -1,0 +1,27 @@
+includes:
+  - phpstan-baseline.php
+  - vendor/phpstan/phpstan/conf/bleedingEdge.neon
+
+parameters:
+  tmpDir: build/phpstan
+  level: 10
+  paths:
+    - src
+    - tests
+  excludePaths:
+    analyseAndScan:
+      - src/Fixer
+      - src/Test/AbstractCustomFixerTestCase.php
+      - tests/Fixer
+  bootstrapFiles:
+    - vendor/autoload.php
+  additionalConstructors:
+    - Nexus\CsConfig\Test\AbstractCustomFixerTestCase::setUp
+  checkBenevolentUnionTypes: true
+  checkImplicitMixed: true
+  checkMissingCallableSignature: true
+  checkStrictPrintfPlaceholderTypes: false
+  checkTooWideReturnTypesInProtectedAndPublicMethods: true
+  checkUninitializedProperties: true
+  reportAlwaysTrueInLastCondition: true
+  treatPhpDocTypesAsCertain: false

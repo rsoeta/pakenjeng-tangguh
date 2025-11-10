@@ -1,0 +1,73 @@
+{
+    "name": "nexusphp/cs-config",
+    "description": "A factory for custom rulesets for PHP CS Fixer.",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "John Paul E. Balandan, CPA",
+            "email": "paulbalandan@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/NexusPHP/cs-config/issues",
+        "source": "https://github.com/NexusPHP/cs-config.git",
+        "slack": "https://nexusphp.slack.com"
+    },
+    "require": {
+        "php": "^8.1",
+        "ext-tokenizer": "*",
+        "friendsofphp/php-cs-fixer": "^3.84"
+    },
+    "require-dev": {
+        "nexusphp/tachycardia": "^2.1",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "phpunit/phpunit": "^10.5 || ^11.0"
+    },
+    "conflict": {
+        "liaison/cs-config": "*"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Nexus\\CsConfig\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Nexus\\CsConfig\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        },
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "scripts": {
+        "cs:check": "php-cs-fixer check --ansi --verbose --diff",
+        "cs:fix": "php-cs-fixer fix --ansi --verbose --diff",
+        "phpstan:baseline": "phpstan analyse --ansi --verbose --generate-baseline=phpstan-baseline.php",
+        "phpstan:check": "phpstan analyse --ansi --verbose",
+        "test:all": [
+            "@cs:check",
+            "@phpstan:check",
+            "@test:unit"
+        ],
+        "test:unit": "phpunit --colors=always"
+    },
+    "scripts-descriptions": {
+        "cs:check": "Checks for coding style violations",
+        "cs:fix": "Fixes any coding style violations",
+        "phpstan:baseline": "Runs PHPStan and dumps resulting errors to baseline",
+        "phpstan:check": "Runs PHPStan with identifiers support",
+        "test:all": "Runs all tests",
+        "test:unit": "Runs all PHPUnit tests"
+    }
+}
