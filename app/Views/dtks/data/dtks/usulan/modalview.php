@@ -461,7 +461,7 @@ $desa_id = session()->get('kode_desa');
                                             </div>
                                         </div>
                                         <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk6">Apakah pengeluaran pangan lebih besar (>70%) dari total pengeluaran?</label>
+                                            <label class="col-10 col-form-label" for="sk6">Apakah pengeluaran pangan lebih besar (>50%) dari total pengeluaran?</label>
                                             <div class="col-2">
                                                 <input class="form-check-input" type="checkbox" id="sk6" name="sk6" <?= $sk6 == '1' ? 'checked' : ''; ?> value="1" <?= $user > 3 ? ' onclick="return false"' : ''; ?> />
                                                 <label for="sk6" class="form-check-label"><?= $sk6 == '1' ? 'Ya' : 'Tidak'; ?></label>

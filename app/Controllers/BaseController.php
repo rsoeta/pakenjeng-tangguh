@@ -45,6 +45,7 @@ class BaseController extends Controller
 	 * @param ResponseInterface $response
 	 * @param LoggerInterface   $logger
 	 */
+
 	public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
 	{
 		// Do Not Edit This Line
@@ -54,5 +55,13 @@ class BaseController extends Controller
 		// Preload any models, libraries, etc, here.
 		//--------------------------------------------------------------------
 		// E.g.: $this->session = \Config\Services::session();
+	}
+
+	protected function showError($message, $title = 'Terjadi Kesalahan')
+	{
+		return view('errors/html/error_general', [
+			'title'   => $title,
+			'message' => $message
+		]);
 	}
 }

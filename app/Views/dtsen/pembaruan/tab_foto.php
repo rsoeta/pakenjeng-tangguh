@@ -1,0 +1,257 @@
+<?php
+$roleId = $user['role_id'] ?? 99;
+$editable = ($roleId <= 4); // Petugas & Operator bisa edit
+$disabled = $editable ? '' : 'disabled';
+
+$foto = $payload['foto'] ?? [];
+$geo  = $payload['geo'] ?? [];
+?>
+
+<div class="p-3">
+    <h5 class="fw-bold mb-3">📸 Foto & Geotag Lokasi Rumah</h5>
+
+    <form id="formFoto" enctype="multipart/form-data">
+        <input type="hidden" name="dtsen_usulan_id" value="<?= esc($payload['id'] ?? $usulan['id'] ?? '') ?>">
+        <input type="hidden" name="no_kk" value="<?= esc($payload['no_kk'] ?? $perumahan['no_kk'] ?? '') ?>">
+
+        <div class="row">
+            <!-- Foto KTP/KK -->
+            <div class="col-md-4 mb-3 text-center">
+                <label class="fw-semibold d-block">Foto KTP / KK</label>
+                <img src="<?= base_url($foto['ktp_kk'] ?? 'data/usulan/foto_identitas/noimage.png') ?>"
+                    class="img-fluid rounded border mb-2" id="previewKtp" style="max-height: 200px;">
+                <?php if ($editable): ?>
+                    <input type="file" name="foto_ktp" id="fotoKtp" class="form-control form-control-sm" accept="image/*">
+                <?php endif; ?>
+            </div>
+
+            <!-- Foto Rumah Depan -->
+            <div class="col-md-4 mb-3 text-center">
+                <label class="fw-semibold d-block">Foto Rumah (Tampak Depan)</label>
+                <img src="<?= base_url($foto['depan'] ?? 'data/usulan/foto_rumah/noimage.png') ?>"
+                    class="img-fluid rounded border mb-2" id="previewDepan" style="max-height: 200px;">
+                <?php if ($editable): ?>
+                    <input type="file" name="foto_depan" id="fotoDepan" class="form-control form-control-sm" accept="image/*">
+                <?php endif; ?>
+            </div>
+
+            <!-- Foto Rumah Dalam -->
+            <div class="col-md-4 mb-3 text-center">
+                <label class="fw-semibold d-block">Foto Rumah (Bagian Dalam)</label>
+                <img src="<?= base_url($foto['dalam'] ?? 'data/usulan/foto_rumah_dalam/noimage.png') ?>"
+                    class="img-fluid rounded border mb-2" id="previewDalam" style="max-height: 200px;">
+                <?php if ($editable): ?>
+                    <input type="file" name="foto_dalam" id="fotoDalam" class="form-control form-control-sm" accept="image/*">
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- 🌍 Koordinat Lokasi -->
+        <h6 class="fw-bold mb-3 mt-3">🌍 Titik Lokasi Rumah (Geotag)</h6>
+
+        <div class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Latitude</label>
+                <div class="input-group">
+                    <input type="text" id="latitude" name="latitude" class="form-control"
+                        value="<?= esc($geo['lat'] ?? '') ?>" readonly>
+                    <button class="btn btn-outline-secondary" type="button" id="btnCopyLat" title="Salin Latitude">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Longitude</label>
+                <div class="input-group">
+                    <input type="text" id="longitude" name="longitude" class="form-control"
+                        value="<?= esc($geo['lng'] ?? '') ?>" readonly>
+                    <button class="btn btn-outline-secondary" type="button" id="btnCopyLng" title="Salin Longitude">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <div id="map" style="height: 300px; border-radius: 10px;"></div>
+        </div>
+
+        <?php if ($editable): ?>
+            <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-success px-4">
+                    <i class="fas fa-save"></i> Simpan Perubahan
+                </button>
+            </div>
+        <?php endif; ?>
+    </form>
+</div>
+
+<!-- ============================== -->
+<!-- 📡 JS SAVE FOTO DAN GEOTAG -->
+<!-- ============================== -->
+<script>
+    $('#formFoto').on('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        $.ajax({
+            url: '<?= base_url("pembaruan-keluarga/save-foto") ?>',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(res) {
+                if (res.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: res.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire('Gagal!', res.message, 'error');
+                }
+            },
+            error: function() {
+                Swal.fire('Error!', 'Tidak dapat mengirim data ke server.', 'error');
+            }
+        });
+    });
+</script>
+
+<!-- ================================================== -->
+<!-- 🧩 SCRIPTS: PREVIEW FOTO, COPY KOORDINAT & PETA MAP -->
+<!-- ================================================== -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    // 📸 preview gambar otomatis saat upload
+    function previewImage(input, targetId) {
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = e => document.getElementById(targetId).src = e.target.result;
+            reader.readAsDataURL(file);
+        }
+    }
+
+    ['Ktp', 'Depan', 'Dalam'].forEach(suffix => {
+        const input = document.getElementById('foto' + suffix);
+        if (input) input.addEventListener('change', e => previewImage(e.target, 'preview' + suffix));
+    });
+
+    // =============================
+    // 🌍 INISIALISASI PETA LEAFLET
+    // =============================
+    document.addEventListener("DOMContentLoaded", function() {
+        const latInput = document.getElementById('latitude');
+        const lngInput = document.getElementById('longitude');
+
+        // Ambil nilai awal dari payload
+        let lat = parseFloat(latInput.value || "-6.895");
+        let lng = parseFloat(lngInput.value || "107.634");
+
+        const map = L.map('map').setView([lat, lng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const marker = L.marker([lat, lng], {
+            draggable: <?= $editable ? 'true' : 'false' ?>
+        }).addTo(map);
+
+        // 📍 Update field koordinat saat marker digeser
+        if (<?= $editable ? 'true' : 'false' ?>) {
+            marker.on('dragend', function(e) {
+                const pos = e.target.getLatLng();
+                latInput.value = pos.lat.toFixed(6);
+                lngInput.value = pos.lng.toFixed(6);
+            });
+        }
+
+        // =============================
+        // 🧭 DETEKSI POSISI USER OTOMATIS
+        // =============================
+        if (navigator.geolocation && <?= $editable ? 'true' : 'false' ?>) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+
+                    // isi otomatis input
+                    latInput.value = userLat.toFixed(6);
+                    lngInput.value = userLng.toFixed(6);
+
+                    // pindahkan marker ke posisi user
+                    marker.setLatLng([userLat, userLng]);
+                    map.setView([userLat, userLng], 17);
+
+                    Swal.fire({
+                        toast: true,
+                        position: 'bottom-end',
+                        icon: 'success',
+                        title: 'Lokasi terdeteksi otomatis!',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                },
+                function(error) {
+                    console.warn("Geolocation error:", error.message);
+                    Swal.fire({
+                        toast: true,
+                        position: 'bottom-end',
+                        icon: 'warning',
+                        title: 'Lokasi tidak dapat dideteksi otomatis.',
+                        showConfirmButton: false,
+                        timer: 2500
+                    });
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 8000,
+                    maximumAge: 0
+                }
+            );
+        }
+    });
+    // =============================
+
+    // 🧭 Tombol copy koordinat
+    document.getElementById('btnCopyLat').addEventListener('click', () => {
+        const val = document.getElementById('latitude').value;
+        navigator.clipboard.writeText(val);
+        Swal.fire({
+            toast: true,
+            position: 'bottom-end',
+            icon: 'success',
+            title: 'Latitude disalin',
+            showConfirmButton: false,
+            timer: 1500
+        });
+    });
+
+    document.getElementById('btnCopyLng').addEventListener('click', () => {
+        const val = document.getElementById('longitude').value;
+        navigator.clipboard.writeText(val);
+        Swal.fire({
+            toast: true,
+            position: 'bottom-end',
+            icon: 'success',
+            title: 'Longitude disalin',
+            showConfirmButton: false,
+            timer: 1500
+        });
+    });
+</script>
+
+<style>
+    #map {
+        border: 2px solid #ddd;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+</style>

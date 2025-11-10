@@ -1,18 +1,60 @@
 <?php
 
-//CountryModel.php
-
 namespace App\Models;
 
 use CodeIgniter\Model;
 
 class GenModel extends Model
 {
+	protected $db;
 
-	protected $table = 'tb_shdk';
-	protected $primaryKey = 'id';
-	protected $allowedFields = ['jenis_shdk'];
+	public function __construct()
+	{
+		parent::__construct();
+		$this->db = \Config\Database::connect();
+	}
 
+	/** Status Kawin (sesuai struktur: idStatus, StatusKawin) */
+	public function getDataStatusKawin(): array
+	{
+		return $this->db->table('tb_status_kawin')
+			->select('idStatus AS id, StatusKawin AS nama')
+			->orderBy('idStatus', 'ASC')
+			->get()
+			->getResultArray();
+	}
+
+	/** Hubungan (SHDK) (struktur: id, jenis_shdk) */
+	public function getDataShdk(): array
+	{
+		return $this->db->table('tb_shdk')
+			->select('id AS id, jenis_shdk AS nama')
+			->orderBy('id', 'ASC')
+			->get()
+			->getResultArray();
+	}
+
+	/** Pekerjaan (struktur: pk_id, pk_nama) */
+	public function getPendudukPekerjaan(): array
+	{
+		return $this->db->table('tb_penduduk_pekerjaan')
+			->select('pk_id AS id, pk_nama AS nama')
+			->orderBy('pk_id', 'ASC')
+			->get()
+			->getResultArray();
+	}
+
+	/** Pendidikan (struktur: pk_id, pk_nama) */
+	public function getPendidikan(): array
+	{
+		return $this->db->table('pendidikan_kk')
+			->select('pk_id AS id, pk_nama AS nama')
+			->orderBy('pk_id', 'ASC')
+			->get()
+			->getResultArray();
+	}
+
+	// function get data from tbl_jenkel
 	public function getDataJenkel()
 	{
 		$builder = $this->db->table('tbl_jenkel');
@@ -24,14 +66,7 @@ class GenModel extends Model
 		return $query;
 	}
 
-	public function getDataStatusKawin()
-	{
-		$builder = $this->db->table('tb_status_kawin');
-		$query = $builder->get()->getResultArray();
-
-		return $query;
-	}
-
+	// function get data from dtks_verivali_pbi
 	public function getDataVerivaliPbi()
 	{
 		$builder = $this->db->table('dtks_verivali_pbi');
@@ -60,15 +95,6 @@ class GenModel extends Model
 	public function getSekolahJenjang()
 	{
 		$builder = $this->db->table('tb_sekolah_jenjang');
-		$query = $builder->get();
-
-		return $query;
-	}
-
-	// function id data tb_penduduk_pekerjaan
-	public function getPendudukPekerjaan()
-	{
-		$builder = $this->db->table('tb_penduduk_pekerjaan');
 		$query = $builder->get();
 
 		return $query;
@@ -344,5 +370,110 @@ class GenModel extends Model
 		$query = $builder->select('*')->get();
 
 		return $query->getResultArray();
+	}
+
+	/**
+	 * Ambil daftar RW berdasarkan kode desa
+	 */
+	public function getRWByDesa($kodeDesa)
+	{
+		return $this->db->table('dtsen_rt')
+			->select('rw')
+			->where('kode_desa', $kodeDesa)
+			->groupBy('rw')
+			->orderBy('rw', 'ASC')
+			->get()
+			->getResultArray();
+	}
+
+	/**
+	 * Ambil daftar RT berdasarkan RW & kode desa (optional)
+	 */
+	public function getRTByDesaRW($kodeDesa, $rw)
+	{
+		return $this->db->table('dtsen_rt')
+			->select('id_rt, rt, rw')
+			->where('kode_desa', $kodeDesa)
+			->where('rw', $rw)
+			->orderBy('rt', 'ASC')
+			->get()
+			->getResultArray();
+	}
+
+	/**
+	 * 🔍 Ambil nama wilayah berdasarkan kode Kemendagri (Otomatis multi-level)
+	 * Bisa input kode provinsi, kabupaten, kecamatan, atau desa.
+	 */
+	public function getNamaWilayah($kode)
+	{
+		if (!$kode) return null;
+
+		$kode = trim($kode);
+
+		// 🎯 Kasus Desa (misal: 32.05.33.2006)
+		if (strlen($kode) >= 10) {
+			$builder = $this->db->table('tb_villages v')
+				->select('v.name AS desa, d.name AS kecamatan, r.name AS kabupaten, p.name AS provinsi')
+				->join('tb_districts d', 'd.id = v.district_id', 'left')
+				->join('tb_regencies r', 'r.id = d.regency_id', 'left')
+				->join('tb_provinces p', 'p.id = r.province_id', 'left')
+				->where('v.id', $kode)
+				->get()
+				->getRowArray();
+
+			return $builder ? $builder : [
+				'desa' => $kode,
+				'kecamatan' => '',
+				'kabupaten' => '',
+				'provinsi' => ''
+			];
+		}
+
+		// 🎯 Kasus Kecamatan (misal: 32.05.33)
+		if (strlen($kode) === 8 || strlen($kode) === 9) {
+			$builder = $this->db->table('tb_districts d')
+				->select('d.name AS kecamatan, r.name AS kabupaten, p.name AS provinsi')
+				->join('tb_regencies r', 'r.id = d.regency_id', 'left')
+				->join('tb_provinces p', 'p.id = r.province_id', 'left')
+				->where('d.id', $kode)
+				->get()
+				->getRowArray();
+
+			return $builder ? $builder : [
+				'desa' => '',
+				'kecamatan' => $kode,
+				'kabupaten' => '',
+				'provinsi' => ''
+			];
+		}
+
+		// 🎯 Kasus Kabupaten (misal: 32.05)
+		if (strlen($kode) === 5) {
+			$builder = $this->db->table('tb_regencies r')
+				->select('r.name AS kabupaten, p.name AS provinsi')
+				->join('tb_provinces p', 'p.id = r.province_id', 'left')
+				->where('r.id', $kode)
+				->get()
+				->getRowArray();
+
+			return $builder ? $builder : [
+				'kabupaten' => $kode,
+				'provinsi' => ''
+			];
+		}
+
+		// 🎯 Kasus Provinsi (misal: 32)
+		if (strlen($kode) === 2) {
+			$builder = $this->db->table('tb_provinces')
+				->select('name AS provinsi')
+				->where('id', $kode)
+				->get()
+				->getRowArray();
+
+			return $builder ? $builder : ['provinsi' => $kode];
+		}
+
+		// Fallback
+		return ['provinsi' => $kode];
 	}
 }

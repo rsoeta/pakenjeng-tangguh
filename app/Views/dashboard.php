@@ -88,6 +88,17 @@
                     </div>
                 </a>
             </div>
+            <div class="col-12 col-sm-6 col-md-3 displayNone">
+                <a href="/bansos_recap">
+                    <div class="info-box heart">
+                        <span class="info-box-icon bg-gradient elevation-1"><i class="fas fa-hand-holding-heart fa-1x mr-2"></i></span>
+                        <div class="info-box-content">
+                            <!-- <span class="info-box-number">10<small>%</small></span> -->
+                            <span class="info-box-text"><strong>Pendataan<br>Penerima Bantuan Sosial</strong></span>
+                        </div>
+                    </div>
+                </a>
+            </div>
         </div>
     </section>
     <section class="content mt-2">
@@ -329,7 +340,7 @@
                                             <div class="icon">
                                                 <i class="ion ion-person"></i>
                                             </div>
-                                            <a href="/usulan" class="small-box-footer">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a>
+                                            <a href="/usulan-bansos" class="small-box-footer">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a>
                                         </div>
                                     </a>
                                 </div>
@@ -397,14 +408,14 @@
                         </div>
                     </div>
                     <div class="card-footer clearfix">
-                        <a href="/usulan" class="btn btn-sm btn-primary float-right">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a>
+                        <a href="/usulan-bansos" class="btn btn-sm btn-primary float-right">Lihat lebih lanjut <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="col-12">
-                <div class="card">
+                <div class="card displayNone">
                     <div class="card-header">
                         <h3 class="card-title"><strong>Rekap Verivali dan Usulan</strong></h3>
                         <div class="card-tools">
@@ -519,7 +530,7 @@
             </div>
 
             <!-- Info boxes -->
-            <div class="col-sm-9 col-md-9 col-12">
+            <div class="col-sm-9 col-md-9 col-12 displayNone">
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title"><strong>Progres Verifikasi dan Validasi PBI-JKN</strong></h3>

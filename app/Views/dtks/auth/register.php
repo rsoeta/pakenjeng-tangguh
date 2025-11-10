@@ -1,134 +1,145 @@
 <?= $this->extend('dtks/auth/templates/index'); ?>
-
 <?= $this->section('content'); ?>
 
-<div class="container">
-    <!-- Outer Row -->
-    <div class="row justify-content-center">
-        <div class="col-xl-4 col-lg-8 col-md-7">
-            <div class="card o-hidden border-0 shadow-lg" id="elemen">
-                <div class="card-body p-0">
-                    <!-- Nested Row within Card Body -->
-                    <div class="row">
-                        <!-- <div class="col-lg-6 d-none d-lg-block bg-login-image"></div> -->
-                        <div class="col">
-                            <div class="p-5">
-                                <div class="text-center">
-                                    <h1 class="h4 text-gray-900"><?= nameApp(); ?></h1>
-                                    <h2 class="h4 text-gray-900"><?= $title; ?></h2>
-                                </div>
-                                <hr>
-                                <!-- pesan validasi error -->
-                                <?php if (session()->get('success')) : ?>
-                                    <div class="col-12 mb-2" style="background-color: darkorange; border-radius: 3px; padding: 10px;">
-                                        <div class="alert alert-success text-success" role="alert">
-                                            <?= session()->get('success'); ?>
-                                        </div>
-                                    </div>
-                                <?php endif; ?>
-                                <?php if (session()->get('message')) : ?>
-                                    <div class="col-12 mb-2" style="background-color: darkorange; border-radius: 3px; padding: 10px;">
-                                        <div class="alert alert-success text-danger" role="alert">
-                                            <?= session()->get('message'); ?>
-                                        </div>
-                                    </div>
-                                <?php endif; ?>
-                                <?php if (isset($validation)) : ?>
-                                    <div class="col-12 mb-2" style="background-color: darkorange; border-radius: 3px; padding: 10px;">
-                                        <div class="col">
-                                            <div class="container">
-                                                <?= $validation->listErrors(); ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php endif; ?>
+<div class="min-vh-100 d-flex align-items-center justify-content-center">
+    <div class="card shadow-lg border-0 rounded-3" id="theme-card" style="max-width: 400px; width: 100%; background-color: var(--card-bg, #fff);">
+        <div class="card-body text-center p-4">
 
-                                <form action="/register" method="POST">
-                                    <?= csrf_field(); ?>
-                                    <div class="form-group my-1">
-                                        <input type="text" class="form-control form-control-sm form-control-user" name="fullname" aria-describedby="emailHelp" placeholder="Masukan Nama Lengkap" value="<?= set_value('fullname'); ?>">
-                                    </div>
-                                    <div class="form-group my-1">
-                                        <input type="numeric" class="form-control form-control-sm form-control-user" name="nik" aria-describedby="emailHelp" placeholder="Masukan No. KTP/NIK" value="<?= set_value('nik'); ?>">
-                                    </div>
-                                    <div class="form-group my-1">
-                                        <input type="numeric" class="form-control form-control-sm form-control-user" name="nope" aria-describedby="emailHelp" placeholder="Masukan No. Handphone" value="<?= set_value('nope'); ?>">
-                                    </div>
-                                    <div class="form-group my-1">
-                                        <input type="email" class="form-control form-control-sm form-control-user" name="email" aria-describedby="emailHelp" placeholder="Masukan Email" value="<?= set_value('email'); ?>">
-                                    </div>
-                                    <div class="form-group my-1">
-                                        <select id="kelurahan" name="kelurahan" class="form-control form-control-sm form-control-user">
-                                            <option value="">-- Pilih Kecamatan --</option>
-                                            <?php foreach ($desa as $row) { ?>
-                                                <option value="<?= $row['id'] ?>" <?= set_select('kelurahan', $row['id']); ?>> <?php echo $row['name']; ?></option>
-                                            <?php } ?>
-                                        </select>
-                                    </div>
-                                    <div class="form-group my-1">
-                                        <select id="kelurahan" name="kelurahan" class="form-control form-control-sm form-control-user">
-                                            <option value="">-- Pilih Desa / Kelurahan --</option>
-                                            <?php foreach ($desa as $row) { ?>
-                                                <option value="<?= $row['id'] ?>" <?= set_select('kelurahan', $row['id']); ?>> <?php echo $row['name']; ?></option>
-                                            <?php } ?>
-                                        </select>
-                                    </div>
-                                    <div class="form-group my-1">
-                                        <select id="no_rw" name="no_rw" class="form-control form-control-sm form-control-user">
-                                            <option value="">-- Pilih RW --</option>
-                                            <?php foreach ($datarw as $row) { ?>
-                                                <option value="<?= $row['no_rw'] ?>" <?= set_select('no_rw', $row['no_rw']); ?>> <?php echo $row['no_rw']; ?></option>
-                                            <?php } ?>
-                                        </select>
-                                    </div>
-                                    <div class="form-group my-1">
-                                        <input type="password" class="form-control form-control-sm form-control-user" name="password" placeholder="Password" id="password" value="<?= set_value('password'); ?>">
-                                    </div>
-                                    <div class="form-group my-1">
-                                        <input type="password" class="form-control form-control-sm form-control-user" name="password_confirm" placeholder="Password confirm" id="password_confirm" value="<?= set_value('password_confirm'); ?>">
-                                    </div>
-                                    <div class="form-group my-1">
-                                        <div class="custom-control custom-checkbox small">
-                                            <input type="checkbox" class="custom-control-input" id="checkbox">
-                                            <label class="custom-control-label" for="checkbox"> Tampilkan kata sandi</label>
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary btn-block">
-                                        Daftar
-                                    </button>
-                                </form>
-                                <hr>
-                                <div class="text-center">
-                                    <a class="small" href="<?= base_url('login'); ?>">Sudah punya Akun!</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Toggle Theme -->
+            <button id="toggleTheme" class="btn btn-outline-secondary btn-sm mb-3" style="border-radius: 10px;">
+                🌙 Mode Gelap
+            </button>
+
+            <!-- Logo -->
+            <div class="mb-3">
+                <img id="appLogo" src="<?= base_url('assets/logo/SINDEN-logo.png'); ?>" alt="Logo SINDEN" style="height: 80px; width: auto;">
             </div>
+
+            <h3 class="text-teal font-weight-bold mb-0" id="titleText">SINDEN</h3>
+            <p class="text-muted small mb-4">Sistem Informasi Data Ekonomi dan Sosial Desa</p>
+
+            <!-- Alert -->
+            <?php if (session()->get('success')) : ?>
+                <div class="alert alert-success text-center small"><?= session()->get('success'); ?></div>
+            <?php endif; ?>
+            <?php if (session()->get('message')) : ?>
+                <div class="alert alert-warning text-center small"><?= session()->get('message'); ?></div>
+            <?php endif; ?>
+            <?php if (isset($validation)) : ?>
+                <div class="alert alert-danger text-center small"><?= $validation->listErrors(); ?></div>
+            <?php endif; ?>
+
+            <!-- Form -->
+            <form action="/register" method="POST">
+                <?= csrf_field(); ?>
+
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" name="fullname" placeholder="Nama Lengkap" value="<?= set_value('fullname'); ?>">
+                    <label>Nama Lengkap</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="number" class="form-control" name="nik" placeholder="Nomor KTP/NIK" value="<?= set_value('nik'); ?>">
+                    <label>Nomor KTP/NIK</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="number" class="form-control" name="nope" placeholder="Nomor Handphone" value="<?= set_value('nope'); ?>">
+                    <label>Nomor Handphone</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="email" class="form-control" name="email" placeholder="Alamat Email" value="<?= set_value('email'); ?>">
+                    <label>Alamat Email</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <select class="form-control" name="kelurahan">
+                        <option value="">-- Pilih Desa / Kelurahan --</option>
+                        <?php foreach ($desa as $row): ?>
+                            <option value="<?= $row['id'] ?>" <?= set_select('kelurahan', $row['id']); ?>><?= $row['name']; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <label>Desa / Kelurahan</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <select class="form-control" name="no_rw">
+                        <option value="">-- Pilih RW --</option>
+                        <?php foreach ($datarw as $row): ?>
+                            <option value="<?= $row['no_rw'] ?>" <?= set_select('no_rw', $row['no_rw']); ?>><?= $row['no_rw']; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <label>Nomor RW</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                    <label>Password</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="password_confirm" name="password_confirm" placeholder="Ulangi Password">
+                    <label>Ulangi Password</label>
+                </div>
+
+                <div class="text-start mb-3">
+                    <input type="checkbox" id="checkbox">
+                    <label for="checkbox" class="small">Tampilkan kata sandi</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mb-3" style="background-color: #2EC4B6; border:none;">Daftar</button>
+            </form>
+
+            <p class="small mb-0">
+                <a href="<?= base_url('login'); ?>" id="linkLogin" class="text-decoration-none fw-bold" style="color:#FFBE0B;">Sudah punya akun?</a>
+            </p>
         </div>
     </div>
 </div>
+
+<!-- Toggle Password -->
 <script>
-    window.setTimeout(function() {
-        $(".alert").fadeTo(500, 0).slideUp(500, function() {
-            $(this).remove();
-        });
-    }, 3000);
+    document.getElementById('checkbox').addEventListener('click', function() {
+        const p1 = document.getElementById('password');
+        const p2 = document.getElementById('password_confirm');
+        const type = p1.type === 'password' ? 'text' : 'password';
+        p1.type = type;
+        p2.type = type;
+    });
+</script>
 
-    $('document').ready(function() {
-        var pwd1 = $("#password");
-        var pwd2 = $("#password_confirm");
-        $('#checkbox').click(function() {
-            if (pwd1.attr('type') === "password" && pwd2.attr('type') === "password") {
-                pwd1.attr('type', 'text') && pwd2.attr('type', 'text');
+<!-- Universal Dark Mode -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const toggleBtn = document.getElementById("toggleTheme");
+        const card = document.getElementById("theme-card");
+        const body = document.body;
+        const linkLogin = document.getElementById("linkLogin");
+
+        const currentTheme = localStorage.getItem("themeMode") || "light";
+        applyTheme(currentTheme);
+
+        toggleBtn.addEventListener("click", function() {
+            const newTheme = body.classList.contains("dark-mode") ? "light" : "dark";
+            applyTheme(newTheme);
+            localStorage.setItem("themeMode", newTheme);
+        });
+
+        function applyTheme(mode) {
+            if (mode === "dark") {
+                body.classList.add("dark-mode");
+                card.style.backgroundColor = "#1e1e1e";
+                card.classList.add("text-light");
+                toggleBtn.innerHTML = "☀️ Mode Terang";
+                linkLogin.style.color = "#FFBE0B";
             } else {
-                pwd1.attr('type', 'password') && pwd2.attr('type', 'password');
+                body.classList.remove("dark-mode");
+                card.style.backgroundColor = "#fff";
+                card.classList.remove("text-light");
+                toggleBtn.innerHTML = "🌙 Mode Gelap";
+                linkLogin.style.color = "#FFBE0B";
             }
-        });
-
-        if ($('#countdown').length) {
-            start_countdown();
         }
     });
 </script>

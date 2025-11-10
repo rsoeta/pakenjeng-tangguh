@@ -21,14 +21,14 @@
     <meta property="og:description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="<?= base_url(); ?>" />
-    <meta property="og:image" content="<?= base_url('icon-dtks.png'); ?>" />
+    <meta property="og:image" content="<?= logoApp(); ?>" />
 
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@sutarsarian" />
     <meta name="twitter:creator" content="@sutarsarian" />
     <meta name="twitter:title" content="<?= nameApp() . ' Kec. ' . ucwords(strtolower(Profil_Admin()['namaKec'])); ?> | <?= $title; ?>" />
     <meta name="twitter:description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng" />
-    <meta name="twitter:image" content="<?= base_url('icon-dtks.png'); ?>" />
+    <meta name="twitter:image" content="<?= logoApp(); ?>" />
 
     <title><?= $title; ?> | <?= nameApp() . ' Kec. ' . ucwords(strtolower(Profil_Admin()['namaKec'])); ?></title>
 
@@ -59,6 +59,7 @@
 
     <!-- select2 -->
     <link href="<?= base_url('assets/plugins/select2/css/select2.min.css'); ?>" rel="stylesheet" />
+    <link href="<?= base_url('assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css'); ?>" rel="stylesheet" />
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.9/css/select2.min.css" integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw==" crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
 
     <!-- fontawesome -->
@@ -69,7 +70,7 @@
     <!-- lightbox -->
     <link rel="stylesheet" href="<?= base_url('assets/lightbox/dist/css/lightbox.min.css'); ?>">
 
-    <link rel="shortcut icon" type="image/x-icon/png" href="<?= base_url('icon-dtks.png'); ?>" />
+    <link rel="shortcut icon" type="image/x-icon/png" href="<?= logoApp(); ?>" />
 
     <!-- Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">

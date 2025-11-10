@@ -35,6 +35,7 @@ class Filters extends BaseConfig
 		'timeFilter' => TimeFilter::class,
 		'menufilterdtks' => MenuFilterDtks::class,
 		// 'trim' => TrimFilter::class,
+		'globalview'    => \App\Filters\GlobalViewDataFilter::class, // 🟢 tambahkan ini
 	];
 
 	/**
@@ -85,11 +86,19 @@ class Filters extends BaseConfig
 				// 'dtks', 'dtks/*',
 				// 'tmbUsul',
 				// 'tambah',
-				'verivali', 'verivali/*',
+				'verivali',
+				'verivali/*',
 				// 'verivalipbi', 'verivalipbi/*',
-				'users', 'users/*',
+				'users',
+				'users/*',
 				// 'expUsulan',
-				'exportExcel', 'tabexport', 'update_status/*', 'hapus', 'formview', 'updateDataUser', 'expKip'
+				'exportExcel',
+				'tabexport',
+				'update_status/*',
+				'hapus',
+				'formview',
+				'updateDataUser',
+				'expKip'
 			]
 		],
 		// 'schfilterkip' => [

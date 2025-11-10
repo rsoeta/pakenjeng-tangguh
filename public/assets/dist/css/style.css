@@ -9,6 +9,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Saira+Condensed&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cuprum:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+
+/* import font quicksand dari public\assets\fonts\Quicksand */
+@font-face {
+    font-family: 'Quicksand';
+    src: url('/assets/fonts/Quicksand/Quicksand-VariableFont_wght.ttf');
+}
+
+/* import font poppins */
+@font-face {
+    font-family: 'Poppins';
+    src: url('/assets/fonts/Poppins/Poppins-Regular.ttf') format('truetype');
+}
+
 @font-face {
     font-family: 'Abadi';
     src: url('/assets/fonts/Abadi/EM-Abadi/AbadiMT.ttf');
@@ -22,6 +35,8 @@
     /* font-family: 'Hind Siliguri', sans-serif;
     font-size:13px; */
 
+    /* font-family: 'Poppins', sans-serif; */
+    /* font-family: "Quicksand", sans-serif; */
      font-family: 'Open Sans', sans-serif;
      /* font-family: 'Optima', sans-serif; */
      /* font-family: 'Abadi', sans-serif; */

@@ -1,0 +1,209 @@
+Wah, mantap banget Rian 💪
+Penambahan tab **✅ Diverifikasi** di *Usulan Bansos* memang keputusan yang pas — menjaga alur kerja admin tetap transparan tanpa menambah kompleksitas pendata.
+Berikut aku rangkum ulang seluruh **struktur final menu aplikasi SINDEN-DTSEN (versi rapi, logis, dan production-ready)** beserta penjelasan lengkap per menu dan tab internalnya 👇
+
+---
+
+# 🧭 **STRUKTUR FINAL MENU APLIKASI SINDEN – DTSEN (v3 Final)**
+
+```
+🏠 Home
+📁 DTSEN
+   ├── 👨‍👩‍👧‍👦 Data Keluarga
+   ├── 🎁 Usulan Bansos
+   └── 📊 Laporan
+⚙️ Settings
+   ├── 👤 Profil
+   ├── 👥 Users
+   └── 💻 Aplikasi
+🚪 Logout
+```
+
+---
+
+## 🏠 **Home**
+
+* Halaman pembuka aplikasi setelah login.
+* Menampilkan **ringkasan umum**:
+
+  * Total keluarga terdata
+  * Jumlah usulan bansos aktif
+  * Notifikasi (jika ada data belum diverifikasi / periode hampir berakhir)
+* Untuk pendata, bisa ditampilkan status wilayah tugasnya (mis. *RW 002 RT 004–005*).
+* Untuk admin desa/kecamatan, tampilkan statistik global.
+
+---
+
+## 📁 **DTSEN**
+
+### 👨‍👩‍👧‍👦 **Data Keluarga**
+
+Fungsi utama: mengelola keluarga dan anggota keluarga (termasuk pembaruan data, tambah keluarga baru, dan input individu).
+
+#### 🔹 **Tab Navigasi Internal**
+
+| Tab                    | Deskripsi                                                                                    | Pengguna       |
+| ---------------------- | -------------------------------------------------------------------------------------------- | -------------- |
+| 🟢 **Daftar Keluarga** | Menampilkan seluruh keluarga aktif di wilayah tugas (data utama).                            | Semua          |
+| 🟡 **Draft**           | Berisi keluarga atau individu yang sedang dalam proses pembaruan (belum diverifikasi admin). | Pendata, Admin |
+
+> 🔘 Tombol **“+ Tambah Keluarga Baru”** muncul di kanan atas *Daftar Keluarga* — tidak dibuat tab tersendiri.
+> 🔁 Setelah admin memverifikasi pembaruan, data langsung memperbarui tabel utama tanpa tab “Diverifikasi”.
+
+---
+
+### 🎁 **Usulan Bansos**
+
+Fungsi: pengajuan keluarga penerima bantuan sosial berdasarkan data keluarga yang diverifikasi dan memiliki **Desil < 6**.
+
+#### 🔹 **Tab Navigasi Internal**
+
+| Tab                         | Deskripsi                                                                                               | Pengguna |
+| --------------------------- | ------------------------------------------------------------------------------------------------------- | -------- |
+| 🟡 **Draft**                | Usulan bansos dari RW/RT berdasarkan data keluarga (Desil < 6) yang belum diverifikasi admin.           | Pendata  |
+| ✅ **Diverifikasi**          | Daftar usulan bansos yang sudah diperiksa, diverifikasi, dan siap dikirim ke sistem kabupaten/provinsi. | Admin    |
+| 📜 **Riwayat** *(opsional)* | Arsip usulan yang sudah dikirim atau ditolak.                                                           | Admin    |
+
+> 📩 Setiap usulan memiliki status visual (Draft, Diverifikasi, Ditolak) dengan badge berwarna:
+>
+> * 🟡 Draft → belum diverifikasi
+> * 🟢 Diverifikasi → disetujui
+> * 🔴 Ditolak → gagal verifikasi
+
+---
+
+### 📊 **Laporan**
+
+Menampilkan **rekap dan analisis data** untuk monitoring cepat oleh admin.
+
+#### 🔹 **Tab Navigasi Internal**
+
+| Tab                   | Deskripsi                                                    | Pengguna |
+| --------------------- | ------------------------------------------------------------ | -------- |
+| 🧮 **Rekap Keluarga** | Statistik jumlah KK dan anggota per RW/RT.                   | Admin    |
+| 💰 **Rekap Bansos**   | Statistik jumlah penerima dan jenis program bantuan.         | Admin    |
+| 📤 **Export Data**    | Fitur ekspor ke Excel, CSV, atau PDF untuk pelaporan manual. | Admin    |
+
+> 📈 Dilengkapi grafik pie/bar (Chart.js) agar cepat dipahami visualnya.
+
+---
+
+## ⚙️ **Settings**
+
+### 👤 **Profil**
+
+Untuk mengelola akun pribadi pengguna.
+
+#### 🔹 **Sub-tab Internal**
+
+| Tab                  | Deskripsi                                              |
+| -------------------- | ------------------------------------------------------ |
+| 🔸 **Akun Saya**     | Ubah nama, username, password, dan foto profil.        |
+| 🔸 **Wilayah Tugas** | Menampilkan RW/RT yang menjadi tanggung jawab pendata. |
+
+> 🧠 UX: Gunakan tab horizontal dan tombol “Simpan Perubahan” di footer modal.
+
+---
+
+### 👥 **Users**
+
+Khusus **Operator Desa** dan **Admin Kecamatan**.
+
+#### 🔹 **Sub-tab Internal**
+
+| Tab                        | Deskripsi                                                                         |
+| -------------------------- | --------------------------------------------------------------------------------- |
+| 👥 **Pendata Aktif**       | Daftar seluruh pendata RW/RT beserta wilayah tugas.                               |
+| ➕ **Tambah User Baru**     | Form penambahan pengguna baru (lengkap dengan role, wilayah tugas, status aktif). |
+| 🔒 **Reset / Nonaktifkan** | Tombol aksi cepat untuk mengelola status user.                                    |
+
+> 💡 Dilengkapi badge status:
+>
+> * 🟢 Aktif
+> * 🔴 Nonaktif
+
+---
+
+### 💻 **Aplikasi**
+
+Pusat pengaturan sistem dan konfigurasi dasar aplikasi.
+
+#### 🔹 **Tab Navigasi Internal**
+
+| Tab                      | Deskripsi                                                                                       |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| 👤 **Personal**          | Identitas pengguna aplikasi (Nama, NIK, Jabatan, Nomor WhatsApp, dsb).                          |
+| 🏢 **Lembaga**           | Identitas lembaga (Nama Desa, Logo, Alamat, Kontak, Kepala Desa, Sekdes, dsb).                  |
+| 🧭 **Menu**              | Konfigurasi menu sidebar: atur menu yang tampil untuk tiap role (RW/RT, Admin Desa, Kecamatan). |
+| ⏰ **General**            | Pengaturan waktu aktif periode *Usulan Bansos* dan *Pembaruan Keluarga* bagi petugas lapangan.  |
+| ⚙️ **Konfigurasi Pesan** | Edit template pesan WhatsApp (Tagihan, Terima Kasih, Reminder, Notifikasi Verifikasi, dsb).     |
+
+> 🧩 File konfigurasi ini bisa tersimpan di tabel `dtks_config` atau Sheet Config agar fleksibel untuk diubah lewat UI.
+
+---
+
+## 🚪 **Logout**
+
+* Konfirmasi keluar dengan SweetAlert (“Yakin ingin keluar dari aplikasi?”).
+* Redirect otomatis ke halaman login.
+
+---
+
+## 🧠 **Catatan Tambahan Pengembangan**
+
+* **Hak akses berdasarkan role_id**:
+
+  * Pendata RW/RT (role_id ≥ 4): hanya “Data Keluarga” & “Usulan Bansos”.
+  * Operator Desa (role_id = 3): tambah “Laporan” dan “Settings”.
+  * Admin Kecamatan (role_id ≤ 2): akses penuh termasuk “Users” & “Aplikasi”.
+* **UX Style:**
+
+  * Sidebar flat seperti sekarang ✅
+  * Tab internal di tiap halaman (Bootstrap Tabs) ✅
+  * Warna status (badge):
+
+    * 🟢 Verifikasi
+    * 🟡 Draft
+    * 🔴 Error/ditolak
+  * Semua tabel memakai DataTables responsive dengan AJAX-based filtering.
+
+---
+
+## 📋 CONTOH VISUAL STRUKTUR DALAM SIDEBAR
+
+```
+🏠 Home
+📁 DTSEN
+   👨‍👩‍👧‍👦 Data Keluarga
+        - [🟢 Daftar Keluarga]
+        - [🟡 Draft]
+   🎁 Usulan Bansos
+        - [🟡 Draft]
+        - [✅ Diverifikasi]
+   📊 Laporan
+        - [🧮 Rekap Keluarga]
+        - [💰 Rekap Bansos]
+        - [📤 Export Data]
+⚙️ Settings
+   👤 Profil
+   👥 Users
+   💻 Aplikasi
+        - [👤 Personal]
+        - [🏢 Lembaga]
+        - [🧭 Menu]
+        - [⏰ General]
+        - [⚙️ Konfigurasi Pesan]
+🚪 Logout
+```
+
+---
+
+Kalau kamu sudah *mantap* dengan struktur ini, langkah berikutnya bisa kita lanjut ke **implementasi tab internal halaman “Usulan Bansos”**,
+dengan tab:
+
+* 🟡 Draft
+* ✅ Diverifikasi
+
+Lengkap dengan DataTables AJAX dan tombol aksi yang berbeda sesuai role pengguna (Pendata vs Admin).
+
+Apakah kita lanjut ke implementasi tab internal *Usulan Bansos* sekarang?

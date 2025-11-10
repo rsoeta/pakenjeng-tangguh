@@ -11,6 +11,7 @@ use App\Models\RwModel;
 use App\Models\RtModel;
 use App\Models\GenModel;
 use App\Models\Dtks\BansosModel;
+use App\Models\Dtks\PendidikanModel;
 use App\Models\Dtks\PekerjaanModel;
 use App\Models\Dtks\StatusKawinModel;
 use App\Models\Dtks\ShdkModel;
@@ -34,8 +35,13 @@ class Usulan22 extends BaseController
     protected $GenModel;
     protected $WilayahModel;
     protected $BansosModel;
+    protected $PendidikanModel;
     protected $PekerjaanModel;
     protected $StatusKawinModel;
+
+    protected $artModel;
+    protected $seModel;
+
     protected $CsvReportModel;
 
     public function __construct()
@@ -50,6 +56,7 @@ class Usulan22 extends BaseController
         $this->GenModel = new GenModel();
         $this->WilayahModel = new WilayahModel();
         $this->BansosModel = new BansosModel();
+        $this->PendidikanModel = new PendidikanModel();
         $this->PekerjaanModel = new PekerjaanModel();
         $this->StatusKawinModel = new StatusKawinModel();
         $this->CsvReportModel = new CsvReportModel();
@@ -109,7 +116,8 @@ class Usulan22 extends BaseController
                 'statusRole' => $this->GenModel->getStatusRole(),
             ];
 
-            return view('dtks/data/dtks/usulan/tables', $data);
+            // return view('dtks/data/dtks/usulan/tables', $data);
+            return view('dtks/data/dtks/usulan/tabel-data', $data);
         } else {
             return redirect()->to('lockscreen');
         }
@@ -252,12 +260,15 @@ class Usulan22 extends BaseController
     public function formtambah()
     {
         if ($this->request->isAJAX()) {
+            // var_dump(deadline_usulan());
+
             if (deadline_usulan() === true) {
 
                 $this->Usulan22Model = new Usulan22Model();
                 $this->WilayahModel = new WilayahModel();
                 $rw = new RwModel();
                 $this->BansosModel = new BansosModel();
+                $this->PendidikanModel = new PendidikanModel();
                 $this->PekerjaanModel = new PekerjaanModel();
                 $this->StatusKawinModel = new StatusKawinModel();
                 $this->ShdkModel = new ShdkModel();
@@ -272,13 +283,13 @@ class Usulan22 extends BaseController
                     'datarw' => $this->RwModel->noRw(),
                     'datart' => $this->RtModel->noRt(),
                     'bansos' => $this->BansosModel->findAll(),
+                    'pendidikan_kk' => $this->PendidikanModel->findAll(),
                     'pekerjaan' => $this->PekerjaanModel->orderBy('pk_nama', 'asc')->findAll(),
                     'statusKawin' => $this->StatusKawinModel->findAll(),
                     'shdk' => $this->ShdkModel->findAll(),
                     'users' => $users->findAll(),
                     'DisabilitasJenisModel' => $DisabilitasJenisModel->findAll(),
                     'sta_ortu' => $GenModel->get_staortu(),
-                    'pendidikan_kk' => $GenModel->get_pendidikan(),
                 ];
 
                 $msg = [
@@ -303,408 +314,759 @@ class Usulan22 extends BaseController
         }
     }
 
-    public function save()
-    {
-        if ($this->request->isAJAX()) {
-            // var_dump($this->request->getPost());
-            // validasi input
+    // public function save()
+    // {
+    //     if ($this->request->isAJAX()) {
+
+    //         $validation = \Config\Services::validation();
+    //         $du_kate = $this->request->getPost('du_kate');
+
+    //         $valid = $this->validate([
+    //             // semua rules validasi kamu tetap sama seperti sebelumnya
+    //             'nik' => [
+    //                 'label' => 'NIK',
+    //                 'rules' => 'required|numeric|is_unique[dtks_usulan_view.du_nik,du_id,{du_id}]|min_length[16]|max_length[16]',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi.',
+    //                     'numeric' => '{field} harus berisi angka.',
+    //                     'is_unique' => '{field} sudah terdaftar.',
+    //                     'min_length' => '{field} terlalu pendek',
+    //                     'max_length' => '{field} terlalu panjang',
+    //                 ]
+    //             ],
+    //             'databansos' => [
+    //                 'label' => 'Program Bansos',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.',
+    //                 ]
+    //             ],
+    //             'nokk' => [
+    //                 'label' => 'No. KK',
+    //                 'rules' => 'required|numeric|min_length[16]|max_length[16]',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi.',
+    //                     'numeric' => '{field} harus berisi angka.',
+    //                     'is_unique' => '{field} sudah terdaftar.',
+    //                     'min_length' => '{field} terlalu pendek',
+    //                     'max_length' => '{field} terlalu panjang'
+    //                 ]
+    //             ],
+    //             'nama' => [
+    //                 'label' => 'Nama Lengkap',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi.',
+    //                     'alpha_numeric_punct' => '{field} harus berisi alphabet.'
+    //                 ]
+    //             ],
+    //             'tempat_lahir' => [
+    //                 'label' => 'Tempat Lahir',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi.',
+    //                     'alpha_numeric_punct' => '{field} harus berisi alphabet.'
+    //                 ]
+    //             ],
+    //             'tanggal_lahir' => [
+    //                 'label' => 'Tanggal Lahir',
+    //                 'rules' => 'required|valid_date',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi.',
+    //                     'valid_date' => '{field} tidak valid.'
+    //                 ]
+    //             ],
+    //             'ibu_kandung' => [
+    //                 'label' => 'Ibu Kandung',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi.'
+    //                 ]
+    //             ],
+    //             'jenis_kelamin' => [
+    //                 'label' => 'Jenis Kelamin',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.'
+    //                 ]
+    //             ],
+    //             'jenis_pendidikan' => [
+    //                 'label' => 'Status Pendidikan',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.'
+    //                 ]
+    //             ],
+    //             'jenis_pekerjaan' => [
+    //                 'label' => 'Jenis Pekerjaan',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.'
+    //                 ]
+    //             ],
+    //             'status_kawin' => [
+    //                 'label' => 'Status Perkawinan',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.'
+    //                 ]
+    //             ],
+    //             'alamat' => [
+    //                 'label' => 'Alamat',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi.'
+    //                 ]
+    //             ],
+    //             'datart' => [
+    //                 'label' => 'No. RT',
+    //                 'rules' => 'required|numeric',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.',
+    //                     'numeric' => '{field} harus berisi angka.'
+    //                 ]
+    //             ],
+    //             'datarw' => [
+    //                 'label' => 'No. RW',
+    //                 'rules' => 'required|numeric',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.',
+    //                     'numeric' => '{field} harus berisi angka.'
+    //                 ]
+    //             ],
+    //             'shdk' => [
+    //                 'label' => 'SHDK',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.'
+    //                 ]
+    //             ],
+    //             'du_foto_identitas' => [
+    //                 'label' => 'Foto Identitas',
+    //                 'rules' => 'uploaded[du_foto_identitas]|is_image[du_foto_identitas]|mime_in[du_foto_identitas,image/jpg,image/jpeg,image/png]',
+    //                 'errors' => [
+    //                     'uploaded' => '{field} harus ada.',
+    //                     'is_image' => '{field} harus berupa gambar.',
+    //                     'mime_in' => '{field} harus berupa gambar.',
+    //                     'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
+    //                 ]
+    //             ],
+    //             'du_foto_rumah' => [
+    //                 'label' => 'Foto Rumah Tampak Depan',
+    //                 'rules' => 'uploaded[du_foto_rumah]|is_image[du_foto_rumah]|mime_in[du_foto_rumah,image/jpg,image/jpeg,image/png]',
+    //                 'errors' => [
+    //                     'uploaded' => '{field} harus ada.',
+    //                     'is_image' => '{field} harus berupa gambar.',
+    //                     'mime_in' => '{field} harus berupa gambar.',
+    //                     'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
+    //                 ]
+    //             ],
+    //             'du_foto_rumah_dalam' => [
+    //                 'label' => 'Foto Rumah Tampak Dalam',
+    //                 'rules' => 'uploaded[du_foto_rumah_dalam]|is_image[du_foto_rumah_dalam]|mime_in[du_foto_rumah_dalam,image/jpg,image/jpeg,image/png]',
+    //                 'errors' => [
+    //                     'uploaded' => '{field} harus ada.',
+    //                     'is_image' => '{field} harus berupa gambar.',
+    //                     'mime_in' => '{field} harus berupa gambar.',
+    //                     'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
+    //                 ]
+    //             ],
+    //             'du_latitude' => [
+    //                 'label' => 'Latitude',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus terisi.'
+    //                 ]
+    //             ],
+    //             'du_longitude' => [
+    //                 'label' => 'Longitude',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus terisi.'
+    //                 ]
+    //             ],
+    //             'du_accuracy' => [
+    //                 'label' => 'Akurasi',
+    //                 'rules' => 'required|less_than_equal_to[20]',
+    //                 'errors' => [
+    //                     'required' => '{field} harus terisi.',
+    //                     'less_than_equal_to' => '{field} harus kurang dari atau sama dengan 20.'
+    //                 ]
+    //             ],
+    //             'du_kate' => [
+    //                 'label' => 'Kel. Adat Terpencil',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus terisi.'
+    //                 ]
+    //             ],
+    //             'du_nasu' => [
+    //                 'label' => 'Nama Suku',
+    //                 'rules' => $du_kate == 1 ? 'required' : 'permit_empty',
+    //                 'errors' => [
+    //                     'required' => '{field} harus terisi.'
+    //                 ]
+    //             ],
+    //         ]);
+
+    //         if (!$valid) {
+    //             $msg = ['error' => $validation->getErrors()];
+    //             echo json_encode($msg);
+    //             return;
+    //         }
+
+    //         // =======================================================
+    //         // ✅ Auto-buat folder jika belum ada (via helper)
+    //         // =======================================================
+    //         $paths = ensureUsulanFolders();
+    //         $path_rumah = $paths['foto_rumah'];
+    //         $path_rumah_dalam = $paths['foto_rumah_dalam'];
+    //         $path_identitas = $paths['foto_identitas'];
+    //         // =======================================================
+
+    //         $kode_desa = session()->get('kode_desa');
+    //         $namaDesa = $this->WilayahModel->getVillage($kode_desa);
+    //         $desaNama = $namaDesa['name'];
+
+    //         $du_foto_rumah = $this->request->getFile('du_foto_rumah');
+    //         $du_foto_rumah_dalam = $this->request->getFile('du_foto_rumah_dalam');
+    //         $du_foto_identitas = $this->request->getFile('du_foto_identitas');
+
+    //         $buat_tanggal = date_create($this->request->getVar('updated_at'));
+    //         $filename_dua = 'DUDFH_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
+    //         $filename_tiga = 'DUDIH_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
+    //         $filename_empat = 'DUDID_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
+
+    //         $img_dua = imagecreatefromjpeg($du_foto_rumah);
+    //         $img_tiga = imagecreatefromjpeg($du_foto_rumah_dalam);
+    //         $img_empat = imagecreatefromjpeg($du_foto_identitas);
+
+    //         $width_dua = imagesx($img_dua);
+    //         $height_dua = imagesy($img_dua);
+    //         $width_tiga = imagesx($img_tiga);
+    //         $height_tiga = imagesy($img_tiga);
+    //         $width_empat = imagesx($img_empat);
+    //         $height_empat = imagesy($img_empat);
+
+    //         if ($width_dua > $height_dua) $img_dua = imagerotate($img_dua, -90, 0);
+    //         if ($width_tiga > $height_tiga) $img_tiga = imagerotate($img_tiga, -90, 0);
+    //         if ($width_empat > $height_empat) $img_empat = imagerotate($img_empat, -90, 0);
+
+    //         $img_dua = imagescale($img_dua, 480, 640);
+    //         $img_tiga = imagescale($img_tiga, 480, 640);
+    //         $img_empat = imagescale($img_empat, 480, 640);
+
+    //         $txtNik = $this->request->getPost('nik');
+    //         $txtNama = strtoupper($this->request->getPost('nama'));
+    //         $txtAlamat = strtoupper($this->request->getPost('alamat') . ' RT/RW ' . $this->request->getPost('datart') . "/" . $this->request->getPost('datarw'));
+    //         $txtKelurahan = $desaNama;
+    //         $txtKecamatan = 'PAKENJENG';
+    //         $txtKabupaten = 'GARUT';
+    //         $txtProvinsi = 'JAWA BARAT';
+    //         $txtLat = $this->request->getPost('du_latitude');
+    //         $txtLang = $this->request->getPost('du_longitude');
+    //         date_default_timezone_set('Asia/Jakarta');
+    //         $txtTimestap = date("d M Y H:i:s");
+
+    //         $txt = "NIK : " . $txtNik . "\nNama : " . $txtNama . "\nAlamat : " . $txtAlamat . "\n" .
+    //             $txtKelurahan . ", " . $txtKecamatan . ", " . $txtKabupaten . ", " . $txtProvinsi .
+    //             "\nLokasi : " . $txtLat . ", " . $txtLang . "\nDibuat pada : " . $txtTimestap . "
+    //         \n@" . nameApp() . " Kec. " . ucwords(strtolower(Profil_Admin()['namaKec']));
+
+    //         $fontFile = FCPATH . 'assets/fonts/Futura Bk BT Book.ttf';
+    //         $angle = 0;
+    //         $quality = 90;
+
+    //         // Watermark dua
+    //         $fontSizeDua = 0.020 * imagesx($img_dua);
+    //         $whiteDua = imagecolorallocate($img_dua, 255, 255, 255);
+    //         $strokeColorDua = imagecolorallocate($img_dua, 26, 36, 33);
+    //         $posXdua = 0.02 * imagesx($img_dua);
+    //         $posYdua = 0.80 * imagesy($img_dua);
+    //         imagettfstroketext($img_dua, $fontSizeDua, $angle, $posXdua, $posYdua, $whiteDua, $strokeColorDua, $fontFile, $txt, 1);
+
+    //         // Watermark tiga
+    //         $fontSizeTiga = 0.020 * imagesx($img_tiga);
+    //         $whiteTiga = imagecolorallocate($img_tiga, 255, 255, 255);
+    //         $strokeColorTiga = imagecolorallocate($img_tiga, 26, 36, 33);
+    //         $posXtiga = 0.02 * imagesx($img_tiga);
+    //         $posYtiga = 0.80 * imagesy($img_tiga);
+    //         imagettfstroketext($img_tiga, $fontSizeTiga, $angle, $posXtiga, $posYtiga, $whiteTiga, $strokeColorTiga, $fontFile, $txt, 1);
+
+    //         // Simpan file
+    //         $save_dua = imagejpeg($img_dua, $path_rumah . $filename_dua, $quality);
+    //         $save_tiga = imagejpeg($img_tiga, $path_rumah_dalam . $filename_tiga, $quality);
+    //         $save_empat = imagejpeg($img_empat, $path_identitas . $filename_empat, $quality);
+
+    //         if (!$save_dua || !$save_tiga || !$save_empat) {
+    //             log_message('error', '❌ Salah satu gambar gagal disimpan. Cek izin folder di /data/usulan/');
+    //         }
+
+    //         // Simpan ke database
+    //         $data = [
+    //             'provinsi' => '32',
+    //             'kabupaten' => '32.05',
+    //             'kecamatan' => '32.05.33',
+    //             'shdk' => $this->request->getVar('shdk'),
+    //             'kelurahan' => $this->request->getVar('kelurahan'),
+    //             'rw' => $this->request->getVar("datarw"),
+    //             'rt' => $this->request->getVar("datart"),
+    //             'alamat' => strtoupper(trim($this->request->getVar('alamat'))),
+    //             'status_kawin' => $this->request->getVar("status_kawin"),
+    //             'du_pendidikan_id' => $this->request->getVar("jenis_pendidikan"),
+    //             'jenis_pekerjaan' => $this->request->getVar("jenis_pekerjaan"),
+    //             'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
+    //             'ibu_kandung' => strtoupper(trim($this->request->getVar("ibu_kandung"))),
+    //             'tanggal_lahir' => $this->request->getVar("tanggal_lahir"),
+    //             'tempat_lahir' => strtoupper(trim($this->request->getVar("tempat_lahir"))),
+    //             'nama' => strtoupper(trim($this->request->getVar('nama'))),
+    //             'nokk' => $this->request->getVar('nokk'),
+    //             'program_bansos' => $this->request->getVar('databansos'),
+    //             'du_nik' => $this->request->getVar('nik'),
+    //             'disabil_status' => $this->request->getVar('disabil_status'),
+    //             'disabil_kode' => $this->request->getVar('disabil_jenis'),
+    //             'hamil_status' => $this->request->getVar('status_hamil'),
+    //             'hamil_tgl' => $this->request->getVar('tgl_hamil'),
+    //             'foto_identitas' => $filename_empat,
+    //             'foto_rumah' => $filename_dua,
+    //             'foto_rumah_dalam' => $filename_tiga,
+    //             'du_latitude' => $this->request->getVar('du_latitude'),
+    //             'du_longitude' => $this->request->getVar('du_longitude'),
+    //             'du_accuracy' => $this->request->getVar('du_accuracy'),
+    //             'sk0' => $this->request->getVar('sk0'),
+    //             'sk1' => $this->request->getVar('sk1'),
+    //             'sk2' => $this->request->getVar('sk2'),
+    //             'sk3' => $this->request->getVar('sk3'),
+    //             'sk4' => $this->request->getVar('sk4'),
+    //             'sk5' => $this->request->getVar('sk5'),
+    //             'sk6' => $this->request->getVar('sk6'),
+    //             'sk7' => $this->request->getVar('sk7'),
+    //             'sk8' => $this->request->getVar('sk8'),
+    //             'sk9' => $this->request->getVar('sk9'),
+    //             'du_so_id' => $this->request->getVar('du_so_id'),
+    //             'du_kate' => $this->request->getVar('du_kate'),
+    //             'du_nasu' => strtoupper(trim($this->request->getVar('du_nasu'))),
+    //             'created_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
+    //             'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
+    //             'created_at_year' => date('Y'),
+    //             'created_at_month' => date('n'),
+    //             'created_by' => session()->get('nik'),
+    //             'updated_by' => session()->get('nik'),
+    //         ];
+
+    //         $this->Usulan22Model->save($data);
+
+    //         log_message('info', '✅ Data usulan disimpan oleh: ' . session()->get('nik'));
+
+    //         $msg = ['sukses' => 'Data berhasil ditambahkan'];
+    //         echo json_encode($msg);
+    //     } else {
+    //         return redirect()->to('lockscreen');
+    //     }
+    // }
+
+    // public function save()
+    // {
+    //     if ($this->request->isAJAX()) {
+    //         // var_dump($this->request->getPost());
+    //         // validasi input
 
 
-            $validation = \Config\Services::validation();
+    //         $validation = \Config\Services::validation();
 
-            $du_kate = $this->request->getPost('du_kate');
-            $valid = $this->validate([
-                'nik' => [
-                    'label' => 'NIK',
-                    'rules' => 'required|numeric|is_unique[dtks_usulan_view.du_nik,du_id,{du_id}]|min_length[16]|max_length[16]',
-                    'errors' => [
-                        'required' => '{field} harus diisi.',
-                        'numeric' => '{field} harus berisi angka.',
-                        'is_unique' => '{field} sudah terdaftar.',
-                        'min_length' => '{field} terlalu pendek',
-                        'max_length' => '{field} terlalu panjang',
-                    ]
-                ],
-                'databansos' => [
-                    'label' => 'Program Bansos',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus dipilih.',
-                    ]
-                ],
-                'nokk' => [
-                    'label' => 'No. KK',
-                    'rules' => 'required|numeric|min_length[16]|max_length[16]',
-                    'errors' => [
-                        'required' => '{field} harus diisi.',
-                        'numeric' => '{field} harus berisi angka.',
-                        'is_unique' => '{field} sudah terdaftar.',
-                        'min_length' => '{field} terlalu pendek',
-                        'max_length' => '{field} terlalu panjang'
-                    ]
-                ],
-                'nama' => [
-                    'label' => 'Nama Lengkap',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus diisi.',
-                        'alpha_numeric_punct' => '{field} harus berisi alphabet.'
-                    ]
-                ],
-                'tempat_lahir' => [
-                    'label' => 'Tempat Lahir',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus diisi.',
-                        'alpha_numeric_punct' => '{field} harus berisi alphabet.'
-                    ]
-                ],
-                'tanggal_lahir' => [
-                    'label' => 'Tanggal Lahir',
-                    'rules' => 'required|valid_date',
-                    'errors' => [
-                        'required' => '{field} harus diisi.',
-                        'valid_date' => '{field} tidak valid.'
-                    ]
-                ],
-                'ibu_kandung' => [
-                    'label' => 'Ibu Kandung',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus diisi.'
-                    ]
-                ],
-                'jenis_kelamin' => [
-                    'label' => 'Jenis Kelamin',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus dipilih.'
-                    ]
-                ],
-                'jenis_pendidikan' => [
-                    'label' => 'Status Pendidikan',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus dipilih.'
-                    ]
-                ],
-                'jenis_pekerjaan' => [
-                    'label' => 'Jenis Pekerjaan',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus dipilih.'
-                    ]
-                ],
-                'status_kawin' => [
-                    'label' => 'Status Perkawinan',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus dipilih.'
-                    ]
-                ],
-                'alamat' => [
-                    'label' => 'Alamat',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus diisi.'
-                    ]
-                ],
-                'datart' => [
-                    'label' => 'No. RT',
-                    'rules' => 'required|numeric',
-                    'errors' => [
-                        'required' => '{field} harus dipilih.',
-                        'numeric' => '{field} harus berisi angka.'
-                    ]
-                ],
-                'datarw' => [
-                    'label' => 'No. RW',
-                    'rules' => 'required|numeric',
-                    'errors' => [
-                        'required' => '{field} harus dipilih.',
-                        'numeric' => '{field} harus berisi angka.'
-                    ]
-                ],
-                'shdk' => [
-                    'label' => 'SHDK',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus dipilih.'
-                    ]
-                ],
-                'du_foto_identitas' => [
-                    'label' => 'Foto Identitas',
-                    'rules' => 'uploaded[du_foto_identitas]|is_image[du_foto_identitas]|mime_in[du_foto_identitas,image/jpg,image/jpeg,image/png]',
-                    'errors' => [
-                        'uploaded' => '{field} harus ada.',
-                        'is_image' => '{field} harus berupa gambar.',
-                        'mime_in' => '{field} harus berupa gambar.',
-                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
-                    ]
-                ],
-                'du_foto_rumah' => [
-                    'label' => 'Foto Rumah Tampak Depan',
-                    'rules' => 'uploaded[du_foto_rumah]|is_image[du_foto_rumah]|mime_in[du_foto_rumah,image/jpg,image/jpeg,image/png]',
-                    'errors' => [
-                        'uploaded' => '{field} harus ada.',
-                        'is_image' => '{field} harus berupa gambar.',
-                        'mime_in' => '{field} harus berupa gambar.',
-                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
-                    ]
-                ],
-                'du_foto_rumah_dalam' => [
-                    'label' => 'Foto Rumah Tampak Dalam',
-                    'rules' => 'uploaded[du_foto_rumah_dalam]|is_image[du_foto_rumah_dalam]|mime_in[du_foto_rumah_dalam,image/jpg,image/jpeg,image/png]',
-                    'errors' => [
-                        'uploaded' => '{field} harus ada.',
-                        'is_image' => '{field} harus berupa gambar.',
-                        'mime_in' => '{field} harus berupa gambar.',
-                        'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
-                    ]
-                ],
-                'du_latitude' => [
-                    'label' => 'Latitude',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus terisi.'
-                    ]
-                ],
-                'du_longitude' => [
-                    'label' => 'Longitude',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus terisi.'
-                    ]
-                ],
-                'du_accuracy' => [
-                    'label' => 'Akurasi',
-                    'rules' => 'required|less_than_equal_to[10]',
-                    'errors' => [
-                        'required' => '{field} harus terisi.',
-                        'less_than_equal_to' => '{field} harus kurang dari atau sama dengan 10.'
-                    ]
-                ],
-                'du_kate' => [
-                    'label' => 'Kel. Adat Terpencil',
-                    'rules' => 'required',
-                    'errors' => [
-                        'required' => '{field} harus terisi.'
-                    ]
-                ],
-                'du_nasu' => [
-                    'label' => 'Nama Suku',
-                    'rules' => $du_kate == 1 ? 'required' : 'permit_empty',
-                    'errors' => [
-                        'required' => '{field} harus terisi.'
-                    ]
-                ],
-            ]);
-            if (!$valid) {
+    //         $du_kate = $this->request->getPost('du_kate');
+    //         $valid = $this->validate([
+    //             'nik' => [
+    //                 'label' => 'NIK',
+    //                 'rules' => 'required|numeric|is_unique[dtks_usulan_view.du_nik,du_id,{du_id}]|min_length[16]|max_length[16]',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi.',
+    //                     'numeric' => '{field} harus berisi angka.',
+    //                     'is_unique' => '{field} sudah terdaftar.',
+    //                     'min_length' => '{field} terlalu pendek',
+    //                     'max_length' => '{field} terlalu panjang',
+    //                 ]
+    //             ],
+    //             'databansos' => [
+    //                 'label' => 'Program Bansos',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.',
+    //                 ]
+    //             ],
+    //             'nokk' => [
+    //                 'label' => 'No. KK',
+    //                 'rules' => 'required|numeric|min_length[16]|max_length[16]',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi.',
+    //                     'numeric' => '{field} harus berisi angka.',
+    //                     'is_unique' => '{field} sudah terdaftar.',
+    //                     'min_length' => '{field} terlalu pendek',
+    //                     'max_length' => '{field} terlalu panjang'
+    //                 ]
+    //             ],
+    //             'nama' => [
+    //                 'label' => 'Nama Lengkap',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi.',
+    //                     'alpha_numeric_punct' => '{field} harus berisi alphabet.'
+    //                 ]
+    //             ],
+    //             'tempat_lahir' => [
+    //                 'label' => 'Tempat Lahir',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi.',
+    //                     'alpha_numeric_punct' => '{field} harus berisi alphabet.'
+    //                 ]
+    //             ],
+    //             'tanggal_lahir' => [
+    //                 'label' => 'Tanggal Lahir',
+    //                 'rules' => 'required|valid_date',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi.',
+    //                     'valid_date' => '{field} tidak valid.'
+    //                 ]
+    //             ],
+    //             'ibu_kandung' => [
+    //                 'label' => 'Ibu Kandung',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi.'
+    //                 ]
+    //             ],
+    //             'jenis_kelamin' => [
+    //                 'label' => 'Jenis Kelamin',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.'
+    //                 ]
+    //             ],
+    //             'jenis_pendidikan' => [
+    //                 'label' => 'Status Pendidikan',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.'
+    //                 ]
+    //             ],
+    //             'jenis_pekerjaan' => [
+    //                 'label' => 'Jenis Pekerjaan',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.'
+    //                 ]
+    //             ],
+    //             'status_kawin' => [
+    //                 'label' => 'Status Perkawinan',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.'
+    //                 ]
+    //             ],
+    //             'alamat' => [
+    //                 'label' => 'Alamat',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi.'
+    //                 ]
+    //             ],
+    //             'datart' => [
+    //                 'label' => 'No. RT',
+    //                 'rules' => 'required|numeric',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.',
+    //                     'numeric' => '{field} harus berisi angka.'
+    //                 ]
+    //             ],
+    //             'datarw' => [
+    //                 'label' => 'No. RW',
+    //                 'rules' => 'required|numeric',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.',
+    //                     'numeric' => '{field} harus berisi angka.'
+    //                 ]
+    //             ],
+    //             'shdk' => [
+    //                 'label' => 'SHDK',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus dipilih.'
+    //                 ]
+    //             ],
+    //             'du_foto_identitas' => [
+    //                 'label' => 'Foto Identitas',
+    //                 'rules' => 'uploaded[du_foto_identitas]|is_image[du_foto_identitas]|mime_in[du_foto_identitas,image/jpg,image/jpeg,image/png]',
+    //                 'errors' => [
+    //                     'uploaded' => '{field} harus ada.',
+    //                     'is_image' => '{field} harus berupa gambar.',
+    //                     'mime_in' => '{field} harus berupa gambar.',
+    //                     'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
+    //                 ]
+    //             ],
+    //             'du_foto_rumah' => [
+    //                 'label' => 'Foto Rumah Tampak Depan',
+    //                 'rules' => 'uploaded[du_foto_rumah]|is_image[du_foto_rumah]|mime_in[du_foto_rumah,image/jpg,image/jpeg,image/png]',
+    //                 'errors' => [
+    //                     'uploaded' => '{field} harus ada.',
+    //                     'is_image' => '{field} harus berupa gambar.',
+    //                     'mime_in' => '{field} harus berupa gambar.',
+    //                     'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
+    //                 ]
+    //             ],
+    //             'du_foto_rumah_dalam' => [
+    //                 'label' => 'Foto Rumah Tampak Dalam',
+    //                 'rules' => 'uploaded[du_foto_rumah_dalam]|is_image[du_foto_rumah_dalam]|mime_in[du_foto_rumah_dalam,image/jpg,image/jpeg,image/png]',
+    //                 'errors' => [
+    //                     'uploaded' => '{field} harus ada.',
+    //                     'is_image' => '{field} harus berupa gambar.',
+    //                     'mime_in' => '{field} harus berupa gambar.',
+    //                     'max_size' => '{field} harus berukuran tidak lebih dari 2MB.'
+    //                 ]
+    //             ],
+    //             'du_latitude' => [
+    //                 'label' => 'Latitude',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus terisi.'
+    //                 ]
+    //             ],
+    //             'du_longitude' => [
+    //                 'label' => 'Longitude',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus terisi.'
+    //                 ]
+    //             ],
+    //             'du_accuracy' => [
+    //                 'label' => 'Akurasi',
+    //                 'rules' => 'required|less_than_equal_to[20]',
+    //                 'errors' => [
+    //                     'required' => '{field} harus terisi.',
+    //                     'less_than_equal_to' => '{field} harus kurang dari atau sama dengan 20.'
+    //                 ]
+    //             ],
+    //             'du_kate' => [
+    //                 'label' => 'Kel. Adat Terpencil',
+    //                 'rules' => 'required',
+    //                 'errors' => [
+    //                     'required' => '{field} harus terisi.'
+    //                 ]
+    //             ],
+    //             'du_nasu' => [
+    //                 'label' => 'Nama Suku',
+    //                 'rules' => $du_kate == 1 ? 'required' : 'permit_empty',
+    //                 'errors' => [
+    //                     'required' => '{field} harus terisi.'
+    //                 ]
+    //             ],
+    //         ]);
+    //         if (!$valid) {
 
-                $msg = [
-                    'error' => [
-                        'nik' => $validation->getError('nik'),
-                        'databansos' => $validation->getError('databansos'),
-                        'nokk' => $validation->getError('nokk'),
-                        'nama' => $validation->getError('nama'),
-                        'tempat_lahir' => $validation->getError('tempat_lahir'),
-                        'tanggal_lahir' => $validation->getError('tanggal_lahir'),
-                        'ibu_kandung' => $validation->getError('ibu_kandung'),
-                        'jenis_kelamin' => $validation->getError('jenis_kelamin'),
-                        'jenis_pendidikan' => $validation->getError('jenis_pendidikan'),
-                        'jenis_pekerjaan' => $validation->getError('jenis_pekerjaan'),
-                        'status_kawin' => $validation->getError('status_kawin'),
-                        'alamat' => $validation->getError('alamat'),
-                        'datart' => $validation->getError('datart'),
-                        'datarw' => $validation->getError('datarw'),
-                        'kelurahan' => $validation->getError('kelurahan'),
-                        'shdk' => $validation->getError('shdk'),
-                        'du_foto_identitas' => $validation->getError('du_foto_identitas'),
-                        'du_foto_rumah' => $validation->getError('du_foto_rumah'),
-                        'du_foto_rumah_dalam' => $validation->getError('du_foto_rumah_dalam'),
-                        'du_latitude' => $validation->getError('du_latitude'),
-                        'du_longitude' => $validation->getError('du_longitude'),
-                        'du_accuracy' => $validation->getError('du_accuracy'),
-                        'du_kate' => $validation->getError('du_kate'),
-                        'du_nasu' => $validation->getError('du_nasu'),
-                        'created_by' => $validation->getError('created_by'),
-                    ]
-                ];
-            } else {
+    //             $msg = [
+    //                 'error' => [
+    //                     'nik' => $validation->getError('nik'),
+    //                     'databansos' => $validation->getError('databansos'),
+    //                     'nokk' => $validation->getError('nokk'),
+    //                     'nama' => $validation->getError('nama'),
+    //                     'tempat_lahir' => $validation->getError('tempat_lahir'),
+    //                     'tanggal_lahir' => $validation->getError('tanggal_lahir'),
+    //                     'ibu_kandung' => $validation->getError('ibu_kandung'),
+    //                     'jenis_kelamin' => $validation->getError('jenis_kelamin'),
+    //                     'jenis_pendidikan' => $validation->getError('jenis_pendidikan'),
+    //                     'jenis_pekerjaan' => $validation->getError('jenis_pekerjaan'),
+    //                     'status_kawin' => $validation->getError('status_kawin'),
+    //                     'alamat' => $validation->getError('alamat'),
+    //                     'datart' => $validation->getError('datart'),
+    //                     'datarw' => $validation->getError('datarw'),
+    //                     'kelurahan' => $validation->getError('kelurahan'),
+    //                     'shdk' => $validation->getError('shdk'),
+    //                     'du_foto_identitas' => $validation->getError('du_foto_identitas'),
+    //                     'du_foto_rumah' => $validation->getError('du_foto_rumah'),
+    //                     'du_foto_rumah_dalam' => $validation->getError('du_foto_rumah_dalam'),
+    //                     'du_latitude' => $validation->getError('du_latitude'),
+    //                     'du_longitude' => $validation->getError('du_longitude'),
+    //                     'du_accuracy' => $validation->getError('du_accuracy'),
+    //                     'du_kate' => $validation->getError('du_kate'),
+    //                     'du_nasu' => $validation->getError('du_nasu'),
+    //                     'created_by' => $validation->getError('created_by'),
+    //                 ]
+    //             ];
+    //         } else {
 
-                $kode_desa = session()->get('kode_desa');
-                $namaDesa = $this->WilayahModel->getVillage($kode_desa);
-                $desaNama = $namaDesa['name'];
+    //             $kode_desa = session()->get('kode_desa');
+    //             $namaDesa = $this->WilayahModel->getVillage($kode_desa);
+    //             $desaNama = $namaDesa['name'];
 
-                $du_foto_rumah = $this->request->getFile('du_foto_rumah');
-                $du_foto_rumah_dalam = $this->request->getFile('du_foto_rumah_dalam');
-                $du_foto_identitas = $this->request->getFile('du_foto_identitas');
+    //             $du_foto_rumah = $this->request->getFile('du_foto_rumah');
+    //             $du_foto_rumah_dalam = $this->request->getFile('du_foto_rumah_dalam');
+    //             $du_foto_identitas = $this->request->getFile('du_foto_identitas');
 
-                // var_dump($dd_foto_cpm);
-                // die;
-                $buat_tanggal = date_create($this->request->getVar('updated_at'));
-                $filename_dua = 'DUDFH_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
-                $filename_tiga = 'DUDIH_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
-                $filename_empat = 'DUDID_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
-                // var_dump($filename_dua);
-                // die;
+    //             // var_dump($dd_foto_cpm);
+    //             // die;
+    //             $buat_tanggal = date_create($this->request->getVar('updated_at'));
+    //             $filename_dua = 'DUDFH_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
+    //             $filename_tiga = 'DUDIH_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
+    //             $filename_empat = 'DUDID_' . $this->request->getPost('nik') . '_' . date_format($buat_tanggal, 'Ymd_His') . '.jpg';
+    //             // var_dump($filename_dua);
+    //             // die;
 
-                $img_dua = imagecreatefromjpeg($du_foto_rumah);
-                $img_tiga = imagecreatefromjpeg($du_foto_rumah_dalam);
-                $img_empat = imagecreatefromjpeg($du_foto_identitas);
+    //             $img_dua = imagecreatefromjpeg($du_foto_rumah);
+    //             $img_tiga = imagecreatefromjpeg($du_foto_rumah_dalam);
+    //             $img_empat = imagecreatefromjpeg($du_foto_identitas);
 
-                // get width and height of image
+    //             // get width and height of image
 
-                $width_dua = imagesx($img_dua);
-                $height_dua = imagesy($img_dua);
+    //             $width_dua = imagesx($img_dua);
+    //             $height_dua = imagesy($img_dua);
 
-                $width_tiga = imagesx($img_tiga);
-                $height_tiga = imagesy($img_tiga);
+    //             $width_tiga = imagesx($img_tiga);
+    //             $height_tiga = imagesy($img_tiga);
 
-                $width_empat = imagesx($img_empat);
-                $height_empat = imagesy($img_empat);
+    //             $width_empat = imagesx($img_empat);
+    //             $height_empat = imagesy($img_empat);
 
-                // reorient image if width is greater than height
-                if ($width_dua > $height_dua) {
-                    $img_dua = imagerotate($img_dua, -90, 0);
-                }
-                if ($width_tiga > $height_tiga) {
-                    $img_tiga = imagerotate($img_tiga, -90, 0);
-                }
-                if ($width_empat > $height_empat) {
-                    $img_empat = imagerotate($img_empat, -90, 0);
-                }
-                // resize image
-                $img_dua = imagescale($img_dua, 480, 640);
-                $img_tiga = imagescale($img_tiga, 480, 640);
-                $img_empat = imagescale($img_empat, 480, 640);
+    //             // reorient image if width is greater than height
+    //             if ($width_dua > $height_dua) {
+    //                 $img_dua = imagerotate($img_dua, -90, 0);
+    //             }
+    //             if ($width_tiga > $height_tiga) {
+    //                 $img_tiga = imagerotate($img_tiga, -90, 0);
+    //             }
+    //             if ($width_empat > $height_empat) {
+    //                 $img_empat = imagerotate($img_empat, -90, 0);
+    //             }
+    //             // resize image
+    //             $img_dua = imagescale($img_dua, 480, 640);
+    //             $img_tiga = imagescale($img_tiga, 480, 640);
+    //             $img_empat = imagescale($img_empat, 480, 640);
 
-                $txtNik = $this->request->getPost('nik');
-                $txtNama = strtoupper($this->request->getPost('nama'));
-                $txtAlamat = strtoupper($this->request->getPost('alamat') . ' RT/RW ' . $this->request->getPost('datart') . "/" . $this->request->getPost('datarw'));
-                $txtKelurahan = $desaNama;
-                $txtKecamatan = 'PAKENJENG';
-                $txtKabupaten = 'GARUT';
-                $txtProvinsi = 'JAWA BARAT';
-                $txtLat = $this->request->getPost('du_latitude');
-                $txtLang = $this->request->getPost('du_longitude');
-                date_default_timezone_set('Asia/Jakarta');
-                $txtTimestap = date("d M Y H:i:s");
+    //             $txtNik = $this->request->getPost('nik');
+    //             $txtNama = strtoupper($this->request->getPost('nama'));
+    //             $txtAlamat = strtoupper($this->request->getPost('alamat') . ' RT/RW ' . $this->request->getPost('datart') . "/" . $this->request->getPost('datarw'));
+    //             $txtKelurahan = $desaNama;
+    //             $txtKecamatan = 'PAKENJENG';
+    //             $txtKabupaten = 'GARUT';
+    //             $txtProvinsi = 'JAWA BARAT';
+    //             $txtLat = $this->request->getPost('du_latitude');
+    //             $txtLang = $this->request->getPost('du_longitude');
+    //             date_default_timezone_set('Asia/Jakarta');
+    //             $txtTimestap = date("d M Y H:i:s");
 
-                $txt = "NIK : " . $txtNik . "\nNama : " . $txtNama . "\nAlamat : " . $txtAlamat . "\n"  . $txtKelurahan . ", " . $txtKecamatan . ", " . $txtKabupaten . ", " . $txtProvinsi . "\nLokasi : " . $txtLat . ", " . $txtLang . "\nDibuat pada : " . $txtTimestap . "
-                \n@" . nameApp() . " Kec. " . ucwords(strtolower(Profil_Admin()['namaKec']));
-                $fontFile = FCPATH . 'assets/fonts/Futura Bk BT Book.ttf';
+    //             $txt = "NIK : " . $txtNik . "\nNama : " . $txtNama . "\nAlamat : " . $txtAlamat . "\n"  . $txtKelurahan . ", " . $txtKecamatan . ", " . $txtKabupaten . ", " . $txtProvinsi . "\nLokasi : " . $txtLat . ", " . $txtLang . "\nDibuat pada : " . $txtTimestap . "
+    //             \n@" . nameApp() . " Kec. " . ucwords(strtolower(Profil_Admin()['namaKec']));
+    //             $fontFile = FCPATH . 'assets/fonts/Futura Bk BT Book.ttf';
 
-                $fontSizeDua = 0.020 * imagesx($img_dua);
-                $whiteDua = imagecolorallocate($img_dua, 255, 255, 255);
-                // $strokeColorDua = imagecolorallocate($img_dua, 0, 0, 0);
-                $strokeColorDua = imagecolorallocate($img_dua, 26, 36, 33);
+    //             $fontSizeDua = 0.020 * imagesx($img_dua);
+    //             $whiteDua = imagecolorallocate($img_dua, 255, 255, 255);
+    //             // $strokeColorDua = imagecolorallocate($img_dua, 0, 0, 0);
+    //             $strokeColorDua = imagecolorallocate($img_dua, 26, 36, 33);
 
-                // pos x from left, pos y from bottom
-                $posXdua = 0.02 * imagesx($img_dua);
-                $posYdua = 0.80 * imagesy($img_dua);
+    //             // pos x from left, pos y from bottom
+    //             $posXdua = 0.02 * imagesx($img_dua);
+    //             $posYdua = 0.80 * imagesy($img_dua);
 
-                $fontSizeTiga = 0.020 * imagesx($img_tiga);
-                $whiteTiga = imagecolorallocate($img_tiga, 255, 255, 255);
-                // $strokeColortiga = imagecolorallocate($img_tiga, 0, 0, 0);
-                $strokeColorTiga = imagecolorallocate($img_tiga, 26, 36, 33);
+    //             $fontSizeTiga = 0.020 * imagesx($img_tiga);
+    //             $whiteTiga = imagecolorallocate($img_tiga, 255, 255, 255);
+    //             // $strokeColortiga = imagecolorallocate($img_tiga, 0, 0, 0);
+    //             $strokeColorTiga = imagecolorallocate($img_tiga, 26, 36, 33);
 
-                // pos x from left, pos y from bottom
-                $posXtiga = 0.02 * imagesx($img_tiga);
-                $posYtiga = 0.80 * imagesy($img_tiga);
+    //             // pos x from left, pos y from bottom
+    //             $posXtiga = 0.02 * imagesx($img_tiga);
+    //             $posYtiga = 0.80 * imagesy($img_tiga);
 
-                // $posX = 10;
-                // $posY = 830;
-                $angle = 0;
+    //             // $posX = 10;
+    //             // $posY = 830;
+    //             $angle = 0;
 
-                // stroke watermark image
-                imagettfstroketext($img_dua, $fontSizeDua, $angle, $posXdua, $posYdua, $whiteDua, $strokeColorDua, $fontFile, $txt, 1);
-                imagettfstroketext($img_tiga, $fontSizeTiga, $angle, $posXtiga, $posYtiga, $whiteTiga, $strokeColorTiga, $fontFile, $txt, 1);
-
-
-                header("Content-type: image/jpg");
-                $quality = 90; // 0 to 100
-
-                // var_dump($img_satu);
-                // die;
-
-                imagejpeg($img_dua, 'data/usulan/foto_rumah/' . $filename_dua, $quality);
-                imagejpeg($img_tiga, 'data/usulan/foto_rumah_dalam/' . $filename_tiga, $quality);
-                imagejpeg($img_empat, 'data/usulan/foto_identitas/' . $filename_empat, $quality);
-                // var_dump($img_satu);
-                // die;
-
-                $data = [
-                    'provinsi' => '32',
-                    'kabupaten' => '32.05',
-                    'kecamatan' => '32.05.33',
-                    'shdk' => $this->request->getVar('shdk'),
-                    'kelurahan' => $this->request->getVar('kelurahan'),
-                    'rw' => $this->request->getVar("datarw"),
-                    'rt' => $this->request->getVar("datart"),
-                    'alamat' => strtoupper(trim($this->request->getVar('alamat'))),
-                    'status_kawin' => $this->request->getVar("status_kawin"),
-                    'du_pendidikan_id' => $this->request->getVar("jenis_pendidikan"),
-                    'jenis_pekerjaan' => $this->request->getVar("jenis_pekerjaan"),
-                    'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
-                    'ibu_kandung' => strtoupper(trim($this->request->getVar("ibu_kandung"))),
-                    'tanggal_lahir' => $this->request->getVar("tanggal_lahir"),
-                    'tempat_lahir' => strtoupper(trim($this->request->getVar("tempat_lahir"))),
-                    'nama' => strtoupper(trim($this->request->getVar('nama'))),
-                    'nokk' => $this->request->getVar('nokk'),
-                    'program_bansos' => $this->request->getVar('databansos'),
-                    'du_nik' => $this->request->getVar('nik'),
-                    'disabil_status' => $this->request->getVar('disabil_status'),
-                    'disabil_kode' => $this->request->getVar('disabil_jenis'),
-                    'hamil_status' => $this->request->getVar('status_hamil'),
-                    'hamil_tgl' => $this->request->getVar('tgl_hamil'),
-                    'foto_identitas' => $filename_empat,
-                    'foto_rumah' => $filename_dua,
-                    'foto_rumah_dalam' => $filename_tiga,
-                    'du_latitude' => $this->request->getVar('du_latitude'),
-                    'du_longitude' => $this->request->getVar('du_longitude'),
-                    'du_accuracy' => $this->request->getVar('du_accuracy'),
-                    'sk0' => $this->request->getVar('sk0'),
-                    'sk1' => $this->request->getVar('sk1'),
-                    'sk2' => $this->request->getVar('sk2'),
-                    'sk3' => $this->request->getVar('sk3'),
-                    'sk4' => $this->request->getVar('sk4'),
-                    'sk5' => $this->request->getVar('sk5'),
-                    'sk6' => $this->request->getVar('sk6'),
-                    'sk7' => $this->request->getVar('sk7'),
-                    'sk8' => $this->request->getVar('sk8'),
-                    'sk9' => $this->request->getVar('sk9'),
-                    'du_so_id' => $this->request->getVar('du_so_id'),
-                    'du_kate' => $this->request->getVar('du_kate'),
-                    'du_nasu' => strtoupper(trim($this->request->getVar('du_nasu'))),
-                    'created_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
-                    'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
-                    'created_at_year' => date('Y'),
-                    'created_at_month' => date('n'),
-                    'created_by' => session()->get('nik'),
-                    'updated_by' => session()->get('nik'),
-
-                    // 'foto_rumah' => $nama_foto_rumah,
-                ];
-                // dd($data);
-                $this->Usulan22Model->save($data);
-
-                $msg = [
-                    'sukses' => 'Data berhasil ditambahkan',
-                ];
-            }
-            echo json_encode($msg);
+    //             // stroke watermark image
+    //             imagettfstroketext($img_dua, $fontSizeDua, $angle, $posXdua, $posYdua, $whiteDua, $strokeColorDua, $fontFile, $txt, 1);
+    //             imagettfstroketext($img_tiga, $fontSizeTiga, $angle, $posXtiga, $posYtiga, $whiteTiga, $strokeColorTiga, $fontFile, $txt, 1);
 
 
-            // session()->setFlashdata('pesan', 'Data berhasil ditambahkan.');
+    //             header("Content-type: image/jpg");
+    //             $quality = 90; // 0 to 100
+
+    //             // var_dump($img_satu);
+    //             // die;
+
+    //             imagejpeg($img_dua, 'data/usulan/foto_rumah/' . $filename_dua, $quality);
+    //             imagejpeg($img_tiga, 'data/usulan/foto_rumah_dalam/' . $filename_tiga, $quality);
+    //             imagejpeg($img_empat, 'data/usulan/foto_identitas/' . $filename_empat, $quality);
+    //             // var_dump($img_satu);
+    //             // die;
+
+    //             $data = [
+    //                 'provinsi' => '32',
+    //                 'kabupaten' => '32.05',
+    //                 'kecamatan' => '32.05.33',
+    //                 'shdk' => $this->request->getVar('shdk'),
+    //                 'kelurahan' => $this->request->getVar('kelurahan'),
+    //                 'rw' => $this->request->getVar("datarw"),
+    //                 'rt' => $this->request->getVar("datart"),
+    //                 'alamat' => strtoupper(trim($this->request->getVar('alamat'))),
+    //                 'status_kawin' => $this->request->getVar("status_kawin"),
+    //                 'du_pendidikan_id' => $this->request->getVar("jenis_pendidikan"),
+    //                 'jenis_pekerjaan' => $this->request->getVar("jenis_pekerjaan"),
+    //                 'jenis_kelamin' => $this->request->getVar('jenis_kelamin'),
+    //                 'ibu_kandung' => strtoupper(trim($this->request->getVar("ibu_kandung"))),
+    //                 'tanggal_lahir' => $this->request->getVar("tanggal_lahir"),
+    //                 'tempat_lahir' => strtoupper(trim($this->request->getVar("tempat_lahir"))),
+    //                 'nama' => strtoupper(trim($this->request->getVar('nama'))),
+    //                 'nokk' => $this->request->getVar('nokk'),
+    //                 'program_bansos' => $this->request->getVar('databansos'),
+    //                 'du_nik' => $this->request->getVar('nik'),
+    //                 'disabil_status' => $this->request->getVar('disabil_status'),
+    //                 'disabil_kode' => $this->request->getVar('disabil_jenis'),
+    //                 'hamil_status' => $this->request->getVar('status_hamil'),
+    //                 'hamil_tgl' => $this->request->getVar('tgl_hamil'),
+    //                 'foto_identitas' => $filename_empat,
+    //                 'foto_rumah' => $filename_dua,
+    //                 'foto_rumah_dalam' => $filename_tiga,
+    //                 'du_latitude' => $this->request->getVar('du_latitude'),
+    //                 'du_longitude' => $this->request->getVar('du_longitude'),
+    //                 'du_accuracy' => $this->request->getVar('du_accuracy'),
+    //                 'sk0' => $this->request->getVar('sk0'),
+    //                 'sk1' => $this->request->getVar('sk1'),
+    //                 'sk2' => $this->request->getVar('sk2'),
+    //                 'sk3' => $this->request->getVar('sk3'),
+    //                 'sk4' => $this->request->getVar('sk4'),
+    //                 'sk5' => $this->request->getVar('sk5'),
+    //                 'sk6' => $this->request->getVar('sk6'),
+    //                 'sk7' => $this->request->getVar('sk7'),
+    //                 'sk8' => $this->request->getVar('sk8'),
+    //                 'sk9' => $this->request->getVar('sk9'),
+    //                 'du_so_id' => $this->request->getVar('du_so_id'),
+    //                 'du_kate' => $this->request->getVar('du_kate'),
+    //                 'du_nasu' => strtoupper(trim($this->request->getVar('du_nasu'))),
+    //                 'created_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
+    //                 'updated_at' => date_format($buat_tanggal, 'Y-m-d H:i:s'),
+    //                 'created_at_year' => date('Y'),
+    //                 'created_at_month' => date('n'),
+    //                 'created_by' => session()->get('nik'),
+    //                 'updated_by' => session()->get('nik'),
+
+    //                 // 'foto_rumah' => $nama_foto_rumah,
+    //             ];
+    //             // dd($data);
+    //             $this->Usulan22Model->save($data);
+
+    //             $msg = [
+    //                 'sukses' => 'Data berhasil ditambahkan',
+    //             ];
+    //         }
+    //         echo json_encode($msg);
 
 
-            // echo json_encode(array("status" => true));
-            // return redirect()->to('/dtks/usulan/tables');
-        } else {
-            return redirect()->to('lockscreen');
-        }
-    }
+    //         // session()->setFlashdata('pesan', 'Data berhasil ditambahkan.');
+
+
+    //         // echo json_encode(array("status" => true));
+    //         // return redirect()->to('/dtks/usulan/tables');
+    //     } else {
+    //         return redirect()->to('lockscreen');
+    //     }
+    // }
 
     public function get_data_penduduk()
     {
@@ -759,6 +1121,7 @@ class Usulan22 extends BaseController
 
         return $this->response->setJSON($response);
     }
+
     public function delete()
     {
         if ($this->request->isAJAX()) {
@@ -1307,6 +1670,7 @@ class Usulan22 extends BaseController
             return redirect()->to('lockscreen');
         }
     }
+
     private function processImage($filePath, $buat_tanggal)
     {
         // Load image

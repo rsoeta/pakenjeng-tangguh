@@ -1,0 +1,133 @@
+wah 🔥 keren banget, kita lanjut ke tahap serius nih — menyamakan **SINDEN-DTSEN** dengan struktur logika seperti **SIKS-NG** milik Kemensos.
+dan ya Rian, aku cukup familiar dengan **struktur sistem & elemen-elemen utama SIKS-NG**, baik dari sisi **menu, alur kerja, maupun bentuk datanya**. mari aku jelaskan secara rinci biar pondasi kita makin kokoh sebelum implementasi 👇
+
+---
+
+## 🧭 1️⃣ Arsitektur Umum SIKS-NG
+
+**SIKS-NG (Sistem Informasi Kesejahteraan Sosial – Next Generation)** adalah sistem berbasis web nasional yang dikembangkan Kemensos RI.
+fungsinya untuk **mengelola Data Terpadu Kesejahteraan Sosial (DTKS)** — sekarang dikenal sebagai **DTSEN (Data Tunggal Sosial dan Ekonomi Nasional)**.
+
+Sistemnya modular, terdiri dari beberapa komponen besar:
+
+| Modul                                           | Fungsi Utama                                                                           |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 🔸 **Data Master / Referensi**                  | Menyimpan master data wilayah, jenis pekerjaan, pendidikan, disabilitas, dan lainnya   |
+| 🔸 **Usulan Data (Pendataan Baru / Pembaruan)** | Form multi-tab untuk menambah, memperbarui, atau menghapus keluarga/individu           |
+| 🔸 **Verifikasi dan Validasi (Verivali)**       | Memeriksa hasil entri petugas, memberi status: *terverifikasi, tidak layak, dll*       |
+| 🔸 **Export / Sinkronisasi**                    | Menghasilkan template Excel (SIKS Format Kemensos) untuk dikirim ke kabupaten/provinsi |
+| 🔸 **Monitoring & Laporan**                     | Menampilkan statistik entri, grafik, dan status proses                                 |
+
+---
+
+## 🧩 2️⃣ Struktur Menu SIKS-NG
+
+Berikut tipikal **alur menu dropdown utama “Usulan Pembaruan DTSEN”** di SIKS-NG versi kabupaten:
+
+```
+📁 DTSEN
+├── Usulan Bansos
+│
+├── Pembaruan Data Keluarga
+│     ├── Data Keluarga
+│     ├── Tambah Keluarga Baru
+│     ├── Tambah Individu Baru
+│     └── Penghapusan Individu
+│
+├── Verifikasi & Validasi Usulan
+│     ├── Daftar Draft
+│     ├── Daftar Dikirim
+│     ├── Daftar Diverifikasi
+│     └── Riwayat Usulan
+│
+└── Laporan & Export
+      ├── Export
+      └── Rekapitulasi Usulan
+
+```
+
+👉 Jadi sebenarnya “Usulan Pembaruan DTSEN” bukan satu form tunggal, melainkan **kategori menu yang menampung empat sub-tipe usulan**.
+
+Namun, sesuai konsep kamu:
+
+> “Kita sederhanakan jadi 1 form multi-tujuan dengan pilihan *Jenis Usulan* di awal.”
+
+itu sangat bagus dan efisien untuk versi **Desa-level**, jadi tinggal dropdown:
+
+```
+Jenis Usulan:
+[ Pembaruan Data ]
+[ Keluarga Baru ]
+[ Individu Baru ]
+[ Lainnya ]
+```
+
+dan backend-nya nanti tinggal isi `jenis = pembaruan|keluarga_baru|individu_baru|lainnya` di tabel `dtsen_usulan`.
+
+---
+
+## 🧱 3️⃣ Struktur Data (Form Usulan / Multi-Tab)
+
+Dalam sistem SIKS-NG, setiap form memiliki **7 tab utama** (kadang disebut 8 tergantung update versi):
+
+| Tab | Nama Tab           | Deskripsi                                                                |
+| --- | ------------------ | ------------------------------------------------------------------------ |
+| 1️⃣ | Data Pokok         | Identitas dasar keluarga/individu (KK, NIK, nama, alamat, kelamin, dll.) |
+| 2️⃣ | Tenaga Kerja       | Status pekerjaan, lapangan usaha, keterampilan, pendapatan               |
+| 3️⃣ | Usaha              | Jenis usaha, omzet, jumlah pekerja, skala ekonomi                        |
+| 4️⃣ | Perumahan          | Kondisi fisik rumah, bahan bangunan, fasilitas air & listrik             |
+| 5️⃣ | Sosial & Kesehatan | Status kawin, pendidikan, kesehatan, disabilitas, kehamilan              |
+| 6️⃣ | Bantuan Sosial     | Riwayat penerima bantuan (PKH, BPNT, BLT, PBI, dll.)                     |
+| 7️⃣ | Foto & Lokasi      | Upload foto rumah & koordinat GPS (latitude, longitude)                  |
+
+Dan tiap tab punya substruktur field lengkap (yang tadi kamu sudah kutip sebagian panjang banget).
+
+---
+
+## 🔄 4️⃣ Alur Kerja Logika (Workflow Operator)
+
+| Langkah                        | Pelaku                                                    | Aksi |
+| ------------------------------ | --------------------------------------------------------- | ---- |
+| 🧍‍♂️ Pendata Desa             | Melakukan pendataan lapangan, entry data lewat SINDEN     |      |
+| 💾 Sistem                      | Menyimpan data ke tabel `dtsen_usulan` (status = “draft”) |      |
+| 👨‍💼 Admin Desa               | Verifikasi dan ubah status ke “verified”                  |      |
+| ⬆️ Admin Kecamatan             | Export ke Template Excel SIKS                             |      |
+| 📤 Upload ke SIKS-NG Kabupaten | Data disinkron ke server Kemensos melalui import Excel    |      |
+
+Dengan kata lain:
+
+> **SINDEN-DTSEN = versi lokal & offline-friendly dari SIKS-NG, yang bisa entri dulu, verifikasi belakangan, baru export.**
+
+---
+
+## 🔗 5️⃣ Hubungan Antar Tabel (Database Design)
+
+| Tabel              | Relasi                    | Keterangan                                                          |
+| ------------------ | ------------------------- | ------------------------------------------------------------------- |
+| `dtsen_rt`         | 🔗→ `dtsen_kk`            | 1 RT memiliki banyak KK                                             |
+| `dtsen_kk`         | 🔗→ `dtsen_art`           | 1 KK memiliki banyak ART                                            |
+| `dtsen_usulan`     | 🔗→ `dtsen_kk` (opsional) | Menyimpan draft/pembaruan berdasarkan KK                            |
+| `dtsen_usulan_art` | 🔗→ `dtsen_usulan`        | Menyimpan anggota keluarga baru (jika jenis usulan = individu_baru) |
+| `dtsen_se`         | 🔗→ `dtsen_kk`            | Data sosial-ekonomi rumah tangga                                    |
+
+---
+
+## 🧠 6️⃣ Integrasi & Output
+
+* Setiap kali usulan disimpan (step by step), JSON payload ditulis di kolom `payload` di tabel `dtsen_usulan`.
+* Setelah diverifikasi, data payload di-*apply* ke tabel `dtsen_kk` dan `dtsen_art`.
+* Saat export, query gabungan dijalankan → diubah ke format `.xlsx` sesuai struktur kolom **Template SIKS-NG** (Excel Import Kemensos).
+
+---
+
+## ✨ Jadi Kesimpulannya
+
+Untuk menyamakan **SINDEN-DTSEN** dengan **SIKS-NG**, kita perlu:
+1️⃣ Menyusun ulang struktur menu & form agar mencerminkan 7 tab SIKS-NG.
+2️⃣ Menyederhanakan ke 1 form dengan pilihan jenis usulan.
+3️⃣ Menjaga alur kerja **(draft → submitted → verified → applied)** sama seperti SIKS-NG.
+4️⃣ Menyusun controller & model agar payload JSON-nya kompatibel dengan export SIKS.
+
+---
+
+Mau kita lanjut malam ini ke tahap **penyusunan struktur menu + navigasi utama (dropdown seperti SIKS-NG)**, atau mau kita dalami dulu **mapping field antara tabel SINDEN (DTKS lama)** dan **struktur tab baru (DTSEN/NextGen)** biar sinkron total?

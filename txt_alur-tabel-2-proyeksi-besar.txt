@@ -1,0 +1,180 @@
+🟦 Baik banget Rian, dan kamu **tepat sekali berhenti di titik ini untuk memastikan arah desainnya benar dulu** sebelum melangkah ke tahap lanjutan — ini keputusan yang sangat tepat sebagai *system architect* 💪
+
+Mari kita bahas secara menyeluruh dan sistematis supaya kamu mendapatkan **gambaran utuh antara `usulan_bansos`, `dtsen_usulan`, dan `dtsen_usulan_art`**, serta mengapa mereka bisa coexist dan bagaimana sebaiknya kamu gunakan di arsitektur **SINDEN-DTSEN** ini.
+
+---
+
+## 🧩 1️⃣ — Fungsi dan Filosofi Per Tabel
+
+### 🔹 `usulan_bansos`
+
+📘 **Asal dan tujuan:**
+
+* Ini adalah **tabel usulan bansos langsung dari petugas lapangan**, yang digunakan untuk *pendataan program bantuan sosial bulanan* (BPNT, PKH, PBI, dsb).
+* Ia bersifat **operasional langsung**, artinya:
+
+  * 1 record = 1 usulan aktif.
+  * Dikirim oleh user tertentu setiap bulan.
+  * Langsung berhubungan dengan verifikasi bansos (Daftar Draft → Dikirim → Diverifikasi → Diterima/Ditolak).
+
+📊 **Isi datanya ringkas, fungsional:**
+
+```text
+id_kk, nik, program_bansos, catatan, status, created_at, created_by
+```
+
+📌 **Karakteristiknya:**
+
+| Aspek       | Penjelasan                          |
+| ----------- | ----------------------------------- |
+| Domain      | Bansos (bantuan sosial)             |
+| Entitas     | Individu                            |
+| Sumber data | dtsen_art / dtsen_kk                |
+| Arah alur   | Dari lapangan ke proses verifikasi  |
+| Sifat data  | Flat, cepat, sederhana, 1:1         |
+| Kaitan      | Digunakan di menu **Usulan Bansos** |
+
+🧠 Jadi: `usulan_bansos` adalah **tempat penyimpanan data usulan program bantuan**, bukan perubahan data kependudukan.
+
+---
+
+### 🔹 `dtsen_usulan`
+
+📗 **Asal dan tujuan:**
+
+* Ini adalah **tabel master sistem pembaruan data SINDEN**, bukan bansos.
+* Didesain untuk menampung *semua jenis pengajuan perubahan data* dari lapangan, seperti:
+
+  * Pembaruan data keluarga (alamat, anggota, kepemilikan rumah, dll)
+  * Penambahan keluarga baru
+  * Penambahan individu baru
+  * Penghapusan anggota keluarga
+* Jadi, ini bukan untuk program bantuan, tapi untuk *pemutakhiran struktur data kependudukan* di dalam sistem DTSEN.
+
+📊 **Struktur pentingnya:**
+
+| Kolom                        | Fungsi                                                                         |
+| ---------------------------- | ------------------------------------------------------------------------------ |
+| `jenis`                      | Menandakan tipe usulan (pembaruan / keluarga_baru / individu_baru / lainnya)   |
+| `payload`                    | Menyimpan detail data dalam format JSON                                        |
+| `status`                     | Menunjukkan tahapan verifikasi (draft, submitted, verified, applied, rejected) |
+| `created_by` / `assigned_to` | Menandai siapa pengusul dan siapa pemeriksa                                    |
+| `summary`                    | Ringkasan hasil / catatan verifikator                                          |
+
+📌 **Karakteristiknya:**
+
+| Aspek       | Penjelasan                                            |
+| ----------- | ----------------------------------------------------- |
+| Domain      | Data sosial kependudukan                              |
+| Entitas     | Keluarga (dtsen_kk)                                   |
+| Sumber data | Form pembaruan data                                   |
+| Arah alur   | Dari operator → verifikator → diterapkan ke `dtsen_*` |
+| Sifat data  | Tersusun, historikal, bisa diverifikasi               |
+| Kaitan      | Digunakan di menu **Pembaruan Data Keluarga**         |
+
+---
+
+### 🔹 `dtsen_usulan_art`
+
+📙 **Asal dan tujuan:**
+
+* Anak tabel dari `dtsen_usulan`, digunakan jika `payload` usulan melibatkan individu tertentu.
+* Contohnya:
+
+  * Tambah anggota keluarga baru → data anggota ditampung di `dtsen_usulan_art`.
+  * Perubahan nama anggota → anggota terkait di-*track* lewat relasi `dtsen_usulan_id`.
+
+📊 **Isi datanya:**
+
+```text
+dtsen_usulan_id (foreign key), nik, nama, hubungan, payload_member (JSON detail individu)
+```
+
+📌 **Karakteristiknya:**
+
+| Aspek      | Penjelasan                                                                  |
+| ---------- | --------------------------------------------------------------------------- |
+| Domain     | Perubahan data individu                                                     |
+| Hubungan   | Anak dari `dtsen_usulan`                                                    |
+| Sifat data | Mendetail per individu                                                      |
+| Kaitan     | Digunakan oleh sub-menu **Tambah Individu Baru** & **Penghapusan Individu** |
+
+---
+
+## 🧭 2️⃣ — Relasi dan Posisi Mereka di Aplikasi
+
+Kita punya dua domain besar di proyek **SINDEN-DTSEN**:
+
+| Domain                       | Modul                               | Tabel utama                        | Keterangan                             |
+| ---------------------------- | ----------------------------------- | ---------------------------------- | -------------------------------------- |
+| 🔹 *Usulan Program Bansos*   | `UsulanBansos`                      | `usulan_bansos`                    | Program bansos (BPNT, PKH, PBI)        |
+| 🔸 *Pembaruan Data Keluarga* | `DtsenSe`, `DtsenKk`, `DtsenUsulan` | `dtsen_usulan`, `dtsen_usulan_art` | Perubahan / sinkronisasi data keluarga |
+
+> 🧠 Dengan kata lain:
+>
+> * **usulan_bansos** → berurusan dengan “siapa layak mendapat bantuan”.
+> * **dtsen_usulan** → berurusan dengan “bagaimana memperbarui data dasar mereka”.
+
+---
+
+## 🔁 3️⃣ — Alur integrasi ideal antara keduanya
+
+Jika proyek kamu berkembang ke sistem yang terintegrasi (misalnya SINDEN versi penuh), maka hubungan antar tabel bisa berjalan seperti ini:
+
+```
+[Form Tambah Usulan Bansos]
+       │
+       ▼
+Insert → usulan_bansos
+       │
+       ▼
+(verifikasi bansos)
+       │
+       ▼
+Jika disetujui → cek dtsen_usulan
+   │
+   ├── Jika keluarga belum ada di DTSEN → buat dtsen_usulan (jenis=keluarga_baru)
+   └── Jika data sudah ada tapi butuh update → buat dtsen_usulan (jenis=pembaruan)
+```
+
+Artinya:
+
+* **Bansos** dan **pembaruan data keluarga** punya *alur paralel*, tapi bisa *bertemu di titik verifikasi* bila data baru muncul dari hasil bansos.
+
+---
+
+## 💡 4️⃣ — Jadi, kesimpulan singkat
+
+| Tabel              | Tujuan                                 | Dipakai oleh                     | Sifat                     |
+| ------------------ | -------------------------------------- | -------------------------------- | ------------------------- |
+| `usulan_bansos`    | Usulan bantuan sosial (BPNT, PKH, PBI) | Menu **Usulan Bansos**           | Flat, 1:1 individu        |
+| `dtsen_usulan`     | Usulan pembaruan data keluarga         | Menu **Pembaruan Data Keluarga** | JSON struktural, historis |
+| `dtsen_usulan_art` | Detil individu di dalam usulan         | Submenu individu                 | Anak dari `dtsen_usulan`  |
+
+---
+
+## 📘 5️⃣ — Rekomendasi Praktik Implementasi
+
+1. **Pertahankan `usulan_bansos`** untuk form bansos (seperti yang kamu sudah pakai sekarang ✅).
+2. **Gunakan `dtsen_usulan` + `dtsen_usulan_art`** hanya untuk pembaruan kependudukan (bukan untuk bansos).
+3. Jika ke depan ingin mengintegrasikan dua domain ini:
+
+   * Tambahkan kolom `source` di `dtsen_usulan` (misalnya: `'manual'`, `'bansos'`).
+   * Maka bansos yang memunculkan data baru bisa tercatat di histori sinkronisasi.
+
+---
+
+Kalimat ringkasnya begini:
+
+> “`usulan_bansos` adalah *data sosial ekonomi (layak bantuan)*,
+> sedangkan `dtsen_usulan` adalah *data demografis (keluarga dan anggota)*.”
+
+---
+
+Apabila arah pengembangan kamu nanti menginginkan satu dashboard rekap, maka dua tabel ini bisa di-*join* melalui `nik` atau `id_kk` sebagai *key penghubung*.
+Tapi dalam konteks saat ini, **Form Usulan Bansos → `usulan_bansos`** sudah 100% benar dan sesuai dengan fungsi modulnya.
+
+---
+
+Apakah kamu ingin saya bantu buatkan diagram DFD-level-1 untuk menggambarkan bagaimana **Usulan Bansos (usulan_bansos)** dan **Pembaruan Data (dtsen_usulan)** bisa saling terhubung tanpa tumpang-tindih?
+Itu akan sangat membantu kalau nanti kamu ingin buat integrasi dashboard tunggal.

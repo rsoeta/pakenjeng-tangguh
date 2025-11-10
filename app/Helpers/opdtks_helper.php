@@ -6,12 +6,12 @@ use App\Models\GenModel;
 
 function nameApp()
 {
-    return 'DTKS Kec. Pakenjeng';
+    return 'SINDEN';
 }
 
 function logoApp()
 {
-    return base_url('icon-dtks8.png');
+    return base_url('assets/logo/SINDEN-logo.png');
 }
 
 // function version app from database
@@ -168,11 +168,44 @@ function Salam()
 
 function imagettfstroketext(&$image, $size, $angle, $x, $y, &$textcolor, &$strokecolor, $fontfile, $text, $px)
 {
-    for ($c1 = ($x - abs($px)); $c1 <= ($x + abs($px)); $c1++)
-        for ($c2 = ($y - abs($px)); $c2 <= ($y + abs($px)); $c2++)
-            $bg = imagettftext($image, $size, $angle, $c1, $c2, $strokecolor, $fontfile, $text);
-    return imagettftext($image, $size, $angle, $x, $y, $textcolor, $fontfile, $text);
+    $x = (int)round($x);
+    $y = (int)round($y);
+    $px = (int)round($px);
+
+    for ($c1 = ($x - abs($px)); $c1 <= ($x + abs($px)); $c1++) {
+        for ($c2 = ($y - abs($px)); $c2 <= ($y + abs($px)); $c2++) {
+            imagettftext(
+                $image,
+                $size,
+                $angle,
+                (int)$c1,
+                (int)$c2,
+                $strokecolor,
+                $fontfile,
+                $text
+            );
+        }
+    }
+
+    return imagettftext(
+        $image,
+        $size,
+        $angle,
+        (int)$x,
+        (int)$y,
+        $textcolor,
+        $fontfile,
+        $text
+    );
 }
+
+// function imagettfstroketext(&$image, $size, $angle, $x, $y, &$textcolor, &$strokecolor, $fontfile, $text, $px)
+// {
+//     for ($c1 = ($x - abs($px)); $c1 <= ($x + abs($px)); $c1++)
+//         for ($c2 = ($y - abs($px)); $c2 <= ($y + abs($px)); $c2++)
+//             $bg = imagettftext($image, $size, $angle, $c1, $c2, $strokecolor, $fontfile, $text);
+//     return imagettftext($image, $size, $angle, $x, $y, $textcolor, $fontfile, $text);
+// }
 
 function hari_ini()
 {
@@ -267,70 +300,35 @@ function bulan_ini()
 
 function deadline_usulan()
 {
-    $times = new Time();
+    $times = new Time('now', 'Asia/Jakarta');
     $db = \Config\Database::connect();
 
-    $tahun = $times->getYear();
-    $bulan = $times->getMonth();
-    $hari = $times->getDay();       // 12
-    $jam = $times->getHour();           // 16
-    $menit = $times->getMinute();         // 15
-    $bulanNext = $bulan + 1;
     $hak_akses = session()->get('role_id');
 
+    // Ambil data waktu berdasarkan role
     $builder = $db->table('dtks_deadline');
     $builder->select('*');
     $builder->where('dd_role', $hak_akses);
-    $dataWaktu = $builder->get()->getResultArray();
-    // var_dump($data);
-    // die;
+    $dataWaktu = $builder->get()->getRowArray();
 
-    foreach ($dataWaktu as $d) {
-        $startDatetimeColumn = $d['dd_waktu_start'];
-        $endDatetimeColumn = $d['dd_waktu_end'];
+    // Cek jika data tidak ditemukan
+    if (!$dataWaktu) {
+        log_message('error', "Deadline tidak ditemukan untuk role: {$hak_akses}");
+        return false;
     }
 
-    // dari chatgpt
-    // Ambil nilai $startDatetime, $endDatetime, $allowedStartHour, dan $allowedEndHour dari database berdasarkan nama kolom
-    $startDatetime      = $startDatetimeColumn;
-    $endDatetime        = $endDatetimeColumn;
-    $allowedStartHour   = $startDatetimeColumn;
-    $allowedEndHour     = $endDatetimeColumn;
+    // Ambil kolom waktu dari database
+    $startDatetime = $dataWaktu['dd_waktu_start'];
+    $endDatetime   = $dataWaktu['dd_waktu_end'];
 
-    // Mengubah tanggal dan waktu menjadi objek DateTime
-    $hari_ini = $tahun . '-' . $bulan . '-' . $hari . ' ' . $jam . ':' . $menit;
-    // $currentDatetime = strtotime($hari_ini);
-    $currentDatetime = $hari_ini;
+    // Buat objek DateTime
+    $startDateTimeObj   = new DateTime($startDatetime);
+    $endDateTimeObj     = new DateTime($endDatetime);
+    $currentDateTimeObj = new DateTime($times->toDateTimeString());
 
-    $startDateTimeObj = new DateTime($startDatetime);
-    $endDateTimeObj = new DateTime($endDatetime);
-    $currentDateTimeObj = new DateTime($currentDatetime);
-
-    // var_dump([$currentDateTimeObj, $startDateTimeObj, $endDateTimeObj]);
-    // die;
-
-    // Memeriksa apakah tanggal dan waktu saat ini berada dalam rentang tanggal deadline
-    if (($currentDateTimeObj >= $startDateTimeObj && $currentDateTimeObj <= $endDateTimeObj) || ($currentDateTimeObj <= $startDateTimeObj && $currentDateTimeObj >= $endDateTimeObj)) {
-        // Mengambil jam, menit, dan detik saat ini
-        $currentHour = intval($currentDateTimeObj->format('H'));
-        $currentMinute = intval($currentDateTimeObj->format('i'));
-        $currentSecond = intval($currentDateTimeObj->format('s'));
-
-        // Mengambil jam, menit, dan detik mulai dan akhir akses yang diizinkan
-        $allowedStartHour = intval($startDateTimeObj->format('H'));
-        $allowedStartMinute = intval($startDateTimeObj->format('i'));
-        $allowedStartSecond = intval($startDateTimeObj->format('s'));
-        $allowedEndHour = intval($endDateTimeObj->format('H'));
-        $allowedEndMinute = intval($endDateTimeObj->format('i'));
-        $allowedEndSecond = intval($endDateTimeObj->format('s'));
-
-        // Memeriksa apakah waktu saat ini berada dalam rentang waktu akses yang diizinkan
-        if (($currentHour > $allowedStartHour && $currentHour < $allowedEndHour) ||
-            ($currentHour === $allowedStartHour && $currentMinute >= $allowedStartMinute && $currentSecond >= $allowedStartSecond) ||
-            ($currentHour === $allowedEndHour && $currentMinute <= $allowedEndMinute && $currentSecond <= $allowedEndSecond)
-        ) {
-            return true; // Akses diizinkan
-        }
+    // Cek apakah sekarang masih dalam rentang waktu deadline
+    if ($currentDateTimeObj >= $startDateTimeObj && $currentDateTimeObj <= $endDateTimeObj) {
+        return true; // Akses diizinkan
     }
 
     return false; // Akses ditolak

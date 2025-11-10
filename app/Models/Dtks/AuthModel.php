@@ -31,6 +31,7 @@ class AuthModel extends Model
         'opr_sch',
         'jabatan_id',
         'user_image',
+        'wilayah_tugas',
         'created_at',
         'updated_at',
         'reset_token',
@@ -79,49 +80,53 @@ class AuthModel extends Model
     {
         $user_id = session()->get('id');
 
-        $builder = $this->db->table('dtks_users');
-        $builder->select('dtks_users.id as id_user, dtks_users.password, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.level, dtks_users.nope, dtks_users.opr_sch, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, tb_roles.id_role as role_id, tb_roles.nm_role, lembaga_profil.lp_id, lembaga_profil.lp_kode, lembaga_profil.lp_kepala, lembaga_profil.lp_nip, lembaga_profil.lp_sekretariat, lembaga_profil.lp_email, lembaga_profil.lp_kode_pos, lembaga_profil.lp_logo, lembaga_kategori.lk_nama, tb_villages.name as nama_desa');
-        $builder->join('tb_roles', 'dtks_users.role_id=tb_roles.id_role');
-        $builder->join('lembaga_profil', 'dtks_users.id=lembaga_profil.lp_user');
-        $builder->join('lembaga_kategori', 'dtks_users.role_id=lembaga_kategori.lk_id');
-        $builder->join('tb_villages', 'dtks_users.kode_desa=tb_villages.id');
-        $query = $builder->getWhere(['dtks_users.id' => $user_id])->getRowArray();
+        $builder = $this->db->table('dtks_users u');
+        $builder->select("
+        u.id AS id_user,
+        u.password,
+        u.nik,
+        u.fullname,
+        u.email,
+        u.level,
+        u.nope,
+        u.opr_sch,
+        u.kode_desa,
+        u.kode_kec,
+        u.kode_kab,
+        u.user_image,
+        u.user_lembaga_id,
+        u.created_at,
+        u.updated_at,
+        u.wilayah_tugas,
+        r.id_role AS role_id,
+        r.nm_role,
+        lp.lp_id,
+        lp.lp_kode,
+        lp.lp_kepala,
+        lp.lp_nip,
+        lp.lp_sekretariat,
+        lp.lp_email,
+        lp.lp_kode_pos,
+        lp.lp_logo,
+        lk.lk_nama,
+        v.name AS nama_desa,
+        d.name AS nama_kecamatan,
+        reg.name AS nama_kabupaten
+    ");
 
-        $buildar = $this->db->table('dtks_users');
-        $buildar->select('dtks_users.id as id_user, dtks_users.password, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.level, dtks_users.nope, dtks_users.opr_sch, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, tb_roles.id_role as role_id, tb_roles.nm_role, lembaga_profil.lp_id, lembaga_profil.lp_kode, lembaga_profil.lp_kepala, lembaga_profil.lp_nip, lembaga_profil.lp_sekretariat, lembaga_profil.lp_email, lembaga_profil.lp_kode_pos, lembaga_profil.lp_logo, lembaga_kategori.lk_nama');
-        $buildar->join('tb_roles', 'dtks_users.role_id=tb_roles.id_role');
-        $buildar->join('lembaga_profil', 'dtks_users.id=lembaga_profil.lp_user');
-        $buildar->join('lembaga_kategori', 'dtks_users.role_id=lembaga_kategori.lk_id');
-        $buildar->join('tb_districts', 'dtks_users.kode_kec=tb_districts.id');
-        $buildar->join('tb_regencies', 'dtks_users.kode_kab=tb_regencies.id');
-        $quera = $buildar->getWhere(['dtks_users.id' => $user_id])->getRowArray();
+        // join opsional — gunakan LEFT agar aman meskipun data lembaga kosong
+        $builder->join('tb_roles r', 'u.role_id = r.id_role', 'left');
+        $builder->join('lembaga_profil lp', 'u.id = lp.lp_user', 'left');
+        $builder->join('lembaga_kategori lk', 'u.role_id = lk.lk_id', 'left');
+        $builder->join('tb_villages v', 'u.kode_desa = v.id', 'left');
+        $builder->join('tb_districts d', 'u.kode_kec = d.id', 'left');
+        $builder->join('tb_regencies reg', 'u.kode_kab = reg.id', 'left');
 
-        $buildor = $this->db->table('dtks_users');
-        $buildor->select('dtks_users.id as id_user, dtks_users.password, dtks_users.nik, dtks_users.fullname, dtks_users.email, dtks_users.level, dtks_users.nope, dtks_users.kode_desa, dtks_users.kode_kec, dtks_users.kode_kab, dtks_users.opr_sch, dtks_users.user_image, dtks_users.user_lembaga_id, dtks_users.created_at, dtks_users.updated_at, tb_roles.id_role as role_id, tb_roles.nm_role');
-        $buildor->join('tb_roles', 'dtks_users.role_id=tb_roles.id_role');
-        // $buildor->join('lembaga_profil', 'dtks_users.id=lembaga_profil.lp_user');
-        // $buildor->join('lembaga_kategori', 'lembaga_profil.lp_kategori=lembaga_kategori.lk_id');
-        // $buildor->join('tb_villages', 'lembaga_profil.lp_kode=tb_villages.id');
-        $quero = $buildor->where('dtks_users.id', $user_id);
-        $quero = $quero->get()->getRowArray();
+        $builder->where('u.id', $user_id);
 
-        // case isset $query, $quera, $quero
-        if ($query) {
-            return $query;
-        } elseif ($quera) {
-            return $quera;
-        } elseif ($quero) {
-            return $quero;
-        } else {
-            return false;
-        }
-        // if (isset($query)) {
-        //     return $query;
-        // } elseif (isset($quera)) {
-        //     return $quera;
-        // } else {
-        //     return $quero;
-        // }
+        $data = $builder->get()->getRowArray();
+
+        return $data ?: false;
     }
 
     public function updatePersonalData($id_user, $personalData)

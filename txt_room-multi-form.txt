@@ -1,0 +1,54 @@
+    halo Katie, disini kita akan memulai program yang kompleks dalam pengembangan proyek SINDEN kita ini. 
+    sekarang kita akan mulai dari mengembangkan fitur-fitur baru yang telah kita rencanakan sebelumnya.
+    Berikut tipikal **alur menu dropdown utama** yang akan kita buat di dalam aplikasi SINDEN ini:
+
+    📁 DTSEN
+    ├── Usulan Bansos
+    │
+    ├── Pembaruan Data Keluarga
+    │     ├── Data Keluarga
+    │     └── Keluarga Baru
+    │
+    ├── Verifikasi & Validasi Usulan
+    │     ├── Daftar Draft
+    │     ├── Daftar Dikirim
+    │     ├── Daftar Diverifikasi
+    │     └── Riwayat Usulan
+    │
+    └── Laporan & Export
+        ├── Export
+        └── Rekapitulasi Usulan
+
+    yang sebelumnya adalah:
+    📁 DTSEN
+    ├── Usulan Bansos
+    │
+    ├── Pembaruan Data Keluarga
+    │     ├── Data Keluarga
+    │     ├── Tambah Keluarga Baru
+    │     ├── Tambah Individu Baru
+    │     └── Penghapusan Individu
+    │
+    ├── Verifikasi & Validasi Usulan
+    │     ├── Daftar Draft
+    │     ├── Daftar Dikirim
+    │     ├── Daftar Diverifikasi
+    │     └── Riwayat Usulan
+    │
+    └── Laporan & Export
+        ├── Export
+        └── Rekapitulasi Usulan
+
+    dapat dilihat bahwa pada menu "Pembaruan Data Keluarga" terdapat beberapa sub-menu seperti "Tambah Individu Baru" dan "Penghapusan Individu" yang akan kita sederhanakan di simpan di menu "Data Keluarga" saja.
+    dengan demikian, pada menu "Pembaruan Data Keluarga" hanya akan ada dua sub-menu yaitu "Data Keluarga" dan "Keluarga Baru".
+    ini akan membuat navigasi menu menjadi lebih sederhana dan mudah dipahami oleh pengguna.
+
+    pertama-tama, kita akan fokus pada menu pembaruan data keluarga.
+    fitur ini akan memungkinkan pengguna untuk mengajukan pembaruan data keluarga mereka secara online.
+    untuk itu, kita akan menggunakan tabel `dtsen_usulan` dan `dtsen_usulan_art` yang sudah ada.
+    tabel `dtsen_usulan` akan menyimpan informasi umum tentang usulan pembaruan data keluarga, sedangkan tabel `dtsen_usulan_art` akan menyimpan detail individu dari setiap anggota keluarga yang diajukan untuk pembaruan.
+    kita akan memastikan bahwa form pembaruan data keluarga ini mudah digunakan dan dapat diakses oleh semua pengguna sesuai dengan wilayah tugas mereka.
+    selanjutnya, kita akan mengintegrasikan fitur ini dengan sistem verifikasi oleh admin desa.
+    ini akan memastikan bahwa setiap usulan pembaruan data keluarga diverifikasi dengan benar sebelum disetujui.
+
+    catatan: jangan membuatkan kode apapun sekarang. kita hanya mendiskusikan alur dan rencana pengembangan fitur ini terlebih dahulu.

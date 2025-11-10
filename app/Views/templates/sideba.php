@@ -5,7 +5,7 @@ $user = session()->get('role_id');
 
 // connect to request uri
 $request = \Config\Services::request();
-$uri = $request->uri->getSegment(1);
+$uri = $request->getUri()->getSegment(1);
 $menus = menu()
 ?>
 

@@ -37,7 +37,7 @@ class Bnba extends BaseController
 
         $data = [
             'namaApp' => 'Opr NewDTKS',
-            'title' => 'BNBA DTKS',
+            'title' => 'BNBA DTSEN',
             'desKels' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', Profil_Admin()['kode_kec'])->findAll(),
             // 'operator' => $this->operator->orderBy('NamaLengkap', 'asc')->findAll(),
             'datarw' => $this->RwModel->noRw(),
@@ -57,268 +57,6 @@ class Bnba extends BaseController
         return view('dtks/data/dtks/clean/index', $data);
     }
 
-    // public function tabel_data()
-    // {
-    //     $model = new BnbaModel();
-    //     // $KetMasalah = new KetModel();
-
-    //     $csrfName = csrf_token();
-    //     $csrfHash = csrf_hash();
-    //     $user = session()->get('role_id');
-
-    //     $filter0 = '1';
-    //     $filter1 = $this->request->getPost('datadesa');
-    //     // $operator = $this->request->getPost('operator');
-    //     $filter2 = $this->request->getPost('datarw');
-    //     $filter3 = $this->request->getPost('datart');
-    //     $filter4 = $this->request->getPost('datashdk');
-
-    //     $listing = $model->get_datatables($filter1, $filter2, $filter3, $filter4, $filter0);
-    //     $jumlah_semua = $model->jumlah_semua();
-    //     $jumlah_filter = $model->jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter0);
-
-    //     $data = array();
-    //     $no = $_POST['start'];
-    //     foreach ($listing as $key) {
-
-    //         $no++;
-    //         $row = array();
-    //         $row[] = $no;
-
-    //         // cari-foto
-    //         $foundFile = ''; // variabel untuk menyimpan nama file dengan 16 digit angka
-    //         $namaFile = '';
-    //         $ekstensiFile = '';
-
-    //         $dirPath = FCPATH . 'data/bnba/foto-kpm'; // Ganti dengan path direktori foto Anda && FCPATH . 'data/dkm/foto-cpm'
-    //         $files = scandir($dirPath);
-
-    //         $filenames = [];
-    //         foreach ($files as $file) {
-    //             if (!in_array($file, array(".", ".."))) {
-    //                 $filenames[] = $file;
-    //             }
-    //         }
-    //         // var_dump($filenames);
-    //         // die;
-
-    //         // Sekarang $filenames berisi daftar file dalam direktori tersebut
-    //         $nik_kpm = $key->db_nik;
-    //         foreach ($filenames as $filename) {
-    //             // preg_match('/\d{16}/', $filename, $matches);
-    //             preg_match('/' . $nik_kpm . '/', $filename, $matches);
-    //             if (!empty($matches)) {
-    //                 $sixteenDigitNumber = $matches[0];
-    //                 $filenameParts = explode($sixteenDigitNumber, $filename);
-
-    //                 // echo "Nama File: {$filenameParts[0]} <br>";
-    //                 // echo "16 digit angka: $sixteenDigitNumber <br>";
-    //                 // echo "Ekstensi File: {$filenameParts[1]} <br>";
-
-    //                 // Mencoba mendapatkan URL foto
-    //                 $fotoURL = FOTO_KPM($filename, 'direktori_pertama');
-    //                 if ($fotoURL === base_url('assets/images/image_not_available.jpg')) {
-    //                     // Jika tidak ditemukan di direktori pertama, coba di direktori kedua
-    //                     $fotoURL = FOTO_KPM($filename, 'direktori_kedua');
-    //                 }
-
-    //                 // echo "URL Foto: $fotoURL <br><br>";
-
-    //                 // Simpan nama file dengan 16 digit angka yang ditemukan
-    //                 $namaFile = $filenameParts[0];
-    //                 $ekstensiFile = $filenameParts[1];
-
-    //                 $foundFile = $filename;
-    //                 var_dump($foundFile);
-    //                 die;
-    //                 break; // Hentikan loop setelah menemukan file
-    //             } else {
-    //                 // echo "Tidak ditemukan 16 digit angka pada $filename<br>";
-    //             }
-    //         }
-
-    //         // echo "Nama File dengan 16 digit angka: $foundFile"; // Menampilkan nama file yang ditemukan
-    //         // akhir cari-foto
-
-    //         $row[] = '
-    //         <a href=' . FOTO_KPM($namaFile . $foundFile . $ekstensiFile, 'foto-kpm') . ' data-lightbox="BNT' . $foundFile . '" data-title="Foto Identitas">
-    //         <img src="' . FOTO_KPM($namaFile . $foundFile . $ekstensiFile, 'foto-kpm') . '" alt="" style="width: 30px; height: 40px; border-radius: 2px;">
-    //         </a>
-    //         ';
-    //         $row[] = $key->db_id_dtks;
-    //         $row[] = $key->db_nama;
-    //         $row[] = $key->db_nkk;
-    //         $row[] = $key->db_nik;
-    //         $row[] = $key->db_tmp_lahir;
-    //         $row[] = $key->db_tgl_lahir;
-    //         $row[] = $key->jenis_shdk;
-
-    //         if ($user <= 4) :
-    //             $row[] = '<a href="javascript:void(0)" title="more info" onclick="detail_person(' . "'" . $key->db_id . "'" . ')"></a>';
-    //         elseif ($user <= 3) :
-    //             $row[] = '<a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->db_id . "'" . ')"><i class="far fa-edit"></i></a> <button class="btn btn-sm btn-secondary" data-id="' . $key->db_id . '" data-nama="' . $key->db_nama . '" id="deleteBtn"><i class="far fa-trash-alt"></i></button>';
-    //         else :
-    //             $row[] = '';
-    //         endif;
-
-    //         $data[] = $row;
-    //     }
-
-    //     $output = array(
-    //         "draw" => $_POST['draw'],
-    //         "recordsTotal" => $jumlah_semua->jml,
-    //         "recordsFiltered" => $jumlah_filter->jml,
-    //         "data" => $data,
-    //     );
-    //     $output[$csrfName] = $csrfHash;
-    //     echo json_encode($output);
-    // }
-
-    // public function tabel_data()
-    // {
-    //     $model = new BnbaModel();
-    //     $csrfName = csrf_token();
-    //     $csrfHash = csrf_hash();
-    //     $user = session()->get('role_id');
-
-    //     $filter0 = '1';
-    //     $filter1 = $this->request->getPost('datadesa');
-    //     $filter2 = $this->request->getPost('datarw');
-    //     $filter3 = $this->request->getPost('datart');
-    //     $filter4 = $this->request->getPost('datashdk');
-
-    //     $listing = $model->get_datatables($filter1, $filter2, $filter3, $filter4, $filter0);
-    //     $jumlah_semua = $model->jumlah_semua();
-    //     $jumlah_filter = $model->jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter0);
-
-    //     $data = array();
-    //     $no = $_POST['start'];
-
-    //     foreach ($listing as $key) {
-    //         // cari foto-kpm
-    //         $dirPathKpm1 = FCPATH . 'data/bnba/foto-kpm'; // Ubah sesuai dengan path direktori foto-kpm Anda
-    //         $dirPathKpm2 = FCPATH . 'data/dkm/foto-cpm'; // Ubah sesuai dengan path direktori foto-cpm Anda
-
-    //         $filesKpm1 = scandir($dirPathKpm1);
-    //         $filesKpm2 = scandir($dirPathKpm2);
-
-    //         $filenames = array_merge(
-    //             array_diff($filesKpm1, array(".", "..")),
-    //             array_diff($filesKpm2, array(".", ".."))
-    //         );
-
-    //         $nik_kpm = $key->db_nik;
-    //         $foundFileKpm = '';
-
-    //         foreach ($filenames as $filename) {
-    //             preg_match('/' . $nik_kpm . '/', $filename, $matches);
-    //             if (!empty($matches)) {
-    //                 $foundFileKpm = $filename;
-    //                 break;
-    //             }
-    //         }
-
-    //         if ($foundFileKpm !== '') {
-    //             $fotoKpmURL = FOTO_KPM($foundFileKpm, 'foto-kpm');
-    //         } elseif (isEmpty(FOTO_KPM($foundFileKpm, 'foto-kpm'))) {
-    //             $fotoKpmURL = FOTO_KPM($foundFileKpm, 'foto-cpm');
-    //         } else {
-    //             $fotoKpmURL = base_url('assets/images/image_not_available.jpg');
-    //         }
-    //         $foto_kpm_URL = $fotoKpmURL;
-
-    //         // Mendapatkan base_url dari CodeIgniter
-    //         $baseURL = base_url();
-
-    //         // URL statis yang ingin diganti
-    //         $staticURL = 'http://localhost:8080/C:%5Claragon%5Cwww%5Cdtks.pakenjeng-tangg%5Cpublic%5C';
-
-    //         // Mengganti bagian awal URL dengan base_url dari CodeIgniter
-    //         $foto_kpm_URL = str_replace($staticURL, $baseURL . '/', $foto_kpm_URL);
-    //         // selesai cari foto-kpm
-
-    //         // cari foto-rumah
-    //         $dirPathRmh1 = FCPATH . 'data/bnba/foto-rumah'; // Ubah sesuai dengan path direktori foto-kpm Anda
-    //         $dirPathRmh2 = FCPATH . 'data/usulan/foto_rumah'; // Ubah sesuai dengan path direktori foto-cpm Anda
-
-    //         $filesRmh1 = scandir($dirPathRmh1);
-    //         $filesRmh2 = scandir($dirPathRmh2);
-
-    //         $filenames = array_merge(
-    //             array_diff($filesRmh1, array(".", "..")),
-    //             array_diff($filesRmh2, array(".", ".."))
-    //         );
-
-    //         $nik_kpm = $key->db_nik;
-    //         $foundFileRmh = '';
-
-    //         foreach ($filenames as $filename) {
-    //             preg_match('/' . $nik_kpm . '/', $filename, $matches);
-    //             if (!empty($matches)) {
-    //                 $foundFileRmh = $filename;
-    //                 break;
-    //             }
-    //         }
-
-    //         if ($foundFileRmh !== '') {
-    //             $fotoRmhURL = FOTO_RUMAH($foundFileRmh, 'foto-rumah');
-    //         } elseif (isEmpty(FOTO_RUMAH($foundFileRmh, 'foto-rumah'))) {
-    //             $fotoRmhURL = FOTO_RUMAH($foundFileRmh, 'foto_rumah');
-    //         } else {
-    //             $fotoRmhURL = base_url('assets/images/image_not_available.jpg');
-    //         }
-    //         $foto_rmh_URL = $fotoRmhURL;
-
-    //         // Mengganti bagian awal URL dengan base_url dari CodeIgniter
-    //         $foto_rmh_URL = str_replace($staticURL, $baseURL . '/', $foto_rmh_URL);
-    //         // selesai cari foto-rumah
-
-    //         $no++;
-    //         $row = array();
-    //         $row[] = $no;
-
-    //         $row[] = '
-    //                     <a href=' . $foto_kpm_URL . ' data-lightbox="' . $foundFileKpm . '" data-title="' . $key->db_nama . '(' . $key->db_nik . ')' . '">
-    //                     <img src="' . $foto_kpm_URL . '" alt="" style="width: 30px; height: 40px; border-radius: 2px;">
-    //                     </a>
-    //                     <a href=' . $foto_rmh_URL . ' data-lightbox="' . $foundFileRmh . '" data-title="' . $key->db_nama . '(' . $key->db_nik . ')' . '"></a>
-    //                     ';
-
-    //         // Menambahkan data lain ke dalam tabel sesuai kebutuhan
-    //         $row[] = $key->db_nama;
-    //         $row[] = $key->db_nkk;
-    //         $row[] = $key->db_nik;
-    //         $row[] = $key->NamaJenKel;
-    //         $row[] = $key->db_tmp_lahir;
-    //         $row[] = $key->db_tgl_lahir;
-    //         $row[] = $key->jenis_shdk;
-
-    //         if ($user <= 3) :
-    //             $row[] = '
-    //             <a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->db_id . "'" . ')"><i class="far fa-edit"></i></a>
-    //             <button class="btn btn-sm btn-secondary" data-id="' . $key->db_id . '" data-nama="' . $key->db_nama . '" id="deleteBtn"><i class="far fa-trash-alt"></i></button>
-    //             ';
-    //         elseif ($user <= 4) :
-    //             $row[] = '
-    //             <a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->db_id . "'" . ')"><i class="far fa-edit"></i></a> 
-    //             ';
-    //         else :
-    //             $row[] = '';
-    //         endif;
-
-    //         $data[] = $row;
-    //     }
-
-    //     $output = array(
-    //         "draw" => $_POST['draw'],
-    //         "recordsTotal" => $jumlah_semua->jml,
-    //         "recordsFiltered" => $jumlah_filter->jml,
-    //         "data" => $data,
-    //     );
-    //     $output[$csrfName] = $csrfHash;
-    //     echo json_encode($output);
-    // }
-
     public function tabel_data()
     {
         $model = new BnbaModel();
@@ -332,6 +70,9 @@ class Bnba extends BaseController
         $filter3 = $this->request->getPost('datart');
         $filter4 = $this->request->getPost('datashdk');
 
+        // 🔸 Tambahkan filter SHDK untuk hanya Kepala Keluarga (db_shdk_id = 1)
+        $filterKepala = 1;
+
         $listing = $model->get_datatables($filter1, $filter2, $filter3, $filter4, $filter0);
         $jumlah_semua = $model->jumlah_semua();
         $jumlah_filter = $model->jumlah_filter($filter1, $filter2, $filter3, $filter4, $filter0);
@@ -340,6 +81,9 @@ class Bnba extends BaseController
         $no = $_POST['start'];
 
         foreach ($listing as $key) {
+            // Pastikan hanya menampilkan yang Kepala Keluarga
+            if ($key->db_shdk_id != 1) continue;
+
             // cari foto-kpm
             $dirPathKpm1 = FCPATH . 'data/bnba/foto-kpm'; // Ubah sesuai dengan path direktori foto-kpm Anda
             $dirPathKpm2 = FCPATH . 'data/dkm/foto-cpm'; // Ubah sesuai dengan path direktori foto-cpm Anda
@@ -482,18 +226,60 @@ class Bnba extends BaseController
             $row[] = $key->db_tgl_lahir;
             $row[] = $key->jenis_shdk;
 
-            if ($user <= 3) :
+            // if ($user <= 3) :
+            //     $row[] = '
+            //     <a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->db_id . "'" . ')"><i class="far fa-edit"></i></a>
+            //     <button class="btn btn-sm btn-secondary" data-id="' . $key->db_id . '" data-nama="' . $key->db_nama . '" id="deleteBtn"><i class="far fa-trash-alt"></i></button>
+            // ';
+            // elseif ($user <= 4) :
+            //     $row[] = '
+            //     <a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->db_id . "'" . ')"><i class="far fa-edit"></i></a> 
+            // ';
+            // else :
+            //     $row[] = '';
+            // endif;
+
+            if ($user <= 3) : // Admin / Operator Desa
                 $row[] = '
-                <a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->db_id . "'" . ')"><i class="far fa-edit"></i></a>
-                <button class="btn btn-sm btn-secondary" data-id="' . $key->db_id . '" data-nama="' . $key->db_nama . '" id="deleteBtn"><i class="far fa-trash-alt"></i></button>
-            ';
+        <div class="d-flex justify-content-center gap-1">
+            <a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->db_id . "'" . ')">
+                <i class="far fa-edit"></i>
+            </a>
+            <button class="btn btn-sm btn-success btnInputDesil"
+                title="Input Desil"
+                data-id="' . $key->db_id . '"
+                data-nokk="' . $key->db_nkk . '"
+                data-nama="' . $key->db_nama . '"
+                data-alamat="' . $key->db_alamat . '"
+                data-desil="' . ($key->kategori_desil ?? '') . '">
+                <i class="fas fa-balance-scale"></i>
+            </button>
+            <button class="btn btn-sm btn-secondary" data-id="' . $key->db_id . '" data-nama="' . $key->db_nama . '" id="deleteBtn">
+                <i class="far fa-trash-alt"></i>
+            </button>
+        </div>
+    ';
             elseif ($user <= 4) :
                 $row[] = '
-                <a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->db_id . "'" . ')"><i class="far fa-edit"></i></a> 
-            ';
+        <div class="d-flex justify-content-center gap-1">
+            <a class="btn btn-sm btn-warning" href="javascript:void(0)" title="Edit" onclick="edit_person(' . "'" . $key->db_id . "'" . ')">
+                <i class="far fa-edit"></i>
+            </a>
+            <button class="btn btn-sm btn-success btnInputDesil"
+                title="Input Desil"
+                data-id="' . $key->db_id . '"
+                data-nokk="' . $key->db_nkk . '"
+                data-nama="' . $key->db_nama . '"
+                data-alamat="' . $key->db_alamat . '"
+                data-desil="' . ($key->kategori_desil ?? '') . '">
+                <i class="fas fa-balance-scale"></i>
+            </button>
+        </div>
+    ';
             else :
                 $row[] = '';
             endif;
+
 
             $data[] = $row;
         }

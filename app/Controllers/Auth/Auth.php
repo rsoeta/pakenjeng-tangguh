@@ -29,55 +29,175 @@ class Auth extends BaseController
         $this->UsersLoginModel = new UsersLoginModel();
     }
 
+    // public function login()
+    // {
+
+    //     $data = [];
+
+    //     if ($this->request->getPost()) {
+
+    //         // var_dump($this->request->getvar());
+    //         // $nik = $this->request->getVar('nik');
+
+    //         $rules = [
+    //             // captha
+    //             // 'captha' => 'required',
+
+    //             'email' => 'required|min_length[6]|max_length[50]|valid_email',
+    //             'password' => 'required|min_length[6]|max_length[255]|validateUser[email,password]',
+    //         ];
+
+    //         $errors = [
+    //             // 'captha' => [
+    //             //     'errors' => 'Captha tidak sesuai',
+    //             // ],
+    //             'password' => [
+    //                 'validateUser' => "User atau Password tidak sesuai",
+    //             ],
+    //         ];
+
+    //         if (!$this->validate($rules, $errors)) {
+    //             $session = session();
+    //             $session->setFlashdata('message', [
+    //                 'type' => 'error', // Tambahkan tipe pesan jika perlu
+    //                 'text' => 'User atau Password tidak sesuai!'
+    //             ]);
+    //             return view('dtks/auth/login', [
+    //                 "validation" => $this->validator,
+    //                 "title" => 'Login',
+    //             ]);
+    //         } else {
+
+    //             $model = new AuthModel();
+
+    //             $user = $model->where('email', $this->request->getVar('email'))->first();
+
+    //             $secret = '6LctvBomAAAAAF900Ud_B6iOfcKX2R9ZvAGPg2bo';
+
+    //             $credential = array(
+    //                 'secret' => $secret,
+    //                 'response' => $this->request->getVar('g-recaptcha-response')
+    //             );
+
+    //             $verify = curl_init();
+    //             curl_setopt($verify, CURLOPT_URL, "https://www.google.com/recaptcha/api/siteverify");
+    //             curl_setopt($verify, CURLOPT_POST, true);
+    //             curl_setopt($verify, CURLOPT_POSTFIELDS, http_build_query($credential));
+    //             curl_setopt($verify, CURLOPT_SSL_VERIFYPEER, false);
+    //             curl_setopt($verify, CURLOPT_RETURNTRANSFER, true);
+    //             $response = curl_exec($verify);
+
+    //             $status = json_decode($response, true);
+    //             if ($status['success']) {
+
+    //                 // tanpa captha
+    //                 // dd($user);
+    //                 $this->setUserSession($user);
+
+    //                 $UsersLogin = new UsersLoginModel();
+    //                 $data_login = [
+    //                     'dul_du_id' => $user['id'],
+    //                     'dul_last_activity' => date('Y-m-d H:i:s'),
+    //                 ];
+    //                 $last_id = $UsersLogin->where('dul_du_id', $user['id'])->first();
+    //                 if (!empty($last_id)) {
+    //                     $UsersLogin->update_data($last_id, $data_login);
+    //                 } else {
+    //                     $UsersLogin->save_data($data_login);
+    //                 }
+
+    //                 // dd($this->setUserSession($user));
+    //                 // Redirecting to dashboard after login
+    //                 if ($user['status'] !== 1) {
+    //                     $session = session();
+    //                     $session->setFlashdata('message', [
+    //                         'type' => 'error',
+    //                         'text' => 'User Non-Aktif, Silakan hubungi Admin!'
+    //                     ]);
+    //                     return redirect()->to('/login');
+    //                 }
+
+    //                 // } else if ($user['status'] == 1 && $user['role_id'] == 5) {
+    //                 //     return redirect()->to('/operatorsch');
+    //                 // } else if ($user['status'] == 1) {
+    //                 //     return redirect()->to('/pages');
+    //                 // Redirecting to the previous URL
+    //                 // Get the redirect URL from the session if available
+    //                 // Check if there is a redirect URL stored in the session
+    //                 $redirectUrl = session()->get('redirectUrl');
+
+    //                 if ($redirectUrl) {
+    //                     // Remove the redirect URL from the session
+    //                     session()->remove('redirectUrl');
+
+    //                     // Temporarily disable the "before" filters
+    //                     $this->filter->disable('before');
+
+    //                     // Redirect to the stored redirect URL
+    //                     return redirect()->to(base_url($redirectUrl));
+    //                     // } else {
+    //                     //     // Redirect to a default page if no redirect URL is set
+    //                     //     return redirect()->to('/pages');
+    //                 }
+    //                 // tanpa captha
+    //             }
+    //         }
+    //     }
+    //     // echo 'test';
+    //     $data = [
+    //         'title' => 'Sign In',
+    //     ];
+
+    //     return view('dtks/auth/login', $data);
+    // }
+
     public function login()
     {
-
         $data = [];
 
         if ($this->request->getPost()) {
 
-            // var_dump($this->request->getvar());
-            // $nik = $this->request->getVar('nik');
-
             $rules = [
-                // captha
-                // 'captha' => 'required',
-
                 'email' => 'required|min_length[6]|max_length[50]|valid_email',
                 'password' => 'required|min_length[6]|max_length[255]|validateUser[email,password]',
             ];
 
             $errors = [
-                // 'captha' => [
-                //     'errors' => 'Captha tidak sesuai',
-                // ],
                 'password' => [
                     'validateUser' => "User atau Password tidak sesuai",
                 ],
             ];
 
             if (!$this->validate($rules, $errors)) {
-                $session = session();
-                $session->setFlashdata('message', [
-                    'type' => 'error', // Tambahkan tipe pesan jika perlu
+                session()->setFlashdata('message', [
+                    'type' => 'error',
                     'text' => 'User atau Password tidak sesuai!'
                 ]);
                 return view('dtks/auth/login', [
                     "validation" => $this->validator,
                     "title" => 'Login',
                 ]);
+            }
+
+            $model = new AuthModel();
+            $user = $model->where('email', $this->request->getVar('email'))->first();
+
+            // === 🧩 Tambahan: Deteksi environment ===
+            $isDev = (ENVIRONMENT === 'development');
+
+            $captchaVerified = false;
+
+            if ($isDev) {
+                // 🔹 Skip reCAPTCHA di local/dev
+                $captchaVerified = true;
             } else {
+                // 🔹 Verifikasi reCAPTCHA di production
+                $secret = '6LctvBomAAAAAF900Ud_B6iOfcKX2R9ZvAGPg2bo'; // Ganti dengan secret key milikmu
 
-                $model = new AuthModel();
-
-                $user = $model->where('email', $this->request->getVar('email'))->first();
-
-                $secret = '6LctvBomAAAAAF900Ud_B6iOfcKX2R9ZvAGPg2bo';
-
-                $credential = array(
+                $credential = [
                     'secret' => $secret,
                     'response' => $this->request->getVar('g-recaptcha-response')
-                );
+                ];
 
                 $verify = curl_init();
                 curl_setopt($verify, CURLOPT_URL, "https://www.google.com/recaptcha/api/siteverify");
@@ -86,68 +206,61 @@ class Auth extends BaseController
                 curl_setopt($verify, CURLOPT_SSL_VERIFYPEER, false);
                 curl_setopt($verify, CURLOPT_RETURNTRANSFER, true);
                 $response = curl_exec($verify);
+                curl_close($verify);
 
                 $status = json_decode($response, true);
-                if ($status['success']) {
+                $captchaVerified = isset($status['success']) && $status['success'] === true;
+            }
 
-                    // tanpa captha
-                    // dd($user);
-                    $this->setUserSession($user);
+            // === 🧩 Jika reCAPTCHA valid (atau dilewati di dev) ===
+            if ($captchaVerified) {
 
-                    $UsersLogin = new UsersLoginModel();
-                    $data_login = [
-                        'dul_du_id' => $user['id'],
-                        'dul_last_activity' => date('Y-m-d H:i:s'),
-                    ];
-                    $last_id = $UsersLogin->where('dul_du_id', $user['id'])->first();
-                    if (!empty($last_id)) {
-                        $UsersLogin->update_data($last_id, $data_login);
-                    } else {
-                        $UsersLogin->save_data($data_login);
-                    }
+                // Buat session login user
+                $this->setUserSession($user);
 
-                    // dd($this->setUserSession($user));
-                    // Redirecting to dashboard after login
-                    if ($user['status'] !== 1) {
-                        $session = session();
-                        $session->setFlashdata('message', [
-                            'type' => 'error',
-                            'text' => 'User Non-Aktif, Silakan hubungi Admin!'
-                        ]);
-                        return redirect()->to('/login');
-                    }
+                $UsersLogin = new UsersLoginModel();
+                $data_login = [
+                    'dul_du_id' => $user['id'],
+                    'dul_last_activity' => date('Y-m-d H:i:s'),
+                ];
+                $last_id = $UsersLogin->where('dul_du_id', $user['id'])->first();
 
-                    // } else if ($user['status'] == 1 && $user['role_id'] == 5) {
-                    //     return redirect()->to('/operatorsch');
-                    // } else if ($user['status'] == 1) {
-                    //     return redirect()->to('/pages');
-                    // Redirecting to the previous URL
-                    // Get the redirect URL from the session if available
-                    // Check if there is a redirect URL stored in the session
-                    $redirectUrl = session()->get('redirectUrl');
-
-                    if ($redirectUrl) {
-                        // Remove the redirect URL from the session
-                        session()->remove('redirectUrl');
-
-                        // Temporarily disable the "before" filters
-                        $this->filter->disable('before');
-
-                        // Redirect to the stored redirect URL
-                        return redirect()->to(base_url($redirectUrl));
-                        // } else {
-                        //     // Redirect to a default page if no redirect URL is set
-                        //     return redirect()->to('/pages');
-                    }
-                    // tanpa captha
+                if (!empty($last_id)) {
+                    $UsersLogin->update_data($last_id, $data_login);
+                } else {
+                    $UsersLogin->save_data($data_login);
                 }
+
+                // Cek status aktif
+                if ($user['status'] !== 1) {
+                    session()->setFlashdata('message', [
+                        'type' => 'error',
+                        'text' => 'User Non-Aktif, Silakan hubungi Admin!'
+                    ]);
+                    return redirect()->to('/login');
+                }
+
+                // Cek redirect URL sebelumnya
+                $redirectUrl = session()->get('redirectUrl');
+                if ($redirectUrl) {
+                    session()->remove('redirectUrl');
+                    return redirect()->to(base_url($redirectUrl));
+                }
+
+                // Default redirect ke dashboard
+                return redirect()->to('/pages');
+            } else {
+                // === reCAPTCHA gagal diverifikasi ===
+                session()->setFlashdata('message', [
+                    'type' => 'error',
+                    'text' => 'Verifikasi reCAPTCHA gagal. Silakan coba lagi.'
+                ]);
+                return redirect()->to('/login')->withInput();
             }
         }
-        // echo 'test';
-        $data = [
-            'title' => 'Sign In',
-        ];
 
+        // Tampilkan form login awal
+        $data = ['title' => 'Sign In'];
         return view('dtks/auth/login', $data);
     }
 
@@ -183,6 +296,7 @@ class Auth extends BaseController
             'opr_sch' => $user['opr_sch'],
             'user_image' => $user['user_image'],
             'user_lembaga_id' => $user['user_lembaga_id'],
+            'wilayah_tugas' => $user['wilayah_tugas'],
             'logDtks' => true,
             // 'previousPage' => $previousPage,
         ];

@@ -6,6 +6,19 @@ use CodeIgniter\Config\BaseConfig;
 
 class App extends BaseConfig
 {
+
+	public function __construct()
+	{
+		parent::__construct();
+
+		// Deteksi baseURL otomatis berdasarkan host
+		if (empty($this->baseURL) || $this->baseURL === 'http://localhost:8080/') {
+			$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+			$host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+			$this->baseURL = "{$scheme}://{$host}/";
+		}
+	}
+
 	/**
 	 * --------------------------------------------------------------------------
 	 * Base Site URL
@@ -23,7 +36,13 @@ class App extends BaseConfig
 	 *
 	 * @var string
 	 */
-	public $baseURL = 'http://localhost:8080/';
+	// public string $baseURL = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http")
+	// 	. "://"
+	// 	. $_SERVER['HTTP_HOST']
+	// 	. "/";
+
+	public $baseURL = '';
+	// public $baseURL = 'http://localhost:8080/';
 	// public $baseURL = 'http://localhost/dtks.pakenjeng-tangg/public/';
 
 	/**
@@ -344,7 +363,15 @@ class App extends BaseConfig
 	 *
 	 * @var string|string[]
 	 */
-	public $proxyIPs = '';
+	// public $proxyIPs = '';
+	/**
+	 * List of proxy IPs to trust.
+	 * Empty array means no proxy IPs are trusted.
+	 *
+	 * @var list<string>
+	 */
+	public array $proxyIPs = [];
+
 
 	/**
 	 * --------------------------------------------------------------------------
@@ -464,4 +491,14 @@ class App extends BaseConfig
 	 * @var boolean
 	 */
 	public $CSPEnabled = false;
+
+	/**
+	 * Allowed hostnames for site URLs.
+	 *
+	 * This restricts the Host header values accepted by your application.
+	 * You can leave it empty for localhost development.
+	 *
+	 * @var list<string>
+	 */
+	public array $allowedHostnames = [];
 }

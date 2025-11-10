@@ -190,6 +190,8 @@
         </div>
     </section>
 </div>
+<?= $this->include('dtsen/se/modal_input_desil'); ?>
+
 <!-- /.container-fluid -->
 <div class="viewmodal" style="display: none;"></div>
 <script>
@@ -459,7 +461,7 @@
             // }
         });
     }
-    console.log();
 </script>
+<script src="<?= base_url('assets/js/input_desil.js'); ?>"></script>
 
 <?= $this->endSection(); ?>

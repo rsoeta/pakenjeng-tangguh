@@ -14,11 +14,11 @@ class MenuFilterDtks implements FilterInterface
         // if logDtks is not set in session and uri from tb_menu column tm_status is 0 then redirect to login page
         if (session()->get('logDtks')) {
 
-            $uri = $request->uri->getSegment(1);
+            $uri = $request->getUri()->getSegment(1);
             if ($uri == 'index.php') {
-                $uri = $request->uri->getSegment(2);
+                $uri = $request->getUri()->getSegment(2);
             } else {
-                $uri = $request->uri->getSegment(1);
+                $uri = $request->getUri()->getSegment(1);
             }
             // dd($uri);
             $menu = $MenuModel->getMenu($uri);

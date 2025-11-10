@@ -1,110 +1,179 @@
 <?= $this->extend('dtks/auth/templates/index'); ?>
-
 <?= $this->section('content'); ?>
 
-<div class="container">
-    <!-- Outer Row -->
-    <div class="row justify-content-center">
-        <div class="col-xl-4 col-lg-8 col-md-7">
-            <div class="card o-hidden border-0 shadow-lg" id="elemen">
-                <div class="card-body p-0">
-                    <!-- Nested Row within Card Body -->
-                    <div class="row">
-                        <!-- <div class="col-lg-6 d-none d-lg-block bg-login-image"></div> -->
-                        <div class="col">
-                            <div class="p-2">
-                                <div class="text-center">
-                                    <div class="card-header text-center">
-                                        <a href="<?= base_url(); ?>">
-                                            <img src="<?= base_url('icon-dtks.png'); ?>" alt="Logo" style="height: 50%; width: 50%;">
-                                        </a>
-                                    </div>
-                                    <h2 class="h5 text-gray-900"><?= $title; ?></h2>
-                                </div>
-                                <hr>
-                                <!-- pesan validasi error -->
-                                <?php if (session()->get('success')) : ?>
-                                    <div class="col-12 mb-2" style="background-color: darkorange; border-radius: 3px; padding: 10px;">
-                                        <div class="alert alert-success text-success" role="alert">
-                                            <?= session()->get('success'); ?>
-                                        </div>
-                                    </div>
-                                <?php endif; ?>
-                                <?php if (isset($validation)) : ?>
-                                    <div class="col-12 mb-2" style="background-color: darkorange; border-radius: 3px; padding: 10px;">
-                                        <div class="col">
-                                            <div class="container">
-                                                <?= $validation->listErrors(); ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php endif; ?>
+<!-- render fonts poppins -->
+<link href="<?= base_url('assets/font/Poppins/poppins.css'); ?>" rel="stylesheet">
 
-                                <form action="/requestReset" method="POST">
-                                    <?= csrf_field(); ?>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="fullname">Nama</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="text" class="form-control form-control-sm form-control-user" name="fullname" aria-describedby="emailHelp" placeholder="Masukan Nama Lengkap" value="<?= set_value('fullname'); ?>">
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="nik">NIK</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="numeric" class="form-control form-control-sm form-control-user" name="nik" aria-describedby="emailHelp" placeholder="Masukan No. KTP/NIK" value="<?= set_value('nik'); ?>">
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="nope">No. HP</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="numeric" class="form-control form-control-sm form-control-user" name="nope" aria-describedby="emailHelp" placeholder="Masukan No. Handphone" value="<?= set_value('nope'); ?>">
-                                        </div>
-                                    </div>
-                                    <div class="form-group row nopadding">
-                                        <label class="col-4 col-sm-4 col-form-label" for="email">Email</label>
-                                        <div class="col-8 col-sm-8">
-                                            <input type="email" class="form-control form-control-sm form-control-user" name="email" aria-describedby="emailHelp" placeholder="Masukan Email" value="<?= set_value('email'); ?>">
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="btn btn-danger btn-block">
-                                        Reset Password
-                                    </button>
-                                    <hr>
-                                    <div class="text-center">
-                                        <a class="small" href="<?= base_url('login'); ?>" style="color: black; font-weight:bold">Sudah punya Akun!</a>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+<style>
+    :root {
+        --green: #2EC4B6;
+        --gold: #FFBE0B;
+        --muted: #6b7280;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(180deg, #f1fbfa 0%, #ffffff 50%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.4s, color 0.4s;
+    }
+
+    .card {
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+        border: none;
+    }
+
+    .card-body {
+        padding: 32px;
+    }
+
+    .text-center img {
+        width: 90px;
+        height: 90px;
+    }
+
+    .btn-danger {
+        background: #FF6B6B;
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-weight: 600;
+    }
+
+    .btn-danger:hover {
+        background: #FF5252;
+    }
+
+    .text-center a {
+        color: var(--green);
+        font-weight: 600;
+    }
+
+    /* 🌙 Dark Mode */
+    body.dark-mode {
+        background: #121212 !important;
+        color: #e0e0e0 !important;
+    }
+
+    body.dark-mode .card {
+        background: #1e1e1e !important;
+        color: #ddd !important;
+    }
+
+    body.dark-mode input {
+        background: #2b2b2b !important;
+        color: #eee !important;
+        border-color: #444 !important;
+    }
+
+    body.dark-mode .btn-danger {
+        background: var(--gold) !important;
+        color: #222 !important;
+    }
+
+    #toggleTheme {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        cursor: pointer;
+    }
+
+    #toggleTheme:hover {
+        color: var(--gold);
+    }
+</style>
+
+<button id="toggleTheme" title="Ganti Mode">
+    <i class="fas fa-moon"></i>
+</button>
+
+<div class="col-xl-4 col-lg-8 col-md-7">
+    <div class="card" id="elemen">
+        <div class="card-body text-center">
+            <a href="<?= base_url(); ?>">
+                <img src="<?= base_url('assets/logo/SINDEN-logo.png'); ?>" alt="SINDEN Logo">
+            </a>
+            <h2 class="h5 text-gray-900 mt-3"><?= $title; ?></h2>
+
+            <p class="small text-muted mb-4">Masukkan data akun Anda untuk mereset password.</p>
+
+            <?php if (session()->get('success')) : ?>
+                <div class="alert alert-success"><?= session()->get('success'); ?></div>
+            <?php endif; ?>
+
+            <?php if (isset($validation)) : ?>
+                <div class="alert alert-warning"><?= $validation->listErrors(); ?></div>
+            <?php endif; ?>
+
+            <form action="/requestReset" method="POST">
+                <?= csrf_field(); ?>
+
+                <div class="form-group text-left">
+                    <label for="fullname">Nama Lengkap</label>
+                    <input type="text" class="form-control" name="fullname" placeholder="Masukan Nama Lengkap" value="<?= set_value('fullname'); ?>">
                 </div>
-            </div>
+
+                <div class="form-group text-left">
+                    <label for="nik">NIK</label>
+                    <input type="text" class="form-control" name="nik" placeholder="Masukan No. KTP/NIK" value="<?= set_value('nik'); ?>">
+                </div>
+
+                <div class="form-group text-left">
+                    <label for="nope">No. HP</label>
+                    <input type="text" class="form-control" name="nope" placeholder="Masukan No. Handphone" value="<?= set_value('nope'); ?>">
+                </div>
+
+                <div class="form-group text-left">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" name="email" placeholder="Masukan Email" value="<?= set_value('email'); ?>">
+                </div>
+
+                <button type="submit" class="btn btn-danger btn-block">Reset Password</button>
+
+                <hr>
+                <a class="small" href="<?= base_url('login'); ?>">Sudah punya akun? Masuk</a>
+            </form>
         </div>
     </div>
 </div>
 
 <script>
-    window.setTimeout(function() {
-        $(".alert").fadeTo(500, 0).slideUp(500, function() {
-            $(this).remove();
-        });
-    }, 3000);
+    document.addEventListener("DOMContentLoaded", function() {
+        const body = document.body;
+        const toggleBtn = document.getElementById("toggleTheme");
+        const theme = localStorage.getItem("theme");
 
-    $('document').ready(function() {
-        var pwd1 = $("#password");
-        var pwd2 = $("#password_confirm");
-        $('#checkbox').click(function() {
-            if (pwd1.attr('type') === "password" && pwd2.attr('type') === "password") {
-                pwd1.attr('type', 'text') && pwd2.attr('type', 'text');
+        if (theme === "dark") {
+            body.classList.add("dark-mode");
+            toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+
+        toggleBtn.addEventListener("click", function() {
+            body.classList.toggle("dark-mode");
+            if (body.classList.contains("dark-mode")) {
+                localStorage.setItem("theme", "dark");
+                toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
             } else {
-                pwd1.attr('type', 'password') && pwd2.attr('type', 'password');
+                localStorage.setItem("theme", "light");
+                toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
             }
         });
-
-        if ($('#countdown').length) {
-            start_countdown();
-        }
     });
+
+    window.setTimeout(function() {
+        document.querySelectorAll(".alert").forEach(el => {
+            el.style.transition = "opacity 0.5s";
+            el.style.opacity = "0";
+            setTimeout(() => el.remove(), 500);
+        });
+    }, 3000);
 </script>
 
 <?php if (session()->getFlashdata('message')) : ?>
@@ -113,17 +182,14 @@
             icon: '<?= session()->getFlashdata('message')['type'] ?>',
             title: '<?= session()->getFlashdata('message')['type'] === 'success' ? 'Berhasil' : 'Gagal' ?>',
             text: '<?= session()->getFlashdata('message')['text'] ?>',
-            showConfirmButton: true,
             timer: 3000,
-            width: '300px'
+            showConfirmButton: false
         }).then(() => {
             <?php if (session()->getFlashdata('message')['type'] === 'success') : ?>
-                // Redirect ke Gmail hanya jika pesan sukses
                 window.location.href = 'https://mail.google.com/';
             <?php endif; ?>
         });
     </script>
 <?php endif; ?>
-
 
 <?= $this->endSection(); ?>

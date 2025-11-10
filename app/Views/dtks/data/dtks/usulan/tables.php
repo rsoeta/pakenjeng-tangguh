@@ -33,6 +33,16 @@
                 </div>
             <?php endif; ?>
 
+            <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.6/dist/signature_pad.umd.min.js"></script>
+
+            <button class="btn btn-success mb-1" data-toggle="modal" data-target="#modalDtsenForm">
+                <i class="fas fa-plus-circle"></i> Tambah Usulan DTSEN
+            </button>
+
+            <!-- Import Modal dan JS -->
+            <?= $this->include('dtsen/usulan/modal_dtsen_tabs'); ?>
+            <script src="<?= base_url('assets/js/dtsen_form.js'); ?>"></script>
+
             <div class="row">
                 <div class="col-12">
                     <div class="card card-primary card-tabs">

@@ -164,4 +164,12 @@ class Cache extends BaseConfig
 		'redis'     => RedisHandler::class,
 		'wincache'  => WincacheHandler::class,
 	];
+
+	/**
+	 * Characters that are reserved for future extensions and
+	 * cannot be used in cache item names.
+	 *
+	 * @var string
+	 */
+	public string $reservedCharacters = '{}()/\@:';
 }

@@ -4,25 +4,76 @@ namespace App\Controllers;
 
 use App\Models\Dtks\Usulan22Model;
 use App\Models\WilayahModel;
+use App\Models\SettingsModel;
+use App\Models\ArticlesModel;
 
 class Landing extends BaseController
 {
 	public function __construct()
 	{
 		$this->WilayahModel = new WilayahModel();
+		$this->Usulan22Model = new Usulan22Model();
 	}
 
 	public function index()
 	{
-		$district_id = Profil_Admin()['kode_kec'];
-		$getDesa = $this->WilayahModel->getDesa($district_id);
+		$settingsModel = new SettingsModel();
+		$articlesModel = new ArticlesModel();
 
-		$data = [
-			'title' => 'Landing',
-			'getDesa' => $getDesa,
-		];
-		return view('landing', $data);
+		// Ambil data dari settings database
+		$background = $settingsModel->getSetting('background_image') ?? 'assets/uploads/backgrounds/landing.jpg';
+		$version    = $settingsModel->getSetting('version') ?? '1.0 (SINDEN – 2025)';
+
+		// Wilayah dari database settings
+		$namaDesa      = $settingsModel->getSetting('nama_desa') ?? 'Pasirlangu';
+		$namaKecamatan = $settingsModel->getSetting('nama_kecamatan') ?? 'Pakenjeng';
+		$namaKabupaten = $settingsModel->getSetting('nama_kabupaten') ?? 'Garut';
+
+		// Footer text: bisa diset manual, atau auto-generate dari data wilayah
+		$footerText = $settingsModel->getSetting('footer_text');
+		if (!$footerText) {
+			$footerText = "Dikembangkan oleh Pemerintah Desa {$namaDesa}, Kecamatan {$namaKecamatan}, Kabupaten {$namaKabupaten}. " .
+				"Mendukung implementasi Data Tunggal Sosial dan Ekonomi Nasional (DTSEN).";
+		}
+
+		// Ambil artikel untuk tampil di landing
+		$articles = $articlesModel->orderBy('created_at', 'DESC')->findAll(6);
+
+		// Kirim data ke view
+		return view('landing', [
+			'background' => base_url($background),
+			'footerText' => $footerText,
+			'version'    => $version,
+			'articles'   => $articles,
+			'namaDesa'   => $namaDesa,
+			'namaKecamatan' => $namaKecamatan,
+			'namaKabupaten' => $namaKabupaten
+		]);
 	}
+
+	public function article($slug)
+	{
+		$articlesModel = new ArticlesModel();
+		$article = $articlesModel->where('slug', $slug)->first();
+
+		if (!$article) {
+			throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+		}
+
+		return view('article_detail', ['article' => $article]);
+	}
+
+	// public function index()
+	// {
+	// 	$district_id = Profil_Admin()['kode_kec'];
+	// 	$getDesa = $this->WilayahModel->getDesa($district_id);
+
+	// 	$data = [
+	// 		'title' => 'Landing',
+	// 		'getDesa' => $getDesa,
+	// 	];
+	// 	return view('landing', $data);
+	// }
 
 	public function maintenance()
 	{

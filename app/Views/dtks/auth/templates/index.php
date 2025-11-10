@@ -15,14 +15,14 @@
     <meta property="og:description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="<?= base_url(); ?>" />
-    <meta property="og:image" content="<?= base_url('icon-dtks.png'); ?>" />
+    <meta property="og:image" content="<?= logoApp(); ?>" />
 
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@sutarsarian" />
     <meta name="twitter:creator" content="@sutarsarian" />
     <meta name="twitter:title" content="<?= nameApp(); ?> | <?= $title; ?>" />
     <meta name="twitter:description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng" />
-    <meta name="twitter:image" content="<?= base_url('icon-dtks.png'); ?>" />
+    <meta name="twitter:image" content="<?= logoApp(); ?>" />
 
     <title><?= $title; ?> | <?= nameApp() . ' Kec. ' . ucwords(strtolower(Profil_Admin()['namaKec'])); ?></title>
 
@@ -41,7 +41,7 @@
 
     <link rel="stylesheet" href="<?= base_url('assets/dist/css/authstyle.css'); ?>">
 
-    <link rel="shortcut icon" type="image/x-icon/png" href="<?= base_url('icon-dtks.png'); ?>">
+    <link rel="shortcut icon" type="image/x-icon/png" href="<?= logoApp(); ?>">
 
     <!-- sweetalert -->
     <link rel="stylesheet" href="<?= base_url('assets/plugins/sweetalert2/sweetalert2.min.css'); ?>">
@@ -60,7 +60,7 @@
 
 </head>
 
-<body class="hold-transition login-page">
+<body class="hold-transition login-page dark-mode">
 
     <?= $this->renderSection('content'); ?>
 

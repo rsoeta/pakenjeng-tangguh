@@ -20,9 +20,9 @@ $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultController('Landing');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
-$routes->set404Override(function () {
-	return view('maintenance2');
-});
+// $routes->set404Override(function () {
+// 	return view('maintenance2');
+// });
 $routes->setAutoRoute(true);
 
 /*
@@ -36,18 +36,20 @@ $routes->setAutoRoute(true);
 // $routes->get('/', 'Pages::home');
 
 // AUTH
-// $routes->match(['get', 'post'], 'lockscreen', 'Lockscreen::index', ['filter' => 'authfilterdtks']);
-$routes->match(['get', 'post'], 'login', 'Auth\Auth::login', ['filter' => 'noauthfilterdtks']);
-// $routes->match(['get', 'post'], 'register', 'Auth\Auth::register', ['filter' => 'noauthfilterdtks']);
-$routes->match(['get', 'post'], 'register', 'Auth\Auth::regOpSek', ['filter' => 'noauthfilterdtks']);
-$routes->match(['get', 'post'], 'lupa-password', 'Auth\Auth::lupaPassword', ['filter' => 'noauthfilterdtks']);
-$routes->match(['get', 'post'], 'requestReset', 'Auth\Auth::requestReset', ['filter' => 'noauthfilterdtks']);
+// $routes->match(['GET', 'POST'], 'lockscreen', 'Lockscreen::index', ['filter' => 'authfilterdtks']);
+$routes->match(['GET', 'POST'], 'login', 'Auth\Auth::login', ['filter' => 'noauthfilterdtks']);
+// $routes->match(['GET', 'POST'], 'register', 'Auth\Auth::register', ['filter' => 'noauthfilterdtks']);
+$routes->match(['GET', 'POST'], 'register', 'Auth\Auth::regOpSek', ['filter' => 'noauthfilterdtks']);
+$routes->match(['GET', 'POST'], 'lupa-password', 'Auth\Auth::lupaPassword', ['filter' => 'noauthfilterdtks']);
+$routes->match(['GET', 'POST'], 'requestReset', 'Auth\Auth::requestReset', ['filter' => 'noauthfilterdtks']);
 $routes->get('reset-password', 'Auth\Auth::resetPassword', ['filter' => 'noauthfilterdtks']);
 $routes->post('reset-password', 'Auth\Auth::processResetPassword', ['filter' => 'noauthfilterdtks']);
 
 
 // $routes->get('/', 'Auth\Pages::home', ['filter' => 'noauthfilterdtks']);
 $routes->get('/', 'Landing::index');
+$routes->get('article/(:segment)', 'Landing::article/$1');
+
 $routes->post('cek_usulan', 'Landing::cek_usulan');
 
 $routes->get('dashboard', 'Auth\Pages::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -59,7 +61,7 @@ $routes->get('logout', 'Auth\Auth::logout');
 $routes->get('redirect', 'Auth\Auth::redirectToExternalLink');
 
 // CHATTING
-$routes->match(['get', 'post'], 'chatt', 'Chat::index', ['filter' => 'authfilterdtks']);
+$routes->match(['GET', 'POST'], 'chatt', 'Chat::index', ['filter' => 'authfilterdtks']);
 $routes->get('getMsg', 'Chat::getMsg', ['filter' => 'authfilterdtks']);
 $routes->get('getUserLogged', 'Chat::getUserLogged', ['filter' => 'authfilterdtks']);
 $routes->post('updateLastActivity', 'Chat::updateLastActivity', ['filter' => 'authfilterdtks']);
@@ -68,8 +70,20 @@ $routes->post('updateLastActivity', 'Chat::updateLastActivity', ['filter' => 'au
 $routes->get('bnba', 'Dtks\Bnba::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tabel_bnba', 'Dtks\Bnba::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('detailBnba', 'Dtks\Bnba::formview', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->match(['get', 'post'], 'editBnba', 'Dtks\Bnba::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->match(['GET', 'POST'], 'editBnba', 'Dtks\Bnba::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+// VERIVALI BNBA
+$routes->get('verivalibnba', 'Dtks\VervalBnba::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('tabVerivaliBnba', 'Dtks\VervalBnba::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('tabVerivaliBnba1', 'Dtks\VervalBnba::tabel_data1', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('tabVerivaliBnba2', 'Dtks\VervalBnba::tabel_data2', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('editBnba', 'Dtks\VervalBnba::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('updatebnba', 'Dtks\VervalBnba::ajax_update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('editBnba1', 'Dtks\VervalBnba::formedit1', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('updatebnba1', 'Dtks\VervalBnba::ajax_update1', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('lockBnba', 'Dtks\VervalBnba::lockBnba', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('unlockBnba', 'Dtks\VervalBnba::unlockBnba', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
+// REKAPITULASI PENYALURAN SEMBAKO PKH
 
 // VERVAL PBI
 $routes->get('verval', 'Dtks\VeriVali09::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -99,21 +113,90 @@ $routes->post('dltInactive', 'Dtks\Pbi\Inactive::hapus', ['filter' => 'authfilte
 // USULAN
 $routes->get('usulan', 'Dtks\Usulan22::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tmbUsul', 'Dtks\Usulan22::save', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->get('tambah', 'Dtks\Usulan22::formtambah', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('get_data_penduduk', 'Dtks\Usulan22::get_data_penduduk', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->GET('tambah', 'Dtks\Usulan22::formtambah', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->POST('get_data_penduduk', 'Dtks\Usulan22::get_data_penduduk', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->resource('api_usulan', ['controller' => 'Api\Dtks_Usulan', 'filter' => 'menufilterdtks']);
-$routes->match(['get', 'post'], 'editUsulan', 'Dtks\Usulan22::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->match(['GET', 'POST'], 'editUsulan', 'Dtks\Usulan22::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('viewUsulan', 'Dtks\Usulan22::formview', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updateUsulan', 'Dtks\Usulan22::update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('dltUsul', 'Dtks\Usulan22::delete', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('tabel_data', 'Dtks\Usulan22::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('tabel_padan', 'Dtks\Usulan22::tabel_padan', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->POST('tabel_data', 'Dtks\Usulan22::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->POST('tabel_padan', 'Dtks\Usulan22::tabel_padan', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('expUsulan', 'Dtks\Usulan22::export', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->match(['get', 'post'], 'exportBa', 'Dtks\Usulan22::exportBa', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->match(['GET', 'POST'], 'exportBa', 'Dtks\Usulan22::exportBa', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->get('import_csv', 'Dtks\Usulan22::import_csv', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('importCsvToDb', 'Dtks\Usulan22::importCsvToDb', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tb_csv', 'Dtks\Usulan22::tbCsv', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('downIden', 'Dtks\Usulan22::downIden');
+
+// === SINDEN (Sistem Informasi Data Ekonomi dan Sosial Desa) === //
+
+// USULAN DTSEN
+$routes->group('dtsen-usulan', ['namespace' => 'App\Controllers'], function ($routes) {
+	$routes->post('start', 'DtsenUsulan::start');
+	$routes->post('saveStep', 'DtsenUsulan::saveStep');
+	$routes->get('getPayload/(:num)', 'DtsenUsulan::getPayload/$1');
+	$routes->post('submitFinal', 'DtsenUsulan::submitFinal');
+	$routes->post('dtsen-usulan/cariKK', 'DtsenUsulan::cariKK');
+});
+
+// === DTSEN - Sosial Ekonomi (Data Keluarga / Input Desil) ===
+$routes->group('dtsen-se', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
+	$routes->get('/', 'Dtsen\DtsenSe::index');
+	$routes->post('update-desil', 'Dtsen\DtsenSe::updateDesil');
+	$routes->post('tabel_data', 'Dtsen\DtsenSe::tabel_data');
+});
+
+// USULAN BANSOS
+$routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
+	$routes->get('/', 'UsulanBansos::index');
+	$routes->get('data', 'UsulanBansos::getDataBulanIni');
+	$routes->post('verifikasi/(:num)', 'UsulanBansos::verifikasi/$1');
+	$routes->delete('delete/(:num)', 'UsulanBansos::delete/$1');
+	$routes->get('check-desil', 'UsulanBansos::checkDesil');
+	$routes->get('search-art', 'UsulanBansos::searchArt');
+	$routes->post('save', 'UsulanBansos::save');
+	$routes->post('verifikasi/(:num)', 'UsulanBansos::verifikasi/$1');
+});
+
+// === DTSEN - Pembaruan Data Keluarga ===
+$routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
+	$routes->get('/', 'Dtsen\PembaruanKeluarga::index');
+	$routes->get('detail/(:num)', 'Dtsen\PembaruanKeluarga::detail/$1');
+	$routes->get('tambah', 'Dtsen\PembaruanKeluarga::tambah');  // 🆕 Form tambah keluarga baru
+	$routes->post('tambah', 'Dtsen\PembaruanKeluarga::store');  // 🆕 Simpan draft baru hasil input
+	$routes->post('save-keluarga', 'Dtsen\PembaruanKeluarga::saveKeluarga');
+	$routes->post('save-anggota', 'Dtsen\PembaruanKeluarga::saveAnggota');
+	$routes->post('delete-anggota', 'Dtsen\PembaruanKeluarga::deleteAnggota');
+	$routes->post('save-rumah', 'Dtsen\PembaruanKeluarga::saveRumah');
+	$routes->post('save-aset', 'Dtsen\PembaruanKeluarga::saveAset');
+	$routes->post('save-foto', 'Dtsen\PembaruanKeluarga::saveFoto');
+	$routes->post('apply', 'Dtsen\PembaruanKeluarga::apply');
+
+	$routes->get('get-anggota-detail', 'Dtsen\PembaruanKeluarga::getAnggotaDetail');
+	// 🧍‍♂️ Prefill Data Individu
+	$routes->get('get-anggota-detail/(:num)', 'Dtsen\PembaruanKeluarga::getAnggotaDetail/$1');
+
+	$routes->get('data', 'Dtsen\PembaruanKeluarga::getDataDraft');
+	$routes->get('lanjutkan/(:num)', 'Dtsen\PembaruanKeluarga::lanjutkan/$1');
+	$routes->get('get-anggota-list/(:num)', 'Dtsen\PembaruanKeluarga::getAnggotaList/$1');
+});
+
+
+// 🌍 API Wilayah Lokal (Dropdown berantai untuk DTSEN)
+$routes->group('api/villages', ['namespace' => 'App\Controllers\Api'], function ($routes) {
+	$routes->get('provinces', 'Villages::provinces');
+	$routes->get('regencies/(:any)', 'Villages::regencies/$1');
+	$routes->get('districts/(:any)', 'Villages::districts/$1');
+	$routes->get('villages/(:any)', 'Villages::villages/$1');
+	$routes->get('lookup/(:any)', 'Villages::lookup/$1'); // 👈 untuk prefill
+});
+
+$routes->group('dtsen-usulan', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
+	$routes->get('/', 'Dtsen\DtsenUsulan::index');
+	$routes->post('save', 'Dtsen\DtsenUsulan::save');
+	$routes->get('data', 'Dtsen\DtsenUsulan::getData');
+});
 
 // PPKS
 $routes->get('ppks', 'Dtks\Ppks::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -121,7 +204,7 @@ $routes->post('tmbUsulPpks', 'Dtks\Ppks::save', ['filter' => 'authfilterdtks', '
 $routes->get('tambahPpks', 'Dtks\Ppks::formtambah', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->post('get_data_penduduk', 'Dtks\Ppks::get_data_penduduk', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->resource('api_usulan', ['controller' => 'Api\Dtks_Usulan', 'filter' => 'menufilterdtks']);
-$routes->match(['get', 'post'], 'editPpks', 'Dtks\Ppks::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->match(['GET', 'POST'], 'editPpks', 'Dtks\Ppks::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('viewPpks', 'Dtks\Ppks::formview', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updatePpks', 'Dtks\Ppks::update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('dltPpks', 'Dtks\Ppks::delete', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -129,7 +212,7 @@ $routes->post('tabel_ppks', 'Dtks\Ppks::tabel_data', ['filter' => 'authfilterdtk
 $routes->post('tabel_padan_ppks', 'Dtks\Ppks::tabel_padan', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('exportPpks', 'Dtks\Ppks::export', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('exportPpks1', 'Dtks\Ppks::export1', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-// $routes->match(['get', 'post'], 'exportBa', 'Dtks\Ppks::exportBa', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+// $routes->match(['GET', 'POST'], 'exportBa', 'Dtks\Ppks::exportBa', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->get('import_csv', 'Dtks\Ppks::import_csv', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->post('importCsvToDb', 'Dtks\Ppks::importCsvToDb', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->post('tb_csv', 'Dtks\Ppks::tbCsv', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -143,7 +226,7 @@ $routes->post('getRespondenData', 'Dtks\Famantama::getRespondenData', ['filter' 
 $routes->post('tmbFamantama', 'Dtks\Famantama::save', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->post('get_data_penduduk', 'Dtks\Famantama::get_data_penduduk', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->resource('api_usulan', ['controller' => 'Api\Dtks_Usulan', 'filter' => 'menufilterdtks']);
-$routes->match(['get', 'post'], 'editFamantama', 'Dtks\Famantama::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->match(['GET', 'POST'], 'editFamantama', 'Dtks\Famantama::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('dltFamantama', 'Dtks\Famantama::delete', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updFamantama', 'Dtks\Famantama::update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('viewFamantama', 'Dtks\Famantama::formview', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -151,7 +234,7 @@ $routes->post('tbFamantama', 'Dtks\Famantama::tabel_data', ['filter' => 'authfil
 $routes->post('tbPadanFamantama', 'Dtks\Famantama::tabel_padan', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('exportFamantama', 'Dtks\Famantama::export', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('exportFamantama1', 'Dtks\Famantama::export1', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-// $routes->match(['get', 'post'], 'exportBa', 'Dtks\Famantama::exportBa', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+// $routes->match(['GET', 'POST'], 'exportBa', 'Dtks\Famantama::exportBa', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->get('import_csv', 'Dtks\Famantama::import_csv', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->post('importCsvToDb', 'Dtks\Famantama::importCsvToDb', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 // $routes->post('tb_csv', 'Dtks\Famantama::tbCsv', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -188,20 +271,8 @@ $routes->post('imporVerivaliGeo', 'Dtks\Geotagging::simpanExcel', ['filter' => '
 $routes->post('editGeo', 'Dtks\Geotagging::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updateGeo', 'Dtks\Geotagging::ajax_update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('modGambar', 'Dtks\Geotagging::modGambar', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->match(['get', 'post'], 'exportBaPdtt', 'Dtks\Geotagging::exportBA', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->match(['GET', 'POST'], 'exportBaPdtt', 'Dtks\Geotagging::exportBA', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('exportDataPdtt', 'Dtks\Geotagging::exportExcel', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-
-// VERIVALI BNBA
-$routes->get('verivalibnba', 'Dtks\VervalBnba::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('tabVerivaliBnba', 'Dtks\VervalBnba::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('tabVerivaliBnba1', 'Dtks\VervalBnba::tabel_data1', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('tabVerivaliBnba2', 'Dtks\VervalBnba::tabel_data2', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('editBnba', 'Dtks\VervalBnba::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('updatebnba', 'Dtks\VervalBnba::ajax_update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('editBnba1', 'Dtks\VervalBnba::formedit1', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('updatebnba1', 'Dtks\VervalBnba::ajax_update1', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('lockBnba', 'Dtks\VervalBnba::lockBnba', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('unlockBnba', 'Dtks\VervalBnba::unlockBnba', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 // OPERATOR KIP
 $routes->get('/operatorsch', 'Dtks\Datakip\DataKip::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -221,8 +292,6 @@ $routes->post('upNonKip', 'Dtks\Datakip\NonKIP::update', ['filter' => 'authfilte
 $routes->post('dltNonKip', 'Dtks\Datakip\NonKIP::delete', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('exportNonKip', 'Dtks\Datakip\NonKIP::export', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
-
-
 // OPERATOR BPNT
 $routes->get('bpnt', 'Dtks\BpntGanti::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tabel_bpnt', 'Dtks\BpntGanti::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -240,8 +309,7 @@ $routes->get('tmbKemis', 'Dtks\Dkm\Kemis::formTmb', ['filter' => 'authfilterdtks
 $routes->post('simpanDkm', 'Dtks\Dkm\Kemis::simpan_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updateDkm', 'Dtks\Dkm\Kemis::update_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('dltDkm', 'Dtks\Dkm\Kemis::delete', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->match(['get', 'post'], 'exportDkm', 'Dtks\Dkm\Kemis::exportBA', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-
+$routes->match(['GET', 'POST'], 'exportDkm', 'Dtks\Dkm\Kemis::exportBA', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 // Setting General
 $routes->get('chart_desa', 'Dtks\VeriVali09::chartDesa', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -258,20 +326,20 @@ $routes->get('/verivali09/redaktirovat/(:num)', 'Dtks\VeriVali09::redaktirovat/$
 
 // Setting Users / Hak Akses
 $routes->get('users', 'Dtks\Users::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->match(['get', 'post'], 'user_tambah', 'Dtks\Users::tambah', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->match(['get', 'post'], 'update_status/(:num)/(:num)', 'Dtks\Users::update_status/$1/$2', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->match(['GET', 'POST'], 'user_tambah', 'Dtks\Users::tambah', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->match(['GET', 'POST'], 'update_status/(:num)/(:num)', 'Dtks\Users::update_status/$1/$2', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('hapus', 'Dtks\Users::hapus', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('formview', 'Dtks\Users::formview', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updateDataUser', 'Dtks\Users::updatedata', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 // profil
-$routes->match(['get', 'post'], 'profil_user', 'Profil\Profil_User::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->match(['GET', 'POST'], 'profil_user', 'Profil\Profil_User::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('update_user', 'Profil\Profil_User::update_user', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('submit_lembaga', 'Profil\Profil_User::submit_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('update_lembaga', 'Profil\Profil_User::update_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 // setting web
-$routes->match(['get', 'post'], 'settings', 'Profil\Profil_Web::index', ['filter' => 'authfilterdtks']);
+$routes->match(['GET', 'POST'], 'settings', 'Profil\Profil_Web::index', ['filter' => 'authfilterdtks']);
 $routes->post('update_web_admin', 'Profil\Profil_Web::update_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('submit_web_lembaga', 'Profil\Profil_Web::submit_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('update_web_lembaga', 'Profil\Profil_Web::update_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);

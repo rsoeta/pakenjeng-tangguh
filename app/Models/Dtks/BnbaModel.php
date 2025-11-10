@@ -10,7 +10,36 @@ class BnbaModel extends Model
     protected $primaryKey = 'db_id';
 
     protected $allowedFields = [
-        "db_id_dtks", "db_province", "db_regency", "db_district", "db_village", "db_alamat", "db_dusun", "db_rw", "db_rt", "db_nkk", "db_nik", "db_nama", "db_tgl_lahir", "db_tmp_lahir", "db_jenkel_id", "db_ibu_kandung", "db_shdk_id", "db_status", "db_tgl_kejadian", "db_noreg_kejadian", "db_tb_status", "db_pkh", "db_bpnt", "db_bst", "db_bpnt_ppkm", "db_pbi", "db_creator", "db_created", "db_modifier", "db_modified"
+        "db_id_dtks",
+        "db_province",
+        "db_regency",
+        "db_district",
+        "db_village",
+        "db_alamat",
+        "db_dusun",
+        "db_rw",
+        "db_rt",
+        "db_nkk",
+        "db_nik",
+        "db_nama",
+        "db_tgl_lahir",
+        "db_tmp_lahir",
+        "db_jenkel_id",
+        "db_ibu_kandung",
+        "db_shdk_id",
+        "db_status",
+        "db_tgl_kejadian",
+        "db_noreg_kejadian",
+        "db_tb_status",
+        "db_pkh",
+        "db_bpnt",
+        "db_bst",
+        "db_bpnt_ppkm",
+        "db_pbi",
+        "db_creator",
+        "db_created",
+        "db_modifier",
+        "db_modified"
     ];
 
     protected $useTimestamps = true;
@@ -24,84 +53,53 @@ class BnbaModel extends Model
     var $order = array('db_nkk' => 'asc', 'db_shdk_id' => 'asc');
     var $order1 = array('db_modified' => 'asc');
 
-    function get_datatables($filter1, $filter2, $filter3, $filter4, $filter0)
+    function get_datatables($filter1 = null, $filter2 = null, $filter3 = null, $filter4 = null, $filter0 = null, $filterKepala = null)
     {
-        // desa
-        if ($filter1 == "") {
-            $kondisi_filter1 = "";
-        } else {
-            $kondisi_filter1 = " AND db_village = '$filter1'";
-        }
-        // rw
-        if ($filter2 == "") {
-            $kondisi_filter2 = "";
-        } else {
-            $kondisi_filter2 = " AND db_rw = '$filter2'";
-        }
-        // status
-        if ($filter3 == "") {
-            $kondisi_filter3 = "";
-        } else {
-            $kondisi_filter3 = " AND db_rt = '$filter3'";
-        }
-        // status
-        if ($filter4 == "") {
-            $kondisi_filter4 = "";
-        } else {
-            $kondisi_filter4 = " AND db_shdk_id = '$filter4'";
-        }
-        // status
-        if ($filter0 == "") {
-            $kondisi_filter0 = "";
-        } else {
-            $kondisi_filter0 = " AND db_status = '$filter0'";
+        $db = db_connect();
+        $builder = $db->table('dtks_bnba');
+        $builder->select('dtks_bnba.*, tb_shdk.jenis_shdk, tbl_jenkel.NamaJenKel, dtks_status.jenis_status, dtsen_se.kategori_desil');
+        $builder->join('tb_shdk', 'tb_shdk.id = dtks_bnba.db_shdk_id', 'left');
+        $builder->join('tbl_jenkel', 'tbl_jenkel.IdJenKel = dtks_bnba.db_jenkel_id', 'left');
+        $builder->join('dtks_status', 'dtks_status.id_status = dtks_bnba.db_status', 'left');
+        $builder->join('dtsen_se', 'dtsen_se.id_kk = dtks_bnba.db_id', 'left');
+
+        // === Filter Kondisional ===
+        if (!empty($filter1)) $builder->where('db_village', $filter1);
+        if (!empty($filter2)) $builder->where('db_rw', $filter2);
+        if (!empty($filter3)) $builder->where('db_rt', $filter3);
+        if (!empty($filter4)) $builder->where('db_shdk_id', $filter4);
+        if (!empty($filter0)) $builder->where('db_status', $filter0);
+
+        // 🔸 Tambahan filter hanya Kepala Keluarga
+        if (!empty($filterKepala)) $builder->where('db_shdk_id', 1);
+
+        // === Searching (DataTables default) ===
+        $searchValue = $_POST['search']['value'] ?? null;
+        if (!empty($searchValue)) {
+            $builder->groupStart()
+                ->like('db_nama', $searchValue)
+                ->orLike('db_nik', $searchValue)
+                ->orLike('db_nkk', $searchValue)
+                ->orLike('db_alamat', $searchValue)
+                ->groupEnd();
         }
 
-        // search
-        if ($_POST['search']['value']) {
-            $search = $_POST['search']['value'];
-            $kondisi_search = "(db_nama LIKE '%$search%' OR db_nik LIKE '%$search%' OR db_nkk LIKE '%$search%' OR db_alamat LIKE '%$search%') $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter0";
-        } else {
-            $kondisi_search = "db_id != '' $kondisi_filter1 $kondisi_filter2 $kondisi_filter3 $kondisi_filter4 $kondisi_filter0";
-        }
-
-        // order
+        // === Ordering (DataTables default) ===
         if (isset($_POST['order'])) {
             $result_order = $this->column_order1[$_POST['order']['0']['column']];
             $result_dir = $_POST['order']['0']['dir'];
-        } else if ($this->order1) {
+            $builder->orderBy($result_order, $result_dir);
+        } elseif (!empty($this->order1)) {
             $order = $this->order1;
-            $result_order = key($order);
-            $result_dir = $order[key($order)];
+            $builder->orderBy(key($order), $order[key($order)]);
         }
 
-        // // order
-        // if (isset($_POST['order'])) {
-        //     $result_order = $this->column_order[$_POST['order']['0']['column']];
-        //     $result_dir = $_POST['order']['0']['dir'];
-        // } else if ($this->order) {
-        //     $result_order = key($this->order);
-        //     $result_dir = $this->order[key($this->order)];
-        // }
-
-
-        if ($_POST['length'] != -1);
-        $db = db_connect();
-        $builder = $db->table('dtks_bnba');
-        $query = $builder->select('*')
-            ->join('tb_shdk', 'tb_shdk.id=dtks_bnba.db_shdk_id')
-            ->join('tbl_jenkel', 'tbl_jenkel.IdJenKel=dtks_bnba.db_jenkel_id')
-            ->join('dtks_status', 'dtks_status.id_status=dtks_bnba.db_status')
-            // ->join('ket_verivali', 'ket_verivali.idb_ketvv=individu_data.ket_verivali')
-            ->where($kondisi_search)
-            ->orderBy($result_order, $result_dir)
-            ->limit($_POST['length'], $_POST['start'])
-            ->get();
-        if (!$query) {
-            die($db->getError()); // Tampilkan pesan kesalahan jika terjadi
+        // === Pagination (DataTables default) ===
+        if ($_POST['length'] != -1) {
+            $builder->limit($_POST['length'], $_POST['start']);
         }
-        // var_dump($result_order, $result_dir);
-        // die;
+
+        $query = $builder->get();
         return $query->getResult();
     }
 

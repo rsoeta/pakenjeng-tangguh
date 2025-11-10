@@ -160,7 +160,7 @@ $desa_id = session()->get('kode_desa');
                                     <div class="form-group row nopadding">
                                         <label class="col-4 col-sm-4 col-form-label" for="du_usia">Usia</label>
                                         <div class="col-8 col-sm-8">
-                                            <input type="number" name="du_usia" id="du_usia" class="form-control form-control-sm" value="" readonly>
+                                            <input type="number" name="du_usia" id="du_usia" class="form-control form-control-sm" value="" readonly hidden>
                                             <div class="invalid-feedback errorusia"></div>
                                         </div>
                                     </div>
@@ -346,7 +346,7 @@ $desa_id = session()->get('kode_desa');
                                             </div>
                                         </div>
                                         <div class="form-group row">
-                                            <label class="col-10 col-form-label" for="sk6">Apakah pengeluaran pangan lebih besar (>70%) dari total pengeluaran?</label>
+                                            <label class="col-10 col-form-label" for="sk6">Apakah pengeluaran pangan lebih besar (>50%) dari total pengeluaran?</label>
                                             <div class="col-2">
                                                 <input class="form-check-input" type="checkbox" id="sk6" name="sk6" <?= $sk6 == '1' ? 'checked' : ''; ?> value="1" onchange="tampilkanLabel('sk6', 'label6')" />
                                                 <label for="sk6" id="label6" class="form-check-label"><?= $sk6 == '1' ? 'Ya' : 'Tidak'; ?></label>

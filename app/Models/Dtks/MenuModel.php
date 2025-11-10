@@ -28,7 +28,7 @@ class MenuModel extends Model
     // get uri
     function getUri()
     {
-        $uri = $this->request->uri->getSegment(1);
+        $uri = $this->request->getUri()->getSegment(1);
         // dd($uri);
         return $uri;
     }
