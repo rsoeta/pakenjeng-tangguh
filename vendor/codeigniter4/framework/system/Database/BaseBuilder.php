@@ -16,9 +16,9 @@ namespace CodeIgniter\Database;
 use Closure;
 use CodeIgniter\Database\Exceptions\DatabaseException;
 use CodeIgniter\Database\Exceptions\DataException;
-use CodeIgniter\Exceptions\InvalidArgumentException;
 use CodeIgniter\Traits\ConditionalTrait;
 use Config\Feature;
+use InvalidArgumentException;
 
 /**
  * Class BaseBuilder
@@ -256,7 +256,7 @@ class BaseBuilder
      * Specifies which sql statements
      * support the ignore option.
      *
-     * @var array<string, string>
+     * @var array
      */
     protected $supportedIgnoreStatements = [];
 
@@ -298,7 +298,7 @@ class BaseBuilder
     /**
      * Constructor
      *
-     * @param array|string|TableName $tableName tablename or tablenames with or without aliases
+     * @param array|string $tableName tablename or tablenames with or without aliases
      *
      * Examples of $tableName: `mytable`, `jobs j`, `jobs j, users u`, `['jobs j','users u']`
      *
@@ -315,19 +315,14 @@ class BaseBuilder
          */
         $this->db = $db;
 
-        if ($tableName instanceof TableName) {
-            $this->tableName = $tableName->getTableName();
-            $this->QBFrom[]  = $this->db->escapeIdentifier($tableName);
-            $this->db->addTableAlias($tableName->getAlias());
-        }
         // If it contains `,`, it has multiple tables
-        elseif (is_string($tableName) && ! str_contains($tableName, ',')) {
+        if (is_string($tableName) && ! str_contains($tableName, ',')) {
             $this->tableName = $tableName;  // @TODO remove alias if exists
-            $this->from($tableName);
         } else {
             $this->tableName = '';
-            $this->from($tableName);
         }
+
+        $this->from($tableName);
 
         if ($options !== null && $options !== []) {
             foreach ($options as $key => $value) {
@@ -3019,7 +3014,7 @@ class BaseBuilder
      *
      * @param array|string $table The table to inspect
      *
-     * @return string|null
+     * @return string|void
      */
     protected function trackAliases($table)
     {
@@ -3028,7 +3023,7 @@ class BaseBuilder
                 $this->trackAliases($t);
             }
 
-            return null;
+            return;
         }
 
         // Does the string contain a comma?  If so, we need to separate
@@ -3043,13 +3038,11 @@ class BaseBuilder
             $table = preg_replace('/\s+AS\s+/i', ' ', $table);
 
             // Grab the alias
-            $alias = trim(strrchr($table, ' '));
+            $table = trim(strrchr($table, ' '));
 
             // Store the alias, if it doesn't already exist
-            $this->db->addTableAlias($alias);
+            $this->db->addTableAlias($table);
         }
-
-        return null;
     }
 
     /**
@@ -3380,8 +3373,6 @@ class BaseBuilder
      * Resets the query builder values.  Called by the get() function
      *
      * @param array $qbResetItems An array of fields to reset
-     *
-     * @return void
      */
     protected function resetRun(array $qbResetItems)
     {
@@ -3392,8 +3383,6 @@ class BaseBuilder
 
     /**
      * Resets the query builder values.  Called by the get() function
-     *
-     * @return void
      */
     protected function resetSelect()
     {
@@ -3411,7 +3400,7 @@ class BaseBuilder
             'QBUnion'    => [],
         ]);
 
-        if ($this->db instanceof BaseConnection) {
+        if (! empty($this->db)) {
             $this->db->setAliasedTables([]);
         }
 
@@ -3425,8 +3414,6 @@ class BaseBuilder
      * Resets the query builder "write" values.
      *
      * Called by the insert() update() insertBatch() updateBatch() and delete() functions
-     *
-     * @return void
      */
     protected function resetWrite()
     {

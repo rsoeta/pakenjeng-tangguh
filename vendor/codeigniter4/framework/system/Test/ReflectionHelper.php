@@ -31,7 +31,8 @@ trait ReflectionHelper
      * @param object|string $obj    object or class name
      * @param string        $method method name
      *
-     * @return Closure(mixed ...$args): mixed
+     * @return         Closure
+     * @phpstan-return Closure(mixed ...$args): mixed
      *
      * @throws ReflectionException
      */

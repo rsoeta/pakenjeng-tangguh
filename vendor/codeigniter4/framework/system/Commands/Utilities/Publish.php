@@ -67,24 +67,17 @@ class Publish extends BaseCommand
      *
      * @var array<string, string>
      */
-    protected $options = [
-        '--namespace' => 'The namespace from which to search for files to publish. By default, all namespaces are analysed.',
-    ];
+    protected $options = [];
 
     /**
      * Displays the help for the spark cli script itself.
      */
     public function run(array $params)
     {
-        $directory = $params[0] ?? 'Publishers';
-        $namespace = $params['namespace'] ?? '';
+        $directory = array_shift($params) ?? 'Publishers';
 
-        if ([] === $publishers = Publisher::discover($directory, $namespace)) {
-            if ($namespace === '') {
-                CLI::write(lang('Publisher.publishMissing', [$directory]));
-            } else {
-                CLI::write(lang('Publisher.publishMissingNamespace', [$directory, $namespace]));
-            }
+        if ([] === $publishers = Publisher::discover($directory)) {
+            CLI::write(lang('Publisher.publishMissing', [$directory]));
 
             return;
         }

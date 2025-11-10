@@ -45,14 +45,12 @@ class Logs extends BaseCollector
     /**
      * Our collected data.
      *
-     * @var list<array{level: string, msg: string}>
+     * @var array
      */
     protected $data;
 
     /**
-     * Returns the data of this collector to be formatted in the toolbar.
-     *
-     * @return array{logs: list<array{level: string, msg: string}>}
+     * Returns the data of this collector to be formatted in the toolbar
      */
     public function display(): array
     {
@@ -68,7 +66,7 @@ class Logs extends BaseCollector
     {
         $this->collectLogs();
 
-        return $this->data !== [];
+        return empty($this->data);
     }
 
     /**
@@ -84,18 +82,14 @@ class Logs extends BaseCollector
     /**
      * Ensures the data has been collected.
      *
-     * @return list<array{level: string, msg: string}>
+     * @return array
      */
     protected function collectLogs()
     {
-        if ($this->data !== []) {
+        if (! empty($this->data)) {
             return $this->data;
         }
 
-        $cache = service('logger')->logCache;
-
-        $this->data = $cache ?? [];
-
-        return $this->data;
+        return $this->data = service('logger', true)->logCache ?? [];
     }
 }

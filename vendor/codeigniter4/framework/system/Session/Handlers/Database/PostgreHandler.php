@@ -26,8 +26,6 @@ class PostgreHandler extends DatabaseHandler
 {
     /**
      * Sets SELECT clause
-     *
-     * @return void
      */
     protected function setSelect(BaseBuilder $builder)
     {

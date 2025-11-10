@@ -73,7 +73,13 @@ class FilterCheck extends BaseCommand
      */
     public function run(array $params)
     {
-        if (! $this->checkParams($params)) {
+        $tbody = [];
+        if (! isset($params[0], $params[1])) {
+            CLI::error('You must specify a HTTP verb and a route.');
+            CLI::write('  Usage: ' . $this->usage);
+            CLI::write('Example: filter:check GET /');
+            CLI::write('         filter:check PUT products/1');
+
             return EXIT_ERROR;
         }
 
@@ -101,38 +107,15 @@ class FilterCheck extends BaseCommand
             return EXIT_ERROR;
         }
 
-        $this->showTable($filterCollector, $filters, $method, $route);
-        $this->showFilterClasses($filterCollector, $method, $route);
+        $filters = $this->addRequiredFilters($filterCollector, $filters);
 
-        return EXIT_SUCCESS;
-    }
+        $tbody[] = [
+            strtoupper($method),
+            $route,
+            implode(' ', $filters['before']),
+            implode(' ', $filters['after']),
+        ];
 
-    /**
-     * @param array<int|string, string|null> $params
-     */
-    private function checkParams(array $params): bool
-    {
-        if (! isset($params[0], $params[1])) {
-            CLI::error('You must specify a HTTP verb and a route.');
-            CLI::write('  Usage: ' . $this->usage);
-            CLI::write('Example: filter:check GET /');
-            CLI::write('         filter:check PUT products/1');
-
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * @param array{before: list<string>, after: list<string>} $filters
-     */
-    private function showTable(
-        FilterCollector $filterCollector,
-        array $filters,
-        string $method,
-        string $route,
-    ): void {
         $thead = [
             'Method',
             'Route',
@@ -140,60 +123,33 @@ class FilterCheck extends BaseCommand
             'After Filters',
         ];
 
+        CLI::table($tbody, $thead);
+
+        return EXIT_SUCCESS;
+    }
+
+    private function addRequiredFilters(FilterCollector $filterCollector, array $filters): array
+    {
+        $output = [];
+
         $required = $filterCollector->getRequiredFilters();
 
-        $coloredRequired = $this->colorItems($required);
+        $colored = [];
 
-        $before = array_merge($coloredRequired['before'], $filters['before']);
-        $after  = array_merge($filters['after'], $coloredRequired['after']);
-
-        $tbody   = [];
-        $tbody[] = [
-            strtoupper($method),
-            $route,
-            implode(' ', $before),
-            implode(' ', $after),
-        ];
-
-        CLI::table($tbody, $thead);
-    }
-
-    /**
-     * Color all elements of the array.
-     *
-     * @param array<array-key, mixed> $array
-     *
-     * @return array<array-key, mixed>
-     */
-    private function colorItems(array $array): array
-    {
-        return array_map(function ($item): array|string {
-            if (is_array($item)) {
-                return $this->colorItems($item);
-            }
-
-            return CLI::color($item, 'yellow');
-        }, $array);
-    }
-
-    private function showFilterClasses(
-        FilterCollector $filterCollector,
-        string $method,
-        string $route,
-    ): void {
-        $requiredFilterClasses = $filterCollector->getRequiredFilterClasses();
-        $filterClasses         = $filterCollector->getClasses($method, $route);
-
-        $coloredRequiredFilterClasses = $this->colorItems($requiredFilterClasses);
-
-        $classList = [
-            'before' => array_merge($coloredRequiredFilterClasses['before'], $filterClasses['before']),
-            'after'  => array_merge($filterClasses['after'], $coloredRequiredFilterClasses['after']),
-        ];
-
-        foreach ($classList as $position => $classes) {
-            CLI::write(ucfirst($position) . ' Filter Classes:', 'cyan');
-            CLI::write(implode(' → ', $classes));
+        foreach ($required['before'] as $filter) {
+            $filter    = CLI::color($filter, 'yellow');
+            $colored[] = $filter;
         }
+        $output['before'] = array_merge($colored, $filters['before']);
+
+        $colored = [];
+
+        foreach ($required['after'] as $filter) {
+            $filter    = CLI::color($filter, 'yellow');
+            $colored[] = $filter;
+        }
+        $output['after'] = array_merge($filters['after'], $colored);
+
+        return $output;
     }
 }

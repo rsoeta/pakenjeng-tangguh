@@ -232,7 +232,7 @@ class Language
      * will return the file's contents, otherwise will merge with
      * the existing language lines.
      *
-     * @return list<mixed>|null
+     * @return array|void
      */
     protected function load(string $file, string $locale, bool $return = false)
     {
@@ -265,8 +265,6 @@ class Language
 
         // Merge our string
         $this->language[$locale][$file] = $lang;
-
-        return null;
     }
 
     /**

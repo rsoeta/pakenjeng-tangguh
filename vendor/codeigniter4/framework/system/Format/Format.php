@@ -23,8 +23,19 @@ use Config\Format as FormatConfig;
  */
 class Format
 {
-    public function __construct(protected FormatConfig $config)
+    /**
+     * Configuration instance
+     *
+     * @var FormatConfig
+     */
+    protected $config;
+
+    /**
+     * Constructor.
+     */
+    public function __construct(FormatConfig $config)
     {
+        $this->config = $config;
     }
 
     /**

@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Helpers\Array;
 
-use CodeIgniter\Exceptions\InvalidArgumentException;
+use InvalidArgumentException;
 
 /**
  * @interal This is internal implementation for the framework.

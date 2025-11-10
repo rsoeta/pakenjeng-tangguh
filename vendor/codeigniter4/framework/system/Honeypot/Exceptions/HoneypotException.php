@@ -14,8 +14,9 @@ declare(strict_types=1);
 namespace CodeIgniter\Honeypot\Exceptions;
 
 use CodeIgniter\Exceptions\ConfigException;
+use CodeIgniter\Exceptions\ExceptionInterface;
 
-class HoneypotException extends ConfigException
+class HoneypotException extends ConfigException implements ExceptionInterface
 {
     /**
      * Thrown when the template value of config is empty.

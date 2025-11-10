@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Publisher;
 
-use CodeIgniter\Exceptions\RuntimeException;
+use RuntimeException;
 
 /**
  * Replace Text Content

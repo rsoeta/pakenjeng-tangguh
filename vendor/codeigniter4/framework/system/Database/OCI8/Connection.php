@@ -16,7 +16,6 @@ namespace CodeIgniter\Database\OCI8;
 use CodeIgniter\Database\BaseConnection;
 use CodeIgniter\Database\Exceptions\DatabaseException;
 use CodeIgniter\Database\Query;
-use CodeIgniter\Database\TableName;
 use ErrorException;
 use stdClass;
 
@@ -193,14 +192,9 @@ class Connection extends BaseConnection
             return $this->dataCache['version'];
         }
 
-        if ($this->connID === false) {
-            $this->initialize();
-        }
-
-        if (($versionString = oci_server_version($this->connID)) === false) {
+        if (! $this->connID || ($versionString = oci_server_version($this->connID)) === false) {
             return '';
         }
-
         if (preg_match('#Release\s(\d+(?:\.\d+)+)#', $versionString, $match)) {
             return $this->dataCache['version'] = $match[1];
         }
@@ -290,25 +284,18 @@ class Connection extends BaseConnection
 
     /**
      * Generates a platform-specific query string so that the column names can be fetched.
-     *
-     * @param string|TableName $table
      */
-    protected function _listColumns($table = ''): string
+    protected function _listColumns(string $table = ''): string
     {
-        if ($table instanceof TableName) {
-            $tableName = $this->escape(strtoupper($table->getActualTableName()));
-            $owner     = $this->username;
-        } elseif (str_contains($table, '.')) {
-            sscanf($table, '%[^.].%s', $owner, $tableName);
-            $tableName = $this->escape(strtoupper($this->DBPrefix . $tableName));
+        if (str_contains($table, '.')) {
+            sscanf($table, '%[^.].%s', $owner, $table);
         } else {
-            $owner     = $this->username;
-            $tableName = $this->escape(strtoupper($this->DBPrefix . $table));
+            $owner = $this->username;
         }
 
         return 'SELECT COLUMN_NAME FROM ALL_TAB_COLUMNS
 			WHERE UPPER(OWNER) = ' . $this->escape(strtoupper($owner)) . '
-				AND UPPER(TABLE_NAME) = ' . $tableName;
+				AND UPPER(TABLE_NAME) = ' . $this->escape(strtoupper($this->DBPrefix . $table));
     }
 
     /**

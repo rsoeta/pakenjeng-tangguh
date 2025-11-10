@@ -30,15 +30,13 @@ class MockSession extends Session
      *
      * @var list<Cookie>
      */
-    public array $cookies = [];
+    public $cookies = [];
 
-    public bool $didRegenerate = false;
+    public $didRegenerate = false;
 
     /**
      * Sets the driver as the session handler in PHP.
      * Extracted for easier testing.
-     *
-     * @return void
      */
     protected function setSaveHandler()
     {
@@ -48,8 +46,6 @@ class MockSession extends Session
     /**
      * Starts the session.
      * Extracted for testing reasons.
-     *
-     * @return void
      */
     protected function startSession()
     {
@@ -60,8 +56,6 @@ class MockSession extends Session
     /**
      * Takes care of setting the cookie on the client side.
      * Extracted for testing reasons.
-     *
-     * @return void
      */
     protected function setCookie()
     {
@@ -71,11 +65,6 @@ class MockSession extends Session
         $this->cookies[] = $this->cookie;
     }
 
-    /**
-     * Regenerates the session ID.
-     *
-     * @return void
-     */
     public function regenerate(bool $destroy = false)
     {
         $this->didRegenerate              = true;

@@ -18,16 +18,9 @@ use CodeIgniter\Config\BaseService;
 
 class MockServices extends BaseService
 {
-    /**
-     * @var array<non-empty-string, non-empty-string>
-     */
     public $psr4 = [
         'Tests/Support' => TESTPATH . '_support/',
     ];
-
-    /**
-     * @var array<class-string, string>
-     */
     public $classmap = [];
 
     public function __construct()

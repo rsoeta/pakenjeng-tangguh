@@ -14,9 +14,9 @@ declare(strict_types=1);
 namespace CodeIgniter\Database;
 
 use ArgumentCountError;
+use BadMethodCallException;
 use CodeIgniter\Database\Exceptions\DatabaseException;
 use CodeIgniter\Events\Events;
-use CodeIgniter\Exceptions\BadMethodCallException;
 use ErrorException;
 
 /**
@@ -31,7 +31,8 @@ abstract class BasePreparedQuery implements PreparedQueryInterface
     /**
      * The prepared statement itself.
      *
-     * @var TStatement|null
+     * @var         object|resource|null
+     * @phpstan-var TStatement|null
      */
     protected $statement;
 
@@ -60,7 +61,8 @@ abstract class BasePreparedQuery implements PreparedQueryInterface
     /**
      * A reference to the db connection to use.
      *
-     * @var BaseConnection<TConnection, TResult>
+     * @var         BaseConnection
+     * @phpstan-var BaseConnection<TConnection, TResult>
      */
     protected $db;
 
@@ -110,7 +112,8 @@ abstract class BasePreparedQuery implements PreparedQueryInterface
      * Takes a new set of data and runs it against the currently
      * prepared query. Upon success, will return a Results object.
      *
-     * @return bool|ResultInterface<TConnection, TResult>
+     * @return         bool|ResultInterface
+     * @phpstan-return bool|ResultInterface<TConnection, TResult>
      *
      * @throws DatabaseException
      */
@@ -134,7 +137,9 @@ abstract class BasePreparedQuery implements PreparedQueryInterface
             $query->setDuration($startTime, $startTime);
 
             // This will trigger a rollback if transactions are being used
-            $this->db->handleTransStatus();
+            if ($this->db->transDepth !== 0) {
+                $this->db->transStatus = false;
+            }
 
             if ($this->db->DBDebug) {
                 // We call this function in order to roll-back queries

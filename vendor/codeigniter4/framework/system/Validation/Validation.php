@@ -15,14 +15,16 @@ namespace CodeIgniter\Validation;
 
 use Closure;
 use CodeIgniter\Database\BaseConnection;
-use CodeIgniter\Exceptions\InvalidArgumentException;
-use CodeIgniter\Exceptions\LogicException;
 use CodeIgniter\HTTP\Exceptions\HTTPException;
 use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\Method;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\Validation\Exceptions\ValidationException;
 use CodeIgniter\View\RendererInterface;
+use Config\Validation as ValidationConfig;
+use InvalidArgumentException;
+use LogicException;
+use TypeError;
 
 /**
  * Validator
@@ -95,7 +97,7 @@ class Validation implements ValidationInterface
     /**
      * Our configuration.
      *
-     * @var object{ruleSets: list<class-string>}
+     * @var ValidationConfig
      */
     protected $config;
 
@@ -109,7 +111,7 @@ class Validation implements ValidationInterface
     /**
      * Validation constructor.
      *
-     * @param object{ruleSets: list<class-string>} $config
+     * @param ValidationConfig $config
      */
     public function __construct($config, RendererInterface $view)
     {
@@ -542,12 +544,12 @@ class Validation implements ValidationInterface
      *
      * @return $this
      *
-     * @throws InvalidArgumentException
+     * @throws TypeError
      */
     public function setRule(string $field, ?string $label, $rules, array $errors = [])
     {
         if (! is_array($rules) && ! is_string($rules)) {
-            throw new InvalidArgumentException('$rules must be of type string|array');
+            throw new TypeError('$rules must be of type string|array');
         }
 
         $ruleSet = [
@@ -869,7 +871,7 @@ class Validation implements ValidationInterface
             ARRAY_FILTER_USE_KEY,
         );
 
-        return implode("\n", $errors);
+        return $errors === [] ? '' : implode("\n", $errors);
     }
 
     /**

@@ -13,10 +13,10 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Log;
 
-use CodeIgniter\Exceptions\RuntimeException;
 use CodeIgniter\Log\Exceptions\LogException;
 use CodeIgniter\Log\Handlers\HandlerInterface;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use Stringable;
 use Throwable;
 
@@ -54,11 +54,11 @@ class Logger implements LoggerInterface
     ];
 
     /**
-     * Array of levels to be logged. The rest will be ignored.
+     * Array of levels to be logged.
+     * The rest will be ignored.
+     * Set in Config/logger.php
      *
-     * Set in app/Config/Logger.php
-     *
-     * @var list<string>
+     * @var array
      */
     protected $loggableLevels = [];
 
@@ -86,7 +86,7 @@ class Logger implements LoggerInterface
     /**
      * Caches instances of the handlers.
      *
-     * @var array<class-string<HandlerInterface>, HandlerInterface>
+     * @var array
      */
     protected $handlers = [];
 
@@ -96,14 +96,14 @@ class Logger implements LoggerInterface
      * value is an associative array of configuration
      * items.
      *
-     * @var array<class-string<HandlerInterface>, array<string, int|list<string>|string>>
+     * @var array<class-string, array<string, int|list<string>|string>>
      */
     protected $handlerConfig = [];
 
     /**
      * Caches logging calls for debugbar.
      *
-     * @var list<array{level: string, msg: string}>
+     * @var array
      */
     public $logCache;
 
@@ -123,34 +123,32 @@ class Logger implements LoggerInterface
      */
     public function __construct($config, bool $debug = CI_DEBUG)
     {
-        $loggableLevels = is_array($config->threshold) ? $config->threshold : range(1, (int) $config->threshold);
+        $this->loggableLevels = is_array($config->threshold) ? $config->threshold : range(1, (int) $config->threshold);
 
         // Now convert loggable levels to strings.
         // We only use numbers to make the threshold setting convenient for users.
-        foreach ($loggableLevels as $level) {
-            /** @var false|string $stringLevel */
-            $stringLevel = array_search($level, $this->logLevels, true);
+        if ($this->loggableLevels !== []) {
+            $temp = [];
 
-            if ($stringLevel === false) {
-                continue;
+            foreach ($this->loggableLevels as $level) {
+                $temp[] = array_search((int) $level, $this->logLevels, true);
             }
 
-            $this->loggableLevels[] = $stringLevel;
+            $this->loggableLevels = $temp;
+            unset($temp);
         }
 
-        if (isset($config->dateFormat)) {
-            $this->dateFormat = $config->dateFormat;
-        }
+        $this->dateFormat = $config->dateFormat ?? $this->dateFormat;
 
-        if ($config->handlers === []) {
+        if (! is_array($config->handlers) || $config->handlers === []) {
             throw LogException::forNoHandlers('LoggerConfig');
         }
 
         // Save the handler configuration for later.
         // Instances will be created on demand.
         $this->handlerConfig = $config->handlers;
-        $this->cacheLogs     = $debug;
 
+        $this->cacheLogs = $debug;
         if ($this->cacheLogs) {
             $this->logCache = [];
         }
@@ -158,6 +156,8 @@ class Logger implements LoggerInterface
 
     /**
      * System is unusable.
+     *
+     * @param string $message
      */
     public function emergency(string|Stringable $message, array $context = []): void
     {
@@ -169,6 +169,8 @@ class Logger implements LoggerInterface
      *
      * Example: Entire website down, database unavailable, etc. This should
      * trigger the SMS alerts and wake you up.
+     *
+     * @param string $message
      */
     public function alert(string|Stringable $message, array $context = []): void
     {
@@ -179,6 +181,8 @@ class Logger implements LoggerInterface
      * Critical conditions.
      *
      * Example: Application component unavailable, unexpected exception.
+     *
+     * @param string $message
      */
     public function critical(string|Stringable $message, array $context = []): void
     {
@@ -188,6 +192,8 @@ class Logger implements LoggerInterface
     /**
      * Runtime errors that do not require immediate action but should typically
      * be logged and monitored.
+     *
+     * @param string $message
      */
     public function error(string|Stringable $message, array $context = []): void
     {
@@ -199,6 +205,8 @@ class Logger implements LoggerInterface
      *
      * Example: Use of deprecated APIs, poor use of an API, undesirable things
      * that are not necessarily wrong.
+     *
+     * @param string $message
      */
     public function warning(string|Stringable $message, array $context = []): void
     {
@@ -207,6 +215,8 @@ class Logger implements LoggerInterface
 
     /**
      * Normal but significant events.
+     *
+     * @param string $message
      */
     public function notice(string|Stringable $message, array $context = []): void
     {
@@ -217,6 +227,8 @@ class Logger implements LoggerInterface
      * Interesting events.
      *
      * Example: User logs in, SQL logs.
+     *
+     * @param string $message
      */
     public function info(string|Stringable $message, array $context = []): void
     {
@@ -225,6 +237,8 @@ class Logger implements LoggerInterface
 
     /**
      * Detailed debug information.
+     *
+     * @param string $message
      */
     public function debug(string|Stringable $message, array $context = []): void
     {
@@ -234,7 +248,8 @@ class Logger implements LoggerInterface
     /**
      * Logs with an arbitrary level.
      *
-     * @param mixed $level
+     * @param string $level
+     * @param string $message
      */
     public function log($level, string|Stringable $message, array $context = []): void
     {
@@ -242,18 +257,24 @@ class Logger implements LoggerInterface
             $level = array_search((int) $level, $this->logLevels, true);
         }
 
+        // Is the level a valid level?
         if (! array_key_exists($level, $this->logLevels)) {
             throw LogException::forInvalidLogLevel($level);
         }
 
+        // Does the app want to log this right now?
         if (! in_array($level, $this->loggableLevels, true)) {
             return;
         }
 
+        // Parse our placeholders
         $message = $this->interpolate($message, $context);
 
         if ($this->cacheLogs) {
-            $this->logCache[] = ['level' => $level, 'msg' => $message];
+            $this->logCache[] = [
+                'level' => $level,
+                'msg'   => $message,
+            ];
         }
 
         foreach ($this->handlerConfig as $className => $config) {
@@ -261,13 +282,17 @@ class Logger implements LoggerInterface
                 $this->handlers[$className] = new $className($config);
             }
 
+            /**
+             * @var HandlerInterface $handler
+             */
             $handler = $this->handlers[$className];
 
             if (! $handler->canHandle($level)) {
                 continue;
             }
 
-            // If the handler returns false, then we don't execute any other handlers.
+            // If the handler returns false, then we
+            // don't execute any other handlers.
             if (! $handler->setDateFormat($this->dateFormat)->handle($level, $message)) {
                 break;
             }
@@ -286,8 +311,7 @@ class Logger implements LoggerInterface
      * {file}
      * {line}
      *
-     * @param string|Stringable    $message
-     * @param array<string, mixed> $context
+     * @param string $message
      *
      * @return string
      */
@@ -297,6 +321,7 @@ class Logger implements LoggerInterface
             return print_r($message, true);
         }
 
+        // build a replacement array with braces around the context keys
         $replace = [];
 
         foreach ($context as $key => $val) {
@@ -310,12 +335,13 @@ class Logger implements LoggerInterface
             $replace['{' . $key . '}'] = $val;
         }
 
+        // Add special placeholders
         $replace['{post_vars}'] = '$_POST: ' . print_r($_POST, true);
         $replace['{get_vars}']  = '$_GET: ' . print_r($_GET, true);
         $replace['{env}']       = ENVIRONMENT;
 
         // Allow us to log the file/line that we are logging from
-        if (str_contains($message, '{file}') || str_contains($message, '{line}')) {
+        if (str_contains($message, '{file}')) {
             [$file, $line] = $this->determineFile();
 
             $replace['{file}'] = $file;
@@ -336,6 +362,7 @@ class Logger implements LoggerInterface
             $replace['{session_vars}'] = '$_SESSION: ' . print_r($_SESSION, true);
         }
 
+        // interpolate replacement values into the message and return
         return strtr($message, $replace);
     }
 
@@ -343,8 +370,6 @@ class Logger implements LoggerInterface
      * Determines the file and line that the logging call
      * was made from by analyzing the backtrace.
      * Find the earliest stack frame that is part of our logging system.
-     *
-     * @return array{string, int|string}
      */
     public function determineFile(): array
     {
@@ -361,19 +386,43 @@ class Logger implements LoggerInterface
             'notice',
         ];
 
-        $trace = debug_backtrace(0);
+        // Generate Backtrace info
+        $trace = \debug_backtrace(0);
 
-        $stackFrames = array_reverse($trace);
+        // So we search from the bottom (earliest) of the stack frames
+        $stackFrames = \array_reverse($trace);
 
+        // Find the first reference to a Logger class method
         foreach ($stackFrames as $frame) {
-            if (in_array($frame['function'], $logFunctions, true)) {
+            if (\in_array($frame['function'], $logFunctions, true)) {
                 $file = isset($frame['file']) ? clean_path($frame['file']) : 'unknown';
                 $line = $frame['line'] ?? 'unknown';
 
-                return [$file, $line];
+                return [
+                    $file,
+                    $line,
+                ];
             }
         }
 
-        return ['unknown', 'unknown'];
+        return [
+            'unknown',
+            'unknown',
+        ];
+    }
+
+    /**
+     * Cleans the paths of filenames by replacing APPPATH, SYSTEMPATH, FCPATH
+     * with the actual var. i.e.
+     *
+     *  /var/www/site/app/Controllers/Home.php
+     *      becomes:
+     *  APPPATH/Controllers/Home.php
+     *
+     * @deprecated Use dedicated `clean_path()` function.
+     */
+    protected function cleanFileNames(string $file): string
+    {
+        return clean_path($file);
     }
 }

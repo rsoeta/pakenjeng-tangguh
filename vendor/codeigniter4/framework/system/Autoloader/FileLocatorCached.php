@@ -117,7 +117,7 @@ final class FileLocatorCached implements FileLocatorInterface
     }
 
     /**
-     * @return list<non-empty-string>
+     * @return list<string>
      */
     public function search(string $path, string $ext = 'php', bool $prioritizeApp = true): array
     {

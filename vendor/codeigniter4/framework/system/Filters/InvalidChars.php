@@ -48,11 +48,13 @@ class InvalidChars implements FilterInterface
      * Check invalid characters.
      *
      * @param list<string>|null $arguments
+     *
+     * @return void
      */
     public function before(RequestInterface $request, $arguments = null)
     {
         if (! $request instanceof IncomingRequest) {
-            return null;
+            return;
         }
 
         $data = [
@@ -67,18 +69,17 @@ class InvalidChars implements FilterInterface
             $this->checkEncoding($values);
             $this->checkControl($values);
         }
-
-        return null;
     }
 
     /**
      * We don't have anything to do here.
      *
      * @param list<string>|null $arguments
+     *
+     * @return void
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        return null;
     }
 
     /**

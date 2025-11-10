@@ -182,21 +182,22 @@ class DownloadResponse extends Response
     }
 
     /**
-     * Get Content-Disposition Header string.
+     * get Content-Disposition Header string.
      */
-    private function getContentDisposition(bool $inline = false): string
+    private function getContentDisposition(): string
     {
-        $downloadFilename = $utf8Filename = $this->getDownloadFileName();
-        $disposition      = $inline ? 'inline' : 'attachment';
+        $downloadFilename = $this->getDownloadFileName();
+
+        $utf8Filename = $downloadFilename;
 
         if (strtoupper($this->charset) !== 'UTF-8') {
             $utf8Filename = mb_convert_encoding($downloadFilename, 'UTF-8', $this->charset);
         }
 
-        $result = sprintf('%s; filename="%s"', $disposition, addslashes($downloadFilename));
+        $result = sprintf('attachment; filename="%s"', $downloadFilename);
 
         if ($utf8Filename !== '') {
-            $result .= sprintf('; filename*=UTF-8\'\'%s', rawurlencode($utf8Filename));
+            $result .= '; filename*=UTF-8\'\'' . rawurlencode($utf8Filename);
         }
 
         return $result;
@@ -340,7 +341,7 @@ class DownloadResponse extends Response
      */
     public function inline()
     {
-        $this->setHeader('Content-Disposition', $this->getContentDisposition(true));
+        $this->setHeader('Content-Disposition', 'inline');
 
         return $this;
     }

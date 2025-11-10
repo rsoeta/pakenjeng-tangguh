@@ -61,10 +61,12 @@ interface ResultInterface
      *
      * @template T of object
      *
-     * @param int|string                       $n    The index of the results to return, or column name.
-     * @param 'array'|'object'|class-string<T> $type The type of result object. 'array', 'object' or class name.
+     * @param         int|string                       $n    The index of the results to return, or column name.
+     * @param         string                           $type The type of result object. 'array', 'object' or class name.
+     * @phpstan-param class-string<T>|'array'|'object' $type
      *
-     * @return ($n is string ? float|int|string|null : ($type is 'object' ? stdClass|null : ($type is 'array' ? array|null : T|null)))
+     * @return         array|float|int|object|stdClass|string|null
+     * @phpstan-return ($n is string ? float|int|string|null : ($type is 'object' ? stdClass|null : ($type is 'array' ? array|null : T|null)))
      */
     public function getRow($n = 0, string $type = 'object');
 
@@ -75,10 +77,11 @@ interface ResultInterface
      *
      * @template T of object
      *
-     * @param int             $n         The index of the results to return.
-     * @param class-string<T> $className
+     * @param         int             $n         The index of the results to return.
+     * @phpstan-param class-string<T> $className
      *
-     * @return T|null
+     * @return         object|null
+     * @phpstan-return T|null
      */
     public function getCustomRowObject(int $n, string $className);
 
@@ -167,8 +170,6 @@ interface ResultInterface
 
     /**
      * Frees the current result.
-     *
-     * @return void
      */
     public function freeResult();
 

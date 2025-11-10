@@ -13,19 +13,12 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Test\Mock;
 
-use CodeIgniter\Exceptions\BadMethodCallException;
+use BadMethodCallException;
 use CodeIgniter\View\Table;
 
 class MockTable extends Table
 {
-    /**
-     * Override inaccessible protected method
-     *
-     * @param string      $method
-     * @param list<mixed> $params
-     *
-     * @return mixed
-     */
+    // Override inaccessible protected method
     public function __call($method, $params)
     {
         if (is_callable([$this, '_' . $method])) {

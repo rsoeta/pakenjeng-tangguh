@@ -87,9 +87,7 @@ class Cell
         // Is the output cached?
         $cacheName ??= str_replace(['\\', '/'], '', $class) . $method . md5(serialize($params));
 
-        $output = $this->cache->get($cacheName);
-
-        if (is_string($output) && $output !== '') {
+        if ($output = $this->cache->get($cacheName)) {
             return $output;
         }
 
@@ -118,7 +116,8 @@ class Cell
      * If a string, it should be in the format "key1=value key2=value".
      * It will be split and returned as an array.
      *
-     * @param array<string, string>|float|string|null $params
+     * @param         array<string, string>|string|null       $params
+     * @phpstan-param array<string, string>|string|float|null $params
      *
      * @return array<string, string>
      */

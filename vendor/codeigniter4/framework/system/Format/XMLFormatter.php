@@ -27,9 +27,9 @@ class XMLFormatter implements FormatterInterface
     /**
      * Takes the given data and formats it.
      *
-     * @param array<array-key, mixed>|object|string $data
+     * @param array|bool|float|int|object|string|null $data
      *
-     * @return false|non-empty-string
+     * @return false|string (XML string | false)
      */
     public function format($data)
     {
@@ -56,8 +56,7 @@ class XMLFormatter implements FormatterInterface
      *
      * @see http://www.codexworld.com/convert-array-to-xml-in-php/
      *
-     * @param array<array-key, mixed> $data
-     * @param SimpleXMLElement        $output
+     * @param SimpleXMLElement $output
      *
      * @return void
      */

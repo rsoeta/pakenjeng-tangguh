@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace CodeIgniter\CLI;
 
 use CodeIgniter\CLI\Exceptions\CLIException;
-use CodeIgniter\Exceptions\InvalidArgumentException;
+use InvalidArgumentException;
 use Throwable;
 
 /**
@@ -107,12 +107,12 @@ class CLI
     /**
      * List of array segments.
      *
-     * @var list<string>
+     * @var array
      */
     protected static $segments = [];
 
     /**
-     * @var array<string, string|null>
+     * @var array
      */
     protected static $options = [];
 
@@ -944,8 +944,6 @@ class CLI
 
     /**
      * Returns the raw array of segments found.
-     *
-     * @return list<string>
      */
     public static function getSegments(): array
     {
@@ -973,8 +971,6 @@ class CLI
 
     /**
      * Returns the raw array of options found.
-     *
-     * @return array<string, string|null>
      */
     public static function getOptions(): array
     {

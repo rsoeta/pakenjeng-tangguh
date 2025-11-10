@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace CodeIgniter\Database;
 
 use CodeIgniter\Database\Exceptions\DatabaseException;
-use CodeIgniter\Exceptions\InvalidArgumentException;
-use CodeIgniter\Exceptions\RuntimeException;
+use InvalidArgumentException;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -846,7 +846,8 @@ class Forge
      * @param array|string          $processedFields Processed column definitions
      *                                               or column names to DROP
      *
-     * @return ($alterType is 'DROP' ? string : false|list<string>|null)
+     * @return         false|list<string>|string|null                            SQL string
+     * @phpstan-return ($alterType is 'DROP' ? string : list<string>|false|null)
      */
     protected function _alterTable(string $alterType, string $table, $processedFields)
     {
@@ -983,8 +984,6 @@ class Forge
 
     /**
      * Performs a data type mapping between different databases.
-     *
-     * @return void
      */
     protected function _attributeType(array &$attributes)
     {
@@ -1000,8 +999,6 @@ class Forge
      *        if $attributes['TYPE'] is found in the array
      *    - array(TYPE => UTYPE) will change $field['type'],
      *        from TYPE to UTYPE in case of a match
-     *
-     * @return void
      */
     protected function _attributeUnsigned(array &$attributes, array &$field)
     {
@@ -1033,9 +1030,6 @@ class Forge
         $field['unsigned'] = ($this->unsigned === true) ? ' UNSIGNED' : '';
     }
 
-    /**
-     * @return void
-     */
     protected function _attributeDefault(array &$attributes, array &$field)
     {
         if ($this->default === false) {
@@ -1057,9 +1051,6 @@ class Forge
         }
     }
 
-    /**
-     * @return void
-     */
     protected function _attributeUnique(array &$attributes, array &$field)
     {
         if (! empty($attributes['UNIQUE']) && $attributes['UNIQUE'] === true) {
@@ -1067,9 +1058,6 @@ class Forge
         }
     }
 
-    /**
-     * @return void
-     */
     protected function _attributeAutoIncrement(array &$attributes, array &$field)
     {
         if (! empty($attributes['AUTO_INCREMENT']) && $attributes['AUTO_INCREMENT'] === true
@@ -1266,8 +1254,6 @@ class Forge
 
     /**
      * Resets table creation vars
-     *
-     * @return void
      */
     public function reset()
     {

@@ -14,8 +14,6 @@ declare(strict_types=1);
 namespace CodeIgniter\Test;
 
 use Closure;
-use CodeIgniter\Exceptions\InvalidArgumentException;
-use CodeIgniter\Exceptions\RuntimeException;
 use CodeIgniter\Filters\Exceptions\FilterException;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\Filters\Filters;
@@ -23,6 +21,8 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Router\RouteCollection;
 use Config\Filters as FiltersConfig;
+use InvalidArgumentException;
+use RuntimeException;
 
 /**
  * Filter Test Trait
@@ -120,7 +120,7 @@ trait FilterTestTrait
      * @param FilterInterface|string $filter   The filter instance, class, or alias
      * @param string                 $position "before" or "after"
      *
-     * @return Closure(list<string>|null=): mixed
+     * @phpstan-return Closure(list<string>|null=): mixed
      */
     protected function getFilterCaller($filter, string $position): Closure
     {
@@ -163,8 +163,6 @@ trait FilterTestTrait
 
         if ($position === 'before') {
             return static function (?array $params = null) use ($filterInstances, $request) {
-                $result = null;
-
                 foreach ($filterInstances as $filter) {
                     $result = $filter->before($request, $params);
 
@@ -190,8 +188,6 @@ trait FilterTestTrait
         $response = clone $this->response;
 
         return static function (?array $params = null) use ($filterInstances, $request, $response) {
-            $result = null;
-
             foreach ($filterInstances as $filter) {
                 $result = $filter->after($request, $response, $params);
 
@@ -268,8 +264,6 @@ trait FilterTestTrait
      * @param string $route    The route to test
      * @param string $position "before" or "after"
      * @param string $alias    Alias for the anticipated filter
-     *
-     * @return void
      */
     protected function assertNotFilter(string $route, string $position, string $alias)
     {
@@ -288,8 +282,6 @@ trait FilterTestTrait
      *
      * @param string $route    The route to test
      * @param string $position "before" or "after"
-     *
-     * @return void
      */
     protected function assertHasFilters(string $route, string $position)
     {
@@ -307,8 +299,6 @@ trait FilterTestTrait
      *
      * @param string $route    The route to test
      * @param string $position "before" or "after"
-     *
-     * @return void
      */
     protected function assertNotHasFilters(string $route, string $position)
     {

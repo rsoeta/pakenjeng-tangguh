@@ -14,16 +14,16 @@ declare(strict_types=1);
 namespace CodeIgniter\Autoloader;
 
 use CodeIgniter\Exceptions\ConfigException;
-use CodeIgniter\Exceptions\InvalidArgumentException;
-use CodeIgniter\Exceptions\RuntimeException;
 use Composer\Autoload\ClassLoader;
 use Composer\InstalledVersions;
 use Config\Autoload;
 use Config\Kint as KintConfig;
 use Config\Modules;
-use Kint\Kint;
+use InvalidArgumentException;
+use Kint;
 use Kint\Renderer\CliRenderer;
 use Kint\Renderer\RichRenderer;
+use RuntimeException;
 
 /**
  * An autoloader that uses both PSR4 autoloading, and traditional classmaps.
@@ -67,21 +67,21 @@ class Autoloader
     /**
      * Stores namespaces as key, and path as values.
      *
-     * @var array<non-empty-string, list<non-empty-string>>
+     * @var array<string, list<string>>
      */
     protected $prefixes = [];
 
     /**
      * Stores class name as key, and path as values.
      *
-     * @var array<class-string, non-empty-string>
+     * @var array<class-string, string>
      */
     protected $classmap = [];
 
     /**
      * Stores files as a list.
      *
-     * @var list<non-empty-string>
+     * @var list<string>
      */
     protected $files = [];
 
@@ -89,7 +89,7 @@ class Autoloader
      * Stores helper list.
      * Always load the URL helper, it should be used in most apps.
      *
-     * @var list<non-empty-string>
+     * @var list<string>
      */
     protected $helpers = ['url'];
 
@@ -123,7 +123,7 @@ class Autoloader
             $this->files = $config->files;
         }
 
-        if ($config->helpers !== []) {
+        if (isset($config->helpers)) {
             $this->helpers = [...$this->helpers, ...$config->helpers];
         }
 
@@ -147,35 +147,36 @@ class Autoloader
 
         // Should we load through Composer's namespaces, also?
         if ($modules->discoverInComposer) {
-            $composerPackages = $modules->composerPackages;
-            $this->loadComposerNamespaces($composer, $composerPackages ?? []);
+            // @phpstan-ignore-next-line
+            $this->loadComposerNamespaces($composer, $modules->composerPackages ?? []);
         }
 
         unset($composer);
     }
 
     /**
-     * Register the loader with the SPL autoloader stack
-     * in the following order:
-     *
-     * 1. Classmap loader
-     * 2. PSR-4 autoloader
-     * 3. Non-class files
+     * Register the loader with the SPL autoloader stack.
      *
      * @return void
      */
     public function register()
     {
+        // Register classmap loader for the files in our class map.
         spl_autoload_register($this->loadClassmap(...), true);
+
+        // Register the PSR-4 autoloader.
         spl_autoload_register($this->loadClass(...), true);
 
+        // Load our non-class files
         foreach ($this->files as $file) {
             $this->includeFile($file);
         }
     }
 
     /**
-     * Unregisters the autoloader from the SPL autoload stack.
+     * Unregister autoloader.
+     *
+     * This method is for testing.
      */
     public function unregister(): void
     {
@@ -186,7 +187,7 @@ class Autoloader
     /**
      * Registers namespaces with the autoloader.
      *
-     * @param array<non-empty-string, list<non-empty-string>|non-empty-string>|non-empty-string $namespace
+     * @param array<string, list<string>|string>|string $namespace
      *
      * @return $this
      */
@@ -218,7 +219,8 @@ class Autoloader
      *
      * If a prefix param is set, returns only paths to the given prefix.
      *
-     * @return ($prefix is null ? array<non-empty-string, list<non-empty-string>> : list<non-empty-string>)
+     * @return         array<string, list<string>>|list<string>
+     * @phpstan-return ($prefix is null ? array<string, list<string>> : list<string>)
      */
     public function getNamespace(?string $prefix = null)
     {
@@ -246,8 +248,6 @@ class Autoloader
     /**
      * Load a class using available class mapping.
      *
-     * @param class-string $class The fully qualified class name.
-     *
      * @internal For `spl_autoload_register` use.
      */
     public function loadClassmap(string $class): void
@@ -262,9 +262,9 @@ class Autoloader
     /**
      * Loads the class file for a given class name.
      *
-     * @param class-string $class The fully qualified class name.
-     *
      * @internal For `spl_autoload_register` use.
+     *
+     * @param string $class The fully qualified class name.
      */
     public function loadClass(string $class): void
     {
@@ -274,9 +274,9 @@ class Autoloader
     /**
      * Loads the class file for a given class name.
      *
-     * @param class-string $class The fully qualified class name.
+     * @param string $class The fully-qualified class name
      *
-     * @return false|non-empty-string The mapped file name on success, or boolean false on fail
+     * @return false|string The mapped file name on success, or boolean false on fail
      */
     protected function loadInNamespace(string $class)
     {
@@ -294,20 +294,21 @@ class Autoloader
                     $filePath = $directory . $relativeClassPath . '.php';
                     $filename = $this->includeFile($filePath);
 
-                    if ($filename !== false) {
+                    if ($filename) {
                         return $filename;
                     }
                 }
             }
         }
 
+        // never found a mapped file
         return false;
     }
 
     /**
      * A central way to include a file. Split out primarily for testing purposes.
      *
-     * @return false|non-empty-string The filename on success, false if the file is not loaded
+     * @return false|string The filename on success, false if the file is not loaded
      */
     protected function includeFile(string $file)
     {
@@ -546,7 +547,7 @@ class Autoloader
 
         RichRenderer::$theme  = $config->richTheme;
         RichRenderer::$folder = $config->richFolder;
-
+        RichRenderer::$sort   = $config->richSort;
         if (isset($config->richObjectPlugins) && is_array($config->richObjectPlugins)) {
             RichRenderer::$value_plugins = $config->richObjectPlugins;
         }

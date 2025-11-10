@@ -68,7 +68,7 @@ class Email
     /**
      * Which method to use for sending e-mails.
      *
-     * @var 'mail'|'sendmail'|'smtp'
+     * @var string 'mail', 'sendmail' or 'smtp'
      */
     public $protocol = 'mail';
 
@@ -117,11 +117,9 @@ class Email
     /**
      * SMTP Encryption
      *
-     * * `tls` - will issue a STARTTLS command to the server
-     * * `ssl` - means implicit SSL
-     * * `''` - for connection on port 465
-     *
-     * @var ''|'ssl'|'tls'
+     * @var string '', 'tls' or 'ssl'. 'tls' will issue a STARTTLS command
+     *             to the server. 'ssl' means implicit SSL. Connection on port
+     *             465 should set this to ''.
      */
     public $SMTPCrypto = '';
 
@@ -144,7 +142,7 @@ class Email
     /**
      * Message format.
      *
-     * @var 'html'|'text'
+     * @var string 'text' or 'html'
      */
     public $mailType = 'text';
 
@@ -172,7 +170,7 @@ class Email
     /**
      * X-Priority header value.
      *
-     * @var int<1, 5>
+     * @var int 1-5
      */
     public $priority = 3;
 
@@ -182,7 +180,7 @@ class Email
      *
      * @see http://www.ietf.org/rfc/rfc822.txt
      *
-     * @var "\r\n"|"n"
+     * @var string "\r\n" or "\n"
      */
     public $newline = "\r\n";
 
@@ -197,7 +195,7 @@ class Email
      *
      * @see http://www.ietf.org/rfc/rfc822.txt
      *
-     * @var "\r\n"|"n"
+     * @var string
      */
     public $CRLF = "\r\n";
 
@@ -263,14 +261,14 @@ class Email
     /**
      * SMTP Connection socket placeholder
      *
-     * @var false|resource|null
+     * @var resource|null
      */
     protected $SMTPConnect;
 
     /**
      * Mail encoding
      *
-     * @var '7bit'|'8bit'
+     * @var string '8bit' or '7bit'
      */
     protected $encoding = '8bit';
 
@@ -344,7 +342,7 @@ class Email
      *
      * @see Email::$protocol
      *
-     * @var list<string>
+     * @var array
      */
     protected $protocols = [
         'mail',
@@ -370,7 +368,7 @@ class Email
      *
      * @see Email::$encoding
      *
-     * @var list<string>
+     * @var array
      */
     protected $bitDepths = [
         '7bit',
@@ -382,7 +380,7 @@ class Email
      *
      * Actual values to send with the X-Priority header
      *
-     * @var array<int, string>
+     * @var array
      */
     protected $priorities = [
         1 => '1 (Highest)',
@@ -395,7 +393,7 @@ class Email
     /**
      * mbstring.func_overload flag
      *
-     * @var bool|null
+     * @var bool
      */
     protected static $func_overload;
 
@@ -405,9 +403,8 @@ class Email
     public function __construct($config = null)
     {
         $this->initialize($config);
-
         if (! isset(static::$func_overload)) {
-            static::$func_overload = extension_loaded('mbstring') && ini_get('mbstring.func_overload');
+            static::$func_overload = (extension_loaded('mbstring') && ini_get('mbstring.func_overload'));
         }
     }
 
@@ -416,7 +413,7 @@ class Email
      *
      * @param array|\Config\Email|null $config
      *
-     * @return $this
+     * @return Email
      */
     public function initialize($config)
     {
@@ -447,7 +444,7 @@ class Email
     /**
      * @param bool $clearAttachments
      *
-     * @return $this
+     * @return Email
      */
     public function clear($clearAttachments = false)
     {
@@ -465,7 +462,7 @@ class Email
 
         $this->setHeader('Date', $this->setDate());
 
-        if ($clearAttachments) {
+        if ($clearAttachments !== false) {
             $this->attachments = [];
         }
 
@@ -475,13 +472,13 @@ class Email
     /**
      * @param string      $from
      * @param string      $name
-     * @param string|null $returnPath
+     * @param string|null $returnPath Return-Path
      *
-     * @return $this
+     * @return Email
      */
     public function setFrom($from, $name = '', $returnPath = null)
     {
-        if (preg_match('/\<(.*)\>/', $from, $match) === 1) {
+        if (preg_match('/\<(.*)\>/', $from, $match)) {
             $from = $match[1];
         }
 
@@ -506,8 +503,9 @@ class Email
         }
 
         $this->setHeader('From', $name . ' <' . $from . '>');
-        $returnPath ??= $from;
-
+        if (! isset($returnPath)) {
+            $returnPath = $from;
+        }
         $this->setHeader('Return-Path', '<' . $returnPath . '>');
         $this->tmpArchive['returnPath'] = $returnPath;
 
@@ -518,11 +516,11 @@ class Email
      * @param string $replyto
      * @param string $name
      *
-     * @return $this
+     * @return Email
      */
     public function setReplyTo($replyto, $name = '')
     {
-        if (preg_match('/\<(.*)\>/', $replyto, $match) === 1) {
+        if (preg_match('/\<(.*)\>/', $replyto, $match)) {
             $replyto = $match[1];
         }
 
@@ -551,7 +549,7 @@ class Email
     /**
      * @param array|string $to
      *
-     * @return $this
+     * @return Email
      */
     public function setTo($to)
     {
@@ -574,7 +572,7 @@ class Email
     /**
      * @param string $cc
      *
-     * @return $this
+     * @return Email
      */
     public function setCC($cc)
     {
@@ -599,7 +597,7 @@ class Email
      * @param string $bcc
      * @param string $limit
      *
-     * @return $this
+     * @return Email
      */
     public function setBCC($bcc, $limit = '')
     {
@@ -627,7 +625,7 @@ class Email
     /**
      * @param string $subject
      *
-     * @return $this
+     * @return Email
      */
     public function setSubject($subject)
     {
@@ -642,7 +640,7 @@ class Email
     /**
      * @param string $body
      *
-     * @return $this
+     * @return Email
      */
     public function setMessage($body)
     {
@@ -735,7 +733,7 @@ class Email
      * @param string $header
      * @param string $value
      *
-     * @return $this
+     * @return Email
      */
     public function setHeader($header, $value)
     {
@@ -745,16 +743,14 @@ class Email
     }
 
     /**
-     * @param list<string>|string $email
+     * @param array|string $email
      *
-     * @return list<string>
+     * @return array
      */
     protected function stringToArray($email)
     {
         if (! is_array($email)) {
-            return str_contains($email, ',')
-                ? preg_split('/[\s,]/', $email, -1, PREG_SPLIT_NO_EMPTY)
-                : (array) trim($email);
+            return (str_contains($email, ',')) ? preg_split('/[\s,]/', $email, -1, PREG_SPLIT_NO_EMPTY) : (array) trim($email);
         }
 
         return $email;
@@ -763,7 +759,7 @@ class Email
     /**
      * @param string $str
      *
-     * @return $this
+     * @return Email
      */
     public function setAltMessage($str)
     {
@@ -775,11 +771,11 @@ class Email
     /**
      * @param string $type
      *
-     * @return $this
+     * @return Email
      */
     public function setMailType($type = 'text')
     {
-        $this->mailType = $type === 'html' ? 'html' : 'text';
+        $this->mailType = ($type === 'html') ? 'html' : 'text';
 
         return $this;
     }
@@ -787,7 +783,7 @@ class Email
     /**
      * @param bool $wordWrap
      *
-     * @return $this
+     * @return Email
      */
     public function setWordWrap($wordWrap = true)
     {
@@ -799,7 +795,7 @@ class Email
     /**
      * @param string $protocol
      *
-     * @return $this
+     * @return Email
      */
     public function setProtocol($protocol = 'mail')
     {
@@ -811,7 +807,7 @@ class Email
     /**
      * @param int $n
      *
-     * @return $this
+     * @return Email
      */
     public function setPriority($n = 3)
     {
@@ -823,7 +819,7 @@ class Email
     /**
      * @param string $newline
      *
-     * @return $this
+     * @return Email
      */
     public function setNewline($newline = "\n")
     {
@@ -835,11 +831,11 @@ class Email
     /**
      * @param string $CRLF
      *
-     * @return $this
+     * @return Email
      */
     public function setCRLF($CRLF = "\n")
     {
-        $this->CRLF = ! in_array($CRLF, ["\n", "\r\n", "\r"], true) ? "\n" : $CRLF;
+        $this->CRLF = ($CRLF !== "\n" && $CRLF !== "\r\n" && $CRLF !== "\r") ? "\n" : $CRLF;
 
         return $this;
     }
@@ -894,10 +890,10 @@ class Email
     protected function getContentType()
     {
         if ($this->mailType === 'html') {
-            return $this->attachments === [] ? 'html' : 'html-attach';
+            return empty($this->attachments) ? 'html' : 'html-attach';
         }
 
-        if ($this->mailType === 'text' && $this->attachments !== []) {
+        if ($this->mailType === 'text' && ! empty($this->attachments)) {
             return 'plain-attach';
         }
 
@@ -999,8 +995,8 @@ class Email
      */
     protected function getAltMessage()
     {
-        if ($this->altMessage !== '') {
-            return $this->wordWrap ? $this->wordWrap($this->altMessage, 76) : $this->altMessage;
+        if (! empty($this->altMessage)) {
+            return ($this->wordWrap) ? $this->wordWrap($this->altMessage, 76) : $this->altMessage;
         }
 
         $body = preg_match('/\<body.*?\>(.*)\<\/body\>/si', $this->body, $match) ? $match[1] : $this->body;
@@ -1012,7 +1008,7 @@ class Email
 
         $body = preg_replace('| +|', ' ', $body);
 
-        return $this->wordWrap ? $this->wordWrap($body, 76) : $body;
+        return ($this->wordWrap) ? $this->wordWrap($body, 76) : $body;
     }
 
     /**
@@ -1023,10 +1019,8 @@ class Email
      */
     public function wordWrap($str, $charlim = null)
     {
-        $charlim ??= 0;
-
-        if ($charlim === 0) {
-            $charlim = $this->wrapChars === 0 ? 76 : $this->wrapChars;
+        if (empty($charlim)) {
+            $charlim = empty($this->wrapChars) ? 76 : $this->wrapChars;
         }
 
         if (str_contains($str, "\r")) {
@@ -1274,13 +1268,13 @@ class Email
     }
 
     /**
-     * @param string $type
+     * @param mixed $type
      *
      * @return bool
      */
     protected function attachmentsHaveMultipart($type)
     {
-        foreach ($this->attachments as $attachment) {
+        foreach ($this->attachments as &$attachment) {
             if ($attachment['multipart'] === $type) {
                 return true;
             }
@@ -1308,14 +1302,14 @@ class Email
                 . 'Content-Type: ' . $attachment['type'] . '; name="' . $name . '"' . $this->newline
                 . 'Content-Disposition: ' . $attachment['disposition'] . ';' . $this->newline
                 . 'Content-Transfer-Encoding: base64' . $this->newline
-                . (isset($attachment['cid']) && $attachment['cid'] !== '' ? 'Content-ID: <' . $attachment['cid'] . '>' . $this->newline : '')
+                . (empty($attachment['cid']) ? '' : 'Content-ID: <' . $attachment['cid'] . '>' . $this->newline)
                 . $this->newline
                 . $attachment['content'] . $this->newline;
         }
 
         // $name won't be set if no attachments were appended,
         // and therefore a boundary wouldn't be necessary
-        if (isset($name)) {
+        if (! empty($name)) {
             $body .= '--' . $boundary . '--';
         }
     }
@@ -1695,9 +1689,8 @@ class Email
     protected function spoolEmail()
     {
         $this->unwrapSpecials();
-        $protocol           = $this->getProtocol();
-        $upperFirstProtocol = ucfirst($protocol);
-        $method             = 'sendWith' . $upperFirstProtocol;
+        $protocol = $this->getProtocol();
+        $method   = 'sendWith' . ucfirst($protocol);
 
         try {
             $success = $this->{$method}();
@@ -1707,7 +1700,7 @@ class Email
         }
 
         if (! $success) {
-            $message = lang('Email.sendFailure' . ($protocol === 'mail' ? 'PHPMail' : $upperFirstProtocol));
+            $message = lang('Email.sendFailure' . ($protocol === 'mail' ? 'PHPMail' : ucfirst($protocol)));
 
             log_message('error', 'Email: ' . $message);
             log_message('error', $this->printDebuggerRaw());
@@ -1886,7 +1879,7 @@ class Email
      */
     protected function SMTPConnect()
     {
-        if ($this->isSMTPConnected()) {
+        if (is_resource($this->SMTPConnect)) {
             return true;
         }
 
@@ -1910,7 +1903,7 @@ class Email
             $this->SMTPTimeout,
         );
 
-        if (! $this->isSMTPConnected()) {
+        if (! is_resource($this->SMTPConnect)) {
             $this->setErrorMessage(lang('Email.SMTPError', [$errno . ' ' . $errstr]));
 
             return false;
@@ -2142,16 +2135,12 @@ class Email
      */
     protected function getHostname()
     {
-        $superglobals = service('superglobals');
-
-        $serverName = $superglobals->server('SERVER_NAME');
-        if (! in_array($serverName, [null, ''], true)) {
-            return $serverName;
+        if (isset($_SERVER['SERVER_NAME'])) {
+            return $_SERVER['SERVER_NAME'];
         }
 
-        $serverAddr = $superglobals->server('SERVER_ADDR');
-        if (! in_array($serverAddr, [null, ''], true)) {
-            return '[' . $serverAddr . ']';
+        if (isset($_SERVER['SERVER_ADDR'])) {
+            return '[' . $_SERVER['SERVER_ADDR'] . ']';
         }
 
         $hostname = gethostname();
@@ -2227,7 +2216,7 @@ class Email
 
     public function __destruct()
     {
-        if ($this->isSMTPConnected()) {
+        if (is_resource($this->SMTPConnect)) {
             try {
                 $this->sendCommand('quit');
             } catch (ErrorException $e) {
@@ -2283,17 +2272,5 @@ class Email
         $this->tmpArchive = [];
 
         return $this->archive;
-    }
-
-    /**
-     * Checks if there is an active SMTP connection.
-     *
-     * @return bool True if SMTP connection is established and open, false otherwise
-     */
-    protected function isSMTPConnected(): bool
-    {
-        return $this->SMTPConnect !== null
-            && $this->SMTPConnect !== false
-            && get_debug_type($this->SMTPConnect) !== 'resource (closed)';
     }
 }

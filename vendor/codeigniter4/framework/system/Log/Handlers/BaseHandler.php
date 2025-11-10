@@ -21,7 +21,7 @@ abstract class BaseHandler implements HandlerInterface
     /**
      * Handles
      *
-     * @var list<string>
+     * @var array
      */
     protected $handles;
 
@@ -33,7 +33,7 @@ abstract class BaseHandler implements HandlerInterface
     protected $dateFormat = 'Y-m-d H:i:s';
 
     /**
-     * @param array{handles?: list<string>} $config
+     * Constructor
      */
     public function __construct(array $config)
     {

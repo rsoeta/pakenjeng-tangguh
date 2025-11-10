@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace CodeIgniter\DataCaster\Cast;
 
 use CodeIgniter\Database\BaseConnection;
-use CodeIgniter\Exceptions\InvalidArgumentException;
 use CodeIgniter\I18n\Time;
+use InvalidArgumentException;
 
 /**
  * Class DatetimeCast
@@ -43,7 +43,12 @@ class DatetimeCast extends BaseCast
         /**
          * @see https://www.php.net/manual/en/datetimeimmutable.createfromformat.php#datetimeimmutable.createfromformat.parameters
          */
-        $format = self::getDateTimeFormat($params, $helper);
+        $format = match ($params[0] ?? '') {
+            ''      => $helper->dateFormat['datetime'],
+            'ms'    => $helper->dateFormat['datetime-ms'],
+            'us'    => $helper->dateFormat['datetime-us'],
+            default => throw new InvalidArgumentException('Invalid parameter: ' . $params[0]),
+        };
 
         return Time::createFromFormat($format, $value);
     }
@@ -57,29 +62,6 @@ class DatetimeCast extends BaseCast
             self::invalidTypeValueError($value);
         }
 
-        if (! $helper instanceof BaseConnection) {
-            $message = 'The parameter $helper must be BaseConnection.';
-
-            throw new InvalidArgumentException($message);
-        }
-
-        $format = self::getDateTimeFormat($params, $helper);
-
-        return $value->format($format);
-    }
-
-    /**
-     * Gets DateTime format from the DB connection.
-     *
-     * @param list<string> $params Additional param
-     */
-    protected static function getDateTimeFormat(array $params, BaseConnection $db): string
-    {
-        return match ($params[0] ?? '') {
-            ''      => $db->dateFormat['datetime'],
-            'ms'    => $db->dateFormat['datetime-ms'],
-            'us'    => $db->dateFormat['datetime-us'],
-            default => throw new InvalidArgumentException('Invalid parameter: ' . $params[0]),
-        };
+        return (string) $value;
     }
 }

@@ -20,16 +20,16 @@ trait ConditionalTrait
      *
      * @template TWhen of mixed
      *
-     * @param TWhen                        $condition
-     * @param callable(self, TWhen): mixed $callback
-     * @param (callable(self): mixed)|null $defaultCallback
-     * @param mixed                        $condition
+     * @phpstan-param TWhen                                            $condition
+     * @phpstan-param callable(self, TWhen): mixed                     $callback
+     * @phpstan-param (callable(self): mixed)|null                     $defaultCallback
+     * @param         array|bool|float|int|object|resource|string|null $condition
      *
      * @return $this
      */
     public function when($condition, callable $callback, ?callable $defaultCallback = null): self
     {
-        if ((bool) $condition) {
+        if ($condition !== '' && $condition !== false && $condition !== null) {
             $callback($this, $condition);
         } elseif ($defaultCallback !== null) {
             $defaultCallback($this);
@@ -43,16 +43,16 @@ trait ConditionalTrait
      *
      * @template TWhenNot of mixed
      *
-     * @param TWhenNot                        $condition
-     * @param callable(self, TWhenNot): mixed $callback
-     * @param (callable(self): mixed)|null    $defaultCallback
-     * @param mixed                           $condition
+     * @phpstan-param TWhenNot                                         $condition
+     * @phpstan-param callable(self, TWhenNot): mixed                  $callback
+     * @phpstan-param (callable(self): mixed)|null                     $defaultCallback
+     * @param         array|bool|float|int|object|resource|string|null $condition
      *
      * @return $this
      */
     public function whenNot($condition, callable $callback, ?callable $defaultCallback = null): self
     {
-        if (! (bool) $condition) {
+        if ($condition === '' || $condition === null || $condition === false || $condition === '0') {
             $callback($this, $condition);
         } elseif ($defaultCallback !== null) {
             $defaultCallback($this);

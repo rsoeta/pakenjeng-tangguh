@@ -282,21 +282,22 @@ trait GeneratorTrait
         return $namespace . $directoryString . str_replace('/', '\\', $class);
     }
 
+    /**
+     * Normalize input classname.
+     */
     private function normalizeInputClassName(): string
     {
         // Gets the class name from input.
         $class = $this->params[0] ?? CLI::getSegment(2);
 
         if ($class === null && $this->hasClassName) {
-            $nameField = $this->classNameLang !== ''
+            // @codeCoverageIgnoreStart
+            $nameLang = $this->classNameLang !== ''
                 ? $this->classNameLang
                 : 'CLI.generator.className.default';
-            $class = CLI::prompt(lang($nameField), null, 'required');
-
-            // Reassign the class name to the params array in case
-            // the class name is requested again
-            $this->params[0] = $class;
+            $class = CLI::prompt(lang($nameLang), null, 'required');
             CLI::newLine();
+            // @codeCoverageIgnoreEnd
         }
 
         helper('inflector');

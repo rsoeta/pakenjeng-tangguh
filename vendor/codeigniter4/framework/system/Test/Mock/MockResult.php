@@ -31,8 +31,6 @@ class MockResult extends BaseResult
 
     /**
      * Generates an array of column names in the result set.
-     *
-     * @return array{}
      */
     public function getFieldNames(): array
     {
@@ -41,8 +39,6 @@ class MockResult extends BaseResult
 
     /**
      * Generates an array of objects representing field meta-data.
-     *
-     * @return array{}
      */
     public function getFieldData(): array
     {
@@ -77,7 +73,7 @@ class MockResult extends BaseResult
      *
      * Overridden by driver classes.
      *
-     * @return array{}
+     * @return mixed
      */
     protected function fetchAssoc()
     {
@@ -87,11 +83,13 @@ class MockResult extends BaseResult
     /**
      * Returns the result set as an object.
      *
-     * @param class-string $className
+     * Overridden by child classes.
      *
-     * @return object
+     * @param string $className
+     *
+     * @return object|stdClass
      */
-    protected function fetchObject($className = stdClass::class)
+    protected function fetchObject($className = 'stdClass')
     {
         return new $className();
     }

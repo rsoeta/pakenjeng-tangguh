@@ -15,69 +15,11 @@ declare(strict_types=1);
 
 if (! function_exists('sanitize_filename')) {
     /**
-     * Sanitize Filename
-     *
-     * Tries to sanitize filenames in order to prevent directory traversal attempts
-     * and other security threats, which is particularly useful for files that
-     * were supplied via user input.
-     *
-     * If it is acceptable for the user input to include relative paths,
-     * e.g. file/in/some/approved/folder.txt, you can set the second optional
-     * parameter, $relativePath to TRUE.
-     *
-     * @param string $filename     Input file name
-     * @param bool   $relativePath Whether to preserve paths
+     * Sanitize a filename to use in a URI.
      */
-    function sanitize_filename(string $filename, bool $relativePath = false): string
+    function sanitize_filename(string $filename): string
     {
-        // List of sanitized filename strings
-        $bad = [
-            '../',
-            '<!--',
-            '-->',
-            '<',
-            '>',
-            "'",
-            '"',
-            '&',
-            '$',
-            '#',
-            '{',
-            '}',
-            '[',
-            ']',
-            '=',
-            ';',
-            '?',
-            '%20',
-            '%22',
-            '%3c',
-            '%253c',
-            '%3e',
-            '%0e',
-            '%28',
-            '%29',
-            '%2528',
-            '%26',
-            '%24',
-            '%3f',
-            '%3b',
-            '%3d',
-        ];
-
-        if (! $relativePath) {
-            $bad[] = './';
-            $bad[] = '/';
-        }
-
-        $filename = remove_invisible_characters($filename, false);
-
-        do {
-            $old      = $filename;
-            $filename = str_replace($bad, '', $filename);
-        } while ($old !== $filename);
-
-        return stripslashes($filename);
+        return service('security')->sanitizeFilename($filename);
     }
 }
 

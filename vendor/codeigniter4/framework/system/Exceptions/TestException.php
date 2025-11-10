@@ -14,9 +14,9 @@ declare(strict_types=1);
 namespace CodeIgniter\Exceptions;
 
 /**
- * Exception thrown when there is an error with the test code.
+ * Exception for automatic logging.
  */
-class TestException extends LogicException
+class TestException extends CriticalError
 {
     use DebugTraceableTrait;
 

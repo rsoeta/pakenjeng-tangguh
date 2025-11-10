@@ -1,0 +1,218 @@
+[10-Nov-2025 10:32:12 UTC] PHP Warning:  require(/home/whcyoyzp/repositories/sinden/app/Config/../../vendor/codeigniter4/framework/system/Boot.php): Failed to open stream: No such file or directory in /home/whcyoyzp/repositories/sinden/spark on line 85
+[10-Nov-2025 10:32:12 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/whcyoyzp/repositories/sinden/app/Config/../../vendor/codeigniter4/framework/system/Boot.php' (include_path='.:/opt/alt/php81/usr/share/pear:/opt/alt/php81/usr/share/php:/usr/share/pear:/usr/share/php') in /home/whcyoyzp/repositories/sinden/spark:85
+Stack trace:
+#0 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/spark on line 85
+[10-Nov-2025 12:29:47 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 12:29:47 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 12:29:47 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(10): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 12:34:11 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 12:34:11 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 12:34:11 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(10): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 12:47:33 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 12:47:33 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 12:47:33 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(10): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:00:19 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:00:19 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:00:19 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(10): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:00:21 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:00:21 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:00:21 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(10): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:00:22 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:00:22 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:00:22 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(10): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:00:23 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:00:23 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:00:23 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(10): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:05:28 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:05:28 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:05:28 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(10): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:06:13 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:06:13 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:06:13 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(10): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:22:02 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:22:02 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:22:02 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(10): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:22:09 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:22:09 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:22:09 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(10): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:22:17 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:22:17 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:22:17 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(10): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:23:09 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:23:09 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:23:09 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(10): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:23:12 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:23:12 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:23:12 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(10): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:23:32 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:23:32 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:23:32 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(10): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:25:19 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:25:19 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:25:19 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(40): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:25:27 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:25:27 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:25:27 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(40): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:26:01 UTC] PHP Fatal error:  Uncaught Error: Class "Config\Paths" not found in /home/whcyoyzp/repositories/sinden/public/index.php:33
+Stack trace:
+#0 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/public/index.php on line 33
+[10-Nov-2025 13:27:12 UTC] PHP Fatal error:  Uncaught Error: Class "Config\Paths" not found in /home/whcyoyzp/repositories/sinden/public/index.php:33
+Stack trace:
+#0 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/public/index.php on line 33
+[10-Nov-2025 13:27:47 UTC] PHP Fatal error:  Uncaught Error: Class "Config\Paths" not found in /home/whcyoyzp/repositories/sinden/public/index.php:33
+Stack trace:
+#0 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/public/index.php on line 33
+[10-Nov-2025 13:29:20 UTC] PHP Fatal error:  Uncaught Error: Class "Config\Paths" not found in /home/whcyoyzp/repositories/sinden/public/index.php:33
+Stack trace:
+#0 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/public/index.php on line 33
+[10-Nov-2025 13:29:48 UTC] PHP Fatal error:  Uncaught Error: Class "Config\Paths" not found in /home/whcyoyzp/repositories/sinden/public/index.php:33
+Stack trace:
+#0 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/public/index.php on line 33
+[10-Nov-2025 13:29:49 UTC] PHP Fatal error:  Uncaught Error: Class "Config\Paths" not found in /home/whcyoyzp/repositories/sinden/public/index.php:33
+Stack trace:
+#0 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/public/index.php on line 33
+[10-Nov-2025 13:29:50 UTC] PHP Fatal error:  Uncaught Error: Class "Config\Paths" not found in /home/whcyoyzp/repositories/sinden/public/index.php:33
+Stack trace:
+#0 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/public/index.php on line 33
+[10-Nov-2025 13:31:08 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:31:11 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:31:12 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:31:12 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:31:13 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:31:59 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:34:51 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:35:10 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:35:10 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:35:11 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:35:11 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:43:49 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:44:58 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:44:59 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:45:00 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:45:06 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:45:28 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:45:30 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:45:59 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:46:21 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:46:53 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:46:54 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:46:55 UTC] PHP Fatal error:  strict_types declaration must be the very first statement in the script in /home/whcyoyzp/repositories/sinden/public/index.php on line 5
+[10-Nov-2025 13:50:19 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:50:19 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:50:19 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(7): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:52:21 UTC] PHP Warning:  Undefined variable $paths in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:52:21 UTC] PHP Warning:  Attempt to read property "appDirectory" on null in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:52:21 UTC] PHP Fatal error:  Uncaught TypeError: rtrim(): Argument #1 ($string) must be of type string, null given in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php:47
+Stack trace:
+#0 /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php(47): rtrim()
+#1 /home/whcyoyzp/repositories/sinden/public/index.php(7): require('/home/whcyoyzp/...')
+#2 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/vendor/codeigniter4/framework/system/bootstrap.php on line 47
+[10-Nov-2025 13:55:42 UTC] PHP Warning:  require(/home/whcyoyzp/repositories/sinden/app/Config/../../vendor/codeigniter4/framework/system/Boot.php): Failed to open stream: No such file or directory in /home/whcyoyzp/repositories/sinden/spark on line 85
+[10-Nov-2025 13:55:42 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/whcyoyzp/repositories/sinden/app/Config/../../vendor/codeigniter4/framework/system/Boot.php' (include_path='.:/opt/alt/php81/usr/share/pear:/opt/alt/php81/usr/share/php:/usr/share/pear:/usr/share/php') in /home/whcyoyzp/repositories/sinden/spark:85
+Stack trace:
+#0 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/spark on line 85
+[10-Nov-2025 13:56:16 UTC] PHP Warning:  require(/home/whcyoyzp/repositories/sinden/public/../vendor/codeigniter4/framework/system/bootstrap.php): Failed to open stream: No such file or directory in /home/whcyoyzp/repositories/sinden/public/index.php on line 7
+[10-Nov-2025 13:56:16 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/whcyoyzp/repositories/sinden/public/../vendor/codeigniter4/framework/system/bootstrap.php' (include_path='.:/opt/alt/php81/usr/share/pear:/opt/alt/php81/usr/share/php:/usr/share/pear:/usr/share/php') in /home/whcyoyzp/repositories/sinden/public/index.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/whcyoyzp/repositories/sinden/public/index.php on line 7

@@ -20,25 +20,16 @@ class MockResourcePresenter extends ResourcePresenter
 {
     use ResponseTrait;
 
-    /**
-     * @return object|null
-     */
     public function getModel()
     {
         return $this->model;
     }
 
-    /**
-     * @return class-string|null
-     */
     public function getModelName()
     {
         return $this->modelName;
     }
 
-    /**
-     * @return 'json'|'xml'|null
-     */
     public function getFormat()
     {
         return $this->format;

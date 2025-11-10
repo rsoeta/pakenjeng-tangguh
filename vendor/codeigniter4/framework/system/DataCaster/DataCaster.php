@@ -26,7 +26,7 @@ use CodeIgniter\DataCaster\Cast\TimestampCast;
 use CodeIgniter\DataCaster\Cast\URICast;
 use CodeIgniter\Entity\Cast\CastInterface as EntityCastInterface;
 use CodeIgniter\Entity\Exceptions\CastException;
-use CodeIgniter\Exceptions\InvalidArgumentException;
+use InvalidArgumentException;
 
 final class DataCaster
 {
@@ -113,9 +113,10 @@ final class DataCaster
      * Add ? at the beginning of the type (i.e. ?string) to get `null`
      * instead of casting $value when $value is null.
      *
-     * @param mixed       $value  The value to convert
-     * @param string      $field  The field name
-     * @param 'get'|'set' $method Allowed to "get" and "set"
+     * @param         mixed       $value  The value to convert
+     * @param         string      $field  The field name
+     * @param         string      $method Allowed to "get" and "set"
+     * @phpstan-param 'get'|'set' $method
      */
     public function castAs(mixed $value, string $field, string $method = 'get'): mixed
     {

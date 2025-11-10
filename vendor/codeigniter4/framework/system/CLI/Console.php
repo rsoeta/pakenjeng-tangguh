@@ -38,13 +38,14 @@ class Console
         $appConfig = config(App::class);
         Services::createRequest($appConfig, true);
         // Load Routes
-        service('routes')->loadRoutes();
+        Services::routes()->loadRoutes();
 
+        $runner  = Services::commands();
         $params  = array_merge(CLI::getSegments(), CLI::getOptions());
         $params  = $this->parseParamsForHelpOption($params);
         $command = array_shift($params) ?? 'list';
 
-        return service('commands')->run($command, $params);
+        return $runner->run($command, $params);
     }
 
     /**
@@ -59,9 +60,10 @@ class Console
         }
 
         CLI::write(sprintf(
-            'CodeIgniter v%s Command Line Tool - Server Time: %s',
+            'CodeIgniter v%s Command Line Tool - Server Time: %s UTC%s',
             CodeIgniter::CI_VERSION,
-            date('Y-m-d H:i:s \\U\\T\\CP'),
+            date('Y-m-d H:i:s'),
+            date('P'),
         ), 'green');
         CLI::newLine();
     }
@@ -73,8 +75,6 @@ class Console
      * If present, it will be found as `['help' => null]`.
      * We'll remove that as an option from `$params` and
      * unshift it as argument instead.
-     *
-     * @param array<int|string, string|null> $params
      */
     private function parseParamsForHelpOption(array $params): array
     {

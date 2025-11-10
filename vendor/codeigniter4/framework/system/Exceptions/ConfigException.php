@@ -14,10 +14,9 @@ declare(strict_types=1);
 namespace CodeIgniter\Exceptions;
 
 /**
- * Exception thrown if the value of the Config class is invalid or the type is
- * incorrect.
+ * Exception for automatic logging.
  */
-class ConfigException extends RuntimeException implements HasExitCodeInterface
+class ConfigException extends CriticalError implements HasExitCodeInterface
 {
     use DebugTraceableTrait;
 

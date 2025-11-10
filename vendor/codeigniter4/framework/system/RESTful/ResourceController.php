@@ -106,7 +106,8 @@ class ResourceController extends BaseResource
     /**
      * Set/change the expected response representation for returned objects
      *
-     * @param 'json'|'xml' $format Response format
+     * @param         string       $format Response format
+     * @phpstan-param 'json'|'xml' $format
      *
      * @return void
      */

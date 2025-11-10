@@ -13,11 +13,11 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Router\Exceptions;
 
-use CodeIgniter\Exceptions\RuntimeException;
+use RuntimeException;
 
 /**
  * @internal
  */
-final class MethodNotFoundException extends RuntimeException implements ExceptionInterface
+final class MethodNotFoundException extends RuntimeException
 {
 }

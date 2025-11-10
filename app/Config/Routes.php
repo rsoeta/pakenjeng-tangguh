@@ -20,9 +20,9 @@ $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultController('Landing');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
-// $routes->set404Override(function () {
-// 	return view('maintenance2');
-// });
+$routes->set404Override(function () {
+    return view('maintenance2');
+});
 $routes->setAutoRoute(true);
 
 /*

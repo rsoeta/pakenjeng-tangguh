@@ -75,10 +75,8 @@ final class ExceptionHandler extends BaseExceptionHandler implements ExceptionHa
                 );
             }
 
-            // Handles non-HTML requests.
             if (! str_contains($request->getHeaderLine('accept'), 'text/html')) {
-                // If display_errors is enabled, shows the error details.
-                $data = $this->isDisplayErrorsEnabled()
+                $data = (ENVIRONMENT === 'development' || ENVIRONMENT === 'testing')
                     ? $this->collectVars($exception, $statusCode)
                     : '';
 
@@ -136,8 +134,13 @@ final class ExceptionHandler extends BaseExceptionHandler implements ExceptionHa
         // Production environments should have a custom exception file.
         $view = 'production.php';
 
-        if ($this->isDisplayErrorsEnabled()) {
-            // If display_errors is enabled, shows the error details.
+        if (
+            in_array(
+                strtolower(ini_get('display_errors')),
+                ['1', 'true', 'on', 'yes'],
+                true,
+            )
+        ) {
             $view = 'error_exception.php';
         }
 
@@ -154,14 +157,5 @@ final class ExceptionHandler extends BaseExceptionHandler implements ExceptionHa
         }
 
         return $view;
-    }
-
-    private function isDisplayErrorsEnabled(): bool
-    {
-        return in_array(
-            strtolower(ini_get('display_errors')),
-            ['1', 'true', 'on', 'yes'],
-            true,
-        );
     }
 }

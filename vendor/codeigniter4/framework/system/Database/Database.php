@@ -15,7 +15,7 @@ namespace CodeIgniter\Database;
 
 use CodeIgniter\Exceptions\ConfigException;
 use CodeIgniter\Exceptions\CriticalError;
-use CodeIgniter\Exceptions\InvalidArgumentException;
+use InvalidArgumentException;
 
 /**
  * Database Connection Factory

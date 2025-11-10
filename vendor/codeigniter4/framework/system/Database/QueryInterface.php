@@ -26,7 +26,7 @@ interface QueryInterface
      *
      * @param mixed $binds
      *
-     * @return $this
+     * @return mixed
      */
     public function setQuery(string $sql, $binds = null, bool $setEscape = true);
 
@@ -34,7 +34,7 @@ interface QueryInterface
      * Returns the final, processed query string after binding, etal
      * has been performed.
      *
-     * @return string
+     * @return mixed
      */
     public function getQuery();
 
@@ -43,7 +43,7 @@ interface QueryInterface
      * for it's start and end values. If no end value is present, will
      * use the current time to determine total duration.
      *
-     * @return $this
+     * @return mixed
      */
     public function setDuration(float $start, ?float $end = null);
 
@@ -57,8 +57,6 @@ interface QueryInterface
 
     /**
      * Stores the error description that happened for this query.
-     *
-     * @return $this
      */
     public function setError(int $code, string $error);
 
@@ -85,7 +83,7 @@ interface QueryInterface
     /**
      * Swaps out one table prefix for a new one.
      *
-     * @return $this
+     * @return mixed
      */
     public function swapPrefix(string $orig, string $swap);
 }

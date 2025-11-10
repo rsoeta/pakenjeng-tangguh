@@ -224,8 +224,9 @@ trait RequestTrait
     /**
      * Allows manually setting the value of PHP global, like $_GET, $_POST, etc.
      *
-     * @param 'cookie'|'get'|'post'|'request'|'server' $name  Superglobal name (lowercase)
-     * @param mixed                                    $value
+     * @param         string                                   $name  Supergrlobal name (lowercase)
+     * @phpstan-param 'get'|'post'|'request'|'cookie'|'server' $name
+     * @param         mixed                                    $value
      *
      * @return $this
      */
@@ -246,10 +247,11 @@ trait RequestTrait
      *
      * http://php.net/manual/en/filter.filters.sanitize.php
      *
-     * @param 'cookie'|'get'|'post'|'request'|'server' $name   Superglobal name (lowercase)
-     * @param array|int|string|null                    $index
-     * @param int|null                                 $filter Filter constant
-     * @param array|int|null                           $flags  Options
+     * @param         string                                   $name   Supergrlobal name (lowercase)
+     * @phpstan-param 'get'|'post'|'request'|'cookie'|'server' $name
+     * @param         array|int|string|null                    $index
+     * @param         int|null                                 $filter Filter constant
+     * @param         array|int|null                           $flags  Options
      *
      * @return array|bool|float|int|object|string|null
      */
@@ -339,7 +341,8 @@ trait RequestTrait
      * Saves a copy of the current state of one of several PHP globals,
      * so we can retrieve them later.
      *
-     * @param 'cookie'|'get'|'post'|'request'|'server' $name Superglobal name (lowercase)
+     * @param         string                                   $name Superglobal name (lowercase)
+     * @phpstan-param 'get'|'post'|'request'|'cookie'|'server' $name
      *
      * @return void
      */

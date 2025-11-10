@@ -117,14 +117,10 @@ class Parser extends View
         $cacheName = $options['cache_name'] ?? str_replace('.php', '', $view);
 
         // Was it cached?
-        if (isset($options['cache'])) {
-            $output = cache($cacheName);
+        if (isset($options['cache']) && ($output = cache($cacheName))) {
+            $this->logPerformance($start, microtime(true), $view);
 
-            if (is_string($output) && $output !== '') {
-                $this->logPerformance($start, microtime(true), $view);
-
-                return $output;
-            }
+            return $output;
         }
 
         $file = $this->viewPath . $view;
@@ -202,9 +198,10 @@ class Parser extends View
      * so that the variable is correctly handled within the
      * parsing itself, and contexts (including raw) are respected.
      *
-     * @param array<string, mixed>                      $data
-     * @param 'attr'|'css'|'html'|'js'|'raw'|'url'|null $context The context to escape it for.
-     *                                                           If 'raw', no escaping will happen.
+     * @param         array<string, mixed>                      $data
+     * @param         non-empty-string|null                     $context The context to escape it for.
+     *                                                                   If 'raw', no escaping will happen.
+     * @phpstan-param null|'html'|'js'|'css'|'url'|'attr'|'raw' $context
      */
     public function setData(array $data = [], ?string $context = null): RendererInterface
     {

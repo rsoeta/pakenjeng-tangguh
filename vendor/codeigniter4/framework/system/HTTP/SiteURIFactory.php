@@ -132,8 +132,7 @@ final class SiteURIFactory
             && pathinfo($this->superglobals->server('SCRIPT_NAME'), PATHINFO_EXTENSION) === 'php'
         ) {
             // Compare each segment, dropping them until there is no match
-            $segments = explode('/', rawurldecode($path));
-            $keep     = explode('/', $path);
+            $segments = $keep = explode('/', $path);
 
             foreach (explode('/', $this->superglobals->server('SCRIPT_NAME')) as $i => $segment) {
                 // If these segments are not the same then we're done
@@ -145,15 +144,6 @@ final class SiteURIFactory
             }
 
             $path = implode('/', $keep);
-        }
-
-        // Cleanup: if indexPage is still visible in the path, remove it
-        if ($this->appConfig->indexPage !== '' && str_starts_with($path, $this->appConfig->indexPage)) {
-            $remainingPath = substr($path, strlen($this->appConfig->indexPage));
-            // Only remove if followed by '/' (route) or nothing (root)
-            if ($remainingPath === '' || str_starts_with($remainingPath, '/')) {
-                $path = ltrim($remainingPath, '/');
-            }
         }
 
         // This section ensures that even on servers that require the URI to

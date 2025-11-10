@@ -16,7 +16,6 @@ use CodeIgniter\Cache\ResponseCache;
 use CodeIgniter\Debug\Timer;
 use CodeIgniter\Events\Events;
 use CodeIgniter\Exceptions\FrameworkException;
-use CodeIgniter\Exceptions\LogicException;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\Filters\Filters;
 use CodeIgniter\HTTP\CLIRequest;
@@ -29,6 +28,7 @@ use CodeIgniter\HTTP\Request;
 use CodeIgniter\HTTP\ResponsableInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\HTTP\URI;
+use CodeIgniter\Router\Exceptions\RedirectException as DeprecatedRedirectException;
 use CodeIgniter\Router\RouteCollectionInterface;
 use CodeIgniter\Router\Router;
 use Config\App;
@@ -41,6 +41,7 @@ use Kint;
 use Kint\Renderer\CliRenderer;
 use Kint\Renderer\RichRenderer;
 use Locale;
+use LogicException;
 use Throwable;
 
 /**
@@ -55,7 +56,7 @@ class CodeIgniter
     /**
      * The current version of CodeIgniter Framework
      */
-    public const CI_VERSION = '4.6.3';
+    public const CI_VERSION = '4.5.8';
 
     /**
      * App startup time.
@@ -141,7 +142,7 @@ class CodeIgniter
      *  web:     Invoked by HTTP request
      *  php-cli: Invoked by CLI via `php public/index.php`
      *
-     * @var 'php-cli'|'web'|null
+     * @phpstan-var 'php-cli'|'web'
      */
     protected ?string $context = null;
 
@@ -293,7 +294,7 @@ class CodeIgniter
 
         RichRenderer::$theme  = $config->richTheme;
         RichRenderer::$folder = $config->richFolder;
-
+        RichRenderer::$sort   = $config->richSort;
         if (isset($config->richObjectPlugins) && is_array($config->richObjectPlugins)) {
             RichRenderer::$value_plugins = $config->richObjectPlugins;
         }
@@ -317,7 +318,7 @@ class CodeIgniter
      *
      * @param bool $returnResponse Used for testing purposes only.
      *
-     * @return ResponseInterface|null
+     * @return ResponseInterface|void
      */
     public function run(?RouteCollectionInterface $routes = null, bool $returnResponse = false)
     {
@@ -352,8 +353,11 @@ class CodeIgniter
         } else {
             try {
                 $this->response = $this->handleRequest($routes, config(Cache::class), $returnResponse);
-            } catch (ResponsableInterface $e) {
+            } catch (DeprecatedRedirectException|ResponsableInterface $e) {
                 $this->outputBufferingEnd();
+                if ($e instanceof DeprecatedRedirectException) {
+                    $e = new RedirectException($e->getMessage(), $e->getCode(), $e);
+                }
 
                 $this->response = $e->getResponse();
             } catch (PageNotFoundException $e) {
@@ -375,8 +379,6 @@ class CodeIgniter
         }
 
         $this->sendResponse();
-
-        return null;
     }
 
     /**
@@ -861,7 +863,7 @@ class CodeIgniter
      * controller method and make the script go. If it's not able to, will
      * show the appropriate Page Not Found error.
      *
-     * @return ResponseInterface|string|null
+     * @return ResponseInterface|string|void
      */
     protected function startController()
     {
@@ -887,8 +889,6 @@ class CodeIgniter
         ) {
             throw PageNotFoundException::forControllerNotFound($this->controller, $this->method);
         }
-
-        return null;
     }
 
     /**
@@ -948,9 +948,7 @@ class CodeIgniter
         $this->response->setStatusCode($e->getCode());
 
         // Is there a 404 Override available?
-        $override = $this->router->get404Override();
-
-        if ($override !== null) {
+        if ($override = $this->router->get404Override()) {
             $returned = null;
 
             if ($override instanceof Closure) {
@@ -1128,7 +1126,7 @@ class CodeIgniter
     /**
      * Sets the app context.
      *
-     * @param 'php-cli'|'web' $context
+     * @phpstan-param 'php-cli'|'web' $context
      *
      * @return $this
      */

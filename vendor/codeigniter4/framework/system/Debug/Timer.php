@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Debug;
 
-use CodeIgniter\Exceptions\RuntimeException;
+use RuntimeException;
 
 /**
  * Class Timer

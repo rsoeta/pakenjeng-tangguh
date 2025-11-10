@@ -15,8 +15,7 @@ namespace CodeIgniter\Database\MySQLi;
 
 use CodeIgniter\Database\BaseConnection;
 use CodeIgniter\Database\Exceptions\DatabaseException;
-use CodeIgniter\Database\TableName;
-use CodeIgniter\Exceptions\LogicException;
+use LogicException;
 use mysqli;
 use mysqli_result;
 use mysqli_sql_exception;
@@ -81,16 +80,6 @@ class Connection extends BaseConnection
      * @var bool
      */
     public $numberNative = false;
-
-    /**
-     * Use MYSQLI_CLIENT_FOUND_ROWS
-     *
-     * Whether affectedRows() should return number of rows found,
-     * or number of rows changed, after an UPDATE query.
-     *
-     * @var bool
-     */
-    public $foundRows = false;
 
     /**
      * Connect to the database.
@@ -191,10 +180,6 @@ class Connection extends BaseConnection
             }
 
             $clientFlags += MYSQLI_CLIENT_SSL;
-        }
-
-        if ($this->foundRows) {
-            $clientFlags += MYSQLI_CLIENT_FOUND_ROWS;
         }
 
         try {
@@ -423,19 +408,10 @@ class Connection extends BaseConnection
 
     /**
      * Generates a platform-specific query string so that the column names can be fetched.
-     *
-     * @param string|TableName $table
      */
-    protected function _listColumns($table = ''): string
+    protected function _listColumns(string $table = ''): string
     {
-        $tableName = $this->protectIdentifiers(
-            $table,
-            true,
-            null,
-            false,
-        );
-
-        return 'SHOW COLUMNS FROM ' . $tableName;
+        return 'SHOW COLUMNS FROM ' . $this->protectIdentifiers($table, true, null, false);
     }
 
     /**

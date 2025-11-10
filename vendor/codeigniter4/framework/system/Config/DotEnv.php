@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Config;
 
-use CodeIgniter\Exceptions\InvalidArgumentException;
+use InvalidArgumentException;
 
 /**
  * Environment-specific configuration

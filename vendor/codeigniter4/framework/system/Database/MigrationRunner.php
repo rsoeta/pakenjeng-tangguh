@@ -16,10 +16,10 @@ namespace CodeIgniter\Database;
 use CodeIgniter\CLI\CLI;
 use CodeIgniter\Events\Events;
 use CodeIgniter\Exceptions\ConfigException;
-use CodeIgniter\Exceptions\RuntimeException;
 use CodeIgniter\I18n\Time;
 use Config\Database;
 use Config\Migrations as MigrationsConfig;
+use RuntimeException;
 use stdClass;
 
 /**
@@ -317,8 +317,6 @@ class MigrationRunner
      *
      * @param string $path Full path to a valid migration file
      * @param string $path Namespace of the target migration
-     *
-     * @return bool
      */
     public function force(string $path, string $namespace, ?string $group = null)
     {
@@ -577,8 +575,6 @@ class MigrationRunner
 
     /**
      * Truncates the history table.
-     *
-     * @return void
      */
     public function clearHistory()
     {
@@ -591,8 +587,6 @@ class MigrationRunner
      * Add a history to the table.
      *
      * @param object $migration
-     *
-     * @return void
      */
     protected function addHistory($migration, int $batch)
     {
@@ -620,8 +614,6 @@ class MigrationRunner
      * Removes a single history
      *
      * @param object $history
-     *
-     * @return void
      */
     protected function removeHistory($history)
     {
@@ -760,8 +752,6 @@ class MigrationRunner
     /**
      * Ensures that we have created our migrations table
      * in the database.
-     *
-     * @return void
      */
     public function ensureTable()
     {

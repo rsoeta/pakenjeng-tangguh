@@ -27,14 +27,16 @@ abstract class BaseResult implements ResultInterface
     /**
      * Connection ID
      *
-     * @var TConnection
+     * @var         object|resource
+     * @phpstan-var TConnection
      */
     public $connID;
 
     /**
      * Result ID
      *
-     * @var false|TResult
+     * @var         false|object|resource
+     * @phpstan-var false|TResult
      */
     public $resultID;
 
@@ -83,8 +85,10 @@ abstract class BaseResult implements ResultInterface
     /**
      * Constructor
      *
-     * @param TConnection $connID
-     * @param TResult     $resultID
+     * @param         object|resource $connID
+     * @param         object|resource $resultID
+     * @phpstan-param TConnection     $connID
+     * @phpstan-param TResult         $resultID
      */
     public function __construct(&$connID, &$resultID)
     {
@@ -115,7 +119,7 @@ abstract class BaseResult implements ResultInterface
     /**
      * Returns the results as an array of custom objects.
      *
-     * @param class-string $className
+     * @phpstan-param class-string $className
      *
      * @return array
      */
@@ -207,7 +211,8 @@ abstract class BaseResult implements ResultInterface
      *
      * If no results, an empty array is returned.
      *
-     * @return list<stdClass>
+     * @return         array<int, stdClass>
+     * @phpstan-return list<stdClass>
      */
     public function getResultObject(): array
     {
@@ -253,10 +258,12 @@ abstract class BaseResult implements ResultInterface
      *
      * @template T of object
      *
-     * @param int|string                       $n    The index of the results to return, or column name.
-     * @param 'array'|'object'|class-string<T> $type The type of result object. 'array', 'object' or class name.
+     * @param         int|string                       $n    The index of the results to return, or column name.
+     * @param         string                           $type The type of result object. 'array', 'object' or class name.
+     * @phpstan-param class-string<T>|'array'|'object' $type
      *
-     * @return ($n is string ? float|int|string|null : ($type is 'object' ? stdClass|null : ($type is 'array' ? array|null : T|null)))
+     * @return         array|float|int|object|stdClass|string|null
+     * @phpstan-return ($n is string ? float|int|string|null : ($type is 'object' ? stdClass|null : ($type is 'array' ? array|null : T|null)))
      */
     public function getRow($n = 0, string $type = 'object')
     {
@@ -293,10 +300,11 @@ abstract class BaseResult implements ResultInterface
      *
      * @template T of object
      *
-     * @param int             $n         The index of the results to return.
-     * @param class-string<T> $className
+     * @param         int             $n         The index of the results to return.
+     * @phpstan-param class-string<T> $className
      *
-     * @return T|null
+     * @return         object|null
+     * @phpstan-return T|null
      */
     public function getCustomRowObject(int $n, string $className)
     {
@@ -529,9 +537,9 @@ abstract class BaseResult implements ResultInterface
     /**
      * Returns the result set as an object.
      *
-     * @param class-string $className
+     * Overridden by child classes.
      *
-     * @return false|object
+     * @return Entity|false|object|stdClass
      */
-    abstract protected function fetchObject(string $className = stdClass::class);
+    abstract protected function fetchObject(string $className = 'stdClass');
 }

@@ -16,7 +16,6 @@ namespace CodeIgniter\Database\Postgre;
 use CodeIgniter\Database\BaseConnection;
 use CodeIgniter\Database\Exceptions\DatabaseException;
 use CodeIgniter\Database\RawSql;
-use CodeIgniter\Database\TableName;
 use ErrorException;
 use PgSql\Connection as PgSqlConnection;
 use PgSql\Result as PgSqlResult;
@@ -242,7 +241,8 @@ class Connection extends BaseConnection
      *
      * @param array|bool|float|int|object|string|null $str
      *
-     * @return ($str is array ? array : float|int|string)
+     * @return         array|float|int|string
+     * @phpstan-return ($str is array ? array : float|int|string)
      */
     public function escape($str)
     {
@@ -305,20 +305,13 @@ class Connection extends BaseConnection
 
     /**
      * Generates a platform-specific query string so that the column names can be fetched.
-     *
-     * @param string|TableName $table
      */
-    protected function _listColumns($table = ''): string
+    protected function _listColumns(string $table = ''): string
     {
-        if ($table instanceof TableName) {
-            $tableName = $this->escape($table->getActualTableName());
-        } else {
-            $tableName = $this->escape($this->DBPrefix . strtolower($table));
-        }
-
         return 'SELECT "column_name"
 			FROM "information_schema"."columns"
-			WHERE LOWER("table_name") = ' . $tableName
+			WHERE LOWER("table_name") = '
+                . $this->escape($this->DBPrefix . strtolower($table))
                 . ' ORDER BY "ordinal_position"';
     }
 
@@ -516,8 +509,6 @@ class Connection extends BaseConnection
 
     /**
      * Build a DSN from the provided parameters
-     *
-     * @return void
      */
     protected function buildDSN()
     {

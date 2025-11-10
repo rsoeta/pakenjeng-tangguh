@@ -50,8 +50,6 @@ class MockLanguage extends Language
 
     /**
      * Arbitrarily turnoff internationalization support for testing
-     *
-     * @return void
      */
     public function disableIntlSupport()
     {

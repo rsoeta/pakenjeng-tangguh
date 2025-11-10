@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace CodeIgniter\DataCaster\Cast;
 
-use CodeIgniter\Exceptions\InvalidArgumentException;
+use InvalidArgumentException;
 
 abstract class BaseCast implements CastInterface
 {

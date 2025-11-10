@@ -100,7 +100,8 @@ class Forge extends BaseForge
      * @param array|string $processedFields Processed column definitions
      *                                      or column names to DROP
      *
-     * @return ($alterType is 'DROP' ? string : list<string>)
+     * @return         list<string>|string                            SQL string
+     * @phpstan-return ($alterType is 'DROP' ? string : list<string>)
      */
     protected function _alterTable(string $alterType, string $table, $processedFields)
     {

@@ -14,11 +14,11 @@ declare(strict_types=1);
 namespace CodeIgniter\Publisher;
 
 use CodeIgniter\Autoloader\FileLocatorInterface;
-use CodeIgniter\Exceptions\RuntimeException;
 use CodeIgniter\Files\FileCollection;
 use CodeIgniter\HTTP\URI;
 use CodeIgniter\Publisher\Exceptions\PublisherException;
 use Config\Publisher as PublisherConfig;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -99,24 +99,18 @@ class Publisher extends FileCollection
      *
      * @return list<self>
      */
-    final public static function discover(string $directory = 'Publishers', string $namespace = ''): array
+    final public static function discover(string $directory = 'Publishers'): array
     {
-        $key = implode('.', [$namespace, $directory]);
-
-        if (isset(self::$discovered[$key])) {
-            return self::$discovered[$key];
+        if (isset(self::$discovered[$directory])) {
+            return self::$discovered[$directory];
         }
 
-        self::$discovered[$key] = [];
+        self::$discovered[$directory] = [];
 
-        /** @var FileLocatorInterface */
+        /** @var FileLocatorInterface $locator */
         $locator = service('locator');
 
-        $files = $namespace === ''
-            ? $locator->listFiles($directory)
-            : $locator->listNamespaceFiles($namespace, $directory);
-
-        if ([] === $files) {
+        if ([] === $files = $locator->listFiles($directory)) {
             return [];
         }
 
@@ -125,14 +119,13 @@ class Publisher extends FileCollection
             $className = $locator->findQualifiedNameFromPath($file);
 
             if ($className !== false && class_exists($className) && is_a($className, self::class, true)) {
-                /** @var class-string<self> $className */
-                self::$discovered[$key][] = new $className();
+                self::$discovered[$directory][] = new $className();
             }
         }
 
-        sort(self::$discovered[$key]);
+        sort(self::$discovered[$directory]);
 
-        return self::$discovered[$key];
+        return self::$discovered[$directory];
     }
 
     /**

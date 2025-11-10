@@ -40,7 +40,7 @@ class DatetimeCast extends BaseCast
         }
 
         if (is_numeric($value)) {
-            return Time::createFromTimestamp((int) $value, date_default_timezone_get());
+            return Time::createFromTimestamp((int) $value);
         }
 
         if (is_string($value)) {

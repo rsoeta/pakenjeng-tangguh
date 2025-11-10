@@ -17,7 +17,10 @@ final class FileVarExportHandler
 {
     private string $path = WRITEPATH . 'cache';
 
-    public function save(string $key, mixed $val): void
+    /**
+     * @param array|bool|float|int|object|string|null $val
+     */
+    public function save(string $key, $val): void
     {
         $val = var_export($val, true);
 
@@ -33,7 +36,10 @@ final class FileVarExportHandler
         @unlink($this->path . "/{$key}");
     }
 
-    public function get(string $key): mixed
+    /**
+     * @return array|bool|float|int|object|string|null
+     */
+    public function get(string $key)
     {
         return @include $this->path . "/{$key}";
     }

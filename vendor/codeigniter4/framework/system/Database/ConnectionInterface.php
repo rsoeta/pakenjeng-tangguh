@@ -32,14 +32,16 @@ interface ConnectionInterface
     /**
      * Connect to the database.
      *
-     * @return false|TConnection
+     * @return         false|object|resource
+     * @phpstan-return false|TConnection
      */
     public function connect(bool $persistent = false);
 
     /**
      * Create a persistent database connection.
      *
-     * @return false|TConnection
+     * @return         false|object|resource
+     * @phpstan-return false|TConnection
      */
     public function persistentConnect();
 
@@ -57,7 +59,8 @@ interface ConnectionInterface
      * get that connection. If you pass either alias in and only a single
      * connection is present, it must return the sole connection.
      *
-     * @return false|TConnection
+     * @return         false|object|resource
+     * @phpstan-return false|TConnection
      */
     public function getConnection(?string $alias = null);
 
@@ -102,7 +105,8 @@ interface ConnectionInterface
      *
      * @param array|string|null $binds
      *
-     * @return BaseResult<TConnection, TResult>|bool|Query
+     * @return         BaseResult|bool|Query
+     * @phpstan-return BaseResult<TConnection, TResult>|bool|Query
      */
     public function query(string $sql, $binds = null);
 
@@ -111,7 +115,8 @@ interface ConnectionInterface
      * is performed, nor are transactions handled. Simply takes a raw
      * query string and returns the database-specific result id.
      *
-     * @return false|TResult
+     * @return         false|object|resource
+     * @phpstan-return false|TResult
      */
     public function simpleQuery(string $sql);
 
@@ -139,7 +144,8 @@ interface ConnectionInterface
      *
      * @param array|bool|float|int|object|string|null $str
      *
-     * @return ($str is array ? array : float|int|string)
+     * @return         array|float|int|string
+     * @phpstan-return ($str is array ? array : float|int|string)
      */
     public function escape($str);
 

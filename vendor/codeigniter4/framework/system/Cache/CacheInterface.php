@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Cache;
 
+/**
+ * Cache interface
+ */
 interface CacheInterface
 {
     /**
@@ -27,16 +30,16 @@ interface CacheInterface
      *
      * @param string $key Cache item name
      *
-     * @return mixed
+     * @return array|bool|float|int|object|string|null
      */
     public function get(string $key);
 
     /**
      * Saves an item to the cache store.
      *
-     * @param string $key   Cache item name
-     * @param mixed  $value The data to save
-     * @param int    $ttl   Time To Live, in seconds (default 60)
+     * @param string                                  $key   Cache item name
+     * @param array|bool|float|int|object|string|null $value The data to save
+     * @param int                                     $ttl   Time To Live, in seconds (default 60)
      *
      * @return bool Success or failure
      */
@@ -84,7 +87,7 @@ interface CacheInterface
      * The information returned and the structure of the data
      * varies depending on the handler.
      *
-     * @return array<array-key, mixed>|false|object|null
+     * @return array|false|object|null
      */
     public function getCacheInfo();
 
@@ -93,9 +96,10 @@ interface CacheInterface
      *
      * @param string $key Cache item name.
      *
-     * @return array<string, mixed>|false|null Returns null if the item does not exist, otherwise array<string, mixed>
-     *                                         with at least the 'expire' key for absolute epoch expiry (or null).
-     *                                         Some handlers may return false when an item does not exist, which is deprecated.
+     * @return array|false|null
+     *                          Returns null if the item does not exist, otherwise array<string, mixed>
+     *                          with at least the 'expire' key for absolute epoch expiry (or null).
+     *                          Some handlers may return false when an item does not exist, which is deprecated.
      */
     public function getMetaData(string $key);
 

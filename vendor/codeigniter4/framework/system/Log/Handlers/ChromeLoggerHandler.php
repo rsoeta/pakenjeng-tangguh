@@ -16,6 +16,8 @@ namespace CodeIgniter\Log\Handlers;
 use CodeIgniter\HTTP\ResponseInterface;
 
 /**
+ * Class ChromeLoggerHandler
+ *
  * Allows for logging items to the Chrome console for debugging.
  * Requires the ChromeLogger extension installed in your browser.
  *
@@ -39,16 +41,7 @@ class ChromeLoggerHandler extends BaseHandler
     /**
      * The final data that is sent to the browser.
      *
-     * @var array{
-     *   version: float,
-     *   columns: list<string>,
-     *   rows: list<array{
-     *     0: list<string>,
-     *     1: string,
-     *     2: string,
-     *   }>,
-     *   request_uri?: string,
-     * }
+     * @var array
      */
     protected $json = [
         'version' => self::VERSION,
@@ -70,7 +63,7 @@ class ChromeLoggerHandler extends BaseHandler
     /**
      * Maps the log levels to the ChromeLogger types.
      *
-     * @var array<string, string>
+     * @var array
      */
     protected $levels = [
         'emergency' => 'error',
@@ -84,7 +77,7 @@ class ChromeLoggerHandler extends BaseHandler
     ];
 
     /**
-     * @param array{handles?: list<string>} $config
+     * Constructor
      */
     public function __construct(array $config = [])
     {
@@ -104,8 +97,10 @@ class ChromeLoggerHandler extends BaseHandler
      */
     public function handle($level, $message): bool
     {
+        // Format our message
         $message = $this->format($message);
 
+        // Generate Backtrace info
         $backtrace = debug_backtrace(0, $this->backtraceLevel);
         $backtrace = end($backtrace);
 
@@ -121,7 +116,11 @@ class ChromeLoggerHandler extends BaseHandler
             $type = $this->levels[$level];
         }
 
-        $this->json['rows'][] = [[$message], $backtraceMessage, $type];
+        $this->json['rows'][] = [
+            [$message],
+            $backtraceMessage,
+            $type,
+        ];
 
         $this->sendLogs();
 
@@ -131,9 +130,9 @@ class ChromeLoggerHandler extends BaseHandler
     /**
      * Converts the object to display nicely in the Chrome Logger UI.
      *
-     * @param object|string $object
+     * @param array|int|object|string $object
      *
-     * @return array<string, mixed>|string
+     * @return array
      */
     protected function format($object)
     {
@@ -151,8 +150,6 @@ class ChromeLoggerHandler extends BaseHandler
 
     /**
      * Attaches the header and the content to the passed in request object.
-     *
-     * @param-out ResponseInterface $response
      *
      * @return void
      */

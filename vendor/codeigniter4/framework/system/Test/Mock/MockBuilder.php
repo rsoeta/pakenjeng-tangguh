@@ -17,9 +17,6 @@ use CodeIgniter\Database\BaseBuilder;
 
 class MockBuilder extends BaseBuilder
 {
-    /**
-     * @var array<string, string>
-     */
     protected $supportedIgnoreStatements = [
         'update' => 'IGNORE',
         'insert' => 'IGNORE',

@@ -13,9 +13,11 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Exceptions;
 
+use Error;
+
 /**
  * Error: Critical conditions, like component unavailable, etc.
  */
-class CriticalError extends RuntimeException
+class CriticalError extends Error
 {
 }

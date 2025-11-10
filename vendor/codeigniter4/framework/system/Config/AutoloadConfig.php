@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace CodeIgniter\Config;
 
 use Laminas\Escaper\Escaper;
-use Laminas\Escaper\EscaperInterface;
 use Laminas\Escaper\Exception\ExceptionInterface;
 use Laminas\Escaper\Exception\InvalidArgumentException as EscaperInvalidArgumentException;
 use Laminas\Escaper\Exception\RuntimeException;
@@ -120,7 +119,6 @@ class AutoloadConfig
         ExceptionInterface::class              => SYSTEMPATH . 'ThirdParty/Escaper/Exception/ExceptionInterface.php',
         EscaperInvalidArgumentException::class => SYSTEMPATH . 'ThirdParty/Escaper/Exception/InvalidArgumentException.php',
         RuntimeException::class                => SYSTEMPATH . 'ThirdParty/Escaper/Exception/RuntimeException.php',
-        EscaperInterface::class                => SYSTEMPATH . 'ThirdParty/Escaper/EscaperInterface.php',
         Escaper::class                         => SYSTEMPATH . 'ThirdParty/Escaper/Escaper.php',
     ];
 

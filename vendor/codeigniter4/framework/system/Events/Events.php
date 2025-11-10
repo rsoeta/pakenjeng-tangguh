@@ -29,7 +29,7 @@ class Events
     /**
      * The list of listeners.
      *
-     * @var array<string, array{0: bool, 1: list<int>, 2: list<callable(mixed): mixed>}>
+     * @var array
      */
     protected static $listeners = [];
 
@@ -53,7 +53,7 @@ class Events
      * Stores information about the events
      * for display in the debug toolbar.
      *
-     * @var list<array{start: float, end: float, event: string}>
+     * @var list<array<string, float|string>>
      */
     protected static $performanceLog = [];
 
@@ -84,12 +84,15 @@ class Events
             $files = service('locator')->search('Config/Events.php');
         }
 
-        $files = array_filter(array_map(
-            static fn (string $file): false|string => realpath($file),
-            $files,
-        ));
+        $files = array_filter(array_map(static function (string $file): false|string {
+            if (is_file($file)) {
+                return realpath($file) ?: $file;
+            }
 
-        static::$files = array_values(array_unique(array_merge($files, [$events])));
+            return false; // @codeCoverageIgnore
+        }, $files));
+
+        static::$files = array_unique(array_merge($files, [$events]));
 
         foreach (static::$files as $file) {
             include $file;
@@ -107,9 +110,9 @@ class Events
      *  Events::on('create', [$myInstance, 'myMethod']);  // Method on an existing instance
      *  Events::on('create', function() {});              // Closure
      *
-     * @param string                 $eventName
-     * @param callable(mixed): mixed $callback
-     * @param int                    $priority
+     * @param string   $eventName
+     * @param callable $callback
+     * @param int      $priority
      *
      * @return void
      */
@@ -135,7 +138,7 @@ class Events
      *  b) a method returns false, at which point execution of subscribers stops.
      *
      * @param string $eventName
-     * @param mixed  ...$arguments
+     * @param mixed  $arguments
      */
     public static function trigger($eventName, ...$arguments): bool
     {
@@ -155,7 +158,7 @@ class Events
                 static::$performanceLog[] = [
                     'start' => $start,
                     'end'   => microtime(true),
-                    'event' => $eventName,
+                    'event' => strtolower($eventName),
                 ];
             }
 
@@ -172,8 +175,6 @@ class Events
      * sorted by priority.
      *
      * @param string $eventName
-     *
-     * @return list<callable(mixed): mixed>
      */
     public static function listeners($eventName): array
     {
@@ -199,8 +200,7 @@ class Events
      * If the listener couldn't be found, returns FALSE, else TRUE if
      * it was removed.
      *
-     * @param string                 $eventName
-     * @param callable(mixed): mixed $listener
+     * @param string $eventName
      */
     public static function removeListener($eventName, callable $listener): bool
     {
@@ -244,8 +244,6 @@ class Events
     /**
      * Sets the path to the file that routes are read from.
      *
-     * @param list<string> $files
-     *
      * @return void
      */
     public static function setFiles(array $files)
@@ -278,7 +276,7 @@ class Events
     /**
      * Getter for the performance log records.
      *
-     * @return list<array{start: float, end: float, event: string}>
+     * @return list<array<string, float|string>>
      */
     public static function getPerformanceLogs()
     {

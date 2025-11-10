@@ -12,13 +12,13 @@
 namespace CodeIgniter\Test;
 
 use CodeIgniter\Controller;
-use CodeIgniter\Exceptions\InvalidArgumentException;
 use CodeIgniter\HTTP\Exceptions\HTTPException;
 use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\HTTP\URI;
 use Config\App;
 use Config\Services;
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -95,7 +95,7 @@ trait ControllerTestTrait
         // The URL helper is always loaded by the system so ensure it is available.
         helper('url');
 
-        if (! $this->appConfig instanceof App) {
+        if (empty($this->appConfig)) {
             $this->appConfig = config(App::class);
         }
 
@@ -104,7 +104,7 @@ trait ControllerTestTrait
             $this->uri = $factory->createFromGlobals();
         }
 
-        if (! $this->request instanceof IncomingRequest) {
+        if (empty($this->request)) {
             // Do some acrobatics, so we can use the Request service with our own URI
             $tempUri = service('uri');
             Services::injectMock('uri', $this->uri);
@@ -115,11 +115,11 @@ trait ControllerTestTrait
             Services::injectMock('uri', $tempUri);
         }
 
-        if (! $this->response instanceof ResponseInterface) {
+        if (empty($this->response)) {
             $this->response = service('response', $this->appConfig, false);
         }
 
-        if (! $this->logger instanceof LoggerInterface) {
+        if (empty($this->logger)) {
             $this->logger = service('logger');
         }
     }

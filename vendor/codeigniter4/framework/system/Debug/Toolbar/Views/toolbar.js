@@ -27,25 +27,22 @@ var ciDebugBar = {
             .getElementById("debug-icon-link")
             .addEventListener("click", ciDebugBar.toggleToolbar, true);
 
+        // Allows to highlight the row of the current history request
+        var btn = this.toolbar.querySelector(
+            'button[data-time="' + localStorage.getItem("debugbar-time") + '"]'
+        );
+        ciDebugBar.addClass(btn.parentNode.parentNode, "current");
+
         historyLoad = this.toolbar.getElementsByClassName("ci-history-load");
 
-        if (historyLoad.length) {
-            // Allows highlighting the row of the current history request
-            var btn = this.toolbar.querySelector(
-                'button[data-time="' + localStorage.getItem("debugbar-time-new") + '"]'
+        for (var i = 0; i < historyLoad.length; i++) {
+            historyLoad[i].addEventListener(
+                "click",
+                function () {
+                    loadDoc(this.getAttribute("data-time"));
+                },
+                true
             );
-            ciDebugBar.addClass(btn.parentNode.parentNode, "current");
-
-
-            for (var i = 0; i < historyLoad.length; i++) {
-                historyLoad[i].addEventListener(
-                    "click",
-                    function () {
-                        loadDoc(this.getAttribute("data-time"));
-                    },
-                    true
-                );
-            }
         }
 
         // Display the active Tab on page load
@@ -80,14 +77,14 @@ var ciDebugBar = {
                 links[i].addEventListener("click", function() {
                     ciDebugBar.toggleDataTable(datatable)
                 }, true);
-
+               
             } else if (toggleData === "childrows") {
 
                 let child = links[i].getAttribute("data-child");
                 links[i].addEventListener("click", function() {
                     ciDebugBar.toggleChildRows(child)
                 }, true);
-
+                
             } else {
                 links[i].addEventListener("click", ciDebugBar.toggleRows, true);
             }
@@ -177,10 +174,10 @@ var ciDebugBar = {
             );
 
             if (target.classList.contains("debug-bar-ndisplay")) {
-                ciDebugBar.switchClass(target, "debug-bar-ndisplay", "debug-bar-dtableRow");
+                ciDebugBar.switchClass(target, "debug-bar-ndisplay", "debug-bar-dtableRow");   
             } else {
                 ciDebugBar.switchClass(target, "debug-bar-dtableRow", "debug-bar-ndisplay");
-            }
+            } 
         }
     },
 
@@ -264,7 +261,7 @@ var ciDebugBar = {
         } else {
             ciDebugBar.switchClass(ciDebugBar.icon, "debug-bar-dinlineBlock", "debug-bar-ndisplay");
             ciDebugBar.switchClass(ciDebugBar.toolbar, "debug-bar-ndisplay", "debug-bar-dinlineBlock");
-        }
+        } 
     },
 
     toggleViewsHints: function () {

@@ -74,7 +74,7 @@ class MigrateRollback extends BaseCommand
             $force = array_key_exists('f', $params) || CLI::getOption('f');
 
             if (! $force && CLI::prompt(lang('Migrations.rollBackConfirm'), ['y', 'n']) === 'n') {
-                return null;
+                return;
             }
             // @codeCoverageIgnoreEnd
         }
@@ -115,7 +115,5 @@ class MigrateRollback extends BaseCommand
             $this->showError($e);
             // @codeCoverageIgnoreEnd
         }
-
-        return null;
     }
 }
