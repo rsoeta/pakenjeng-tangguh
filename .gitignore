@@ -13,6 +13,7 @@
 /.history/            # VSCode local history
 /.DS_Store            # macOS file metadata
 Thumbs.db             # Windows thumbnail cache
+vendor/*
 
 # ----------------------------------------------------------------------
 # SYSTEM & ENVIRONMENT FILES
@@ -46,6 +47,9 @@ yarn-error.log*
 /public/data/*
 !/public/index.php
 !/public/.htaccess
+# Pastikan folder data publik tidak dihapus Git
+!public/data/
+!public/data/**
 
 # ----------------------------------------------------------------------
 # LARAGON / LOCAL TOOLS
