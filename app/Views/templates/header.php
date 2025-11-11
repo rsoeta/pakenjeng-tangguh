@@ -36,6 +36,7 @@
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="<?= base_url('assets/plugins/fontawesome-free/css/all.min.css'); ?>">
     <!-- Theme style -->
@@ -43,6 +44,8 @@
     <!-- Ionicons -->
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     <link rel="stylesheet" href="<?= base_url('assets/dist/css/style.css'); ?>">
+    <!-- custom.css -->
+    <link rel="stylesheet" href="<?= base_url('assets/css/custom.css'); ?>">
     <!-- <link rel="stylesheet" href="<?= base_url('assets/dist/css/chat.css'); ?>"> -->
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css"> -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.2/css/dataTables.bootstrap5.min.css">
@@ -108,7 +111,23 @@
 
     <script src="https://cdn.jsdelivr.net/npm/moment/min/moment.min.js"></script>
 
-
+    <!-- tambahkan script untuk SweetAlert2 -->
+    <script>
+        const toggleBtn = document.getElementById('toggleTheme');
+        toggleBtn.addEventListener('click', function() {
+            const isDark = document.body.classList.contains('dark-mode');
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                timer: 1200,
+                showConfirmButton: false,
+                icon: isDark ? 'info' : 'success',
+                title: isDark ? '🌙 Mode Gelap Aktif' : '☀️ Mode Terang Aktif',
+                background: isDark ? '#182c25' : '#fff',
+                color: isDark ? '#f8f9fa' : '#333',
+            });
+        });
+    </script>
 </head>
 
 <!-- <body class="hold-transition sidebar-mini"> -->

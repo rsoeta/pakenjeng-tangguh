@@ -18,6 +18,10 @@ use App\Models\Dtks\VervalPbiModel;
 use App\Models\Dtks\KipModel;
 use App\Models\Dtks\AuthModel;
 use App\Models\Dtks\BnbaModel;
+use App\Models\DtsenKkModel;
+use App\Models\DtsenDraftModel;
+use App\Models\DtsenSeModel;
+use App\Models\DtsenUsulanBansosModel;
 
 
 
@@ -37,6 +41,10 @@ class Pages extends BaseController
         $this->WilayahModel = new WilayahModel();
         $this->AuthModel = new AuthModel();
         $this->BnbaModel = new BnbaModel();
+        $this->DtsenKkModel = new DtsenKkModel();
+        $this->DtsenDraftModel = new DtsenDraftModel();
+        $this->DtsenSeModel = new DtsenSeModel();
+        $this->DtsenUsulanBansosModel = new DtsenUsulanBansosModel();
     }
 
     public function home()
@@ -53,93 +61,78 @@ class Pages extends BaseController
 
     public function index()
     {
+        $session = session();
+        $kodeDesa     = $session->get('kode_desa');
+        $roleId       = $session->get('role_id');
+        $rwUser       = $session->get('level');
+        $filterRW     = $this->request->getPost('filterRW') ?? null;
+        $wilayahTugas = $session->get('wilayah_tugas');
 
-        $BansosModel = new BansosModel();
-        $DesaModel = new WilayahModel();
-
-        $YatimModel = new YatimModel();
-        $yatim = $YatimModel->jmlYatim();
-
-        $JandaModel = new JandaModel();
-        $janda = $JandaModel->jmlJanda();
-
-        $Usulan22Model = new Usulan22Model();
-        $rekapUsulan = $Usulan22Model->rekapUsulan();
-
-        $deadline = new GenModel();
-        $dd = $deadline->getDeadline();
-        foreach ($dd as $d) {
-            $dd_waktu_start = $d['dd_waktu_start'];
-            $dd_waktu_end = $d['dd_waktu_end'];
-        }
-        $dd_waktu_start = date_create($dd_waktu_start);
-        $dd_waktu_end = date_create($dd_waktu_end);
-
-
-        // dd($yatim);
-        // $yatims[];
-
-        foreach ($yatim as $row) {
-            $yatims[] = array(
-                'Rw' => $row->Rw,
-                'jml' => $row->jml,
-            );
-        }
-
-        foreach ($janda as $row) {
-            $jandas[] = array(
-                'RW' => $row->RW,
-                'jml' => $row->jml,
-            );
-        }
-
-        $jbt = (session()->get('level'));
-
-        $desa = $DesaModel->findAll();
-        foreach ($desa as $row) {
-        }
-
-        $capaianAll = 0;
-        foreach ($rekapUsulan as $row) {
-            $capaianAll += $row->Capaian;
-        }
-
-        $data = [
-            'title' => 'Dashboard',
-            // 'desa' => $row['id'],
-            'bansos' => $BansosModel->getBansos(),
-            'dtks_status' => $this->GenModel->getStatusDtks(),
-            'Rw' => $jbt,
-            'jmlRecord' => $this->verivali09->jumlah_semua(),
-            'getDataGrup' => $this->verivali09->getDataGroupBy(),
-            'rekapUsulan' => $this->Usulan22Model->rekapUsulan(),
-            'jumlah_semua_usulan' => $this->Usulan22Model->jumlah_semua(),
-            'rekapPbi' => $this->VervalPbiModel->jumlah_semua(),
-            'rincianHasil' => $this->VervalPbiModel->jml_grup(),
-            'rincianDesa' => $this->VervalPbiModel->jml_perdesa(),
-            'jml_persentase' => $this->VervalPbiModel->jml_persentase(),
-            'jmlPerbaikan' => $this->VervalPbiModel->perbaikanAll(),
-            'percentages' => $this->VervalPbiModel->jml_persentase(),
-            'statusRole' => $this->GenModel->getStatusRole(),
-            'user_login' => $this->AuthModel->getUserId(),
-            'countStatusBnba' => $this->BnbaModel->countStatusBnba(),
-            'capaianAll' => $capaianAll,
-            'dd_waktu_start' => $dd_waktu_start,
-            'dd_waktu_end' => $dd_waktu_end,
+        $filter = [
+            'kode_desa'     => $kodeDesa,
+            'rw'            => ($roleId >= 4 ? $rwUser : null),
+            'wilayah_tugas' => $wilayahTugas,
         ];
-        if (session()->get('status') == 1 && session()->get('role_id') <= 4) {
-            // dd($data['deadline']);
-            return view('/dashboard', $data);
-            // return view('dash', $data);
-        } elseif (session()->get('status') == 1 && session()->get('role_id') == 5) {
 
+        // 🔹 total keluarga (BNBA)
+        $totalKK = $this->DtsenKkModel->countVerifiedByUser($roleId, $filter);
+
+        // 🔹 total draft (status = 'draft')
+        $totalDraft = $this->DtsenDraftModel->countDraftByUser($roleId, $filter);
+
+        // 🔹 data desil (kategori kesejahteraan)
+        $dataDesil = $this->DtsenSeModel->getDesilByRole($roleId, $filter);
+
+
+        // dd($totalPembaruan);
+        // dd([
+        //     'userRole' => $userRole,
+        //     'wilayahTugas' => $wilayahTugas,
+
+        // ]);
+
+        // 🔹 Total Usulan Bansos Bulan Ini
+        $totalUsulan = $this->DtsenUsulanBansosModel->countUsulanBansosBulanIni($roleId, $filter);
+
+
+        // 🔹 Deadline (optional)
+        $deadline = $this->GenModel->getDeadline();
+        foreach ($deadline as $d) {
+            $dd_waktu_start = date_create($d['dd_waktu_start']);
+            $dd_waktu_end = date_create($d['dd_waktu_end']);
+        }
+
+        // 🔹 Siapkan Data ke View
+        $data = [
+            'title'          => 'Dashboard',
+            'totalKK'        => $totalKK,
+            'totalUsulan'    => $totalUsulan,
+            'totalDraft'     => $totalDraft,
+            'dataDesil'      => $dataDesil,
+            'dd_waktu_start' => $dd_waktu_start ?? null,
+            'dd_waktu_end'   => $dd_waktu_end ?? null,
+            'user_login'     => $this->AuthModel->getUserId(), // ✅ ditambahkan kembali
+        ];
+
+        // dd($data);
+
+        // ✅ Set Flashdata untuk notifikasi login
+        if (!session()->getFlashdata('login_success')) {
+            session()->setFlashdata('login_success', true);
+        }
+
+        // 🔹 Tampilkan view dashboard futuristik
+        if (session()->get('status') == 1 && $roleId <= 4) {
+            return view('dashboard', $data);
+        } elseif (session()->get('status') == 1 && $roleId == 5) {
+            // 🔸 Mode operator sekolah (contoh tetap)
             $data = [
                 'title' => 'Data Kartu Indonesia Pintar',
                 'statusRole' => $this->GenModel->getStatusRole(),
                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
-                'nama_sekolah' => $this->UsersModel->getSchool()->getResultArray(),
+                'nama_sekolah' => $this->AuthModel->getSchool()->getResultArray(),
                 'jenjang_sekolah' => $this->GenModel->getSekolahJenjang()->getResultArray(),
-                'kelas_sekolah' => $this->KipModel->getKelas()->getResultArray(),
+                'kelas_sekolah' => $this->GenModel->getKelas()->getResultArray(),
             ];
             return view('dtks/data/kip/home', $data);
         }
@@ -157,8 +150,6 @@ class Pages extends BaseController
 
         return $this->response->setJSON($rekapUsulanArray);
     }
-
-
 
     public function tables()
     {

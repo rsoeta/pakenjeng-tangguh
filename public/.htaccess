@@ -1,42 +1,15 @@
-# ===============================================================
-# 🚀 CodeIgniter 4 - Pretty URLs (no index.php)
-# Works on IdCloudHost / LiteSpeed / Apache PHP 8.1
-# ===============================================================
-
-# Force PHP 8.1
-RemoveHandler .php
-RemoveHandler .php7
-RemoveHandler .phtml
-AddHandler application/x-httpd-alt-php81 .php .php7 .phtml
-AddType application/x-httpd-alt-php81 .php
-
-# Enable Rewrite Engine
 <IfModule mod_rewrite.c>
-    Options +FollowSymlinks
     RewriteEngine On
-
-    # Set RewriteBase to subfolder if needed (root for subdomain)
-    RewriteBase /
-
-    # Redirect Trailing Slashes...
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} (.+)/$
-    RewriteRule ^ %1 [L,R=301]
-
-    # Rewrite "www" to non-www
-    RewriteCond %{HTTPS} !=on
-    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-    RewriteRule ^ http://%1%{REQUEST_URI} [R=301,L]
-
-    # Send non-existing requests to index.php
+    # Ensure index.php is hidden (CI4 front controller)
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.php/$1 [L]
-
-    # Ensure Authorization header is passed along
-    RewriteCond %{HTTP:Authorization} .
-    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    RewriteRule ^(.*)$ index.php/$1 [L,NC,QSA]
 </IfModule>
 
-# Disable directory browsing
+# Force PHP 8.1 handler (if host supports alt php handlers)
+<IfModule mime_module>
+    AddHandler application/x-httpd-alt-php81 .php .php7 .phtml
+</IfModule>
+
+# Security: disable directory listing
 Options -Indexes

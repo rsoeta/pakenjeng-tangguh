@@ -48,4 +48,12 @@ class Kint extends \CodeIgniter\Config\BaseConfig
             TextRenderer::$decorations = false;
         }
     }
+
+    public array $plugins = [
+        'Kint\\Parser\\FsPathPlugin',
+        'Kint\\Parser\\JsonPlugin',
+        'Kint\\Parser\\TracePlugin',
+        'Kint\\Parser\\ThrowablePlugin',
+        'Kint\\Parser\\DateTimePlugin',
+    ];
 }

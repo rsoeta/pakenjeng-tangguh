@@ -1,0 +1,437 @@
+/* 🌿 Navbar SINDEN */
+.navbar-sinden {
+    background: linear-gradient(90deg, #2ecc71 0%, #a3e4d7 45%, #f7dc6f 100%) !important;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    border-bottom: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Logo & Brand */
+.navbar-sinden .navbar-brand {
+    font-weight: 600;
+    color: #fff !important;
+    letter-spacing: 0.5px;
+}
+
+/* Hover efek */
+.navbar-sinden .nav-link:hover {
+    color: #ffeaa7 !important;
+    transition: color 0.3s ease-in-out;
+}
+
+/* Aktif menu */
+.navbar-sinden .nav-link.active {
+    color: #fef9e7 !important;
+    font-weight: 600;
+}
+
+/* Icon style */
+.navbar-sinden .nav-icon {
+    color: #fefefe;
+    opacity: 0.9;
+}
+
+.navbar-sinden .nav-icon:hover {
+    opacity: 1;
+}
+
+/* Tambahan efek “gelombang suara” di background (opsional dekoratif) */
+.navbar-sinden::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='40' viewBox='0 0 200 40'%3E%3Cpath fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='2' d='M0 20 Q25 5 50 20 T100 20 T150 20 T200 20'/%3E%3C/svg%3E") repeat-x;
+    opacity: 0.4;
+    pointer-events: none;
+    animation: sindenWave 6s linear infinite;
+}
+
+@keyframes sindenWave {
+    from { background-position-x: 0; }
+    to { background-position-x: 200px; }
+}
+
+/* 🌿 Default (Light Theme) */
+.navbar-sinden {
+    background: linear-gradient(90deg, #2ecc71 0%, #a3e4d7 45%, #f7dc6f 100%) !important;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-sinden {
+    background: linear-gradient(180deg, #145a32 0%, #1e8449 100%);
+    color: #ecf0f1;
+}
+
+.sidebar-sinden .nav-link,
+.sidebar-sinden .brand-link {
+    color: #ecf0f1 !important;
+}
+
+.sidebar-sinden .nav-link.active {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+}
+
+.sidebar-sinden .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* 🌙 Dark Mode Theme */
+body.dark-mode {
+    background-color: #0d1117 !important;
+    color: #e5e8e8 !important;
+}
+
+/* Navbar dark mode */
+body.dark-mode .navbar-sinden {
+    background: linear-gradient(90deg, #0b3d2e 0%, #145a32 45%, #b7950b 100%) !important;
+    color: #fefefe;
+    box-shadow: 0 2px 6px rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .navbar-sinden .nav-link:hover {
+    color: #f4d03f !important;
+}
+
+/* Sidebar dark mode */
+body.dark-mode .sidebar-sinden {
+    background: linear-gradient(180deg, #0b3d2e 0%, #154360 100%);
+    color: #f9e79f;
+}
+
+body.dark-mode .sidebar-sinden .nav-link.active {
+    background: rgba(255, 215, 0, 0.2);
+}
+
+body.dark-mode .sidebar-sinden .nav-link:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Ikon toggle animasi */
+#toggleTheme {
+    transition: all 0.3s ease;
+}
+
+body.dark-mode #toggleTheme {
+    border-color: #f4d03f !important;
+    color: #f4d03f !important;
+}
+
+.sidebar-sinden .nav-link.active {
+    border-left: 4px solid #f4d03f;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* 🌙 Warna font konten dashboard pada dark-mode */
+
+/* Untuk container utama dashboard */
+body.dark-mode .content-wrapper,
+body.dark-mode section.content {
+    background-color: #0d1117 !important;
+    color: #f1f2f3 !important;
+}
+
+/* Untuk kartu ringkas statistik utama */
+body.dark-mode .stat-card,
+body.dark-mode .info-box,
+body.dark-mode .small-box {
+    background: #182c25 !important;
+    color: #f8f9fa !important;
+    box-shadow: 0 2px 5px rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Label atau judul di dalam kartu */
+body.dark-mode .stat-card h6,
+body.dark-mode .info-box-text,
+body.dark-mode .small-box .inner h6,
+body.dark-mode .small-box .inner span {
+    color: #e0e6e8 !important;
+}
+
+/* Angka utama di kartu */
+body.dark-mode .stat-card h3,
+body.dark-mode .info-box-number,
+body.dark-mode .small-box .inner h3 {
+    color: #fefefe !important;
+    font-weight: 600;
+}
+
+/* Ikon di kartu */
+body.dark-mode .info-box-icon,
+body.dark-mode .small-box .icon {
+    color: #f4d03f !important;
+    opacity: 0.9;
+}
+
+/* Hover animasi ringan */
+body.dark-mode .small-box:hover,
+body.dark-mode .info-box:hover {
+    background: #1b3b2e !important;
+    transform: translateY(-2px);
+    transition: all 0.2s ease-in-out;
+}
+
+/* Untuk judul section seperti “Jumlah Keluarga Berdasarkan Kategori Desil” */
+body.dark-mode h5, 
+body.dark-mode h4 {
+    color: #f8f9fa !important;
+}
+
+/* Chart container */
+body.dark-mode .chart-box {
+    background: #182c25 !important;
+    border-radius: 10px;
+    padding: 15px;
+    color: #f8f9fa !important;
+    box-shadow: 0 2px 6px rgba(255, 255, 255, 0.05);
+}
+
+/* Warna garis pembatas di chart / card */
+body.dark-mode .card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* 🌙 Dark Mode — DataTables Styling SINDEN */
+body.dark-mode table.dataTable {
+  background-color: #1b2228 !important;
+  color: #f8f9fa !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-mode table.dataTable thead th {
+  background-color: #22313f !important;
+  color: #fdfdfd !important;
+  border-bottom: 2px solid #2ecc71 !important; /* aksen hijau SINDEN */
+  font-weight: 600;
+}
+
+body.dark-mode table.dataTable tbody td {
+  background-color: #1b2228 !important;
+  color: #f8f9fa !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode table.dataTable tbody tr:hover {
+  background-color: #243640 !important;
+  transition: background 0.2s ease-in-out;
+}
+
+/* Text di footer/pagination */
+body.dark-mode .dataTables_info,
+body.dark-mode .dataTables_paginate,
+body.dark-mode .dataTables_length label,
+body.dark-mode .dataTables_filter label {
+  color: #e5e7e9 !important;
+}
+
+/* Input search dan select entries */
+body.dark-mode .dataTables_filter input,
+body.dark-mode .dataTables_length select {
+  background-color: #243640 !important;
+  color: #f8f9fa !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 4px;
+}
+
+body.dark-mode .dataTables_filter input::placeholder {
+  color: #aeb6bf !important;
+}
+
+/* Tombol pagination */
+body.dark-mode .paginate_button {
+  background: #182c25 !important;
+  color: #f8f9fa !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+body.dark-mode .paginate_button.current,
+body.dark-mode .paginate_button:hover {
+  background: #2ecc71 !important;
+  color: #fff !important;
+  border-color: #2ecc71 !important;
+}
+
+/* Header tab aktif (contohnya “Daftar Keluarga / Draft Pembaruan”) */
+body.dark-mode .nav-tabs .nav-link.active {
+  background-color: #22313f !important;
+  color: #fdfdfd !important;
+  border-color: #2ecc71 #2ecc71 transparent !important;
+  font-weight: 600;
+}
+
+/* Tabs non-aktif */
+body.dark-mode .nav-tabs .nav-link {
+  background-color: #1b2228 !important;
+  color: #e0e0e0 !important;
+  border-color: transparent;
+}
+
+body.dark-mode .nav-tabs .nav-link:hover {
+  color: #f4d03f !important;
+}
+
+/* Card pembungkus DataTable */
+body.dark-mode .card,
+body.dark-mode .dataTables_wrapper {
+  background-color: #182c25 !important;
+  color: #f8f9fa !important;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 2px 5px rgba(255, 255, 255, 0.05);
+}
+
+/* Warna indikator sort di header */
+body.dark-mode table.dataTable thead .sorting:after,
+body.dark-mode table.dataTable thead .sorting_asc:after,
+body.dark-mode table.dataTable thead .sorting_desc:after {
+  color: #f4d03f !important;
+}
+
+/* Tombol aksi tambahan (misal Tambah Keluarga Baru) */
+body.dark-mode .btn-primary {
+  background-color: #27ae60 !important;
+  border-color: #27ae60 !important;
+  color: #fff !important;
+}
+
+body.dark-mode .btn-primary:hover {
+  background-color: #2ecc71 !important;
+  border-color: #2ecc71 !important;
+}
+
+body.dark-mode table.dataTable.stripe tbody tr:nth-of-type(odd) {
+  background-color: #1e272e !important;
+}
+
+/* 🌙 SweetAlert2 – Mode Gelap Khusus SINDEN */
+body.dark-mode .swal2-popup {
+  background: linear-gradient(180deg, #182c25 0%, #0d1117 100%) !important;
+  color: #f8f9fa !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .swal2-title {
+  color: #fefefe !important;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+body.dark-mode .swal2-html-container {
+  color: #d6dbdf !important;
+  font-size: 15px;
+}
+
+/* Tombol utama */
+body.dark-mode .swal2-confirm {
+  background-color: #2ecc71 !important; /* emerald green */
+  border: none !important;
+  color: #fff !important;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(46, 204, 113, 0.4);
+}
+
+body.dark-mode .swal2-confirm:hover {
+  background-color: #27ae60 !important;
+}
+
+/* Tombol batal */
+body.dark-mode .swal2-cancel {
+  background-color: #424949 !important;
+  color: #f8f9fa !important;
+  border: none !important;
+}
+
+body.dark-mode .swal2-cancel:hover {
+  background-color: #515a5a !important;
+}
+
+/* Icon SweetAlert */
+body.dark-mode .swal2-icon.swal2-success {
+  border-color: #27ae60 !important;
+  color: #2ecc71 !important;
+}
+
+body.dark-mode .swal2-icon.swal2-warning {
+  border-color: #f4d03f !important;
+  color: #f4d03f !important;
+}
+
+body.dark-mode .swal2-icon.swal2-error {
+  border-color: #e74c3c !important;
+  color: #e74c3c !important;
+}
+
+/* Input dan checkbox */
+body.dark-mode .swal2-input {
+  background-color: #243640 !important;
+  color: #f8f9fa !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-mode .swal2-input:focus {
+  border-color: #2ecc71 !important;
+  box-shadow: 0 0 0 1px #2ecc71 !important;
+}
+
+/* Animasi masuk */
+.swal2-popup {
+  transition: all 0.25s ease-in-out;
+  border-radius: 12px !important;
+}
+
+/* 🔧 Perbaiki jarak antara navbar dan konten utama */
+.content-wrapper {
+  padding-top: 0.75rem !important; /* default biasanya 1.5rem–2rem */
+}
+
+/* Jika pakai .content-header di dashboard, perkecil juga */
+.content-header {
+  margin-bottom: 0.5rem !important;
+  padding-top: 0 !important;
+  padding-bottom: 0.25rem !important;
+}
+
+/* Untuk perangkat mobile (lebar < 768px), kurangi lebih jauh */
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding-top: 0.5rem !important;
+  }
+  .content-header {
+    margin-bottom: 0.25rem !important;
+  }
+}
+
+/* Pastikan kartu hero “Assalamualaikum” tidak punya margin berlebih */
+.hero-welcome,
+.hero-card,
+.greeting-card {
+  margin-top: 0 !important;
+}
+
+.content > .container-fluid {
+  padding-top: 0.5rem !important;
+}
+
+/* 🌿 Default compact layout */
+.content-wrapper {
+  padding-top: 0.75rem !important;
+  transition: padding-top 0.3s ease;
+}
+
+/* Header konten */
+.content-header {
+  margin-bottom: 0.5rem !important;
+  padding-top: 0 !important;
+  padding-bottom: 0.25rem !important;
+}
+
+/* Mobile default fallback */
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding-top: 0.5rem !important;
+  }
+}
+
+

@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use App\Traits\WilayahFilterTrait;
 
 class DtsenKkModel extends Model
 {
+    use WilayahFilterTrait; // ✅ panggil trait-nya
+
     protected $table            = 'dtsen_kk';
     protected $primaryKey       = 'id_kk';
     protected $allowedFields    = [
@@ -174,5 +177,29 @@ class DtsenKkModel extends Model
 
         $builder->orderBy('kk.no_kk', 'ASC');
         return $builder->get()->getResultArray();
+    }
+    /**
+     * Hitung total pembaruan keluarga (yang sudah diverifikasi)
+     */
+    public function countVerified()
+    {
+        return $this->selectCount('id')
+            // ->where('status', 'diverifikasi')
+            ->countAllResults();
+    }
+
+    /**
+     * Count total KK (BNBA) pada dtsen_kk sesuai filter.
+     * $filter sama formatnya dengan getFilteredData
+     */
+    public function countVerifiedByUser(int $userRole, array $filter = [])
+    {
+        $builder = $this->db->table('dtsen_kk kk')
+            ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left');
+
+        // panggil trait helper
+        $this->applyWilayahFilter($builder, $filter, $userRole);
+
+        return (int) $builder->countAllResults();
     }
 }

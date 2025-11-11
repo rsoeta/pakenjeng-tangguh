@@ -47,8 +47,8 @@
                             <tr>
                                 <th></th>
                                 <th>No.</th>
-                                <th>No KK</th>
                                 <th>Kepala Keluarga</th>
+                                <th>No KK</th>
                                 <th>Alamat</th>
                                 <th>Wilayah</th>
                                 <th>Desil</th>
@@ -65,8 +65,8 @@
                             <tr>
                                 <th></th>
                                 <th>No.</th>
-                                <th>No KK</th>
                                 <th>Kepala Keluarga</th>
+                                <th>No KK</th>
                                 <th>Status</th>
                                 <th>Tanggal Dibuat</th>
                                 <th>Petugas</th>
@@ -105,11 +105,11 @@
                     render: (d, t, r, m) => m.row + 1
                 },
                 {
-                    data: 'no_kk'
-                },
-                {
                     data: 'kepala_keluarga',
                     className: 'text-capitalize'
+                },
+                {
+                    data: 'no_kk'
                 },
                 {
                     data: 'alamat',
@@ -176,12 +176,12 @@
                     render: (d, t, r, m) => m.row + 1
                 },
                 {
-                    data: 'no_kk_target',
-                    title: 'No KK'
-                },
-                {
                     data: 'nama_kepala',
                     title: 'Kepala Keluarga'
+                },
+                {
+                    data: 'no_kk_target',
+                    title: 'No KK'
                 },
                 {
                     data: 'status',

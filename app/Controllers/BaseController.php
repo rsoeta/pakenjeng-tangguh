@@ -9,19 +9,15 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
-/**
- * Class BaseController
- *
- * BaseController provides a convenient place for loading components
- * and performing functions that are needed by all your controllers.
- * Extend this class in any new controllers:
- *     class Home extends BaseController
- *
- * For security be sure to declare any new methods as protected or private.
- */
+// Import model yang diperlukan
+use App\Models\Dtks\AuthModel;
+use App\Models\GenModel;
 
 class BaseController extends Controller
 {
+	protected $AuthModel;
+	protected $GenModel;
+
 	/**
 	 * Instance of the main Request object.
 	 *
@@ -31,8 +27,7 @@ class BaseController extends Controller
 
 	/**
 	 * An array of helpers to be loaded automatically upon
-	 * class instantiation. These helpers will be available
-	 * to all other controllers that extend BaseController.
+	 * class instantiation.
 	 *
 	 * @var array
 	 */
@@ -40,12 +35,7 @@ class BaseController extends Controller
 
 	/**
 	 * Constructor.
-	 *
-	 * @param RequestInterface  $request
-	 * @param ResponseInterface $response
-	 * @param LoggerInterface   $logger
 	 */
-
 	public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
 	{
 		// Do Not Edit This Line
@@ -54,7 +44,17 @@ class BaseController extends Controller
 		//--------------------------------------------------------------------
 		// Preload any models, libraries, etc, here.
 		//--------------------------------------------------------------------
-		// E.g.: $this->session = \Config\Services::session();
+		$this->AuthModel = new AuthModel();
+		$this->GenModel  = new GenModel();
+
+		// Ambil data global
+		$user_login  = $this->AuthModel->getUserId() ?? ['fullname' => 'Guest', 'user_image' => 'default.png'];
+		$statusRole  = $this->GenModel->getStatusRole() ?? [];
+
+		// ✅ Simpan ke shared data untuk semua view
+		$renderer = service('renderer');
+		$renderer->setVar('user_login', $user_login);
+		$renderer->setVar('statusRole', $statusRole);
 	}
 
 	protected function showError($message, $title = 'Terjadi Kesalahan')
@@ -64,4 +64,13 @@ class BaseController extends Controller
 			'message' => $message
 		]);
 	}
+
+	// Optional helper render agar bisa include variabel user_login otomatis
+	// protected function render($view, $data = [])
+	// {
+	// 	$data['user_login'] = $this->AuthModel->getUserId();
+	// 	$data['statusRole'] = $this->GenModel->getStatusRole();
+	// 	return view($view, $data);
+	// }
+
 }

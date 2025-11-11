@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Models\Dtks\AuthModel;
 use App\Models\DtsenArtModel;
 use App\Models\DtsenSeModel;
-use App\Models\UsulanBansosModel;
+use App\Models\DtsenUsulanBansosModel;
 use App\Models\GenModel;
 use App\Models\Dtks\Usulan22Model;
 use App\Models\Dtks\BansosModel;
@@ -17,7 +17,7 @@ class UsulanBansos extends Controller
     protected $artModel;
     protected $seModel;
     protected $usulanModel;
-    protected $usulanBansosModel;
+    protected $DtsenUsulanBansosModel;
     protected $BansosModel;
     protected $GenModel;
 
@@ -27,7 +27,7 @@ class UsulanBansos extends Controller
         $this->artModel = new DtsenArtModel();
         $this->seModel = new DtsenSeModel();
         $this->usulanModel = new Usulan22Model();
-        $this->usulanBansosModel = new UsulanBansosModel();
+        $this->DtsenUsulanBansosModel = new DtsenUsulanBansosModel();
         $this->BansosModel = new BansosModel();
         $this->GenModel = new GenModel();
 
@@ -271,7 +271,7 @@ class UsulanBansos extends Controller
             'created_by' => session()->get('nik') ?? 'system',
         ];
 
-        $this->usulanBansosModel->insert($data);
+        $this->DtsenUsulanBansosModel->insert($data);
 
         // 🔄 update flag individu
         $db->table('dtsen_art')
@@ -311,7 +311,7 @@ class UsulanBansos extends Controller
                 ]);
             }
 
-            $model = new \App\Models\UsulanBansosModel();
+            $model = new \App\Models\DtsenUsulanBansosModel();
             $data = $model->find($id);
 
             if (!$data) {
@@ -345,7 +345,7 @@ class UsulanBansos extends Controller
         $tahun  = date('Y');
         $status = $this->request->getGet('status'); // bisa 'draft' atau 'diverifikasi'
 
-        $builder = $this->usulanBansosModel
+        $builder = $this->DtsenUsulanBansosModel
             ->select("
             dtsen_usulan_bansos.*,
             dtsen_art.nama,
@@ -383,12 +383,12 @@ class UsulanBansos extends Controller
     public function verifikasi($id)
     {
         try {
-            $usulan = $this->usulanBansosModel->find($id);
+            $usulan = $this->DtsenUsulanBansosModel->find($id);
             if (!$usulan) {
                 return $this->response->setJSON(['success' => false, 'message' => 'Data tidak ditemukan.']);
             }
 
-            $this->usulanBansosModel->update($id, [
+            $this->DtsenUsulanBansosModel->update($id, [
                 'status' => 'diverifikasi',
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updated_by' => session()->get('nik') ?? session()->get('user_nik') ?? null

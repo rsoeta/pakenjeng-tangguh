@@ -9,7 +9,9 @@ $uri = $request->getUri()->getSegment(1);
 $menus = menu()
 ?>
 
-<aside class="main-sidebar sidebar-dark-primary elevation-4" style="height: 100%;">
+<!-- <aside class="main-sidebar sidebar-dark-primary elevation-4" style="height: 100%;"> -->
+<aside class="main-sidebar sidebar-sinden elevation-4">
+
     <!-- Brand Logo -->
     <a href="/pages" class="brand-link">
         <img src="<?= logoApp(); ?>" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">

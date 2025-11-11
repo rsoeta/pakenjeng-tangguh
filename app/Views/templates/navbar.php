@@ -1,9 +1,12 @@
 <?php
-
-$user_image = $user_login['user_image'];
+$user_image = isset($user_login['user_image'])
+    ? $user_login['user_image']
+    : 'default.png'; // fallback image kalau kosong
 ?>
 
-<nav class="main-header navbar navbar-expand navbar-dark layout-navbar-fixed">
+
+<!-- <nav class="main-header navbar navbar-expand navbar-dark layout-navbar-fixed"> -->
+<nav class="main-header navbar navbar-expand navbar-sinden layout-navbar-fixed position-relative">
     <!-- Left navbar links -->
     <ul class="navbar-nav">
         <li class="nav-item">
@@ -14,6 +17,12 @@ $user_image = $user_login['user_image'];
         </li>
     </ul>
     <ul class="navbar-nav ml-auto">
+        <div class="text-right mr-3">
+            <button id="toggleTheme" class="btn btn-sm btn-outline-light rounded-pill">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+
         <li class="nav-item dropdown">
             <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
                 <img src="<?= Foto_Profil($user_image, 'profil'); ?>" class="img-size-50 mr-3 img-circle float-right" style="width: 30px; height: 30px; border-radius: 50%;">

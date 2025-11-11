@@ -21,7 +21,7 @@ $routes->setDefaultController('Landing');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
 $routes->set404Override(function () {
-    return view('maintenance2');
+	return view('maintenance2');
 });
 $routes->setAutoRoute(true);
 
@@ -52,8 +52,15 @@ $routes->get('article/(:segment)', 'Landing::article/$1');
 
 $routes->post('cek_usulan', 'Landing::cek_usulan');
 
-$routes->get('dashboard', 'Auth\Pages::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->get('pages', 'Auth\Pages::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+// ✅ Cara 1 (lebih direkomendasikan)
+$routes->get('dashboard', 'Auth\Pages::index', [
+	'filter' => ['authfilterdtks', 'menufilterdtks']
+]);
+
+$routes->get('pages', 'Auth\Pages::index', [
+	'filter' => ['authfilterdtks', 'menufilterdtks']
+]);
+
 $routes->get('getNilaiJumlah', 'Auth\Pages::getNilaiJumlah');
 
 $routes->get('logout', 'Auth\Auth::logout');

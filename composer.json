@@ -18,6 +18,13 @@
     "post-update-cmd": [
       "CodeIgniter\\ComposerScripts::postUpdate",
       "php spark commands"
-    ]
+    ],
+    "post-install-cmd": [
+        "php scripts/fix_kint.php"
+    ],
+    "post-update-cmd": [
+        "php scripts/fix_kint.php"
+    ],
+    "auto-fix-kint": "php scripts/fix_kint.php"
   }
 }
