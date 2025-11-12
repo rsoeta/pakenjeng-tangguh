@@ -6,26 +6,20 @@ use CodeIgniter\Config\BaseConfig;
 
 class Email extends BaseConfig
 {
-	public $fromEmail;
-	public $fromName;
-	public $protocol = 'smtp';
-	public $SMTPHost;
-	public $SMTPUser;
-	public $SMTPPass;
-	public $SMTPPort;
-	public $SMTPCrypto;
-	public $mailType = 'html';
-	public $charset = 'UTF-8';
-	public $wordWrap = true;
+	public string $fromEmail  = 'no-reply@sinden.pasirlangu.desa.id';
+	public string $fromName   = 'SINDEN System';
+	public string $recipients = '';
 
-	public function __construct()
-	{
-		$this->fromEmail = env('email.fromEmail', 'default@domain.com');
-		$this->fromName = env('email.fromName', 'Default Name');
-		$this->SMTPHost = env('email.SMTPHost', 'smtp.domain.com');
-		$this->SMTPUser = env('email.SMTPUser', 'user@domain.com');
-		$this->SMTPPass = env('email.SMTPPass', '');
-		$this->SMTPPort = env('email.SMTPPort', 587);
-		$this->SMTPCrypto = env('email.SMTPCrypto', 'tls');
-	}
+	// Gunakan SMTP
+	public string $protocol   = 'smtp';
+	public string $SMTPHost   = 'sinden.pasirlangu.desa.id';
+	public string $SMTPUser   = 'no-reply@sinden.pasirlangu.desa.id';
+	public string $SMTPPass   = 'rdSZj!XKU^kn}G99'; // <— ubah sesuai password akun email
+	public int    $SMTPPort   = 465; // 465=SSL, 587=TLS
+	public string $SMTPCrypto = 'ssl'; // ubah ke 'tls' jika pakai port 587
+
+	public string $mailType   = 'html';
+	public bool   $validate   = true;
+	public string $charset    = 'utf-8';
+	public string $newline    = "\r\n";
 }

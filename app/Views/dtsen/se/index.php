@@ -27,19 +27,28 @@
             <div class="card-body tab-content">
                 <!-- ===================== TAB 1: DAFTAR KELUARGA ===================== -->
                 <div class="tab-pane fade show active" id="tabDaftar" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div>
-                            <label for="filterRW" class="form-label fw-bold mb-0">Filter RW:</label>
-                            <select id="filterRW" class="form-select form-select-sm d-inline-block" style="width: 120px;">
+                    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+                        <!-- <div class="d-flex align-items-center">
+                            <label for="filterRW" class="form-label fw-bold mb-0 me-2">Filter RW:</label>
+                            <select id="filterRW" class="form-select form-select-sm" style="width: 120px;">
                                 <option value="">[ Semua ]</option>
                                 <?php foreach ($dataRW as $rw): ?>
                                     <option value="<?= $rw['rw'] ?>"><?= $rw['rw'] ?></option>
                                 <?php endforeach; ?>
                             </select>
+                        </div> -->
+                        <!-- buat div dibwah ini rata kanan -->
+                        <div class="ms-auto d-flex gap-2 mb-2">
+                            <!-- buat kedua tombol dibawah merapat dalam satu baris -->
+                            <div class="btn-group" role="group">
+                                <button id="btnReloadKeluarga" class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-sync-alt"></i> Muat Ulang
+                                </button>
+                                <button id="btnTambahKeluarga" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-user-plus"></i> Tambah Keluarga Baru
+                                </button>
+                            </div>
                         </div>
-                        <button id="btnTambahKeluarga" class="btn btn-primary btn-sm">
-                            <i class="fas fa-user-plus"></i> Tambah Keluarga Baru
-                        </button>
                     </div>
 
                     <table id="tableKeluarga" class="table table-striped table-hover nowrap w-100">
@@ -60,6 +69,12 @@
 
                 <!-- ===================== TAB 2: DRAFT PEMBARUAN ===================== -->
                 <div class="tab-pane fade" id="tabDraft" role="tabpanel">
+                    <div class="d-flex justify-content-end mb-2">
+                        <button id="btnReloadDraft" class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-sync-alt"></i> Muat Ulang
+                        </button>
+                    </div>
+
                     <table id="tableDraftKeluarga" class="table table-striped table-hover nowrap w-100">
                         <thead class="text-center">
                             <tr>
@@ -133,18 +148,18 @@
                     data: null,
                     className: 'text-nowrap',
                     render: row => `
-          <a href="/pembaruan-keluarga/detail/${row.id_kk}" class="btn btn-success btn-sm me-1" title="Pembaruan Keluarga">
-            <i class="fas fa-users-cog"></i>
-          </a>
-          <button class="btn btn-primary btn-sm btnInputDesil"
-            data-id="${row.id_kk}"
-            data-nama="${row.kepala_keluarga}"
-            data-nokk="${row.no_kk}"
-            data-alamat="${row.alamat}"
-            data-desil="${row.kategori_desil ?? ''}">
-            <i class="fas fa-hand-holding-heart"></i>
-          </button>
-        `
+                        <a href="/pembaruan-keluarga/detail/${row.id_kk}" class="btn btn-success btn-sm me-1" title="Pembaruan Keluarga">
+                            <i class="fas fa-users-cog"></i>
+                        </a>
+                        <button class="btn btn-primary btn-sm btnInputDesil"
+                            data-id="${row.id_kk}"
+                            data-nama="${row.kepala_keluarga}"
+                            data-nokk="${row.no_kk}"
+                            data-alamat="${row.alamat}"
+                            data-desil="${row.kategori_desil ?? ''}">
+                            <i class="fas fa-hand-holding-heart"></i>
+                        </button>
+                    `
                 }
             ],
             responsive: true,
@@ -158,6 +173,14 @@
 
         $('#filterRW').on('change', () => tableKeluarga.ajax.reload());
         $('#btnTambahKeluarga').on('click', () => window.location.href = '/pembaruan-keluarga/tambah');
+        $('#btnReloadKeluarga').on('click', () => {
+            tableKeluarga.ajax.reload(null, false);
+            const btn = $(this);
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Memuat...');
+            setTimeout(() => {
+                btn.prop('disabled', false).html('<i class="fas fa-sync-alt"></i> Muat Ulang');
+            }, 800);
+        });
 
         // ========================= 🟡 TABLE DRAFT PEMBARUAN =========================
         const tableDraft = $('#tableDraftKeluarga').DataTable({
@@ -203,16 +226,25 @@
                     title: 'Aksi',
                     orderable: false,
                     render: id => `
-                    <a href="/pembaruan-keluarga/lanjutkan/${id}" class="btn btn-warning btn-sm">
-                        <i class="fas fa-edit"></i> Lanjutkan
-                    </a>
-        `
+                        <a href="/pembaruan-keluarga/lanjutkan/${id}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit"></i> Lanjutkan
+                        </a>
+                    `
                 }
             ],
             responsive: true,
             pageLength: 10,
             createdRow: row => $(row).find('td').css('text-align', 'left'),
             headerCallback: thead => $(thead).find('th').css('text-align', 'center')
+        });
+
+        $('#btnReloadDraft').on('click', function() {
+            tableDraft.ajax.reload(null, false);
+            const btn = $(this);
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Memuat...');
+            setTimeout(() => {
+                btn.prop('disabled', false).html('<i class="fas fa-sync-alt"></i> Muat Ulang');
+            }, 800);
         });
 
     });

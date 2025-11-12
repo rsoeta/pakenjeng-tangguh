@@ -6,9 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SINDEN — Sistem Informasi Data Ekonomi dan Sosial Desa</title>
   <link rel="stylesheet" href="<?= base_url('assets/css/sinden-landing.css'); ?>">
+  <link rel="stylesheet" href="<?= base_url('assets/dist/css/authstyle.css'); ?>">
   <link rel="icon" href="<?= base_url('assets/logo/SINDEN-logo.png'); ?>" type="image/png">
   <!-- render fonts poppins -->
-  <link href="<?= base_url('assets/font/Poppins/poppins.css'); ?>" rel="stylesheet">
+  <!-- <link href="<?= base_url('assets/font/Poppins/poppins.css'); ?>" rel="stylesheet"> -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 
@@ -22,11 +25,11 @@
     </div>
   </header>
 
-  <section id="home" class="hero" style="background-image: url('<?= $background ?>');">
+  <section id="home" class="hero">
     <div class="overlay"></div>
     <div class="hero-content">
       <h1>SINDEN</h1>
-      <p>Sistem Informasi Data Ekonomi dan Sosial Desa</p>
+      <p><?php echo titleApp() ?></p>
       <a href="<?= base_url('login'); ?>" class="btn-primary">Buka SINDEN Sekarang</a>
     </div>
   </section>

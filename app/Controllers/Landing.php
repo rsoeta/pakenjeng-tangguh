@@ -41,6 +41,7 @@ class Landing extends BaseController
 
 		// Kirim data ke view
 		return view('landing', [
+			'titleApp' => titleApp(),
 			'background' => base_url($background),
 			'footerText' => $footerText,
 			'version'    => $version,

@@ -8,11 +8,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Rian Sutarsa">
-    <meta name="keywords" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng">
-    <meta name="description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng">
+    <meta name="keywords" content="<?= titleApp(); ?>">
+    <meta name="description" content="<?= titleApp(); ?>">
 
     <meta property="og:title" content="<?= nameApp(); ?> | <?= $title; ?>" />
-    <meta property="og:description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng" />
+    <meta property="og:description" content="<?= titleApp(); ?>" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="<?= base_url(); ?>" />
     <meta property="og:image" content="<?= logoApp(); ?>" />
@@ -21,10 +21,10 @@
     <meta name="twitter:site" content="@sutarsarian" />
     <meta name="twitter:creator" content="@sutarsarian" />
     <meta name="twitter:title" content="<?= nameApp(); ?> | <?= $title; ?>" />
-    <meta name="twitter:description" content="Aplikasi Pembantu Pemutakhiran Data Terpadu Kesejahteraan Sosial (DTKS) Kecamatan Pakenjeng" />
+    <meta name="twitter:description" content="<?= titleApp(); ?>" />
     <meta name="twitter:image" content="<?= logoApp(); ?>" />
 
-    <title><?= $title; ?> | <?= nameApp() . ' Kec. ' . ucwords(strtolower(Profil_Admin()['namaKec'])); ?></title>
+    <title><?= $title; ?> | <?= nameApp(); ?></title>
 
 
     <!-- Google Font: Source Sans Pro -->

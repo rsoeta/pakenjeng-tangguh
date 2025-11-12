@@ -7,7 +7,6 @@
 <script src="https://www.google.com/recaptcha/api.js"></script>
 
 <!-- render fonts poppins -->
-<link href="<?= base_url('assets/font/Poppins/poppins.css'); ?>" rel="stylesheet">
 <style>
     :root {
         --green: #2EC4B6;
@@ -122,7 +121,9 @@
         <img src="<?= base_url('assets/logo/SINDEN-logo.png'); ?>" alt="SINDEN Logo">
     </a> -->
     <div class="login-logo">
-        <img src="<?= base_url('assets/logo/SINDEN-logo.png'); ?>" alt="SINDEN Logo">
+        <a href="<?= base_url(); ?>">
+            <img src="<?= base_url('assets/logo/SINDEN-logo.png'); ?>" alt="SINDEN Logo">
+        </a>
     </div>
     <div class="title">SINDEN</div>
     <div class="subtitle">Sistem Informasi Data Ekonomi dan Sosial Desa</div>

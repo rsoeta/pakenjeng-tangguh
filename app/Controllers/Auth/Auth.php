@@ -581,84 +581,95 @@ class Auth extends BaseController
 
     public function requestReset()
     {
-        // Aktifkan error reporting untuk debugging
-        error_reporting(E_ALL);
-        ini_set('display_errors', 1);
-
-        // Load helper tambahan jika diperlukan
         helper('opdtks_helper');
 
         $email = $this->request->getPost('email');
-        $nik = $this->request->getPost('nik');
+        $nik   = $this->request->getPost('nik');
 
-        // Cari user berdasarkan email dan NIK
-        $user = $this->AuthModel->where('email', $email)
+        // Validasi input
+        if (empty($email) || empty($nik)) {
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => 'Email dan NIK wajib diisi.'
+            ]);
+            return redirect()->back()->withInput();
+        }
+
+        $user = $this->AuthModel
+            ->where('email', $email)
             ->where('nik', $nik)
             ->first();
 
-        if ($user) {
-            try {
-                // Buat token unik
-                $token = bin2hex(random_bytes(32));
-
-                // Simpan token dan waktu kedaluwarsa di database
-                $this->AuthModel->save([
-                    'id' => $user['id'],
-                    'reset_token' => $token,
-                    'reset_expiry' => date('Y-m-d H:i:s', strtotime('+1 hour'))
-                ]);
-
-                // Buat link reset password
-                $resetLink = base_url("reset-password?token=$token");
-
-                // Konfigurasi dan kirim email
-                $emailService = \Config\Services::email();
-                $emailService->setTo($user['email']);
-                $emailService->setFrom(
-                    'admin@pakenjeng-tangguh.id', // Ganti dengan alamat email domain Anda
-                    nameApp() // Ambil nama aplikasi dari helper
-                );
-                $emailService->setSubject('Reset Password');
-                $emailService->setMessage("
-                <p>Halo, {$user['fullname']}!</p>
-                <p>Untuk mereset password Anda, silakan klik link berikut:</p>
-                <p><a href='{$resetLink}'>Reset Password</a></p>
-                <p>Link ini akan kedaluwarsa dalam waktu 1 jam.</p>
-            ");
-
-                // Kirim email dan tangani respon
-                if ($emailService->send()) {
-                    // Set flashdata untuk menampilkan pesan sukses di halaman login
-                    session()->setFlashdata('message', [
-                        'type' => 'success',
-                        'text' => 'Email reset password telah dikirim.',
-                        'context' => 'requestReset' // Identifikasi konteks
-                    ]);
-                    return redirect()->to(base_url('login'));
-                } else {
-                    // Tangani kesalahan pengiriman email
-                    $error = $emailService->printDebugger(['headers']);
-                    log_message('error', 'Error sending email: ' . $error);
-                    session()->setFlashdata('message', [
-                        'type' => 'error',
-                        'text' => 'Terjadi kesalahan dalam pengiriman email.'
-                    ]);
-                    return redirect()->back();
-                }
-            } catch (\Exception $e) {
-                // Tangani kesalahan lain (misalnya, random_bytes gagal)
-                log_message('error', 'Error in requestReset: ' . $e->getMessage());
-                session()->setFlashdata('message', [
-                    'type' => 'error',
-                    'text' => 'Terjadi kesalahan dalam proses reset password.'
-                ]);
-                return redirect()->back();
-            }
-        } else {
-            // Jika user tidak ditemukan
+        if (!$user) {
             session()->setFlashdata('message', [
                 'type' => 'error',
                 'text' => 'Data tidak ditemukan.'
+            ]);
+            return redirect()->back()->withInput();
+        }
+
+        try {
+            // Generate token dan simpan
+            $token = bin2hex(random_bytes(32));
+            $this->AuthModel->update($user['id'], [
+                'reset_token'  => $token,
+                'reset_expiry' => date('Y-m-d H:i:s', strtotime('+1 hour'))
+            ]);
+
+            // Siapkan email
+            $resetLink = base_url("reset-password?token={$token}");
+            $subject   = 'Reset Password Anda';
+            $message   = "
+            <p>Halo, <strong>{$user['fullname']}</strong>.</p>
+            <p>Kami menerima permintaan untuk mereset password akun Anda.</p>
+            <p>Silakan klik tautan berikut untuk melanjutkan proses:</p>
+            <p><a href='{$resetLink}' style='background:#28a745;color:white;padding:8px 12px;border-radius:4px;text-decoration:none;'>Reset Password</a></p>
+            <p>Link ini berlaku selama 1 jam.</p>
+            <hr>
+            <p>Abaikan pesan ini jika Anda tidak merasa meminta reset password.</p>
+        ";
+
+            // Load config email
+            $emailService = \Config\Services::email();
+            $config = config('Email');
+            $emailService->initialize((array)$config);
+
+            $emailService->setTo($user['email']);
+            $emailService->setFrom($config->fromEmail, $config->fromName);
+            $emailService->setSubject($subject);
+            $emailService->setMessage($message);
+
+            // Kirim email
+            if ($emailService->send()) {
+                session()->setFlashdata('message', [
+                    'type' => 'success',
+                    'text' => 'Email reset password telah dikirim ke alamat Anda.'
+                ]);
+                return redirect()->to(base_url('login'));
+            }
+
+            // Jika gagal kirim
+            $error = $emailService->printDebugger(['headers']);
+            log_message('error', 'Email gagal dikirim: ' . $error);
+
+            // Mode dev: tampilkan isi email
+            if (ENVIRONMENT === 'development') {
+                echo "<h3>Debug Email (Mode Dev)</h3>";
+                echo "<pre>{$error}</pre>";
+                echo "<hr><h4>Isi Email:</h4>{$message}";
+                exit;
+            }
+
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => 'Terjadi kesalahan dalam pengiriman email. Silakan hubungi admin.'
+            ]);
+            return redirect()->back();
+        } catch (\Throwable $e) {
+            log_message('error', 'requestReset() error: ' . $e->getMessage());
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => 'Terjadi kesalahan internal. Coba lagi nanti.'
             ]);
             return redirect()->back();
         }

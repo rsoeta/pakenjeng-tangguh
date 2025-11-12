@@ -116,22 +116,18 @@
                 <?= csrf_field(); ?>
 
                 <div class="form-group text-left">
-                    <label for="fullname">Nama Lengkap</label>
                     <input type="text" class="form-control" name="fullname" placeholder="Masukan Nama Lengkap" value="<?= set_value('fullname'); ?>">
                 </div>
 
                 <div class="form-group text-left">
-                    <label for="nik">NIK</label>
                     <input type="text" class="form-control" name="nik" placeholder="Masukan No. KTP/NIK" value="<?= set_value('nik'); ?>">
                 </div>
 
                 <div class="form-group text-left">
-                    <label for="nope">No. HP</label>
                     <input type="text" class="form-control" name="nope" placeholder="Masukan No. Handphone" value="<?= set_value('nope'); ?>">
                 </div>
 
                 <div class="form-group text-left">
-                    <label for="email">Email</label>
                     <input type="email" class="form-control" name="email" placeholder="Masukan Email" value="<?= set_value('email'); ?>">
                 </div>
 

@@ -79,7 +79,8 @@
 <div class="content-wrapper p-4">
     <!-- Hero -->
     <div class="hero-banner">
-        <h2>👋 Assalamualaikum, Selamat <?= Salam(); ?>, <?= ucwords(strtolower(session()->get('fullname'))); ?></h2>
+        <h2>👋 Assalamualaikum, Selamat <?= Salam(); ?>,</h2>
+        <h2><?= ucwords(strtolower(session()->get('fullname'))); ?></h2>
         <small>Terima kasih telah berkontribusi dalam memperbarui data kesejahteraan masyarakat desa.</small>
     </div>
 
