@@ -12,28 +12,40 @@
     <section class="content">
         <div class="card shadow-sm">
             <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex justify-content-between align-items-start mb-3">
                     <h4 class="fw-bold mb-0">🗂️ Detail Pembaruan Data Keluarga</h4>
-                    <?php $status = $usulan['status'] ?? $sumber ?? ''; ?>
-                    <?php if (!empty($usulan['status']) && $usulan['status'] == 'draft'): ?>
-                        <span class="badge bg-warning text-dark">Draft Pembaruan</span>
-                    <?php elseif ($status == $sumber): ?>
-                        <span class="badge bg-success">Baru</span>
-                    <?php elseif (!empty($usulan['status'])): ?>
-                        <span class="badge bg-primary">Terverifikasi</span>
-                    <?php endif; ?>
-                </div>
 
-                <!-- Badge Kategori Desil sebelah kanan -->
-                <div class="mb-3 text-end">
-                    <?php if (!empty($kategori_desil)) : ?>
-                        <button type="button" class="btn 
-                <?php if ($kategori_desil <= 2) echo 'btn-danger';
-                        elseif ($kategori_desil <= 4) echo 'btn-warning';
-                        else echo 'btn-success'; ?>">
-                            Desil <span class="badge bg-secondary"><?= $kategori_desil ?></span>
-                        </button>
-                    <?php endif ?>
+                    <div class="text-end">
+
+                        <!-- BADGE STATUS -->
+                        <?php $status = $usulan['status'] ?? $sumber ?? ''; ?>
+
+                        <?php if (!empty($usulan['status']) && $usulan['status'] == 'draft'): ?>
+                            <span class="badge bg-warning text-dark mb-1 d-inline-block">Draft Pembaruan</span>
+
+                        <?php elseif ($status == $sumber): ?>
+                            <span class="badge bg-success mb-1 d-inline-block">Baru</span>
+
+                        <?php elseif (!empty($usulan['status'])): ?>
+                            <span class="badge bg-primary mb-1 d-inline-block">Terverifikasi</span>
+                        <?php endif; ?>
+
+                        <!-- BADGE DESIL -->
+                        <?php if (!empty($kategori_desil)): ?>
+                            <div class="mt-1">
+                                <button type="button"
+                                    class="btn 
+                        <?php
+                            if ($kategori_desil <= 2) echo 'btn-danger';
+                            elseif ($kategori_desil <= 4) echo 'btn-warning';
+                            else echo 'btn-success';
+                        ?>">
+                                    Desil <span class="badge bg-secondary"><?= $kategori_desil ?></span>
+                                </button>
+                            </div>
+                        <?php endif; ?>
+
+                    </div>
                 </div>
 
                 <!-- Nav Tabs -->

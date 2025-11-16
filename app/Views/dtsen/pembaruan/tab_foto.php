@@ -19,9 +19,9 @@ $geo  = $payload['geo'] ?? [];
             <div class="col-md-4 mb-3 text-center">
                 <label class="fw-semibold d-block">Foto KTP / KK</label>
                 <img src="<?= base_url($foto['ktp_kk'] ?? 'data/usulan/foto_identitas/noimage.png') ?>"
-                    class="img-fluid rounded border mb-2" id="previewKtp" style="max-height: 200px;">
+                    class="img-fluid rounded border mb-2 img-download" id="previewKtp" style="max-height: 200px;">
                 <?php if ($editable): ?>
-                    <input type="file" name="foto_ktp" id="fotoKtp" class="form-control form-control-sm" accept="image/*">
+                    <input type="file" name="foto_ktp" id="fotoKtp" class="form-control form-control-sm" accept="image/*" capture="environment">
                 <?php endif; ?>
             </div>
 
@@ -29,9 +29,9 @@ $geo  = $payload['geo'] ?? [];
             <div class="col-md-4 mb-3 text-center">
                 <label class="fw-semibold d-block">Foto Rumah (Tampak Depan)</label>
                 <img src="<?= base_url($foto['depan'] ?? 'data/usulan/foto_rumah/noimage.png') ?>"
-                    class="img-fluid rounded border mb-2" id="previewDepan" style="max-height: 200px;">
+                    class="img-fluid rounded border mb-2 img-download" id="previewDepan" style="max-height: 200px;">
                 <?php if ($editable): ?>
-                    <input type="file" name="foto_depan" id="fotoDepan" class="form-control form-control-sm" accept="image/*">
+                    <input type="file" name="foto_depan" id="fotoDepan" class="form-control form-control-sm" accept="image/*" capture="environment">
                 <?php endif; ?>
             </div>
 
@@ -39,9 +39,9 @@ $geo  = $payload['geo'] ?? [];
             <div class="col-md-4 mb-3 text-center">
                 <label class="fw-semibold d-block">Foto Rumah (Bagian Dalam)</label>
                 <img src="<?= base_url($foto['dalam'] ?? 'data/usulan/foto_rumah_dalam/noimage.png') ?>"
-                    class="img-fluid rounded border mb-2" id="previewDalam" style="max-height: 200px;">
+                    class="img-fluid rounded border mb-2 img-download" id="previewDalam" style="max-height: 200px;">
                 <?php if ($editable): ?>
-                    <input type="file" name="foto_dalam" id="fotoDalam" class="form-control form-control-sm" accept="image/*">
+                    <input type="file" name="foto_dalam" id="fotoDalam" class="form-control form-control-sm" accept="image/*" capture="environment">
                 <?php endif; ?>
             </div>
         </div>
@@ -130,6 +130,24 @@ $geo  = $payload['geo'] ?? [];
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+    // download gambar saat di klik
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('img-download')) {
+            const img = e.target;
+            const url = img.src;
+
+            // ambil nama file dari url
+            const filename = url.split('/').pop();
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename || 'gambar.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    });
+
     // 📸 preview gambar otomatis saat upload
     function previewImage(input, targetId) {
         const file = input.files[0];
@@ -247,6 +265,101 @@ $geo  = $payload['geo'] ?? [];
             timer: 1500
         });
     });
+
+    // Kompres Gambar
+    const MAX_FILE_SIZE = 500000; // 500 KB
+    const MAX_WIDTH = 1280; // resize max width (untuk HP kamera besar)
+    const inputs = [{
+            input: 'fotoKtp',
+            preview: 'previewKtp'
+        },
+        {
+            input: 'fotoDepan',
+            preview: 'previewDepan'
+        },
+        {
+            input: 'fotoDalam',
+            preview: 'previewDalam'
+        }
+    ];
+
+    inputs.forEach(item => {
+        const fileInput = document.getElementById(item.input);
+        if (!fileInput) return;
+
+        fileInput.addEventListener('change', handleImage);
+
+        function handleImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = new Image();
+                img.src = e.target.result;
+
+                img.onload = async function() {
+                    const compressedBlob = await compressImage(img);
+                    const compressedFile = new File([compressedBlob], file.name, {
+                        type: "image/jpeg"
+                    });
+
+                    // untuk preview
+                    const url = URL.createObjectURL(compressedBlob);
+                    document.getElementById(item.preview).src = url;
+
+                    // replace file input
+                    const dt = new DataTransfer();
+                    dt.items.add(compressedFile);
+                    fileInput.files = dt.files;
+
+                    console.log(
+                        `${item.input}
+                     before: ${(file.size / 1024).toFixed(1)} KB,
+                     after: ${(compressedFile.size / 1024).toFixed(1)} KB`
+                    );
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    async function compressImage(img) {
+        let canvas = document.createElement("canvas");
+        let ctx = canvas.getContext("2d");
+
+        // resize jika terlalu besar
+        let scale = 1;
+        if (img.width > MAX_WIDTH) {
+            scale = MAX_WIDTH / img.width;
+        }
+
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        let quality = 0.92;
+        let blob = await canvasToBlob(canvas, quality);
+
+        // loop sampai < 500 KB
+        while (blob.size > MAX_FILE_SIZE && quality > 0.1) {
+            quality -= 0.07;
+            blob = await canvasToBlob(canvas, quality);
+        }
+
+        return blob;
+    }
+
+    function canvasToBlob(canvas, quality) {
+        return new Promise(resolve => {
+            canvas.toBlob(
+                blob => resolve(blob),
+                "image/jpeg",
+                quality
+            );
+        });
+    }
 </script>
 
 <style>

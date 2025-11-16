@@ -44,6 +44,16 @@ class PembaruanKeluarga extends BaseController
                 throw new \Exception("Data KK tidak ditemukan untuk id_kk={$id_kk}");
             }
 
+            // Ambil kategori desil dari dtsen_se
+            $seData = $db->table('dtsen_se')
+                ->select('kategori_desil')
+                ->where('id_kk', $id_kk)
+                ->orderBy('id_se', 'DESC') // ambil SE terbaru jika lebih dari satu
+                ->get()
+                ->getRowArray();
+
+            $kategoriDesil = $seData['kategori_desil'] ?? null;
+
             // 2) Ambil data RT terkait (jika ada)
             $rtData = [];
             if (!empty($kkData['id_rt'])) {
@@ -122,6 +132,7 @@ class PembaruanKeluarga extends BaseController
             // 7) MODE: belum ada usulan -> gunakan data utama (dtsen_kk + dtsen_rt)
             if (empty($usulan['id'])) {
                 $perumahan = [
+                    'kategori_desil'     => $kkData['kategori_desil'] ?? '',
                     'no_kk'              => $kkData['no_kk'] ?? '',
                     'kepala_keluarga'    => $kkData['kepala_keluarga'] ?? '',
                     'alamat'             => $kkData['alamat'] ?? '',
@@ -161,7 +172,9 @@ class PembaruanKeluarga extends BaseController
                     'payload'   => $payload,
                     'usulan'    => $usulan,
                     'id_kk'     => $kkData['id_kk'],
-                    'sumber'    => 'utama'
+                    'sumber'    => 'utama',
+                    'kategori_desil' => $kategoriDesil,
+
                 ];
 
                 log_message('debug', '✅ [detail] Memuat data dari tabel utama (tidak ada usulan)');
@@ -217,7 +230,9 @@ class PembaruanKeluarga extends BaseController
                 'payload'   => $payload,
                 'usulan'    => $usulan,
                 'id_kk'     => $usulan['dtsen_kk_id'] ?? $kkData['id_kk'],
-                'sumber'    => 'usulan'
+                'sumber'    => 'usulan',
+                'kategori_desil' => $kategoriDesil,
+
             ];
 
             log_message('debug', '✅ [detail] Memuat data dari dtsen_usulan (draft/usulan)');
@@ -590,7 +605,6 @@ class PembaruanKeluarga extends BaseController
             ]);
         }
     }
-
 
     /**
      * 🧱 Simpan Data Kepemilikan Aset

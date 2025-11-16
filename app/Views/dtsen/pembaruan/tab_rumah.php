@@ -103,6 +103,28 @@ $san = $perumahan['sanitasi'] ?? [];
                     </div>
 
                     <div class="col-md-3">
+                        <label class="form-label">Jenis Dinding</label>
+                        <select name="jenis_dinding" id="jenis_dinding" class="form-select" <?= $editable ? '' : 'disabled' ?>>
+                            <?php
+                            $opsiDinding = [
+                                'Tembok',
+                                'Plesteran anyaman bambu/kawat',
+                                'Kayu/papan/gypsum/GRC/calciboard',
+                                'Anyaman bambu',
+                                'Batang kayu',
+                                'Bambu',
+                                'Lainnya'
+                            ];
+                            $sel = $kond['jenis_dinding'] ?? '';
+                            foreach ($opsiDinding as $o) {
+                                $s = ($o == $sel) ? 'selected' : '';
+                                echo "<option value=\"$o\" $s>$o</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
                         <label class="form-label">Jenis Atap</label>
                         <select name="jenis_atap" id="jenis_atap" class="form-select" <?= $editable ? '' : 'disabled' ?>>
                             <?php $opsiAtap = ['Genteng', 'Asbes', 'Seng', 'Rumbia', 'Bambu', 'Lainnya'];
@@ -113,10 +135,10 @@ $san = $perumahan['sanitasi'] ?? [];
                             } ?>
                         </select>
                     </div>
-                </div>
+                    <!-- </div> -->
 
-                <div class="row g-2 mt-2">
-                    <div class="col-md-4">
+                    <!-- <div class="row g-2 mt-2"> -->
+                    <div class="col-md-3">
                         <label class="form-label">Bahan Bakar Utama Memasak</label>
                         <select name="bahan_bakar" id="bahan_bakar" class="form-select" <?= $editable ? '' : 'disabled' ?>>
                             <?php
@@ -130,7 +152,7 @@ $san = $perumahan['sanitasi'] ?? [];
                         </select>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label">Sumber Air Minum</label>
                         <select name="sumber_air" id="sumber_air" class="form-select" <?= $editable ? '' : 'disabled' ?>>
                             <?php
@@ -144,7 +166,7 @@ $san = $perumahan['sanitasi'] ?? [];
                         </select>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label">Sumber Penerangan Utama</label>
                         <select name="sumber_listrik" id="sumber_listrik" class="form-select" <?= $editable ? '' : 'disabled' ?>>
                             <?php
