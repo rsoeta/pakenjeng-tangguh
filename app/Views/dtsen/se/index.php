@@ -18,9 +18,16 @@
                     </li>
                     <li class="nav-item">
                         <button class="nav-link" id="tabDraft-tab" data-bs-toggle="tab" data-bs-target="#tabDraft" type="button" role="tab">
-                            🟡 Draft Pembaruan
+                            🟡 Draft
                         </button>
                     </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="tabSubmitted-tab" data-bs-toggle="tab"
+                            data-bs-target="#tabSubmitted" type="button" role="tab">
+                            🟠 Submitted
+                        </button>
+                    </li>
+
                 </ul>
             </div>
 
@@ -90,6 +97,30 @@
                         </thead>
                     </table>
                 </div>
+                <!-- ===================== TAB 2: SUBMITTED PEMBARUAN ===================== -->
+                <div class="tab-pane fade" id="tabSubmitted" role="tabpanel">
+                    <div class="d-flex justify-content-end mb-2">
+                        <button id="btnReloadSubmitted" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-sync-alt"></i> Muat Ulang
+                        </button>
+                    </div>
+
+                    <table id="tableSubmitted" class="table table-striped table-hover nowrap w-100">
+                        <thead class="text-center">
+                            <tr>
+                                <th></th>
+                                <th>No.</th>
+                                <th>Kepala Keluarga</th>
+                                <th>No KK</th>
+                                <th>Status</th>
+                                <th>Tanggal Dibuat</th>
+                                <th>Petugas</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+
             </div>
         </div>
     </section>
@@ -240,6 +271,64 @@
 
         $('#btnReloadDraft').on('click', function() {
             tableDraft.ajax.reload(null, false);
+            const btn = $(this);
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Memuat...');
+            setTimeout(() => {
+                btn.prop('disabled', false).html('<i class="fas fa-sync-alt"></i> Muat Ulang');
+            }, 800);
+        });
+
+        // ========================= 🟠 TABLE SUBMITTED =========================
+        const tableSubmitted = $('#tableSubmitted').DataTable({
+            ajax: {
+                url: '/pembaruan-keluarga/data?submitted=1',
+                type: 'GET',
+                dataType: 'json',
+                dataSrc: json => json.data || []
+            },
+            columns: [{
+                    data: null,
+                    defaultContent: ''
+                },
+                {
+                    data: null,
+                    render: (d, t, r, m) => m.row + 1
+                },
+                {
+                    data: 'nama_kepala'
+                },
+                {
+                    data: 'no_kk_target'
+                },
+                {
+                    data: 'status',
+                    render: s => `<span class="badge bg-info">SUBMITTED</span>`
+                },
+                {
+                    data: 'created_at',
+                    render: d => d ? new Date(d).toLocaleString('id-ID') : '-'
+                },
+                {
+                    data: 'created_by_name',
+                    defaultContent: '-'
+                },
+                {
+                    data: 'id',
+                    render: id => `
+                <a href="/pembaruan-keluarga/lanjutkan/${id}" class="btn btn-success btn-sm">
+                    <i class="fas fa-eye"></i> Lihat
+                </a>
+            `
+                }
+            ],
+            responsive: true,
+            pageLength: 10,
+            createdRow: row => $(row).find('td').css('text-align', 'left'),
+            headerCallback: thead => $(thead).find('th').css('text-align', 'center')
+        });
+
+        $('#btnReloadSubmitted').on('click', function() {
+            tableSubmitted.ajax.reload(null, false);
             const btn = $(this);
             btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Memuat...');
             setTimeout(() => {

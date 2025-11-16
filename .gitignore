@@ -50,6 +50,7 @@ yarn-error.log*
 # Pastikan folder data publik tidak dihapus Git
 !public/data/
 !public/data/**
+public/data/*
 
 # ----------------------------------------------------------------------
 # LARAGON / LOCAL TOOLS

@@ -88,6 +88,34 @@
     const isTambahMode = "<?= $sumber === 'baru' ? 'true' : 'false' ?>";
     const payload = <?= json_encode($payload ?? []) ?>;
     console.log('🚀 Payload dari PHP:', payload);
+
+    // Auto Uppercase
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('upper')) {
+            e.target.value = e.target.value.toUpperCase();
+        }
+    });
+
+    // Only numbers
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('onlynum')) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        }
+    });
+
+    // Format ribuan untuk rupiah
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('rupiah')) {
+            let value = e.target.value.replace(/\D/g, ''); // hanya angka
+            e.target.value = new Intl.NumberFormat('id-ID').format(value);
+        }
+    });
+
+    document.querySelector('form').addEventListener('submit', function() {
+        document.querySelectorAll('.rupiah').forEach(function(el) {
+            el.value = el.value.replace(/\./g, '').replace(/,/g, '');
+        });
+    });
 </script>
 
 <!-- Script utama -->

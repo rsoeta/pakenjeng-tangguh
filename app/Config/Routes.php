@@ -184,7 +184,8 @@ $routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview
 	// 🧍‍♂️ Prefill Data Individu
 	$routes->get('get-anggota-detail/(:num)', 'Dtsen\PembaruanKeluarga::getAnggotaDetail/$1');
 
-	$routes->get('data', 'Dtsen\PembaruanKeluarga::getDataDraft');
+	// $routes->get('data', 'Dtsen\PembaruanKeluarga::getDataDraft');
+	$routes->get('data', 'Dtsen\PembaruanKeluarga::data');
 	$routes->get('lanjutkan/(:num)', 'Dtsen\PembaruanKeluarga::lanjutkan/$1');
 	$routes->get('get-anggota-list/(:num)', 'Dtsen\PembaruanKeluarga::getAnggotaList/$1');
 });

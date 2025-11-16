@@ -15,12 +15,12 @@ $disabled = $editable ? '' : 'disabled';
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="keluarga_no_kk" class="form-label fw-bold">Nomor Kartu Keluarga</label>
-                <input type="text" class="form-control" id="keluarga_no_kk" name="no_kk"
-                    value="<?= esc($perumahan['no_kk'] ?? '') ?>" <?= $disabled ?>>
+                <input type="text" class="form-control onlynum" id="keluarga_no_kk" name="no_kk"
+                    value="<?= esc($perumahan['no_kk'] ?? '') ?>" <?= $disabled ?> maxlength="16">
             </div>
             <div class="col-md-6">
                 <label for="kepala_keluarga" class="form-label fw-bold">Kepala Keluarga</label>
-                <input type="text" class="form-control" id="kepala_keluarga" name="kepala_keluarga"
+                <input type="text" class="form-control upper" id="kepala_keluarga" name="kepala_keluarga"
                     value="<?= esc($perumahan['kepala_keluarga'] ?? '') ?>" <?= $disabled ?>>
             </div>
         </div>
@@ -28,7 +28,7 @@ $disabled = $editable ? '' : 'disabled';
         <div class="row mb-3">
             <div class="col-md-8">
                 <label for="alamat" class="form-label fw-bold">Alamat Lengkap</label>
-                <textarea class="form-control" id="alamat" name="alamat" rows="2" <?= $disabled ?>><?= esc($perumahan['alamat'] ?? '') ?></textarea>
+                <textarea class="form-control upper" id="alamat" name="alamat" rows="2" <?= $disabled ?>><?= esc($perumahan['alamat'] ?? '') ?></textarea>
             </div>
             <div class="col-md-2">
                 <label for="rw" class="form-label fw-bold">RW</label>
@@ -52,7 +52,7 @@ $disabled = $editable ? '' : 'disabled';
             </div>
             <div class="col-md-4">
                 <label for="nama_suku" class="form-label fw-bold">Nama Suku</label>
-                <input type="text" class="form-control" id="nama_suku" name="nama_suku"
+                <input type="text" class="form-control upper" id="nama_suku" name="nama_suku"
                     value="<?= esc($perumahan['nama_suku'] ?? '') ?>" <?= $disabled ?>>
             </div>
         </div>

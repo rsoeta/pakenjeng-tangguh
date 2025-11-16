@@ -54,17 +54,17 @@
                                 <!-- Nama & NIK -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Nama Lengkap</label>
-                                    <input type="text" class="form-control required" name="nama" id="nama">
+                                    <input type="text" class="form-control required upper" name="nama" id="nama">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">NIK</label>
-                                    <input type="text" class="form-control required" name="nik" id="nik" maxlength="16">
+                                    <input type="text" class="form-control required onlynum" name="nik" id="nik" maxlength="16">
                                 </div>
 
                                 <!-- TTL -->
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Tempat Lahir</label>
-                                    <input type="text" class="form-control required" name="tempat_lahir" id="tempat_lahir">
+                                    <input type="text" class="form-control required upper" name="tempat_lahir" id="tempat_lahir">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Tanggal Lahir</label>
@@ -106,7 +106,7 @@
                                 <!-- Ibu Kandung -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Nama Ibu Kandung</label>
-                                    <input type="text" class="form-control required" name="ibu_kandung" id="ibu_kandung">
+                                    <input type="text" class="form-control required upper" name="ibu_kandung" id="ibu_kandung">
                                 </div>
 
                                 <!-- Alamat -->
@@ -149,7 +149,7 @@
                                 <!-- Nomor KK -->
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold">Nomor KK</label>
-                                    <input type="text" class="form-control required" name="individu_no_kk" id="individu_no_kk">
+                                    <input type="text" class="form-control required onlynum" name="individu_no_kk" id="individu_no_kk" maxlength="16">
                                 </div>
 
                             </div>
@@ -269,7 +269,7 @@
                                 <!-- Lapangan Usaha -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Jenis Lapangan Usaha Pekerjaan Utama</label>
-                                    <select class="form-select required" name="lapangan_usaha" id="lapangan_usaha">
+                                    <select class="form-select" name="lapangan_usaha" id="lapangan_usaha">
                                         <option value="">Pilih...</option>
                                         <option value="Pertanian tanaman padi & palawija">Pertanian tanaman padi & palawija</option>
                                         <option value="Hortikultura">Hortikultura</option>
@@ -319,8 +319,16 @@
 
                                 <!-- Pendapatan -->
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold">Pendapatan Sebulan Terakhir (Rp)</label>
-                                    <input type="number" class="form-control required" name="pendapatan" id="pendapatan" placeholder="Contoh: 1500000">
+                                    <label class="form-label fw-bold">Pendapatan Sebulan Terakhir</label>
+                                    <select class="form-select required" name="pendapatan" id="pendapatan">
+                                        <option value="" selected disabled>-- Pilih Pendapatan --</option>
+                                        <option value="Tidak Ada Penghasilan">Tidak Ada Penghasilan</option>
+                                        <option value="<1 Juta Per Bulan">&lt;1 Juta Per Bulan</option>
+                                        <option value=">=1 Jt Per Bulan -<UMK">&gt;=1 Jt Per Bulan - &lt; UMK</option>
+                                        <option value="UMK">UMK</option>
+                                        <option value=">UMK - 10 Jt Per Bulan">&gt; UMK - 10 Jt Per Bulan</option>
+                                        <option value=">10 Jt Per Bulan">&gt; 10 Jt Per Bulan</option>
+                                    </select>
                                 </div>
 
                                 <!-- Keterampilan -->

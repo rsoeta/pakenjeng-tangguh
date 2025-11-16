@@ -163,15 +163,15 @@ $san = $perumahan['sanitasi'] ?? [];
                 <div id="div_info_listrik" class="row g-2 mt-2" style="display: none;">
                     <div class="col-md-4">
                         <label class="form-label">Nomor Pelanggan</label>
-                        <input type="text" name="nomor_pelanggan" id="nomor_pelanggan" class="form-control" value="<?= esc($kond['nomor_pelanggan'] ?? '') ?>" <?= $editable ? '' : 'readonly' ?>>
+                        <input type="text" name="nomor_pelanggan" id="nomor_pelanggan" class="form-control onlynum" value="<?= esc($kond['nomor_pelanggan'] ?? '') ?>" <?= $editable ? '' : 'readonly' ?>>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Nomor Meter</label>
-                        <input type="text" name="nomor_meter" id="nomor_meter" class="form-control" value="<?= esc($kond['nomor_meter'] ?? '') ?>" <?= $editable ? '' : 'readonly' ?>>
+                        <input type="text" name="nomor_meter" id="nomor_meter" class="form-control onlynum" value="<?= esc($kond['nomor_meter'] ?? '') ?>" <?= $editable ? '' : 'readonly' ?>>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Besar Daya (WATT)</label>
-                        <input type="text" name="daya_listrik" id="daya_listrik" class="form-control" value="<?= esc($kond['daya_listrik'] ?? '') ?>" <?= $editable ? '' : 'readonly' ?>>
+                        <input type="text" name="daya_listrik" id="daya_listrik" class="form-control onlynum" value="<?= esc($kond['daya_listrik'] ?? '') ?>" <?= $editable ? '' : 'readonly' ?>>
                     </div>
                 </div>
             </div>

@@ -8,8 +8,6 @@
   <link rel="stylesheet" href="<?= base_url('assets/css/sinden-landing.css'); ?>">
   <link rel="stylesheet" href="<?= base_url('assets/dist/css/authstyle.css'); ?>">
   <link rel="icon" href="<?= base_url('assets/logo/SINDEN-logo.png'); ?>" type="image/png">
-  <!-- render fonts poppins -->
-  <!-- <link href="<?= base_url('assets/font/Poppins/poppins.css'); ?>" rel="stylesheet"> -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
 
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>

@@ -42,7 +42,6 @@ class Landing extends BaseController
 		// Kirim data ke view
 		return view('landing', [
 			'titleApp' => titleApp(),
-			'background' => base_url($background),
 			'footerText' => $footerText,
 			'version'    => $version,
 			'articles'   => $articles,
@@ -63,18 +62,6 @@ class Landing extends BaseController
 
 		return view('article_detail', ['article' => $article]);
 	}
-
-	// public function index()
-	// {
-	// 	$district_id = Profil_Admin()['kode_kec'];
-	// 	$getDesa = $this->WilayahModel->getDesa($district_id);
-
-	// 	$data = [
-	// 		'title' => 'Landing',
-	// 		'getDesa' => $getDesa,
-	// 	];
-	// 	return view('landing', $data);
-	// }
 
 	public function maintenance()
 	{
