@@ -748,6 +748,28 @@ class PembaruanKeluarga extends BaseController
             $payloadLama['foto'] = $payloadLama['foto'] ?? [];
             $payloadLama['geo']  = $payloadLama['geo']  ?? [];
 
+            // ==========================================
+            // 🔒 VALIDASI WAJIB: FOTO + GEOTAG HARUS ADA
+            // ==========================================
+            $fotoLama = $payloadLama['foto'] ?? [];
+            $geoLama  = $payloadLama['geo'] ?? [];
+
+            $ternyataBelumAdaFotoKTP   = empty($fotoLama['ktp_kk'])   && !$this->request->getFile('foto_ktp')->isValid();
+            $ternyataBelumAdaFotoDepan = empty($fotoLama['depan'])    && !$this->request->getFile('foto_depan')->isValid();
+            $ternyataBelumAdaFotoDalam = empty($fotoLama['dalam'])    && !$this->request->getFile('foto_dalam')->isValid();
+
+            $latBaru = $this->request->getPost('latitude');
+            $lngBaru = $this->request->getPost('longitude');
+
+            $geoKosong = (empty($geoLama['lat']) && empty($geoLama['lng']) && (empty($latBaru) || empty($lngBaru)));
+
+            if ($ternyataBelumAdaFotoKTP || $ternyataBelumAdaFotoDepan || $ternyataBelumAdaFotoDalam || $geoKosong) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Gagal menyimpan! Semua foto dan titik lokasi (Geotag) wajib diisi terlebih dahulu.'
+                ]);
+            }
+
             // 📁 Direktori upload
             $uploadBase = FCPATH . 'data/usulan/';
             $dirs = [
@@ -1338,19 +1360,68 @@ class PembaruanKeluarga extends BaseController
                 ],
             ];
 
-            // 🔍 Pastikan NIK tidak duplikat dalam 1 KK
-            $nikExists = $db->table('dtsen_usulan_art ua')
+            // 🔍 Cek apakah NIK sudah ada pada KK yang sama
+            $existingArt = $db->table('dtsen_usulan_art ua')
+                ->select('ua.id')
                 ->join('dtsen_usulan u', 'u.id = ua.dtsen_usulan_id', 'left')
                 ->where('ua.nik', $post['nik'])
                 ->where('u.dtsen_kk_id', $idKk)
-                ->countAllResults();
+                ->get()
+                ->getRowArray();
 
-            if ($nikExists) {
+            // 🔹 Siapkan data utama
+            $dataArt = [
+                'dtsen_usulan_id' => $usulan_id,
+                'nik' => $post['nik'],
+                'nama' => $post['nama'],
+                'hubungan' => $post['hubungan'] ?? null,
+                'payload_member' => json_encode($payloadIndividu, JSON_UNESCAPED_UNICODE),
+                'updated_at' => date('Y-m-d H:i:s'),
+                'updated_by' => $userId
+            ];
+
+            // 🟦 1. Jika sudah ada → UPDATE
+            if ($existingArt) {
+                $db->table('dtsen_usulan_art')
+                    ->where('id', $existingArt['id'])
+                    ->update($dataArt);
+
                 return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'NIK ini sudah terdaftar pada KK yang sama.'
+                    'status' => 'success',
+                    'message' => 'Data individu berhasil diperbarui.',
+                    'mode' => 'update'
                 ]);
             }
+
+            // 🟩 2. Jika belum ada → INSERT baru
+            $dataArt['created_at'] = date('Y-m-d H:i:s');
+            $dataArt['created_by'] = $userId;
+
+            $inserted = $db->table('dtsen_usulan_art')->insert($dataArt);
+
+            if (!$inserted) {
+                throw new \Exception('Gagal menyimpan ke tabel dtsen_usulan_art.');
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Data individu berhasil ditambahkan.',
+                'mode' => 'insert'
+            ]);
+
+            // // 🔍 Pastikan NIK tidak duplikat dalam 1 KK
+            // $nikExists = $db->table('dtsen_usulan_art ua')
+            //     ->join('dtsen_usulan u', 'u.id = ua.dtsen_usulan_id', 'left')
+            //     ->where('ua.nik', $post['nik'])
+            //     ->where('u.dtsen_kk_id', $idKk)
+            //     ->countAllResults();
+
+            // if ($nikExists) {
+            //     return $this->response->setJSON([
+            //         'status' => 'error',
+            //         'message' => 'NIK ini sudah terdaftar pada KK yang sama.'
+            //     ]);
+            // }
 
             // 🔹 Siapkan data utama untuk tabel dtsen_usulan_art
             $dataArt = [

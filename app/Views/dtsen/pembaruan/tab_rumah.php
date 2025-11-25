@@ -12,8 +12,6 @@ $san = $perumahan['sanitasi'] ?? [];
 
 ?>
 
-<?= $this->include('dtsen/pembaruan/_prefill_helper.php') ?>
-
 <div class="p-3">
     <div class="d-flex justify-content-between align-items-center mb-2">
         <h5 class="mb-0">🏡 Keterangan Perumahan</h5>

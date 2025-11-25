@@ -377,10 +377,10 @@
                                         ];
                                         foreach ($skills as $s) {
                                             echo "
-                    <div class='form-check form-check-inline'>
-                        <input class='form-check-input skill-check' type='checkbox' name='keterampilan[]' value='$s' id='skill_" . md5($s) . "'>
-                        <label class='form-check-label small' for='skill_" . md5($s) . "'>$s</label>
-                    </div>";
+                                        <div class='form-check form-check-inline'>
+                                            <input class='form-check-input skill-check' type='checkbox' name='keterampilan[]' value='$s' id='skill_" . md5($s) . "'>
+                                            <label class='form-check-label small' for='skill_" . md5($s) . "'>$s</label>
+                                        </div>";
                                         }
                                         ?>
                                     </div>
