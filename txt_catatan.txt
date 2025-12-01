@@ -1027,3 +1027,12 @@
             Selesai! URL https://some-random-words.try.cloudflare.com itulah yang bisa Anda bagikan. URL ini sekarang mengarah langsung ke localhost:8000 Anda, tanpa batas bandwidth seperti Ngrok.
 
             Untuk menghentikan tunnel, cukup tekan Ctrl + C di jendela terminal Anda.
+
+=======================================================================================================================================================
+🟦 2. Struktur Database Tambahan
+
+Tambahkan 2 kolom ke tabel dtsen_kk:
+
+ALTER TABLE dtsen_kk 
+ADD wa_due_date DATETIME NULL AFTER updated_at,
+ADD wa_reminder_sent TINYINT(1) DEFAULT 0 AFTER wa_due_date;

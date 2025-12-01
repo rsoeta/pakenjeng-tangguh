@@ -6,19 +6,28 @@ use App\Models\Dtks\AuthModel;
 use App\Models\WilayahModel;
 use App\Models\GenModel;
 use App\Models\Dtks\LembagaModel;
+use App\Models\Dtsen\WaConfigModel;
 
 
 use App\Controllers\BaseController;
 
 class Profil_User extends BaseController
 {
+    protected $AuthModel;
+    protected $GenModel;
+    protected $LembagaModel;
+    protected $WilayahModel;
+    protected $WaConfigModel;
+
     public function __construct()
     {
         $this->AuthModel = new AuthModel();
         $this->GenModel = new GenModel();
         $this->LembagaModel = new LembagaModel();
         $this->WilayahModel = new WilayahModel();
+        $this->WaConfigModel = new WaConfigModel();   // ← tambahan WA model
     }
+
     public function index()
     {
         $user_role = session()->get('role_id');
@@ -43,6 +52,10 @@ class Profil_User extends BaseController
                 $nama_pemerintah = $nama_desa;
             }
 
+            // dd($user_id);
+
+            $wa_setting = $this->WaConfigModel->getConfig($user_id);
+
             $data = [
                 'namaApp' => 'Opr NewDTKS',
                 'title' => 'Profil',
@@ -53,7 +66,8 @@ class Profil_User extends BaseController
                 'getAjax' => $this->WilayahModel->getAjaxSearch()->getResultArray(),
                 'user_role' => $user_role,
                 'nama_pemerintah' => $nama_pemerintah,
-
+                // ➕ WA SETTINGS DIKIRIM KE VIEW
+                'wa_setting' => $wa_setting,
             ];
             // dd($data['getAjax']);
             // dd($data['user_login']);

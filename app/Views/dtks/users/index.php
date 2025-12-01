@@ -2,7 +2,67 @@
 
 <?= $this->section('content'); ?>
 
+
 <div class="content-wrapper mt-1">
+    <style>
+        #tabelUser_wrapper .dt-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            /* supaya tetap responsif */
+            margin-bottom: 10px;
+        }
+
+        #tabelUser_wrapper .dt-left,
+        #tabelUser_wrapper .dt-middle,
+        #tabelUser_wrapper .dt-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #customFilter select {
+            height: 30px !important;
+            padding: 2px 6px !important;
+        }
+
+        #customFilter label {
+            font-size: 12px;
+            margin-bottom: -2px;
+            display: block;
+        }
+
+        .gap-2>* {
+            margin-right: 8px;
+        }
+
+        .dt-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            gap: 20px;
+        }
+
+        .dt-filters {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .dt-filters label {
+            font-size: 12px;
+            margin-bottom: -2px;
+            display: block;
+        }
+
+        .dt-filters select {
+            height: 30px !important;
+            padding: 2px 6px !important;
+        }
+    </style>
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <div class="container-fluid">
@@ -43,11 +103,99 @@
                 <div class="card-body">
                     <br>
                     <div class="tengah">
+                        <!-- <div class="row mb-3">
+
+                            <div class="col-md-3">
+                                <label>Level User</label>
+                                <select id="filterRole" class="form-control form-control-sm">
+                                    <option value="">Semua</option>
+                                    <?php foreach ($roles as $r) : ?>
+                                        <option value="<?= $r['nm_role']; ?>"><?= $r['nm_role']; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Status</label>
+                                <select id="filterStatus" class="form-control form-control-sm">
+                                    <option value="">Semua</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>No. RW</label>
+                                <select id="filterRW" class="form-control form-control-sm">
+                                    <option value="">Semua</option>
+                                    <?php
+                                    $rwList = array_unique(array_column($users, 'level'));
+                                    sort($rwList);
+                                    foreach ($rwList as $rw) {
+                                        echo "<option value='$rw'>$rw</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+
+                        </div> -->
+
+                        <!-- <div id="customFilter"></div> -->
+                        <div class="dt-toolbar">
+
+                            <!-- kiri: show entries -->
+                            <div class="dt-left"></div>
+
+                            <!-- tengah: filter custom -->
+                            <div class="dt-filters">
+
+                                <div>
+                                    <label>Level User</label>
+                                    <select id="filterRole" class="form-control form-control-sm">
+                                        <option value="">Semua</option>
+                                        <?php foreach ($roles as $r): ?>
+                                            <option value="<?= $r['nm_role']; ?>"><?= $r['nm_role']; ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label>Status</label>
+                                    <select id="filterStatus" class="form-control form-control-sm">
+                                        <option value="">Semua</option>
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label>No. RW</label>
+                                    <select id="filterRW" class="form-control form-control-sm">
+                                        <option value="">Semua</option>
+                                        <?php
+                                        $rwList = array_unique(array_column($users, 'level'));
+                                        sort($rwList);
+                                        foreach ($rwList as $rw) {
+                                            echo "<option value='$rw'>$rw</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+
+                            </div>
+
+                            <!-- kanan: search -->
+                            <div class="dt-right"></div>
+
+                        </div>
+
+
                         <table id="tabelUser" class="table table-sm table-hover table-head-fixed compact" style="width: 100%;">
                             <thead class="text-primary">
                                 <tr>
                                     <th>NO</th>
                                     <th>NAMA LENGKAP</th>
+                                    <th>WILAYAH AKTIF</th>
                                     <th>NAMA DESA</th>
                                     <th>NO. RW</th>
                                     <th>NIK</th>
@@ -65,6 +213,7 @@
                                     <tr>
                                         <td scope="row"><?= $i; ?></td>
                                         <td><?= $row['fullname']; ?></td>
+                                        <td><?= tampilWilayahHumanis($row['wilayah_tugas']); ?></td>
                                         <td><?= $row['nama_desa']; ?></td>
                                         <td><?= $row['level']; ?></td>
                                         <td><?= $row['nik']; ?></td>
@@ -125,8 +274,35 @@
 <div class="viewmodal" style="display: none;"></div>
 <script>
     $(document).ready(function() {
-        $('#tabelUser').DataTable({
+        // Setelah DataTable dibuat
+        let table = $('#tabelUser').DataTable({
             responsive: true
+        });
+
+        // Pindahkan show entries & search ke layout baru
+        $('#tabelUser_wrapper .dataTables_length').appendTo('.dt-left');
+        $('#tabelUser_wrapper .dataTables_filter').appendTo('.dt-right');
+
+        // Custom filter (AND Filtering)
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+
+            let filterRole = $('#filterRole').val().toLowerCase();
+            let filterStatus = $('#filterStatus').val().toLowerCase();
+            let filterRW = $('#filterRW').val().toLowerCase();
+
+            let statusText = $(table.row(dataIndex).node()).find('td:eq(10) a').text().trim().toLowerCase();
+            let rwText = data[4].toLowerCase();
+            let roleText = data[7].toLowerCase();
+
+            if (filterStatus && filterStatus !== statusText) return false;
+            if (filterRW && !rwText.includes(filterRW)) return false;
+            if (filterRole && !roleText.includes(filterRole)) return false;
+
+            return true;
+        });
+
+        $('#filterStatus, #filterRW, #filterRole').on('change', function() {
+            table.draw();
         });
 
         // $('body').addClass('sidebar-collapse');

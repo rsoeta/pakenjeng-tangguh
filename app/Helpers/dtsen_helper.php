@@ -67,3 +67,26 @@ function titleApp(): string
 {
     return 'Sistem Informasi Data Ekonomi dan Sosial Desa';
 }
+
+function tampilWilayahHumanis($wilayah_tugas)
+{
+    if (!$wilayah_tugas) return '-';
+
+    $result = [];
+
+    // Pisah per RW: "001:005,007|004:002"
+    $rwSets = explode('|', $wilayah_tugas);
+
+    foreach ($rwSets as $set) {
+        // Pisah RW dan RT: "001" - "005,007"
+        list($rw, $rtList) = explode(':', $set);
+
+        // Format: RW 001 RT 005, 007
+        $rtList = str_replace(',', ', ', $rtList);
+
+        $result[] = "RW $rw RT $rtList";
+    }
+
+    // Pisahkan antar RW dengan tanda "; "
+    return implode('; ', $result);
+}

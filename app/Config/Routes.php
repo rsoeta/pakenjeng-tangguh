@@ -340,13 +340,7 @@ $routes->post('hapus', 'Dtks\Users::hapus', ['filter' => 'authfilterdtks', 'filt
 $routes->post('formview', 'Dtks\Users::formview', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updateDataUser', 'Dtks\Users::updatedata', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
-// profil
-$routes->match(['GET', 'POST'], 'profil_user', 'Profil\Profil_User::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('update_user', 'Profil\Profil_User::update_user', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('submit_lembaga', 'Profil\Profil_User::submit_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('update_lembaga', 'Profil\Profil_User::update_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-
-// setting web
+// setting web hak akses Super Admin
 $routes->match(['GET', 'POST'], 'settings', 'Profil\Profil_Web::index', ['filter' => 'authfilterdtks']);
 $routes->post('update_web_admin', 'Profil\Profil_Web::update_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('submit_web_lembaga', 'Profil\Profil_Web::submit_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -361,6 +355,42 @@ $routes->post('update_web_general', 'Profil\Profil_Web::update_general', ['filte
 $routes->post('updateBatch', 'Profil\Profil_Web::updateBatch', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updateBatchGen', 'Profil\Profil_Web::updateBatchGen', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
+// profil user petugas entri, dan Admin Desa
+$routes->match(['GET', 'POST'], 'profil_user', 'Profil\Profil_User::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('update_user', 'Profil\Profil_User::update_user', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('submit_lembaga', 'Profil\Profil_User::submit_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('update_lembaga', 'Profil\Profil_User::update_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+
+// WhatsApp Settings (Admin Desa)
+$routes->group('pengaturan_wa', ['filter' => 'authfilterdtks'], function ($routes) {
+	$routes->get('/', 'Profil\WaSettings::index');
+	$routes->post('save_api', 'Profil\WaSettings::saveApi');
+	$routes->post('save_template', 'Profil\WaSettings::saveTemplate');
+	$routes->post('preview', 'Profil\WaSettings::preview');
+	$routes->post('test', 'Profil\WaSettings::testApi');
+
+	// Fonnte Settings
+	$routes->post('save_fonnte', 'Profil\WaSettings::saveFonnte');
+	$routes->post('test_fonnte', 'Profil\WaSettings::testFonnte');
+});
+
+$routes->get('test-env', 'TestEnv::index');
+$routes->get('test-wa', 'TestEnv::testWa');
+
+
+// Reminder Monitoring (UI + API)
+$routes->get('laporan-dtsen', 'Dtsen\ReminderMonitor::index', ['filter' => 'authfilterdtks']);
+$routes->get('dtsen/reminder-monitor', 'Dtsen\ReminderMonitor::index', ['filter' => 'authfilterdtks']);
+$routes->get('dtsen/reminder-monitor/list', 'Dtsen\ReminderMonitor::listAjax', ['filter' => 'authfilterdtks']);
+$routes->post('dtsen/reminder-monitor/resend', 'Dtsen\ReminderMonitor::resend', ['filter' => 'authfilterdtks']);
+
+// Cron Jobs
+$routes->cli('cron/wa-reminder', 'Cron\WaReminder::index');
+$routes->get('cron/reminder', 'Cron\Reminder::index');
+
+// Migration Tool (Admin Only)
+$routes->get('admin/migrate', 'Admin\MigrationTool::index', ['filter' => 'authfilterdtks']);
+$routes->get('admin/download-db', 'Admin\MigrationTool::downloadDb', ['filter' => 'authfilterdtks']);
 
 /*
  * --------------------------------------------------------------------

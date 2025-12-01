@@ -1,7 +1,5 @@
 <?php
 
-//CountryModel.php
-
 namespace App\Models\Dtks;
 
 use CodeIgniter\Model;
@@ -13,7 +11,7 @@ class UsersModel extends Model
 
 	protected $primaryKey = 'id';
 
-	protected $allowedFields = ['nik', 'username', 'fullname', 'email', 'password', 'status', 'level', 'role_id', 'kode_desa', 'nope', 'opr_sch', 'user_image', 'created_at', 'updated_at'];
+	protected $allowedFields = ['nik', 'username', 'fullname', 'email', 'status', 'jabatan_id', 'level', 'role_id', 'kode_desa', 'kode_kec', 'kode_kab', 'nope', 'opr_sch', 'user_image', 'user_lembaga_id', 'wilayah_tugas', 'password', 'created_at', 'updated_at', 'reset_token', 'reset_expiry'];
 
 	protected function beforeInsert(array $data)
 	{
@@ -46,13 +44,29 @@ class UsersModel extends Model
 	public function getFindAll()
 	{
 		$builder = $this->db->table('dtks_users');
-		$builder->select('dtks_users.id, nik, username, fullname, email, password, status, level, role_id, kode_desa, tb_villages.id as desa_id, tb_villages.name as nama_desa, nope, user_image, created_at, updated_at');
+		$builder->select('
+        dtks_users.id,
+        nik,
+        username,
+        fullname,
+        email,
+        password,
+        status,
+        level,
+        role_id,
+        kode_desa,
+        tb_villages.id as desa_id,
+        tb_villages.name as nama_desa,
+        nope,
+        user_image,
+        wilayah_tugas,
+        created_at,
+        updated_at
+    ');
 		$builder->join('tb_roles', 'tb_roles.id_role = dtks_users.role_id', 'left');
 		$builder->join('tb_villages', 'tb_villages.id = dtks_users.kode_desa', 'left');
 		$builder->orderBy('created_at', 'asc');
-		$query = $builder->get();
-
-		return $query;
+		return $builder->get();
 	}
 
 	public function update_status($uid, $ustatus)
@@ -83,5 +97,34 @@ class UsersModel extends Model
 		$query = $builder->get();
 
 		return $query;
+	}
+
+	public function getByDesa($kode_desa)
+	{
+		$builder = $this->db->table('dtks_users');
+		$builder->select('
+        dtks_users.id,
+        nik,
+        username,
+        fullname,
+        email,
+        password,
+        status,
+        level,
+        role_id,
+        kode_desa,
+        tb_villages.id as desa_id,
+        tb_villages.name as nama_desa,
+        nope,
+        user_image,
+        wilayah_tugas,
+        created_at,
+        updated_at
+    ');
+		$builder->join('tb_roles', 'tb_roles.id_role = dtks_users.role_id', 'left');
+		$builder->join('tb_villages', 'tb_villages.id = dtks_users.kode_desa', 'left');
+		$builder->where('dtks_users.kode_desa', $kode_desa);
+		$builder->orderBy('created_at', 'asc');
+		return $builder->get();
 	}
 }

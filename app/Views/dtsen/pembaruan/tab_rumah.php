@@ -1,8 +1,4 @@
 <?php
-?>
-
-<!-- app/Views/dtsen/pembaruan/tab_rumah.php -->
-<?php
 $roleId = $user['role_id'] ?? 99;
 $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 $perumahan = $payload['perumahan'] ?? [];

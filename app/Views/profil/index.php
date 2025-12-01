@@ -103,6 +103,19 @@
                                 <li class="nav-item" <?= $user_login['role_id'] > 3 ? 'hidden' : ''; ?>>
                                     <a class="nav-link" id="custom-tabs-three-profile-tab" data-toggle="pill" href="#custom-tabs-three-profile" role="tab" aria-controls="custom-tabs-three-profile" aria-selected="false"><strong><i class="fas fa-landmark"></i> Lembaga</strong></a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="custom-tabs-three-wa-tab" data-toggle="pill"
+                                        href="#custom-tabs-three-wa" role="tab">
+                                        <strong><i class="fab fa-whatsapp"></i> WhatsApp</strong>
+                                    </a>
+                                </li>
+                                <!-- Migration Tool -->
+                                <li class="nav-item">
+                                    <a class="nav-link" id="custom-tabs-three-migrate-tool" data-toggle="pill"
+                                        href="#custom-tabs-three-migrate" role="tab">
+                                        <strong><i class="fas fa-database"></i> Migration Tool</strong>
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                         <div class="card-body">
@@ -217,7 +230,14 @@
                                         </form>
                                     </div>
                                 </div>
+                                <div class="tab-pane fade" id="custom-tabs-three-wa" role="tabpanel">
+                                    <?= $this->include('profil/wa_settings'); ?>
+                                </div>
+                                <div class="tab-pane fade" id="custom-tabs-three-migrate" role="tabpanel">
+                                    <?= $this->include('profil/migration_tool'); ?>
+                                </div>
                             </div>
+
                         </div>
                         <!-- /.card -->
                     </div>

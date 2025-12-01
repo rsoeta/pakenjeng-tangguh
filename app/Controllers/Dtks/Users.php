@@ -17,7 +17,7 @@ class Users extends BaseController
 {
     public function __construct()
     {
-        helper(['form']);
+        helper(['form', 'url', 'opdtks', 'dtsen_helper']);
         $this->VervalPbiModel = new VervalPbiModel();
         $this->User = new UsersModel();
         $this->AuthModel = new AuthModel();
@@ -29,27 +29,61 @@ class Users extends BaseController
 
     public function index()
     {
+        $userLogin = $this->AuthModel->getUserId();
+        $roleId    = $userLogin['role_id'];
+        $kodeDesa  = $userLogin['kode_desa'];
+
+        // Default: semua user
+        $users = $this->User->getFindAll()->getResultArray();
+
+        // Jika Admin Desa (role_id = 3)
+        if ($roleId == 3) {
+            $users = $this->User->getByDesa($kodeDesa)->getResultArray();
+        }
+
         $kode_kab = Profil_Admin()['kode_kab'];
         $kode_kec = Profil_Admin()['kode_kec'];
-        $data = [
-            'namaApp' => 'Opr NewDTKS',
-            'title' => 'Daftar Users',
-            'title1' => 'Tambah User',
-            'role' => $this->Role->getRole(),
-            'user_login' => $this->AuthModel->getUserId(),
-            'kode_kec' => $kode_kec,
-            'kecamatan' => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
-            'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
-            'datarw' => $this->WilayahModel->getDataRW()->getResultArray(),
-            'users' => $this->User->getFindAll()->getResultArray(),
-            'roles' => $this->Role->getRole()->getResultArray(),
-            'percentages' => $this->VervalPbiModel->jml_persentase(),
-            'statusRole' => $this->GenModel->getStatusRole(),
 
+        $data = [
+            'title'        => 'Daftar Users',
+            'title1'       => 'Tambah User',
+            'role'         => $this->Role->getRole(),
+            'user_login'   => $userLogin,
+            'kode_kec'     => $kode_kec,
+            'kecamatan'    => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
+            'desa'         => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
+            'datarw'       => $this->WilayahModel->getDataRW()->getResultArray(),
+            'users'        => $users,
+            'roles'        => $this->Role->getRole()->getResultArray(),
+            'percentages'  => $this->VervalPbiModel->jml_persentase(),
+            'statusRole'   => $this->GenModel->getStatusRole(),
         ];
-        // return view('dtks/data/yatim/index');
+
         return view('dtks/users/index', $data);
     }
+
+    // public function index()
+    // {
+    //     $kode_kab = Profil_Admin()['kode_kab'];
+    //     $kode_kec = Profil_Admin()['kode_kec'];
+    //     $data = [
+    //         'title' => 'Daftar Users',
+    //         'title1' => 'Tambah User',
+    //         'role' => $this->Role->getRole(),
+    //         'user_login' => $this->AuthModel->getUserId(),
+    //         'kode_kec' => $kode_kec,
+    //         'kecamatan' => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
+    //         'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
+    //         'datarw' => $this->WilayahModel->getDataRW()->getResultArray(),
+    //         'users' => $this->User->getFindAll()->getResultArray(),
+    //         'roles' => $this->Role->getRole()->getResultArray(),
+    //         'percentages' => $this->VervalPbiModel->jml_persentase(),
+    //         'statusRole' => $this->GenModel->getStatusRole(),
+
+    //     ];
+    //     // return view('dtks/data/yatim/index');
+    //     return view('dtks/users/index', $data);
+    // }
 
     // function tambah user
     public function tambah()
