@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Dtsen;
 
 use App\Models\Dtks\AuthModel;
-use App\Models\DtsenArtModel;
-use App\Models\DtsenSeModel;
-use App\Models\DtsenUsulanBansosModel;
+use App\Models\Dtsen\DtsenArtModel;
+use App\Models\Dtsen\DtsenSeModel;
+use App\Models\Dtsen\DtsenUsulanBansosModel;
 use App\Models\GenModel;
 use App\Models\Dtks\Usulan22Model;
 use App\Models\Dtks\BansosModel;
@@ -311,7 +311,7 @@ class UsulanBansos extends Controller
                 ]);
             }
 
-            $model = new \App\Models\DtsenUsulanBansosModel();
+            $model = new DtsenUsulanBansosModel();
             $data = $model->find($id);
 
             if (!$data) {

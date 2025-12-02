@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Dtsen;
 
 use CodeIgniter\Model;
 use App\Traits\WilayahFilterTrait;

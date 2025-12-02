@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Dtsen;
 
 use CodeIgniter\Model;
 use App\Traits\WilayahFilterTrait;
@@ -11,6 +11,9 @@ class DtsenKkModel extends Model
 
     protected $table            = 'dtsen_kk';
     protected $primaryKey       = 'id_kk';
+    protected $useSoftDeletes = true;
+    protected $deletedField   = 'deleted_at';
+
     protected $allowedFields    = [
         'id_rt',
         'no_kk',
@@ -46,6 +49,9 @@ class DtsenKkModel extends Model
 
         // join ke dtsen_se untuk ambil desil
         $builder->join('dtsen_se se', 'se.id_kk = kk.id_kk', 'left');
+
+        // FIX WAJIB
+        $builder->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left');
 
         // filter berdasarkan wilayah (opsional)
         if (!empty($filter1)) $builder->where('kk.id_rt', $filter1);   // contoh filter RT
@@ -98,6 +104,9 @@ class DtsenKkModel extends Model
         $builder = $db->table('dtsen_kk kk');
         $builder->select('kk.id_kk');
         $builder->join('dtsen_se se', 'se.id_kk = kk.id_kk', 'left');
+
+        // FIX WAJIB
+        $builder->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left');
 
         if (!empty($filter1)) $builder->where('kk.id_rt', $filter1);
         if ($filterKepala) {
@@ -178,6 +187,7 @@ class DtsenKkModel extends Model
         $builder->orderBy('kk.no_kk', 'ASC');
         return $builder->get()->getResultArray();
     }
+
     /**
      * Hitung total pembaruan keluarga (yang sudah diverifikasi)
      */

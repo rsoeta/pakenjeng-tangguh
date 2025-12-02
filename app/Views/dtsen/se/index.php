@@ -13,7 +13,7 @@
                 <ul class="nav nav-tabs card-header-tabs" id="tabKeluarga" role="tablist">
                     <li class="nav-item">
                         <button class="nav-link active" id="tabDaftar-tab" data-bs-toggle="tab" data-bs-target="#tabDaftar" type="button" role="tab">
-                            🟢 Daftar Keluarga
+                            🔵 Daftar Keluarga
                         </button>
                     </li>
                     <li class="nav-item">
@@ -24,7 +24,7 @@
                     <li class="nav-item">
                         <button class="nav-link" id="tabSubmitted-tab" data-bs-toggle="tab"
                             data-bs-target="#tabSubmitted" type="button" role="tab">
-                            🟠 Submitted
+                            🟢 Submitted
                         </button>
                     </li>
 
@@ -124,6 +124,7 @@
             </div>
         </div>
     </section>
+
 </div>
 
 <!-- 🔹 Modal Input Desil -->
@@ -336,6 +337,41 @@
             }, 800);
         });
 
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get("tab");
+
+        if (!tab) return;
+
+        // Mapping parameter → id tab
+        const tabMap = {
+            "draft": "#tabDraft",
+            "submitted": "#tabSubmitted"
+        };
+
+        const targetPane = tabMap[tab];
+        if (!targetPane) return;
+
+        // Cari tombol tab bootstrap-nya (bukan <a>, tapi <button>)
+        const tabButton = document.querySelector(`button[data-bs-target="${targetPane}"]`);
+
+        if (tabButton) {
+            // Trigger Bootstrap tab show
+            const tabInstance = new bootstrap.Tab(tabButton);
+            tabInstance.show();
+
+            // Scroll ke area tab (opsional)
+            setTimeout(() => {
+                tabButton.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+            }, 150);
+        }
     });
 </script>
 

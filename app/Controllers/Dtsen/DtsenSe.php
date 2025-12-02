@@ -2,8 +2,8 @@
 
 namespace App\Controllers\Dtsen;
 
-use App\Models\DtsenKkModel;
-use App\Models\DtsenRtModel;
+use App\Models\Dtsen\DtsenKkModel;
+use App\Models\Dtsen\DtsenRtModel;
 use App\Models\GenModel;
 use CodeIgniter\Controller;
 

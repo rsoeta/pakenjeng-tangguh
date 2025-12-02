@@ -15,6 +15,14 @@ use App\Models\WilayahModel;
 
 class Users extends BaseController
 {
+    protected $VervalPbiModel;
+    protected $User;
+    protected $AuthModel;
+    protected $Role;
+    protected $RwModel;
+    protected $GenModel;
+    protected $WilayahModel;
+
     public function __construct()
     {
         helper(['form', 'url', 'opdtks', 'dtsen_helper']);

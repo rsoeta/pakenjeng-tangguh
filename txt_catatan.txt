@@ -1036,3 +1036,13 @@ Tambahkan 2 kolom ke tabel dtsen_kk:
 ALTER TABLE dtsen_kk 
 ADD wa_due_date DATETIME NULL AFTER updated_at,
 ADD wa_reminder_sent TINYINT(1) DEFAULT 0 AFTER wa_due_date;
+
+=======================================================================================================================================================
+🟦 3. Struktur tabel dengan fitur soft delete
+
+ALTER TABLE dtsen_kk ADD COLUMN deleted_at DATETIME NULL AFTER updated_at;
+
+Jika kamu ingin lebih aman, bisa tambahkan cascade update:
+
+ALTER TABLE dtsen_se ADD CONSTRAINT fk_se_kk FOREIGN KEY (id_kk) 
+REFERENCES dtsen_kk(id_kk) ON UPDATE CASCADE;

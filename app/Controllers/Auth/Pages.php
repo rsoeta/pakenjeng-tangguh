@@ -18,17 +18,35 @@ use App\Models\Dtks\VervalPbiModel;
 use App\Models\Dtks\KipModel;
 use App\Models\Dtks\AuthModel;
 use App\Models\Dtks\BnbaModel;
-use App\Models\DtsenKkModel;
-use App\Models\DtsenDraftModel;
-use App\Models\DtsenSeModel;
-use App\Models\DtsenUsulanBansosModel;
+use App\Models\Dtsen\DtsenKkModel;
+use App\Models\Dtsen\DtsenDraftModel;
+use App\Models\Dtsen\DtsenSeModel;
+use App\Models\Dtsen\DtsenUsulanBansosModel;
 
 
 
 class Pages extends BaseController
 {
+    protected $BansosModel;
+    protected $GenModel;
+    protected $KipModel;
+    protected $Rw;
+    protected $UsersModel;
+    protected $usulan21;
+    protected $Usulan22Model;
+    protected $verivali09;
+    protected $VervalPbiModel;
+    protected $WilayahModel;
+    protected $AuthModel;
+    protected $BnbaModel;
+    protected $DtsenKkModel;
+    protected $DtsenDraftModel;
+    protected $DtsenSeModel;
+    protected $DtsenUsulanBansosModel;
+
     public function __construct()
     {
+
         $this->BansosModel = new BansosModel();
         $this->GenModel = new GenModel();
         $this->KipModel = new KipModel();
@@ -80,6 +98,9 @@ class Pages extends BaseController
         // 🔹 total draft (status = 'draft')
         $totalDraft = $this->DtsenDraftModel->countDraftByUser($roleId, $filter);
 
+        // 🔹 total submitted (menggunakan query submitted builder)
+        $totalSubmitted = $this->DtsenDraftModel->countSubmittedByUser($roleId, $filter);
+
         // 🔹 data desil (kategori kesejahteraan)
         $dataDesil = $this->DtsenSeModel->getDesilByRole($roleId, $filter);
 
@@ -108,6 +129,7 @@ class Pages extends BaseController
             'totalKK'        => $totalKK,
             'totalUsulan'    => $totalUsulan,
             'totalDraft'     => $totalDraft,
+            'totalSubmitted' => $totalSubmitted,
             'dataDesil'      => $dataDesil,
             'dd_waktu_start' => $dd_waktu_start ?? null,
             'dd_waktu_end'   => $dd_waktu_end ?? null,

@@ -2,7 +2,7 @@
 
 namespace App\Controllers\Dtsen;
 
-use App\Models\DtsenUsulanModel;
+use App\Models\Dtsen\DtsenUsulanModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class DtsenUsulan extends BaseController
