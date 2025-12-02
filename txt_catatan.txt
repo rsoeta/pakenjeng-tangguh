@@ -1042,6 +1042,17 @@ ADD wa_reminder_sent TINYINT(1) DEFAULT 0 AFTER wa_due_date;
 
 ALTER TABLE dtsen_kk ADD COLUMN deleted_at DATETIME NULL AFTER updated_at;
 
+ALTER TABLE dtsen_kk ADD COLUMN delete_reason TEXT NULL AFTER deleted_at;
+
+ALTER TABLE dtsen_art 
+ADD COLUMN deleted_at DATETIME NULL,
+ADD COLUMN delete_reason TEXT NULL;
+
+ALTER TABLE dtsen_usulan_art
+ADD COLUMN deleted_at DATETIME NULL,
+ADD COLUMN delete_reason TEXT NULL;
+
+
 Jika kamu ingin lebih aman, bisa tambahkan cascade update:
 
 ALTER TABLE dtsen_se ADD CONSTRAINT fk_se_kk FOREIGN KEY (id_kk) 

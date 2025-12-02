@@ -552,7 +552,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     <!-- gabungkan tombol -->
                     <div class="btn-group">
                         <button class="btn btn-sm btn-primary btnEditAnggota" data-id="${row.id_art ?? row.id}" title="Edit"><i class="fas fa-edit"></i>Edit</button>
-                        <button class="btn btn-sm btn-danger btnHapusAnggota" data-id="${row.id_art ?? row.id}" title="Hapus"><i class="fas fa-trash"></i>Hapus</button>
+                        <button class="btn btn-sm btn-danger btnHapusAnggota" data-id="${row.id_art ?? row.id}" title="Hapus"><i class="fas fa-trash-alt"></i>Hapus</button>
                     </div>
                     </td>
                 </tr>`;
@@ -594,6 +594,41 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             });
         });
 
+        $(document).on('click', '.btnHapusAnggota', function() {
+            const id = $(this).data('id');
+
+            Swal.fire({
+                title: 'Hapus Anggota?',
+                html: `
+                <p class="text-start">Silakan isi alasan penghapusan:</p>
+                <textarea id="deleteReason" class="form-control" rows="3" placeholder="Wajib diisi..."></textarea>
+            `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Hapus',
+                preConfirm: () => {
+                    const reason = $('#deleteReason').val().trim();
+                    if (!reason) {
+                        Swal.showValidationMessage('Alasan wajib diisi!');
+                    }
+                    return reason;
+                }
+            }).then(result => {
+                if (!result.isConfirmed) return;
+
+                $.post(`${window.baseUrl}/pembaruan-keluarga/delete-anggota`, {
+                    id_art: id,
+                    reason: result.value
+                }, function(res) {
+                    if (res.status) {
+                        Swal.fire('Berhasil!', res.message, 'success');
+                        loadTableAnggota();
+                    } else {
+                        Swal.fire('Gagal', res.message, 'error');
+                    }
+                }, 'json');
+            });
+        });
 
     });
 </script>

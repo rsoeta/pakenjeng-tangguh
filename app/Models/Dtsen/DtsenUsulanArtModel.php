@@ -8,6 +8,9 @@ class DtsenUsulanArtModel extends Model
 {
     protected $table         = 'dtsen_usulan_art';
     protected $primaryKey    = 'id';
+    protected $useSoftDeletes   = true;
+    protected $deletedField     = 'deleted_at';
+
     protected $allowedFields = [
         'dtsen_usulan_id',
         'nik',
@@ -17,7 +20,9 @@ class DtsenUsulanArtModel extends Model
         'created_at',
         'updated_at',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'deleted_at',
+        'delete_reason'
     ];
     protected $useTimestamps = false;
     protected $returnType    = 'array';

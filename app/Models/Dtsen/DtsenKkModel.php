@@ -30,7 +30,10 @@ class DtsenKkModel extends Model
         'created_at',
         'updated_at',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'deleted_at',
+        'delete_reason'
+
     ];
     protected $useTimestamps    = true;
 
@@ -143,6 +146,8 @@ class DtsenKkModel extends Model
             ')
             ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
             ->join('dtsen_se se', 'se.id_kk = kk.id_kk', 'left'); // 🟢 tambahan penting
+
+        $builder->where('kk.deleted_at', null);
 
         // filter wilayah
         if (!empty($filter['kode_desa'])) {

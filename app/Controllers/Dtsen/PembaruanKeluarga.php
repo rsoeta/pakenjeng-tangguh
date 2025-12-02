@@ -160,6 +160,7 @@ class PembaruanKeluarga extends BaseController
                 // ambil anggota dari tabel utama
                 $anggota = $db->table('dtsen_art')
                     ->where('id_kk', $id_kk)
+                    ->where('deleted_at', null)
                     ->get()
                     ->getResultArray();
 
@@ -218,6 +219,7 @@ class PembaruanKeluarga extends BaseController
             // ambil anggota dari usulan_art
             $anggota = $db->table('dtsen_usulan_art')
                 ->where('dtsen_usulan_id', $usulan['id'])
+                ->where('deleted_at', null)
                 ->get()
                 ->getResultArray();
 
@@ -462,17 +464,66 @@ class PembaruanKeluarga extends BaseController
     // 🗑️ Hapus anggota
     public function deleteAnggota()
     {
-        $id = $this->request->getPost('id');
-
-        if (!$id) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'ID anggota tidak ditemukan.']);
-        }
-
         try {
-            $this->db->table('dtsen_usulan_art')->where('id', $id)->delete();
-            return $this->response->setJSON(['status' => 'success', 'message' => 'Anggota berhasil dihapus.']);
+            $idArt = $this->request->getPost('id_art');
+            $reason = trim($this->request->getPost('reason'));
+
+            if (!$idArt) {
+                return $this->response->setJSON(['status' => false, 'message' => 'ID anggota tidak valid']);
+            }
+
+            if ($reason === '') {
+                return $this->response->setJSON(['status' => false, 'message' => 'Alasan wajib diisi']);
+            }
+
+            $db = \Config\Database::connect();
+
+            // 1️⃣ Periksa apakah sedang dalam usulan aktif
+            $usulan = $db->table('dtsen_usulan_art')
+                ->where('id', $idArt)
+                ->get()->getRowArray();
+
+            // ============================
+            // CASE 1 → Hapus dari USULAN
+            // ============================
+            if ($usulan) {
+
+                $db->table('dtsen_usulan_art')
+                    ->where('id', $idArt)
+                    ->update([
+                        'deleted_at'    => date('Y-m-d H:i:s'),
+                        'delete_reason' => $reason
+                    ]);
+
+                return $this->response->setJSON([
+                    'status' => true,
+                    'message' => 'Anggota berhasil dihapus dari draf.'
+                ]);
+            }
+
+            // ============================
+            // CASE 2 → Hapus dari DATA UTAMA (dtsen_art)
+            // ============================
+            $utama = $db->table('dtsen_art')->where('id_art', $idArt)->get()->getRowArray();
+
+            if ($utama) {
+                $db->table('dtsen_art')
+                    ->where('id_art', $idArt)
+                    ->update([
+                        'deleted_at'    => date('Y-m-d H:i:s'),
+                        'delete_reason' => $reason
+                    ]);
+
+                return $this->response->setJSON([
+                    'status' => true,
+                    'message' => 'Anggota berhasil dihapus dari data utama.'
+                ]);
+            }
+
+            return $this->response->setJSON(['status' => false, 'message' => 'Data anggota tidak ditemukan']);
         } catch (\Throwable $e) {
-            return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+            log_message('error', '[deleteAnggota] ' . $e->getMessage());
+            return $this->response->setJSON(['status' => false, 'message' => $e->getMessage()]);
         }
     }
 
@@ -1642,6 +1693,9 @@ class PembaruanKeluarga extends BaseController
                     ->select('ua.*, s.jenis_shdk, ua.nik')
                     ->join('tb_shdk s', 's.id = ua.hubungan', 'left')
                     ->where('ua.dtsen_usulan_id', $usulan['id'])
+                    ->where('ua.deleted_at', null)
+                    // orderBy berdasarkan hubungan keluarga
+                    ->orderBy('s.id', 'ASC')
                     ->get()
                     ->getResultArray();
             }
@@ -1656,6 +1710,7 @@ class PembaruanKeluarga extends BaseController
                 ->select('a.*, s.jenis_shdk, a.nik')
                 ->join('tb_shdk s', 's.id = a.shdk', 'left')
                 ->where('a.id_kk', $id_kk)
+                ->where('a.deleted_at', null)
                 ->orderBy('s.id', 'ASC')
                 ->get()
                 ->getResultArray();

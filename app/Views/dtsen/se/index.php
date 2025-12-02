@@ -1,6 +1,25 @@
 <?= $this->extend('templates/index'); ?>
 <?= $this->section('content'); ?>
 
+<style>
+    .nav-tabs-right {
+        border-left: 1px solid #ddd;
+        height: 100%;
+        padding-left: 0;
+    }
+
+    .nav-tabs-right .nav-link {
+        text-align: left;
+        border-radius: 0;
+        border-left: 3px solid transparent;
+    }
+
+    .nav-tabs-right .nav-link.active {
+        background-color: #f8f9fa;
+        border-left: 3px solid #007bff;
+    }
+</style>
+
 <div class="content-wrapper mt-0">
     <div class="content-header">
         <h3 class="mb-2">👨‍👩‍👧‍👦 Data Keluarga DTSEN</h3>
@@ -27,6 +46,14 @@
                             🟢 Submitted
                         </button>
                     </li>
+                    <!-- Admin Only -->
+                    <?php if ($role_id <= 3): ?>
+                        <li class="nav-item">
+                            <button class="nav-link" id="tabArsip-tab" data-bs-toggle="tab" data-bs-target="#tabArsip" type="button" role="tab">
+                                🔴 Arsip
+                            </button>
+                        </li>
+                    <?php endif; ?>
 
                 </ul>
             </div>
@@ -121,6 +148,79 @@
                     </table>
                 </div>
 
+                <!-- ===================== TAB 4: ARSIP ===================== -->
+                <div class="tab-pane fade" id="tabArsip" role="tabpanel">
+
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light border-bottom pb-0">
+                            <!-- 🔥 TAB ATAS UNTUK ARSIP -->
+                            <ul class="nav nav-tabs" id="arsipTab" role="tablist">
+                                <li class="nav-item">
+                                    <button class="nav-link active" id="arsipKeluarga-tab"
+                                        data-bs-toggle="tab"
+                                        data-bs-target="#arsipKeluarga"
+                                        type="button" role="tab">
+                                        📁 Arsip Keluarga
+                                    </button>
+                                </li>
+
+                                <li class="nav-item">
+                                    <button class="nav-link" id="arsipAnggota-tab"
+                                        data-bs-toggle="tab"
+                                        data-bs-target="#arsipAnggota"
+                                        type="button" role="tab">
+                                        👤 Arsip Anggota
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="card-body tab-content">
+
+                            <!-- ===================== SUBTAB: ARSIP KELUARGA ===================== -->
+                            <div class="tab-pane fade show active" id="arsipKeluarga" role="tabpanel">
+                                <h5 class="fw-bold mb-3">📁 Arsip Keluarga</h5>
+
+                                <table id="tableArsipKeluarga" class="table table-striped table-hover w-100">
+                                    <thead class="text-center">
+                                        <tr>
+                                            <th>No.</th>
+                                            <th>Kepala Keluarga</th>
+                                            <th>No KK</th>
+                                            <th>Alamat</th>
+                                            <th>RW/RT</th>
+                                            <th>Tanggal Hapus</th>
+                                            <th>Alasan</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+
+                            <!-- ===================== SUBTAB: ARSIP ANGGOTA ===================== -->
+                            <div class="tab-pane fade" id="arsipAnggota" role="tabpanel">
+                                <h5 class="fw-bold mb-3">👤 Arsip Anggota Keluarga</h5>
+
+                                <table id="tableArsipAnggota" class="table table-striped table-hover w-100">
+                                    <thead class="text-center">
+                                        <tr>
+                                            <th>No.</th>
+                                            <th>NIK</th>
+                                            <th>Nama</th>
+                                            <th>Hubungan</th>
+                                            <th>ID KK</th>
+                                            <th>Tanggal Hapus</th>
+                                            <th>Alasan</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
@@ -135,7 +235,7 @@
 <script>
     $(document).ready(function() {
 
-        // ========================= 🟢 TABLE DAFTAR KELUARGA =========================
+        // ========================= 🔵 TABLE DAFTAR KELUARGA =========================
         const tableKeluarga = $('#tableKeluarga').DataTable({
             ajax: {
                 url: '/dtsen-se/tabel_data',
@@ -191,6 +291,10 @@
                             data-desil="${row.kategori_desil ?? ''}">
                             <i class="fas fa-hand-holding-heart"></i>
                         </button>
+                         <!-- 🔥 Tambahkan tombol hapus -->
+                        <button class="btn btn-danger btn-sm btnDeleteKeluarga" data-id="${row.id_kk}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     `
                 }
             ],
@@ -213,6 +317,48 @@
                 btn.prop('disabled', false).html('<i class="fas fa-sync-alt"></i> Muat Ulang');
             }, 800);
         });
+
+        // ========================= 🔥 HAPUS KELUARGA =========================
+        $(document).on('click', '.btnDeleteKeluarga', function() {
+            let id = $(this).data('id');
+
+            Swal.fire({
+                title: 'Hapus Keluarga?',
+                html: `
+            <p class="mb-2">Sebutkan alasan penghapusan:</p>
+            <textarea id="alasanHapus" class="form-control" rows="3" placeholder="Wajib diisi"></textarea>
+        `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Hapus',
+                preConfirm: () => {
+                    const alasan = document.getElementById('alasanHapus').value.trim();
+                    if (!alasan) {
+                        Swal.showValidationMessage('Alasan wajib diisi!');
+                    }
+                    return alasan;
+                }
+            }).then(result => {
+                if (!result.isConfirmed) return;
+
+                let alasan = result.value;
+
+                $.post('/dtsen-se/delete', {
+                        id_kk: id,
+                        alasan: alasan
+                    },
+                    function(res) {
+                        if (res.status) {
+                            Swal.fire('Berhasil', res.message, 'success');
+                            tableKeluarga.ajax.reload(null, false);
+                        } else {
+                            Swal.fire('Gagal', res.message, 'error');
+                        }
+                    }, 'json'
+                );
+            });
+        });
+
 
         // ========================= 🟡 TABLE DRAFT PEMBARUAN =========================
         const tableDraft = $('#tableDraftKeluarga').DataTable({
@@ -279,7 +425,7 @@
             }, 800);
         });
 
-        // ========================= 🟠 TABLE SUBMITTED =========================
+        // ========================= 🟢 TABLE SUBMITTED =========================
         const tableSubmitted = $('#tableSubmitted').DataTable({
             ajax: {
                 url: '/pembaruan-keluarga/data?submitted=1',
@@ -328,6 +474,7 @@
             headerCallback: thead => $(thead).find('th').css('text-align', 'center')
         });
 
+        // 🔥 Reload submitted
         $('#btnReloadSubmitted').on('click', function() {
             tableSubmitted.ajax.reload(null, false);
             const btn = $(this);
@@ -336,6 +483,197 @@
                 btn.prop('disabled', false).html('<i class="fas fa-sync-alt"></i> Muat Ulang');
             }, 800);
         });
+
+        document.addEventListener("shown.bs.tab", function(event) {
+            const target = event.target.getAttribute("data-bs-target");
+
+            if (target === "#arsipKeluarga" && !arsipKeluargaLoaded) {
+                loadArsipKeluarga();
+                arsipKeluargaLoaded = true;
+            }
+
+            if (target === "#arsipAnggota" && !arsipAnggotaLoaded) {
+                loadArsipAnggota();
+                arsipAnggotaLoaded = true;
+            }
+        });
+
+        // ========================= 🔴 TABLE ARSIP =========================
+
+        $(document).on("click", ".nav-link", function() {
+            const target = $(this).data("target");
+
+            if (target === "#tableArsipKeluarga") showArsipKeluarga();
+            if (target === "#tableArsipAnggota") showArsipAnggota();
+        });
+
+        let arsipKeluargaLoaded = false;
+        let arsipAnggotaLoaded = false;
+
+        function showArsipKeluarga() {
+            const wrap = $('#arsipContent');
+            wrap.html($('#tmplArsipKeluarga').html()); // tempelkan template
+
+            loadArsipKeluarga(); // setelah tabel ada di DOM → baru inisialisasi DT
+        }
+
+        function showArsipAnggota() {
+            const wrap = $('#arsipContent');
+            wrap.html($('#tmplArsipAnggota').html());
+
+            loadArsipAnggota();
+        }
+
+        let dtArsipKeluarga = null;
+        let dtArsipAnggota = null;
+
+        // =============== TABLE ARSIP KELUARGA =================
+        function loadArsipKeluarga() {
+            if (dtArsipKeluarga) {
+                dtArsipKeluarga.ajax.reload(null, false);
+                return;
+            }
+
+            dtArsipKeluarga = $('#tableArsipKeluarga').DataTable({
+                ajax: {
+                    url: '/dtsen-se/tabel_arsip',
+                    type: 'POST',
+                    dataSrc: 'data'
+                },
+                columns: [{
+                        data: null,
+                        render: (d, t, r, m) => m.row + 1
+                    },
+                    {
+                        data: 'kepala_keluarga'
+                    },
+                    {
+                        data: 'no_kk'
+                    },
+                    {
+                        data: 'alamat'
+                    },
+                    {
+                        data: null,
+                        render: r => `RW ${r.rw} / RT ${r.rt}`
+                    },
+                    {
+                        data: 'deleted_at'
+                    },
+                    {
+                        data: 'delete_reason'
+                    },
+                    {
+                        data: null,
+                        render: row => `
+                    <button class="btn btn-success btn-sm btnRestoreKK"
+                        data-id="${row.id_kk}">
+                        <i class="fas fa-undo"></i> Restore
+                    </button>`
+                    }
+                ]
+            });
+        }
+
+        // restore KK
+        $(document).on('click', '.btnRestoreKK', function() {
+            let id = $(this).data('id');
+
+            Swal.fire({
+                title: "Pulihkan Keluarga?",
+                text: "Data akan dikembalikan ke daftar keluarga.",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Ya, kembalikan!"
+            }).then(result => {
+                if (!result.isConfirmed) return;
+
+                $.post('/dtsen-se/restore', {
+                    id_kk: id
+                }, function(res) {
+                    if (res.status) {
+                        Swal.fire("Berhasil!", res.message, "success");
+                        loadArsipKeluarga(); // reload tanpa reinit
+                    } else {
+                        Swal.fire("Gagal!", res.message, "error");
+                    }
+                }, 'json');
+            });
+        });
+
+        // =============== TABLE ARSIP ANGGOTA =================
+        function loadArsipAnggota() {
+            if (dtArsipAnggota) {
+                dtArsipAnggota.ajax.reload(null, false);
+                return;
+            }
+
+            dtArsipAnggota = $('#tableArsipAnggota').DataTable({
+                ajax: {
+                    url: '/dtsen-se/arsip-anggota',
+                    type: 'GET',
+                    dataSrc: 'data'
+                },
+                columns: [{
+                        data: null,
+                        render: (d, t, r, m) => m.row + 1
+                    },
+                    {
+                        data: 'nik'
+                    },
+                    {
+                        data: 'nama'
+                    },
+                    {
+                        data: 'jenis_shdk'
+                    },
+                    {
+                        data: 'id_kk'
+                    },
+                    {
+                        data: 'deleted_at'
+                    },
+                    {
+                        data: 'delete_reason'
+                    },
+                    {
+                        data: null,
+                        render: row => `
+                    <button class="btn btn-success btn-sm btnRestoreAnggota"
+                        data-id="${row.id}"
+                        data-source="${row.sumber}">
+                        <i class="fas fa-undo"></i> Restore
+                    </button>`
+                    }
+                ]
+            });
+        }
+
+        // restore anggota
+        $(document).on('click', '.btnRestoreAnggota', function() {
+            let id = $(this).data('id');
+
+            Swal.fire({
+                title: "Pulihkan Anggota?",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Ya, pulihkan!"
+            }).then(result => {
+                if (!result.isConfirmed) return;
+
+                $.post('/dtsen-se/restore-art', {
+                    id_art: id
+                }, function(res) {
+                    if (res.status) {
+                        Swal.fire("Berhasil!", res.message, "success");
+                        loadArsipAnggota();
+                    } else {
+                        Swal.fire("Gagal!", res.message, "error");
+                    }
+                }, 'json');
+            });
+        });
+
 
     });
 </script>
@@ -374,5 +712,6 @@
         }
     });
 </script>
+
 
 <?= $this->endSection(); ?>

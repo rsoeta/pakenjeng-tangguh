@@ -155,6 +155,11 @@ $routes->group('dtsen-se', ['filter' => ['authfilterdtks', 'globalview']], funct
 	$routes->get('/', 'Dtsen\DtsenSe::index');
 	$routes->post('update-desil', 'Dtsen\DtsenSe::updateDesil');
 	$routes->post('tabel_data', 'Dtsen\DtsenSe::tabel_data');
+	$routes->post('delete', 'Dtsen\DtsenSe::deleteKeluarga');
+	$routes->post('restore', 'Dtsen\DtsenSe::restoreKeluarga');
+	$routes->post('tabel_arsip', 'Dtsen\DtsenSe::tabel_arsip');
+	$routes->get('arsip-anggota', 'Dtsen\DtsenSe::arsipAnggota');
+	$routes->post('restore-art', 'Dtsen\DtsenSe::restoreArt');
 });
 
 // USULAN BANSOS

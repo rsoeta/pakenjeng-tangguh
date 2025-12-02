@@ -8,6 +8,9 @@ class DtsenArtModel extends Model
 {
     protected $table            = 'dtsen_art';
     protected $primaryKey       = 'id_art';
+    protected $useSoftDeletes   = true;
+    protected $deletedField     = 'deleted_at';
+
     protected $allowedFields    = [
         'id_kk',
         'nik',
@@ -29,7 +32,9 @@ class DtsenArtModel extends Model
         'created_at',
         'updated_at',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'deleted_at',
+        'delete_reason'
     ];
     protected $useTimestamps    = true;
 
