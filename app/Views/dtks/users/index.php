@@ -296,9 +296,9 @@
             let filterStatus = $('#filterStatus').val().toLowerCase();
             let filterRW = $('#filterRW').val().toLowerCase();
 
-            let statusText = $(table.row(dataIndex).node()).find('td:eq(10) a').text().trim().toLowerCase();
+            let roleText = data[8].toLowerCase();
+            let statusText = $(table.row(dataIndex).node()).find('td:eq(11) a').text().trim().toLowerCase();
             let rwText = data[4].toLowerCase();
-            let roleText = data[7].toLowerCase();
 
             if (filterStatus && filterStatus !== statusText) return false;
             if (filterRW && !rwText.includes(filterRW)) return false;

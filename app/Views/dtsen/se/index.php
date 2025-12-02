@@ -243,7 +243,7 @@
                     render: s => `<span class="badge bg-secondary">${(s || 'draft').toUpperCase()}</span>`
                 },
                 {
-                    data: 'created_at',
+                    data: 'updated_at',
                     title: 'Tanggal Dibuat',
                     render: d => d ? new Date(d).toLocaleString('id-ID') : '-'
                 },
@@ -305,7 +305,7 @@
                     render: s => `<span class="badge bg-info">SUBMITTED</span>`
                 },
                 {
-                    data: 'created_at',
+                    data: 'updated_at',
                     render: d => d ? new Date(d).toLocaleString('id-ID') : '-'
                 },
                 {
