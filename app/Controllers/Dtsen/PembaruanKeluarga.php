@@ -485,6 +485,27 @@ class PembaruanKeluarga extends BaseController
             $post = $this->request->getPost();
             $user = session()->get();
 
+            // === VALIDASI INPUT ===
+            $nomorPelanggan = trim($post['nomor_pelanggan'] ?? '');
+            $nomorMeter     = trim($post['nomor_meter'] ?? '');
+
+            // Validasi nomor pelanggan (11–13 digit)
+            if ($nomorPelanggan !== '' && !preg_match('/^[0-9]{11,13}$/', $nomorPelanggan)) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Nomor Pelanggan harus terdiri dari 11 sampai 13 digit angka.'
+                ]);
+            }
+
+            // Validasi nomor meter (8–13 digit)
+            if ($nomorMeter !== '' && !preg_match('/^[0-9]{8,13}$/', $nomorMeter)) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Nomor Meter harus terdiri dari 8 sampai 13 digit angka.'
+                ]);
+            }
+
+            // === PROSES SIMPAN DATA ===
             $usulanId = $post['dtsen_usulan_id'] ?? null;
             if (!$usulanId) {
                 return $this->response->setJSON([

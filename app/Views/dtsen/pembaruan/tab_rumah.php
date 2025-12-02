@@ -186,8 +186,17 @@ $san = $perumahan['sanitasi'] ?? [];
                         <input type="text" name="nomor_meter" id="nomor_meter" class="form-control onlynum" value="<?= esc($kond['nomor_meter'] ?? '') ?>" <?= $editable ? '' : 'readonly' ?>>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Besar Daya (WATT)</label>
-                        <input type="text" name="daya_listrik" id="daya_listrik" class="form-control onlynum" value="<?= esc($kond['daya_listrik'] ?? '') ?>" <?= $editable ? '' : 'readonly' ?>>
+                        <label class="form-label">Besar Daya</label>
+                        <select name="daya_listrik" id="daya_listrik" class="form-select" <?= $editable ? '' : 'disabled' ?>>
+                            <?php
+                            $opsiDaya = ['TANPA METERAN', '450 WATT', '900 WATT', '1.300 WATT', '2.200 WATT', '> 2.200 WATT', '< = 900 WATT', '> 900 WATT'];
+                            $sel = $kond['daya_listrik'] ?? '';
+                            foreach ($opsiDaya as $o) {
+                                $s = ($o == $sel) ? 'selected' : '';
+                                echo "<option value=\"$o\" $s>$o</option>";
+                            }
+                            ?>
+                        </select>
                     </div>
                 </div>
             </div>
