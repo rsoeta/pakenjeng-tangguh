@@ -70,8 +70,37 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                 </div>
             </div>
 
+            <!-- ================= TERNAK ================= -->
+            <div class="col-12 col-lg-6">
+                <div class="card border shadow-sm">
+                    <div class="card-header bg-light fw-bold">
+                        Jumlah Ternak yang Dimiliki:
+                    </div>
+                    <div class="card-body">
+                        <?php
+                        $ternak = [
+                            'Sapi' => 'sapi',
+                            'Kuda' => 'kuda',
+                            'Babi' => 'babi',
+                            'Kerbau' => 'kerbau',
+                            'Kambing / Domba' => 'kambing'
+                        ];
+                        ?>
+                        <div class="row">
+                            <?php foreach ($ternak as $label => $name): ?>
+                                <div class="col-md-4 mb-2">
+                                    <label class="form-label"><?= esc("Jumlah $label") ?></label>
+                                    <input type="number" min="0" class="form-control form-control-sm"
+                                        name="<?= $name ?>" value="<?= esc($aset[$name] ?? 0) ?>" <?= $disabled ?>>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- ================= ASET TIDAK BERGERAK ================= -->
-            <div class="col-12 mt-3">
+            <div class="col-12">
                 <div class="card border shadow-sm">
                     <div class="card-header bg-light fw-bold">
                         Jumlah Aset Tidak Bergerak yang Dimiliki:
@@ -105,35 +134,6 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                                     <option value="TIDAK" <?= ($aset['rumah_lain'] ?? '') === 'TIDAK' ? 'selected' : '' ?>>TIDAK</option>
                                 </select>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ================= TERNAK ================= -->
-            <div class="col-12 col-lg-6">
-                <div class="card border shadow-sm">
-                    <div class="card-header bg-light fw-bold">
-                        Jumlah Ternak yang Dimiliki:
-                    </div>
-                    <div class="card-body">
-                        <?php
-                        $ternak = [
-                            'Sapi' => 'sapi',
-                            'Kerbau' => 'kerbau',
-                            'Kuda' => 'kuda',
-                            'Kambing / Domba' => 'kambing',
-                            'Babi' => 'babi'
-                        ];
-                        ?>
-                        <div class="row">
-                            <?php foreach ($ternak as $label => $name): ?>
-                                <div class="col-md-6 mb-2">
-                                    <label class="form-label"><?= esc("Jumlah $label") ?></label>
-                                    <input type="number" min="0" class="form-control form-control-sm"
-                                        name="<?= $name ?>" value="<?= esc($aset[$name] ?? 0) ?>" <?= $disabled ?>>
-                                </div>
-                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>
