@@ -1707,6 +1707,31 @@ class PembaruanKeluarga extends BaseController
         }
     }
 
+    private function parseWilayahTugas(?string $wilayahTugas): array
+    {
+        $result = [];
+
+        if (empty($wilayahTugas)) {
+            return $result;
+        }
+
+        $rwGroups = explode('|', $wilayahTugas); // contoh: 002:003,004|005:001,002
+
+        foreach ($rwGroups as $group) {
+            [$rw, $rtList] = array_pad(explode(':', trim($group)), 2, '');
+            if ($rw === '') continue;
+
+            $rts = $rtList ? array_map('trim', explode(',', $rtList)) : [];
+
+            $result[] = [
+                'rw' => $rw,
+                'rt' => $rts
+            ];
+        }
+
+        return $result;
+    }
+
     public function data()
     {
         $submitted = $this->request->getGet('submitted');
@@ -1732,175 +1757,362 @@ class PembaruanKeluarga extends BaseController
     public function getDataDraft()
     {
         try {
-            $session = session();
-            $kodeDesa = $session->get('kode_desa');
-            $wilayahTugas = $session->get('wilayah_tugas'); // e.g. "002:003,004"
-            $roleId = (int) ($session->get('role_id') ?? 99);
-
-            $status = $this->request->getGet('status') ?? 'draft';
+            $session        = session();
+            $kodeDesa       = $session->get('kode_desa');
+            $wilayahTugas   = $session->get('wilayah_tugas');
+            $roleId         = (int) ($session->get('role_id') ?? 99);
+            $status         = $this->request->getGet('status') ?? 'draft';
 
             $db = $this->db;
 
-            // builder utama dari dtsen_usulan alias us
             $builder = $db->table('dtsen_usulan us')
-                ->select("us.id, us.usulan_no, us.jenis, us.status, us.dtsen_kk_id, us.no_kk_target, us.created_at, us.updated_at,
-                      kk.no_kk, kk.kepala_keluarga,
-                      r.rw, r.rt,
-                      COALESCE(u.fullname, us.created_by) AS created_by_name,
-                      COALESCE(u.id, NULL) AS created_by_id,
-                      COALESCE(payload, '{}') AS payload,
-                      (SELECT COUNT(1) FROM dtsen_usulan_art aua WHERE aua.dtsen_usulan_id = us.id) AS jumlah_art_usulan
-            ");
+                ->select("
+                us.id, us.usulan_no, us.jenis, us.status, us.dtsen_kk_id, 
+                us.no_kk_target, us.created_at, us.updated_at,
+                kk.no_kk, kk.kepala_keluarga,
+                r.rw, r.rt,
+                COALESCE(u.fullname, us.created_by) AS created_by_name,
+                COALESCE(u.id, NULL) AS created_by_id,
+                COALESCE(us.payload, '{}') AS payload,
+                (SELECT COUNT(1) FROM dtsen_usulan_art aua WHERE aua.dtsen_usulan_id = us.id) AS jumlah_art_usulan
+            ")
+                ->join('dtsen_kk kk', 'kk.id_kk = us.dtsen_kk_id', 'left')
+                ->join('dtsen_rt r', 'r.id_rt = kk.id_rt', 'left')
+                ->join('dtks_users u', ' (u.id = us.created_by OR u.nik = us.created_by) ', 'left', false)
+                ->where('us.status', $status);
 
-            $builder->join('dtsen_kk kk', 'kk.id_kk = us.dtsen_kk_id', 'left');
-            // ambil RW/RT dari tabel RT
-            $builder->join('dtsen_rt r', 'r.id_rt = kk.id_rt', 'left');
-
-            // join dtks_users (coba cocokkan id atau nik)
-            // menggunakan LEFT JOIN dengan kondisi OR agar kompatibel jika created_by menyimpan id atau nik
-            $builder->join('dtks_users u', ' (u.id = us.created_by OR u.nik = us.created_by) ', 'left', false);
-
-            $builder->where('us.status', $status);
-
-            // filter by desa via dtsen_rt.kode_desa jika ada
+            // Filter desa
             if (!empty($kodeDesa)) {
                 $builder->where('r.kode_desa', $kodeDesa);
             }
 
-            // Respect wilayah_tugas: jika ada dan user non-super (role>=4), filter berdasarkan RW
+            // Filter wilayah tugas (role >= 4)
             if (!empty($wilayahTugas) && $roleId >= 4) {
-                $parts = explode(':', $wilayahTugas);
-                $rwPart = trim($parts[0] ?? '');
-                if ($rwPart !== '') {
-                    $builder->where('r.rw', $rwPart);
+                $parsed = $this->parseWilayahTugas($wilayahTugas);
+
+                $builder->groupStart(); // where group RW/RT
+
+                foreach ($parsed as $group) {
+                    $builder->orGroupStart()
+                        ->where('r.rw', $group['rw']);
+
+                    if (!empty($group['rt'])) {
+                        $builder->whereIn('r.rt', $group['rt']);
+                    }
+
+                    $builder->groupEnd();
                 }
+
+                $builder->groupEnd();
             }
 
             $builder->orderBy('us.updated_at', 'ASC');
 
             $rows = $builder->get()->getResultArray();
 
+            // 🔄 Format output baris
             foreach ($rows as &$r) {
-                // Ambil No. KK
+
+                $payload = json_decode($r['payload'], true) ?? [];
+
                 $r['no_kk'] = $r['no_kk'] ?? $r['no_kk_target'] ?? '';
+                $r['nama_kepala'] =
+                    $r['kepala_keluarga'] ??
+                    ($payload['kepala_keluarga'] ?? '') ??
+                    '';
 
-                // Pastikan nama kepala ada di alias 'nama_kepala'
-                $r['nama_kepala'] = $r['kepala_keluarga']
-                    ?? ($r['payload'] ? (json_decode($r['payload'], true)['kepala_keluarga'] ?? '') : '')
-                    ?? '';
-
-                // Gabungan RW/RT untuk tampilan
-                $r['rw_rt'] = trim(($r['rw'] ? "RW {$r['rw']}" : '-') . " / " . ($r['rt'] ? "RT {$r['rt']}" : '-'));
-
-                // Petugas pembuat
-                $r['created_by_name'] = $r['created_by_name'] ?? $r['created_by'];
-
-                // Jumlah anggota usulan
+                $r['rw_rt'] = "RW {$r['rw']} / RT {$r['rt']}";
+                $r['created_by_name'] = $r['created_by_name'] ?? '-';
                 $r['jumlah_art_usulan'] = (int) ($r['jumlah_art_usulan'] ?? 0);
             }
             unset($r);
 
-
             return $this->response->setJSON(['data' => $rows]);
         } catch (\Throwable $e) {
             log_message('error', '❌ getDataDraft() error: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'error' => true,
-                'message' => 'Gagal mengambil data draft: ' . $e->getMessage()
-            ]);
+            return $this->response
+                ->setStatusCode(500)
+                ->setJSON([
+                    'error' => true,
+                    'message' => 'Gagal mengambil data draft: ' . $e->getMessage()
+                ]);
         }
     }
 
+    // public function getDataDraft()
+    // {
+    //     try {
+    //         $session = session();
+    //         $kodeDesa = $session->get('kode_desa');
+    //         $wilayahTugas = $session->get('wilayah_tugas'); // e.g. "002:003,004"
+    //         $roleId = (int) ($session->get('role_id') ?? 99);
+
+    //         $status = $this->request->getGet('status') ?? 'draft';
+
+    //         $db = $this->db;
+
+    //         // builder utama dari dtsen_usulan alias us
+    //         $builder = $db->table('dtsen_usulan us')
+    //             ->select("us.id, us.usulan_no, us.jenis, us.status, us.dtsen_kk_id, us.no_kk_target, us.created_at, us.updated_at,
+    //                   kk.no_kk, kk.kepala_keluarga,
+    //                   r.rw, r.rt,
+    //                   COALESCE(u.fullname, us.created_by) AS created_by_name,
+    //                   COALESCE(u.id, NULL) AS created_by_id,
+    //                   COALESCE(payload, '{}') AS payload,
+    //                   (SELECT COUNT(1) FROM dtsen_usulan_art aua WHERE aua.dtsen_usulan_id = us.id) AS jumlah_art_usulan
+    //         ");
+
+    //         $builder->join('dtsen_kk kk', 'kk.id_kk = us.dtsen_kk_id', 'left');
+    //         // ambil RW/RT dari tabel RT
+    //         $builder->join('dtsen_rt r', 'r.id_rt = kk.id_rt', 'left');
+
+    //         // join dtks_users (coba cocokkan id atau nik)
+    //         // menggunakan LEFT JOIN dengan kondisi OR agar kompatibel jika created_by menyimpan id atau nik
+    //         $builder->join('dtks_users u', ' (u.id = us.created_by OR u.nik = us.created_by) ', 'left', false);
+
+    //         $builder->where('us.status', $status);
+
+    //         // filter by desa via dtsen_rt.kode_desa jika ada
+    //         if (!empty($kodeDesa)) {
+    //             $builder->where('r.kode_desa', $kodeDesa);
+    //         }
+
+    //         // Respect wilayah_tugas: jika ada dan user non-super (role>=4), filter berdasarkan RW
+    //         if (!empty($wilayahTugas) && $roleId >= 4) {
+    //             $parts = explode(':', $wilayahTugas);
+    //             $rwPart = trim($parts[0] ?? '');
+    //             if ($rwPart !== '') {
+    //                 $builder->where('r.rw', $rwPart);
+    //             }
+    //         }
+
+    //         $builder->orderBy('us.updated_at', 'ASC');
+
+    //         $rows = $builder->get()->getResultArray();
+
+    //         foreach ($rows as &$r) {
+    //             // Ambil No. KK
+    //             $r['no_kk'] = $r['no_kk'] ?? $r['no_kk_target'] ?? '';
+
+    //             // Pastikan nama kepala ada di alias 'nama_kepala'
+    //             $r['nama_kepala'] = $r['kepala_keluarga']
+    //                 ?? ($r['payload'] ? (json_decode($r['payload'], true)['kepala_keluarga'] ?? '') : '')
+    //                 ?? '';
+
+    //             // Gabungan RW/RT untuk tampilan
+    //             $r['rw_rt'] = trim(($r['rw'] ? "RW {$r['rw']}" : '-') . " / " . ($r['rt'] ? "RT {$r['rt']}" : '-'));
+
+    //             // Petugas pembuat
+    //             $r['created_by_name'] = $r['created_by_name'] ?? $r['created_by'];
+
+    //             // Jumlah anggota usulan
+    //             $r['jumlah_art_usulan'] = (int) ($r['jumlah_art_usulan'] ?? 0);
+    //         }
+    //         unset($r);
+
+
+    //         return $this->response->setJSON(['data' => $rows]);
+    //     } catch (\Throwable $e) {
+    //         log_message('error', '❌ getDataDraft() error: ' . $e->getMessage());
+    //         return $this->response->setStatusCode(500)->setJSON([
+    //             'error' => true,
+    //             'message' => 'Gagal mengambil data draft: ' . $e->getMessage()
+    //         ]);
+    //     }
+    // }
+
     private function getSubmittedData()
     {
-        $db = \Config\Database::connect();
+        try {
+            $session        = session();
+            $kodeDesa       = $session->get('kode_desa');
+            $wilayahTugas   = $session->get('wilayah_tugas');
+            $roleId         = (int) ($session->get('role_id') ?? 99);
 
-        $builder = $db->table('dtsen_usulan u')
-            ->select('
-            u.id,
-            u.no_kk_target,
-            u.status,
-            u.created_at,
-            u.updated_at,
-            petugas.fullname AS created_by_name,
-            JSON_UNQUOTE(JSON_EXTRACT(u.payload, "$.perumahan.kepala_keluarga")) AS nama_kepala
-        ')
-            ->join('dtks_users petugas', 'petugas.id = u.created_by', 'left')
+            $db = \Config\Database::connect();
 
-            // status harus draft
-            ->where('u.status', 'draft')
+            $builder = $db->table('dtsen_usulan u')
+                ->select("
+                u.id, u.no_kk_target, u.status,
+                u.created_at, u.updated_at,
+                petugas.fullname AS created_by_name,
+                JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.kepala_keluarga')) AS nama_kepala,
+                r.rw, r.rt
+            ")
+                ->join('dtks_users petugas', 'petugas.id = u.created_by', 'left')
+                ->join('dtsen_kk kk', 'kk.id_kk = u.dtsen_kk_id', 'left')
+                ->join('dtsen_rt r', 'r.id_rt = kk.id_rt', 'left')
 
-            // payload utama harus ada
-            ->where('JSON_LENGTH(u.payload) >', 0)
+                ->where('u.status', 'draft')
+                ->where('JSON_LENGTH(u.payload) >', 0)
 
-            // =============================
-            // VALIDASI PERUMAHAN
-            // =============================
+                // Wajib field perumahan
+                ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.no_kk')) <> ''")
+                ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.kepala_keluarga')) <> ''")
+                ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.alamat')) <> ''")
 
-            // wajib ada no_kk, kepala_keluarga, alamat
-            ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.no_kk')) <> ''")
-            ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.kepala_keluarga')) <> ''")
-            ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.alamat')) <> ''")
-
-            // PERUMAHAN: kondisi wajib terisi (ARRAY TIDAK BOLEH KOSONG)
-            ->where("
-            JSON_EXTRACT(u.payload, '$.perumahan.kondisi') IS NOT NULL
-            AND JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.kondisi')) > 0
+                ->where("
+                JSON_EXTRACT(u.payload, '$.perumahan.kondisi') IS NOT NULL
+                AND JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.kondisi')) > 0
             ")
 
-            // PERUMAHAN: wilayah wajib terisi
-            ->where("
-            JSON_EXTRACT(u.payload, '$.perumahan.wilayah') IS NOT NULL
-            AND JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.wilayah')) > 0
+                ->where("
+                JSON_EXTRACT(u.payload, '$.perumahan.wilayah') IS NOT NULL
+                AND JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.wilayah')) > 0
             ")
 
-            // PERUMAHAN: sanitasi wajib terisi
-            ->where("
-            JSON_EXTRACT(u.payload, '$.perumahan.sanitasi') IS NOT NULL
-            AND JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.sanitasi')) > 0
+                ->where("
+                JSON_EXTRACT(u.payload, '$.perumahan.sanitasi') IS NOT NULL
+                AND JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.sanitasi')) > 0
             ")
 
-            // =============================
-            // VALIDASI ATRIBUT LAIN (contoh rumah)
-            // =============================
-            // ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.rumah.nomor_pelanggan')) <> ''")
-            // ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.rumah.nomor_meter')) <> ''")
-            // ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.rumah.daya_listrik')) <> ''")
+                // Validasi foto wajib
+                ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.ktp_kk')) <> ''")
+                ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.dalam')) <> ''")
+                ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.depan')) <> ''")
 
-            // =============================
-            // VALIDASI FOTO
-            // =============================
-            ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.ktp_kk')) <> ''")
-            ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.dalam')) <> ''")
-            ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.depan')) <> ''")
+                // Validasi ART wajib lengkap
+                ->where('EXISTS (
+                SELECT 1
+                FROM dtsen_usulan_art a
+                WHERE a.dtsen_usulan_id = u.id
+                AND JSON_LENGTH(a.payload_member) > 0
 
-            // =============================
-            // VALIDASI ART WAJIB LENGKAP
-            // =============================
-            ->where('EXISTS (
-            SELECT 1 FROM dtsen_usulan_art a
-            WHERE a.dtsen_usulan_id = u.id
-              AND JSON_LENGTH(a.payload_member) > 0
+                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.identitas.nik")) <> ""
+                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.identitas.nama")) <> ""
+                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.identitas.jenis_kelamin")) <> ""
+                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.pendidikan.jenjang_pendidikan")) <> ""
+                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.kesehatan.penyakit_kronis")) <> ""
+                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.tenaga_kerja.pendapatan")) <> ""
+            )');
 
-              -- identitas wajib lengkap
-              AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.identitas.nik")) <> ""
-              AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.identitas.nama")) <> ""
-              AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.identitas.jenis_kelamin")) <> ""
+            // Filter desa
+            if (!empty($kodeDesa)) {
+                $builder->where('r.kode_desa', $kodeDesa);
+            }
 
-              -- pendidikan wajib terisi
-              AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.pendidikan.jenjang_pendidikan")) <> ""
+            // Filter wilayah tugas (role >= 4)
+            if (!empty($wilayahTugas) && $roleId >= 4) {
+                $parsed = $this->parseWilayahTugas($wilayahTugas);
 
-              -- kesehatan wajib terisi
-              AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.kesehatan.penyakit_kronis")) <> ""
+                $builder->groupStart();
+                foreach ($parsed as $group) {
+                    $builder->orGroupStart()
+                        ->where('r.rw', $group['rw']);
 
-              -- tenaga kerja wajib terisi
-              AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.tenaga_kerja.pendapatan")) <> ""
-        )')
+                    if (!empty($group['rt'])) {
+                        $builder->whereIn('r.rt', $group['rt']);
+                    }
 
-            ->orderBy('u.updated_at', 'ASC');
+                    $builder->groupEnd();
+                }
+                $builder->groupEnd();
+            }
 
-        $result = $builder->get()->getResultArray();
+            $builder->orderBy('u.updated_at', 'ASC');
 
-        return $this->respond(['data' => $result]);
+            $result = $builder->get()->getResultArray();
+
+            return $this->respond(['data' => $result]);
+        } catch (\Throwable $e) {
+            log_message('error', '❌ getSubmittedData error: ' . $e->getMessage());
+            return $this->respond([
+                'error' => true,
+                'message' => 'Gagal mengambil data submitted: ' . $e->getMessage()
+            ], 500);
+        }
     }
+
+    // private function getSubmittedData()
+    // {
+    //     $db = \Config\Database::connect();
+
+    //     $builder = $db->table('dtsen_usulan u')
+    //         ->select('
+    //         u.id,
+    //         u.no_kk_target,
+    //         u.status,
+    //         u.created_at,
+    //         u.updated_at,
+    //         petugas.fullname AS created_by_name,
+    //         JSON_UNQUOTE(JSON_EXTRACT(u.payload, "$.perumahan.kepala_keluarga")) AS nama_kepala
+    //     ')
+    //         ->join('dtks_users petugas', 'petugas.id = u.created_by', 'left')
+
+    //         // status harus draft
+    //         ->where('u.status', 'draft')
+
+    //         // payload utama harus ada
+    //         ->where('JSON_LENGTH(u.payload) >', 0)
+
+    //         // =============================
+    //         // VALIDASI PERUMAHAN
+    //         // =============================
+
+    //         // wajib ada no_kk, kepala_keluarga, alamat
+    //         ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.no_kk')) <> ''")
+    //         ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.kepala_keluarga')) <> ''")
+    //         ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.alamat')) <> ''")
+
+    //         // PERUMAHAN: kondisi wajib terisi (ARRAY TIDAK BOLEH KOSONG)
+    //         ->where("
+    //         JSON_EXTRACT(u.payload, '$.perumahan.kondisi') IS NOT NULL
+    //         AND JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.kondisi')) > 0
+    //         ")
+
+    //         // PERUMAHAN: wilayah wajib terisi
+    //         ->where("
+    //         JSON_EXTRACT(u.payload, '$.perumahan.wilayah') IS NOT NULL
+    //         AND JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.wilayah')) > 0
+    //         ")
+
+    //         // PERUMAHAN: sanitasi wajib terisi
+    //         ->where("
+    //         JSON_EXTRACT(u.payload, '$.perumahan.sanitasi') IS NOT NULL
+    //         AND JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.sanitasi')) > 0
+    //         ")
+
+    //         // =============================
+    //         // VALIDASI ATRIBUT LAIN (contoh rumah)
+    //         // =============================
+    //         // ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.rumah.nomor_pelanggan')) <> ''")
+    //         // ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.rumah.nomor_meter')) <> ''")
+    //         // ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.rumah.daya_listrik')) <> ''")
+
+    //         // =============================
+    //         // VALIDASI FOTO
+    //         // =============================
+    //         ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.ktp_kk')) <> ''")
+    //         ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.dalam')) <> ''")
+    //         ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.depan')) <> ''")
+
+    //         // =============================
+    //         // VALIDASI ART WAJIB LENGKAP
+    //         // =============================
+    //         ->where('EXISTS (
+    //         SELECT 1 FROM dtsen_usulan_art a
+    //         WHERE a.dtsen_usulan_id = u.id
+    //           AND JSON_LENGTH(a.payload_member) > 0
+
+    //           -- identitas wajib lengkap
+    //           AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.identitas.nik")) <> ""
+    //           AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.identitas.nama")) <> ""
+    //           AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.identitas.jenis_kelamin")) <> ""
+
+    //           -- pendidikan wajib terisi
+    //           AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.pendidikan.jenjang_pendidikan")) <> ""
+
+    //           -- kesehatan wajib terisi
+    //           AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.kesehatan.penyakit_kronis")) <> ""
+
+    //           -- tenaga kerja wajib terisi
+    //           AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.tenaga_kerja.pendapatan")) <> ""
+    //     )')
+
+    //         ->orderBy('u.updated_at', 'ASC');
+
+    //     $result = $builder->get()->getResultArray();
+
+    //     return $this->respond(['data' => $result]);
+    // }
 }
