@@ -413,7 +413,7 @@ class Auth extends BaseController
                 $email = htmlentities(strip_tags(trim($this->request->getVar('email'))));
                 $kode_desa = htmlentities(strip_tags(trim($this->request->getVar('kelurahan'))));
                 $level = htmlentities(strip_tags(trim($this->request->getVar('no_rw'))));
-                $opr_sch = htmlentities(strip_tags(trim(strtoupper($this->request->getVar('opr_sch')))));
+                $opr_sch = htmlentities(strip_tags(trim(strtoupper((string) ($this->request->getVar('opr_sch') ?? '')))));
                 $nope = htmlentities(strip_tags(trim($this->request->getVar('nope'))));
                 $password = htmlentities(strip_tags(trim($this->request->getVar('password'))));
 
@@ -627,5 +627,107 @@ class Auth extends BaseController
         ]);
 
         return redirect()->to(base_url('login'));
+    }
+
+    public function adminResetPassword()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Invalid access'
+            ]);
+        }
+
+        $id = $this->request->getJSON()->id ?? null;
+
+        if (!$id) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'ID tidak ditemukan'
+            ]);
+        }
+
+        $user = $this->AuthModel->find($id);
+
+        if (!$user) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'User tidak ditemukan'
+            ]);
+        }
+
+        try {
+            // Generate token baru
+            $token = bin2hex(random_bytes(32));
+
+            $this->AuthModel->update($id, [
+                'reset_token'  => $token,
+                'reset_expiry' => date('Y-m-d H:i:s', strtotime('+1 hour'))
+            ]);
+
+            // ==========================
+            //  KIRIM EMAIL
+            // ==========================
+            $resetLink = base_url("reset-password?token={$token}");
+            $subject   = 'Reset Password Akun Anda';
+            $message   = "
+            <p>Halo, <strong>{$user['fullname']}</strong>.</p>
+            <p>Admin desa telah mengirimkan link reset password.</p>
+            <p>Klik tombol berikut:</p>
+            <p><a href='{$resetLink}' style='background:#007bff;color:white;padding:10px 15px;border-radius:4px;text-decoration:none;'>Reset Password</a></p>
+            <p>Berlaku 1 jam.</p>
+        ";
+
+            $email = \Config\Services::email();
+            $config = config('Email');
+            $email->initialize((array)$config);
+
+            $email->setTo($user['email']);
+            $email->setFrom($config->fromEmail, $config->fromName);
+            $email->setSubject($subject);
+            $email->setMessage($message);
+
+            if (!$email->send()) {
+                log_message('error', 'Email gagal dikirim: ' . $email->printDebugger(['headers']));
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Email gagal dikirim, cek konfigurasi email.'
+                ]);
+            }
+
+            // ==========================
+            //  KIRIM WHATSAPP
+            // ==========================
+            $wa = new \App\Libraries\WaService();
+            $resetLink = base_url("reset-password?token={$token}");
+
+            $fullname = ucwords(strtolower($user['fullname'])); // kapital per kata
+
+            $messageWA = "*SINDEN System*\n\n"
+                . "Halo *{$fullname}*,\n"
+                . "Admin desa telah mengirimkan link reset password untuk akun Anda.\n"
+                . "Silakan cek email Anda: *{$user['email']}*.\n\n"
+                . "Jika email tidak muncul, periksa folder *Spam* atau *Promosi*.\n\n"
+                . "Atau klik link berikut untuk langsung reset password:\n"
+                . "{$resetLink}\n\n"
+                . "_(Pesan otomatis – tidak perlu dibalas)_";
+
+            $wa->sendText($user['nope'], $messageWA);
+
+            // ==========================
+            //  RESPONSE KE AJAX
+            // ==========================
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Link reset password telah dikirim via Email dan WhatsApp.'
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'adminResetPassword() error: ' . $e->getMessage());
+
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan internal.'
+            ]);
+        }
     }
 }

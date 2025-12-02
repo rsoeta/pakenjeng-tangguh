@@ -79,6 +79,13 @@
                         </select>
                     </div>
                 </div>
+                <!-- tambah form wilayah_tugas -->
+                <div class="form-group row mb-1">
+                    <label class="col-4 col-sm-4 col-form-label" for="wilayah_tugas">Wilayah Tugas</label>
+                    <div class="col-8 col-sm-8">
+                        <input type="text" name="wilayah_tugas" id="wilayah_tugas" class="form-control form-control-sm" value="<?= set_value('wilayah_tugas', $wilayah_tugas); ?>">
+                    </div>
+                </div>
                 <div class="form-group row mb-1">
                     <label class="col-4 col-sm-4 col-form-label" for="status">Status</label>
                     <div class="col-8 col-sm-8">

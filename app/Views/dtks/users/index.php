@@ -200,6 +200,7 @@
                                     <th>NO. RW</th>
                                     <th>NIK</th>
                                     <th>EMAIL</th>
+                                    <th>NO. HP</th>
                                     <th>LEVEL</th>
                                     <th>USER IMAGE</th>
                                     <th>DIBUAT PADA</th>
@@ -218,6 +219,7 @@
                                         <td><?= $row['level']; ?></td>
                                         <td><?= $row['nik']; ?></td>
                                         <td><?= $row['email']; ?></td>
+                                        <td><?= $row['nope']; ?></td>
                                         <td>
                                             <?php if ($row['role_id'] == 1) {
                                                 $badges = 'bg-danger';
@@ -249,6 +251,10 @@
                                             <?php } else { ?>
                                                 <a href="/update_status/<?php echo $row['id']; ?>/<?php echo $row['status']; ?>" class="btn btn-dark btn-sm rounded-pill">Inactive</a>
                                             <?php } ?>
+                                            <!-- tampilkan tombol reset -->
+                                            <button class="btn btn-info btn-sm rounded-pill" onclick="requestReset('<?= $row['id']; ?>')">
+                                                Reset Password
+                                            </button>
                                         </td>
                                         <td>
                                             <button type="button" class="btn btn-sm btn-outline-success" onclick="view('<?= $row['id']; ?>')">
@@ -406,6 +412,72 @@
     });
 </script>
 
+<script>
+    function requestReset(userId) {
+        Swal.fire({
+            title: "Kirim Reset Password?",
+            text: "Link reset password akan dikirim ke email pengguna.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Ya, kirim!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                Swal.fire({
+                    title: "Memproses...",
+                    text: "Mohon tunggu sebentar",
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                fetch("<?= base_url('admin-reset-password') ?>", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-Requested-With": "XMLHttpRequest"
+                        },
+                        body: JSON.stringify({
+                            id: userId
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+
+                        Swal.close();
+
+                        Swal.fire({
+                            title: "Informasi",
+                            text: data.message,
+                            icon: data.status === "success" ? "success" : "error",
+                            confirmButtonText: "OK"
+                        });
+
+                        // Refresh badge setelah reset dikirim
+                        if (data.status === "success") {
+                            let badge = document.getElementById("badge-reset-" + userId);
+                            if (badge) {
+                                badge.classList.remove("badge-danger");
+                                badge.classList.add("badge-success");
+                                badge.textContent = "Sudah reset";
+                            }
+                        }
+                    })
+                    .catch(err => {
+                        Swal.close();
+                        Swal.fire({
+                            title: "Error",
+                            text: "Terjadi kesalahan pada server.",
+                            icon: "error"
+                        });
+                        console.error(err);
+                    });
+            }
+        });
+    }
+</script>
+
 <!-- Modal -->
 <div class="modal fade" id="modalAdd" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -459,6 +531,10 @@
                                     <option value="<?= $row['no_rw'] ?>" <?= set_select('no_rw', $row['no_rw']); ?>> <?php echo $row['no_rw']; ?></option>
                                 <?php } ?>
                             </select>
+                        </div>
+                        <!-- tambah input wilayah tugas -->
+                        <div class="form-group my-1">
+                            <input type="text" name="wilayah_tugas" id="wilayah_tugas" class="form-control form-control form-control-user" placeholder="Wilayah Tugas" value="<?= set_value('wilayah_tugas'); ?>">
                         </div>
                         <div class="row">
                             <div class="col-md-6">

@@ -45,6 +45,9 @@ $routes->match(['GET', 'POST'], 'requestReset', 'Auth\Auth::requestReset', ['fil
 $routes->get('reset-password', 'Auth\Auth::resetPassword', ['filter' => 'noauthfilterdtks']);
 $routes->post('reset-password', 'Auth\Auth::processResetPassword', ['filter' => 'noauthfilterdtks']);
 
+// Admin Reset Password
+$routes->post('admin-reset-password', 'Auth\Auth::adminResetPassword', ['filter' => 'authfilterdtks']);
+
 
 // $routes->get('/', 'Auth\Pages::home', ['filter' => 'noauthfilterdtks']);
 $routes->get('/', 'Landing::index');

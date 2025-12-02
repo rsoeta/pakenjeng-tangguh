@@ -107,13 +107,14 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="form-label">Luas Sawah / Kebun (m²)</label>
+                                <label class="form-label">Luas Sawah / Kebun</label>
                                 <select name="luas_sawah" class="form-select form-select-sm" <?= $disabled ?>>
                                     <option value="">Pilih</option>
                                     <option <?= ($aset['luas_sawah'] ?? '') === 'TIDAK MEMILIKI' ? 'selected' : '' ?>>TIDAK MEMILIKI</option>
-                                    <option <?= ($aset['luas_sawah'] ?? '') === 'KURANG DARI 100 M2' ? 'selected' : '' ?>>KURANG DARI 100 M2</option>
-                                    <option <?= ($aset['luas_sawah'] ?? '') === '100-500 M2' ? 'selected' : '' ?>>100-500 M2</option>
-                                    <option <?= ($aset['luas_sawah'] ?? '') === 'LEBIH DARI 500 M2' ? 'selected' : '' ?>>LEBIH DARI 500 M2</option>
+                                    <option <?= ($aset['luas_sawah'] ?? '') === 'KURANG DARI 1000 M2' ? 'selected' : '' ?>>KURANG DARI 1000 M2</option>
+                                    <option <?= ($aset['luas_sawah'] ?? '') === '1000-5000 M2' ? 'selected' : '' ?>>1000-5000 M2</option>
+                                    <option <?= ($aset['luas_sawah'] ?? '') === '5000-10000 M2' ? 'selected' : '' ?>>5000-10000 M2</option>
+                                    <option <?= ($aset['luas_sawah'] ?? '') === 'LEBIH DARI 10000 M2' ? 'selected' : '' ?>>LEBIH DARI 10000 M2</option>
                                 </select>
                             </div>
                             <div class="col-md-4">

@@ -109,13 +109,15 @@
                                         <strong><i class="fab fa-whatsapp"></i> WhatsApp</strong>
                                     </a>
                                 </li>
-                                <!-- Migration Tool -->
-                                <li class="nav-item">
-                                    <a class="nav-link" id="custom-tabs-three-migrate-tool" data-toggle="pill"
-                                        href="#custom-tabs-three-migrate" role="tab">
-                                        <strong><i class="fas fa-database"></i> Migration Tool</strong>
-                                    </a>
-                                </li>
+                                <!-- Migration Tool (Admin) -->
+                                <?php if ($user_login['role_id'] <= 3): ?>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="custom-tabs-three-migrate-tool" data-toggle="pill"
+                                            href="#custom-tabs-three-migrate" role="tab">
+                                            <strong><i class="fas fa-database"></i> Migration Tool</strong>
+                                        </a>
+                                    </li>
+                                <?php endif; ?>
                             </ul>
                         </div>
                         <div class="card-body">
@@ -233,9 +235,12 @@
                                 <div class="tab-pane fade" id="custom-tabs-three-wa" role="tabpanel">
                                     <?= $this->include('profil/wa_settings'); ?>
                                 </div>
-                                <div class="tab-pane fade" id="custom-tabs-three-migrate" role="tabpanel">
-                                    <?= $this->include('profil/migration_tool'); ?>
-                                </div>
+                                <!-- Migration Tool (Admin) -->
+                                <?php if ($user_login['role_id'] <= 3): ?>
+                                    <div class="tab-pane fade" id="custom-tabs-three-migrate" role="tabpanel">
+                                        <?= $this->include('profil/migration_tool'); ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
 
                         </div>

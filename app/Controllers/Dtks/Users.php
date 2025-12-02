@@ -57,33 +57,12 @@ class Users extends BaseController
             'roles'        => $this->Role->getRole()->getResultArray(),
             'percentages'  => $this->VervalPbiModel->jml_persentase(),
             'statusRole'   => $this->GenModel->getStatusRole(),
+            'wilayah_tugas' => $userLogin['wilayah_tugas'],
+            'nope'         => $userLogin['nope'],
         ];
 
         return view('dtks/users/index', $data);
     }
-
-    // public function index()
-    // {
-    //     $kode_kab = Profil_Admin()['kode_kab'];
-    //     $kode_kec = Profil_Admin()['kode_kec'];
-    //     $data = [
-    //         'title' => 'Daftar Users',
-    //         'title1' => 'Tambah User',
-    //         'role' => $this->Role->getRole(),
-    //         'user_login' => $this->AuthModel->getUserId(),
-    //         'kode_kec' => $kode_kec,
-    //         'kecamatan' => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
-    //         'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
-    //         'datarw' => $this->WilayahModel->getDataRW()->getResultArray(),
-    //         'users' => $this->User->getFindAll()->getResultArray(),
-    //         'roles' => $this->Role->getRole()->getResultArray(),
-    //         'percentages' => $this->VervalPbiModel->jml_persentase(),
-    //         'statusRole' => $this->GenModel->getStatusRole(),
-
-    //     ];
-    //     // return view('dtks/data/yatim/index');
-    //     return view('dtks/users/index', $data);
-    // }
 
     // function tambah user
     public function tambah()
@@ -136,6 +115,15 @@ class Users extends BaseController
 
                     ]
                 ],
+                'wilayah_tugas' => [
+                    'label' => 'Wilayah Tugas',
+                    'rules' => 'required|min_length[3]|max_length[100]',
+                    'errors' => [
+                        'required' => '{field} harus diisi',
+                        'min_length' => '{field} terlalu pendek',
+                        'max_length' => '{field} terlalu panjang',
+                    ]
+                ],
                 'password' => [
                     'label' => 'Password',
                     'rules' => 'required|min_length[6]|max_length[255]',
@@ -164,6 +152,7 @@ class Users extends BaseController
                     'kecamatan' => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
                     'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
                     'datarw' => $this->WilayahModel->getDataRW()->getResultArray(),
+                    'wilayahTugasOptions' => $this->WilayahModel->getWilayahTugasOptions(),
                     'users' => $this->User->getFindAll()->getResultArray(),
                     'user_login' => $this->AuthModel->getUserId(),
                     'roles' => $this->Role->getRole()->getResultArray(),
@@ -191,9 +180,10 @@ class Users extends BaseController
                     'kode_kab' => '32.05',
                     'kode_prov' => '32',
                     'status' => 0,
-                    'opr_sch' => strtoupper($this->request->getVar('opr_sch')),
+                    'opr_sch' => strtoupper((string) ($this->request->getVar('opr_sch') ?? '')),
                     'nope' => $this->request->getVar('nope'),
                     'role_id' => 99,
+                    'wilayah_tugas' => $this->request->getVar('wilayah_tugas'),
                     'password' => $this->request->getVar('password'),
                     'created_at' => date('Y-m-d H:i:s'),
                 ];
@@ -248,6 +238,7 @@ class Users extends BaseController
                 'level' => $row['level'],
                 'role_id' => $row['role_id'],
                 'datarw' => $this->RwModel->noRw(),
+                'wilayah_tugas' => $row['wilayah_tugas'],
                 'user_image' => $row['user_image'],
                 'roles' => $this->Role->getRole()->getResultArray(),
                 'kecamatan' => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
@@ -283,6 +274,7 @@ class Users extends BaseController
                 'kode_desa' => $kode_desa,
                 'role_id' => $this->request->getVar('role'),
                 'level' => $this->request->getVar('no_rw'),
+                'wilayah_tugas' => $this->request->getVar('wilayah_tugas'),
                 'status' => $this->request->getVar('status'),
             ];
             // var_dump($simpandata);
