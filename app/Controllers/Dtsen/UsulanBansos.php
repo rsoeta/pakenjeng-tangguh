@@ -31,7 +31,7 @@ class UsulanBansos extends Controller
         $this->BansosModel = new BansosModel();
         $this->GenModel = new GenModel();
 
-        helper(['opdtks']);
+        helper(['opdtks_helper', 'opdtsen_helper']);
     }
 
     /**
@@ -79,7 +79,7 @@ class UsulanBansos extends Controller
         // 🔹 Siapkan data untuk view
         $data = [
             'title'         => 'Usulan Bansos',
-            'namaApp'       => 'SINDEN',
+            'namaApp'       => nameApp(),
             'bansos'        => $bansos,
             'user_login'    => $userData,
             'wilayah_rw'    => $rw,
@@ -364,7 +364,7 @@ class UsulanBansos extends Controller
             $builder->where('dtsen_usulan_bansos.status', $status);
         }
 
-        $builder->orderBy('dtsen_usulan_bansos.created_at', 'DESC');
+        $builder->orderBy('dtsen_usulan_bansos.created_at', 'ASC');
 
         try {
             $data = $builder->findAll();

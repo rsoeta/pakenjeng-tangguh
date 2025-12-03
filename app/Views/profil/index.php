@@ -100,17 +100,17 @@
                                 <li class="nav-item">
                                     <a class="nav-link active" id="custom-tabs-three-home-tab" data-toggle="pill" href="#custom-tabs-three-home" role="tab" aria-controls="custom-tabs-three-home" aria-selected="true"><strong><i class="far fa-user"></i> Personal</strong></a>
                                 </li>
-                                <li class="nav-item" <?= $user_login['role_id'] > 3 ? 'hidden' : ''; ?>>
-                                    <a class="nav-link" id="custom-tabs-three-profile-tab" data-toggle="pill" href="#custom-tabs-three-profile" role="tab" aria-controls="custom-tabs-three-profile" aria-selected="false"><strong><i class="fas fa-landmark"></i> Lembaga</strong></a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="custom-tabs-three-wa-tab" data-toggle="pill"
-                                        href="#custom-tabs-three-wa" role="tab">
-                                        <strong><i class="fab fa-whatsapp"></i> WhatsApp</strong>
-                                    </a>
-                                </li>
-                                <!-- Migration Tool (Admin) -->
                                 <?php if ($user_login['role_id'] <= 3): ?>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="custom-tabs-three-profile-tab" data-toggle="pill" href="#custom-tabs-three-profile" role="tab" aria-controls="custom-tabs-three-profile" aria-selected="false"><strong><i class="fas fa-landmark"></i> Lembaga</strong></a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="custom-tabs-three-wa-tab" data-toggle="pill"
+                                            href="#custom-tabs-three-wa" role="tab">
+                                            <strong><i class="fab fa-whatsapp"></i> WhatsApp</strong>
+                                        </a>
+                                    </li>
+                                    <!-- Migration Tool (Admin) -->
                                     <li class="nav-item">
                                         <a class="nav-link" id="custom-tabs-three-migrate-tool" data-toggle="pill"
                                             href="#custom-tabs-three-migrate" role="tab">

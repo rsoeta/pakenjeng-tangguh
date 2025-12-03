@@ -142,7 +142,7 @@
                         const role = <?= session()->get('role_id') ?? 99 ?>;
                         let btn = `
                     <button class="btn btn-danger btn-sm btnHapusUsulan" data-id="${id}">
-                        <i class="fas fa-trash"></i>
+                        <i class="fas fa-trash-alt"></i>
                     </button>
                 `;
                         if (role <= 3) {
