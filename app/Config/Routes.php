@@ -20,16 +20,20 @@ $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultController('Landing');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
-$routes->set404Override(function () {
-	return view('maintenance2');
-});
-$routes->setAutoRoute(true);
+// $routes->set404Override(function () {
+// 	return view('maintenance2');
+// });
+// $routes->setAutoRoute(true);
+$routes->setAutoRoute(false);
 
 /*
  * --------------------------------------------------------------------
  * Route Definitions
  * --------------------------------------------------------------------
  */
+$routes->get('tes-routes', function () {
+	return "ROUTE WORKING";
+});
 
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
@@ -142,7 +146,7 @@ $routes->post('downIden', 'Dtks\Usulan22::downIden');
 // === SINDEN (Sistem Informasi Data Ekonomi dan Sosial Desa) === //
 
 // USULAN DTSEN
-$routes->group('dtsen-usulan', ['namespace' => 'App\Controllers'], function ($routes) {
+$routes->group('dtsen-usulan', ['namespace' => 'App\Controllers', 'filter' => ['authfilterdtks', 'menufilterdtks']], function ($routes) {
 	$routes->post('start', 'DtsenUsulan::start');
 	$routes->post('saveStep', 'DtsenUsulan::saveStep');
 	$routes->get('getPayload/(:num)', 'DtsenUsulan::getPayload/$1');
@@ -399,6 +403,34 @@ $routes->get('cron/reminder', 'Cron\Reminder::index');
 // Migration Tool (Admin Only)
 $routes->get('admin/migrate', 'Admin\MigrationTool::index', ['filter' => 'authfilterdtks']);
 $routes->get('admin/download-db', 'Admin\MigrationTool::downloadDb', ['filter' => 'authfilterdtks']);
+
+// DTSEN - Pemeriksaan Data Sosial Ekonomi
+$routes->group('dtsen', [
+	'namespace' => 'App\Controllers\Dtsen',
+	'filter' => ['authfilterdtks']
+], function ($routes) {
+
+	// Pemeriksaan Data
+	$routes->get('pemeriksaan', 'Pemeriksaan::index');
+	$routes->post('pemeriksaan/listKK', 'Pemeriksaan::listKK');
+	$routes->post('pemeriksaan/listART', 'Pemeriksaan::listART');
+	$routes->get('pemeriksaan/export', 'Pemeriksaan::export');
+
+	// DETAIL
+	$routes->get('kk/detail/(:num)', 'Pemeriksaan::detailKK/$1');
+	$routes->get('art/detail/(:num)', 'Pemeriksaan::detailART/$1');
+
+	// EDIT
+	$routes->get('kk/edit/(:num)', 'Pemeriksaan::ajaxEditKK/$1');
+	$routes->get('art/edit/(:num)', 'Pemeriksaan::ajaxEditART/$1');
+
+	// UPDATE ← WAJIB ADA FILTER
+	$routes->post('kk/update/(:num)', 'Pemeriksaan::ajaxUpdateKK/$1');
+	$routes->post('art/update/(:num)', 'Pemeriksaan::ajaxUpdateART/$1');
+
+	$routes->post('kk/delete/(:num)', 'Pemeriksaan::ajaxDeleteKK/$1');
+	$routes->post('art/delete/(:num)', 'Pemeriksaan::ajaxDeleteART/$1');
+});
 
 /*
  * --------------------------------------------------------------------

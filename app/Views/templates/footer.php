@@ -12,19 +12,12 @@
 
 <script src="<?= base_url('assets/plugins/select2/js/select2.full.min.js'); ?>"></script>
 
-<!-- ./wrapper -->
-
-<!-- Bootstrap -->
-<script src="<?= base_url('assets/plugins/bootstrap/js/bootstrap.bundle.min.js'); ?>"></script>
-
-<!-- JavaScript Bundle with Popper -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="<?= base_url('assets/lightbox/dist/js/lightbox.min.js'); ?>"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/js/all.min.js"></script>
 
 <!-- overlayScrollbars -->
 <script src="<?= base_url('assets/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js'); ?>"></script>
-<!-- AdminLTE App -->
+<!-- AdminLTE -->
 <script src="<?= base_url('assets/dist/js/adminlte.js'); ?>"></script>
 
 <!-- PAGE PLUGINS -->
@@ -92,6 +85,28 @@
                 toggleBtn.classList.remove('btn-outline-warning');
                 toggleBtn.classList.add('btn-outline-light');
             }
+        });
+    });
+</script>
+
+<!-- tambahkan script untuk SweetAlert2 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.getElementById('toggleTheme');
+        if (!toggleBtn) return; // prevent error
+
+        toggleBtn.addEventListener('click', function() {
+            const isDark = document.body.classList.contains('dark-mode');
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                timer: 1200,
+                showConfirmButton: false,
+                icon: isDark ? 'info' : 'success',
+                title: isDark ? '🌙 Mode Gelap Aktif' : '☀️ Mode Terang Aktif',
+                background: isDark ? '#182c25' : '#fff',
+                color: isDark ? '#f8f9fa' : '#333',
+            });
         });
     });
 </script>

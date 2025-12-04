@@ -51,7 +51,14 @@ class Filters extends BaseConfig
 			'cors',
 		],
 		'after'  => [
-			'toolbar',
+			'toolbar' => [
+				'except' => [
+					'dtsen/*',
+					'dtsen/kk/*',
+					'dtsen/art/*',
+					'dtsen/pemeriksaan/*'
+				]
+			],
 			// 'honeypot',
 		],
 	];

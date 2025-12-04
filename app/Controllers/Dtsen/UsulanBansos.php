@@ -113,6 +113,7 @@ class UsulanBansos extends Controller
             ->groupStart()
             ->like('dtsen_art.nik', $term)
             ->orLike('dtsen_art.nama', $term)
+            ->where('dtsen_art.deleted_at', null)
             ->groupEnd()
             ->limit(10);
 

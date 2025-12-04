@@ -210,7 +210,8 @@ class DtsenKkModel extends Model
     public function countVerifiedByUser(int $userRole, array $filter = [])
     {
         $builder = $this->db->table('dtsen_kk kk')
-            ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left');
+            ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
+            ->where('kk.deleted_at', null);
 
         // panggil trait helper
         $this->applyWilayahFilter($builder, $filter, $userRole);
