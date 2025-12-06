@@ -477,6 +477,24 @@ tr.selected td:before {
   cursor: pointer;
 }
 
+table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control:before,
+table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
+    background-color: #0d6efd !important;
+    border-color: #0a58ca !important;
+}
+
+/* Offcanvas ekstra lebar untuk pemeriksaan */
+#offcanvasMaster.offcanvas {
+    width: 900px !important;     /* default 400px */
+    max-width: 95% !important;   /* supaya tetap responsif */
+}
+
+@media (max-width: 768px) {
+    #offcanvasMaster.offcanvas {
+        width: 100% !important;
+    }
+}
+
 @media (max-width: 575.98px) {
     /* img {
         width: 100% !important;

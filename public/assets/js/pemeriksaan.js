@@ -92,25 +92,78 @@ document.addEventListener("DOMContentLoaded", function () {
     $(document).on("click", "#btnReloadKK", () => tableKK.ajax.reload(null, false));
     $(document).on("click", "#btnReloadART", () => tableART.ajax.reload(null, false));
 
+    // // ============================================================
+    // // 5. OFFCANVAS HANDLER
+    // // ============================================================
+    // const offcanvasEl   = document.getElementById("offcanvasMaster");
+    // const offcanvasBody = document.getElementById("offcanvasBody");
+    // const offcanvasTitle= document.getElementById("offcanvasTitle");
+    // const offcanvas     = new BS5.Offcanvas(offcanvasEl, { scroll: true, backdrop: true });
+
+    // function openOffcanvas(title, url) {
+    //     offcanvasTitle.innerHTML = title;
+    //     offcanvasBody.innerHTML  = "Memuat...";
+
+    //     offcanvas.show();
+
+    //     fetch(url)
+    //         .then(r => r.text())
+    //         .then(html => offcanvasBody.innerHTML = html)
+    //         .catch(() => offcanvasBody.innerHTML = "Gagal memuat.");
+    // }
+
     // ============================================================
-    // 5. OFFCANVAS HANDLER
+    // OFFCANVAS HANDLER — MIX BOOTSTRAP4 + BOOTSTRAP5
     // ============================================================
-    const offcanvasEl   = document.getElementById("offcanvasMaster");
-    const offcanvasBody = document.getElementById("offcanvasBody");
-    const offcanvasTitle= document.getElementById("offcanvasTitle");
-    const offcanvas     = new bootstrap.Offcanvas(offcanvasEl, { scroll: true, backdrop: true });
+
+    const offcanvasEl    = document.getElementById("offcanvasMaster");
+    const offcanvasBody  = document.getElementById("offcanvasBody");
+    const offcanvasTitle = document.getElementById("offcanvasTitle");
+
+    // Buat instance Offcanvas dari Bootstrap 5 (namespace BS5)
+    let offcanvas = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        if (typeof BS5 !== "undefined") {
+            offcanvas = new BS5.Offcanvas(offcanvasEl, {
+                scroll: true,
+                backdrop: true
+            });
+            console.log("[OFFCANVAS] Bootstrap 5 aktif");
+        } else {
+            console.error("[OFFCANVAS] Bootstrap 5 tidak ditemukan!");
+        }
+    });
 
     function openOffcanvas(title, url) {
+
+        const offcanvas = new BS5.Offcanvas(offcanvasEl, { backdrop: true, scroll: true });
+
         offcanvasTitle.innerHTML = title;
-        offcanvasBody.innerHTML  = "Memuat...";
+        offcanvasBody.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary"></div>
+                <div class="mt-2">Memuat data...</div>
+            </div>
+        `;
 
         offcanvas.show();
 
         fetch(url)
             .then(r => r.text())
-            .then(html => offcanvasBody.innerHTML = html)
-            .catch(() => offcanvasBody.innerHTML = "Gagal memuat.");
+            .then(html => {
+                offcanvasBody.innerHTML = html;
+
+                if (document.querySelector("#tableART")) {
+                    initART(); // Load DataTable ketika tabel sudah ada
+                }
+            })
+            .catch(err => {
+                offcanvasBody.innerHTML =
+                    `<div class="alert alert-danger">Gagal memuat: ${err}</div>`;
+            });
     }
+
 
     // ============================================================
     // 6. VIEW / EDIT EVENTS
@@ -214,3 +267,27 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 });
+
+document.addEventListener('shown.bs.offcanvas', function () {
+    const table = $('#tableART').DataTable();
+    table.columns.adjust().responsive.recalc();
+});
+
+function initART() {
+    if (!$.fn.DataTable) return;
+
+    if ($.fn.DataTable.isDataTable('#tableART')) {
+        $('#tableART').DataTable().destroy();
+    }
+
+    return $('#tableART').DataTable({
+        responsive: true,
+        pageLength: 50,
+        lengthChange: false,
+        ordering: true,
+        autoWidth: false,
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json"
+        }
+    });
+}

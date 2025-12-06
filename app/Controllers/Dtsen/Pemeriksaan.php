@@ -389,7 +389,9 @@ class Pemeriksaan extends BaseController
         $user = $this->AuthModel->getUserId();
         if (!$user) return "Akses ditolak";
 
-        // ambil KK
+        // ============================
+        // 1) Ambil DATA KK + JOIN BANSOS + RT
+        // ============================
         $kk = $this->db->table('dtsen_kk as kk')
             ->select('kk.*, rt.rw, rt.rt, dbj.dbj_nama_bansos')
             ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
@@ -399,16 +401,37 @@ class Pemeriksaan extends BaseController
 
         if (!$kk) return "Data KK tidak ditemukan.";
 
-        // ambil ART anggota
-        $arts = $this->db->table('dtsen_art')
-            ->where('id_kk', $id_kk)
-            ->orderBy('shdk', 'ASC')
+        // ============================
+        // 2) Ambil DATA ART + JOIN SHDK + Pendidikan + Pekerjaan + Bansos
+        // ============================
+        $arts = $this->db->table('dtsen_art as a')
+            ->select("
+            a.*,
+            sh.jenis_shdk,
+            pk.pk_nama as pendidikan_nama,
+            pj.pk_nama as pekerjaan_nama,
+            dbj.dbj_nama_bansos as bantuan_nama
+        ")
+            ->join('tb_shdk sh', 'sh.id = a.shdk', 'left')
+            ->join('pendidikan_kk pk', 'pk.pk_id = a.pendidikan_terakhir', 'left')
+            ->join('tb_penduduk_pekerjaan pj', 'pj.pk_id = a.pekerjaan', 'left')
+            ->join('dtks_bansos_jenis dbj', 'dbj.dbj_id = a.program_bansos', 'left')
+            ->where('a.id_kk', $id_kk)
+            ->orderBy('a.shdk', 'ASC')
             ->get()->getResultArray();
 
-        // kirim ke view partial
+        // hitung anggota secara dinamis
+        $jumlahAnggota = $this->db->table('dtsen_art')
+            ->where('id_kk', $id_kk)
+            ->countAllResults();
+
+        // ============================
+        // 3) Kirim ke VIEW
+        // ============================
         return view('dtsen/pemeriksaan/detail_kk', [
-            'kk' => $kk,
-            'arts' => $arts
+            'kk'   => $kk,
+            'arts' => $arts,
+            'jumlahAnggota' => $jumlahAnggota
         ]);
     }
 
@@ -417,16 +440,65 @@ class Pemeriksaan extends BaseController
         $user = $this->AuthModel->getUserId();
         if (!$user) return "Akses ditolak";
 
+        // Ambil data ART dan KK
         $art = $this->db->table('dtsen_art as a')
-            ->select('a.*, kk.no_kk, kk.kepala_keluarga, rt.rw, rt.rt, dbj.dbj_nama_bansos')
+            ->select('a.*, kk.no_kk, kk.kepala_keluarga, rt.rw, rt.rt')
             ->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'left')
             ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
-            ->join('dtks_bansos_jenis dbj', 'dbj.dbj_id = a.program_bansos', 'left')
             ->where('a.id_art', $id_art)
             ->get()->getRowArray();
 
         if (!$art) return "Data ART tidak ditemukan.";
 
+        // ============================================
+        // 🔍 Parse JSON Program Bansos
+        // ============================================
+
+        $rawJson = trim((string) $art['program_bansos']);
+        $json = json_decode($rawJson, true);
+
+        if (!is_array($json)) $json = [];
+
+        // Normalisasi key lowercase
+        $jsonNorm = [];
+        foreach ($json as $k => $v) {
+            $jsonNorm[strtolower(trim($k))] = (int) $v;
+        }
+
+        // Mapping
+        $map = [
+            'pkh'  => 'PKH',
+            'bpnt' => 'BPNT',
+            'bst'  => 'BST',
+            'pbi'  => 'PBI'
+        ];
+
+        $aktif = [];
+        foreach ($map as $kode => $nama) {
+            if (isset($jsonNorm[$kode]) && $jsonNorm[$kode] == 1) {
+                $aktif[] = $nama;
+            }
+        }
+
+        $art['bantuan_nama'] = $aktif ? implode(', ', $aktif) : '-';
+
+        // ============================================
+        // 🔍 Join SHDK, Pendidikan, Pekerjaan
+        // ============================================
+
+        // SHDK
+        $shdk = $this->db->table('tb_shdk')->where('id', $art['shdk'])->get()->getRowArray();
+        $art['jenis_shdk'] = $shdk['jenis_shdk'] ?? '-';
+
+        // Pendidikan
+        $pk = $this->db->table('pendidikan_kk')->where('pk_id', $art['pendidikan_terakhir'])->get()->getRowArray();
+        $art['pendidikan_nama'] = $pk['pk_nama'] ?? '-';
+
+        // Pekerjaan
+        $job = $this->db->table('tb_penduduk_pekerjaan')->where('pk_id', $art['pekerjaan'])->get()->getRowArray();
+        $art['pekerjaan_nama'] = $job['pk_nama'] ?? '-';
+
+        // ============================================
         return view('dtsen/pemeriksaan/detail_art', [
             'art' => $art
         ]);

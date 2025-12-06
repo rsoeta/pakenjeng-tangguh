@@ -66,14 +66,12 @@
     <!-- JAVASCRIPT — URUTAN BENAR -->
     <!-- ===================== -->
 
-    <!-- jQuery ONLY ONE TIME -->
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-migrate/3.3.2/jquery-migrate.min.js"></script>
 
-    <!-- Bootstrap — ONLY ONE TIME (hapus duplikasi di footer.php) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE (Bootstrap 4 bundle!) -->
     <script src="/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-
 
     <!-- Datatables -->
     <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>

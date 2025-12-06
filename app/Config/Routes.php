@@ -200,41 +200,8 @@ $routes->group('dtsen', [
 
 	// DELETE
 	$routes->post('kk/delete/(:num)', 'Pemeriksaan::ajaxDeleteKK/$1');
-	$routes->post('art/delete', 'Pemeriksaan::ajaxDeleteART/$1');
+	$routes->post('art/delete/(:num)', 'Pemeriksaan::ajaxDeleteART/$1');
 });
-
-// $routes->group('dtsen', [
-// 	'namespace' => 'App\Controllers\Dtsen',
-// 	'filter' => ['authfilterdtks', 'menufilterdtks']
-// ], function ($routes) {
-
-// 	// Reminder Monitoring (UI + API)
-// 	$routes->get('laporan', 'Dtsen\ReminderMonitor::index');
-// 	$routes->get('reminder-monitor', 'Dtsen\ReminderMonitor::index');
-// 	$routes->get('reminder-monitor/list', 'Dtsen\ReminderMonitor::listAjax');
-// 	$routes->post('reminder-monitor/resend', 'Dtsen\ReminderMonitor::resend');
-
-// 	// Pemeriksaan Data
-// 	$routes->get('pemeriksaan', 'Dtsen\Pemeriksaan::index');
-// 	$routes->post('pemeriksaan/listKK', 'Dtsen\Pemeriksaan::listKK');
-// 	$routes->post('pemeriksaan/listART', 'Dtsen\Pemeriksaan::listART');
-// 	$routes->get('pemeriksaan/export', 'Dtsen\Pemeriksaan::export');
-
-// 	// DETAIL
-// 	$routes->get('kk/detail/(:num)', 'Pemeriksaan::detailKK/$1');
-// 	$routes->get('art/detail/(:num)', 'Pemeriksaan::detailART/$1');
-
-// 	// EDIT
-// 	$routes->get('kk/edit/(:num)', 'Pemeriksaan::ajaxEditKK/$1');
-// 	$routes->get('art/edit/(:num)', 'Pemeriksaan::ajaxEditART/$1');
-
-// 	// UPDATE ← WAJIB ADA FILTER
-// 	$routes->post('kk/update/(:num)', 'Pemeriksaan::ajaxUpdateKK/$1');
-// 	$routes->post('art/update/(:num)', 'Pemeriksaan::ajaxUpdateART/$1');
-
-// 	$routes->post('kk/delete/(:num)', 'Pemeriksaan::ajaxDeleteKK/$1');
-// 	$routes->post('art/delete/(:num)', 'Pemeriksaan::ajaxDeleteART/$1');
-// });
 
 
 // ====================================================================

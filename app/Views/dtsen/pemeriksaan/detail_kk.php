@@ -1,5 +1,4 @@
 <div class="container-fluid">
-    <h5 class="mb-3">Detail KK</h5>
 
     <table class="table table-sm table-bordered">
         <tr>
@@ -8,7 +7,7 @@
         </tr>
         <tr>
             <th>Kepala Keluarga</th>
-            <td><?= esc($kk['kepala_keluarga']) ?></td>
+            <td><strong><?= esc($kk['kepala_keluarga']) ?></strong></td>
         </tr>
         <tr>
             <th>Alamat</th>
@@ -19,12 +18,12 @@
             <td><?= esc($kk['rw']) ?> / <?= esc($kk['rt']) ?></td>
         </tr>
         <tr>
-            <th>Jumlah Anggota (field)</th>
-            <td><?= esc($kk['jumlah_anggota']) ?></td>
+            <th>Jumlah Anggota</th>
+            <td><?= esc($jumlahAnggota) ?></td>
         </tr>
         <tr>
             <th>Program Bansos</th>
-            <td><?= esc($kk['program_bansos']) ?></td>
+            <td><?= esc($kk['dbj_nama_bansos'] ?? '-') ?></td>
         </tr>
         <tr>
             <th>Kategori Adat</th>
@@ -45,7 +44,8 @@
     </table>
 
     <h6 class="mt-4">Daftar Anggota KK</h6>
-    <table class="table table-sm table-striped">
+
+    <table class="table table-sm table-striped" id="tableART">
         <thead>
             <tr>
                 <th>SHDK</th>
@@ -60,13 +60,13 @@
         <tbody>
             <?php foreach ($arts as $a): ?>
                 <tr>
-                    <td><?= esc($a['shdk']) ?></td>
+                    <td><?= esc($a['jenis_shdk'] ?? '-') ?></td>
                     <td><?= esc($a['nik']) ?></td>
                     <td><?= esc($a['nama']) ?></td>
                     <td><?= esc($a['jenis_kelamin']) ?></td>
                     <td><?= esc($a['tanggal_lahir']) ?></td>
-                    <td><?= esc($a['pendidikan_terakhir']) ?></td>
-                    <td><?= esc($a['pekerjaan']) ?></td>
+                    <td><?= esc($a['pendidikan_nama'] ?? '-') ?></td>
+                    <td><?= esc($a['pekerjaan_nama'] ?? '-') ?></td>
                 </tr>
             <?php endforeach ?>
         </tbody>

@@ -10,6 +10,10 @@
 <!-- /.control-sidebar -->
 </div>
 
+<!-- ===================== -->
+<!-- JAVASCRIPT — FOOTER -->
+<!-- ===================== -->
+
 <script src="<?= base_url('assets/plugins/select2/js/select2.full.min.js'); ?>"></script>
 
 <script src="<?= base_url('assets/lightbox/dist/js/lightbox.min.js'); ?>"></script>
@@ -29,6 +33,17 @@
 
 <!-- AdminLTE for demo purposes -->
 <script src="<?= base_url('assets/dist/js/demo.js'); ?>"></script>
+
+<script>
+    // Load Bootstrap 5 secara DINAMIS agar tidak diambil alih AdminLTE
+    let bs5Script = document.createElement("script");
+    bs5Script.src = "https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js";
+    bs5Script.onload = () => {
+        window.BS5 = bootstrap;
+        console.log("🔥 Bootstrap 5 loaded in isolated mode!");
+    };
+    document.body.appendChild(bs5Script);
+</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
