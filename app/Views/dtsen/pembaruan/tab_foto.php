@@ -82,11 +82,16 @@ $geo  = $payload['geo'] ?? [];
             </div>
         </div>
 
-        <div class="mt-3 mb-3">
+        <div class="mt-3 mb-3 d-flex gap-2">
             <button type="button" class="btn btn-sm btn-primary" id="btnGetLocation">
                 <i class="fas fa-map-marker-alt"></i> Ambil Lokasi Saat Ini
             </button>
+
+            <button type="button" class="btn btn-sm btn-info" id="btnCopyFull" title="Salin Latitude & Longitude">
+                <i class="fas fa-copy"></i> Salin Koordinat
+            </button>
         </div>
+
 
         <div class="mt-3">
             <div id="map" style="height: 300px; border-radius: 10px;"></div>
@@ -301,6 +306,28 @@ $geo  = $payload['geo'] ?? [];
             title: 'Longitude disalin',
             showConfirmButton: false,
             timer: 1500
+        });
+    });
+
+    // Copy LAT + LNG lengkap
+    document.getElementById("btnCopyFull").addEventListener("click", function() {
+        const lat = document.getElementById("latitude").value;
+        const lng = document.getElementById("longitude").value;
+
+        if (!lat || !lng) {
+            Swal.fire("Gagal", "Latitude & Longitude belum lengkap!", "warning");
+            return;
+        }
+
+        const full = `${lat}, ${lng}`;
+        navigator.clipboard.writeText(full);
+
+        Swal.fire({
+            icon: "success",
+            title: "Koordinat Disalin!",
+            text: full,
+            timer: 1800,
+            showConfirmButton: false
         });
     });
 
