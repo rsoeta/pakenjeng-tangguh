@@ -9,10 +9,17 @@ $geo  = $payload['geo'] ?? [];
 
 <div class="p-3">
     <h5 class="fw-bold mb-3">📸 Foto & Geotag Lokasi Rumah</h5>
+    <!-- tampilkan session login -->
+    <!-- <p>
+        <?php foreach (session()->get() as $key => $value): ?>
+            - <?= $key ?> : <?= $value ?><br>
+        <?php endforeach; ?>
 
+    </p> -->
     <form id="formFoto" enctype="multipart/form-data">
         <input type="hidden" name="dtsen_usulan_id" value="<?= esc($payload['id'] ?? $usulan['id'] ?? '') ?>">
         <input type="hidden" name="no_kk" value="<?= esc($payload['no_kk'] ?? $perumahan['no_kk'] ?? '') ?>">
+        <input type="hidden" name="kepala_keluarga" value="<?= esc($payload['kepala_keluarga'] ?? $perumahan['kepala_keluarga'] ?? '') ?>">
 
         <div class="row">
             <!-- Foto KTP/KK -->
@@ -268,81 +275,8 @@ $geo  = $payload['geo'] ?? [];
             );
         });
     });
-    // =============================
-
-    // document.addEventListener("DOMContentLoaded", function() {
-    //     const latInput = document.getElementById('latitude');
-    //     const lngInput = document.getElementById('longitude');
-
-    //     // Ambil nilai awal dari payload
-    //     let lat = parseFloat(latInput.value || "-6.895");
-    //     let lng = parseFloat(lngInput.value || "107.634");
-
-    //     const map = L.map('map').setView([lat, lng], 15);
-    //     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    //         maxZoom: 18,
-    //         attribution: '&copy; OpenStreetMap contributors'
-    //     }).addTo(map);
-
-    //     const marker = L.marker([lat, lng], {
-    //         draggable: <?= $editable ? 'true' : 'false' ?>
-    //     }).addTo(map);
-
-    //     // 📍 Update field koordinat saat marker digeser
-    //     if (<?= $editable ? 'true' : 'false' ?>) {
-    //         marker.on('dragend', function(e) {
-    //             const pos = e.target.getLatLng();
-    //             latInput.value = pos.lat.toFixed(6);
-    //             lngInput.value = pos.lng.toFixed(6);
-    //         });
-    //     }
 
     // =============================
-    // 🧭 DETEKSI POSISI USER OTOMATIS
-    // =============================
-    // if (navigator.geolocation && <?= $editable ? 'true' : 'false' ?>) {
-    //     navigator.geolocation.getCurrentPosition(
-    //         function(position) {
-    //             const userLat = position.coords.latitude;
-    //             const userLng = position.coords.longitude;
-
-    //             // isi otomatis input
-    //             latInput.value = userLat.toFixed(6);
-    //             lngInput.value = userLng.toFixed(6);
-
-    //             // pindahkan marker ke posisi user
-    //             marker.setLatLng([userLat, userLng]);
-    //             map.setView([userLat, userLng], 17);
-
-    //             Swal.fire({
-    //                 toast: true,
-    //                 position: 'bottom-end',
-    //                 icon: 'success',
-    //                 title: 'Lokasi terdeteksi otomatis!',
-    //                 showConfirmButton: false,
-    //                 timer: 2000
-    //             });
-    //         },
-    //         function(error) {
-    //             console.warn("Geolocation error:", error.message);
-    //             Swal.fire({
-    //                 toast: true,
-    //                 position: 'bottom-end',
-    //                 icon: 'warning',
-    //                 title: 'Lokasi tidak dapat dideteksi otomatis.',
-    //                 showConfirmButton: false,
-    //                 timer: 2500
-    //             });
-    //         }, {
-    //             enableHighAccuracy: true,
-    //             timeout: 8000,
-    //             maximumAge: 0
-    //         }
-    //     );
-    // }
-    // });
-    // =============================
-
     // 🧭 Tombol copy koordinat
     document.getElementById('btnCopyLat').addEventListener('click', () => {
         const val = document.getElementById('latitude').value;

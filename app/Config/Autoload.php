@@ -94,5 +94,5 @@ class Autoload extends AutoloadConfig
      * @var list<string>
      */
     // public $helpers = [];
-    public $helpers = ['usulan', 'opdtks', 'dtks_helper', 'dtsen_helper'];
+    public $helpers = ['usulan', 'opdtks', 'dtks_helper', 'dtsen_helper', 'menu_helper', 'app_helper', 'tanggal_helper', 'watermark_helper'];
 }

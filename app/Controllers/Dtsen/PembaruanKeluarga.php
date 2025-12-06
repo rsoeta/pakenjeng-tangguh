@@ -899,6 +899,90 @@ class PembaruanKeluarga extends BaseController
                 if (!is_dir($dir)) mkdir($dir, 0777, true);
             }
 
+            // ==========================================
+            // Ambil No KK dari POST (lebih akurat daripada database)
+            // ==========================================
+
+            // Ambil data dari POST dengan fallback aman (hindari trim(null) deprecated)
+            $noKKManualRaw    = $this->request->getPost('no_kk');
+            $kepalaKeluargaRaw = $this->request->getPost('kepala_keluarga');
+            $latRaw           = $this->request->getPost('latitude');
+            $lngRaw           = $this->request->getPost('longitude');
+
+            // Cast ke string / fallback supaya trim tidak menerima null
+            $noKKManual     = trim((string) ($noKKManualRaw ?? ''));
+            $kepalaKeluarga = trim((string) ($kepalaKeluargaRaw ?? ''));
+            $lat            = trim((string) ($latRaw ?? ''));
+            $lng            = trim((string) ($lngRaw ?? ''));
+
+            // fallback jika kosong
+            if ($noKKManual === '') {
+                // coba ambil dari DB (seperti rencana fallback sebelumnya)
+                $kkId = $this->db->table('dtsen_usulan')
+                    ->select('dtsen_kk_id')
+                    ->where('id', $usulanId)
+                    ->get()
+                    ->getRow('dtsen_kk_id');
+
+                $noKKdb = $this->db->table('dtsen_kk')
+                    ->select('no_kk')
+                    ->where('id_kk', $kkId)
+                    ->get()
+                    ->getRow('no_kk');
+
+                $noKK = $noKKdb ?? 'unknown';
+            } else {
+                $noKK = $noKKManual;
+            }
+
+            // nama kepala keluarga fallback
+            if ($kepalaKeluarga === '') {
+                $kepalaKeluarga = $payloadLama['kepala_keluarga'] ?? ($kk['kepala_keluarga'] ?? 'Tidak ditemukan');
+            }
+
+            // normalisasi lat/lng untuk nama file (tetap simpan original untuk watermark text)
+            $latForFile = str_replace([' ', ','], ['_', '_'], $lat !== '' ? $lat : '0');
+            $lngForFile = str_replace([' ', ','], ['_', '_'], $lng !== '' ? $lng : '0');
+
+
+            // ===========================================
+            $kodeDesaFull = session()->get('kode_desa'); // contoh: 32.05.33.2006
+
+            $WilayahModel = new \App\Models\WilayahModel();
+
+            $desaRow = $WilayahModel
+                ->select("
+                        tb_villages.name      AS desa,
+                        tb_districts.name     AS kecamatan,
+                        tb_regencies.name     AS kabupaten,
+                        tb_provinces.name     AS provinsi
+                    ")
+                ->join('tb_districts', 'tb_districts.id = tb_villages.district_id', 'left')
+                ->join('tb_regencies', 'tb_regencies.id = tb_villages.regency_id', 'left')
+                ->join('tb_provinces', 'tb_provinces.id = tb_villages.province_id', 'left')
+                ->where('tb_villages.id', $kodeDesaFull)
+                ->get()
+                ->getRowArray();
+
+            // Fallback aman
+            $namaDesa      = strtoupper($desaRow['desa']      ?? '-');
+            $namaKecamatan = strtoupper($desaRow['kecamatan'] ?? '-');
+            $namaKabupaten = strtoupper($desaRow['kabupaten'] ?? '-');
+            $namaProvinsi  = strtoupper($desaRow['provinsi']  ?? '-');
+
+            $wilayahFull = "Desa {$namaDesa}, Kec. {$namaKecamatan}, Kab. {$namaKabupaten}, Prov. {$namaProvinsi}";
+
+            // dd($wilayahFull);
+
+
+            // Latitude & longitude untuk nama file
+            $lat  = $this->request->getPost('latitude')  ?? '0';
+            $lng  = $this->request->getPost('longitude') ?? '0';
+
+            // Normalisasi karakter untuk nama file
+            $lat = str_replace([' ', ','], ['_', '_'], $lat);
+            $lng = str_replace([' ', ','], ['_', '_'], $lng);
+
             // 🧩 Mapping field foto dari form
             $fotoFields = [
                 'foto_ktp'   => ['path' => 'foto_identitas/',   'key' => 'ktp_kk'],
@@ -907,15 +991,65 @@ class PembaruanKeluarga extends BaseController
             ];
 
             // 🖼️ Proses upload foto (merge, bukan replace)
+            // $fotoGabungan = $payloadLama['foto'];
+            // foreach ($fotoFields as $field => $opt) {
+            //     $file = $this->request->getFile($field);
+            //     if ($file && $file->isValid() && !$file->hasMoved()) {
+            //         // $newName = 'usulan_' . $usulanId . '_' . $field . '_' . time() . '.' . $file->getExtension();
+            //         $newName = 'usulan_' . $usulanId . '_' . $field . '_' . time() . '.' . $file->getExtension();
+            //         $file->move($uploadBase . $opt['path'], $newName, true);
+            //         $fotoGabungan[$opt['key']] = 'data/usulan/' . $opt['path'] . $newName;
+            //     }
+            // }
+
+            // 🖼️ Proses upload foto dengan nama file format baru
             $fotoGabungan = $payloadLama['foto'];
+
             foreach ($fotoFields as $field => $opt) {
                 $file = $this->request->getFile($field);
+
                 if ($file && $file->isValid() && !$file->hasMoved()) {
-                    $newName = 'usulan_' . $usulanId . '_' . $field . '_' . time() . '.' . $file->getExtension();
+
+                    $timestamp = time();
+
+                    // nama file (normalisasi)
+                    $newName = 'sinden_'
+                        . preg_replace('/\s+/', '', $noKK) . '_'
+                        . $field . '_'
+                        . $latForFile . '_'
+                        . $lngForFile . '_'
+                        . $timestamp . '.'
+                        . $file->getExtension();
+
+                    $finalPath = $uploadBase . $opt['path'] . $newName;
+
+                    // pindah file
                     $file->move($uploadBase . $opt['path'], $newName, true);
+
+                    // watermark only for foto_depan & foto_dalam (jangan watermark foto_ktp)
+                    if ($field !== 'foto_ktp') {
+                        // gunakan nilai lat/lng asli (bukan yang dinormalisasi untuk filename)
+                        $latText = $lat !== '' ? $lat : ($geoGabungan['lat'] ?? '-');
+                        $lngText = $lng !== '' ? $lng : ($geoGabungan['lng'] ?? '-');
+
+                        // call helper watermark premium
+                        applyWatermarkPremium($finalPath, [
+                            'no_kk'     => (string) $noKK,
+                            'kepala'    => (string) $kepalaKeluarga,
+                            'petugas'   => (string) ($session->get('fullname') ?? 'Petugas'),
+                            'tanggal'   => date('d F Y'),
+                            'latitude'  => (string) ($latText ?? ($geoGabungan['lat'] ?? '-')),
+                            'longitude' => (string) ($lngText ?? ($geoGabungan['lng'] ?? '-')),
+                            'wilayah'   => (string) ($wilayahFull ?? '')
+                        ]);
+                    }
+
+                    // simpan ke payload
                     $fotoGabungan[$opt['key']] = 'data/usulan/' . $opt['path'] . $newName;
                 }
             }
+
+
 
             // 📍 GeoTag (merge data baru dengan lama)
             $geoGabungan = $payloadLama['geo'];
@@ -935,6 +1069,53 @@ class PembaruanKeluarga extends BaseController
                     'updated_at'  => date('Y-m-d H:i:s'),
                     'summary'     => 'Foto & GeoTag diperbarui oleh ' . ($session->get('nama') ?? 'Sistem')
                 ]);
+
+            // ===============================================
+            // 📲 Kirim Notifikasi WhatsApp ke Admin
+            // ===============================================
+
+            // =============================================================
+            // 📌 1. Ambil dtsen_kk_id dari dtsen_usulan
+            // =============================================================
+            $usulanRow = $this->db->table('dtsen_usulan')
+                ->select('dtsen_kk_id')
+                ->where('id', $usulanId)
+                ->get()
+                ->getRowArray();
+
+            $kkId = $usulanRow['dtsen_kk_id'] ?? null;
+
+            // =============================================================
+            // 📌 2. Ambil data KK sebenarnya berdasarkan dtsen_kk_id
+            // =============================================================
+            $kk = $this->db->table('dtsen_kk')
+                ->select('no_kk, kepala_keluarga, alamat')
+                ->where('id_kk', $kkId)
+                ->get()
+                ->getRowArray();
+
+            // fallback jika null
+            $namaKK = $kk['kepala_keluarga'] ?? 'Tidak ditemukan';
+            $noKK   = $kk['no_kk'] ?? '-';
+            $alamatKK = $kk['alamat'] ?? '-';
+
+            // 2. Buat pesan WA
+            $pesan = "📷 *Update Foto Rumah Berhasil*\n\n"
+                . "Nama: *{$namaKK}*\n"
+                . "No. KK: *{$noKK}*\n"
+                . "Alamat: *{$kk['alamat']}*\n\n"
+                . "✔️ Semua foto + Geotag berhasil dikirim oleh petugas.";
+
+            // 3. Nomor admin penerima
+            $adminNumber = "6285708098155"; // ganti dengan nomor admin
+
+            // 4. Kirim
+            try {
+                $wa = new \App\Libraries\WaService();
+                $wa->sendText($adminNumber, $pesan);
+            } catch (\Throwable $e) {
+                log_message('error', 'Gagal kirim WA admin: ' . $e->getMessage());
+            }
 
             return $this->response->setJSON([
                 'status'  => 'success',

@@ -45,98 +45,124 @@ $menus = menu()
         <!-- Sidebar Menu -->
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                <?php foreach ($menus as $menu) {
-                    // make 5 level menu with tm_status as status = 1 and tm_grup_akses as grup_akses >= $user
-                    if ($menu['tm_status'] == 1 && $menu['tm_grup_akses'] >= $user) {
-                        if ($menu['tm_parent_id'] == 0) {
-                            // if menu has child
 
-                            if (menu_child($menu['tm_id']) != null) {
-                                echo '<li class="nav-item has-treeview">';
-                                echo '<a href="' . base_url($menu['tm_url']) . '" class="nav-link">';
-                                echo '<i class="nav-icon ' . $menu['tm_icon'] . ' mr-1"></i>';
-                                echo '<p>' . $menu['tm_nama'] . '<i class="right fas fa-angle-left"></i></p>';
-                                echo '</a>';
-                                echo '<ul class="nav nav-treeview nav-second-level">';
-                                foreach (menu_child($menu['tm_id']) as $menu_child) {
-                                    // make 4 level menu with tm_status as status = 1 and tm_grup_akses as grup_akses >= $user
-                                    if ($menu_child['tm_status'] == 1 && $menu_child['tm_grup_akses'] >= $user) {
-                                        if (menu_child_child($menu_child['tm_id']) != null) {
-                                            echo '<li class="nav-item has-treeview">';
-                                            echo '<a href="' . base_url($menu_child['tm_url']) . '" class="nav-link">';
-                                            echo '<i class="nav-icon ' . $menu_child['tm_icon'] . ' mr-1"></i>';
-                                            echo '<p>' . $menu_child['tm_nama'] . '<i class="right fas fa-angle-left"></i></p>';
-                                            echo '</a>';
-                                            echo '<ul class="nav nav-treeview nav-third-level">';
-                                            foreach (menu_child_child($menu_child['tm_id']) as $menu_child_child) {
-                                                // make 3 level menu with tm_status as status = 1 and tm_grup_akses as grup_akses >= $user
-                                                if ($menu_child_child['tm_status'] == 1 && $menu_child_child['tm_grup_akses'] >= $user) {
-                                                    if (menu_child_child_child($menu_child_child['tm_id']) != null) {
-                                                        echo '<li class="nav-item has-treeview">';
-                                                        echo '<a href="' . base_url($menu_child_child['tm_url']) . '" class="nav-link">';
-                                                        echo '<i class="nav-icon ' . $menu_child_child['tm_icon'] . ' mr-1"></i>';
-                                                        echo '<p>' . $menu_child_child['tm_nama'] . '<i class="right fas fa-angle-left"></i></p>';
-                                                        echo '</a>';
-                                                        echo '<ul class="nav nav-treeview nav-fourth-level">';
-                                                        foreach (menu_child_child_child($menu_child_child['tm_id']) as $menu_child_child_child) {
-                                                            // make 2 level menu with tm_status as status = 1 and tm_grup_akses as grup_akses >= $user
-                                                            if ($menu_child_child_child['tm_status'] == 1 && $menu_child_child_child['tm_grup_akses'] >= $user) {
-                                                                echo '<li class="nav-item">';
-                                                                echo '<a href="' . base_url($menu_child_child_child['tm_url']) . '" class="nav-link">';
-                                                                echo '<i class="nav-icon ' . $menu_child_child_child['tm_icon'] . ' mr-1"></i>';
-                                                                echo '<p>' . $menu_child_child_child['tm_nama'] . '</p>';
-                                                                echo '</a>';
-                                                                echo '</li>';
-                                                            }
-                                                        }
-                                                        echo '</ul>';
-                                                        echo '</li>';
-                                                    } else {
-                                                        echo '<li class="nav-item">';
-                                                        echo '<a href="' . base_url($menu_child_child['tm_url']) . '" class="nav-link">';
-                                                        echo '<i class="nav-icon ' . $menu_child_child['tm_icon'] . ' mr-1"></i>';
-                                                        echo '<p>' . $menu_child_child['tm_nama'] . '</p>';
-                                                        echo '</a>';
-                                                        echo '</li>';
-                                                    }
-                                                }
-                                            }
-                                            echo '</ul>';
-                                            echo '</li>';
-                                        } else {
-                                            echo '<li class="nav-item">';
-                                            echo '<a href="' . base_url($menu_child['tm_url']) . '" class="nav-link">';
-                                            echo '<i class="nav-icon ' . $menu_child['tm_icon'] . ' mr-1"></i>';
-                                            echo '<p>' . $menu_child['tm_nama'] . '</p>';
-                                            echo '</a>';
-                                            echo '</li>';
-                                        }
-                                    }
-                                }
-                                echo '</ul>';
-                                echo '</li>';
-                            } else {
-                                echo '<li class="nav-item">';
-                                echo '<a href="' . base_url($menu['tm_url']) . '" class="nav-link">';
-                                echo '<i class="nav-icon ' . $menu['tm_icon'] . ' mr-1"></i>';
-                                echo '<p>' . $menu['tm_nama'] . '</p>';
-                                echo '</a>';
-                                echo '</li>';
-                            }
-                        }
-                    }
-                } ?>
+                <?php foreach ($menus as $menu) : ?>
+
+                    <?php
+                    // Validasi akses menu
+                    if ($menu['tm_status'] != 1 || $menu['tm_grup_akses'] < $user) continue;
+
+                    // Apakah menu ini punya child?
+                    $children = menu_child($menu['tm_id']);
+                    $hasChild = !empty($children);
+
+                    // Tentukan apakah parent harus terbuka
+                    $isMenuOpen = $hasChild && menu_is_open($children);
+
+                    // Tentukan apakah menu ini aktif
+                    $isActive = menu_is_active($menu['tm_url']);
+                    ?>
+
+                    <?php if ($menu['tm_parent_id'] == 0) : ?>
+
+                        <!-- MENU LEVEL 1 -->
+                        <li class="nav-item <?= $isMenuOpen ? 'menu-open' : ''; ?>">
+
+                            <a href="<?= $hasChild ? '#' : menu_url($menu['tm_url']); ?>"
+                                class="nav-link <?= ($isActive || $isMenuOpen) ? 'active' : ''; ?>">
+
+                                <i class="nav-icon <?= $menu['tm_icon']; ?> mr-1"></i>
+                                <p>
+                                    <?= $menu['tm_nama']; ?>
+                                    <?php if ($hasChild) : ?>
+                                        <i class="right fas fa-angle-left"></i>
+                                    <?php endif; ?>
+                                </p>
+                            </a>
+
+                            <?php if ($hasChild) : ?>
+                                <ul class="nav nav-treeview nav-second-level">
+
+                                    <?php foreach ($children as $child) : ?>
+
+                                        <?php
+                                        if ($child['tm_status'] != 1 || $child['tm_grup_akses'] < $user) continue;
+
+                                        $child2 = menu_child_child($child['tm_id']);
+                                        $hasChild2 = !empty($child2);
+
+                                        $isOpen2 = $hasChild2 && menu_is_open($child2);
+                                        $isActive2 = menu_is_active($child['tm_url']);
+                                        ?>
+
+                                        <li class="nav-item <?= $isOpen2 ? 'menu-open' : ''; ?>">
+
+                                            <a href="<?= $hasChild2 ? '#' : menu_url($child['tm_url']); ?>"
+                                                class="nav-link <?= ($isActive2 || $isOpen2) ? 'active' : ''; ?>">
+
+                                                <i class="nav-icon <?= $child['tm_icon']; ?> mr-1"></i>
+                                                <p>
+                                                    <?= $child['tm_nama']; ?>
+                                                    <?php if ($hasChild2) : ?>
+                                                        <i class="right fas fa-angle-left"></i>
+                                                    <?php endif; ?>
+                                                </p>
+                                            </a>
+
+                                            <?php if ($hasChild2) : ?>
+                                                <ul class="nav nav-treeview nav-third-level">
+
+                                                    <?php foreach ($child2 as $child_lvl2) : ?>
+
+                                                        <?php
+                                                        if ($child_lvl2['tm_status'] != 1 || $child_lvl2['tm_grup_akses'] < $user) continue;
+
+                                                        $child3 = menu_child_child_child($child_lvl2['tm_id']);
+                                                        $hasChild3 = !empty($child3);
+
+                                                        $isActive3 = menu_is_active($child_lvl2['tm_url']);
+                                                        ?>
+
+                                                        <li class="nav-item">
+
+                                                            <a href="<?= menu_url($child_lvl2['tm_url']); ?>"
+                                                                class="nav-link <?= $isActive3 ? 'active' : ''; ?>">
+
+                                                                <i class="nav-icon <?= $child_lvl2['tm_icon']; ?> mr-1"></i>
+                                                                <p><?= $child_lvl2['tm_nama']; ?></p>
+                                                            </a>
+
+                                                        </li>
+
+                                                    <?php endforeach; ?>
+
+                                                </ul>
+                                            <?php endif; ?>
+
+                                        </li>
+
+                                    <?php endforeach; ?>
+
+                                </ul>
+                            <?php endif; ?>
+
+                        </li>
+
+                    <?php endif; ?>
+
+                <?php endforeach; ?>
+
+
+                <!-- Logout -->
                 <li class="nav-item" id="keluar">
                     <a href="/logout" class="nav-link">
                         <i class="nav-icon fa-fw fa fa-sign-out-alt"></i>
-                        <p>
-                            Logout
-                        </p>
+                        <p>Logout</p>
                     </a>
                 </li>
+
             </ul>
         </nav>
         <!-- /.sidebar-menu -->
-    </div>
-    <!-- /.sidebar -->
+
 </aside>

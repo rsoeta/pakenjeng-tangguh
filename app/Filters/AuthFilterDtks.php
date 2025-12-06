@@ -10,22 +10,19 @@ class AuthFilterDtks implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        // Do something here
+        // Jika belum login DTSEN
         if (!session()->get('logDtks')) {
-            // Setelah login berhasil, arahkan pengguna ke halaman sebelumnya
-            return redirect()->to(base_url('login'));
+            return redirect()->to(base_url('logout'));
+        }
+
+        // Jika role_id tidak ditemukan (session rusak)
+        if (!session()->get('role_id')) {
+            return redirect()->to(base_url('logout'));
         }
     }
 
-    //--------------------------------------------------------------------
-
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // Do something here
-        // if (session()->get('logDtks') == true) {
-        //     //     return redirect()->to(base_url('pbb/user'));
-        //     $previousPage = session()->get('previousPage');
-        //     return redirect()->to($previousPage);
-        // }
+        // optional
     }
 }

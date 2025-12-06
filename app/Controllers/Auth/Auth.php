@@ -125,8 +125,10 @@ class Auth extends BaseController
                     return redirect()->to(base_url($redirectUrl));
                 }
 
+                dd(session()->get());
+
                 // Default redirect ke dashboard
-                return redirect()->to('/pages');
+                return redirect()->to('/dashboard');
             } else {
                 // === reCAPTCHA gagal diverifikasi ===
                 session()->setFlashdata('message', [

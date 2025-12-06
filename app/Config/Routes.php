@@ -20,9 +20,9 @@ $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultController('Landing');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
-// $routes->set404Override(function () {
-// 	return view('maintenance2');
-// });
+$routes->set404Override(function () {
+	return view('maintenance2');
+});
 // $routes->setAutoRoute(true);
 $routes->setAutoRoute(false);
 
@@ -31,9 +31,6 @@ $routes->setAutoRoute(false);
  * Route Definitions
  * --------------------------------------------------------------------
  */
-$routes->get('tes-routes', function () {
-	return "ROUTE WORKING";
-});
 
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
@@ -74,6 +71,175 @@ $routes->get('logout', 'Auth\Auth::logout');
 
 $routes->get('redirect', 'Auth\Auth::redirectToExternalLink');
 
+// ====================================================================
+// === SINDEN (Sistem Informasi Data Ekonomi dan Sosial Desa) === //
+// ====================================================================
+
+// USULAN DTSEN
+$routes->group('dtsen-usulan', ['namespace' => 'App\Controllers', 'filter' => ['authfilterdtks', 'menufilterdtks']], function ($routes) {
+	$routes->post('start', 'DtsenUsulan::start');
+	$routes->post('saveStep', 'DtsenUsulan::saveStep');
+	$routes->get('getPayload/(:num)', 'DtsenUsulan::getPayload/$1');
+	$routes->post('submitFinal', 'DtsenUsulan::submitFinal');
+	$routes->post('dtsen-usulan/cariKK', 'DtsenUsulan::cariKK');
+
+	$routes->get('/', 'Dtsen\DtsenUsulan::index');
+	$routes->post('save', 'Dtsen\DtsenUsulan::save');
+	$routes->get('data', 'Dtsen\DtsenUsulan::getData');
+});
+
+// === DTSEN - Sosial Ekonomi (Data Keluarga / Input Desil) ===
+$routes->group('dtsen-se', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
+	$routes->get('/', 'Dtsen\DtsenSe::index');
+	$routes->post('update-desil', 'Dtsen\DtsenSe::updateDesil');
+	$routes->post('tabel_data', 'Dtsen\DtsenSe::tabel_data');
+	$routes->post('delete', 'Dtsen\DtsenSe::deleteKeluarga');
+	$routes->post('restore', 'Dtsen\DtsenSe::restoreKeluarga');
+	$routes->post('tabel_arsip', 'Dtsen\DtsenSe::tabel_arsip');
+	$routes->get('arsip-anggota', 'Dtsen\DtsenSe::arsipAnggota');
+	$routes->post('restore-art', 'Dtsen\DtsenSe::restoreArt');
+});
+
+// USULAN BANSOS
+$routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
+	$routes->get('/', 'Dtsen\UsulanBansos::index');
+	$routes->get('data', 'Dtsen\UsulanBansos::getDataBulanIni');
+	$routes->post('verifikasi/(:num)', 'Dtsen\UsulanBansos::verifikasi/$1');
+	$routes->delete('delete/(:num)', 'Dtsen\UsulanBansos::delete/$1');
+	$routes->get('check-desil', 'Dtsen\UsulanBansos::checkDesil');
+	$routes->get('search-art', 'Dtsen\UsulanBansos::searchArt');
+	$routes->post('save', 'Dtsen\UsulanBansos::save');
+	$routes->post('verifikasi/(:num)', 'Dtsen\UsulanBansos::verifikasi/$1');
+});
+
+// === DTSEN - Pembaruan Data Keluarga ===
+$routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
+	$routes->get('/', 'Dtsen\PembaruanKeluarga::index');
+	$routes->get('detail/(:num)', 'Dtsen\PembaruanKeluarga::detail/$1');
+	$routes->get('tambah', 'Dtsen\PembaruanKeluarga::tambah');  // 🆕 Form tambah keluarga baru
+	$routes->post('tambah', 'Dtsen\PembaruanKeluarga::store');  // 🆕 Simpan draft baru hasil input
+	$routes->post('save-keluarga', 'Dtsen\PembaruanKeluarga::saveKeluarga');
+	$routes->post('save-anggota', 'Dtsen\PembaruanKeluarga::saveAnggota');
+	$routes->post('delete-anggota', 'Dtsen\PembaruanKeluarga::deleteAnggota');
+	$routes->post('save-rumah', 'Dtsen\PembaruanKeluarga::saveRumah');
+	$routes->post('save-aset', 'Dtsen\PembaruanKeluarga::saveAset');
+	$routes->post('save-foto', 'Dtsen\PembaruanKeluarga::saveFoto');
+	$routes->post('apply', 'Dtsen\PembaruanKeluarga::apply');
+
+	$routes->get('get-anggota-detail', 'Dtsen\PembaruanKeluarga::getAnggotaDetail');
+	// 🧍‍♂️ Prefill Data Individu
+	$routes->get('get-anggota-detail/(:num)', 'Dtsen\PembaruanKeluarga::getAnggotaDetail/$1');
+
+	// $routes->get('data', 'Dtsen\PembaruanKeluarga::getDataDraft');
+	$routes->get('data', 'Dtsen\PembaruanKeluarga::data');
+	$routes->get('lanjutkan/(:num)', 'Dtsen\PembaruanKeluarga::lanjutkan/$1');
+	$routes->get('get-anggota-list/(:num)', 'Dtsen\PembaruanKeluarga::getAnggotaList/$1');
+});
+
+
+// 🌍 API Wilayah Lokal (Dropdown berantai untuk DTSEN)
+$routes->group('api/villages', ['namespace' => 'App\Controllers\Api'], function ($routes) {
+	$routes->get('provinces', 'Villages::provinces');
+	$routes->get('regencies/(:any)', 'Villages::regencies/$1');
+	$routes->get('districts/(:any)', 'Villages::districts/$1');
+	$routes->get('villages/(:any)', 'Villages::villages/$1');
+	$routes->get('lookup/(:any)', 'Villages::lookup/$1'); // 👈 untuk prefill
+});
+
+
+// WhatsApp Settings (Admin Desa)
+$routes->group('pengaturan_wa', ['filter' => ['authfilterdtks', 'menufilterdtks']], function ($routes) {
+	$routes->get('/', 'Profil\WaSettings::index');
+	$routes->post('save_api', 'Profil\WaSettings::saveApi');
+	$routes->post('save_template', 'Profil\WaSettings::saveTemplate');
+	$routes->post('preview', 'Profil\WaSettings::preview');
+	$routes->post('test', 'Profil\WaSettings::testApi');
+
+	// Fonnte Settings
+	$routes->post('save_fonnte', 'Profil\WaSettings::saveFonnte');
+	$routes->post('test_fonnte', 'Profil\WaSettings::testFonnte');
+});
+
+// Cron Jobs
+$routes->cli('cron/wa-reminder', 'Cron\WaReminder::index');
+$routes->get('cron/reminder', 'Cron\Reminder::index');
+
+// Migration Tool (Admin Only)
+$routes->get('admin/migrate', 'Admin\MigrationTool::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->get('admin/download-db', 'Admin\MigrationTool::downloadDb', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+
+// DTSEN - Pemeriksaan Data Sosial Ekonomi
+$routes->group('dtsen', [
+	'namespace' => 'App\Controllers\Dtsen',
+	'filter' => ['authfilterdtks', 'menufilterdtks']
+], function ($routes) {
+
+	// Reminder Monitoring (UI + API)
+	$routes->get('laporan', 'ReminderMonitor::index');
+	$routes->get('reminder-monitor', 'ReminderMonitor::index');
+	$routes->get('reminder-monitor/list', 'ReminderMonitor::listAjax');
+	$routes->post('reminder-monitor/resend', 'ReminderMonitor::resend');
+
+	// Pemeriksaan Data
+	$routes->get('pemeriksaan', 'Pemeriksaan::index');
+	$routes->post('pemeriksaan/listKK', 'Pemeriksaan::listKK');
+	$routes->post('pemeriksaan/listART', 'Pemeriksaan::listART');
+	$routes->get('pemeriksaan/export', 'Pemeriksaan::export');
+
+	// DETAIL
+	$routes->get('kk/detail/(:num)', 'Pemeriksaan::detailKK/$1');
+	$routes->get('art/detail/(:num)', 'Pemeriksaan::detailART/$1');
+
+	// EDIT
+	$routes->get('kk/edit/(:num)', 'Pemeriksaan::ajaxEditKK/$1');
+	$routes->get('art/edit/(:num)', 'Pemeriksaan::ajaxEditART/$1');
+
+	// UPDATE
+	$routes->post('kk/update/(:num)', 'Pemeriksaan::ajaxUpdateKK/$1');
+	$routes->post('art/update/(:num)', 'Pemeriksaan::ajaxUpdateART/$1');
+
+	// DELETE
+	$routes->post('kk/delete/(:num)', 'Pemeriksaan::ajaxDeleteKK/$1');
+	$routes->post('art/delete', 'Pemeriksaan::ajaxDeleteART/$1');
+});
+
+// $routes->group('dtsen', [
+// 	'namespace' => 'App\Controllers\Dtsen',
+// 	'filter' => ['authfilterdtks', 'menufilterdtks']
+// ], function ($routes) {
+
+// 	// Reminder Monitoring (UI + API)
+// 	$routes->get('laporan', 'Dtsen\ReminderMonitor::index');
+// 	$routes->get('reminder-monitor', 'Dtsen\ReminderMonitor::index');
+// 	$routes->get('reminder-monitor/list', 'Dtsen\ReminderMonitor::listAjax');
+// 	$routes->post('reminder-monitor/resend', 'Dtsen\ReminderMonitor::resend');
+
+// 	// Pemeriksaan Data
+// 	$routes->get('pemeriksaan', 'Dtsen\Pemeriksaan::index');
+// 	$routes->post('pemeriksaan/listKK', 'Dtsen\Pemeriksaan::listKK');
+// 	$routes->post('pemeriksaan/listART', 'Dtsen\Pemeriksaan::listART');
+// 	$routes->get('pemeriksaan/export', 'Dtsen\Pemeriksaan::export');
+
+// 	// DETAIL
+// 	$routes->get('kk/detail/(:num)', 'Pemeriksaan::detailKK/$1');
+// 	$routes->get('art/detail/(:num)', 'Pemeriksaan::detailART/$1');
+
+// 	// EDIT
+// 	$routes->get('kk/edit/(:num)', 'Pemeriksaan::ajaxEditKK/$1');
+// 	$routes->get('art/edit/(:num)', 'Pemeriksaan::ajaxEditART/$1');
+
+// 	// UPDATE ← WAJIB ADA FILTER
+// 	$routes->post('kk/update/(:num)', 'Pemeriksaan::ajaxUpdateKK/$1');
+// 	$routes->post('art/update/(:num)', 'Pemeriksaan::ajaxUpdateART/$1');
+
+// 	$routes->post('kk/delete/(:num)', 'Pemeriksaan::ajaxDeleteKK/$1');
+// 	$routes->post('art/delete/(:num)', 'Pemeriksaan::ajaxDeleteART/$1');
+// });
+
+
+// ====================================================================
+// === DTKS - Data Terpadu Keserjahteraan Sosial === //
+// ====================================================================
 // CHATTING
 $routes->match(['GET', 'POST'], 'chatt', 'Chat::index', ['filter' => 'authfilterdtks']);
 $routes->get('getMsg', 'Chat::getMsg', ['filter' => 'authfilterdtks']);
@@ -142,81 +308,6 @@ $routes->get('import_csv', 'Dtks\Usulan22::import_csv', ['filter' => 'authfilter
 $routes->post('importCsvToDb', 'Dtks\Usulan22::importCsvToDb', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tb_csv', 'Dtks\Usulan22::tbCsv', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('downIden', 'Dtks\Usulan22::downIden');
-
-// === SINDEN (Sistem Informasi Data Ekonomi dan Sosial Desa) === //
-
-// USULAN DTSEN
-$routes->group('dtsen-usulan', ['namespace' => 'App\Controllers', 'filter' => ['authfilterdtks', 'menufilterdtks']], function ($routes) {
-	$routes->post('start', 'DtsenUsulan::start');
-	$routes->post('saveStep', 'DtsenUsulan::saveStep');
-	$routes->get('getPayload/(:num)', 'DtsenUsulan::getPayload/$1');
-	$routes->post('submitFinal', 'DtsenUsulan::submitFinal');
-	$routes->post('dtsen-usulan/cariKK', 'DtsenUsulan::cariKK');
-});
-
-// === DTSEN - Sosial Ekonomi (Data Keluarga / Input Desil) ===
-$routes->group('dtsen-se', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
-	$routes->get('/', 'Dtsen\DtsenSe::index');
-	$routes->post('update-desil', 'Dtsen\DtsenSe::updateDesil');
-	$routes->post('tabel_data', 'Dtsen\DtsenSe::tabel_data');
-	$routes->post('delete', 'Dtsen\DtsenSe::deleteKeluarga');
-	$routes->post('restore', 'Dtsen\DtsenSe::restoreKeluarga');
-	$routes->post('tabel_arsip', 'Dtsen\DtsenSe::tabel_arsip');
-	$routes->get('arsip-anggota', 'Dtsen\DtsenSe::arsipAnggota');
-	$routes->post('restore-art', 'Dtsen\DtsenSe::restoreArt');
-});
-
-// USULAN BANSOS
-$routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
-	$routes->get('/', 'Dtsen\UsulanBansos::index');
-	$routes->get('data', 'Dtsen\UsulanBansos::getDataBulanIni');
-	$routes->post('verifikasi/(:num)', 'Dtsen\UsulanBansos::verifikasi/$1');
-	$routes->delete('delete/(:num)', 'Dtsen\UsulanBansos::delete/$1');
-	$routes->get('check-desil', 'Dtsen\UsulanBansos::checkDesil');
-	$routes->get('search-art', 'Dtsen\UsulanBansos::searchArt');
-	$routes->post('save', 'Dtsen\UsulanBansos::save');
-	$routes->post('verifikasi/(:num)', 'Dtsen\UsulanBansos::verifikasi/$1');
-});
-
-// === DTSEN - Pembaruan Data Keluarga ===
-$routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
-	$routes->get('/', 'Dtsen\PembaruanKeluarga::index');
-	$routes->get('detail/(:num)', 'Dtsen\PembaruanKeluarga::detail/$1');
-	$routes->get('tambah', 'Dtsen\PembaruanKeluarga::tambah');  // 🆕 Form tambah keluarga baru
-	$routes->post('tambah', 'Dtsen\PembaruanKeluarga::store');  // 🆕 Simpan draft baru hasil input
-	$routes->post('save-keluarga', 'Dtsen\PembaruanKeluarga::saveKeluarga');
-	$routes->post('save-anggota', 'Dtsen\PembaruanKeluarga::saveAnggota');
-	$routes->post('delete-anggota', 'Dtsen\PembaruanKeluarga::deleteAnggota');
-	$routes->post('save-rumah', 'Dtsen\PembaruanKeluarga::saveRumah');
-	$routes->post('save-aset', 'Dtsen\PembaruanKeluarga::saveAset');
-	$routes->post('save-foto', 'Dtsen\PembaruanKeluarga::saveFoto');
-	$routes->post('apply', 'Dtsen\PembaruanKeluarga::apply');
-
-	$routes->get('get-anggota-detail', 'Dtsen\PembaruanKeluarga::getAnggotaDetail');
-	// 🧍‍♂️ Prefill Data Individu
-	$routes->get('get-anggota-detail/(:num)', 'Dtsen\PembaruanKeluarga::getAnggotaDetail/$1');
-
-	// $routes->get('data', 'Dtsen\PembaruanKeluarga::getDataDraft');
-	$routes->get('data', 'Dtsen\PembaruanKeluarga::data');
-	$routes->get('lanjutkan/(:num)', 'Dtsen\PembaruanKeluarga::lanjutkan/$1');
-	$routes->get('get-anggota-list/(:num)', 'Dtsen\PembaruanKeluarga::getAnggotaList/$1');
-});
-
-
-// 🌍 API Wilayah Lokal (Dropdown berantai untuk DTSEN)
-$routes->group('api/villages', ['namespace' => 'App\Controllers\Api'], function ($routes) {
-	$routes->get('provinces', 'Villages::provinces');
-	$routes->get('regencies/(:any)', 'Villages::regencies/$1');
-	$routes->get('districts/(:any)', 'Villages::districts/$1');
-	$routes->get('villages/(:any)', 'Villages::villages/$1');
-	$routes->get('lookup/(:any)', 'Villages::lookup/$1'); // 👈 untuk prefill
-});
-
-$routes->group('dtsen-usulan', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
-	$routes->get('/', 'Dtsen\DtsenUsulan::index');
-	$routes->post('save', 'Dtsen\DtsenUsulan::save');
-	$routes->get('data', 'Dtsen\DtsenUsulan::getData');
-});
 
 // PPKS
 $routes->get('ppks', 'Dtks\Ppks::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -372,65 +463,6 @@ $routes->match(['GET', 'POST'], 'profil_user', 'Profil\Profil_User::index', ['fi
 $routes->post('update_user', 'Profil\Profil_User::update_user', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('submit_lembaga', 'Profil\Profil_User::submit_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('update_lembaga', 'Profil\Profil_User::update_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-
-// WhatsApp Settings (Admin Desa)
-$routes->group('pengaturan_wa', ['filter' => 'authfilterdtks'], function ($routes) {
-	$routes->get('/', 'Profil\WaSettings::index');
-	$routes->post('save_api', 'Profil\WaSettings::saveApi');
-	$routes->post('save_template', 'Profil\WaSettings::saveTemplate');
-	$routes->post('preview', 'Profil\WaSettings::preview');
-	$routes->post('test', 'Profil\WaSettings::testApi');
-
-	// Fonnte Settings
-	$routes->post('save_fonnte', 'Profil\WaSettings::saveFonnte');
-	$routes->post('test_fonnte', 'Profil\WaSettings::testFonnte');
-});
-
-$routes->get('test-env', 'TestEnv::index');
-$routes->get('test-wa', 'TestEnv::testWa');
-
-
-// Reminder Monitoring (UI + API)
-$routes->get('laporan-dtsen', 'Dtsen\ReminderMonitor::index', ['filter' => 'authfilterdtks']);
-$routes->get('dtsen/reminder-monitor', 'Dtsen\ReminderMonitor::index', ['filter' => 'authfilterdtks']);
-$routes->get('dtsen/reminder-monitor/list', 'Dtsen\ReminderMonitor::listAjax', ['filter' => 'authfilterdtks']);
-$routes->post('dtsen/reminder-monitor/resend', 'Dtsen\ReminderMonitor::resend', ['filter' => 'authfilterdtks']);
-
-// Cron Jobs
-$routes->cli('cron/wa-reminder', 'Cron\WaReminder::index');
-$routes->get('cron/reminder', 'Cron\Reminder::index');
-
-// Migration Tool (Admin Only)
-$routes->get('admin/migrate', 'Admin\MigrationTool::index', ['filter' => 'authfilterdtks']);
-$routes->get('admin/download-db', 'Admin\MigrationTool::downloadDb', ['filter' => 'authfilterdtks']);
-
-// DTSEN - Pemeriksaan Data Sosial Ekonomi
-$routes->group('dtsen', [
-	'namespace' => 'App\Controllers\Dtsen',
-	'filter' => ['authfilterdtks']
-], function ($routes) {
-
-	// Pemeriksaan Data
-	$routes->get('pemeriksaan', 'Pemeriksaan::index');
-	$routes->post('pemeriksaan/listKK', 'Pemeriksaan::listKK');
-	$routes->post('pemeriksaan/listART', 'Pemeriksaan::listART');
-	$routes->get('pemeriksaan/export', 'Pemeriksaan::export');
-
-	// DETAIL
-	$routes->get('kk/detail/(:num)', 'Pemeriksaan::detailKK/$1');
-	$routes->get('art/detail/(:num)', 'Pemeriksaan::detailART/$1');
-
-	// EDIT
-	$routes->get('kk/edit/(:num)', 'Pemeriksaan::ajaxEditKK/$1');
-	$routes->get('art/edit/(:num)', 'Pemeriksaan::ajaxEditART/$1');
-
-	// UPDATE ← WAJIB ADA FILTER
-	$routes->post('kk/update/(:num)', 'Pemeriksaan::ajaxUpdateKK/$1');
-	$routes->post('art/update/(:num)', 'Pemeriksaan::ajaxUpdateART/$1');
-
-	$routes->post('kk/delete/(:num)', 'Pemeriksaan::ajaxDeleteKK/$1');
-	$routes->post('art/delete/(:num)', 'Pemeriksaan::ajaxDeleteART/$1');
-});
 
 /*
  * --------------------------------------------------------------------
