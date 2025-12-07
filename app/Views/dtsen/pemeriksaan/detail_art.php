@@ -7,7 +7,7 @@
 
     <tr>
         <th>Nama</th>
-        <td><?= esc($art['nama']) ?></td>
+        <td><strong><?= esc($art['nama']) ?></strong></td>
     </tr>
 
     <tr>

@@ -48,27 +48,35 @@ function applyWatermarkPremium(string $imagePath, array $data)
 
 
     // ============================================================
-    // 4. FORMAT TANGGAL INDONESIA
+    // 4. FORMAT TANGGAL INDONESIA — SAFE VERSION
     // ============================================================
-    function tanggal_indo($dateString)
-    {
-        $bulan = [
-            1 => "Januari",
-            "Februari",
-            "Maret",
-            "April",
-            "Mei",
-            "Juni",
-            "Juli",
-            "Agustus",
-            "September",
-            "Oktober",
-            "November",
-            "Desember"
-        ];
+    if (!function_exists('tanggal_indo')) {
+        function tanggal_indo($dateString)
+        {
+            if (empty($dateString)) {
+                return '-';
+            }
 
-        $t = strtotime($dateString);
-        return date("d", $t) . " " . $bulan[intval(date("m", $t))] . " " . date("Y", $t);
+            $bulan = [
+                1 => "Januari",
+                "Februari",
+                "Maret",
+                "April",
+                "Mei",
+                "Juni",
+                "Juli",
+                "Agustus",
+                "September",
+                "Oktober",
+                "November",
+                "Desember"
+            ];
+
+            $t = strtotime($dateString);
+            if (!$t) return $dateString;
+
+            return date("d", $t) . " " . $bulan[(int) date("m", $t)] . " " . date("Y", $t);
+        }
     }
 
     $tanggalIndo = tanggal_indo($data['tanggal'] ?? date('Y-m-d'));

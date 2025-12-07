@@ -35,47 +35,6 @@ function Profil_Admin()
     return $query->getRowArray();
 }
 
-// function menu()
-// {
-//     $db = \Config\Database::connect();
-//     $builder = $db->table('tb_menu');
-//     $builder->select('tm_id, tm_nama, tm_class, tm_url, tm_icon, tm_parent_id, tm_status, tm_grup_akses');
-//     $query = $builder->get();
-
-//     return $query->getResultArray();
-// }
-
-// // how to make fuction menu_child?
-// function menu_child($menu_id)
-// {
-//     $db = \Config\Database::connect();
-//     $builder = $db->table('tb_menu');
-//     $builder->select('tm_id, tm_nama, tm_class, tm_url, tm_icon, tm_parent_id, tm_status, tm_grup_akses');
-//     $builder->where('tm_parent_id', $menu_id);
-//     $query = $builder->get();
-//     return $query->getResultArray();
-// }
-
-// function menu_child_child($menu_child)
-// {
-//     $db = \Config\Database::connect();
-//     $builder = $db->table('tb_menu');
-//     $builder->select('tm_id, tm_nama, tm_class, tm_url, tm_icon, tm_parent_id, tm_status, tm_grup_akses');
-//     $builder->where('tm_parent_id', $menu_child);
-//     $query = $builder->get();
-//     return $query->getResultArray();
-// }
-
-// function menu_child_child_child($menu_child_child)
-// {
-//     $db = \Config\Database::connect();
-//     $builder = $db->table('tb_menu');
-//     $builder->select('tm_id, tm_nama, tm_class, tm_url, tm_icon, tm_parent_id, tm_status, tm_grup_akses');
-//     $builder->where('tm_parent_id', $menu_child_child);
-//     $query = $builder->get();
-//     return $query->getResultArray();
-// }
-
 function FOTO_DOKUMEN($fileName = '', $dir = '', $defFile = '')
 {
     if ($fileName !== '' && $fileName !== null && file_exists(FCPATH . 'data/bnba/' . $dir . '/' . $fileName)) {
