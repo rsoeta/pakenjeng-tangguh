@@ -15,6 +15,14 @@ function menu_url(string $url)
 
     // 2. Mapping prefix berdasarkan modul group
     $prefixMap = [
+        // Modul Admin
+        'migrate'             => 'admin/',
+        'download-db'         => 'admin/',
+        'articles'            => 'admin/',
+        // 'article-categories'  => 'admin/',
+        // 'users'               => 'admin/',
+        'settings'            => 'admin/',
+
         // Modul DTSEN
         'pemeriksaan'        => 'dtsen/',
         'reminder-monitor'   => 'dtsen/',

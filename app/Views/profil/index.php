@@ -98,25 +98,35 @@
                         <div class="card-header p-0 pt-1 border-bottom-0">
                             <ul class="nav nav-tabs" id="custom-tabs-three-tab" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" id="custom-tabs-three-home-tab" data-toggle="pill" href="#custom-tabs-three-home" role="tab" aria-controls="custom-tabs-three-home" aria-selected="true"><strong><i class="far fa-user"></i> Personal</strong></a>
+                                    <a class="nav-link active" id="custom-tabs-three-home-tab" data-toggle="pill"
+                                        href="#custom-tabs-three-home" role="tab" aria-controls="custom-tabs-three-home" aria-selected="true">
+                                        <strong><i class="far fa-user"></i> Personal</strong></a>
                                 </li>
                                 <?php if ($user_login['role_id'] <= 3): ?>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="custom-tabs-three-profile-tab" data-toggle="pill" href="#custom-tabs-three-profile" role="tab" aria-controls="custom-tabs-three-profile" aria-selected="false"><strong><i class="fas fa-landmark"></i> Lembaga</strong></a>
+                                        <a class="nav-link" id="custom-tabs-three-general-tab" data-toggle="pill"
+                                            href="#custom-tabs-three-general" role="tab" aria-controls="custom-tabs-three-general" aria-selected="false">
+                                            <strong><i class="fas fa-cog mr-1"></i> General</strong></a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="custom-tabs-three-profile-tab" data-toggle="pill"
+                                            href="#custom-tabs-three-profile" role="tab" aria-controls="custom-tabs-three-profile" aria-selected="false">
+                                            <strong><i class="fas fa-landmark"></i> Lembaga</strong></a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" id="custom-tabs-three-wa-tab" data-toggle="pill"
-                                            href="#custom-tabs-three-wa" role="tab">
+                                            href="#custom-tabs-three-wa" role="tab" aria-controls="custom-tabs-three-wa" aria-selected="false">
                                             <strong><i class="fab fa-whatsapp"></i> WhatsApp</strong>
                                         </a>
                                     </li>
                                     <!-- Migration Tool (Admin) -->
                                     <li class="nav-item">
                                         <a class="nav-link" id="custom-tabs-three-migrate-tool" data-toggle="pill"
-                                            href="#custom-tabs-three-migrate" role="tab">
+                                            href="#custom-tabs-three-migrate" role="tab" aria-controls="custom-tabs-three-migrate" aria-selected="false">
                                             <strong><i class="fas fa-database"></i> Migration Tool</strong>
                                         </a>
                                     </li>
+
                                 <?php endif; ?>
                             </ul>
                         </div>
@@ -185,61 +195,138 @@
                                         </form>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade" id="custom-tabs-three-profile" role="tabpanel" aria-labelledby="custom-tabs-three-profile-tab" <?= $user_login['role_id'] > 3 ? 'hidden' : ''; ?>>
-                                    <div class="col-12 col-md-4 col-lg-4 col-4">
-                                        <form id="lembaga_form" method="POST" enctype="multipart/form-data">
-
-                                            <?= form_input(['type' => 'hidden', 'name' => 'lp_id', 'class' => 'form-control', 'id' => 'lp_id', 'value' => isset($user_login['lp_id']) ? set_value('lp_id', $user_login['lp_id']) : '']); ?>
-                                            <!-- /.card-header -->
-                                            <strong><i class="fas fa-landmark mr-1"></i> Lembaga</strong>
-                                            <select name="user_lembaga_id" id="user_lembaga_id" class="form-control" disabled>
-                                                <?php foreach ($lembaga as $row) { ?>
-                                                    <option <?= $row['lk_id'] == $user_login['role_id'] ? 'selected' : '' ?> value="<?= $row['lk_id']; ?>"><?= $row['lk_nama']; ?></option>
-                                                <?php } ?>
-                                            </select>
-                                            <hr>
-
-                                            <strong><i class="fas fa-user mr-1"></i> Nama Pimpinan</strong>
-                                            <?= form_input(['name' => 'lp_kepala', 'class' => 'form-control', 'id' => 'lp_kepala', 'value' => isset($user_login['lp_kepala']) ? set_value('lp_kepala', strtoupper($user_login['lp_kepala'])) : '']); ?>
-                                            <hr>
-
-                                            <strong><i class="fas fa-address-book mr-1"></i> NIP</strong>
-                                            <?= form_input(['name' => 'lp_nip', 'class' => 'form-control', 'id' => 'lp_nip', 'value' => isset($user_login['lp_nip']) ? set_value('lp_nip', $user_login['lp_nip']) : '']); ?>
-                                            <hr>
-
-                                            <strong><i class="fas fa-map-marker-alt mr-1"></i> Sekretariat</strong>
-                                            <?= form_textarea(['name' => 'lp_sekretariat', 'class' => 'form-control', 'rows' => '3', 'spellcheck' => 'false', 'id' => 'lp_sekretariat', 'value' => isset($user_login['lp_sekretariat']) ? set_value('lp_sekretariat', $user_login['lp_sekretariat']) : '']); ?>
-                                            <hr>
-
-                                            <strong><i class="fas fa-envelope mr-1"></i> Email Lembaga</strong>
-                                            <?= form_input(['name' => 'lp_email', 'class' => 'form-control', 'id' => 'lp_email', 'value' => isset($user_login['lp_email']) ? set_value('lp_email', $user_login['lp_email']) : '']); ?>
-                                            <hr>
-
-                                            <strong><i class="fas fa-archive mr-1"></i> Kode Pos</strong>
-                                            <?= form_input(['name' => 'lp_kode_pos', 'class' => 'form-control', 'id' => 'lp_kode_pos', 'value' => isset($user_login['lp_kode_pos']) ? set_value('lp_kode_pos', $user_login['lp_kode_pos']) : '']); ?>
-                                            <hr>
-
-                                            <strong><i class="fas fa-image mr-1"></i> Logo</strong>
-                                            <hr>
-
-                                            <?= form_input(['type' => 'hidden', 'name' => 'id_user', 'class' => 'form-control', 'id' => 'id_user', 'value' => isset($user_login) ? set_value('id_user', $user_login['id_user']) : '']); ?>
-
-                                            <?php if (isset($user_login['lp_id'])) : ?>
-                                                <button type="button" id="lembagaUpdate" class="btn btn-success btn-block">Update</button>
-                                            <?php else : ?>
-                                                <button type="button" id="lembagaSubmit" class="btn btn-success btn-block">Submit</button>
-                                            <?php endif; ?>
-                                        </form>
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="custom-tabs-three-wa" role="tabpanel">
-                                    <?= $this->include('profil/wa_settings'); ?>
-                                </div>
-                                <!-- Migration Tool (Admin) -->
                                 <?php if ($user_login['role_id'] <= 3): ?>
+                                    <div class="tab-pane fade" id="custom-tabs-three-general" role="tabpanel" aria-labelledby="custom-tab-three-general">
+                                        <!-- Usulan Akses -->
+                                        <div class="card">
+                                            <form id="updateForm" method="post" action="">
+                                                <div class="card-header">
+                                                    <h5><strong>Usulan Akses</strong></h1>
+                                                </div>
+                                                <div class="card-body">
+                                                    <?php foreach ($deadline as $dl) { ?>
+                                                        <div class="row">
+                                                            <div class="col-4 col-sm-3">
+                                                                <strong><i class="fa fa-user mr-1"></i> Hak-Akses</strong>
+                                                                <select class="form-control" name="dd_role[]">
+                                                                    <?php foreach ($statusRole as $s) { ?>
+                                                                        <option <?= $dl['dd_role'] == $s['id_role'] ? 'selected' : ''; ?> value="<?= $s['id_role']; ?>"><?= $s['nm_role']; ?></option>
+                                                                    <?php } ?>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-4 col-sm-3">
+                                                                <input type="hidden" name="dd_id[]" id="" value="<?= $dl['dd_id']; ?>">
+                                                                <strong><i class="fa fa-calendar-alt mr-1"></i> Start Date</strong>
+                                                                <input type="datetime-local" name="dd_waktu_start[]" id="" class="form-control" value="<?= $dl['dd_waktu_start']; ?>">
+                                                            </div>
+                                                            <div class="col-4 col-sm-3">
+                                                                <strong><i class="fa fa-calendar-alt mr-1"></i> End Date</strong>
+                                                                <input type="datetime-local" name="dd_waktu_end[]" id="" class="form-control" value="<?= $dl['dd_waktu_end']; ?>">
+                                                            </div>
+
+                                                        </div>
+                                                    <?php } ?>
+                                                    <div class="row">
+                                                        <div class="col-12 col-md-9 col-sm-9 text-right mt-2">
+                                                            <button type="submit" class="btn btn-success btnGenUpdate"><i class="fa fa-check-double"></i> Update</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <!-- General Akses -->
+                                        <div class="card">
+                                            <form id="updateFormGen" method="post" action="">
+                                                <div class="card-header">
+                                                    <h5><strong>General Akses</strong></h1>
+                                                </div>
+                                                <div class="card-body">
+                                                    <?php foreach ($deadline_general as $dlg) { ?>
+                                                        <div class="row">
+                                                            <div class="col-4 col-sm-3">
+                                                                <strong><i class="fa fa-user mr-1"></i> Hak-Akses</strong>
+                                                                <select class="form-control" name="dd_role[]">
+                                                                    <?php foreach ($statusRole as $s) { ?>
+                                                                        <option <?= $dlg['dd_role'] == $s['id_role'] ? 'selected' : ''; ?> value="<?= $s['id_role']; ?>"><?= $s['nm_role']; ?></option>
+                                                                    <?php } ?>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-4 col-sm-3">
+                                                                <input type="hidden" name="dd_id[]" id="" value="<?= $dlg['dd_id']; ?>">
+                                                                <strong><i class="fa fa-calendar-alt mr-1"></i> Start Date</strong>
+                                                                <input type="datetime-local" name="dd_waktu_start[]" id="" class="form-control" value="<?= $dlg['dd_waktu_start']; ?>">
+                                                            </div>
+                                                            <div class="col-4 col-sm-3">
+                                                                <strong><i class="fa fa-calendar-alt mr-1"></i> End Date</strong>
+                                                                <input type="datetime-local" name="dd_waktu_end[]" id="" class="form-control" value="<?= $dlg['dd_waktu_end']; ?>">
+                                                            </div>
+
+                                                        </div>
+                                                    <?php } ?>
+                                                    <div class="row">
+                                                        <div class="col-12 col-md-9 col-sm-9 text-right mt-2">
+                                                            <button type="submit" class="btn btn-warning btnGenUpdate"><i class="fa fa-check-circle"></i> Update</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="custom-tabs-three-profile" role="tabpanel" aria-labelledby="custom-tabs-three-profile-tab">
+                                        <div class="col-12 col-md-4 col-lg-4 col-4">
+                                            <form id="lembaga_form" method="POST" enctype="multipart/form-data">
+
+                                                <?= form_input(['type' => 'hidden', 'name' => 'lp_id', 'class' => 'form-control', 'id' => 'lp_id', 'value' => isset($user_login['lp_id']) ? set_value('lp_id', $user_login['lp_id']) : '']); ?>
+                                                <!-- /.card-header -->
+                                                <strong><i class="fas fa-landmark mr-1"></i> Lembaga</strong>
+                                                <select name="user_lembaga_id" id="user_lembaga_id" class="form-control" disabled>
+                                                    <?php foreach ($lembaga as $row) { ?>
+                                                        <option <?= $row['lk_id'] == $user_login['role_id'] ? 'selected' : '' ?> value="<?= $row['lk_id']; ?>"><?= $row['lk_nama']; ?></option>
+                                                    <?php } ?>
+                                                </select>
+                                                <hr>
+
+                                                <strong><i class="fas fa-user mr-1"></i> Nama Pimpinan</strong>
+                                                <?= form_input(['name' => 'lp_kepala', 'class' => 'form-control', 'id' => 'lp_kepala', 'value' => isset($user_login['lp_kepala']) ? set_value('lp_kepala', strtoupper($user_login['lp_kepala'])) : '']); ?>
+                                                <hr>
+
+                                                <strong><i class="fas fa-address-book mr-1"></i> NIP</strong>
+                                                <?= form_input(['name' => 'lp_nip', 'class' => 'form-control', 'id' => 'lp_nip', 'value' => isset($user_login['lp_nip']) ? set_value('lp_nip', $user_login['lp_nip']) : '']); ?>
+                                                <hr>
+
+                                                <strong><i class="fas fa-map-marker-alt mr-1"></i> Sekretariat</strong>
+                                                <?= form_textarea(['name' => 'lp_sekretariat', 'class' => 'form-control', 'rows' => '3', 'spellcheck' => 'false', 'id' => 'lp_sekretariat', 'value' => isset($user_login['lp_sekretariat']) ? set_value('lp_sekretariat', $user_login['lp_sekretariat']) : '']); ?>
+                                                <hr>
+
+                                                <strong><i class="fas fa-envelope mr-1"></i> Email Lembaga</strong>
+                                                <?= form_input(['name' => 'lp_email', 'class' => 'form-control', 'id' => 'lp_email', 'value' => isset($user_login['lp_email']) ? set_value('lp_email', $user_login['lp_email']) : '']); ?>
+                                                <hr>
+
+                                                <strong><i class="fas fa-archive mr-1"></i> Kode Pos</strong>
+                                                <?= form_input(['name' => 'lp_kode_pos', 'class' => 'form-control', 'id' => 'lp_kode_pos', 'value' => isset($user_login['lp_kode_pos']) ? set_value('lp_kode_pos', $user_login['lp_kode_pos']) : '']); ?>
+                                                <hr>
+
+                                                <strong><i class="fas fa-image mr-1"></i> Logo</strong>
+                                                <hr>
+
+                                                <?= form_input(['type' => 'hidden', 'name' => 'id_user', 'class' => 'form-control', 'id' => 'id_user', 'value' => isset($user_login) ? set_value('id_user', $user_login['id_user']) : '']); ?>
+
+                                                <?php if (isset($user_login['lp_id'])) : ?>
+                                                    <button type="button" id="lembagaUpdate" class="btn btn-success btn-block">Update</button>
+                                                <?php else : ?>
+                                                    <button type="button" id="lembagaSubmit" class="btn btn-success btn-block">Submit</button>
+                                                <?php endif; ?>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="custom-tabs-three-wa" role="tabpanel">
+                                        <?= $this->include('profil/wa_settings'); ?>
+                                    </div>
+                                    <!-- Migration Tool (Admin) -->
                                     <div class="tab-pane fade" id="custom-tabs-three-migrate" role="tabpanel">
                                         <?= $this->include('profil/migration_tool'); ?>
                                     </div>
+
                                 <?php endif; ?>
                             </div>
 
@@ -420,6 +507,59 @@
                     $elt.attr('disabled', true);
                 }, 500);
 
+            });
+        });
+
+
+        $('#updateForm').on('submit', function(e) {
+            e.preventDefault(); // Mencegah formulir dikirimkan secara default
+
+            var formData = $(this).serialize(); // Mengambil data formulir
+
+            $.ajax({
+                url: '/updateBatch', // Ganti dengan URL yang sesuai dengan controller dan method Anda
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    // Tanggapan dari server setelah proses update berhasil
+                    // console.log(response);
+                    // Tampilkan SweetAlert sukses
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sukses',
+                        text: 'Update deadline usulan berhasil!',
+                    });
+                },
+                error: function(xhr, status, error) {
+                    // Penanganan kesalahan jika terjadi
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+
+        $('#updateFormGen').on('submit', function(e) {
+            e.preventDefault(); // Mencegah formulir dikirimkan secara default
+
+            var formData = $(this).serialize(); // Mengambil data formulir
+
+            $.ajax({
+                url: '/updateBatchGen', // Ganti dengan URL yang sesuai dengan controller dan method Anda
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    // Tanggapan dari server setelah proses update berhasil
+                    // console.log(response);
+                    // Tampilkan SweetAlert sukses
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sukses',
+                        text: 'Update deadline general berhasil!',
+                    });
+                },
+                error: function(xhr, status, error) {
+                    // Penanganan kesalahan jika terjadi
+                    console.error(xhr.responseText);
+                }
             });
         });
 

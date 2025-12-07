@@ -15,6 +15,14 @@ use App\Controllers\BaseController;
 
 class Profil_Web extends BaseController
 {
+    protected $AuthModel;
+    protected $GenModel;
+    protected $DeadlineModel;
+    protected $DeadlineGenModel;
+    protected $LembagaModel;
+    protected $WilayahModel;
+    protected $MenuModel;
+    
     public function __construct()
     {
         $this->AuthModel = new AuthModel();

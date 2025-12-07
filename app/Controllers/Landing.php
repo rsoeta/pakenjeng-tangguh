@@ -5,7 +5,7 @@ namespace App\Controllers;
 use App\Models\Dtks\Usulan22Model;
 use App\Models\WilayahModel;
 use App\Models\SettingsModel;
-use App\Models\ArticlesModel;
+use App\Models\ArticleModel;
 
 class Landing extends BaseController
 {
@@ -18,7 +18,7 @@ class Landing extends BaseController
 	public function index()
 	{
 		$settingsModel = new SettingsModel();
-		$articlesModel = new ArticlesModel();
+		$articleModel = new ArticleModel();
 
 		// Ambil data dari settings database
 		$background = $settingsModel->getSetting('background_image') ?? 'assets/uploads/backgrounds/landing.jpg';
@@ -37,7 +37,7 @@ class Landing extends BaseController
 		}
 
 		// Ambil artikel untuk tampil di landing
-		$articles = $articlesModel->orderBy('created_at', 'DESC')->findAll(6);
+		$articles = $articleModel->orderBy('created_at', 'DESC')->findAll(6);
 
 		// Kirim data ke view
 		return view('landing', [
@@ -53,7 +53,7 @@ class Landing extends BaseController
 
 	public function article($slug)
 	{
-		$articlesModel = new ArticlesModel();
+		$articleModel = new ArticleModel();
 		$article = $articlesModel->where('slug', $slug)->first();
 
 		if (!$article) {

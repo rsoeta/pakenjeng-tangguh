@@ -110,6 +110,9 @@ $routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview']], 
 	$routes->get('search-art', 'Dtsen\UsulanBansos::searchArt');
 	$routes->post('save', 'Dtsen\UsulanBansos::save');
 	$routes->post('verifikasi/(:num)', 'Dtsen\UsulanBansos::verifikasi/$1');
+
+	// NEW: check deadline API untuk modal + countdown
+	$routes->get('check-deadline', 'Dtsen\UsulanBansos::checkDeadline');
 });
 
 // === DTSEN - Pembaruan Data Keluarga ===
@@ -164,10 +167,6 @@ $routes->group('pengaturan_wa', ['filter' => ['authfilterdtks', 'menufilterdtks'
 $routes->cli('cron/wa-reminder', 'Cron\WaReminder::index');
 $routes->get('cron/reminder', 'Cron\Reminder::index');
 
-// Migration Tool (Admin Only)
-$routes->get('admin/migrate', 'Admin\MigrationTool::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->get('admin/download-db', 'Admin\MigrationTool::downloadDb', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-
 // DTSEN - Pemeriksaan Data Sosial Ekonomi
 $routes->group('dtsen', [
 	'namespace' => 'App\Controllers\Dtsen',
@@ -202,6 +201,29 @@ $routes->group('dtsen', [
 	$routes->post('kk/delete/(:num)', 'Pemeriksaan::ajaxDeleteKK/$1');
 	$routes->post('art/delete/(:num)', 'Pemeriksaan::ajaxDeleteART/$1');
 });
+
+// public CMS / admin
+$routes->group('admin', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
+
+	// Migration Tool (Admin Only)
+	$routes->get('migrate', 'Admin\MigrationTool::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+	$routes->get('download-db', 'Admin\MigrationTool::downloadDb', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+
+	// Article Management
+	$routes->get('articles', 'Admin\ArticleController::index');
+	$routes->get('articles/create', 'Admin\ArticleController::create');
+	$routes->post('articles/store', 'Admin\ArticleController::store');
+	$routes->get('articles/edit/(:num)', 'Admin\ArticleController::edit/$1');
+	$routes->post('articles/update/(:num)', 'Admin\ArticleController::update/$1');
+	$routes->delete('articles/delete/(:num)', 'Admin\ArticleController::delete/$1');
+
+	// TinyMCE image upload endpoint
+	$routes->post('articles/upload-image', 'Admin\ArticleController::uploadImage');
+});
+
+// Frontend article view
+$routes->get('artikel', 'ArticleFront::index');
+$routes->get('artikel/(:segment)', 'ArticleFront::show/$1');
 
 
 // ====================================================================

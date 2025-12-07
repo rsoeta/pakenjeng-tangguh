@@ -990,18 +990,6 @@ class PembaruanKeluarga extends BaseController
                 'foto_dalam' => ['path' => 'foto_rumah_dalam/', 'key' => 'dalam'],
             ];
 
-            // 🖼️ Proses upload foto (merge, bukan replace)
-            // $fotoGabungan = $payloadLama['foto'];
-            // foreach ($fotoFields as $field => $opt) {
-            //     $file = $this->request->getFile($field);
-            //     if ($file && $file->isValid() && !$file->hasMoved()) {
-            //         // $newName = 'usulan_' . $usulanId . '_' . $field . '_' . time() . '.' . $file->getExtension();
-            //         $newName = 'usulan_' . $usulanId . '_' . $field . '_' . time() . '.' . $file->getExtension();
-            //         $file->move($uploadBase . $opt['path'], $newName, true);
-            //         $fotoGabungan[$opt['key']] = 'data/usulan/' . $opt['path'] . $newName;
-            //     }
-            // }
-
             // 🖼️ Proses upload foto dengan nama file format baru
             $fotoGabungan = $payloadLama['foto'];
 

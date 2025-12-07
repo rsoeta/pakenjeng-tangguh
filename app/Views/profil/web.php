@@ -768,45 +768,6 @@
             }
         });
 
-        // $(".btnGenUpdate").click(function(event) {
-        //     //     alert('test');
-        //     // });
-        //     event.preventDefault();
-        //     const form_data = new FormData($('#update_form')[0]);
-        //     const dd_id = $('#dd_id').val();
-        //     const dd_waktu_start = $('#dd_waktu_start').val();
-        //     const dd_waktu_end = $('#dd_waktu_end').val();
-        //     const dd_role = $('#dd_role').val();
-        //     const dd_deskripsi = $('#dd_deskripsi').val();
-
-        //     if (dd_waktu_start != null || dd_waktu_end != null || dd_role != null) {
-        //         $.ajax({
-        //             type: "POST",
-        //             url: '<?= site_url('update_web_general'); ?>',
-        //             dataType: 'json',
-        //             data: form_data,
-        //             processData: false,
-        //             contentType: false,
-        //             success: function(res) {
-        //                 // alert(res);
-        //                 if (res) {
-        //                     $("#lembagaMsg").show();
-        //                     $("#lembagaMsg").html('Data berhasil diupdate.');
-        //                     setTimeout(function() {
-        //                         $("#lembagaMsg").hide();
-        //                     }, 2000);
-        //                     setTimeout(function() {
-        //                         location.reload();
-        //                     }, 2010);
-        //                     // alert (res)
-        //                 }
-        //             }
-        //         });
-        //     } else {
-        //         alert('Isi dengan lengkap!');
-        //     }
-        // });
-
         $('#updateForm').on('submit', function(e) {
             e.preventDefault(); // Mencegah formulir dikirimkan secara default
 
@@ -858,7 +819,6 @@
                 }
             });
         });
-
 
         $(function() {
             $('#personalUpdate').click(function() {

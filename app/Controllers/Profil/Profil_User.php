@@ -68,6 +68,9 @@ class Profil_User extends BaseController
                 'nama_pemerintah' => $nama_pemerintah,
                 // ➕ WA SETTINGS DIKIRIM KE VIEW
                 'wa_setting' => $wa_setting,
+                'deadline' => $this->GenModel->getDeadline(),
+                'deadline_general' => $this->GenModel->getDeadlinePpks(),
+
             ];
             // dd($data['getAjax']);
             // dd($data['user_login']);

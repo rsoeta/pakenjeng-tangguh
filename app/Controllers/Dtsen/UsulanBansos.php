@@ -340,20 +340,62 @@ class UsulanBansos extends Controller
     /**
      * 📊 Ambil data usulan bansos (bisa difilter berdasarkan status)
      */
+    // public function getDataBulanIni()
+    // {
+    //     $bulan  = date('m');
+    //     $tahun  = date('Y');
+    //     $status = $this->request->getGet('status'); // bisa 'draft' atau 'diverifikasi'
+
+    //     $builder = $this->DtsenUsulanBansosModel
+    //         ->select("
+    //         dtsen_usulan_bansos.*,
+    //         dtsen_art.nama,
+    //         dbj.dbj_nama_bansos,
+    //         u1.fullname AS created_by_name,
+    //         u2.fullname AS updated_by_name
+    //     ")
+    //         ->join('dtsen_art', 'dtsen_art.nik = dtsen_usulan_bansos.nik', 'left')
+    //         ->join('dtks_bansos_jenis dbj', 'dbj.dbj_id = dtsen_usulan_bansos.program_bansos', 'left')
+    //         ->join('dtks_users u1', 'u1.nik = dtsen_usulan_bansos.created_by', 'left')
+    //         ->join('dtks_users u2', 'u2.nik = dtsen_usulan_bansos.updated_by', 'left')
+    //         ->where('MONTH(dtsen_usulan_bansos.created_at)', $bulan)
+    //         ->where('YEAR(dtsen_usulan_bansos.created_at)', $tahun);
+
+    //     if ($status) {
+    //         $builder->where('dtsen_usulan_bansos.status', $status);
+    //     }
+
+    //     $builder->orderBy('dtsen_usulan_bansos.created_at', 'ASC');
+
+    //     try {
+    //         $data = $builder->findAll();
+
+    //         log_message('info', "✅ getDataBulanIni() memuat " . count($data) . " data untuk status={$status}");
+    //         return $this->response->setJSON(['data' => $data]);
+    //     } catch (\Throwable $e) {
+    //         log_message('error', "❌ getDataBulanIni() error: " . $e->getMessage());
+    //         return $this->response->setJSON(['data' => [], 'error' => $e->getMessage()]);
+    //     }
+    // }
     public function getDataBulanIni()
     {
+        $session = session();
+        $roleId = (int) $session->get('role_id');
+        $nik = $session->get('nik');
+
         $bulan  = date('m');
         $tahun  = date('Y');
-        $status = $this->request->getGet('status'); // bisa 'draft' atau 'diverifikasi'
+        $status = $this->request->getGet('status'); // 'draft' atau 'diverifikasi'
 
         $builder = $this->DtsenUsulanBansosModel
             ->select("
-            dtsen_usulan_bansos.*,
-            dtsen_art.nama,
-            dbj.dbj_nama_bansos,
-            u1.fullname AS created_by_name,
-            u2.fullname AS updated_by_name
-        ")
+                dtsen_usulan_bansos.*,
+                dtsen_art.nama,
+                dbj.dbj_nama_bansos,
+                u1.fullname AS created_by_name,
+                u1.nope    AS created_by_nope,
+                u2.fullname AS updated_by_name
+            ")
             ->join('dtsen_art', 'dtsen_art.nik = dtsen_usulan_bansos.nik', 'left')
             ->join('dtks_bansos_jenis dbj', 'dbj.dbj_id = dtsen_usulan_bansos.program_bansos', 'left')
             ->join('dtks_users u1', 'u1.nik = dtsen_usulan_bansos.created_by', 'left')
@@ -361,16 +403,28 @@ class UsulanBansos extends Controller
             ->where('MONTH(dtsen_usulan_bansos.created_at)', $bulan)
             ->where('YEAR(dtsen_usulan_bansos.created_at)', $tahun);
 
+        // Filter status jika diminta
         if ($status) {
             $builder->where('dtsen_usulan_bansos.status', $status);
+        }
+
+        // RULE: role 1,2,3 lihat semua
+        // role 4 lihat hanya data yang dia buat
+        // role >4 tidak dapat melihat data sama sekali -> return empty
+        if ($roleId > 4) {
+            // langsung return empty dataset
+            log_message('info', "[getDataBulanIni] role_id={$roleId} tidak diizinkan melihat data.");
+            return $this->response->setJSON(['data' => []]);
+        } elseif ($roleId === 4) {
+            // hanya data yang dibuat oleh dirinya sendiri
+            $builder->where('dtsen_usulan_bansos.created_by', $nik);
         }
 
         $builder->orderBy('dtsen_usulan_bansos.created_at', 'ASC');
 
         try {
             $data = $builder->findAll();
-
-            log_message('info', "✅ getDataBulanIni() memuat " . count($data) . " data untuk status={$status}");
+            log_message('info', "✅ getDataBulanIni() memuat " . count($data) . " data untuk role={$roleId}, status={$status}");
             return $this->response->setJSON(['data' => $data]);
         } catch (\Throwable $e) {
             log_message('error', "❌ getDataBulanIni() error: " . $e->getMessage());
@@ -379,23 +433,105 @@ class UsulanBansos extends Controller
     }
 
     /**
+     * API: check-deadline
+     * Mengembalikan { allowed: bool, start: datetime, end: datetime }
+     */
+    public function checkDeadline()
+    {
+        try {
+            $roleId = session()->get('role_id');
+
+            $db = \Config\Database::connect();
+            $dataWaktu = $db->table('dtks_deadline')
+                ->where('dd_role', $roleId)
+                ->get()->getRowArray();
+
+            if (!$dataWaktu) {
+                return $this->response->setJSON([
+                    'allowed' => false,
+                    'message' => 'Deadline tidak ditemukan.'
+                ]);
+            }
+
+            // Pastikan semua DateTime memakai Asia/Jakarta
+            $tz = new \DateTimeZone('Asia/Jakarta');
+
+            $start = new \DateTime($dataWaktu['dd_waktu_start'], $tz);
+            $end   = new \DateTime($dataWaktu['dd_waktu_end'], $tz);
+            $now   = new \DateTime('now', $tz);
+
+            $allowed = ($now >= $start && $now <= $end);
+
+            return $this->response->setJSON([
+                'allowed' => $allowed,
+                'start'   => $start->format('Y-m-d H:i:s'),
+                'end'     => $end->format('Y-m-d H:i:s'),
+                'now'     => $now->format('Y-m-d H:i:s')
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', '[checkDeadline] ' . $e->getMessage());
+            return $this->response->setJSON(['allowed' => false]);
+        }
+    }
+
+    /**
      * ✅ Verifikasi usulan bansos oleh admin
+     */
+    // public function verifikasi($id)
+    // {
+    //     try {
+    //         $usulan = $this->DtsenUsulanBansosModel->find($id);
+    //         if (!$usulan) {
+    //             return $this->response->setJSON(['success' => false, 'message' => 'Data tidak ditemukan.']);
+    //         }
+
+    //         $this->DtsenUsulanBansosModel->update($id, [
+    //             'status' => 'diverifikasi',
+    //             'updated_at' => date('Y-m-d H:i:s'),
+    //             'updated_by' => session()->get('nik') ?? session()->get('user_nik') ?? null
+    //         ]);
+
+    //         log_message('info', "[verifikasi] ID {$id} diverifikasi oleh " . (session()->get('fullname') ?? 'Admin'));
+    //         return $this->response->setJSON(['success' => true, 'message' => 'Usulan berhasil diverifikasi.']);
+    //     } catch (\Throwable $e) {
+    //         log_message('error', "[verifikasi] Error: " . $e->getMessage());
+    //         return $this->response->setJSON(['success' => false, 'message' => 'Terjadi kesalahan server.']);
+    //     }
+    // }
+    /**
+     * ✅ Verifikasi usulan bansos oleh admin (hanya role_id <= 3)
      */
     public function verifikasi($id)
     {
         try {
+            $session = session();
+            $roleId = (int) $session->get('role_id');
+            $userNik = $session->get('nik') ?? $session->get('user_nik') ?? null;
+
+            // Hanya role 1..3 yang boleh verifikasi
+            if ($roleId > 3) {
+                log_message('warning', "[verifikasi] Akses ditolak untuk role_id={$roleId}, user={$userNik}");
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki hak untuk melakukan verifikasi.'
+                ])->setStatusCode(403);
+            }
+
             $usulan = $this->DtsenUsulanBansosModel->find($id);
             if (!$usulan) {
-                return $this->response->setJSON(['success' => false, 'message' => 'Data tidak ditemukan.']);
+                return $this->response->setJSON(['success' => false, 'message' => 'Data tidak ditemukan.'])->setStatusCode(404);
             }
+
+            // Optional: jika ingin membatasi verifikasi hanya untuk usulan di bulan ini juga, cek tanggal created_at
+            // $bulan = date('m'); $tahun = date('Y'); if (date('m', strtotime($usulan['created_at'])) != $bulan) { ... }
 
             $this->DtsenUsulanBansosModel->update($id, [
                 'status' => 'diverifikasi',
                 'updated_at' => date('Y-m-d H:i:s'),
-                'updated_by' => session()->get('nik') ?? session()->get('user_nik') ?? null
+                'updated_by' => $userNik
             ]);
 
-            log_message('info', "[verifikasi] ID {$id} diverifikasi oleh " . (session()->get('fullname') ?? 'Admin'));
+            log_message('info', "[verifikasi] ID {$id} diverifikasi oleh " . ($session->get('fullname') ?? $userNik));
             return $this->response->setJSON(['success' => true, 'message' => 'Usulan berhasil diverifikasi.']);
         } catch (\Throwable $e) {
             log_message('error', "[verifikasi] Error: " . $e->getMessage());

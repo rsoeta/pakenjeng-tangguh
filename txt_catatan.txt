@@ -1072,3 +1072,11 @@ REFERENCES dtsen_kk(id_kk) ON UPDATE CASCADE;
     changed_by VARCHAR(100),
     changed_at DATETIME
     );
+=======================================================================================================================================================
+5. Menambahkan fitur artikel pada sistem SINDEN
+
+ALTER TABLE `articles`
+  ADD COLUMN `status` ENUM('draft','publish') NOT NULL DEFAULT 'draft',
+  ADD COLUMN `author_id` INT NULL,
+  ADD COLUMN `meta_description` VARCHAR(255) NULL,
+  ADD COLUMN `category_id` INT NULL;

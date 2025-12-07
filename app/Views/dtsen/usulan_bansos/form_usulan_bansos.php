@@ -66,4 +66,4 @@
     </div>
 </div>
 
-<script src="<?= base_url('assets/js/usulan_bansos.js'); ?>"></script>
+<!-- <script src="<?= base_url('assets/js/usulan_bansos.js'); ?>"></script> -->

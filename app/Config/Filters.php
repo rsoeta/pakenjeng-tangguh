@@ -76,6 +76,10 @@ class Filters extends BaseConfig
 				// ==============================
 				// Modul DTSEN yang memang admin only
 				// ==============================
+				'dtsen-monitoring',
+				'dtsen-monitoring/*',
+				'admin/articles',
+				'admin/articles/*',
 				// 'dtsen-reminder',
 				// 'dtsen-reminder/*',
 				// 'pengaturan_wa',
