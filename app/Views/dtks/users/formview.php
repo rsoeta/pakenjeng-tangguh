@@ -36,6 +36,12 @@
                     </div>
                 </div>
                 <div class="form-group row mb-1">
+                    <label class="col-4 col-sm-4 col-form-label" for="nope">No. HP</label>
+                    <div class="col-8 col-sm-8">
+                        <input type="text" name="nope" id="nope" class="form-control form-control-sm" value="<?= set_value('nope', $nope); ?>">
+                    </div>
+                </div>
+                <div class="form-group row mb-1">
                     <label for="role" class="col-4 col-sm-4">Role</label>
                     <div class="col-8 col-sm-8">
                         <select type="number" name="role" id="role" class="form-control form-control-sm">
