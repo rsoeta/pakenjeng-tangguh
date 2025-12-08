@@ -1080,3 +1080,13 @@ ALTER TABLE `articles`
   ADD COLUMN `author_id` INT NULL,
   ADD COLUMN `meta_description` VARCHAR(255) NULL,
   ADD COLUMN `category_id` INT NULL;
+
+
+=======================================================================================================================================================6. Tabel Kriteria Penerima Bantuan Sosial Berdasarkan SHDK dan Role Pilihan Bansos Berdasarkan Desil
+| SHDK  | DESIL | Yang tampil        | Status  |
+| ----- | ----- | ------------------ | ------- |
+| 1/3   | 5     | **BPNT + PBI**     | ✔ benar |
+| lain  | 5     | **PBI** saja       | ✔ benar |
+| 1/3   | ≤4    | semua program role | ✔ benar |
+| lain  | ≤4    | PBI saja           | ✔ benar |
+| semua | >5    | tidak layak        | ✔ benar |

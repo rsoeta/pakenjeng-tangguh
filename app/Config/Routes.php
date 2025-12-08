@@ -211,6 +211,10 @@ $routes->group('admin', ['filter' => ['authfilterdtks', 'globalview', 'menufilte
 
 	// Article Management
 	$routes->get('articles', 'Admin\ArticleController::index');
+	// di group admin (sudah ada filter auth)
+	$routes->get('articles/data', 'Admin\ArticleController::data');
+	$routes->get('articles/get/(:num)', 'Admin\ArticleController::get/$1'); // untuk edit (isi form)
+
 	$routes->get('articles/create', 'Admin\ArticleController::create');
 	$routes->post('articles/store', 'Admin\ArticleController::store');
 	$routes->get('articles/edit/(:num)', 'Admin\ArticleController::edit/$1');

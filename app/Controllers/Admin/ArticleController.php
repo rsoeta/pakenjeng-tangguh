@@ -37,6 +37,85 @@ class ArticleController extends BaseController
         return view('admin/articles/index', $data);
     }
 
+    /**
+     * JSON endpoint untuk DataTable
+     */
+    public function data()
+    {
+        // Jika ingin batasi akses: hanya role <= 3 (admin)
+        $role = session()->get('role_id') ?? 99;
+        if ($role > 3) {
+            return $this->response->setStatusCode(403)->setJSON(['data' => []]);
+        }
+
+        $articles = $this->articleModel->orderBy('created_at', 'DESC')->findAll();
+
+        $data = [];
+        $no = 0;
+        foreach ($articles as $row) {
+            $no++;
+            $statusBadge = $row['status'] === 'publish'
+                ? '<span class="badge bg-success">PUBLISH</span>'
+                : '<span class="badge bg-secondary">DRAFT</span>';
+
+            $thumbUrl = $row['image']
+                ? base_url('uploads/articles/' . $row['image'])
+                : base_url('assets/images/image_not_available.jpg');
+
+            $imgTag = '<img src="' . $thumbUrl . '" class="article-thumb">';
+
+            // action buttons (Edit opens edit tab and loads data; Delete calls AJAX)
+            $editBtn = '<button class="btn btn-sm btn-primary btnEditArticle" data-id="' . $row['id'] . '"><i class="fas fa-edit"></i></button>';
+            $delBtn  = '<button class="btn btn-sm btn-danger btnDeleteArticle ms-1" data-id="' . $row['id'] . '"><i class="fas fa-trash"></i></button>';
+
+            $data[] = [
+                'no' => $no,
+                'image' => $imgTag,
+                'title' => esc($row['title']),
+                'status' => $statusBadge,
+                'created_at' => $row['created_at'] ? date('d M Y H:i', strtotime($row['created_at'])) : '-',
+                'actions' => $editBtn . $delBtn,
+                'raw' => $row, // optional, for debugging client-side if needed
+            ];
+        }
+
+        return $this->response->setJSON(['data' => $data]);
+    }
+
+    /**
+     * Ambil single artikel (untuk populasi form edit)
+     */
+    public function get($id = null)
+    {
+        if (!$id) return $this->response->setJSON(['success' => false, 'message' => 'ID tidak diberikan']);
+
+        $article = $this->articleModel->find($id);
+        if (!$article) return $this->response->setJSON(['success' => false, 'message' => 'Artikel tidak ditemukan']);
+
+        return $this->response->setJSON(['success' => true, 'data' => $article]);
+    }
+
+    /**
+     * Hapus artikel (POST)
+     */
+    public function delete($id = null)
+    {
+        $role = session()->get('role_id') ?? 99;
+        if ($role > 3) {
+            return $this->response->setStatusCode(403)->setJSON(['success' => false, 'message' => 'Akses ditolak']);
+        }
+
+        if (!$id) return $this->response->setJSON(['success' => false, 'message' => 'ID tidak diberikan']);
+
+        try {
+            $this->articleModel->delete($id);
+            return $this->response->setJSON(['success' => true, 'message' => 'Artikel dihapus.']);
+        } catch (\Throwable $e) {
+            log_message('error', '[ArticleController::delete] ' . $e->getMessage());
+            return $this->response->setJSON(['success' => false, 'message' => 'Gagal menghapus artikel.']);
+        }
+    }
+
     public function create()
     {
         return view('admin/articles/create'); // form dengan TinyMCE
@@ -85,11 +164,11 @@ class ArticleController extends BaseController
         return redirect()->to('/admin/articles')->with('success', 'Artikel diperbarui.');
     }
 
-    public function delete($id)
-    {
-        $this->articleModel->delete($id);
-        return $this->response->setJSON(['success' => true, 'message' => 'Artikel dihapus.']);
-    }
+    // public function delete($id)
+    // {
+    //     $this->articleModel->delete($id);
+    //     return $this->response->setJSON(['success' => true, 'message' => 'Artikel dihapus.']);
+    // }
 
     /** TinyMCE image upload */
     public function uploadImage()

@@ -46,19 +46,20 @@ $(document).ready(function () {
 
     /* ---------------------------------------------
        RULE 2 — DESIL FILTER
-       Desil 5 → hanya BPNT & PBI
+       Desil 5 → hanya SEMBAKO & PBI
     --------------------------------------------- */
     function filterByDesil(desil) {
         if (desil === 5) {
-            console.log("🔒 DESIL 5 → hanya BPNT+PBI");
-
+            console.log("🔒 DESIL 5 → hanya SEMBAKO+PBI");
             $('#program_bansos option').each(function () {
                 const text = $(this).text().toUpperCase();
                 if (
                     !text.includes('BPNT') &&
+                    !text.includes('SEMBAKO') &&   //<-- tambahan penting
                     !text.includes('PBI') &&
                     $(this).val() !== ''
-                ) {
+                )
+    {
                     $(this).hide();
                 }
             });
@@ -68,28 +69,75 @@ $(document).ready(function () {
     /* ---------------------------------------------
        RULE GABUNGAN (SHDK + DESIL + VALIDASI)
     --------------------------------------------- */
+    // function applyProgramFilters(shdk, desil) {
+    //     resetProgramBansos();
+
+    //     // Tidak layak → Desil > 5
+    //     if (desil > 5) {
+    //         Swal.fire({
+    //             icon: 'warning',
+    //             title: 'Tidak Layak',
+    //             text: 'Kategori desil di atas 5 tidak dapat mengajukan.'
+    //         });
+    //         $('#program_bansos option').not('[value=""]').hide();
+    //         return;
+    //     }
+
+    //     // SHDK (hanya PBI)
+    //     const allowContinue = filterBySHDK(shdk);
+    //     if (!allowContinue) return;
+
+    //     // DESIL 5
+    //     filterByDesil(desil);
+    // }
+
     function applyProgramFilters(shdk, desil) {
+
         resetProgramBansos();
 
-        // Tidak layak → Desil > 5
+        // Jika SHDK tidak valid → anggap 1 (Kepala Keluarga)
+        // agar user tidak terkunci hanya ke PBI
+        if (!shdk || isNaN(shdk)) {
+            console.warn("⚠ SHDK NULL → fallback sebagai KK");
+            shdk = 1;
+        }
+
+        const select = $('#program_bansos');
+        const options = select.find('option');
+
+        // DESIL > 5 → Tidak layak
         if (desil > 5) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Tidak Layak',
-                text: 'Kategori desil di atas 5 tidak dapat mengajukan.'
-            });
-            $('#program_bansos option').not('[value=""]').hide();
+            Swal.fire('Tidak Layak', 'Kategori desil di atas 5 tidak dapat mengajukan.', 'warning');
+            options.not('[value=""]').hide();
             return;
         }
 
-        // SHDK (hanya PBI)
-        const allowContinue = filterBySHDK(shdk);
-        if (!allowContinue) return;
-
         // DESIL 5
-        filterByDesil(desil);
-    }
+        if (desil === 5) {
+            options.each(function () {
+                const text = $(this).text().toUpperCase();
+                if (
+                    !text.includes('BPNT') &&
+                    !text.includes('SEMBAKO') &&   //<-- tambahan penting
+                    !text.includes('PBI') &&
+                    $(this).val() !== ''
+                )
+                    {
+                    $(this).hide();
+                }
+            });
+        }
 
+        // SHDK filter
+        if (shdk !== 1 && shdk !== 3) {
+            options.each(function () {
+                const text = $(this).text().toUpperCase();
+                if (!text.includes('PBI') && $(this).val() !== '') {
+                    $(this).hide();
+                }
+            });
+        }
+    }
 
     /* ========================================================================
        🟢 EVENT: Tombol Tambah Usulan (cek deadline dulu)

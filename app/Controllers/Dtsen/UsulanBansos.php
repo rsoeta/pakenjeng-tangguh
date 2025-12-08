@@ -48,8 +48,10 @@ class UsulanBansos extends Controller
         $bansosModel = new BansosModel();
         $bansos = $bansosModel->select('dbj_id, dbj_nama_bansos')
             ->where('is_active', 1)
-            ->orderBy('dbj_nama_bansos', 'ASC')
+            ->orderBy('dbj_id', 'ASC')
             ->findAll();
+
+        // dd($bansos);
 
         // 🔹 Parsing wilayah_tugas
         $wilayahTugas = $userInfo['wilayah_tugas'] ?? '';

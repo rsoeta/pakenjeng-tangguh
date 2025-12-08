@@ -1,167 +1,238 @@
 <?= $this->extend('templates/index'); ?>
 <?= $this->section('content'); ?>
-<!-- <script src="https://cdn.tiny.cloud/1/NO-API-KEY/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script> -->
+
+<style>
+    .article-thumb {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+    }
+</style>
+
 <script src="<?= base_url('assets/js/tinymce/tinymce.min.js'); ?>"></script>
+<script src="<?= base_url('assets/js/admin/articles.table.js'); ?>"></script>
+
 
 <div class="content-wrapper mt-0">
-    <div class="content-header">
-        <h3 class="mb-2">📰 <?= $title; ?></h3>
+
+    <!-- HEADER -->
+    <div class="content-header d-flex justify-content-between align-items-center">
+        <h3 class="mb-2">📰 Artikel</h3>
+        <span class="text-muted"><?= date('d M Y') ?></span>
     </div>
 
     <section class="content">
 
-        <div class="card card-primary card-outline">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <i class="fas fa-edit"></i>
-                    Artikel Baru
-                </h3>
-            </div>
+        <div class="card shadow-sm border-0">
             <div class="card-body">
-                <h4>Left Sided</h4>
+
                 <div class="row">
-                    <div class="col-5 col-sm-3">
-                        <div class="nav flex-column nav-tabs h-100" id="vert-tabs-tab" role="tablist" aria-orientation="vertical">
-                            <a class="nav-link active" id="vert-tabs-home-tab" data-toggle="pill" href="#vert-tabs-home" role="tab" aria-controls="vert-tabs-home" aria-selected="true">Daftar Artikel</a>
-                            <a class="nav-link" id="vert-tabs-profile-tab" data-toggle="pill" href="#vert-tabs-profile" role="tab" aria-controls="vert-tabs-profile" aria-selected="false">Tulis Artikel</a>
-                            <a class="nav-link" id="vert-tabs-messages-tab" data-toggle="pill" href="#vert-tabs-messages" role="tab" aria-controls="vert-tabs-messages" aria-selected="false">Ubah Artikel</a>
-                            <a class="nav-link" id="vert-tabs-settings-tab" data-toggle="pill" href="#vert-tabs-settings" role="tab" aria-controls="vert-tabs-settings" aria-selected="false">Settings</a>
+                    <div class="col-md-3 col-12 mb-3 border-right">
+                        <!-- Sidebar menu -->
+                        <div class="nav flex-column nav-pills" id="article-nav" role="tablist">
+
+                            <a class="nav-link active" id="tab-list" data-bs-toggle="pill"
+                                href="#pane-list" role="tab">
+                                <i class="fas fa-list"></i> Daftar Artikel
+                            </a>
+
+                            <a class="nav-link" id="tab-create" data-bs-toggle="pill"
+                                href="#pane-create" role="tab">
+                                <i class="fas fa-plus-circle"></i> Tulis Artikel Baru
+                            </a>
+
+                            <a class="nav-link d-none" id="tab-edit" data-bs-toggle="pill"
+                                href="#pane-edit" role="tab">
+                                <i class="fas fa-edit"></i> Ubah Artikel
+                            </a>
+
+                            <a class="nav-link" id="tab-settings" data-bs-toggle="pill"
+                                href="#pane-settings" role="tab">
+                                <i class="fas fa-cog"></i> Pengaturan
+                            </a>
                         </div>
                     </div>
-                    <div class="col-7 col-sm-9">
-                        <div class="tab-content" id="vert-tabs-tabContent">
-                            <div class="tab-pane text-left fade show active" id="vert-tabs-home" role="tabpanel" aria-labelledby="vert-tabs-home-tab">
-                                <!-- table lorem ipsum -->
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h3 class="card-title">Bordered Table</h3>
-                                    </div>
-                                    <!-- /.card-header -->
-                                    <div class="card-body">
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th style="width: 10px">#</th>
-                                                    <th>Task</th>
-                                                    <th>Progress</th>
-                                                    <th style="width: 40px">Label</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>1.</td>
-                                                    <td>Update software</td>
-                                                    <td>
-                                                        <div class="progress progress-xs">
-                                                            <div class="progress-bar progress-bar-danger" style="width: 55%"></div>
-                                                        </div>
-                                                    </td>
-                                                    <td><span class="badge bg-danger">55%</span></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>2.</td>
-                                                    <td>Clean database</td>
-                                                    <td>
-                                                        <div class="progress progress-xs">
-                                                            <div class="progress-bar bg-warning" style="width: 70%"></div>
-                                                        </div>
-                                                    </td>
-                                                    <td><span class="badge bg-warning">70%</span></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>3.</td>
-                                                    <td>Cron job running</td>
-                                                    <td>
-                                                        <div class="progress progress-xs progress-striped active">
-                                                            <div class="progress-bar bg-primary" style="width: 30%"></div>
-                                                        </div>
-                                                    </td>
-                                                    <td><span class="badge bg-primary">30%</span></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>4.</td>
-                                                    <td>Fix and squish bugs</td>
-                                                    <td>
-                                                        <div class="progress progress-xs progress-striped active">
-                                                            <div class="progress-bar bg-success" style="width: 90%"></div>
-                                                        </div>
-                                                    </td>
-                                                    <td><span class="badge bg-success">90%</span></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <!-- /.card-body -->
-                                    <div class="card-footer clearfix">
-                                        <ul class="pagination pagination-sm m-0 float-right">
-                                            <li class="page-item"><a class="page-link" href="#">«</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">1</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">»</a></li>
-                                        </ul>
-                                    </div>
+
+                    <!-- RIGHT SIDE -->
+                    <div class="col-md-9 col-12">
+                        <div class="tab-content">
+
+                            <!-- =======================================================================
+                                1. LIST ARTIKEL
+                            ======================================================================== -->
+                            <div class="tab-pane fade show active" id="pane-list" role="tabpanel">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <h5 class="mb-0">Daftar Artikel</h5>
+                                    <button id="btnReloadArticles" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-sync-alt"></i> Reload
+                                    </button>
                                 </div>
+
+                                <table id="tableArticles" class="table table-striped table-bordered" width="100%">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Gambar</th> <!-- WAJIB DITAMBAHKAN -->
+                                            <th>Judul</th>
+                                            <th>Status</th>
+                                            <th>Tanggal</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
                             </div>
-                            <div class="tab-pane fade" id="vert-tabs-profile" role="tabpanel" aria-labelledby="vert-tabs-profile-tab">
+
+                            <!-- =======================================================================
+                                2. FORM BUAT ARTIKEL BARU
+                            ======================================================================== -->
+                            <div class="tab-pane fade" id="pane-create" role="tabpanel">
+
+                                <h5>Tulis Artikel Baru</h5>
+                                <hr>
+
                                 <form method="post" action="<?= base_url('/admin/articles/store') ?>">
-                                    <input class="form-control" name="title" placeholder="Judul" />
-                                    <select name="status" class="custom-select form-control-borderded mt-2 mb-2">
-                                        <option value="draft">Draft</option>
-                                        <option value="publish">Publish</option>
-                                    </select>
-                                    <textarea id="tinyDesc" name="description"></textarea>
-                                    <!-- buat tombol submit disebelah kanan -->
-                                    <div class="modal-footer">
-                                        <div class="text-right">
-                                            <button type="submit" class="btn btn-success">
-                                                <i class="fas fa-save"></i> Simpan
-                                            </button>
-                                        </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Judul Artikel</label>
+                                        <input class="form-control" name="title" required placeholder="Judul artikel...">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Status</label>
+                                        <select name="status" class="form-select">
+                                            <option value="draft">Draft</option>
+                                            <option value="publish">Publish</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Isi Artikel</label>
+                                        <textarea id="articleCreateEditor" name="description"></textarea>
+                                    </div>
+
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-save"></i> Simpan Artikel
+                                        </button>
                                     </div>
                                 </form>
                             </div>
-                            <div class="tab-pane fade" id="vert-tabs-messages" role="tabpanel" aria-labelledby="vert-tabs-messages-tab">
-                                Morbi turpis dolor, vulputate vitae felis non, tincidunt congue mauris. Phasellus volutpat augue id mi placerat mollis. Vivamus faucibus eu massa eget condimentum. Fusce nec hendrerit sem, ac tristique nulla. Integer vestibulum orci odio. Cras nec augue ipsum. Suspendisse ut velit condimentum, mattis urna a, malesuada nunc. Curabitur eleifend facilisis velit finibus tristique. Nam vulputate, eros non luctus efficitur, ipsum odio volutpat massa, sit amet sollicitudin est libero sed ipsum. Nulla lacinia, ex vitae gravida fermentum, lectus ipsum gravida arcu, id fermentum metus arcu vel metus. Curabitur eget sem eu risus tincidunt eleifend ac ornare magna.
+
+                            <!-- =======================================================================
+                                3. FORM EDIT ARTIKEL
+                            ======================================================================== -->
+                            <div class="tab-pane fade" id="pane-edit" role="tabpanel">
+                                <h5>Ubah Artikel</h5>
+                                <hr>
+
+                                <form id="editArticleForm" method="post" action="#">
+                                    <input type="hidden" name="id" id="edit_id">
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Judul Artikel</label>
+                                        <input class="form-control" name="title" id="edit_title" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Status</label>
+                                        <select name="status" class="form-select" id="edit_status">
+                                            <option value="draft">Draft</option>
+                                            <option value="publish">Publish</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Isi Artikel</label>
+                                        <textarea id="articleEditEditor" name="description"></textarea>
+                                    </div>
+
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save"></i> Update Artikel
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                            <div class="tab-pane fade" id="vert-tabs-settings" role="tabpanel" aria-labelledby="vert-tabs-settings-tab">
-                                Pellentesque vestibulum commodo nibh nec blandit. Maecenas neque magna, iaculis tempus turpis ac, ornare sodales tellus. Mauris eget blandit dolor. Quisque tincidunt venenatis vulputate. Morbi euismod molestie tristique. Vestibulum consectetur dolor a vestibulum pharetra. Donec interdum placerat urna nec pharetra. Etiam eget dapibus orci, eget aliquet urna. Nunc at consequat diam. Nunc et felis ut nisl commodo dignissim. In hac habitasse platea dictumst. Praesent imperdiet accumsan ex sit amet facilisis.
+
+                            <!-- =======================================================================
+                                4. SETTINGS
+                            ======================================================================== -->
+                            <div class="tab-pane fade" id="pane-settings" role="tabpanel">
+                                <h5>Pengaturan Artikel</h5>
+                                <p class="text-muted">Menu pengaturan artikel dapat ditambahkan di sini.</p>
                             </div>
+
                         </div>
                     </div>
                 </div>
+
             </div>
-            <!-- /.card -->
         </div>
 
     </section>
 </div>
 
+<!-- TinyMCE INITIALIZER -->
 <script>
-    tinymce.init({
-        selector: '#tinyDesc',
-        plugins: 'image link lists table code',
-        toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code',
-        images_upload_url: '<?= base_url("admin/articles/upload-image") ?>',
-        images_upload_credentials: true, // sertakan cookie & headers (jika perlu sesi)
-        automatic_uploads: true,
-        relative_urls: false,
-        remove_script_host: false,
-        convert_urls: true,
-        // fallback handler jika TinyMCE mengirim field "file" atau "image"
-        images_upload_handler: function(blobInfo, success, failure) {
-            var formData = new FormData();
-            formData.append('file', blobInfo.blob(), blobInfo.filename());
-            fetch('<?= base_url("admin/articles/upload-image") ?>', {
-                method: 'POST',
-                body: formData,
-                credentials: 'same-origin'
-            }).then(r => r.json()).then(json => {
-                if (json.location) success(json.location);
-                else failure('Upload gagal');
-            }).catch(err => failure('Upload error: ' + err));
+    function initTiny(selector) {
+        if (typeof tinymce === "undefined") {
+            console.error("TinyMCE belum terload!");
+            return;
         }
+        tinymce.init({
+            selector: selector,
+            plugins: 'image link lists table code',
+            height: 350,
+            toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code',
+            images_upload_url: '<?= base_url("admin/articles/upload-image") ?>',
+            automatic_uploads: true,
+            relative_urls: false,
+            remove_script_host: false,
+            images_upload_handler: function(blobInfo, success, failure) {
+                let formData = new FormData();
+                formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+                fetch('<?= base_url("admin/articles/upload-image") ?>', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(r => r.json())
+                    .then(json => json.location ? success(json.location) : failure("Upload gagal"))
+                    .catch(err => failure("Upload error: " + err));
+            }
+        });
+    }
+
+    initTiny('#articleCreateEditor');
+    initTiny('#articleEditEditor');
+
+    $('#editArticleForm').on('submit', function(e) {
+        e.preventDefault();
+        const id = $('#edit_id').val();
+        const payload = $(this).serialize(); // plus description from tinymce if needed
+        payload.description = tinymce.get('articleEditEditor').getContent();
+
+        $.post('/admin/articles/update/' + id, payload)
+            .done(function(res) {
+                if (res.success) {
+                    Swal.fire('Berhasil', res.message, 'success');
+                    $('#tab-list').trigger('click');
+                    $('#tab-edit').addClass('d-none'); // hide edit tab if desired
+                    $('#tableArticles').DataTable().ajax.reload(null, false);
+                } else {
+                    Swal.fire('Gagal', res.message, 'error');
+                }
+            })
+            .fail(function() {
+                Swal.fire('Error', 'Gagal memperbarui artikel.', 'error');
+            });
     });
+
+    render: img => img ?
+        `<img src="${img}" class="article-thumb">` :
+        '<span class="text-muted">Tidak ada</span>'
 </script>
 
 <?= $this->endSection(); ?>
