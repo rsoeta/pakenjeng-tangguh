@@ -105,6 +105,7 @@ $routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview']], 
 	$routes->get('/', 'Dtsen\UsulanBansos::index');
 	$routes->get('data', 'Dtsen\UsulanBansos::getDataBulanIni');
 	$routes->post('verifikasi/(:num)', 'Dtsen\UsulanBansos::verifikasi/$1');
+	$routes->post('delete/(:num)', 'Dtsen\UsulanBansos::delete/$1');
 	$routes->delete('delete/(:num)', 'Dtsen\UsulanBansos::delete/$1');
 	$routes->get('check-desil', 'Dtsen\UsulanBansos::checkDesil');
 	$routes->get('search-art', 'Dtsen\UsulanBansos::searchArt');

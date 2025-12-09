@@ -190,7 +190,11 @@
                                 <i class="fas fa-sync-alt"></i> Reload
                             </button>
                         </div>
-
+                        <!-- CSRF Token untuk AJAX -->
+                        <input type="hidden"
+                            id="csrfToken"
+                            name="<?= csrf_token() ?>"
+                            value="<?= csrf_hash() ?>" />
                         <table id="tableUsulanBansosDraft" class="table table-striped table-bordered w-100"></table>
                     </div>
 

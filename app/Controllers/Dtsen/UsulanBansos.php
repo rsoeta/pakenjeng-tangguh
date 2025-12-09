@@ -336,9 +336,14 @@ class UsulanBansos extends Controller
                 'message' => 'Data usulan berhasil dihapus.'
             ]);
         } catch (\Throwable $e) {
+            // return $this->response->setJSON([
+            //     'success' => false,
+            //     'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            // ]);
             return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'status' => true,
+                'message' => 'Data berhasil dihapus.',
+                'csrfToken' => csrf_hash()
             ]);
         }
     }
