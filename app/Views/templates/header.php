@@ -11,6 +11,9 @@
     <meta http-equiv="pragma" content="no-cache">
     <meta http-equiv="expires" content="0">
 
+    <meta name="csrf-token-name" content="<?= csrf_token() ?>">
+    <meta name="csrf-token-value" content="<?= csrf_hash() ?>">
+
     <!-- <meta http-equiv="Content-Security-Policy" content="connect-src 'ws://localhost:8080';"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Rian Sutarsa">

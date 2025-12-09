@@ -20,6 +20,10 @@ class UsulanBansos extends Controller
     protected $DtsenUsulanBansosModel;
     protected $BansosModel;
     protected $GenModel;
+    protected $session;
+    protected $request;
+    protected $response;
+    protected $validation;
 
     public function __construct()
     {

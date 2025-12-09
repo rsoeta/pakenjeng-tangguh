@@ -126,6 +126,83 @@
     });
 </script>
 
+<script>
+    // ============================================================
+    // GLOBAL CSRF HANDLER — AUTO REFRESH TOKEN UNTUK SEMUA AJAX
+    // ============================================================
+
+    // Ambil token awal dari meta tag
+    let csrfName = document.querySelector('meta[name="csrf-token-name"]').getAttribute("content");
+    let csrfValue = document.querySelector('meta[name="csrf-token-value"]').getAttribute("content");
+
+    // Simpan ke window global
+    window.CSRF = {
+        name: csrfName,
+        value: csrfValue
+    };
+
+    // ------------------------------
+    // Inject token ke setiap request AJAX (jQuery)
+    // ------------------------------
+    if (typeof $ !== "undefined") {
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (settings.type === "POST") {
+                    // Untuk form_params atau x-www-form-urlencoded
+                    if (typeof settings.data === "string") {
+                        settings.data += `&${window.CSRF.name}=${window.CSRF.value}`;
+                    }
+                }
+            }
+        });
+
+        // Tangkap token baru dari semua response
+        $(document).ajaxComplete(function(event, xhr) {
+            try {
+                let token = xhr.getResponseHeader("X-CSRF-TOKEN");
+                if (token) {
+                    window.CSRF.value = token;
+                    document.querySelector('meta[name="csrf-token-value"]').setAttribute("content", token);
+                }
+            } catch (e) {
+                console.warn("Tidak bisa update CSRF token:", e);
+            }
+        });
+    }
+
+    // ------------------------------
+    // Untuk Fetch API (opsional tapi direkomendasikan)
+    // ------------------------------
+    window.secureFetch = async function(url, options = {}) {
+        options.headers = options.headers || {};
+
+        // Jika POST maka sertakan token
+        if (options.method && options.method.toUpperCase() === "POST") {
+            if (options.headers["Content-Type"] === "application/json") {
+                let body = JSON.parse(options.body || "{}");
+                body[window.CSRF.name] = window.CSRF.value;
+                options.body = JSON.stringify(body);
+            } else {
+                // FormUrlEncoded
+                let form = new URLSearchParams(options.body || "");
+                form.append(window.CSRF.name, window.CSRF.value);
+                options.body = form.toString();
+            }
+        }
+
+        let response = await fetch(url, options);
+
+        // Ambil token baru dari header response
+        let newToken = response.headers.get("X-CSRF-TOKEN");
+        if (newToken) {
+            window.CSRF.value = newToken;
+            document.querySelector('meta[name="csrf-token-value"]').setAttribute("content", newToken);
+        }
+
+        return response;
+    };
+</script>
+
 </body>
 
 </html>

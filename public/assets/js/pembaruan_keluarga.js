@@ -35,7 +35,7 @@ $(document).ready(function () {
             return;
         }
 
-        console.log("✅ Prefill Wilayah:", wilayah, wilayahNama);
+        // console.log("✅ Prefill Wilayah:", wilayah, wilayahNama);
 
         const setSelect2Value = (selector, id, text) => {
             if (!id || !text) return;
@@ -65,7 +65,7 @@ $(document).ready(function () {
             return;
         }
 
-        console.log("✅ Prefill Rumah:", perumahan);
+        // console.log("✅ Prefill Rumah:", perumahan);
 
         // Kondisi rumah
         if (perumahan.kondisi) {

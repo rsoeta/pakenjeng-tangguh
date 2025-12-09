@@ -52,7 +52,7 @@ $routes->post('admin-reset-password', 'Auth\Auth::adminResetPassword', ['filter'
 
 // $routes->get('/', 'Auth\Pages::home', ['filter' => 'noauthfilterdtks']);
 $routes->get('/', 'Landing::index');
-$routes->get('article/(:segment)', 'Landing::article/$1');
+$routes->get('article/(:segment)', 'Landing::articleDetail/$1');
 
 $routes->post('cek_usulan', 'Landing::cek_usulan');
 
@@ -124,6 +124,7 @@ $routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview
 	$routes->post('save-keluarga', 'Dtsen\PembaruanKeluarga::saveKeluarga');
 	$routes->post('save-anggota', 'Dtsen\PembaruanKeluarga::saveAnggota');
 	$routes->post('delete-anggota', 'Dtsen\PembaruanKeluarga::deleteAnggota');
+	$routes->post('delete-keluarga', 'Dtsen\PembaruanKeluarga::deleteKeluarga');
 	$routes->post('save-rumah', 'Dtsen\PembaruanKeluarga::saveRumah');
 	$routes->post('save-aset', 'Dtsen\PembaruanKeluarga::saveAset');
 	$routes->post('save-foto', 'Dtsen\PembaruanKeluarga::saveFoto');
@@ -203,6 +204,15 @@ $routes->group('dtsen', [
 });
 
 // public CMS / admin
+$routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($routes) {
+	$routes->get('articles/data', 'ArticleController::data');
+	$routes->get('articles/get/(:num)', 'ArticleController::get/$1');
+	$routes->post('articles/store', 'ArticleController::store');
+	$routes->post('articles/update/(:num)', 'ArticleController::update/$1');
+	$routes->post('articles/delete/(:num)', 'ArticleController::delete/$1');
+});
+
+
 $routes->group('admin', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
 
 	// Migration Tool (Admin Only)
@@ -212,14 +222,9 @@ $routes->group('admin', ['filter' => ['authfilterdtks', 'globalview', 'menufilte
 	// Article Management
 	$routes->get('articles', 'Admin\ArticleController::index');
 	// di group admin (sudah ada filter auth)
-	$routes->get('articles/data', 'Admin\ArticleController::data');
-	$routes->get('articles/get/(:num)', 'Admin\ArticleController::get/$1'); // untuk edit (isi form)
 
 	$routes->get('articles/create', 'Admin\ArticleController::create');
-	$routes->post('articles/store', 'Admin\ArticleController::store');
 	$routes->get('articles/edit/(:num)', 'Admin\ArticleController::edit/$1');
-	$routes->post('articles/update/(:num)', 'Admin\ArticleController::update/$1');
-	$routes->delete('articles/delete/(:num)', 'Admin\ArticleController::delete/$1');
 
 	// TinyMCE image upload endpoint
 	$routes->post('articles/upload-image', 'Admin\ArticleController::uploadImage');

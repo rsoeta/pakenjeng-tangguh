@@ -12,46 +12,47 @@ use App\Filters\AdminFilter;
 use App\Filters\SchFilterKip;
 use App\Filters\TimeFilter;
 use App\Filters\MenuFilterDtks;
+use App\Filters\CsrfAudit;
+use App\Filters\AttachCsrfHeader;
 
 class Filters extends BaseConfig
 {
 	public $aliases = [
-		'csrf'     => CSRF::class,
-		'toolbar'  => DebugToolbar::class,
-		'honeypot' => Honeypot::class,
-		'cors'     => \App\Filters\Cors::class,
-		"authfilterdtks" => AuthFilterDtks::class,
-		"noauthfilterdtks" => NoauthFilterDtks::class,
-		'adminFilter' => AdminFilter::class,
-		'schfilterkip' => SchFilterKip::class,
-		'timeFilter' => TimeFilter::class,
-		'menufilterdtks' => MenuFilterDtks::class,
-		'globalview' => \App\Filters\GlobalViewDataFilter::class,
+		'csrf'            => CSRF::class,
+		'toolbar'         => DebugToolbar::class,
+		'honeypot'        => Honeypot::class,
+		'cors'            => \App\Filters\Cors::class,
+		'authfilterdtks'  => AuthFilterDtks::class,
+		'noauthfilterdtks' => NoauthFilterDtks::class,
+		'adminFilter'     => AdminFilter::class,
+		'schfilterkip'    => SchFilterKip::class,
+		'timeFilter'      => TimeFilter::class,
+		'menufilterdtks'  => MenuFilterDtks::class,
+		'globalview'      => \App\Filters\GlobalViewDataFilter::class,
+		'csrf_audit'      => CsrfAudit::class,
+		'attach_csrf_hdr' => AttachCsrfHeader::class,
 	];
 
 	public $globals = [
 		'before' => [
-			'cors',
+			// NOTE:
+			// CSRF intentionally not applied globally here.
+			// Use 'csrf' in $filters below for specific routes if you prefer route-level protection.
 		],
 		'after'  => [
-			// empty
+			// attach CSRF header to every response (if CSRF enabled)
+			'attach_csrf_hdr'
 		],
 	];
 
-	public $methods = [];
+	// don't force CSRF on all POST methods
+	// public $methods = [ 'POST' => ['csrf'] ];
 
 	public $filters = [
 
-		/**
-		 * ⚠ ADMIN FILTER – hanya untuk modul yang memang harus admin
-		 * Tidak menimpa seluruh DTSEN, dan tidak memblok pemeriksaan dtsen.
-		 */
+		// Keep adminFilter and others as you had them (partial excerpt)
 		'adminFilter' => [
 			'before' => [
-
-				// ==============================
-				// Tetap dipertahankan seperti asli
-				// ==============================
 				'verivali',
 				'verivali/*',
 				'users',
@@ -63,35 +64,40 @@ class Filters extends BaseConfig
 				'formview',
 				'updateDataUser',
 				'expKip',
-
-				// ==============================
-				// FIXED:
-				// Hapus 'dtsen/pemeriksaan' dari adminFilter
-				// karena modul ini dikendalikan MenuFilterDtks,
-				// supaya operator (role 3) tetap bisa masuk
-				// sementara viewer (role >3) ditolak.
-				// ==============================
-				// 'dtsen/pemeriksaan',  <-- DIHAPUS (fix)
-
-				// ==============================
-				// Modul DTSEN yang memang admin only
-				// ==============================
 				'dtsen-monitoring',
 				'dtsen-monitoring/*',
-				'admin/articles',
-				'admin/articles/*',
-				// 'dtsen-reminder',
-				// 'dtsen-reminder/*',
-				// 'pengaturan_wa',
-				// 'laporan-dtsen',
-				// 'laporan-dtsen/*',
-				// 'dtsen/reminder-monitor',
-				// 'dtsen/reminder-monitor/*',
-				// 'admin/migrate',
-				// 'admin/download-db',
 			]
 		],
 
-		// (schfilterkip tetap dibiarkan disabled sesuai file aslinya)
+		// CSRF: route-level protection
+		'csrf' => [
+			'before' => [
+				// ROUTE LIST: sensitive endpoints that should keep CSRF ON
+				'login',
+				'register',
+				'lupa-password',
+				'requestReset',
+				'reset-password',
+				'admin/articles/store',
+				'admin/articles/update/*',
+				'admin/articles/delete/*',
+				'pengaturan_wa/save_api',
+				'pengaturan_wa/save_template',
+				'pengaturan_wa/save_fonnte',
+				'settings',
+				'update_web_admin',
+				'update_web_lembaga',
+				// tambahkan route lain yang benar-benar perlu proteksi form tradisional
+			]
+		],
+
+		// Audit filter: catat POST tanpa token atau kegagalan
+		'csrf_audit' => [
+			'before' => [
+				// opsional: aktifkan audit di seluruh POST untuk startup (bisa dihapus setelah stabil)
+				// gunakan pola di bawah jika ingin aktifkan pencatatan untuk semua POST routes:
+				// '*' atau specific groups
+			]
+		],
 	];
 }

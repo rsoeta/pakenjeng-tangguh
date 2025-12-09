@@ -40,30 +40,6 @@ class WaService
         $this->fonnteToken  = trim($this->fonnteToken ?? '');
     }
 
-    // public function sendText(string $to, string $message): array
-    // {
-    //     $no = $this->normalizeNumber($to);
-
-    //     // Try alatwa first
-    //     if ($this->alatwaApiKey && $this->alatwaDevice && $this->alatwaSender) {
-    //         $alatwa = $this->sendViaAlatwa($no, $message);
-    //         if ($alatwa['status'] === true) {
-    //             return ['status' => true, 'provider' => 'alatwa', 'raw' => $alatwa];
-    //         }
-    //     }
-
-    //     // Fallback to Fonnte
-    //     if ($this->fonnteToken) {
-    //         $fonnte = $this->sendViaFonnte($no, $message);
-    //         if ($fonnte['status'] === true) {
-    //             return ['status' => true, 'provider' => 'fonnte', 'raw' => $fonnte];
-    //         }
-    //         return ['status' => false, 'provider' => 'fonnte', 'error' => $fonnte];
-    //     }
-
-    //     return ['status' => false, 'provider' => 'none', 'error' => 'No valid provider'];
-    // }
-
     public function sendText(string $number, string $message): array
     {
         return $this->sendViaFonnte($number, $message);
@@ -153,11 +129,21 @@ class WaService
         }
     }
 
-    protected function normalizeNumber(string $n): string
+    public function normalizeNumber(string $n): string
     {
         $n = trim($n);
-        if (preg_match('/^0(\d+)$/', $n, $m)) return '62' . $m[1];
-        if (strpos($n, '+') === 0) return substr($n, 1);
+
+        // 0812xxxx → 62812xxxx
+        if (preg_match('/^0(\d+)$/', $n, $m)) {
+            return '62' . $m[1];
+        }
+
+        // +62812xxxx → 62812xxxx
+        if (strpos($n, '+') === 0) {
+            return substr($n, 1);
+        }
+
+        // Sudah format internasional
         return $n;
     }
 }

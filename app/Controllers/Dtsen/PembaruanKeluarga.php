@@ -166,7 +166,7 @@ class PembaruanKeluarga extends BaseController
 
                 $data = [
                     'title'     => 'Detail Pembaruan Keluarga',
-                    'namaApp'   => 'SINDEN',
+                    'namaApp'   => nameApp(),
                     'user'      => session()->get(),
                     'kkData'    => $kkData,
                     'rtData'    => $rtData,
@@ -225,7 +225,7 @@ class PembaruanKeluarga extends BaseController
 
             $data = [
                 'title'     => 'Detail Pembaruan Keluarga',
-                'namaApp'   => 'SINDEN',
+                'namaApp'   => nameApp(),
                 'user'      => session()->get(),
                 'kkData'    => $kkData,
                 'rtData'    => $rtData,
@@ -524,6 +524,35 @@ class PembaruanKeluarga extends BaseController
         } catch (\Throwable $e) {
             log_message('error', '[deleteAnggota] ' . $e->getMessage());
             return $this->response->setJSON(['status' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function deleteKeluarga()
+    {
+        $id = $this->request->getJSON()->id ?? null;
+
+        if (!$id) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'ID tidak diberikan.'
+            ]);
+        }
+
+        try {
+            // Hard delete
+            $this->db->table('dtsen_usulan_art')->where('dtsen_usulan_id', $id)->delete();
+            $this->db->table('dtsen_usulan')->where('id', $id)->delete();
+
+            return $this->response->setJSON([
+                'status' => true,
+                'message' => 'Usulan berhasil dihapus permanen.'
+            ]);
+        } catch (\Throwable $e) {
+
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Gagal menghapus: ' . $e->getMessage()
+            ]);
         }
     }
 
@@ -827,6 +856,7 @@ class PembaruanKeluarga extends BaseController
      * - Merge payload lama + baru (tidak overwrite penuh)
      * - Menyimpan file foto (ktp_kk, depan, dalam)
      * - Menyimpan koordinat geo (lat, lng)
+     * - Kirim WhatsApp ke Admin
      */
     public function saveFoto()
     {
@@ -1037,8 +1067,6 @@ class PembaruanKeluarga extends BaseController
                 }
             }
 
-
-
             // 📍 GeoTag (merge data baru dengan lama)
             $geoGabungan = $payloadLama['geo'];
             $geoGabungan['lat'] = $this->request->getPost('latitude')  ?? $geoGabungan['lat'] ?? null;
@@ -1062,47 +1090,111 @@ class PembaruanKeluarga extends BaseController
             // 📲 Kirim Notifikasi WhatsApp ke Admin
             // ===============================================
 
-            // =============================================================
-            // 📌 1. Ambil dtsen_kk_id dari dtsen_usulan
-            // =============================================================
+            // 1. Ambil dtsen_kk_id dari dtsen_usulan
             $usulanRow = $this->db->table('dtsen_usulan')
-                ->select('dtsen_kk_id')
+                ->select('dtsen_kk_id, created_by')
                 ->where('id', $usulanId)
                 ->get()
                 ->getRowArray();
 
             $kkId = $usulanRow['dtsen_kk_id'] ?? null;
+            $creatorUserId = $usulanRow['created_by'] ?? null;
 
-            // =============================================================
-            // 📌 2. Ambil data KK sebenarnya berdasarkan dtsen_kk_id
-            // =============================================================
+            // 2. Ambil data KK
             $kk = $this->db->table('dtsen_kk')
                 ->select('no_kk, kepala_keluarga, alamat')
                 ->where('id_kk', $kkId)
                 ->get()
                 ->getRowArray();
 
-            // fallback jika null
-            $namaKK = $kk['kepala_keluarga'] ?? 'Tidak ditemukan';
-            $noKK   = $kk['no_kk'] ?? '-';
+            $namaKK   = $kk['kepala_keluarga'] ?? '-';
+            $noKK     = $kk['no_kk'] ?? '-';
             $alamatKK = $kk['alamat'] ?? '-';
 
-            // 2. Buat pesan WA
-            $pesan = "📷 *Update Foto Rumah Berhasil*\n\n"
-                . "Nama: *{$namaKK}*\n"
-                . "No. KK: *{$noKK}*\n"
-                . "Alamat: *{$kk['alamat']}*\n\n"
-                . "✔️ Semua foto + Geotag berhasil dikirim oleh petugas.";
+            // 3. Ambil kode_desa petugas (login)
+            $kodeDesaPetugas = session()->get('kode_desa');
 
-            // 3. Nomor admin penerima
-            $adminNumber = "6285708098155"; // ganti dengan nomor admin
+            // 4. Ambil semua admin (role_id=3) dalam desa yang sama
+            $admins = $this->db->table('dtks_users')
+                ->select('fullname, nope')
+                ->where('role_id', 3)
+                ->where('kode_desa', $kodeDesaPetugas)
+                ->get()
+                ->getResultArray();
 
-            // 4. Kirim
-            try {
+            // Jika tidak ada admin → log dan skip
+            if (empty($admins)) {
+                log_message('warning', "[WA Foto] Tidak ditemukan admin role_id=3 pada desa {$kodeDesaPetugas}");
+            } else {
+
+                // === Format tanggal Indonesia ===
+                $hari = [
+                    'Sunday'    => 'Minggu',
+                    'Monday'    => 'Senin',
+                    'Tuesday'   => 'Selasa',
+                    'Wednesday' => 'Rabu',
+                    'Thursday'  => 'Kamis',
+                    'Friday'    => 'Jumat',
+                    'Saturday'  => 'Sabtu'
+                ];
+
+                $bulan = [
+                    1 => 'Januari',
+                    2 => 'Februari',
+                    3 => 'Maret',
+                    4 => 'April',
+                    5 => 'Mei',
+                    6 => 'Juni',
+                    7 => 'Juli',
+                    8 => 'Agustus',
+                    9 => 'September',
+                    10 => 'Oktober',
+                    11 => 'November',
+                    12 => 'Desember'
+                ];
+
+                $now  = date('Y-m-d H:i:s');
+                $hariIndo = $hari[date('l', strtotime($now))];
+                $tgl      = date('d', strtotime($now));
+                $bln      = $bulan[intval(date('m', strtotime($now)))];
+                $thn      = date('Y', strtotime($now));
+                $jam      = date('H:i', strtotime($now)) . " WIB";
+
+                $tanggalLengkap = "{$hariIndo}, {$tgl} {$bln} {$thn}, {$jam}";
+
+                // === Format Pesan WA Final ===
+                $pesan =
+                    "*== SINDEN System ==*\n"
+                    . "*📷 Update Foto Rumah Berhasil*\n\n"
+                    . "Nama: *{$namaKK}*\n"
+                    . "No. KK: *{$noKK}*\n"
+                    . "Alamat: {$alamatKK}\n"
+                    . "Waktu: {$tanggalLengkap}\n\n"
+                    . "✔ Semua foto + Geotag berhasil dikirim oleh petugas.";
+
+                // === Kirim WA ke setiap admin (role_id = 3) ===
                 $wa = new \App\Libraries\WaService();
-                $wa->sendText($adminNumber, $pesan);
-            } catch (\Throwable $e) {
-                log_message('error', 'Gagal kirim WA admin: ' . $e->getMessage());
+
+                foreach ($admins as $admin) {
+
+                    if (empty($admin['nope'])) {
+                        log_message('warning', "[WA Foto] Admin {$admin['fullname']} tidak memiliki nomor WhatsApp");
+                        continue;
+                    }
+
+                    // Normalisasi nomor WA
+                    $nomorWA = preg_replace('/[^0-9]/', '', $admin['nope']);
+                    if (str_starts_with($nomorWA, '0')) {
+                        $nomorWA = '62' . substr($nomorWA, 1);
+                    }
+
+                    try {
+                        $send = $wa->sendText($nomorWA, $pesan);
+                        log_message('info', "[WA Foto] Pesan dikirim ke admin {$admin['fullname']} ({$nomorWA}) | " . json_encode($send));
+                    } catch (\Throwable $e) {
+                        log_message('error', "[WA Foto] ERROR kirim WA ke {$nomorWA}: " . $e->getMessage());
+                    }
+                }
             }
 
             return $this->response->setJSON([
@@ -1119,6 +1211,10 @@ class PembaruanKeluarga extends BaseController
         }
     }
 
+    /**
+     * ♻️ Simpan Data Seluruh ke Database Utama (dtsen_kk, dtsen_art, dtsen_se)
+     * - fitur baru, kirim pesan ke petugas entri (users.nope) sesuai data hasil pekerjaannya
+     */
     public function apply()
     {
         $this->db->transBegin();
@@ -1126,7 +1222,7 @@ class PembaruanKeluarga extends BaseController
             $usulan_id = $this->request->getPost('usulan_id');
             $userId    = session()->get('id') ?? 'system';
 
-            // 🔍 Ambil data usulan utama
+            // 🔍 Ambil data usulan utama (simpan status lama untuk pengecekan)
             $usulan = $this->db->table('dtsen_usulan')
                 ->where('id', $usulan_id)
                 ->get()
@@ -1135,6 +1231,8 @@ class PembaruanKeluarga extends BaseController
             if (!$usulan) {
                 throw new \Exception('Data usulan tidak ditemukan.');
             }
+
+            $statusSebelumnya = $usulan['status'] ?? null;
 
             $payload = json_decode($usulan['payload'] ?? '{}', true);
             if (json_last_error() !== JSON_ERROR_NONE) {
@@ -1204,6 +1302,7 @@ class PembaruanKeluarga extends BaseController
                 ->getResultArray();
 
             if (!empty($anggotaUsulan)) {
+                // hapus dulu anggota lama, lalu insert yang baru
                 $this->db->table('dtsen_art')->where('id_kk', $idKk)->delete();
 
                 foreach ($anggotaUsulan as $art) {
@@ -1249,14 +1348,14 @@ class PembaruanKeluarga extends BaseController
                 $this->db->table('dtsen_se')
                     ->where('id_kk', $idKk)
                     ->update([
-                        'kepemilikan_aset'       => $kepemilikan_aset,
-                        'kepemilikan_bantuan'    => $kepemilikan_bantuan,
+                        'kepemilikan_aset'         => $kepemilikan_aset,
+                        'kepemilikan_bantuan'      => $kepemilikan_bantuan,
                         'rata_penghasilan_bulanan' => $payload['penghasilan'] ?? null,
                         'rata_pengeluaran_bulanan' => $payload['pengeluaran'] ?? null,
-                        'latitude'               => $geo['lat'] ?? null,
-                        'longitude'              => $geo['lng'] ?? null,
-                        'updated_at'             => date('Y-m-d H:i:s'),
-                        'updated_by'             => $userId
+                        'latitude'                 => $geo['lat'] ?? null,
+                        'longitude'                => $geo['lng'] ?? null,
+                        'updated_at'               => date('Y-m-d H:i:s'),
+                        'updated_by'               => $userId
                     ]);
             } else {
                 $this->db->table('dtsen_se')->insert([
@@ -1305,9 +1404,158 @@ class PembaruanKeluarga extends BaseController
             ]);
 
             // =======================================================
-
+            // Commit transaction dulu — setelah commit, kirim WhatsApp
+            // =======================================================
             $this->db->transCommit();
             log_message('info', "✅ Usulan ID {$usulan_id} diterapkan oleh {$userId}. Reminder dibuat.");
+
+            // =======================================================
+            // 🔔 Kirim WhatsApp ke Petugas Entri (dtks_users.nope)
+            // Hanya kirim jika status sebelumnya bukan 'diverifikasi'
+            // =======================================================
+            try {
+                if (($statusSebelumnya ?? '') !== 'diverifikasi') {
+
+                    $creatorNik = $usulan['created_by'] ?? null;
+
+                    if (!empty($creatorNik)) {
+
+                        // 1) Coba cari berdasarkan NIK
+                        $petugas = $this->db->table('dtks_users')
+                            ->select('id, fullname, nope, nik')
+                            ->where('nik', $creatorNik)
+                            ->get()
+                            ->getRowArray();
+
+                        // 2) Jika tidak ketemu → fallback cari berdasarkan user_id
+                        if (!$petugas) {
+                            $petugas = $this->db->table('dtks_users')
+                                ->select('id, fullname, nope, nik')
+                                ->where('id', $creatorNik)
+                                ->get()
+                                ->getRowArray();
+
+                            if ($petugas) {
+                                log_message('info', "[WA APPLY] Petugas ditemukan via fallback user_id={$creatorNik}");
+                            }
+                        }
+
+                        if (!$petugas) {
+                            log_message('warning', "[WA APPLY] Petugas tidak ditemukan. created_by={$creatorNik}");
+                        }
+
+                        if ($petugas && !empty($petugas['nope'])) {
+
+                            // Normalisasi nomor HP → 0812 menjadi 62812 dst
+                            $waService = new \App\Libraries\WaService();
+                            // $nomorWA  = $waService->normalizeNumber($petugas['nope']);
+                            $nomorWA = preg_replace('/[^0-9]/', '', $petugas['nope']); // hapus semua non-digit
+
+                            if (str_starts_with($nomorWA, '0')) {
+                                $nomorWA = '62' . substr($nomorWA, 1);
+                            }
+
+                            if (str_starts_with($nomorWA, '620')) {
+                                $nomorWA = '62' . substr($nomorWA, 3);
+                            }
+
+                            // Ambil info KK untuk isi pesan
+                            $kkInfo = $this->db->table('dtsen_kk')
+                                ->select('no_kk, kepala_keluarga, alamat, id_rt')
+                                ->where('id_kk', $idKk)
+                                ->get()
+                                ->getRowArray();
+
+                            // Ambil RT/RW
+                            $rtText = '-';
+                            $rwText = '-';
+                            if (!empty($kkInfo['id_rt'])) {
+                                $rtRow = $this->db->table('dtsen_rt')
+                                    ->select('rt,rw')
+                                    ->where('id_rt', $kkInfo['id_rt'])
+                                    ->get()
+                                    ->getRowArray();
+
+                                if ($rtRow) {
+                                    $rtText = $rtRow['rt'] ?? '-';
+                                    $rwText = $rtRow['rw'] ?? '-';
+                                }
+                            }
+
+                            // Format tanggal Indonesia lengkap
+                            $hari = [
+                                'Sunday' => 'Minggu',
+                                'Monday' => 'Senin',
+                                'Tuesday' => 'Selasa',
+                                'Wednesday' => 'Rabu',
+                                'Thursday' => 'Kamis',
+                                'Friday' => 'Jumat',
+                                'Saturday' => 'Sabtu'
+                            ];
+
+                            $bulan = [
+                                1 => 'Januari',
+                                2 => 'Februari',
+                                3 => 'Maret',
+                                4 => 'April',
+                                5 => 'Mei',
+                                6 => 'Juni',
+                                7 => 'Juli',
+                                8 => 'Agustus',
+                                9 => 'September',
+                                10 => 'Oktober',
+                                11 => 'November',
+                                12 => 'Desember'
+                            ];
+
+                            $now = date('Y-m-d H:i:s');
+                            $hariIndo = $hari[date('l', strtotime($now))];
+                            $tgl = date('d', strtotime($now));
+                            $bln = $bulan[intval(date('m', strtotime($now)))];
+                            $thn = date('Y', strtotime($now));
+                            $jam = date('H:i', strtotime($now)) . " WIB";
+
+                            $tanggalLengkap = "{$hariIndo}, {$tgl} {$bln} {$thn}, {$jam}";
+
+                            // ===============================
+                            // 📌 Format Pesan WA (Final)
+                            // ===============================
+                            $msg  = "*== SINDEN System ==*\n";
+                            $msg .= "📌 *Pemberitahuan Validasi Groundcheck*\n";
+                            $msg .= "Usulan No. {$usulan_id} telah selesai divalidasi.\n\n";
+                            $msg .= "👤 Kepala Keluarga: *" . ($kkInfo['kepala_keluarga'] ?? '-') . "*\n";
+                            $msg .= "🏠 No. KK: *" . ($kkInfo['no_kk'] ?? '-') . "*\n";
+                            $msg .= "📍 Alamat: " . ($kkInfo['alamat'] ?? '-') . " RT {$rtText} RW {$rwText}\n";
+                            $msg .= "🗓 Waktu: {$tanggalLengkap}\n\n";
+                            $msg .= "Terima kasih atas kerja baiknya.";
+
+                            // ===============================
+                            // 📤 Kirim WA via WaService
+                            // ===============================
+                            try {
+                                // $send = $waService->sendText($nomorWA, $msg);
+                                $send = $waService->sendText($nomorWA, $msg);
+
+                                if (!is_array($send) || empty($send['status']) || $send['status'] != 'success') {
+                                    log_message('error', '[WA APPLY] Provider WA error: ' . json_encode($send));
+                                }
+
+                                log_message('info', '[WA APPLY] Pesan terkirim ke ' . $nomorWA . ' | ' . json_encode($send));
+                            } catch (\Throwable $e) {
+                                log_message('error', '[WA APPLY] ERROR mengirim WA: ' . $e->getMessage());
+                            }
+                        } else {
+                            log_message('warning', "[WA APPLY] Nomor WA tidak ditemukan di dtks_users untuk NIK: {$creatorNik}");
+                        }
+                    } else {
+                        log_message('warning', "[WA APPLY] created_by kosong, WA tidak dapat dikirim.");
+                    }
+                } else {
+                    log_message('info', "[WA APPLY] Status sebelumnya sudah diverifikasi — WA tidak dikirim ulang.");
+                }
+            } catch (\Throwable $e) {
+                log_message('error', "[WA APPLY OUTER] {$e->getMessage()}");
+            }
 
             return $this->response->setJSON([
                 'status'   => 'success',
@@ -1721,7 +1969,7 @@ class PembaruanKeluarga extends BaseController
 
             $data = [
                 'title'       => 'Tambah Pembaruan Keluarga Baru',
-                'namaApp'     => 'SINDEN',
+                'namaApp'     => nameApp(),
                 'user'        => $session->get(),
                 'kkData'      => [], // kosong karena belum ada keluarga
                 'rtData'      => [],

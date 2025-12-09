@@ -1,105 +1,98 @@
 // assets/js/admin/articles.table.js
-$(function () {
 
-    // =============================
-    // INIT DATATABLE (MAIN TABLE)
-    // =============================
-    const tableArticles = $('#tableArticles').DataTable({
+$(function () {
+    const table = $('#tableArticles').DataTable({
         ajax: {
             url: '/admin/articles/data',
             type: 'GET',
-            dataSrc: json => json.data || []
+            dataSrc: res => res.data || []
         },
         columns: [
             { data: 'no', width: '40px' },
-            { 
-                data: 'image', 
-                width: '70px',
-                render: img => img ? `<img src="${img}" class="img-thumbnail" style="height:55px;width:auto;">` : '-'
-            },
+            { data: 'image', width: '70px' },
             { data: 'title' },
-            { 
-                data: 'status', 
-                width: '120px',
-                render: s => `<span class="badge bg-${s === 'publish' ? 'success' : 'secondary'}">${s.toUpperCase()}</span>`
-            },
-            { 
-                data: 'created_at', 
-                width: '140px',
-                render: d => d ? new Date(d).toLocaleString('id-ID') : '-' 
-            },
-            { data: 'actions', orderable: false, searchable: false, width: '120px' }
+            { data: 'status', width: '120px' },
+            { data: 'created_at', width: '130px' },
+            { data: 'actions', width: '120px', orderable:false }
         ],
-        createdRow: (row, data) => $(row).find('td').css('vertical-align','middle'),
-        order: [[4, 'desc']],
-        processing: true,
         responsive: true,
-        language: { emptyTable: "Belum ada artikel." }
+        processing: true
     });
 
-    // =============================
-    // RELOAD BUTTON
-    // =============================
-    $('#btnReloadArticles').on('click', function () {
-        tableArticles.ajax.reload(null, false);
+    // reload event
+    $('#btnReloadArticles').on('click', () =>{
+        table.ajax.reload(null,false);
     });
 
-    // =============================
-    // EDIT HANDLER
-    // =============================
+    // open edit form
     $(document).on('click', '.btnEditArticle', function () {
         const id = $(this).data('id');
-        if (!id) return;
 
         $.getJSON('/admin/articles/get/' + id)
             .done(res => {
                 if (!res.success) {
-                    return Swal.fire('Gagal', res.message, 'error');
+                    Swal.fire('Error', res.message, 'error');
+                    return;
                 }
 
-                const art = res.data;
+                const a = res.data;
 
-                $('#edit_id').val(art.id);
-                $('#edit_title').val(art.title);
-                $('#edit_status').val(art.status);
+                $('#edit_id').val(a.id);
+                $('#edit_title').val(a.title);
+                $('#edit_status').val(a.status);
+                tinymce.get('articleEditEditor').setContent(a.description || '');
 
-                if (tinymce.get('articleEditEditor')) {
-                    tinymce.get('articleEditEditor').setContent(art.description ?? '');
-                }
-
+                $('#tab-edit').removeClass('d-none');
                 $('a[href="#pane-edit"]').tab('show');
-            })
-            .fail(() => Swal.fire('Error', 'Tidak dapat mengambil data artikel.', 'error'));
+            });
     });
 
-    // =============================
-    // DELETE HANDLER
-    // =============================
-    $(document).on('click', '.btnDeleteArticle', function () {
-        const id = $(this).data('id');
-        if (!id) return;
+    // delete
+    $(document).on("click", ".btnDeleteArticle", function () {
+        const id = $(this).data("id");
 
         Swal.fire({
-            title: 'Hapus Artikel?',
-            text: 'Data akan dihapus permanen.',
-            icon: 'warning',
+            title: "Hapus Artikel?",
+            text: "Artikel akan dihapus permanen.",
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonText: 'Hapus',
-            cancelButtonText: 'Batal'
-        }).then(res => {
-            if (!res.isConfirmed) return;
+            confirmButtonText: "Hapus",
+            cancelButtonText: "Batal",
+        }).then((result) => {
+            if (!result.isConfirmed) return;
 
-            $.post('/admin/articles/delete/' + id)
-                .done(r => {
-                    if (r.success) {
-                        Swal.fire('Terhapus', r.message, 'success');
-                        tableArticles.ajax.reload(null, false);
-                    } else {
-                        Swal.fire('Gagal', r.message, 'error');
+            const csrfName  = $('meta[name="csrf-token-name"]').attr("content");
+            const csrfValue = $('meta[name="csrf-token-value"]').attr("content");
+
+            let payload = {};
+            payload[csrfName] = csrfValue;
+
+            $.ajax({
+                url: "/admin/articles/delete/" + id,
+                type: "POST",
+                data: payload,
+                success: function (res, status, xhr) {
+
+                    // refresh token baru
+                    let newToken = xhr.getResponseHeader("X-CSRF-TOKEN");
+                    if (newToken) {
+                        $('meta[name="csrf-token-value"]').attr("content", newToken);
                     }
-                })
-                .fail(() => Swal.fire('Error', 'Gagal menghapus artikel.', 'error'));
+
+                    if (res.success) {
+                        Swal.fire("Terhapus", res.message, "success");
+                        $("#tableArticles").DataTable().ajax.reload(null, false);
+                    } else {
+                        Swal.fire("Gagal", res.message, "error");
+                    }
+                },
+                error: function (xhr) {
+                    console.error("Delete error:", xhr);
+                    Swal.fire("Error", "Gagal menghapus artikel.", "error");
+                }
+            });
         });
     });
+
 
 });

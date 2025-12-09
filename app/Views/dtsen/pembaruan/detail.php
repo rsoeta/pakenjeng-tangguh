@@ -27,7 +27,7 @@
                             <span class="badge bg-success mb-1 d-inline-block">Baru</span>
 
                         <?php elseif (!empty($usulan['status'])): ?>
-                            <span class="badge bg-primary mb-1 d-inline-block">Terverifikasi</span>
+                            <span class="badge bg-primary mb-1 d-inline-block">Tervalidasi</span>
                         <?php endif; ?>
 
                         <!-- BADGE DESIL -->
@@ -90,16 +90,12 @@
     </section>
 </div>
 
-<!-- Dependencies -->
-<script src="<?= base_url('assets/vendor/jquery/jquery.min.js') ?>"></script>
-<script src="<?= base_url('assets/vendor/select2/js/select2.full.min.js') ?>"></script>
-
 <!-- Variabel global -->
 <script>
     window.baseUrl = "<?= rtrim(base_url(), '/') ?>";
     const isTambahMode = "<?= $sumber === 'baru' ? 'true' : 'false' ?>";
     const payload = <?= json_encode($payload ?? []) ?>;
-    console.log('🚀 Payload dari PHP:', payload);
+    // console.log('🚀 Payload dari PHP:', payload);
 
     // Auto Uppercase
     document.addEventListener('input', function(e) {

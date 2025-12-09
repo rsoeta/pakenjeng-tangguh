@@ -28,25 +28,33 @@
     <div class="hero-content">
       <h1>SINDEN</h1>
       <p><?php echo titleApp() ?></p>
-      <a href="<?= base_url('login'); ?>" class="btn-primary">Buka SINDEN Sekarang</a>
+      <a href="<?= base_url('login'); ?>" class="btn-primary">Login</a>
     </div>
   </section>
 
   <section id="articles" class="cards">
-    <h2>Berita & Artikel Desa</h2>
+    <h2>Berita & Artikel</h2>
     <div class="card-grid">
+
       <?php if (count($articles) > 0): ?>
         <?php foreach ($articles as $article): ?>
           <div class="card">
+
             <img src="<?= base_url($article['image']); ?>" alt="<?= esc($article['title']); ?>">
+
             <h3><?= esc($article['title']); ?></h3>
-            <p><?= character_limiter(strip_tags($article['description']), 100); ?></p>
+
+            <p><?= esc($article['excerpt']); ?></p>
+
             <a href="<?= base_url('article/' . $article['slug']); ?>" class="read-more">Selengkapnya →</a>
+
           </div>
         <?php endforeach; ?>
+
       <?php else: ?>
         <p class="no-articles">Belum ada artikel yang dipublikasikan.</p>
       <?php endif; ?>
+
     </div>
   </section>
 

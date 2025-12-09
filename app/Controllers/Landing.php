@@ -9,16 +9,22 @@ use App\Models\ArticleModel;
 
 class Landing extends BaseController
 {
+	protected $WilayahModel;
+	protected $Usulan22Model;
+	protected $articleModel;
+
 	public function __construct()
 	{
 		$this->WilayahModel = new WilayahModel();
 		$this->Usulan22Model = new Usulan22Model();
+		$this->articleModel = new ArticleModel();
 	}
 
 	public function index()
 	{
 		$settingsModel = new SettingsModel();
 		$articleModel = new ArticleModel();
+		helper('text');
 
 		// Ambil data dari settings database
 		$background = $settingsModel->getSetting('background_image') ?? 'assets/uploads/backgrounds/landing.jpg';
@@ -37,7 +43,29 @@ class Landing extends BaseController
 		}
 
 		// Ambil artikel untuk tampil di landing
-		$articles = $articleModel->orderBy('created_at', 'DESC')->findAll(6);
+		// $articles = $articleModel->orderBy('created_at', 'DESC')->findAll(6);
+		$articles = $this->articleModel
+			->where('status', 'publish')
+			->orderBy('created_at', 'DESC')
+			->limit(6)
+			->findAll();
+
+		foreach ($articles as &$a) {
+
+			// pastikan path image sesuai base_url
+			$a['image'] = $a['image']
+				? 'uploads/articles/' . $a['image']
+				: 'assets/images/image_not_available.jpg';
+
+			// pastikan description tidak terlalu panjang
+			// $a['excerpt'] = character_limiter(strip_tags($a['description']), 100);
+			$excerpt = character_limiter(strip_tags($a['description']), 100);
+
+			// ganti &hellip; menjadi ...
+			$excerpt = str_replace(['&hellip;', '&#8230;'], '...', $excerpt);
+
+			$a['excerpt'] = $excerpt;
+		}
 
 		// Kirim data ke view
 		return view('landing', [
@@ -54,7 +82,7 @@ class Landing extends BaseController
 	public function article($slug)
 	{
 		$articleModel = new ArticleModel();
-		$article = $articlesModel->where('slug', $slug)->first();
+		$article = $articleModel->where('slug', $slug)->first();
 
 		if (!$article) {
 			throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
@@ -121,5 +149,40 @@ class Landing extends BaseController
 
 			echo json_encode($msg);
 		}
+	}
+
+	public function articleDetail($slug)
+	{
+		helper('text');
+
+		$article = $this->articleModel
+			->where('slug', $slug)
+			->where('status', 'publish')
+			->first();
+
+		if (!$article) {
+			throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Artikel tidak ditemukan.");
+		}
+
+		// Set image path
+		$article['image_url'] = $article['image']
+			? base_url('uploads/articles/' . $article['image'])
+			: base_url('assets/images/image_not_available.jpg');
+
+		// Tambahkan format tanggal
+		$article['published'] = date('d M Y H:i', strtotime($article['created_at']));
+
+		// Text excerpt untuk meta SEO
+		$article['excerpt'] = character_limiter(strip_tags($article['description']), 160);
+
+		$article['slug'];
+
+
+		return view('article_detail', [
+			'article' => $article,
+			'titleApp' => titleApp(),
+			'version' => versionApp(),
+			'footerText' => 'footerText()',
+		]);
 	}
 }

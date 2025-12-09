@@ -69,29 +69,6 @@ function openOffcanvas(title, url) {
         });
 }
 
-// ============================================================
-// 3. DATATABLE INIT (MODULAR)
-// ============================================================
-// function initART() {
-//     if (!$.fn.DataTable) return;
-
-//     if ($.fn.DataTable.isDataTable("#tableART")) {
-//         $("#tableART").DataTable().destroy();
-//     }
-
-//     $("#tableART").DataTable({
-//         responsive: true,
-//         pageLength: 50,
-//         lengthChange: false,
-//         ordering: true,
-//         autoWidth: false,
-//         language: {
-//             url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json"
-//         }
-//     });
-
-//     console.log("[ART-Table] Initialized");
-// }
 function initART(options = {}) {
     // Jika DataTables belum tersedia
     if (!$.fn.DataTable) return;

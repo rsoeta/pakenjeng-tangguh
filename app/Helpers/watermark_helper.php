@@ -86,7 +86,7 @@ function applyWatermarkPremium(string $imagePath, array $data)
     // 5. BUILD TEXT LINES
     // ============================================================
     $textLines = [
-        ['font' => $fontBold,    'text' => "== SINDEN SYSTEM =="],
+        ['font' => $fontBold,    'text' => "== SINDEN System =="],
         ['font' => $fontRegular, 'text' => "KK: {$data['no_kk']} • {$data['kepala']}"],
         ['font' => $fontRegular, 'text' => "Petugas: {$data['petugas']} • {$tanggalIndo}"],
         ['font' => $fontRegular, 'text' => "Lokasi: {$data['latitude']}, {$data['longitude']} • Validated"],

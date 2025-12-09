@@ -11,10 +11,6 @@
     }
 </style>
 
-<script src="<?= base_url('assets/js/tinymce/tinymce.min.js'); ?>"></script>
-<script src="<?= base_url('assets/js/admin/articles.table.js'); ?>"></script>
-
-
 <div class="content-wrapper mt-0">
 
     <!-- HEADER -->
@@ -93,30 +89,44 @@
                                 <h5>Tulis Artikel Baru</h5>
                                 <hr>
 
-                                <form method="post" action="<?= base_url('/admin/articles/store') ?>">
+                                <form method="post" action="<?= base_url('/admin/articles/store') ?>" enctype="multipart/form-data">
+                                    <?= csrf_field() ?>
+
+                                    <!-- Judul -->
                                     <div class="mb-3">
                                         <label class="form-label">Judul Artikel</label>
-                                        <input class="form-control" name="title" required placeholder="Judul artikel...">
+                                        <input type="text" class="form-control" name="title" placeholder="Judul artikel..." required>
                                     </div>
 
+                                    <!-- Status -->
                                     <div class="mb-3">
                                         <label class="form-label">Status</label>
-                                        <select name="status" class="form-select">
+                                        <select class="form-select" name="status">
                                             <option value="draft">Draft</option>
                                             <option value="publish">Publish</option>
                                         </select>
                                     </div>
 
+                                    <!-- Gambar -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Gambar Utama Artikel</label>
+                                        <input type="file" class="form-control" name="image" accept="image/*">
+                                        <small class="text-muted">Opsional. Jika disertakan akan muncul sebagai thumbnail.</small>
+                                    </div>
+
+                                    <!-- Konten -->
                                     <div class="mb-3">
                                         <label class="form-label">Isi Artikel</label>
                                         <textarea id="articleCreateEditor" name="description"></textarea>
                                     </div>
 
+                                    <!-- Submit -->
                                     <div class="text-end">
                                         <button type="submit" class="btn btn-success">
                                             <i class="fas fa-save"></i> Simpan Artikel
                                         </button>
                                     </div>
+
                                 </form>
                             </div>
 
@@ -127,7 +137,9 @@
                                 <h5>Ubah Artikel</h5>
                                 <hr>
 
-                                <form id="editArticleForm" method="post" action="#">
+                                <form id="editArticleForm" method="post" enctype="multipart/form-data" onsubmit="return false;">
+                                    <?= csrf_field() ?>
+
                                     <input type="hidden" name="id" id="edit_id">
 
                                     <div class="mb-3">
@@ -143,6 +155,20 @@
                                         </select>
                                     </div>
 
+                                    <!-- ========================== -->
+                                    <!-- 🖼 PREVIEW GAMBAR + INPUT  -->
+                                    <!-- ========================== -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Preview Gambar</label><br>
+                                        <img id="edit_image_preview" src="/assets/images/image_not_available.jpg"
+                                            style="width:120px;border-radius:6px;border:1px solid #ccc;">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Gambar Artikel (opsional)</label>
+                                        <input type="file" class="form-control" id="edit_image" name="image" accept="image/*">
+                                    </div>
+
                                     <div class="mb-3">
                                         <label class="form-label">Isi Artikel</label>
                                         <textarea id="articleEditEditor" name="description"></textarea>
@@ -154,6 +180,7 @@
                                         </button>
                                     </div>
                                 </form>
+
                             </div>
 
                             <!-- =======================================================================
@@ -174,6 +201,11 @@
     </section>
 </div>
 
+<script src="<?= base_url('assets/js/tinymce/tinymce.min.js'); ?>"></script>
+<script src="<?= base_url('assets/js/admin/articles.table.js') ?>"></script>
+<script src="<?= base_url('assets/js/admin/articles.form.js') ?>"></script>
+<script src="<?= base_url('assets/js/admin/articles.create.js'); ?>"></script>
+
 <!-- TinyMCE INITIALIZER -->
 <script>
     function initTiny(selector) {
@@ -184,55 +216,53 @@
         tinymce.init({
             selector: selector,
             plugins: 'image link lists table code',
-            height: 350,
+            height: 550,
             toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code',
             images_upload_url: '<?= base_url("admin/articles/upload-image") ?>',
             automatic_uploads: true,
             relative_urls: false,
             remove_script_host: false,
             images_upload_handler: function(blobInfo, success, failure) {
+
+                const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
+                const csrfValue = document.querySelector('meta[name="csrf-token-value"]').content;
+
                 let formData = new FormData();
                 formData.append('file', blobInfo.blob(), blobInfo.filename());
+                formData.append(csrfName, csrfValue); // TOKEN HARUS DIKIRIM
 
-                fetch('<?= base_url("admin/articles/upload-image") ?>', {
+                fetch('/admin/articles/upload-image', {
                         method: 'POST',
                         body: formData
                     })
                     .then(r => r.json())
-                    .then(json => json.location ? success(json.location) : failure("Upload gagal"))
+                    .then(json => {
+                        if (json.location) {
+                            success(json.location);
+                        } else {
+                            failure("Upload gagal");
+                        }
+                    })
                     .catch(err => failure("Upload error: " + err));
             }
+
         });
     }
 
     initTiny('#articleCreateEditor');
     initTiny('#articleEditEditor');
 
-    $('#editArticleForm').on('submit', function(e) {
-        e.preventDefault();
-        const id = $('#edit_id').val();
-        const payload = $(this).serialize(); // plus description from tinymce if needed
-        payload.description = tinymce.get('articleEditEditor').getContent();
-
-        $.post('/admin/articles/update/' + id, payload)
-            .done(function(res) {
-                if (res.success) {
-                    Swal.fire('Berhasil', res.message, 'success');
-                    $('#tab-list').trigger('click');
-                    $('#tab-edit').addClass('d-none'); // hide edit tab if desired
-                    $('#tableArticles').DataTable().ajax.reload(null, false);
-                } else {
-                    Swal.fire('Gagal', res.message, 'error');
-                }
-            })
-            .fail(function() {
-                Swal.fire('Error', 'Gagal memperbarui artikel.', 'error');
-            });
-    });
-
     render: img => img ?
         `<img src="${img}" class="article-thumb">` :
         '<span class="text-muted">Tidak ada</span>'
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+    }
 </script>
 
 <?= $this->endSection(); ?>

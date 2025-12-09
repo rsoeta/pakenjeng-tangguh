@@ -705,7 +705,7 @@ class Auth extends BaseController
 
             $fullname = ucwords(strtolower($user['fullname'])); // kapital per kata
 
-            $messageWA = "*SINDEN System*\n\n"
+            $messageWA = "*== SINDEN System ==*\n\n"
                 . "Halo *{$fullname}*,\n"
                 . "Admin desa telah mengirimkan link reset password untuk akun Anda.\n"
                 . "Silakan cek email Anda: *{$user['email']}*.\n\n"

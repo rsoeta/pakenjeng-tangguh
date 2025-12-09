@@ -301,7 +301,7 @@
             responsive: true,
             pageLength: 10,
             language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
+                url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
             },
             createdRow: row => $(row).find('td').css('text-align', 'left'),
             headerCallback: thead => $(thead).find('th').css('text-align', 'center')
@@ -403,11 +403,16 @@
                     data: 'id',
                     title: 'Aksi',
                     orderable: false,
-                    render: id => `
+                    render: function(id, type, row, meta) {
+                        return `
                         <a href="/pembaruan-keluarga/lanjutkan/${id}" class="btn btn-warning btn-sm">
                             <i class="fas fa-edit"></i> Lanjutkan
                         </a>
-                    `
+                        <button class="btn btn-danger btn-sm btnDeleteUsulan" data-id="${row.id}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                `;
+                    }
                 }
             ],
             responsive: true,
@@ -449,7 +454,7 @@
                 },
                 {
                     data: 'status',
-                    render: s => `<span class="badge bg-info">SUBMITTED</span>`
+                    render: () => `<span class="badge bg-info">SUBMITTED</span>`
                 },
                 {
                     data: 'updated_at',
@@ -459,19 +464,58 @@
                     data: 'created_by_name',
                     defaultContent: '-'
                 },
+
+                // PERBAIKAN DI SINI
                 {
                     data: 'id',
-                    render: id => `
-                <a href="/pembaruan-keluarga/lanjutkan/${id}" class="btn btn-success btn-sm">
-                    <i class="fas fa-eye"></i> Lihat
-                </a>
-            `
+                    render: function(id, type, row, meta) {
+                        return `
+                    <a href="/pembaruan-keluarga/lanjutkan/${id}" 
+                       class="btn btn-success btn-sm">
+                        <i class="fas fa-eye"></i> Lihat
+                    </a>
+                    <button class="btn btn-danger btn-sm btnDeleteUsulan" data-id="${row.id}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                `;
+                    }
                 }
             ],
             responsive: true,
-            pageLength: 10,
-            createdRow: row => $(row).find('td').css('text-align', 'left'),
-            headerCallback: thead => $(thead).find('th').css('text-align', 'center')
+            pageLength: 10
+        });
+
+        // ========================= 🔥 HAPUS USULAN KELUARGA =========================
+        $(document).on('click', '.btnDeleteUsulan', function() {
+            const id = $(this).data('id');
+
+            Swal.fire({
+                title: 'Hapus Usulan?',
+                text: 'Data usulan beserta ART-nya akan dihapus permanen.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Hapus Permanen'
+            }).then(res => {
+                if (!res.isConfirmed) return;
+
+                fetch('/pembaruan-keluarga/delete-keluarga', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id
+                        })
+                    })
+                    .then(r => r.json())
+                    .then(json => {
+                        Swal.fire(json.status ? 'Berhasil' : 'Gagal', json.message, json.status ? 'success' : 'error');
+
+                        // Reload kedua tabel
+                        tableDraftKeluarga?.ajax?.reload(null, false);
+                        tableSubmitted?.ajax?.reload(null, false);
+                    });
+            });
         });
 
         // 🔥 Reload submitted

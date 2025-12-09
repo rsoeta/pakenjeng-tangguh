@@ -140,6 +140,7 @@
     <?php endif; ?>
 
     <form action="/login" method="post">
+        <?= csrf_field() ?>
         <div class="mb-3">
             <input type="email" class="form-control" placeholder="Email" id="email" name="email" value="<?= set_value('email'); ?>" required>
         </div>

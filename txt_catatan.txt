@@ -1090,3 +1090,245 @@ ALTER TABLE `articles`
 | 1/3   | ≤4    | semua program role | ✔ benar |
 | lain  | ≤4    | PBI saja           | ✔ benar |
 | semua | >5    | tidak layak        | ✔ benar |
+
+method PembaruanKeluarga::apply() -- versi lama
+/**
+    * ♻️ Simpan Data Seluruh ke Database Utama (dtsen_kk, dtsen_art, dtsen_se)
+    * - fitur baru, kirim pesan ke petugas entri (role_id 4) sesuai data hasil pekerjaannya
+    */
+// public function apply()
+// {
+//     $this->db->transBegin();
+//     try {
+//         $usulan_id = $this->request->getPost('usulan_id');
+//         $userId    = session()->get('id') ?? 'system';
+
+//         // 🔍 Ambil data usulan utama
+//         $usulan = $this->db->table('dtsen_usulan')
+//             ->where('id', $usulan_id)
+//             ->get()
+//             ->getRowArray();
+
+//         if (!$usulan) {
+//             throw new \Exception('Data usulan tidak ditemukan.');
+//         }
+
+//         $payload = json_decode($usulan['payload'] ?? '{}', true);
+//         if (json_last_error() !== JSON_ERROR_NONE) {
+//             throw new \Exception('Payload tidak valid: ' . json_last_error_msg());
+//         }
+
+//         $idKk = $usulan['dtsen_kk_id'] ?? null;
+//         if (!$idKk) {
+//             throw new \Exception('ID KK tidak ditemukan dalam usulan.');
+//         }
+
+//         // =======================================================
+//         // 🏠 1️⃣ Update Tabel dtsen_rt
+//         // =======================================================
+//         $geo      = $payload['geo'] ?? [];
+//         $foto     = $payload['foto'] ?? [];
+//         $rumah    = $payload['perumahan'] ?? [];
+//         $kondisi  = $rumah['kondisi'] ?? [];
+//         $sanitasi = $rumah['sanitasi'] ?? [];
+
+//         $rtUpdate = [
+//             'kepemilikan_rumah' => $rumah['status_kepemilikan'] ?? 'Milik Sendiri',
+//             'luas_lantai'        => $kondisi['luas_lantai'] ?? null,
+//             'jenis_lantai'       => $kondisi['jenis_lantai'] ?? null,
+//             'jenis_dinding'      => $kondisi['jenis_dinding'] ?? null,
+//             'bahan_bakar'        => $kondisi['bahan_bakar'] ?? null,
+//             'sumber_air'         => $kondisi['sumber_air'] ?? null,
+//             'sumber_listrik'     => $kondisi['sumber_listrik'] ?? null,
+//             'sanitasi'           => $sanitasi['pembuangan_tinja'] ?? null,
+//             'foto_rumah'         => $foto['depan'] ?? null,
+//             'foto_rumah_dalam'   => $foto['dalam'] ?? null,
+//             'latitude'           => $geo['lat'] ?? null,
+//             'longitude'          => $geo['lng'] ?? null,
+//             'updated_at'         => date('Y-m-d H:i:s'),
+//             'updated_by'         => $userId
+//         ];
+
+//         // ambil id_rt untuk update
+//         $idRt = $this->db->table('dtsen_kk')->select('id_rt')->where('id_kk', $idKk)->get()->getRow('id_rt');
+//         if ($idRt) {
+//             $this->db->table('dtsen_rt')->where('id_rt', $idRt)->update($rtUpdate);
+//         }
+
+//         // =======================================================
+//         // 👪 2️⃣ Update Tabel dtsen_kk (DATA RUMAH)
+//         // =======================================================
+//         $kkUpdate = [
+//             'kepala_keluarga'          => $rumah['kepala_keluarga'] ?? null,
+//             'alamat'                   => $rumah['alamat'] ?? null,
+//             'status_kepemilikan_rumah' => $rumah['status_kepemilikan'] ?? null,
+//             'kategori_adat'            => $rumah['kategori_adat'] ?? 'Tidak',
+//             'nama_suku'                => $rumah['nama_suku'] ?? null,
+//             'foto_kk'                  => $foto['ktp_kk'] ?? $foto['ktp'] ?? null,
+//             'foto_rumah'               => $foto['depan'] ?? null,
+//             'foto_rumah_dalam'         => $foto['dalam'] ?? null,
+//             'updated_at'               => date('Y-m-d H:i:s'),
+//             'updated_by'               => $userId
+//         ];
+//         $this->db->table('dtsen_kk')->where('id_kk', $idKk)->update($kkUpdate);
+
+//         // =======================================================
+//         // 👤 3️⃣ Sinkronisasi dtsen_art
+//         // =======================================================
+//         $anggotaUsulan = $this->db->table('dtsen_usulan_art')
+//             ->where('dtsen_usulan_id', $usulan_id)
+//             ->get()
+//             ->getResultArray();
+
+//         if (!empty($anggotaUsulan)) {
+//             $this->db->table('dtsen_art')->where('id_kk', $idKk)->delete();
+
+//             foreach ($anggotaUsulan as $art) {
+//                 $payloadMember = json_decode($art['payload_member'] ?? '{}', true);
+//                 $identitas     = $payloadMember['identitas'] ?? [];
+
+//                 $dataArt = [
+//                     'id_kk'             => $idKk,
+//                     'nik'               => $identitas['nik'] ?? $art['nik'] ?? null,
+//                     'nama'              => $identitas['nama'] ?? $art['nama'] ?? null,
+//                     'jenis_kelamin'     => $identitas['jenis_kelamin'] ?? null,
+//                     'tanggal_lahir'     => $identitas['tanggal_lahir'] ?? null,
+//                     'tempat_lahir'      => $identitas['tempat_lahir'] ?? null,
+//                     'pendidikan_terakhir' => $identitas['pendidikan'] ?? null,
+//                     'pekerjaan'         => $identitas['pekerjaan'] ?? null,
+//                     'status_kawin'      => $identitas['status_kawin'] ?? null,
+//                     'hubungan_keluarga' => $identitas['hubungan'] ?? null,
+//                     'foto_identitas'    => $payloadMember['foto'] ?? null,
+//                     'source_name'       => 'apply_usulan_' . $usulan_id,
+//                     'created_by'        => $userId,
+//                     'created_at'        => date('Y-m-d H:i:s')
+//                 ];
+
+//                 $this->db->table('dtsen_art')->insert($dataArt);
+//             }
+//         }
+
+//         // =======================================================
+//         // 💰 4️⃣ Upsert Sosial Ekonomi dtsen_se
+//         // =======================================================
+//         $aset  = $payload['aset'] ?? [];
+//         $geo   = $payload['geo'] ?? [];
+
+//         $kepemilikan_aset     = json_encode($aset, JSON_UNESCAPED_UNICODE);
+//         $kepemilikan_bantuan  = json_encode($payload['bantuan'] ?? [], JSON_UNESCAPED_UNICODE);
+
+//         $existingSE = $this->db->table('dtsen_se')
+//             ->where('id_kk', $idKk)
+//             ->get()
+//             ->getRowArray();
+
+//         if ($existingSE) {
+//             $this->db->table('dtsen_se')
+//                 ->where('id_kk', $idKk)
+//                 ->update([
+//                     'kepemilikan_aset'       => $kepemilikan_aset,
+//                     'kepemilikan_bantuan'    => $kepemilikan_bantuan,
+//                     'rata_penghasilan_bulanan' => $payload['penghasilan'] ?? null,
+//                     'rata_pengeluaran_bulanan' => $payload['pengeluaran'] ?? null,
+//                     'latitude'               => $geo['lat'] ?? null,
+//                     'longitude'              => $geo['lng'] ?? null,
+//                     'updated_at'             => date('Y-m-d H:i:s'),
+//                     'updated_by'             => $userId
+//                 ]);
+//         } else {
+//             $this->db->table('dtsen_se')->insert([
+//                 'id_rt'        => $idRt,
+//                 'id_kk'        => $idKk,
+//                 'kepemilikan_aset'       => $kepemilikan_aset,
+//                 'kepemilikan_bantuan'    => $kepemilikan_bantuan,
+//                 'rata_penghasilan_bulanan' => $payload['penghasilan'] ?? null,
+//                 'rata_pengeluaran_bulanan' => $payload['pengeluaran'] ?? null,
+//                 'latitude'     => $geo['lat'] ?? null,
+//                 'longitude'    => $geo['lng'] ?? null,
+//                 'source_name'  => 'apply_usulan_' . $usulan_id,
+//                 'created_by'   => $userId,
+//                 'created_at'   => date('Y-m-d H:i:s')
+//             ]);
+//         }
+
+//         // =======================================================
+//         // 🟦 UPDATE STATUS USULAN
+//         // =======================================================
+//         $this->db->table('dtsen_usulan')
+//             ->where('id', $usulan_id)
+//             ->update([
+//                 'status'       => 'diverifikasi',
+//                 'verified_at'  => date('Y-m-d H:i:s'),
+//                 'verified_by'  => $userId
+//             ]);
+
+//         // =======================================================
+//         // 🟩 WA INTEGRATION — Generate Reminder Log
+//         // =======================================================
+//         $waConfig = $this->db->table('dtsen_wa_config')
+//             ->where('user_id', $userId)
+//             ->get()
+//             ->getRowArray();
+
+//         $interval = $waConfig['reminder_default_months'] ?? 3;
+//         $dueDate  = date('Y-m-d H:i:s', strtotime("+$interval months"));
+
+//         // Insert reminder log
+//         $this->db->table('dtsen_kk_reminder_log')->insert([
+//             'kk_id'    => $idKk,
+//             'admin_id' => $userId,
+//             'due_date' => $dueDate,
+//             'status'   => 'pending'
+//         ]);
+
+//         // =======================================================
+
+//         $this->db->transCommit();
+//         log_message('info', "✅ Usulan ID {$usulan_id} diterapkan oleh {$userId}. Reminder dibuat.");
+
+//         return $this->response->setJSON([
+//             'status'   => 'success',
+//             'message'  => 'Data usulan berhasil diterapkan ke database utama.',
+//             'redirect' => base_url('dtsen-se')
+//         ]);
+//     } catch (\Throwable $e) {
+
+//         $this->db->transRollback();
+//         log_message('error', '[apply] ' . $e->getMessage());
+
+//         return $this->response->setJSON([
+//             'status'  => 'error',
+//             'message' => 'Gagal menerapkan data: ' . $e->getMessage()
+//         ]);
+//     }
+// }
+
+dihapus dari app\Views\dtsen\pembaruan\detail.php
+<!-- Dependencies -->
+<!-- <script src="<?= base_url('assets/vendor/jquery/jquery.min.js') ?>"></script>
+<script src="<?= base_url('assets/vendor/select2/js/select2.full.min.js') ?>"></script> -->
+<!-- jQuery LOCAL -->
+<script src="<?= base_url('assets/vendor/jquery/jquery.min.js') ?>"
+    onerror="this.onerror=null; this.src='https://code.jquery.com/jquery-3.6.4.min.js'">
+</script>
+
+<!-- jQuery Migrate (opsional, karena project Anda pakai DataTables lama) -->
+<script src="<?= base_url('assets/vendor/jquery/jquery-migrate.min.js') ?>"
+    onerror="this.onerror=null; this.src='https://code.jquery.com/jquery-migrate-3.3.2.min.js'">
+</script>
+<!-- Select2 CSS -->
+<link rel="stylesheet"
+    href="<?= base_url('assets/vendor/select2/css/select2.min.css') ?>"
+    onerror="this.onerror=null; this.href='https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css'">
+
+<!-- Select2 JS -->
+<script src="<?= base_url('assets/vendor/select2/js/select2.full.min.js') ?>"
+    onerror="this.onerror=null; this.src='https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.full.min.js'">
+</script>
+<link rel="stylesheet"
+    href="<?= base_url('assets/vendor/datatables/datatables.min.css') ?>"
+    onerror="this.onerror=null; this.href='https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css'">
+
+<script src="<?= base_url('assets/vendor/datatables/datatables.min.js') ?>"
+    onerror="this.onerror=null; this.src='https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js'">
+</script>
