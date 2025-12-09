@@ -70,7 +70,19 @@ $(document).ready(function () {
                 render: (d, t, r, m) => m.row + 1
             },
 
-            { data: 'nik', title: 'NIK' },
+            {
+                data: 'nik',
+                title: 'NIK',
+                render: nik => `
+                    <div class="d-flex align-items-center">
+                        <span class="me-2 nik-text">${nik}</span>
+                        <button class="btn btn-outline-primary btn-sm btnCopyNIK" data-nik="${nik}" title="Salin NIK">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                `
+            }
+            ,
             { data: 'nama', title: 'Nama' },
 
             {
@@ -125,6 +137,29 @@ $(document).ready(function () {
         ],
         createdRow: row => $(row).find('td').css('text-align', 'left'),
         headerCallback: thead => $(thead).find('th').css('text-align', 'center')
+    });
+
+    // Tombol Salin NIK
+    $(document).on('click', '.btnCopyNIK', function () {
+        const nik = $(this).data('nik');
+
+        navigator.clipboard.writeText(nik)
+            .then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'NIK disalin',
+                    text: `NIK ${nik} berhasil disalin ke clipboard`,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            })
+            .catch(err => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal menyalin',
+                    text: 'Clipboard tidak didukung oleh browser.',
+                });
+            });
     });
 
     /* ============================================================
