@@ -13,8 +13,8 @@ $disabled = $editable ? '' : 'disabled';
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="keluarga_no_kk" class="form-label fw-bold">Nomor Kartu Keluarga</label>
-                <input type="text" class="form-control onlynum" id="keluarga_no_kk" name="no_kk"
-                    value="<?= esc($perumahan['no_kk'] ?? '') ?>" <?= $disabled ?> maxlength="16">
+                <input type="text" class="form-control onlynum16" id="keluarga_no_kk" name="no_kk"
+                    value="<?= esc($perumahan['no_kk'] ?? '') ?>" <?= $disabled ?> maxlength="16" minlength="16">
             </div>
             <div class="col-md-6">
                 <label for="kepala_keluarga" class="form-label fw-bold">Kepala Keluarga</label>
@@ -68,10 +68,3 @@ $disabled = $editable ? '' : 'disabled';
         <?php endif; ?>
     </form>
 </div>
-
-<!-- ============================== -->
-<script>
-    $(document).ready(function() {
-
-    });
-</script>

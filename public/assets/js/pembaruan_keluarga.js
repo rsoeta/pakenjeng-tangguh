@@ -25,6 +25,171 @@ $(document).ready(function () {
         }
     };
 
+    
+
+    /* ======================================================
+   ✅ Listener Global untuk Event Usia <5 & bekerja_seminggu = "Tidak" (semua umur): Semua field tenaga kerja lain → kosong + readonly
+   ====================================================== */
+    // ---------------------------
+    // Apply rules & helper funcs
+    // ---------------------------
+
+    // Helper: hitung usia dari tanggal 'YYYY-MM-DD'
+    function hitungUsiaFromDateString(tgl) {
+        if (!tgl) return 0;
+        const today = new Date();
+        const birth = new Date(tgl);
+        let usia = today.getFullYear() - birth.getFullYear();
+        const m = today.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) usia--;
+        return usia < 0 ? 0 : usia;
+    }
+
+    // Ambil elemen sekali (jika elemen belum ada saat ready, selector tetap bekerja karena dipanggil saat modal show)
+    const $tanggalLahir = $('#tanggal_lahir');
+    const $jenisKelamin = $('#jenis_kelamin');
+
+    // Pendidikan fields
+    const $partisipasi = $('#partisipasi_sekolah');
+    const $jenjang = $('#jenjang_pendidikan');
+    const $kelasTertinggi = $('#kelas_tertinggi');
+    const $ijazah = $('#ijazah_tertinggi');
+
+    // Tenaga Kerja fields
+    const $bekerja = $('#bekerja_seminggu');
+    const $lapanganUsaha = $('#lapangan_usaha');
+    const $statusPekerjaan = $('#status_pekerjaan');
+    const $pendapatan = $('#pendapatan');
+    const $skillChecks = $('.skill-check');
+
+    // Kesehatan
+    const $statusHamil = $('#status_hamil');
+
+    // Fungsi-fungsi kecil
+    function lockPendidikan() {
+        $partisipasi.val('Belum Pernah Sekolah').prop('disabled', true);
+        $jenjang.val('').prop('disabled', true);
+        $kelasTertinggi.val('').prop('disabled', true);
+        $ijazah.val('').prop('disabled', true);
+    }
+    function unlockPendidikan() {
+        $partisipasi.prop('disabled', false);
+        $jenjang.prop('disabled', false);
+        $kelasTertinggi.prop('disabled', false);
+        $ijazah.prop('disabled', false);
+    }
+
+    function clearTenagaKerja() {
+        $lapanganUsaha.val('');
+        $statusPekerjaan.val('');
+        $pendapatan.val('');
+        // $skillChecks.prop('checked', false);
+    }
+    function lockTenagaKerjaForUnder5() {
+        $bekerja.val('Belum Ditentukan').prop('disabled', true);
+        clearTenagaKerja();
+        $lapanganUsaha.prop('disabled', true);
+        $statusPekerjaan.prop('disabled', true);
+        $pendapatan.prop('disabled', true);
+        // $skillChecks.prop('disabled', true);
+    }
+    function unlockTenagaKerja() {
+        $bekerja.prop('disabled', false);
+        $lapanganUsaha.prop('disabled', false);
+        $statusPekerjaan.prop('disabled', false);
+        $pendapatan.prop('disabled', false);
+        // $skillChecks.prop('disabled', false);
+    }
+
+    function updateStatusHamilByGender() {
+        const gender = $jenisKelamin.val();
+        if (gender && gender.toLowerCase().startsWith('l')) { // "Laki-laki"
+            $statusHamil.val('Tidak').prop('disabled', true);
+        } else {
+            $statusHamil.prop('disabled', false);
+        }
+    }
+
+    // ------------- MAIN applyRules -------------
+    function applyRules() {
+        // ambil tanggal lahir terkini dari DOM
+        const tgl = $tanggalLahir.val();
+        const usia = hitungUsiaFromDateString(tgl);
+
+        // Pendidikan
+        if (usia < 5) {
+            lockPendidikan();
+        } else {
+            unlockPendidikan();
+        }
+
+        // Tenaga Kerja
+        if (usia < 5) {
+            lockTenagaKerjaForUnder5();
+        } else {
+            // jika sebelumnya terkunci oleh usia <5, kita buka;
+            // tetapi jika user sudah memilih 'Tidak' pada bekerja_seminggu, tetap kunci sisanya
+            unlockTenagaKerja();
+            if ($bekerja.val() === 'Tidak') {
+                clearTenagaKerja();
+                $lapanganUsaha.prop('disabled', true);
+                $statusPekerjaan.prop('disabled', true);
+                $pendapatan.prop('disabled', true);
+                $skillChecks.prop('disabled', true);
+            }
+        }
+
+        // Kesehatan (status hamil)
+        updateStatusHamilByGender();
+    }
+
+    // expose globally so AJAX success and other handlers can call it
+    window.applyRules = applyRules;
+
+    // ------------- Event bindings -------------
+    // Trigger saat modal benar-benar tampil (Bootstrap shown event)
+    $(document).on('shown.bs.modal', '#modalAnggota', function () {
+        // small timeout not strictly necessary with shown.bs.modal, but keep minimal delay to ensure prefill finished
+        setTimeout(function () {
+            applyRules();
+            console.log('🧾 Modal Anggota terbuka, applyRules() dipanggil.');
+        }, 15);
+    });
+
+    // Jika user mengubah tanggal lahir manual -> update langsung
+    $tanggalLahir.on('change input', function () {
+        applyRules();
+    });
+
+    // Jika user mengubah jenis kelamin -> update langsung (untuk status hamil)
+    $jenisKelamin.on('change', function () {
+        applyRules();
+    });
+
+    // Jika user mengubah pilihan bekerja_seminggu -> jika 'Tidak' kunci sisanya
+    $bekerja.on('change', function () {
+        if ($(this).val() === 'Tidak') {
+            clearTenagaKerja();
+            $lapanganUsaha.prop('disabled', true);
+            $statusPekerjaan.prop('disabled', true);
+            $pendapatan.prop('disabled', true);
+            $skillChecks.prop('disabled', true);
+        } else {
+            // hanya buka kalau usia >=5
+            const usiaNow = hitungUsiaFromDateString($tanggalLahir.val());
+            if (usiaNow >= 5) {
+                $lapanganUsaha.prop('disabled', false);
+                $statusPekerjaan.prop('disabled', false);
+                $pendapatan.prop('disabled', false);
+                $skillChecks.prop('disabled', false);
+            }
+        }
+    });
+
+        // OPTIONAL: panggil applyRules() saat halaman ready jika modal sudah berisi nilai (edit inline)
+        // (tidak memaksa modal terbuka)
+        // applyRules(); // Uncomment kalau perlu pada page load
+
     /* ======================================================
      🏡 Prefill Wilayah Select2 (AJAX)
     ======================================================= */
@@ -196,21 +361,149 @@ $(document).ready(function () {
     📤 Submit Data Form
     ======================================================= */
 
+    // // =============================
+    // // 🛡️ VALIDASI WAJIB FORM KELUARGA
+    // // =============================
+    // $('#formDataKeluarga').on('submit', function (e) {
+    //     e.preventDefault();
+
+    //     const noKK           = $('#keluarga_no_kk').val().trim();
+    //     const kepala         = $('#kepala_keluarga').val().trim();
+    //     const alamat         = $('#alamat').val().trim();
+    //     const rw             = $('#rw').val().trim();
+    //     const rt             = $('#rt').val().trim();
+    //     const kategoriAdat   = $('#kategori_adat').val().trim();
+    //     const namaSuku       = $('#nama_suku').val().trim();
+
+    //     // ========== VALIDASI DASAR ==========
+    //     if (!noKK || !kepala || !alamat || !rw || !rt || !kategoriAdat) {
+    //         Swal.fire({
+    //             icon: 'error',
+    //             title: 'Gagal',
+    //             text: 'Semua field wajib diisi sebelum menyimpan.'
+    //         });
+    //         return;
+    //     }
+
+    //     // ========== VALIDASI SUKU TAMBAHAN ==========
+    //     if (kategoriAdat === 'Ya' && !namaSuku) {
+    //         Swal.fire({
+    //             icon: 'error',
+    //             title: 'Gagal',
+    //             text: 'Nama Suku wajib diisi karena Keluarga Adat = Ya.'
+    //         });
+    //         return;
+    //     }
+
+    //     // =============================
+    //     // 🟢 Jika valid → lanjutkan konfirmasi simpan
+    //     // =============================
+    //     Swal.fire({
+    //         title: 'Simpan Perubahan?',
+    //         text: 'Data keluarga akan disimpan sebagai draft pembaruan.',
+    //         icon: 'question',
+    //         showCancelButton: true,
+    //         confirmButtonText: 'Ya, Simpan',
+    //         cancelButtonText: 'Batal'
+    //     }).then(result => {
+    //         if (!result.isConfirmed) return;
+
+    //         const sumber = $('#sumber').val();
+
+    //         $.ajax({
+    //             url: baseUrl + '/pembaruan-keluarga/save-keluarga',
+    //             method: 'POST',
+    //             data: $('#formDataKeluarga').serialize(),
+    //             dataType: 'json',
+    //             success: res => {
+    //                 if (res.status === 'success') {
+    //                     Swal.fire({
+    //                         icon: 'success',
+    //                         title: 'Berhasil!',
+    //                         text: res.message,
+    //                         timer: 1500,
+    //                         showConfirmButton: false
+    //                     });
+
+    //                     if (res.id_kk) {
+    //                         $('#id_kk').val(res.id_kk);
+    //                     }
+
+    //                     if (sumber === 'baru' && res.id_kk) {
+    //                         setTimeout(() => {
+    //                             window.location.href = `${baseUrl}/pembaruan-keluarga/detail/${res.id_kk}`;
+    //                         }, 1200);
+    //                         return;
+    //                     }
+
+    //                     $('#sumber').val('utama');
+    //                     setTimeout(() => location.reload(), 1000);
+
+    //                 } else {
+    //                     Swal.fire({
+    //                         icon: 'error',
+    //                         title: 'Gagal',
+    //                         text: res.message || 'Tidak dapat menyimpan data.'
+    //                     });
+    //                 }
+    //             },
+    //             error: xhr => {
+    //                 Swal.fire({
+    //                     icon: 'error',
+    //                     title: 'Error',
+    //                     text: 'Terjadi kesalahan saat menyimpan data.'
+    //                 });
+    //             }
+    //         });
+
+    //     });
+
+    // });
+
     // =============================
     // 🛡️ VALIDASI WAJIB FORM KELUARGA
     // =============================
     $('#formDataKeluarga').on('submit', function (e) {
         e.preventDefault();
 
-        const noKK           = $('#keluarga_no_kk').val().trim();
-        const kepala         = $('#kepala_keluarga').val().trim();
-        const alamat         = $('#alamat').val().trim();
-        const rw             = $('#rw').val().trim();
-        const rt             = $('#rt').val().trim();
-        const kategoriAdat   = $('#kategori_adat').val().trim();
-        const namaSuku       = $('#nama_suku').val().trim();
+        let noKK           = $('#keluarga_no_kk').val().trim();
+        const kepala       = $('#kepala_keluarga').val().trim();
+        const alamat       = $('#alamat').val().trim();
+        const rw           = $('#rw').val().trim();
+        const rt           = $('#rt').val().trim();
+        const kategoriAdat = $('#kategori_adat').val().trim();
+        const namaSuku     = $('#nama_suku').val().trim();
 
-        // ========== VALIDASI DASAR ==========
+        // ===========================================
+        // 🔒 1) Bersihkan input: hanya angka
+        // ===========================================
+        noKK = noKK.replace(/\D/g, '');
+        $('#keluarga_no_kk').val(noKK);
+
+        // ===========================================
+        // 🔒 2) VALIDASI KHUSUS No KK (16 digit + tidak boleh 00)
+        // ===========================================
+        if (noKK.length !== 16) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Nomor KK Tidak Valid',
+                text: 'Nomor KK harus berisi 16 digit angka.'
+            });
+            return;
+        }
+
+        if (noKK.slice(-2) === "00") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Nomor KK Tidak Valid',
+                text: 'Dua digit terakhir Nomor KK tidak boleh 00.'
+            });
+            return;
+        }
+
+        // ===========================================
+        // 🔒 3) VALIDASI DASAR FIELD WAJIB
+        // ===========================================
         if (!noKK || !kepala || !alamat || !rw || !rt || !kategoriAdat) {
             Swal.fire({
                 icon: 'error',
@@ -220,7 +513,9 @@ $(document).ready(function () {
             return;
         }
 
-        // ========== VALIDASI SUKU TAMBAHAN ==========
+        // ===========================================
+        // 🔒 4) VALIDASI SUKU TAMBAHAN
+        // ===========================================
         if (kategoriAdat === 'Ya' && !namaSuku) {
             Swal.fire({
                 icon: 'error',
@@ -231,7 +526,7 @@ $(document).ready(function () {
         }
 
         // =============================
-        // 🟢 Jika valid → lanjutkan konfirmasi simpan
+        // 🟢 5) KONFIRMASI SIMPAN
         // =============================
         Swal.fire({
             title: 'Simpan Perubahan?',
@@ -294,76 +589,6 @@ $(document).ready(function () {
         });
 
     });
-    // // 🔹 Simpan Data Keluarga (Tab Perumahan)
-    // $('#formDataKeluarga').on('submit', function (e) {
-    //     e.preventDefault();
-
-    //     Swal.fire({
-    //         title: 'Simpan Perubahan?',
-    //         text: 'Data keluarga akan disimpan sebagai draft pembaruan.',
-    //         icon: 'question',
-    //         showCancelButton: true,
-    //         confirmButtonText: 'Ya, Simpan',
-    //         cancelButtonText: 'Batal'
-    //     }).then(result => {
-    //         if (!result.isConfirmed) return;
-
-    //         const sumber = $('#sumber').val();
-
-    //         $.ajax({
-    //             url: baseUrl + '/pembaruan-keluarga/save-keluarga',
-    //             method: 'POST',
-    //             data: $(this).serialize(),
-    //             dataType: 'json',
-    //             success: res => {
-    //                 if (res.status === 'success') {
-    //                     Swal.fire({
-    //                         icon: 'success',
-    //                         title: 'Berhasil!',
-    //                         text: res.message,
-    //                         timer: 1500,
-    //                         showConfirmButton: false
-    //                     });
-
-    //                     // 💾 Simpan ID KK baru (jika mode tambah)
-    //                     if (res.id_kk) {
-    //                         $('#id_kk').val(res.id_kk);
-    //                         console.log('🆕 ID KK baru diset:', res.id_kk);
-    //                     }
-
-    //                     // ✅ Jika mode TAMBAH (baru) → redirect ke halaman detail/{id_kk}
-    //                     if (sumber === 'baru' && res.id_kk) {
-    //                         setTimeout(() => {
-    //                             window.location.href = `${baseUrl}/pembaruan-keluarga/detail/${res.id_kk}`;
-    //                         }, 1200);
-    //                         return;
-    //                     }
-
-    //                     // 🔁 Jika mode edit/draft → ubah sumber jadi utama & reload
-    //                     if (sumber !== 'baru') {
-    //                         $('#sumber').val('utama');
-    //                         setTimeout(() => location.reload(), 1000);
-    //                     }
-    //                 } else {
-    //                     Swal.fire({
-    //                         icon: 'error',
-    //                         title: 'Gagal',
-    //                         text: res.message || 'Tidak dapat menyimpan data.'
-    //                     });
-    //                 }
-    //             },
-    //             error: xhr => {
-    //                 console.error('❌ AJAX Error:', xhr.responseText);
-    //                 Swal.fire({
-    //                     icon: 'error',
-    //                     title: 'Error',
-    //                     text: 'Terjadi kesalahan saat menyimpan data.'
-    //                 });
-    //             }
-    //         });
-    //     });
-    // });
-
 
     // 🔹 Simpan Data Rumah
     $('#formRumah').on('submit', function (e) {
@@ -494,6 +719,7 @@ $(document).ready(function () {
         }
     }
 });
+
 /* ======================================================
    ✅ Listener Global untuk Event Sukses Simpan Anggota
    ====================================================== */
@@ -517,3 +743,4 @@ $(document).on('anggota:saved', function() {
         }
     }, 800); // beri jeda 0,8 detik supaya modal benar-benar tertutup
 });
+

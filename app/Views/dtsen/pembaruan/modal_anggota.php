@@ -47,113 +47,149 @@
                     </ul>
 
                     <div class="tab-content pt-3">
-                        <!-- TAB 1 -->
+                        <!-- TAB 1: IDENTITAS -->
                         <div class="tab-pane fade show active" id="tab-identitas" role="tabpanel">
-                            <div class="row g-3">
+                            <div class="row g-4">
+                                <!-- ===================== ROW ATAS ===================== -->
+                                <div class="row align-items-center border-bottom pb-1 mt-3 mb-1">
+                                    <label class="col-md-5 col-12 col-form-label fw-bold">
+                                        Status Keberadaan
+                                    </label>
 
-                                <!-- Nama & NIK -->
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Nama Lengkap</label>
-                                    <input type="text" class="form-control required upper" name="nama" id="nama">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">NIK</label>
-                                    <input type="text" class="form-control required onlynum" name="nik" id="nik" maxlength="16">
-                                </div>
-
-                                <!-- TTL -->
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Tempat Lahir</label>
-                                    <input type="text" class="form-control required upper" name="tempat_lahir" id="tempat_lahir">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Tanggal Lahir</label>
-                                    <input type="date" class="form-control required" name="tanggal_lahir" id="tanggal_lahir">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Jenis Kelamin</label>
-                                    <select class="form-select required" name="jenis_kelamin" id="jenis_kelamin">
-                                        <option value="">Pilih...</option>
-                                        <option value="L">Laki-laki</option>
-                                        <option value="P">Perempuan</option>
-                                    </select>
-                                </div>
-
-                                <!-- Status Kawin -->
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Status Kawin</label>
-                                    <select class="form-select required" name="status_kawin" id="status_kawin"></select>
-                                </div>
-
-                                <!-- Hubungan -->
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Hubungan dgn Kepala Keluarga</label>
-                                    <select class="form-select required" name="hubungan" id="hubungan"></select>
-                                </div>
-
-                                <!-- Pekerjaan -->
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Pekerjaan</label>
-                                    <select class="form-select required" name="pekerjaan" id="pekerjaan"></select>
-                                </div>
-
-                                <!-- Pendidikan -->
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Pendidikan Terakhir</label>
-                                    <select class="form-select required" name="pendidikan_terakhir" id="pendidikan_terakhir"></select>
-                                </div>
-
-                                <!-- Ibu Kandung -->
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Nama Ibu Kandung</label>
-                                    <input type="text" class="form-control required upper" name="ibu_kandung" id="ibu_kandung">
-                                </div>
-
-                                <!-- Alamat -->
-                                <div class="col-md-12">
-                                    <label class="form-label fw-bold">Alamat Domisili</label>
-                                    <div class="row g-2">
-                                        <div class="col-md-3">
-                                            <label class="form-label">Provinsi</label>
-                                            <select class="form-select" id="ind_provinsi" name="provinsi"></select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label">Kabupaten</label>
-                                            <select class="form-select" id="ind_kabupaten" name="kabupaten"></select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label">Kecamatan</label>
-                                            <select class="form-select" id="ind_kecamatan" name="kecamatan"></select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label">Desa</label>
-                                            <select class="form-select" id="ind_desa" name="desa"></select>
-                                        </div>
+                                    <div class="col-md-7 col-12">
+                                        <select class="form-select required" name="status_keberadaan" id="status_keberadaan">
+                                            <option value="">Pilih...</option>
+                                            <option>Belum Ditentukan</option>
+                                            <option>Tinggal Bersama Keluarga</option>
+                                            <option>Meninggal</option>
+                                            <option>Tidak Tinggal Bersama Keluarga/Pindah Ke Wilayah Lain</option>
+                                            <option>Tidak Tinggal Bersama Keluarga/Pindah Ke Luar Negeri</option>
+                                            <option>Tidak Ditemukan</option>
+                                        </select>
                                     </div>
                                 </div>
+                                <!-- <hr> -->
 
-                                <!-- Status Keberadaan -->
-                                <div class="col-md-8">
-                                    <label class="form-label fw-bold">Status Keberadaan</label>
-                                    <select class="form-select required" name="status_keberadaan" id="status_keberadaan">
-                                        <option value="">Pilih...</option>
-                                        <option>Belum Ditentukan</option>
-                                        <option>Tinggal Bersama Keluarga</option>
-                                        <option>Meninggal</option>
-                                        <option>Tidak Tinggal Bersama Keluarga/Pindah Ke Wilayah (Daerah) Lain Di Indonesia</option>
-                                        <option>Tidak Tinggal Bersama Keluarga/Pindah Ke Luar Negeri</option>
-                                        <option>Tidak Ditemukan</option>
-                                    </select>
+                                <!-- ===================== KIRI ===================== -->
+                                <div class="col-lg-6">
+
+                                    <div class="row g-3">
+
+                                        <!-- Nama Lengkap -->
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold">Nama Lengkap</label>
+                                            <input type="text" class="form-control required upper" name="nama" id="nama">
+                                        </div>
+
+                                        <!-- NIK -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">NIK</label>
+                                            <input type="text" class="form-control required onlynum16" name="nik" id="nik" maxlength="16">
+                                        </div>
+
+                                        <!-- NKK -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Nomor KK</label>
+                                            <input type="text" class="form-control required onlynum16" name="individu_no_kk" id="individu_no_kk" maxlength="16">
+                                        </div>
+
+                                        <!-- TTL -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Tanggal Lahir</label>
+                                            <input type="date" class="form-control required" name="tanggal_lahir" id="tanggal_lahir">
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Tempat Lahir</label>
+                                            <input type="text" class="form-control required upper" name="tempat_lahir" id="tempat_lahir">
+                                        </div>
+
+                                        <!-- Hubungan -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Hubungan dengan Kepala Keluarga</label>
+                                            <select class="form-select required" name="hubungan" id="hubungan"></select>
+                                        </div>
+
+                                        <!-- Status Kawin -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Status Kawin</label>
+                                            <select class="form-select required" name="status_kawin" id="status_kawin"></select>
+                                        </div>
+
+                                        <!-- Ibu Kandung -->
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold">Nama Ibu Kandung</label>
+                                            <input type="text" class="form-control required upper" name="ibu_kandung" id="ibu_kandung">
+                                        </div>
+
+                                    </div>
+
                                 </div>
 
-                                <!-- Nomor KK -->
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Nomor KK</label>
-                                    <input type="text" class="form-control required onlynum" name="individu_no_kk" id="individu_no_kk" maxlength="16">
+                                <!-- ===================== KANAN ===================== -->
+                                <div class="col-lg-6">
+
+                                    <div class="row g-3">
+
+                                        <!-- Pendidikan -->
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold">Pendidikan Terakhir</label>
+                                            <select class="form-select required" name="pendidikan_terakhir" id="pendidikan_terakhir"></select>
+                                        </div>
+
+                                        <!-- Pekerjaan -->
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold">Pekerjaan</label>
+                                            <select class="form-select required" name="pekerjaan" id="pekerjaan"></select>
+                                        </div>
+
+                                        <!-- Jenis Kelamin -->
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold">Jenis Kelamin</label>
+                                            <div class="d-flex gap-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="jenis_kelamin" value="L" id="jkL">
+                                                    <label class="form-check-label" for="jkL">Laki-laki</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="jenis_kelamin" value="P" id="jkP">
+                                                    <label class="form-check-label" for="jkP">Perempuan</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Wilayah Capil -->
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold border-bottom pb-1">Wilayah Capil (Sesuai Data Kependudukan)</label>
+
+                                            <div class="row g-2 mt-1">
+                                                <div class="col-md-3">
+                                                    <label class="form-label small">Provinsi</label>
+                                                    <select class="form-select" id="ind_provinsi" name="provinsi"></select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label small">Kabupaten/Kota</label>
+                                                    <select class="form-select" id="ind_kabupaten" name="kabupaten"></select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label small">Kecamatan</label>
+                                                    <select class="form-select" id="ind_kecamatan" name="kecamatan"></select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label small">Kel/Desa</label>
+                                                    <select class="form-select" id="ind_desa" name="desa"></select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
                                 </div>
+
 
                             </div>
                         </div>
+
                         <!-- TAB 2: Pendidikan -->
                         <div class="tab-pane fade" id="tab-pendidikan" role="tabpanel" aria-labelledby="tab-pendidikan-tab">
                             <div class="row g-3">
@@ -303,7 +339,7 @@
                                 <!-- Status Pekerjaan -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Status dalam Pekerjaan Utama</label>
-                                    <select class="form-select required" name="status_pekerjaan" id="status_pekerjaan">
+                                    <select class="form-select" name="status_pekerjaan" id="status_pekerjaan">
                                         <option value="">Pilih...</option>
                                         <option value="Belum Ditentukan">Belum Ditentukan</option>
                                         <option value="Berusaha sendiri">Berusaha sendiri</option>
@@ -320,7 +356,7 @@
                                 <!-- Pendapatan -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Pendapatan Sebulan Terakhir</label>
-                                    <select class="form-select required" name="pendapatan" id="pendapatan">
+                                    <select class="form-select" name="pendapatan" id="pendapatan">
                                         <option value="" selected disabled>-- Pilih Pendapatan --</option>
                                         <option value="Tidak Ada Penghasilan">Tidak Ada Penghasilan</option>
                                         <option value="<1 Juta Per Bulan">&lt;1 Juta Per Bulan</option>

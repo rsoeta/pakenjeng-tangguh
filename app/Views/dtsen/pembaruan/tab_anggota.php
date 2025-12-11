@@ -236,6 +236,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
          * ✏️ EVENT: Tombol Edit Anggota
          * ============================================================ */
         $(document).on('click', '.btnEditAnggota', function() {
+
             const id = $(this).data('id');
             if (!id) return Swal.fire("Info", "ID anggota tidak ditemukan.", "info");
 
@@ -341,8 +342,13 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 const idKk = $('#id_kk').val() || $('[name="id_kk"]').val();
                 $('#formAnggota #id_kk').val(idKk);
                 $('#modalAnggota').modal('show');
+                setTimeout(applyRules, 30);
 
             }).fail(() => Swal.fire("Error", "Gagal memuat data anggota.", "error"));
+        });
+
+        $(document).on('shown.bs.modal', '#modalAnggota', function() {
+            applyRules();
         });
 
         /* ======================================================
@@ -452,7 +458,9 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             const form = $(this);
             let valid = true;
 
-            // Validasi minimal: NIK dan Nama wajib
+            /* ======================================================
+               1) VALIDASI KOLOM REQUIRED
+            ====================================================== */
             form.find('.required').each(function() {
                 if (!$(this).val().trim()) {
                     $(this).addClass('is-invalid');
@@ -462,11 +470,42 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 }
             });
 
+            /* ======================================================
+               2) VALIDASI 16 DIGIT UNTUK: NIK, No KK, Individu No KK
+            ====================================================== */
+            const digitFields = [
+                '#nik',
+                '#keluarga_no_kk', // jika tidak ada, otomatis dilewati
+                '#individu_no_kk'
+            ];
+
+            digitFields.forEach(selector => {
+                const el = form.find(selector);
+                if (el.length > 0) {
+                    let value = el.val().replace(/\D/g, ''); // hanya angka
+                    el.val(value); // bersihkan otomatis
+
+                    if (value.length !== 16) {
+                        el.addClass('is-invalid');
+                        valid = false;
+                    } else {
+                        el.removeClass('is-invalid');
+                    }
+                }
+            });
+
             if (!valid) {
-                Swal.fire("Isian belum lengkap", "Harap isi semua kolom wajib.", "warning");
+                Swal.fire(
+                    "Isian Tidak Valid",
+                    "Pastikan semua kolom wajib sudah diisi dan NIK/No KK terdiri dari 16 digit angka.",
+                    "warning"
+                );
                 return;
             }
 
+            /* ======================================================
+               3) KONFIRMASI SIMPAN
+            ====================================================== */
             Swal.fire({
                 title: 'Simpan Data?',
                 text: 'Data individu akan disimpan ke draf pembaruan keluarga.',
@@ -498,7 +537,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                                 timer: 1200,
                                 showConfirmButton: false,
                                 willClose: () => {
-                                    // ✅ Trigger event global agar tableAnggota reload
+                                    // 🔄 Reload tabel anggota
                                     $(document).trigger('anggota:saved');
                                 }
                             });
@@ -514,6 +553,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 });
             });
         });
+
         $('#modalAnggota').on('shown.bs.modal', function() {
             console.log('🧾 Modal Anggota terbuka, event submit aktif');
         });

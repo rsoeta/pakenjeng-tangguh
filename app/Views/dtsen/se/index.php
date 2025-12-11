@@ -718,6 +718,71 @@
             });
         });
 
+        // Saat user klik tab
+        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+
+            const target = $(e.target).attr('data-bs-target'); // ex: #tabDraft
+
+            let tab = 'daftar';
+            if (target === '#tabDraft') tab = 'draft';
+            if (target === '#tabSubmitted') tab = 'submitted';
+            if (target === '#tabDaftar') tab = 'daftar';
+
+            // 1. Update URL TANPA reload halaman
+            history.replaceState(null, "", "?tab=" + tab);
+
+            // 2. Reload DataTable sesuai tab aktif
+            if (tab === 'daftar') {
+                tableKeluarga.ajax.reload();
+            }
+            if (tab === 'draft') {
+                tableDraft.ajax.reload();
+            }
+            if (tab === 'submitted') {
+                tableSubmitted.ajax.reload();
+            }
+        });
+
+        function activateTabFromURL() {
+            const url = new URL(window.location.href);
+            const tab = url.searchParams.get('tab') || 'daftar';
+
+            // Peta tab terhadap ID tombol dan tab-pane
+            const tabMap = {
+                daftar: {
+                    btn: '#tabDaftar-tab',
+                    pane: '#tabDaftar',
+                    table: tableKeluarga
+                },
+                draft: {
+                    btn: '#tabDraft-tab',
+                    pane: '#tabDraft',
+                    table: tableDraft
+                },
+                submitted: {
+                    btn: '#tabSubmitted-tab',
+                    pane: '#tabSubmitted',
+                    table: tableSubmitted
+                },
+            };
+
+            const target = tabMap[tab] || tabMap.daftar;
+
+            // Aktifkan tombol tab
+            $(target.btn).tab('show');
+
+            // Setelah pane ditampilkan, adjust kolom DataTables
+            setTimeout(() => {
+                if (target.table) {
+                    target.table.columns.adjust().draw(false);
+                }
+            }, 100);
+        }
+
+        // Jalankan otomatis ketika halaman load
+        activateTabFromURL();
+
+
 
     });
 </script>

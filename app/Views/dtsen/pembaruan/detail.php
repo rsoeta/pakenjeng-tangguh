@@ -111,6 +111,32 @@
         }
     });
 
+    // =========================
+    // Validasi Angka 16 Digit
+    // =========================
+    document.querySelectorAll('.onlynum16').forEach(input => {
+
+        // Saat mengetik — hanya angka
+        input.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, ''); // hapus non-digit
+
+            if (this.value.length > 16) {
+                this.value = this.value.slice(0, 16); // batasi 16 digit
+            }
+        });
+
+        // Saat keluar dari input — cek panjang
+        input.addEventListener('blur', function() {
+            if (this.value.length !== 16) {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+    });
+
     // Format ribuan untuk rupiah
     document.addEventListener('input', function(e) {
         if (e.target.classList.contains('rupiah')) {

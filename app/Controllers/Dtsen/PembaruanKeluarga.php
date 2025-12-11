@@ -1280,6 +1280,7 @@ class PembaruanKeluarga extends BaseController
             // 👪 2️⃣ Update Tabel dtsen_kk (DATA RUMAH)
             // =======================================================
             $kkUpdate = [
+                'no_kk'                    => $rumah['no_kk'] ?? null,
                 'kepala_keluarga'          => $rumah['kepala_keluarga'] ?? null,
                 'alamat'                   => $rumah['alamat'] ?? null,
                 'status_kepemilikan_rumah' => $rumah['status_kepemilikan'] ?? null,
