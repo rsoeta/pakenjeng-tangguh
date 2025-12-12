@@ -248,44 +248,44 @@ $san = $perumahan['sanitasi'] ?? [];
                     </div>
 
                     <!-- Jenis Kloset -->
-                    <div class="fasilitas-extra">
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Jenis Kloset</label>
-                            <select name="jenis_kloset" id="jenis_kloset"
-                                class="form-select uniform-select" <?= $editable ? '' : 'disabled' ?>>
-                                <?php
-                                $opsiKloset = ['Leher angsa', 'Plengsengan dengan tutup', 'Plengsengan tanpa tutup', 'Cemplung'];
-                                $sel = $san['jenis_kloset'] ?? '';
-                                foreach ($opsiKloset as $o) {
-                                    $s = ($o == $sel) ? 'selected' : '';
-                                    echo "<option value=\"$o\" $s>$o</option>";
-                                }
-                                ?>
-                            </select>
-                        </div>
-                        <!-- Pembuangan Tinja -->
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Tempat Pembuangan Akhir Tinja</label>
-                            <select name="pembuangan_tinja" id="pembuangan_tinja"
-                                class="form-select uniform-select" <?= $editable ? '' : 'disabled' ?>>
-                                <?php
-                                $opsiTinja = [
-                                    'Tangki septik',
-                                    'IPAL',
-                                    'Kolam/sawah/sungai/danau/laut',
-                                    'Lubang tanah',
-                                    'Pantai/tanah lapang/kebun',
-                                    'Lainnya'
-                                ];
-                                $sel = $san['pembuangan_tinja'] ?? '';
-                                foreach ($opsiTinja as $o) {
-                                    $s = ($o == $sel) ? 'selected' : '';
-                                    echo "<option value=\"$o\" $s>$o</option>";
-                                }
-                                ?>
-                            </select>
-                        </div>
+                    <!-- <div class="fasilitas-extra"> -->
+                    <div class="col-md-4 fasilitas-extra">
+                        <label class="form-label fw-bold">Jenis Kloset</label>
+                        <select name="jenis_kloset" id="jenis_kloset"
+                            class="form-select uniform-select" <?= $editable ? '' : 'disabled' ?>>
+                            <?php
+                            $opsiKloset = ['Leher angsa', 'Plengsengan dengan tutup', 'Plengsengan tanpa tutup', 'Cemplung'];
+                            $sel = $san['jenis_kloset'] ?? '';
+                            foreach ($opsiKloset as $o) {
+                                $s = ($o == $sel) ? 'selected' : '';
+                                echo "<option value=\"$o\" $s>$o</option>";
+                            }
+                            ?>
+                        </select>
                     </div>
+                    <!-- Pembuangan Tinja -->
+                    <div class="col-md-4 fasilitas-extra">
+                        <label class="form-label fw-bold">Tempat Pembuangan Akhir Tinja</label>
+                        <select name="pembuangan_tinja" id="pembuangan_tinja"
+                            class="form-select uniform-select" <?= $editable ? '' : 'disabled' ?>>
+                            <?php
+                            $opsiTinja = [
+                                'Tangki septik',
+                                'IPAL',
+                                'Kolam/sawah/sungai/danau/laut',
+                                'Lubang tanah',
+                                'Pantai/tanah lapang/kebun',
+                                'Lainnya'
+                            ];
+                            $sel = $san['pembuangan_tinja'] ?? '';
+                            foreach ($opsiTinja as $o) {
+                                $s = ($o == $sel) ? 'selected' : '';
+                                echo "<option value=\"$o\" $s>$o</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <!-- </div> -->
                 </div>
             </div>
         </div>
