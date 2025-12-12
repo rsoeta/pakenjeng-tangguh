@@ -24,8 +24,199 @@ $(document).ready(function () {
             reader.readAsDataURL(input.files[0]);
         }
     };
+// ===================================================================
+// 🎓 SMART EDUCATION MODULE — FINAL FIX (KELAS 8 + VALIDASI USIA)
+// ===================================================================
+
+// ------------------------
+// 1. LEVEL PENDIDIKAN
+// ------------------------
+const jenjangLevel = {
+    "Belum Ditentukan": 0,
+    "Tidak Punya Ijazah SD": 0,
+    "Paket A": 0, "SDLB": 0, "SD": 0, "MI": 0, "SPM/PDF Ula": 0,
+
+    "Paket B": 1, "SMP LB": 1, "SMP": 1, "MTS": 1, "SPM/PDF Wustha": 1,
+
+    "Paket C": 2, "SMLB": 2, "SMA": 2, "MA": 2,
+    "SMK": 2, "MAK": 2, "SPM/PDF Ulya": 2,
+
+    "DI/D2/D3": 3,
+    "D4/S1": 4, "Profesi": 4,
+    "S2": 5,
+    "S3": 6
+};
+
+// ------------------------
+// 2. VALIDASI KELAS
+// ------------------------
+const kelasValid = {
+    level0: [1,2,3,4,5,6],     // SD
+    level1: [1,2,3],          // SMP
+    level2: [1,2,3,4],        // SMA/SMK
+    levelPT: [1,2,3,4,5,6,7,8]
+};
+
+// ------------------------
+// 3. Hitung Usia dari Tanggal Lahir
+// ------------------------
+function getUsia() {
+    const tgl = $('#tanggal_lahir').val();
+    if (!tgl) return null;
+
+    const dob = new Date(tgl);
+    const now = new Date();
+    
+    let usia = now.getFullYear() - dob.getFullYear();
+    const m = now.getMonth() - dob.getMonth();
+
+    if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) usia--;
+
+    return usia;
+}
+
+// ===================================================================
+// 4. MASTER SWITCH — PARTISIPASI SEKOLAH
+// ===================================================================
+function handlePartisipasiSekolah() {
+    const ps = $('#partisipasi_sekolah').val();
+    const fJenjang = $('#jenjang_pendidikan');
+    const fKelas = $('#kelas_tertinggi');
+    const fIjazah = $('#ijazah_tertinggi');
+
+    if (ps === "") {
+        fJenjang.prop('disabled', true).val("");
+        fKelas.prop('disabled', true).val("");
+        fIjazah.prop('disabled', true).val("");
+        return;
+    }
+
+    if (ps === "Belum Pernah Sekolah") {
+        fJenjang.val("Belum Ditentukan").prop('disabled', true);
+        fKelas.val("").prop('disabled', true);
+        fIjazah.val("Tidak Punya Ijazah SD").prop('disabled', true);
+        return;
+    }
+
+    // Selain itu aktifkan
+    fJenjang.prop('disabled', false);
+    fKelas.prop('disabled', false);
+    fIjazah.prop('disabled', false);
+}
+
+$('#partisipasi_sekolah').on('change', handlePartisipasiSekolah);
+
+
+
+// ===================================================================
+// 5. VALIDASI USIA MINIMAL BERDASARKAN JENJANG
+// ===================================================================
+
+function validateUsiaJenjang() {
+    const usia = getUsia();
+    const jenjang = $('#jenjang_pendidikan').val();
+
+    if (!usia || !jenjang) return;
+
+    let minUsia = 0;
+
+    if (["SD", "MI", "Paket A", "SDLB", "SPM/PDF Ula"].includes(jenjang)) minUsia = 6;
+    if (["SMP", "MTS", "Paket B", "SMP LB", "SPM/PDF Wustha"].includes(jenjang)) minUsia = 12;
+    if (["SMA", "MA", "SMK", "MAK", "Paket C", "SMLB", "SPM/PDF Ulya"].includes(jenjang)) minUsia = 15;
+    if (["DI/D2/D3"].includes(jenjang)) minUsia = 18;
+    if (["D4/S1", "Profesi"].includes(jenjang)) minUsia = 18;
+    if (jenjang === "S2") minUsia = 22;
+    if (jenjang === "S3") minUsia = 25;
+
+    if (usia < minUsia) {
+        Swal.fire("Validasi Usia", 
+            `Usia ${usia} tahun terlalu muda untuk jenjang ${jenjang}. Minimal usia adalah ${minUsia} tahun.`,
+            "warning"
+        );
+        $('#jenjang_pendidikan').val("");
+    }
+}
+
+$('#tanggal_lahir, #jenjang_pendidikan').on('change', validateUsiaJenjang);
+
+
+
+// ===================================================================
+// 6. VALIDASI IJAZAH BERDASARKAN JENJANG
+// ===================================================================
+function validateJenjangIjazah() {
+    const ps = $('#partisipasi_sekolah').val();
+    const jenjang = $('#jenjang_pendidikan').val();
+    const ijazah = $('#ijazah_tertinggi').val();
+
+    if (!jenjang || !ijazah) return;
+
+    // ✔ Abaikan validasi jika ijazah = Belum Ditentukan
+    if (ijazah === "Belum Ditentukan") return;
+
+    const levelJenjang = jenjangLevel[jenjang] ?? 0;
+    const levelIjazah = jenjangLevel[ijazah] ?? 0;
+
+    // Masih sekolah → ijazah harus lebih rendah
+    if (ps === "Masih Sekolah") {
+
+        // ✔ Jika ijazah = placeholder ("Belum Ditentukan") → valid
+        if (ijazah === "Belum Ditentukan") return;
+
+        if (levelIjazah >= levelJenjang) {
+            Swal.fire("Validasi Pendidikan",
+                "Ijazah tidak boleh sama atau lebih tinggi dari jenjang yang sedang ditempuh.",
+                "warning"
+            );
+            $('#ijazah_tertinggi').val("");
+        }
+    }
+
+    // Tidak sekolah lagi → ijazah ≤ jenjang
+    if (ps === "Tidak Bersekolah Lagi" && levelIjazah > levelJenjang) {
+        Swal.fire("Validasi Pendidikan",
+            "Ijazah tidak boleh lebih tinggi dari jenjang pendidikan terakhir.",
+            "warning"
+        );
+        $('#ijazah_tertinggi').val("");
+    }
+}
+
+$('#jenjang_pendidikan, #ijazah_tertinggi, #partisipasi_sekolah')
+    .on('change', validateJenjangIjazah);
 
     
+// ===================================================================
+// 7. VALIDASI KELAS — FIX TAMAT & LULUS (KELAS 8 ALWAYS VALID)
+// ===================================================================
+function validateKelas() {
+    const jenjang = $('#jenjang_pendidikan').val();
+    const kelas = parseInt($('#kelas_tertinggi').val());
+
+    if (!kelas || !jenjang) return;
+
+    // FIX: Jika kelas = 8 → anggap "Tamat & Lulus", SELALU VALID
+    if (kelas === 8) return;
+
+    let allowed = [];
+    const lv = jenjangLevel[jenjang] ?? 0;
+
+    if (lv === 0) allowed = kelasValid.level0;
+    else if (lv === 1) allowed = kelasValid.level1;
+    else if (lv === 2) allowed = kelasValid.level2;
+    else if (lv >= 3) allowed = kelasValid.levelPT;
+
+    if (!allowed.includes(kelas)) {
+        Swal.fire("Validasi Kelas",
+            `Kelas ${kelas} tidak valid untuk jenjang ${jenjang}.`,
+            "warning"
+        );
+        $('#kelas_tertinggi').val("");
+    }
+}
+
+$('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
+
 
     /* ======================================================
    ✅ Listener Global untuk Event Usia <5 & bekerja_seminggu = "Tidak" (semua umur): Semua field tenaga kerja lain → kosong + readonly
@@ -141,6 +332,12 @@ $(document).ready(function () {
 
         // Kesehatan (status hamil)
         updateStatusHamilByGender();
+        // Partisipasi Sekolah
+        // autoFillPendidikan();
+
+        handlePartisipasiSekolah();
+        validateJenjangIjazah();
+        validateKelas();
     }
 
     // expose globally so AJAX success and other handlers can call it

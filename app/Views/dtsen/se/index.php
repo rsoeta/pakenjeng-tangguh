@@ -462,7 +462,26 @@
                 },
                 {
                     data: 'created_by_name',
-                    defaultContent: '-'
+                    render: function(name, type, row) {
+
+                        const nope = row.created_by_nope || '';
+
+                        // Jika tidak ada nomor → tampilkan nama biasa
+                        if (!nope) return name || '-';
+
+                        // Normalisasi nomor → ubah ke 62xxx
+                        let phone = nope.replace(/\D/g, ""); // buang spasi / tanda
+                        if (phone.startsWith("0")) phone = "62" + phone.substring(1);
+                        else if (!phone.startsWith("62")) phone = "62" + phone;
+
+                        return `
+                            <a href="https://wa.me/${phone}" 
+                            class="text-success fw-bold" 
+                            target="_blank">
+                                <i class="fab fa-whatsapp"></i> ${name}
+                            </a>
+                        `;
+                    }
                 },
 
                 // PERBAIKAN DI SINI

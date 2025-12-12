@@ -118,7 +118,7 @@ $san = $perumahan['sanitasi'] ?? [];
                         </select>
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label">Jenis Atap</label>
                         <select name="jenis_atap" id="jenis_atap" class="form-select" <?= $editable ? '' : 'disabled' ?>>
                             <?php $opsiAtap = ['Genteng', 'Asbes', 'Seng', 'Rumbia', 'Bambu', 'Lainnya'];
@@ -132,7 +132,7 @@ $san = $perumahan['sanitasi'] ?? [];
                     <!-- </div> -->
 
                     <!-- <div class="row g-2 mt-2"> -->
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label">Bahan Bakar Utama Memasak</label>
                         <select name="bahan_bakar" id="bahan_bakar" class="form-select" <?= $editable ? '' : 'disabled' ?>>
                             <?php
@@ -146,7 +146,7 @@ $san = $perumahan['sanitasi'] ?? [];
                         </select>
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label">Sumber Air Minum</label>
                         <select name="sumber_air" id="sumber_air" class="form-select" <?= $editable ? '' : 'disabled' ?>>
                             <?php
@@ -159,8 +159,21 @@ $san = $perumahan['sanitasi'] ?? [];
                             ?>
                         </select>
                     </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Jarak Sumber Air Minum ke Pembuangan Limbah</label>
+                        <select name="jarak_air_ke_limbah" id="jarak_air_ke_limbah" class="form-select" <?= $editable ? '' : 'disabled' ?>>
+                            <?php
+                            $opsiJarak = ['< 10 meter', '>= 10 meter', 'Tidak tahu'];
+                            $sel = $san['jarak_air_ke_limbah'] ?? '';
+                            foreach ($opsiJarak as $o) {
+                                $s = ($o == $sel) ? 'selected' : '';
+                                echo "<option value=\"$o\" $s>$o</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label">Sumber Penerangan Utama</label>
                         <select name="sumber_listrik" id="sumber_listrik" class="form-select" <?= $editable ? '' : 'disabled' ?>>
                             <?php
@@ -251,19 +264,7 @@ $san = $perumahan['sanitasi'] ?? [];
                             ?>
                         </select>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Jarak Sumber Air Minum ke Pembuangan Limbah</label>
-                        <select name="jarak_air_ke_limbah" id="jarak_air_ke_limbah" class="form-select" <?= $editable ? '' : 'disabled' ?>>
-                            <?php
-                            $opsiJarak = ['< 10 meter', '>= 10 meter', 'Tidak tahu'];
-                            $sel = $san['jarak_air_ke_limbah'] ?? '';
-                            foreach ($opsiJarak as $o) {
-                                $s = ($o == $sel) ? 'selected' : '';
-                                echo "<option value=\"$o\" $s>$o</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
+
                 </div>
             </div>
         </div>

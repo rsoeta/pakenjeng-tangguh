@@ -2330,6 +2330,7 @@ class PembaruanKeluarga extends BaseController
                 u.id, u.no_kk_target, u.status,
                 u.created_at, u.updated_at,
                 petugas.fullname AS created_by_name,
+                petugas.nope AS created_by_nope,
                 JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.kepala_keluarga')) AS nama_kepala,
                 r.rw, r.rt
             ")

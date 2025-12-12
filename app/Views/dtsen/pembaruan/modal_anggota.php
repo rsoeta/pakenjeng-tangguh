@@ -211,6 +211,7 @@
                                     <select class="form-select" name="jenjang_pendidikan" id="jenjang_pendidikan">
                                         <option value="">Pilih...</option>
                                         <option value="Belum Ditentukan">Belum Ditentukan</option>
+                                        <option value="Tidak Punya Ijazah SD">Tidak Punya Ijazah SD</option>
                                         <option value="Paket A">Paket A</option>
                                         <option value="SDLB">SDLB</option>
                                         <option value="SD">SD</option>
@@ -233,7 +234,6 @@
                                         <option value="Profesi">Profesi</option>
                                         <option value="S2">S2</option>
                                         <option value="S3">S3</option>
-                                        <option value="Tidak Punya Ijazah SD">Tidak Punya Ijazah SD</option>
                                     </select>
                                 </div>
 
@@ -260,6 +260,7 @@
                                     <select class="form-select" name="ijazah_tertinggi" id="ijazah_tertinggi">
                                         <option value="">Pilih...</option>
                                         <option value="Belum Ditentukan">Belum Ditentukan</option>
+                                        <option value="Tidak Punya Ijazah SD">Tidak Punya Ijazah SD</option>
                                         <option value="Paket A">Paket A</option>
                                         <option value="SDLB">SDLB</option>
                                         <option value="SD">SD</option>
@@ -282,7 +283,6 @@
                                         <option value="Profesi">Profesi</option>
                                         <option value="S2">S2</option>
                                         <option value="S3">S3</option>
-                                        <option value="Tidak Punya Ijazah SD">Tidak Punya Ijazah SD</option>
                                     </select>
                                 </div>
                             </div>
