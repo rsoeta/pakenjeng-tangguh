@@ -26,6 +26,35 @@ $(document).ready(function () {
     };
 
     // ------------------------
+    // ASET TIDAK BERGERAK
+    // ------------------------
+    function syncMemilikiLahan() {
+        const luas = $('select[name="luas_sawah"]').val();
+        const $lahan = $('#memiliki_lahan');
+
+        if (!luas) {
+            $lahan.val('');
+            return;
+        }
+
+        if (luas === 'TIDAK MEMILIKI') {
+            $lahan.val('TIDAK');
+        } else {
+            $lahan.val('YA');
+        }
+    }
+
+    $(document).on('mousedown', '#memiliki_lahan', function (e) {
+        e.preventDefault();
+    });
+
+    // Trigger saat user ganti luas sawah
+    $(document).on('change', 'select[name="luas_sawah"]', syncMemilikiLahan);
+
+    // Trigger saat halaman load (prefill edit)
+    $(document).ready(syncMemilikiLahan);
+
+    // ------------------------
     // FASILITAS BAB
     // ------------------------
     function toggleFasilitasBab() {

@@ -46,7 +46,7 @@
                         <!-- APPLY BUTTON -->
                         <?php if ($user['role_id'] <= 3): ?>
                             <button id="btnApply"
-                                class="btn btn-success btn-sm shadow-sm px-3 py-1"
+                                class="btn btn-danger btn-sm shadow-sm px-3 py-1"
                                 data-usulan-id="<?= esc($usulan['id'] ?? $payload['id'] ?? '') ?>">
                                 <i class="fas fa-check-circle"></i> Terapkan Data
                             </button>

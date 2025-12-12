@@ -87,7 +87,7 @@ $san = $perumahan['sanitasi'] ?? [];
                     <div class="col-md-3">
                         <label class="form-label">Jenis Lantai</label>
                         <select name="jenis_lantai" id="jenis_lantai" class="form-select" <?= $editable ? '' : 'disabled' ?>>
-                            <?php $opsiLantai = ['Keramik', 'Semen', 'Tanah', 'Kayu', 'Lainnya'];
+                            <?php $opsiLantai = ['Marmer/granit', 'Keramik', 'Parket/vinil/karpet', 'Ubin/tegal/teraso', 'Kayu', 'Semen', 'Bambu', 'Tanah', 'Lainnya'];
                             $sel = $kond['jenis_lantai'] ?? '';
                             foreach ($opsiLantai as $o) {
                                 $s = ($o == $sel) ? 'selected' : '';
@@ -121,7 +121,7 @@ $san = $perumahan['sanitasi'] ?? [];
                     <div class="col-md-2">
                         <label class="form-label">Jenis Atap</label>
                         <select name="jenis_atap" id="jenis_atap" class="form-select" <?= $editable ? '' : 'disabled' ?>>
-                            <?php $opsiAtap = ['Genteng', 'Asbes', 'Seng', 'Rumbia', 'Bambu', 'Lainnya'];
+                            <?php $opsiAtap = ['Beton', 'Genteng',  'Seng', 'Asbes', 'Bambu', 'Kayu/sirap', 'Rumbia', 'Lainnya'];
                             $sel = $kond['jenis_atap'] ?? '';
                             foreach ($opsiAtap as $o) {
                                 $s = ($o == $sel) ? 'selected' : '';

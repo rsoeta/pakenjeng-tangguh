@@ -18,6 +18,14 @@ if (!empty($payload['aset'])) {
 $isComplete = !empty($aset) && !in_array(null, $aset, true);
 ?>
 
+<style>
+    select[readonly],
+    select[data-auto="true"] {
+        pointer-events: none;
+        background-color: #f8f9fa;
+        opacity: 0.95;
+    }
+</style>
 <div class="p-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="fw-bold mb-0">
@@ -120,7 +128,11 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Memiliki Lahan (selain yang ditempati)</label>
-                                <select name="memiliki_lahan" class="form-select form-select-sm" <?= $disabled ?>>
+                                <select name="memiliki_lahan"
+                                    id="memiliki_lahan"
+                                    class="form-select form-select-sm bg-light"
+                                    readonly
+                                    data-auto="true">
                                     <option value="">Pilih</option>
                                     <option value="YA" <?= ($aset['memiliki_lahan'] ?? '') === 'YA' ? 'selected' : '' ?>>YA</option>
                                     <option value="TIDAK" <?= ($aset['memiliki_lahan'] ?? '') === 'TIDAK' ? 'selected' : '' ?>>TIDAK</option>
