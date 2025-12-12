@@ -261,7 +261,13 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 $('#nama').val(d.nama ?? '');
                 $('#tempat_lahir').val(d.tempat_lahir ?? '');
                 $('#tanggal_lahir').val(d.tanggal_lahir ?? '');
-                $('#jenis_kelamin').val(d.jenis_kelamin ?? '');
+                // $('#jenis_kelamin').val(d.jenis_kelamin ?? '');
+                // Prefill Jenis Kelamin (radio button)
+                $('input[name="jenis_kelamin"]').prop('checked', false); // reset dulu
+                if (d.jenis_kelamin === 'L' || d.jenis_kelamin === 'P') {
+                    $(`input[name="jenis_kelamin"][value="${d.jenis_kelamin}"]`).prop('checked', true);
+                }
+
                 updateSelectOptions('#status_kawin', drop.status_kawin, d.status_kawin ?? d.status_kawin_label);
                 updateSelectOptions('#hubungan', drop.hubungan, d.hubungan ?? d.hubungan_label);
                 updateSelectOptions('#pekerjaan', drop.pekerjaan, d.pekerjaan ?? d.pekerjaan_label);
@@ -409,12 +415,28 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         });
 
         /* ============================================================
-         * ♀️ Toggle field kehamilan berdasarkan gender
+         * ♀️ Toggle field kehamilan berdasarkan gender (radio version)
          * ============================================================ */
-        $('#jenis_kelamin').on('change', function() {
-            if ($(this).val() === 'L') $('#status_hamil').val('').parent().hide();
-            else $('#status_hamil').parent().show();
-        }).trigger('change');
+        $('input[name="jenis_kelamin"]').on('change', function() {
+            const gender = $('input[name="jenis_kelamin"]:checked').val();
+
+            if (gender === 'L') {
+                $('#status_hamil').val('Tidak'); // otomatis Non-Hamil
+                $('#status_hamil').prop('disabled', true);
+            } else {
+                $('#status_hamil').prop('disabled', false);
+            }
+        });
+
+        // Trigger saat modal dibuka (prefill)
+        setTimeout(() => {
+            const gender = $('input[name="jenis_kelamin"]:checked').val();
+            if (gender === 'L') {
+                $('#status_hamil').val('Tidak').prop('disabled', true);
+            } else {
+                $('#status_hamil').prop('disabled', false);
+            }
+        }, 50);
 
         /* ============================================================
          * 🎓 Disable jenjang bila belum pernah sekolah
