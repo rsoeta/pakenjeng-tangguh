@@ -221,12 +221,23 @@ $san = $perumahan['sanitasi'] ?? [];
                 <strong>3. Sarana Sanitasi</strong>
             </div>
             <div class="card-body">
-                <div class="row g-2">
-                    <div class="col-md-6">
-                        <label class="form-label">Kepemilikan Fasilitas BAB</label>
-                        <select name="fasilitas_bab" id="fasilitas_bab" class="form-select" <?= $editable ? '' : 'disabled' ?>>
+
+                <div class="row g-2 align-items-end">
+
+                    <!-- Fasilitas BAB -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Kepemilikan Fasilitas BAB</label>
+                        <select name="fasilitas_bab" id="fasilitas_bab"
+                            class="form-select uniform-select" <?= $editable ? '' : 'disabled' ?>>
                             <?php
-                            $opsiBab = ['Ada, digunakan hanya Anggota Keluarga sendiri', 'Ada, digunakan bersama Anggota Keluarga dari Keluarga tertentu', 'Ada, di MCK komunal', 'Ada, di MCK umum/siapapun menggunakan', 'Ada, Anggota Keluarga tidak menggunakan', 'Tidak ada fasilitas'];
+                            $opsiBab = [
+                                'Ada, digunakan hanya Anggota Keluarga sendiri',
+                                'Ada, digunakan bersama Anggota Keluarga dari Keluarga tertentu',
+                                'Ada, di MCK komunal',
+                                'Ada, di MCK umum/siapapun menggunakan',
+                                'Ada, Anggota Keluarga tidak menggunakan',
+                                'Tidak ada fasilitas'
+                            ];
                             $sel = $san['fasilitas_bab'] ?? '';
                             foreach ($opsiBab as $o) {
                                 $s = ($o == $sel) ? 'selected' : '';
@@ -235,36 +246,46 @@ $san = $perumahan['sanitasi'] ?? [];
                             ?>
                         </select>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Jenis Kloset</label>
-                        <select name="jenis_kloset" id="jenis_kloset" class="form-select" <?= $editable ? '' : 'disabled' ?>>
-                            <?php
-                            $opsiKloset = ['Leher angsa', 'Plengsengan dengan tutup', 'Plengsengan tanpa tutup', 'Cemplung'];
-                            $sel = $san['jenis_kloset'] ?? '';
-                            foreach ($opsiKloset as $o) {
-                                $s = ($o == $sel) ? 'selected' : '';
-                                echo "<option value=\"$o\" $s>$o</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-                </div>
 
-                <div class="row g-2 mt-2">
-                    <div class="col-md-6">
-                        <label class="form-label">Tempat Pembuangan Akhir Tinja</label>
-                        <select name="pembuangan_tinja" id="pembuangan_tinja" class="form-select" <?= $editable ? '' : 'disabled' ?>>
-                            <?php
-                            $opsiTinja = ['Tangki septik', 'IPAL', 'Kolam/sawah/sungai/danau/laut', 'Lubang tanah', 'Pantai/tanah lapang/kebun', 'Lainnya'];
-                            $sel = $san['pembuangan_tinja'] ?? '';
-                            foreach ($opsiTinja as $o) {
-                                $s = ($o == $sel) ? 'selected' : '';
-                                echo "<option value=\"$o\" $s>$o</option>";
-                            }
-                            ?>
-                        </select>
+                    <!-- Jenis Kloset -->
+                    <div class="fasilitas-extra">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Jenis Kloset</label>
+                            <select name="jenis_kloset" id="jenis_kloset"
+                                class="form-select uniform-select" <?= $editable ? '' : 'disabled' ?>>
+                                <?php
+                                $opsiKloset = ['Leher angsa', 'Plengsengan dengan tutup', 'Plengsengan tanpa tutup', 'Cemplung'];
+                                $sel = $san['jenis_kloset'] ?? '';
+                                foreach ($opsiKloset as $o) {
+                                    $s = ($o == $sel) ? 'selected' : '';
+                                    echo "<option value=\"$o\" $s>$o</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <!-- Pembuangan Tinja -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Tempat Pembuangan Akhir Tinja</label>
+                            <select name="pembuangan_tinja" id="pembuangan_tinja"
+                                class="form-select uniform-select" <?= $editable ? '' : 'disabled' ?>>
+                                <?php
+                                $opsiTinja = [
+                                    'Tangki septik',
+                                    'IPAL',
+                                    'Kolam/sawah/sungai/danau/laut',
+                                    'Lubang tanah',
+                                    'Pantai/tanah lapang/kebun',
+                                    'Lainnya'
+                                ];
+                                $sel = $san['pembuangan_tinja'] ?? '';
+                                foreach ($opsiTinja as $o) {
+                                    $s = ($o == $sel) ? 'selected' : '';
+                                    echo "<option value=\"$o\" $s>$o</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
                     </div>
-
                 </div>
             </div>
         </div>

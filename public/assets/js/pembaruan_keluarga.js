@@ -24,6 +24,41 @@ $(document).ready(function () {
             reader.readAsDataURL(input.files[0]);
         }
     };
+
+    // ------------------------
+    // FASILITAS BAB
+    // ------------------------
+    function toggleFasilitasBab() {
+    const val = $('#fasilitas_bab').val();
+
+    if (val === "Tidak ada fasilitas") {
+
+        // Sembunyikan elemen
+        $('.fasilitas-extra').hide();
+
+        // Kosongkan value
+        $('#jenis_kloset').val("");
+        $('#pembuangan_tinja').val("");
+
+        // Disable agar tidak terkirim
+        $('#jenis_kloset, #pembuangan_tinja').prop('disabled', true);
+
+    } else {
+
+        // Tampilkan elemen
+        $('.fasilitas-extra').show();
+
+        // Aktifkan kembali
+        $('#jenis_kloset, #pembuangan_tinja').prop('disabled', false);
+    }
+}
+
+// Event perubahan
+$('#fasilitas_bab').on('change', toggleFasilitasBab);
+
+// Trigger saat halaman load
+toggleFasilitasBab();
+
 // ===================================================================
 // 🎓 SMART EDUCATION MODULE — FINAL FIX (KELAS 8 + VALIDASI USIA)
 // ===================================================================
@@ -185,7 +220,7 @@ function validateJenjangIjazah() {
 $('#jenjang_pendidikan, #ijazah_tertinggi, #partisipasi_sekolah')
     .on('change', validateJenjangIjazah);
 
-    
+
 // ===================================================================
 // 7. VALIDASI KELAS — FIX TAMAT & LULUS (KELAS 8 ALWAYS VALID)
 // ===================================================================
