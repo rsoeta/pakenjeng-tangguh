@@ -15,79 +15,79 @@
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <h4 class="fw-bold mb-0">🗂️ Detail Pembaruan Data Keluarga</h4>
 
-                    <div class="text-end">
+                    <div class="d-flex justify-content-end align-items-center flex-wrap gap-1 mt-2">
 
                         <!-- BADGE STATUS -->
                         <?php $status = $usulan['status'] ?? $sumber ?? ''; ?>
 
                         <?php if (!empty($usulan['status']) && $usulan['status'] == 'draft'): ?>
-                            <span class="badge bg-warning text-dark mb-1 d-inline-block">Draft Pembaruan</span>
+                            <span class="badge bg-warning text-dark px-2 py-1 small">Draft</span>
 
                         <?php elseif ($status == $sumber): ?>
-                            <span class="badge bg-success mb-1 d-inline-block">Baru</span>
+                            <span class="badge bg-success px-2 py-1 small">Baru</span>
 
                         <?php elseif (!empty($usulan['status'])): ?>
-                            <span class="badge bg-primary mb-1 d-inline-block">Tervalidasi</span>
+                            <span class="badge bg-primary px-2 py-1 small">Tervalidasi</span>
                         <?php endif; ?>
 
                         <!-- BADGE DESIL -->
                         <?php if (!empty($kategori_desil)): ?>
-                            <div class="mt-1">
-                                <button type="button"
-                                    class="btn 
-                        <?php
-                            if ($kategori_desil <= 2) echo 'btn-danger';
-                            elseif ($kategori_desil <= 4) echo 'btn-warning';
-                            else echo 'btn-success';
-                        ?>">
-                                    Desil <span class="badge bg-secondary"><?= $kategori_desil ?></span>
-                                </button>
-                            </div>
+                            <span class="badge 
+            <?php
+                            if ($kategori_desil <= 2) echo 'bg-danger';
+                            elseif ($kategori_desil <= 4) echo 'bg-warning text-dark';
+                            else echo 'bg-success';
+            ?>
+            px-2 py-1 small">
+                                Desil <span class="badge bg-light text-dark"><?= $kategori_desil ?></span>
+                            </span>
+                        <?php endif; ?>
+
+                        <!-- APPLY BUTTON -->
+                        <?php if ($user['role_id'] <= 3): ?>
+                            <button id="btnApply"
+                                class="btn btn-success btn-sm shadow-sm px-3 py-1"
+                                data-usulan-id="<?= esc($usulan['id'] ?? $payload['id'] ?? '') ?>">
+                                <i class="fas fa-check-circle"></i> Terapkan Data
+                            </button>
                         <?php endif; ?>
 
                     </div>
+
                 </div>
+            </div>
 
-                <!-- Nav Tabs -->
-                <ul class="nav nav-tabs" id="pembaruanTabs" role="tablist">
-                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabKeluarga" role="tab">Data Keluarga</a></li>
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-anggota" role="tab">Anggota</a></li>
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabRumah" role="tab">Rumah</a></li>
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabAset" role="tab">Aset</a></li>
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabFoto" role="tab">Foto & Geotag</a></li>
-                </ul>
+            <!-- Nav Tabs -->
+            <ul class="nav nav-tabs" id="pembaruanTabs" role="tablist">
+                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabKeluarga" role="tab">Data Keluarga</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-anggota" role="tab">Anggota</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabRumah" role="tab">Rumah</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabAset" role="tab">Aset</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabFoto" role="tab">Foto & Geotag</a></li>
+            </ul>
 
-                <!-- Tab Content -->
-                <div class="tab-content p-3">
-                    <div class="tab-pane fade show active" id="tabKeluarga" role="tabpanel">
-                        <?= $this->include('dtsen/pembaruan/tab_keluarga'); ?>
-                    </div>
-                    <div class="tab-pane fade" id="tab-anggota" role="tabpanel">
-                        <?= $this->include('dtsen/pembaruan/tab_anggota'); ?>
-                    </div>
-                    <div class="tab-pane fade" id="tabRumah" role="tabpanel">
-                        <?= $this->include('dtsen/pembaruan/tab_rumah'); ?>
-                    </div>
-                    <div class="tab-pane fade" id="tabAset" role="tabpanel">
-                        <?= $this->include('dtsen/pembaruan/tab_aset'); ?>
-                    </div>
-                    <div class="tab-pane fade" id="tabFoto" role="tabpanel">
-                        <?= $this->include('dtsen/pembaruan/tab_foto'); ?>
-                    </div>
+            <!-- Tab Content -->
+            <div class="tab-content p-3">
+                <div class="tab-pane fade show active" id="tabKeluarga" role="tabpanel">
+                    <?= $this->include('dtsen/pembaruan/tab_keluarga'); ?>
+                </div>
+                <div class="tab-pane fade" id="tab-anggota" role="tabpanel">
+                    <?= $this->include('dtsen/pembaruan/tab_anggota'); ?>
+                </div>
+                <div class="tab-pane fade" id="tabRumah" role="tabpanel">
+                    <?= $this->include('dtsen/pembaruan/tab_rumah'); ?>
+                </div>
+                <div class="tab-pane fade" id="tabAset" role="tabpanel">
+                    <?= $this->include('dtsen/pembaruan/tab_aset'); ?>
+                </div>
+                <div class="tab-pane fade" id="tabFoto" role="tabpanel">
+                    <?= $this->include('dtsen/pembaruan/tab_foto'); ?>
                 </div>
             </div>
         </div>
+</div>
 
-        <?php if ($user['role_id'] <= 3): ?>
-            <div class="text-end">
-                <button id="btnApply"
-                    class="btn btn-success btn-lg shadow-sm mt-3"
-                    data-usulan-id="<?= esc($usulan['id'] ?? $payload['id'] ?? '') ?>">
-                    <i class="fas fa-check-circle"></i> Terapkan Data ke Database Utama
-                </button>
-            </div>
-        <?php endif; ?>
-    </section>
+</section>
 </div>
 
 <!-- Variabel global -->

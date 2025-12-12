@@ -66,6 +66,7 @@ class Filters extends BaseConfig
 				'expKip',
 				'dtsen-monitoring',
 				'dtsen-monitoring/*',
+				'admin/articles',
 			]
 		],
 

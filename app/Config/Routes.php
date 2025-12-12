@@ -205,7 +205,7 @@ $routes->group('dtsen', [
 });
 
 // public CMS / admin
-$routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($routes) {
+$routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => ['authfilterdtks', 'menufilterdtks']], function ($routes) {
 	$routes->get('articles/data', 'ArticleController::data');
 	$routes->get('articles/get/(:num)', 'ArticleController::get/$1');
 	$routes->post('articles/store', 'ArticleController::store');
