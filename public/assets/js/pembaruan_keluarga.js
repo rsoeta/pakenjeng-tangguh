@@ -742,7 +742,7 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
         $('#keluarga_no_kk').val(noKK);
 
         // ===========================================
-        // 🔒 2) VALIDASI KHUSUS No KK (16 digit + tidak boleh 00)
+        // 🔒 2) VALIDASI KHUSUS No KK (16 digit + tidak boleh 000)
         // ===========================================
         if (noKK.length !== 16) {
             Swal.fire({
@@ -753,11 +753,11 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
             return;
         }
 
-        if (noKK.slice(-2) === "00") {
+        if (noKK.slice(-3) === "000") {
             Swal.fire({
                 icon: 'error',
                 title: 'Nomor KK Tidak Valid',
-                text: 'Dua digit terakhir Nomor KK tidak boleh 00.'
+                text: 'Tiga digit terakhir Nomor KK tidak boleh 000.'
             });
             return;
         }
