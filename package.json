@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "browser-image-compression": "^2.0.2",
     "moment": "^2.30.1"
   }
 }

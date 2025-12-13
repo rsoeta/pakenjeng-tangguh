@@ -90,3 +90,43 @@ function tampilWilayahHumanis($wilayah_tugas)
     // Pisahkan antar RW dengan tanda "; "
     return implode('; ', $result);
 }
+
+if (!function_exists('formatTanggalWIB')) {
+    function formatTanggalWIB()
+    {
+        date_default_timezone_set('Asia/Jakarta');
+
+        $hari = [
+            'Sun' => 'Min',
+            'Mon' => 'Sen',
+            'Tue' => 'Sel',
+            'Wed' => 'Rab',
+            'Thu' => 'Kam',
+            'Fri' => 'Jum',
+            'Sat' => 'Sab',
+        ];
+
+        $bulan = [
+            1 => 'Jan',
+            2 => 'Feb',
+            3 => 'Mar',
+            4 => 'Apr',
+            5 => 'Mei',
+            6 => 'Jun',
+            7 => 'Jul',
+            8 => 'Agu',
+            9 => 'Sep',
+            10 => 'Okt',
+            11 => 'Nov',
+            12 => 'Des'
+        ];
+
+        $h = $hari[date('D')];
+        $tgl = date('d');
+        $bln = $bulan[(int) date('m')];
+        $thn = date('Y');
+        $jam = date('H:i');
+
+        return "{$h}, {$tgl} {$bln} {$thn}, {$jam} WIB";
+    }
+}

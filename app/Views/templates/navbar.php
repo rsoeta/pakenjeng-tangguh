@@ -16,7 +16,17 @@ $user_image = isset($user_login['user_image'])
             <a href="/pages" class="nav-link">Home</a>
         </li>
     </ul>
+
     <ul class="navbar-nav ml-auto">
+
+        <!-- 🕒 Tanggal & Waktu WIB -->
+        <li class="nav-item d-flex align-items-center mr-3">
+            <span id="waktuWIB" class="navbar-text waktu-wib">
+                <!-- diisi via JS atau PHP -->
+                <?= formatTanggalWIB(); ?>
+            </span>
+        </li>
+
         <div class="text-right mr-3">
             <button id="toggleTheme" class="btn btn-sm btn-outline-light rounded-pill">
                 <i class="fas fa-moon"></i>

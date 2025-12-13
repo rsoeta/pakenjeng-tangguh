@@ -331,10 +331,10 @@ $geo  = $payload['geo'] ?? [];
         });
     });
 
-    // Kompres Gambar
-    const MAX_FILE_SIZE = 500000; // 500 KB
-    const MAX_WIDTH = 1280; // resize max width (untuk HP kamera besar)
-    const inputs = [{
+    /* ============================================================
+     * 📸 IMAGE UPLOAD + COMPRESSION HANDLER (FINAL)
+     * ============================================================ */
+    const imageInputs = [{
             input: 'fotoKtp',
             preview: 'previewKtp'
         },
@@ -348,82 +348,84 @@ $geo  = $payload['geo'] ?? [];
         }
     ];
 
-    inputs.forEach(item => {
+    imageInputs.forEach(item => {
         const fileInput = document.getElementById(item.input);
         if (!fileInput) return;
 
-        fileInput.addEventListener('change', handleImage);
-
-        function handleImage(event) {
-            const file = event.target.files[0];
+        fileInput.addEventListener('change', async function() {
+            const file = this.files[0];
             if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = new Image();
-                img.src = e.target.result;
+            // validasi file gambar
+            if (!file.type.startsWith('image/')) {
+                Swal.fire(
+                    'File tidak valid',
+                    'File harus berupa gambar (JPG / PNG).',
+                    'warning'
+                );
+                this.value = '';
+                return;
+            }
 
-                img.onload = async function() {
-                    const compressedBlob = await compressImage(img);
-                    const compressedFile = new File([compressedBlob], file.name, {
-                        type: "image/jpeg"
+            try {
+                // 🔹 proses kompresi
+                const compressedResult = await compressWithLibrary(file);
+
+                // 🔒 PAKSA hasil selalu File (atasi Blob vs File)
+                const compressedFile = compressedResult instanceof File ?
+                    compressedResult :
+                    new File([compressedResult], file.name, {
+                        type: 'image/jpeg',
+                        lastModified: Date.now()
                     });
 
-                    // untuk preview
-                    const url = URL.createObjectURL(compressedBlob);
-                    document.getElementById(item.preview).src = url;
+                // 🔹 preview
+                const previewEl = document.getElementById(item.preview);
+                if (previewEl) {
+                    previewEl.src = URL.createObjectURL(compressedFile);
+                }
 
-                    // replace file input
-                    const dt = new DataTransfer();
-                    dt.items.add(compressedFile);
-                    fileInput.files = dt.files;
+                // 🔹 replace input file
+                const dt = new DataTransfer();
+                dt.items.add(compressedFile);
+                fileInput.files = dt.files;
 
-                    console.log(
-                        `${item.input}
-                     before: ${(file.size / 1024).toFixed(1)} KB,
-                     after: ${(compressedFile.size / 1024).toFixed(1)} KB`
-                    );
-                };
-            };
-            reader.readAsDataURL(file);
-        }
+                console.log(
+                    `[${item.input}] before: ${(file.size / 1024).toFixed(1)} KB | after: ${(compressedFile.size / 1024).toFixed(1)} KB`
+                );
+
+            } catch (err) {
+                console.error('❌ Gagal kompres gambar:', err);
+
+                Swal.fire(
+                    'Gagal Kompres Gambar',
+                    err.message || 'Terjadi kesalahan saat memproses gambar.',
+                    'error'
+                );
+
+                // reset input jika gagal
+                this.value = '';
+            }
+        });
     });
 
-    async function compressImage(img) {
-        let canvas = document.createElement("canvas");
-        let ctx = canvas.getContext("2d");
-
-        // resize jika terlalu besar
-        let scale = 1;
-        if (img.width > MAX_WIDTH) {
-            scale = MAX_WIDTH / img.width;
+    /* ============================================================
+     * 🗜️ IMAGE COMPRESSION HELPER (browser-image-compression)
+     * ============================================================ */
+    async function compressWithLibrary(file) {
+        if (typeof imageCompression !== 'function') {
+            throw new Error('Library imageCompression belum dimuat');
         }
 
-        canvas.width = img.width * scale;
-        canvas.height = img.height * scale;
+        const options = {
+            maxSizeMB: 0.5, // target ±500 KB
+            maxWidthOrHeight: 1280, // aman untuk foto HP
+            useWebWorker: true,
+            fileType: 'image/jpeg',
+            initialQuality: 0.8
+        };
 
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        let quality = 0.92;
-        let blob = await canvasToBlob(canvas, quality);
-
-        // loop sampai < 500 KB
-        while (blob.size > MAX_FILE_SIZE && quality > 0.1) {
-            quality -= 0.07;
-            blob = await canvasToBlob(canvas, quality);
-        }
-
-        return blob;
-    }
-
-    function canvasToBlob(canvas, quality) {
-        return new Promise(resolve => {
-            canvas.toBlob(
-                blob => resolve(blob),
-                "image/jpeg",
-                quality
-            );
-        });
+        return await imageCompression(file, options);
     }
 </script>
 

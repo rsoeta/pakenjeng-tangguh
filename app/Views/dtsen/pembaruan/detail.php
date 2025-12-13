@@ -152,6 +152,10 @@
     });
 </script>
 
+<!-- browser-image-compression -->
+<!-- <script src="https://unpkg.com/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script> -->
+<script src="/assets/vendor/browser-image-compression.js"></script>
+
 <!-- Script utama -->
 <script src="<?= base_url('assets/js/pembaruan_keluarga.js'); ?>"></script>
 

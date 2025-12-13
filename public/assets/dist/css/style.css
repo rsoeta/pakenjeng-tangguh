@@ -489,9 +489,48 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
     max-width: 95% !important;   /* supaya tetap responsif */
 }
 
+/* Jam */
+/* ===== WIB Navbar ===== */
+.waktu-wib {
+    font-size: 2rem;              /* desktop: jelas & proporsional */
+    font-weight: 600;
+    color: #f8f9fa;
+    white-space: nowrap;
+
+    /* 🔥 Shadow hitam halus */
+    text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.55),
+        0 0 1px rgba(0, 0, 0, 0.8);
+}
+
+/* Tablet */
+@media (max-width: 992px) {
+    .waktu-wib {
+        font-size: 1.1rem;
+    }
+}
+
 @media (max-width: 768px) {
     #offcanvasMaster.offcanvas {
         width: 100% !important;
+    }
+    .waktu-wib {
+         font-size: 1.1rem;        /* 🔥 diperbesar dari sebelumnya */
+        font-weight: 500;
+    }
+}
+
+/* Mobile */
+@media (max-width: 576px) {
+    .waktu-wib {
+        font-size: 1.1rem;
+        font-weight: 600;
+        line-height: 1.2;
+
+        /* sedikit lebih tegas di mobile */
+        text-shadow:
+            0 1px 3px rgba(0, 0, 0, 0.65),
+            0 0 2px rgba(0, 0, 0, 0.9);
     }
 }
 
