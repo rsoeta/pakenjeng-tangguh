@@ -560,6 +560,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                                 showConfirmButton: false,
                                 willClose: () => {
                                     // 🔄 Reload tabel anggota
+                                    loadTableAnggota();
                                     $(document).trigger('anggota:saved');
                                 }
                             });

@@ -1877,20 +1877,6 @@ class PembaruanKeluarga extends BaseController
                 'mode' => 'insert'
             ]);
 
-            // // 🔍 Pastikan NIK tidak duplikat dalam 1 KK
-            // $nikExists = $db->table('dtsen_usulan_art ua')
-            //     ->join('dtsen_usulan u', 'u.id = ua.dtsen_usulan_id', 'left')
-            //     ->where('ua.nik', $post['nik'])
-            //     ->where('u.dtsen_kk_id', $idKk)
-            //     ->countAllResults();
-
-            // if ($nikExists) {
-            //     return $this->response->setJSON([
-            //         'status' => 'error',
-            //         'message' => 'NIK ini sudah terdaftar pada KK yang sama.'
-            //     ]);
-            // }
-
             // 🔹 Siapkan data utama untuk tabel dtsen_usulan_art
             $dataArt = [
                 'dtsen_usulan_id' => $usulan_id,
