@@ -54,3 +54,16 @@ RewriteRule .* - [E=noconntimeout:1]
    php_value upload_max_filesize 2G
    php_value post_max_size 2G
 </IfModule>
+
+<IfModule mod_mime.c>
+  AddType font/ttf .ttf
+  AddType font/otf .otf
+  AddType application/font-woff .woff
+  AddType application/font-woff2 .woff2
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(ttf|otf|woff|woff2)$">
+    Header set Access-Control-Allow-Origin "*"
+  </FilesMatch>
+</IfModule>
