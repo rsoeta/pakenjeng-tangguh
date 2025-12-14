@@ -20,12 +20,10 @@ $user_image = isset($user_login['user_image'])
     <ul class="navbar-nav ml-auto">
 
         <!-- 🕒 Tanggal & Waktu WIB -->
-        <li class="nav-item d-flex align-items-center mr-3">
-            <span id="waktuWIB" class="navbar-text waktu-wib">
-                <!-- diisi via JS atau PHP -->
-                <?= formatTanggalWIB(); ?>
-            </span>
-        </li>
+        <div id="wibClock" class="wib-clock text-end">
+            <div id="wibTime" class="wib-time">00:00:00</div>
+            <div id="wibDate" class="wib-date">Sabtu, 13 Des 2025</div>
+        </div>
 
         <div class="text-right mr-3">
             <button id="toggleTheme" class="btn btn-sm btn-outline-light rounded-pill">

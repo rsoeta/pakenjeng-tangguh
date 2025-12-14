@@ -255,9 +255,30 @@
                     data: 'kepala_keluarga',
                     className: 'text-capitalize'
                 },
+                // {
+                //     data: 'no_kk'
+                // },
                 {
-                    data: 'no_kk'
+                    data: 'no_kk',
+                    className: 'text-nowrap',
+                    render: function(noKK, type, row) {
+                        if (!noKK) return '-';
+
+                        return `
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-semibold">${noKK}</span>
+                                <button 
+                                    type="button"
+                                    class="btn btn-outline-secondary btn-xs btnCopyNoKK"
+                                    data-value="${noKK}"
+                                    title="Salin No KK">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
                 },
+
                 {
                     data: 'alamat',
                     render: d => d || '-'
@@ -450,8 +471,26 @@
                     data: 'nama_kepala'
                 },
                 {
-                    data: 'no_kk_target'
+                    data: 'no_kk_target',
+                    className: 'text-nowrap',
+                    render: function(noKK, type, row) {
+                        if (!noKK) return '-';
+
+                        return `
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-semibold">${noKK}</span>
+                                <button 
+                                    type="button"
+                                    class="btn btn-outline-secondary btn-xs btnCopyNoKK"
+                                    data-value="${noKK}"
+                                    title="Salin No KK">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
                 },
+
                 {
                     data: 'status',
                     render: () => `<span class="badge bg-info">SUBMITTED</span>`
@@ -502,6 +541,27 @@
             ],
             responsive: true,
             pageLength: 10
+        });
+
+        // ========================= 📋 COPY NO KK =========================
+        $(document).on('click', '.btnCopyNoKK', function() {
+            const value = $(this).data('value');
+
+            if (!value) return;
+
+            navigator.clipboard.writeText(value).then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Tersalin',
+                    text: 'No. KK berhasil disalin ke clipboard',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top'
+                });
+            }).catch(() => {
+                Swal.fire('Gagal', 'Tidak dapat menyalin No. KK', 'error');
+            });
         });
 
         // ========================= 🔥 HAPUS USULAN KELUARGA =========================

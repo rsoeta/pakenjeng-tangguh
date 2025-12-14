@@ -201,6 +201,42 @@
 
         return response;
     };
+
+    function startWIBClock() {
+        const timeEl = document.getElementById('wibTime');
+        const dateEl = document.getElementById('wibDate');
+
+        if (!timeEl || !dateEl) return;
+
+        const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const bulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+        function updateClock() {
+            const now = new Date(
+                new Date().toLocaleString('en-US', {
+                    timeZone: 'Asia/Jakarta'
+                })
+            );
+
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+
+            const dayName = hari[now.getDay()];
+            const date = String(now.getDate()).padStart(2, '0');
+            const monthName = bulan[now.getMonth()];
+            const year = now.getFullYear();
+
+            timeEl.textContent = `${h}:${m}:${s}`;
+            dateEl.textContent = `${dayName}, ${date} ${monthName} ${year}`;
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+    }
+
+    // jalankan setelah DOM siap
+    document.addEventListener('DOMContentLoaded', startWIBClock);
 </script>
 
 </body>

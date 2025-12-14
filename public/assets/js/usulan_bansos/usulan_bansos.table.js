@@ -170,7 +170,9 @@ $(document).ready(function () {
                     title: 'NIK disalin',
                     text: `NIK ${nik} berhasil disalin ke clipboard`,
                     timer: 1500,
-                    showConfirmButton: false
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top'
                 });
             })
             .catch(err => {
@@ -193,7 +195,9 @@ $(document).ready(function () {
                     title: 'Nama disalin',
                     text: `Nama "${nama}" berhasil disalin ke clipboard`,
                     timer: 1500,
-                    showConfirmButton: false
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top'
                 });
             })
             .catch(err => {
