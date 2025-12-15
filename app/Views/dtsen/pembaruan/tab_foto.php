@@ -418,11 +418,11 @@ $geo  = $payload['geo'] ?? [];
         }
 
         const options = {
-            maxSizeMB: 0.5, // target ±500 KB
+            maxSizeMB: 0.45, // target ±450 KB
             maxWidthOrHeight: 1280, // aman untuk foto HP
             useWebWorker: true,
             fileType: 'image/jpeg',
-            initialQuality: 0.8
+            initialQuality: 0.75 // sedikit diturunkan
         };
 
         return await imageCompression(file, options);

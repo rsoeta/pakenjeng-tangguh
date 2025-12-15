@@ -130,3 +130,31 @@ if (!function_exists('formatTanggalWIB')) {
         return "{$h}, {$tgl} {$bln} {$thn}, {$jam} WIB";
     }
 }
+
+function recompressImageToTarget(
+    string $filePath,
+    int $targetKB = 500,
+    int $minQuality = 65
+) {
+    if (!file_exists($filePath)) return;
+
+    [$width, $height, $type] = getimagesize($filePath);
+    if ($type !== IMAGETYPE_JPEG) return;
+
+    $image = imagecreatefromjpeg($filePath);
+    if (!$image) return;
+
+    $quality = 85;
+
+    do {
+        ob_start();
+        imagejpeg($image, null, $quality);
+        $data = ob_get_clean();
+
+        $sizeKB = strlen($data) / 1024;
+        $quality -= 5;
+    } while ($sizeKB > $targetKB && $quality >= $minQuality);
+
+    file_put_contents($filePath, $data);
+    imagedestroy($image);
+}

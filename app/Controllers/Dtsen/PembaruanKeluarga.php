@@ -1060,6 +1060,8 @@ class PembaruanKeluarga extends BaseController
                             'longitude' => (string) ($lngText ?? ($geoGabungan['lng'] ?? '-')),
                             'wilayah'   => (string) ($wilayahFull ?? '')
                         ]);
+                        // 🔧 FINAL HARD COMPRESSION (WAJIB)
+                        recompressImageToTarget($finalPath, 500);
                     }
 
                     // simpan ke payload
