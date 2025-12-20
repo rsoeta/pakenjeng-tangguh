@@ -2,13 +2,21 @@
 
 namespace App\Controllers\Dtsen;
 
+use CodeIgniter\Controller;
+use CodeIgniter\HTTP\IncomingRequest;
+
+
 use App\Models\Dtsen\DtsenKkModel;
 use App\Models\Dtsen\DtsenRtModel;
 use App\Models\GenModel;
-use CodeIgniter\Controller;
 
 class DtsenSe extends Controller
 {
+    /**
+     * @var IncomingRequest
+     */
+    protected $request;
+
     protected $kkModel;
     protected $rtModel;
     protected $genModel;
@@ -87,10 +95,10 @@ class DtsenSe extends Controller
             $idKk = $this->request->getPost('id_kk');
             $kategoriDesil = $this->request->getPost('kategori_desil');
 
-            if (empty($idKk) || empty($kategoriDesil)) {
+            if (empty($idKk)) {
                 return $this->response->setJSON([
                     'status' => 'error',
-                    'message' => 'ID KK atau Desil tidak boleh kosong.'
+                    'message' => 'ID KK tidak boleh kosong.'
                 ]);
             }
 

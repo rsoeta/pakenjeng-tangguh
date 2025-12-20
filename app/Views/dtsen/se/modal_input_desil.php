@@ -27,7 +27,7 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Kategori Desil</label>
-                        <select class="form-select" name="kategori_desil" id="kategori_desil" required>
+                        <select class="form-select" name="kategori_desil" id="kategori_desil">
                             <option value="">[ Pilih Desil ]</option>
                             <?php for ($i = 1; $i <= 10; $i++) : ?>
                                 <option value="<?= $i ?>">Desil <?= $i ?></option>
