@@ -19,21 +19,20 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         </div>
     <?php endif; ?>
 </div>
-<table class="table table-bordered table-sm table-striped" id="tableAnggota">
-    <thead class="table-light">
+<table class="table table-bordered table-sm table-striped w-100" id="tableAnggota">
+    <thead class="table-light text-center">
         <tr>
-            <th style="width:5%">No</th>
-            <th style="width:20%">NIK</th>
+            <th></th> <!-- Responsive control -->
+            <th>No</th>
+            <th>No. KK</th>
+            <th>NIK</th>
             <th>Nama</th>
-            <th style="width:20%">Hubungan Keluarga</th>
-            <th style="width:15%" class="text-center">Aksi</th>
+            <th>Tanggal Lahir</th>
+            <th>Hubungan Keluarga</th>
+            <th>Aksi</th>
         </tr>
     </thead>
-    <tbody>
-        <tr>
-            <td colspan="5" class="text-center text-muted">Memuat data...</td>
-        </tr>
-    </tbody>
+
 </table>
 <!-- </div> -->
 
@@ -560,7 +559,9 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                                 showConfirmButton: false,
                                 willClose: () => {
                                     // 🔄 Reload tabel anggota
-                                    loadTableAnggota();
+                                    // loadTableAnggota();
+                                    initTableAnggota();
+                                    // Tutup modal
                                     $(document).trigger('anggota:saved');
                                 }
                             });
@@ -584,60 +585,175 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         /* ============================================================
          * 📋 LOAD TABLE ANGGOTA
          * ============================================================ */
-        function loadTableAnggota(callback) {
+        // function loadTableAnggota(callback) {
+        //     const idKk = $('#id_kk').val();
+        //     if (!idKk) {
+        //         console.warn('⚠️ ID KK belum ada, tidak bisa memuat anggota.');
+        //         if (callback) callback();
+        //         return;
+        //     }
+
+        //     $.getJSON(`${window.baseUrl}/pembaruan-keluarga/get-anggota-list/${idKk}`, function(res) {
+        //         if (res.status !== 'success') {
+        //             $('#tableAnggota tbody').html(`<tr><td colspan="5" class="text-center text-danger">${res.message}</td></tr>`);
+        //             if (callback) callback();
+        //             return;
+        //         }
+
+        //         let html = '';
+        //         res.data.forEach((row, i) => {
+
+        //             const hubungan = row.jenis_shdk ?
+        //                 row.jenis_shdk.toUpperCase() :
+        //                 (row.hubungan_keluarga ?? row.shdk ?? '-');
+
+        //             const tglLahir = row.tanggal_lahir ?
+        //                 new Date(row.tanggal_lahir).toLocaleDateString('id-ID') :
+        //                 '-';
+
+        //             html += `
+        //             <tr>
+        //                 <td class="text-center">${i + 1}</td>
+        //                 <td>${row.no_kk ?? '-'}</td>
+        //                 <td>${row.nik ?? '-'}</td>
+        //                 <td>${row.nama ?? '-'}</td>
+        //                 <td>${tglLahir}</td>
+        //                 <td>${hubungan}</td>
+        //                 <td class="text-end">
+        //                     <div class="btn-group btn-group-sm">
+        //                         <button class="btn btn-primary btnEditAnggota"
+        //                                 data-id="${row.id_art ?? row.id}">
+        //                             <i class="fas fa-edit"></i>
+        //                         </button>
+        //                         <button class="btn btn-danger btnHapusAnggota"
+        //                                 data-id="${row.id_art ?? row.id}">
+        //                             <i class="fas fa-trash-alt"></i>
+        //                         </button>
+        //                     </div>
+        //                 </td>
+        //             </tr>`;
+        //         });
+
+
+        //         $('#tableAnggota tbody').html(
+        //             html || `<tr><td colspan="5" class="text-center text-muted">Belum ada anggota keluarga.</td></tr>`
+        //         );
+
+        //         if (callback) callback();
+        //     }).fail(() => {
+        //         $('#tableAnggota tbody').html(`<tr><td colspan="5" class="text-center text-danger">Gagal memuat data anggota.</td></tr>`);
+        //         if (callback) callback();
+        //     });
+        // }
+
+        let tableAnggota;
+
+        function initTableAnggota() {
             const idKk = $('#id_kk').val();
-            if (!idKk) {
-                console.warn('⚠️ ID KK belum ada, tidak bisa memuat anggota.');
-                if (callback) callback();
+            if (!idKk) return;
+
+            if ($.fn.DataTable.isDataTable('#tableAnggota')) {
+                tableAnggota.ajax.reload();
                 return;
             }
 
-            $.getJSON(`${window.baseUrl}/pembaruan-keluarga/get-anggota-list/${idKk}`, function(res) {
-                if (res.status !== 'success') {
-                    $('#tableAnggota tbody').html(`<tr><td colspan="5" class="text-center text-danger">${res.message}</td></tr>`);
-                    if (callback) callback();
-                    return;
-                }
+            tableAnggota = $('#tableAnggota').DataTable({
+                destroy: true,
+                ajax: {
+                    url: `${window.baseUrl}/pembaruan-keluarga/get-anggota-list/${idKk}`,
+                    dataSrc: function(json) {
+                        if (json.status !== 'success') {
+                            Swal.fire('Error', json.message || 'Gagal memuat anggota', 'error');
+                            return [];
+                        }
+                        return json.data;
+                    }
+                },
+                responsive: true,
+                autoWidth: false,
+                pageLength: 10,
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
+                },
+                columns: [{
+                        data: null,
+                        defaultContent: '',
+                        className: 'control',
+                        orderable: false
+                    },
+                    {
+                        data: null,
+                        render: (d, t, r, m) => m.row + 1
+                    },
+                    {
+                        data: 'no_kk',
+                        defaultContent: '-'
+                    },
+                    {
+                        data: 'nik',
+                        defaultContent: '-'
+                    },
+                    {
+                        data: 'nama',
+                        defaultContent: '-'
+                    },
+                    {
+                        data: 'tanggal_lahir',
+                        render: d => d ?
+                            new Date(d).toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                            }) : '-'
+                    },
+                    { // Hubungan
+                        data: null,
+                        render: row =>
+                            row.hubungan_keluarga_label ??
+                            row.jenis_shdk ??
+                            row.hubungan_keluarga ??
+                            '-'
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        render: r => `
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-primary btnEditAnggota" data-id="${r.id_art ?? r.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btnHapusAnggota" data-id="${r.id_art ?? r.id}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>`
+                    }
+                ]
 
-                let html = '';
-                res.data.forEach((row, i) => {
-                    const hubungan = row.jenis_shdk ?
-                        row.jenis_shdk.toUpperCase() :
-                        (row.hubungan_keluarga ?? row.shdk ?? '-');
-
-                    html += `
-                <tr>
-                    <td>${i + 1}</td>
-                    <td>${row.nik ?? '-'}</td>
-                    <td>${row.nama ?? '-'}</td>
-                    <td>${hubungan}</td>
-                    <td class="text-end">
-                    <!-- gabungkan tombol -->
-                    <div class="btn-group">
-                        <button class="btn btn-sm btn-primary btnEditAnggota" data-id="${row.id_art ?? row.id}" title="Edit"><i class="fas fa-edit"></i>Edit</button>
-                        <button class="btn btn-sm btn-danger btnHapusAnggota" data-id="${row.id_art ?? row.id}" title="Hapus"><i class="fas fa-trash-alt"></i>Hapus</button>
-                    </div>
-                    </td>
-                </tr>`;
-                });
-
-                $('#tableAnggota tbody').html(
-                    html || `<tr><td colspan="5" class="text-center text-muted">Belum ada anggota keluarga.</td></tr>`
-                );
-
-                if (callback) callback();
-            }).fail(() => {
-                $('#tableAnggota tbody').html(`<tr><td colspan="5" class="text-center text-danger">Gagal memuat data anggota.</td></tr>`);
-                if (callback) callback();
             });
         }
 
-        loadTableAnggota();
+        $(document).ready(function() {
+            if ($.fn.DataTable.isDataTable('#tableAnggota')) {
+                $('#tableAnggota').DataTable().clear().destroy();
+            }
+
+            initTableAnggota();
+        });
+
+        // reload setelah tambah / edit anggota
+        $(document).on('anggota:saved', function() {
+            if (tableAnggota) tableAnggota.ajax.reload(null, false);
+        });
+
+        // loadTableAnggota();
+        initTableAnggota();
 
         /* ======================================================
-        🔁 TOMBOL RELOAD DAFTAR ANGGOTA
-        ====================================================== */
+           🔁 TOMBOL RELOAD DAFTAR ANGGOTA (FIXED)
+           ====================================================== */
         $(document).on('click', '#btnReloadAnggota', function() {
+
             Swal.fire({
                 title: 'Memuat ulang data...',
                 text: 'Harap tunggu sebentar.',
@@ -645,18 +761,30 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 didOpen: () => Swal.showLoading()
             });
 
-            loadTableAnggota(() => {
+            if ($.fn.DataTable.isDataTable('#tableAnggota')) {
+                tableAnggota.ajax.reload(function() {
+
+                    Swal.close();
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: 'Daftar anggota berhasil dimuat ulang.',
+                        timer: 800,
+                        showConfirmButton: false
+                    });
+
+                }, false); // false = tetap di halaman saat ini
+            } else {
+                // fallback (jika table belum init)
+                initTableAnggota();
                 Swal.close();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: 'Daftar anggota berhasil dimuat ulang.',
-                    timer: 800,
-                    showConfirmButton: false
-                });
-            });
+            }
         });
 
+        /* ============================================================
+         * 🗑️ EVENT: Hapus Anggota
+         * ============================================================ */
         $(document).on('click', '.btnHapusAnggota', function() {
             const id = $(this).data('id');
 
@@ -685,7 +813,8 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 }, function(res) {
                     if (res.status) {
                         Swal.fire('Berhasil!', res.message, 'success');
-                        loadTableAnggota();
+                        // loadTableAnggota();
+                        initTableAnggota();
                     } else {
                         Swal.fire('Gagal', res.message, 'error');
                     }

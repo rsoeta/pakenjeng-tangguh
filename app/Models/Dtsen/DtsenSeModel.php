@@ -24,8 +24,10 @@ class DtsenSeModel extends Model
         'status_kip',
         'kategori_desil',
         'catatan_tambahan',
+        'created_at',
+        'updated_at',
         'created_by',
-        'updated_by'
+        'updated_by',
     ];
     protected $useTimestamps    = true;
 

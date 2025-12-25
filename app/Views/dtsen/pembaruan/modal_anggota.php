@@ -165,19 +165,19 @@
                                             <div class="row g-2 mt-1">
                                                 <div class="col-md-3">
                                                     <label class="form-label small">Provinsi</label>
-                                                    <select class="form-select" id="ind_provinsi" name="provinsi"></select>
+                                                    <select class="form-select required" id="ind_provinsi" name="provinsi"></select>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class="form-label small">Kabupaten/Kota</label>
-                                                    <select class="form-select" id="ind_kabupaten" name="kabupaten"></select>
+                                                    <select class="form-select required" id="ind_kabupaten" name="kabupaten"></select>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class="form-label small">Kecamatan</label>
-                                                    <select class="form-select" id="ind_kecamatan" name="kecamatan"></select>
+                                                    <select class="form-select required" id="ind_kecamatan" name="kecamatan"></select>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class="form-label small">Kel/Desa</label>
-                                                    <select class="form-select" id="ind_desa" name="desa"></select>
+                                                    <select class="form-select required" id="ind_desa" name="desa"></select>
                                                 </div>
                                             </div>
                                         </div>

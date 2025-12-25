@@ -2115,6 +2115,8 @@ class PembaruanKeluarga extends BaseController
             $anggotaUtama = $db->table('dtsen_art a')
                 ->select('a.*, s.jenis_shdk, a.nik')
                 ->join('tb_shdk s', 's.id = a.shdk', 'left')
+                ->select('a.*, kk.no_kk, s.jenis_shdk')
+                ->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'left')
                 ->where('a.id_kk', $id_kk)
                 ->where('a.deleted_at', null)
                 ->orderBy('s.id', 'ASC')
@@ -2133,12 +2135,58 @@ class PembaruanKeluarga extends BaseController
                 }
             }
 
+            /**
+             * STRUKTUR PAYLOAD ART (USULAN):
+             * payload_member.identitas.individu_no_kk  → No. KK
+             * payload_member.identitas.tanggal_lahir   → Tanggal lahir
+             * JANGAN ambil dari dtsen_usulan.no_kk_target
+             */
             foreach ($anggotaUsulan as $row) {
-                if (!empty($row['nik'])) {
-                    // Jika ada di usulan, timpa data lama
-                    $gabungan[$row['nik']] = $row;
+                if (empty($row['nik'])) {
+                    continue;
                 }
+
+                // Decode payload_member
+                $payload = [];
+                if (!empty($row['payload_member'])) {
+                    $payload = json_decode($row['payload_member'], true) ?? [];
+                }
+
+                // Ambil identitas dengan aman
+                $identitas = $payload['identitas'] ?? [];
+
+                // ✅ No. KK dari payload.identitas.individu_no_kk
+                $row['no_kk'] = $identitas['individu_no_kk'] ?? null;
+
+                // ✅ Tanggal lahir dari payload.identitas.tanggal_lahir
+                $row['tanggal_lahir'] = $identitas['tanggal_lahir'] ?? null;
+
+                // ✅ Hubungan keluarga → NAMA, bukan kode
+                $row['hubungan_keluarga_label'] =
+                    $row['jenis_shdk']
+                    ?? $row['hubungan']
+                    ?? '-';
+
+                // Timpa data utama bila NIK sama
+                $gabungan[$row['nik']] = $row;
             }
+
+            // foreach ($anggotaUsulan as &$row) {
+            //     if (!empty($row['payload_member'])) {
+            //         $payload = json_decode($row['payload_member'], true);
+            //         $row['no_kk'] = $usulan['no_kk_target'] ?? null;
+            //         $row['tanggal_lahir'] = $payload['tanggal_lahir'] ?? null;
+            //     }
+            // }
+
+            // foreach ($anggotaUsulan as $row) {
+            //     if (!empty($row['nik'])) {
+            //         // Jika ada di usulan, timpa data lama
+            //         $gabungan[$row['nik']] = $row;
+            //         $row['no_kk'] = $usulan['no_kk_target'] ?? null;
+            //         $row['tanggal_lahir'] = $payload['tanggal_lahir'] ?? null;
+            //     }
+            // }
 
             // Konversi ke array numerik biasa
             $anggotaFinal = array_values($gabungan);

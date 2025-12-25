@@ -32,25 +32,25 @@ $san = $perumahan['sanitasi'] ?? [];
                 <div class="row g-2">
                     <div class="col-md-3">
                         <label class="form-label">Provinsi</label>
-                        <select id="rumah_provinsi" name="provinsi" class="form-select" <?= $editable ? '' : 'disabled' ?>>
+                        <select id="rumah_provinsi" name="provinsi" class="form-select required" <?= $editable ? '' : 'disabled' ?>>
                             <option value="">[Pilih Provinsi]</option>
                         </select>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Kabupaten / Kota</label>
-                        <select id="rumah_regency" name="regency" class="form-select" <?= $editable ? '' : 'disabled' ?>>
+                        <select id="rumah_regency" name="regency" class="form-select required" <?= $editable ? '' : 'disabled' ?>>
                             <option value="">[Pilih Kabupaten]</option>
                         </select>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Kecamatan</label>
-                        <select id="rumah_district" name="district" class="form-select" <?= $editable ? '' : 'disabled' ?>>
+                        <select id="rumah_district" name="district" class="form-select required" <?= $editable ? '' : 'disabled' ?>>
                             <option value="">[Pilih Kecamatan]</option>
                         </select>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Desa / Kelurahan</label>
-                        <select id="rumah_village" name="village" class="form-select" <?= $editable ? '' : 'disabled' ?>>
+                        <select id="rumah_village" name="village" class="form-select required" <?= $editable ? '' : 'disabled' ?>>
                             <option value="">[Pilih Desa]</option>
                         </select>
                     </div>

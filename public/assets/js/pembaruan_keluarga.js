@@ -317,6 +317,12 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
     const $pendapatan = $('#pendapatan');
     const $skillChecks = $('.skill-check');
 
+    // Usaha
+    const $memilikiUsaha = $('#memiliki_usaha');
+    const $formUsahaDetail = $('#form_usaha_detail');
+    const $usahaDetailInputs = $('#form_usaha_detail')
+        .find('input, select');
+
     // Kesehatan
     const $statusHamil = $('#status_hamil');
 
@@ -365,44 +371,86 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
         }
     }
 
+    function clearUsaha() {
+        $memilikiUsaha.val('Tidak');
+        $usahaDetailInputs.val('');
+    }
+
+    function lockUsaha() {
+        clearUsaha();
+        $memilikiUsaha.prop('disabled', true);
+        $formUsahaDetail.hide();
+        $usahaDetailInputs.prop('disabled', true);
+    }
+
+    function unlockUsaha() {
+        $memilikiUsaha.prop('disabled', false);
+        $usahaDetailInputs.prop('disabled', false);
+
+        if ($memilikiUsaha.val() === 'Ya') {
+            $formUsahaDetail.show();
+        } else {
+            $formUsahaDetail.hide();
+            $usahaDetailInputs.val('');
+        }
+    }
+
     // ------------- MAIN applyRules -------------
     function applyRules() {
-        // ambil tanggal lahir terkini dari DOM
         const tgl = $tanggalLahir.val();
         const usia = hitungUsiaFromDateString(tgl);
+        const bekerjaVal = $bekerja.val();
 
-        // Pendidikan
+        /* ===============================
+        PENDIDIKAN
+        =============================== */
         if (usia < 5) {
             lockPendidikan();
         } else {
             unlockPendidikan();
         }
 
-        // Tenaga Kerja
+        /* ===============================
+        TENAGA KERJA & USAHA
+        =============================== */
         if (usia < 5) {
+            // ⛔ Usia balita
             lockTenagaKerjaForUnder5();
+            lockUsaha();
+
         } else {
-            // jika sebelumnya terkunci oleh usia <5, kita buka;
-            // tetapi jika user sudah memilih 'Tidak' pada bekerja_seminggu, tetap kunci sisanya
+            // usia >= 5
             unlockTenagaKerja();
-            if ($bekerja.val() === 'Tidak') {
+
+            if (bekerjaVal === 'Tidak') {
+                // ⛔ Tidak bekerja
                 clearTenagaKerja();
                 $lapanganUsaha.prop('disabled', true);
                 $statusPekerjaan.prop('disabled', true);
                 $pendapatan.prop('disabled', true);
-                $skillChecks.prop('disabled', true);
+                $skillChecks.prop('checked', false).prop('disabled', true);
+
+                lockUsaha();
+            } else {
+                // ✅ Bekerja = Ya / Belum Ditentukan
+                $skillChecks.prop('disabled', false);
+                unlockUsaha();
             }
         }
 
-        // Kesehatan (status hamil)
+        /* ===============================
+        KESEHATAN
+        =============================== */
         updateStatusHamilByGender();
-        // Partisipasi Sekolah
-        // autoFillPendidikan();
 
+        /* ===============================
+        VALIDASI LAIN
+        =============================== */
         handlePartisipasiSekolah();
         validateJenjangIjazah();
         validateKelas();
     }
+
 
     // expose globally so AJAX success and other handlers can call it
     window.applyRules = applyRules;
@@ -447,9 +495,18 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
         }
     });
 
-        // OPTIONAL: panggil applyRules() saat halaman ready jika modal sudah berisi nilai (edit inline)
-        // (tidak memaksa modal terbuka)
-        // applyRules(); // Uncomment kalau perlu pada page load
+    $(document).on('change', '#memiliki_usaha', function () {
+        if ($(this).val() === 'Ya') {
+            $('#form_usaha_detail').slideDown(150);
+        } else {
+            $('#form_usaha_detail').slideUp(150);
+            $('#form_usaha_detail').find('input, select').val('');
+        }
+    });
+
+    // OPTIONAL: panggil applyRules() saat halaman ready jika modal sudah berisi nilai (edit inline)
+    // (tidak memaksa modal terbuka)
+    // applyRules(); // Uncomment kalau perlu pada page load
 
     /* ======================================================
      🏡 Prefill Wilayah Select2 (AJAX)
