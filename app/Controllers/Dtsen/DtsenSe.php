@@ -56,24 +56,62 @@ class DtsenSe extends Controller
     {
         try {
             $session = session();
+
+            // =============================
+            // 1️⃣ DATA SESSION
+            // =============================
             $kodeDesa     = $session->get('kode_desa');
-            $roleId       = $session->get('role_id');
-            $rwUser       = $session->get('level');
-            $filterRW     = $this->request->getPost('filterRW') ?? null;
+            $roleId       = (int) $session->get('role_id');
+            $rwUser       = $session->get('level'); // RW user (untuk petugas RW)
             $wilayahTugas = $session->get('wilayah_tugas');
 
+            // =============================
+            // 2️⃣ FILTER DARI FRONTEND
+            // =============================
+            $filterClient = $this->request->getPost('filter') ?? [];
+
+            // Debug penting (aktifkan saat perlu)
+            // log_message('debug', '📥 FILTER FE: ' . json_encode($filterClient));
+
+            // =============================
+            // 3️⃣ NORMALISASI FILTER
+            // =============================
             $filter = [
                 'kode_desa'     => $kodeDesa,
-                'rw'            => ($roleId >= 4 ? $rwUser : $filterRW),
                 'wilayah_tugas' => $wilayahTugas,
+
+                // filter UI
+                'rw'     => $filterClient['rw']     ?? null,
+                'rt'     => $filterClient['rt']     ?? null,
+                'status' => $filterClient['status'] ?? null,
+                'desil'  => $filterClient['desil']  ?? null,
             ];
 
+            // =============================
+            // 4️⃣ FILTER AKSES (ROLE-BASED)
+            // =============================
+            // Petugas RW (role >= 4) TIDAK BOLEH melihat RW lain
+            if ($roleId >= 4) {
+                $filter['rw'] = $rwUser; // paksa RW sesuai akun
+            }
+
+            // =============================
+            // 5️⃣ AMBIL DATA
+            // =============================
             $dataKeluarga = $this->kkModel->getFilteredData($filter);
 
-            return $this->response->setJSON(['data' => $dataKeluarga]);
+            return $this->response->setJSON([
+                'data' => $dataKeluarga
+            ]);
         } catch (\Throwable $e) {
+
             log_message('error', '❌ tabel_data() error: ' . $e->getMessage());
-            return $this->response->setJSON(['data' => [], 'error' => true, 'message' => $e->getMessage()]);
+
+            return $this->response->setJSON([
+                'data'    => [],
+                'error'   => true,
+                'message' => $e->getMessage()
+            ]);
         }
     }
 
@@ -311,5 +349,48 @@ class DtsenSe extends Controller
         } catch (\Throwable $e) {
             return $this->response->setJSON(['status' => false, 'message' => $e->getMessage()]);
         }
+    }
+
+    // app/Controllers/Dtsen/DtsenSe.php
+    public function listRW()
+    {
+        $session  = session();
+        $kodeDesa = $session->get('kode_desa');
+
+        $db = \Config\Database::connect();
+
+        $rows = $db->table('tb_rt')
+            ->select('no_rw')
+            ->distinct()
+            ->where('kode_desa', $kodeDesa)
+            ->orderBy('no_rw', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        $data = array_map(fn($r) => $r['no_rw'], $rows);
+
+        return $this->response->setJSON(['data' => $data]);
+    }
+
+    public function listRT($rw)
+    {
+        $session  = session();
+        $kodeDesa = $session->get('kode_desa');
+
+        $db = \Config\Database::connect();
+
+        $rows = $db->table('tb_rt')
+            ->select('no_rt')
+            ->where([
+                'kode_desa' => $kodeDesa,
+                'no_rw'     => $rw
+            ])
+            ->orderBy('no_rt', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        $data = array_map(fn($r) => $r['no_rt'], $rows);
+
+        return $this->response->setJSON(['data' => $data]);
     }
 }

@@ -98,6 +98,8 @@ $routes->group('dtsen-se', ['filter' => ['authfilterdtks', 'globalview']], funct
 	$routes->post('tabel_arsip', 'Dtsen\DtsenSe::tabel_arsip');
 	$routes->get('arsip-anggota', 'Dtsen\DtsenSe::arsipAnggota');
 	$routes->post('restore-art', 'Dtsen\DtsenSe::restoreArt');
+	$routes->get('list-rw', 'Dtsen\DtsenSe::listRW');
+	$routes->get('list-rt/(:segment)', 'Dtsen\DtsenSe::listRT/$1');
 });
 
 // USULAN BANSOS

@@ -24,19 +24,19 @@
                             <span class="badge bg-warning text-dark px-2 py-1 small">Draft</span>
 
                         <?php elseif ($status == $sumber): ?>
-                            <span class="badge bg-success px-2 py-1 small">Baru</span>
+                            <span class="badge bg-success px-2 py-1 small">New</span>
 
                         <?php elseif (!empty($usulan['status'])): ?>
-                            <span class="badge bg-primary px-2 py-1 small">Tervalidasi</span>
+                            <span class="badge bg-primary px-2 py-1 small">Verified</span>
                         <?php endif; ?>
 
                         <!-- BADGE DESIL -->
                         <?php if (!empty($kategori_desil)): ?>
                             <span class="badge 
             <?php
-                            if ($kategori_desil <= 2) echo 'bg-danger';
-                            elseif ($kategori_desil <= 4) echo 'bg-warning text-dark';
-                            else echo 'bg-success';
+                            if ($kategori_desil <= 3) echo 'bg-success';
+                            elseif ($kategori_desil <= 5) echo 'bg-warning text-dark';
+                            else echo 'bg-danger';
             ?>
             px-2 py-1 small">
                                 Desil <span class="badge bg-light text-dark"><?= $kategori_desil ?></span>
@@ -46,7 +46,7 @@
                         <!-- APPLY BUTTON -->
                         <?php if ($user['role_id'] <= 3): ?>
                             <button id="btnApply"
-                                class="btn btn-danger btn-sm shadow-sm px-3 py-1"
+                                class="btn btn-outline-dark btn-sm shadow-sm px-3 py-1"
                                 data-usulan-id="<?= esc($usulan['id'] ?? $payload['id'] ?? '') ?>">
                                 <i class="fas fa-check-circle"></i> Terapkan Data
                             </button>

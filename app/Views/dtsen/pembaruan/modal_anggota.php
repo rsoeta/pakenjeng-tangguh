@@ -296,7 +296,6 @@
                                     <label class="form-label fw-bold">Apakah bekerja/membantu bekerja selama seminggu terakhir?</label>
                                     <select class="form-select required" name="bekerja_seminggu" id="bekerja_seminggu">
                                         <option value="">Pilih...</option>
-                                        <option value="Belum Ditentukan">Belum Ditentukan</option>
                                         <option value="Ya">Ya</option>
                                         <option value="Tidak">Tidak</option>
                                     </select>
@@ -341,7 +340,6 @@
                                     <label class="form-label fw-bold">Status dalam Pekerjaan Utama</label>
                                     <select class="form-select" name="status_pekerjaan" id="status_pekerjaan">
                                         <option value="">Pilih...</option>
-                                        <option value="Belum Ditentukan">Belum Ditentukan</option>
                                         <option value="Berusaha sendiri">Berusaha sendiri</option>
                                         <option value="Berusaha dibantu buruh tidak tetap/tidak dibayar">Berusaha dibantu buruh tidak tetap/tidak dibayar</option>
                                         <option value="Berusaha dibantu buruh tetap/dibayar">Berusaha dibantu buruh tetap/dibayar</option>
@@ -438,35 +436,73 @@
                                 </div>
 
                                 <!-- Form tambahan (hanya muncul bila 'Ya') -->
-                                <div id="form_usaha_detail" style="display: none;">
-                                    <div class="col-md-6 mt-3">
-                                        <label class="form-label fw-bold">Jumlah usaha sendiri/bersama yang dimiliki</label>
-                                        <input type="number" class="form-control required-if-ya" name="jumlah_usaha" id="jumlah_usaha" placeholder="Contoh: 1">
-                                    </div>
+                                <div id="form_usaha_detail" class="mt-3" style="display: none;">
+                                    <div class="row g-3">
 
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Jumlah pekerja yang dibayar pada usaha utama</label>
-                                        <input type="number" class="form-control required-if-ya" name="pekerja_dibayar" id="pekerja_dibayar" placeholder="Contoh: 2">
-                                    </div>
+                                        <!-- =======================
+                                            KOLOM KIRI (JUMLAH & PEKERJA)
+                                        ======================== -->
+                                        <div class="col-12 col-md-6">
+                                            <div class="row g-3">
 
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Jumlah pekerja yang tidak dibayar pada usaha utama</label>
-                                        <input type="number" class="form-control required-if-ya" name="pekerja_tidak_dibayar" id="pekerja_tidak_dibayar" placeholder="Contoh: 1">
-                                    </div>
+                                                <div class="col-12">
+                                                    <label class="form-label fw-bold">
+                                                        Jumlah usaha sendiri/bersama yang dimiliki
+                                                    </label>
+                                                    <input type="number"
+                                                        class="form-control required-if-ya"
+                                                        name="jumlah_usaha"
+                                                        id="jumlah_usaha"
+                                                        placeholder="Contoh: 1">
+                                                </div>
 
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Omzet per Bulan</label>
-                                        <select class="form-select required-if-ya" name="omzet_bulanan" id="omzet_bulanan">
-                                            <option value="">Pilih...</option>
-                                            <option value="Belum Ditentukan">Belum Ditentukan</option>
-                                            <option value="< 5 Juta (Ultra Mikro)">&lt; 5 Juta (Ultra Mikro)</option>
-                                            <option value="5 < 15 Juta (Ultra Mikro)">5 - &lt;15 Juta (Ultra Mikro)</option>
-                                            <option value="15 < 25 Juta (Ultra Mikro)">15 - &lt;25 Juta (Ultra Mikro)</option>
-                                            <option value="25 < 167 Juta (Mikro)">25 - &lt;167 Juta (Mikro)</option>
-                                            <option value="167 < 1.250 Juta (Kecil)">167 - &lt;1.250 Juta (Kecil)</option>
-                                            <option value="1.250 < 4.167 Juta (Menengah)">1.250 - &lt;4.167 Juta (Menengah)</option>
-                                            <option value=">=4.167 Juta (Besar)">≥ 4.167 Juta (Besar)</option>
-                                        </select>
+                                                <div class="col-12">
+                                                    <label class="form-label fw-bold">
+                                                        Jumlah pekerja yang dibayar pada usaha utama
+                                                    </label>
+                                                    <input type="number"
+                                                        class="form-control required-if-ya"
+                                                        name="pekerja_dibayar"
+                                                        id="pekerja_dibayar"
+                                                        placeholder="Contoh: 2">
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <label class="form-label fw-bold">
+                                                        Jumlah pekerja yang tidak dibayar pada usaha utama
+                                                    </label>
+                                                    <input type="number"
+                                                        class="form-control required-if-ya"
+                                                        name="pekerja_tidak_dibayar"
+                                                        id="pekerja_tidak_dibayar"
+                                                        placeholder="Contoh: 1">
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <!-- =======================
+                                            KOLOM KANAN (OMZET)
+                                        ======================== -->
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label fw-bold">
+                                                Omzet per Bulan
+                                            </label>
+                                            <select class="form-select required-if-ya"
+                                                name="omzet_bulanan"
+                                                id="omzet_bulanan">
+                                                <option value="">Pilih...</option>
+                                                <option value="Belum Ditentukan">Belum Ditentukan</option>
+                                                <option value="< 5 Juta (Ultra Mikro)">&lt; 5 Juta (Ultra Mikro)</option>
+                                                <option value="5 < 15 Juta (Ultra Mikro)">5 - &lt;15 Juta (Ultra Mikro)</option>
+                                                <option value="15 < 25 Juta (Ultra Mikro)">15 - &lt;25 Juta (Ultra Mikro)</option>
+                                                <option value="25 < 167 Juta (Mikro)">25 - &lt;167 Juta (Mikro)</option>
+                                                <option value="167 < 1.250 Juta (Kecil)">167 - &lt;1.250 Juta (Kecil)</option>
+                                                <option value="1.250 < 4.167 Juta (Menengah)">1.250 - &lt;4.167 Juta (Menengah)</option>
+                                                <option value=">=4.167 Juta (Besar)">≥ 4.167 Juta (Besar)</option>
+                                            </select>
+                                        </div>
+
                                     </div>
                                 </div>
 
@@ -479,9 +515,8 @@
                                 <!-- Status Hamil -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Status Hamil <span class="text-muted small">(hanya untuk perempuan)</span></label>
-                                    <select class="form-select" name="status_hamil" id="status_hamil">
+                                    <select class="form-select required" name="status_hamil" id="status_hamil">
                                         <option value="">Pilih...</option>
-                                        <option value="Belum Ditentukan">Belum Ditentukan</option>
                                         <option value="Ya">Ya</option>
                                         <option value="Tidak">Tidak</option>
                                     </select>
@@ -517,7 +552,6 @@
                                     <label class="form-label fw-bold">Keluhan Kesehatan Kronis / Menahun</label>
                                     <select class="form-select required" name="penyakit_kronis" id="penyakit_kronis">
                                         <option value="">Pilih...</option>
-                                        <option value="Belum Ditentukan">Belum Ditentukan</option>
                                         <option value="Tidak Ada">Tidak Ada</option>
                                         <option value="Hipertensi (darah tinggi)">Hipertensi (Darah Tinggi)</option>
                                         <option value="Rematik">Rematik</option>

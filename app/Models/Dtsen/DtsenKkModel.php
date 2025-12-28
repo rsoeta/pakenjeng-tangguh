@@ -128,36 +128,37 @@ class DtsenKkModel extends Model
         return $builder->countAllResults();
     }
 
-    public function getFilteredData($filter)
+    public function getFilteredData(array $filter)
     {
-        $builder = $this->db->table('dtsen_kk kk')
+        $db = $this->db;
+
+        /**
+         * ======================================================
+         * 1️⃣ AMBIL DATA KK DASAR (AMAN & STABIL)
+         * ======================================================
+         */
+        $builder = $db->table('dtsen_kk kk')
             ->select('
-                kk.id_kk,
-                kk.no_kk,
-                kk.kepala_keluarga,
-                kk.alamat,
-                rt.rw,
-                rt.rt,
-                se.kategori_desil,
-                kk.program_bansos,
-                kk.kategori_adat,
-                kk.jumlah_anggota,
-                kk.created_at
-            ')
+            kk.id_kk,
+            kk.no_kk,
+            kk.kepala_keluarga,
+            kk.alamat,
+            rt.rw,
+            rt.rt,
+            se.kategori_desil
+        ')
             ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
-            ->join('dtsen_se se', 'se.id_kk = kk.id_kk', 'left'); // 🟢 tambahan penting
+            ->join('dtsen_se se', 'se.id_kk = kk.id_kk', 'left')
+            ->where('kk.deleted_at', null);
 
-        $builder->where('kk.deleted_at', null);
-
-        // filter wilayah
+        // 🔐 Filter desa
         if (!empty($filter['kode_desa'])) {
             $builder->where('rt.kode_desa', $filter['kode_desa']);
         }
 
-        // filter wilayah_tugas tetap seperti sebelumnya (kode terakhir yang sudah berfungsi)
+        // 🔐 Filter wilayah tugas (LOGIKA LAMA — JANGAN DIUBAH)
         if (!empty($filter['wilayah_tugas'])) {
-            $wilayahTugas = trim($filter['wilayah_tugas']);
-            $wilayahTugas = str_replace('RW:', '', $wilayahTugas);
+            $wilayahTugas = str_replace('RW:', '', trim($filter['wilayah_tugas']));
             $blokRW = preg_split('/[|;]/', $wilayahTugas);
 
             $builder->groupStart();
@@ -165,9 +166,8 @@ class DtsenKkModel extends Model
                 $blok = trim($blok);
                 if (!$blok) continue;
 
-                $parts = explode(':', $blok);
-                $rw = trim($parts[0]);
-                $rtList = isset($parts[1]) ? explode(',', $parts[1]) : [];
+                [$rw, $rtStr] = array_pad(explode(':', $blok), 2, null);
+                $rtList = $rtStr ? explode(',', $rtStr) : [];
 
                 $builder->orGroupStart()
                     ->groupStart()
@@ -189,8 +189,135 @@ class DtsenKkModel extends Model
             $builder->groupEnd();
         }
 
-        $builder->orderBy('kk.no_kk', 'ASC');
-        return $builder->get()->getResultArray();
+        $keluarga = $builder->orderBy('kk.no_kk', 'ASC')->get()->getResultArray();
+        if (empty($keluarga)) return [];
+
+        /**
+         * ======================================================
+         * 2️⃣ AMBIL USULAN TERBARU (1x QUERY)
+         * ======================================================
+         */
+        $ids = array_column($keluarga, 'id_kk');
+
+        $usulanRows = $db->table('dtsen_usulan')
+            ->select('id, dtsen_kk_id, status, payload')
+            ->whereIn('dtsen_kk_id', $ids)
+            ->whereIn('status', ['draft', 'submitted', 'verified', 'diverifikasi'])
+            ->orderBy('id', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        $usulanMap = [];
+        foreach ($usulanRows as $u) {
+            if (!isset($usulanMap[$u['dtsen_kk_id']])) {
+                $usulanMap[$u['dtsen_kk_id']] = $u;
+            }
+        }
+
+        /**
+         * ======================================================
+         * 3️⃣ HITUNG STATUS FINAL
+         * ======================================================
+         */
+        foreach ($keluarga as &$row) {
+            $row['usulan_status'] = null;
+            $row['is_submitted_ready'] = 0;
+
+            if (!isset($usulanMap[$row['id_kk']])) continue;
+
+            $u = $usulanMap[$row['id_kk']];
+            $row['usulan_status'] = $u['status'];
+
+            if ($u['status'] === 'draft') {
+                $payload = json_decode($u['payload'], true);
+                if ($this->isPayloadLengkap($payload)) {
+                    $row['is_submitted_ready'] = 1;
+                }
+            }
+        }
+        unset($row);
+
+        /**
+         * ======================================================
+         * 3.5️⃣ FILTER RW / RT / DESIL (BARU)
+         * ======================================================
+         */
+        $keluarga = array_values(array_filter($keluarga, function ($row) use ($filter) {
+
+            // RW
+            if (!empty($filter['rw']) && $filter['rw'] !== 'all') {
+                if ((string)$row['rw'] !== (string)$filter['rw']) {
+                    return false;
+                }
+            }
+
+            // RT
+            if (!empty($filter['rt']) && $filter['rt'] !== 'all') {
+                if ((string)$row['rt'] !== (string)$filter['rt']) {
+                    return false;
+                }
+            }
+
+            // DESIL
+            if (!empty($filter['desil']) && $filter['desil'] !== 'all') {
+                if ($filter['desil'] === 'none') {
+                    return empty($row['kategori_desil']);
+                }
+                if ((int)$row['kategori_desil'] !== (int)$filter['desil']) {
+                    return false;
+                }
+            }
+
+            return true;
+        }));
+
+        /**
+         * ======================================================
+         * 4️⃣ FILTER STATUS (SUDAH STABIL — JANGAN DIUBAH)
+         * ======================================================
+         */
+        if (!empty($filter['status']) && $filter['status'] !== 'all') {
+
+            $keluarga = array_values(array_filter($keluarga, function ($row) use ($filter) {
+
+                $status = $filter['status'];
+
+                if ($status === 'none') {
+                    return empty($row['usulan_status']);
+                }
+
+                if ($status === 'draft') {
+                    return $row['usulan_status'] === 'draft'
+                        && (int)$row['is_submitted_ready'] === 0;
+                }
+
+                if ($status === 'submitted') {
+                    return $row['usulan_status'] === 'draft'
+                        && (int)$row['is_submitted_ready'] === 1;
+                }
+
+                if ($status === 'verified') {
+                    return in_array($row['usulan_status'], ['verified', 'diverifikasi']);
+                }
+
+                return true;
+            }));
+        }
+
+        return $keluarga;
+    }
+
+    private function isPayloadLengkap(array $payload): bool
+    {
+        return !empty($payload['perumahan']['no_kk'])
+            && !empty($payload['perumahan']['kepala_keluarga'])
+            && !empty($payload['perumahan']['alamat'])
+            && !empty($payload['perumahan']['wilayah'])
+            && !empty($payload['perumahan']['kondisi'])
+            && !empty($payload['perumahan']['sanitasi'])
+            && !empty($payload['foto']['ktp_kk'])
+            && !empty($payload['foto']['depan'])
+            && !empty($payload['foto']['dalam']);
     }
 
     /**

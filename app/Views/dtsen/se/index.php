@@ -61,27 +61,89 @@
             <div class="card-body tab-content">
                 <!-- ===================== TAB 1: DAFTAR KELUARGA ===================== -->
                 <div class="tab-pane fade show active" id="tabDaftar" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
-                        <!-- <div class="d-flex align-items-center">
-                            <label for="filterRW" class="form-label fw-bold mb-0 me-2">Filter RW:</label>
-                            <select id="filterRW" class="form-select form-select-sm" style="width: 120px;">
-                                <option value="">[ Semua ]</option>
-                                <?php foreach ($dataRW as $rw): ?>
-                                    <option value="<?= $rw['rw'] ?>"><?= $rw['rw'] ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div> -->
-                        <!-- buat div dibwah ini rata kanan -->
-                        <div class="ms-auto d-flex gap-2 mb-2">
-                            <!-- buat kedua tombol dibawah merapat dalam satu baris -->
-                            <div class="btn-group" role="group">
-                                <button id="btnReloadKeluarga" class="btn btn-outline-success btn-sm">
-                                    <i class="fas fa-sync-alt"></i> Muat Ulang
-                                </button>
-                                <button id="btnTambahKeluarga" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-user-plus"></i> Tambah Keluarga Baru
-                                </button>
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body py-3">
+
+                            <!-- ================= HEADER: FILTER + ACTION ================= -->
+                            <div class="row g-2 align-items-end">
+
+                                <!-- ================= FILTER BAR ================= -->
+                                <div class="col-lg">
+                                    <div class="row g-2 align-items-end" id="filterBarKeluarga">
+
+                                        <!-- 🔐 AKSES -->
+                                        <div class="col-auto">
+                                            <label class="form-label small fw-bold mb-1">Akses</label>
+                                            <div class="form-control form-control-sm bg-light text-nowrap" id="filterAkses">
+                                                Akses Desa Penuh
+                                            </div>
+                                        </div>
+
+                                        <!-- RW -->
+                                        <div class="col-auto">
+                                            <label class="form-label small fw-bold mb-1">Wilayah (RW)</label>
+                                            <select class="form-select form-select-sm" id="filterRW">
+                                                <option value="">Semua RW</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- RT -->
+                                        <div class="col-auto">
+                                            <label class="form-label small fw-bold mb-1">RT</label>
+                                            <select class="form-select form-select-sm" id="filterRT" disabled>
+                                                <option value="">Semua RT</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- 📌 STATUS -->
+                                        <div class="col-auto">
+                                            <label class="form-label small fw-bold mb-1">Status</label>
+                                            <select class="form-select form-select-sm" id="filterStatus">
+                                                <option value="">Semua Status</option>
+                                                <option value="none">Belum Ada Pembaruan</option>
+                                                <option value="draft">Draft</option>
+                                                <option value="submitted">Submitted</option>
+                                                <option value="verified">Verified</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- 📊 DESIL -->
+                                        <div class="col-auto">
+                                            <label class="form-label small fw-bold mb-1">Desil</label>
+                                            <select class="form-select form-select-sm" id="filterDesil">
+                                                <option value="">Semua</option>
+                                                <option value="belum">Belum</option>
+                                                <?php for ($i = 1; $i <= 10; $i++): ?>
+                                                    <option value="<?= $i ?>">Desil <?= $i ?></option>
+                                                <?php endfor; ?>
+                                            </select>
+                                        </div>
+
+                                        <!-- 🔄 RESET -->
+                                        <div class="col-auto">
+                                            <button class="btn btn-outline-secondary btn-sm" id="btnResetFilter">
+                                                <i class="fas fa-undo"></i>
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <!-- ================= ACTION BUTTON ================= -->
+                                <div class="col-lg-auto ms-lg-auto">
+                                    <div class="btn-group w-100" role="group">
+                                        <button id="btnReloadKeluarga" class="btn btn-outline-success btn-sm">
+                                            <i class="fas fa-sync-alt"></i> Muat Ulang
+                                        </button>
+                                        <button id="btnTambahKeluarga" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-user-plus"></i> Tambah Keluarga
+                                        </button>
+                                    </div>
+                                </div>
+
                             </div>
+                            <!-- ================= END HEADER ================= -->
+
                         </div>
                     </div>
 
@@ -94,6 +156,7 @@
                                 <th>No KK</th>
                                 <th>Alamat</th>
                                 <th>Wilayah</th>
+                                <th>Status</th> <!-- 🆕 -->
                                 <th>Desil</th>
                                 <th>Aksi</th>
                             </tr>
@@ -235,47 +298,73 @@
 <script>
     $(document).ready(function() {
 
+        // =========================
+        // 🔎 FILTER STATE (GLOBAL)
+        // =========================
+        const filterKeluarga = {
+            rw: '',
+            rt: '',
+            status: '',
+            desil: ''
+        };
+
+        function loadRW() {
+            $.getJSON('/dtsen-se/list-rw', function(res) {
+                const $rw = $('#filterRW');
+                $rw.empty().append('<option value="">Semua RW</option>');
+
+                res.data.forEach(rw => {
+                    $rw.append(`<option value="${rw}">RW ${rw}</option>`);
+                });
+            });
+        }
+
+        loadRW();
+
         // ========================= 🔵 TABLE DAFTAR KELUARGA =========================
         const tableKeluarga = $('#tableKeluarga').DataTable({
             ajax: {
                 url: '/dtsen-se/tabel_data',
                 type: 'POST',
-                data: d => d.filterRW = $('#filterRW').val(),
+                data: function(d) {
+                    d.filter = filterKeluarga;
+                    console.log('📤 FILTER DIKIRIM:', d.filter);
+                },
                 dataSrc: 'data'
             },
+
             columns: [{
                     data: null,
                     defaultContent: ''
                 },
+
                 {
                     data: null,
                     render: (d, t, r, m) => m.row + 1
                 },
+
                 {
                     data: 'kepala_keluarga',
                     className: 'text-capitalize'
                 },
-                // {
-                //     data: 'no_kk'
-                // },
+
                 {
                     data: 'no_kk',
                     className: 'text-nowrap',
-                    render: function(noKK, type, row) {
+                    render: function(noKK) {
                         if (!noKK) return '-';
-
                         return `
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="fw-semibold">${noKK}</span>
-                                <button 
-                                    type="button"
-                                    class="btn btn-outline-secondary btn-xs btnCopyNoKK"
-                                    data-value="${noKK}"
-                                    title="Salin No KK">
-                                    <i class="fas fa-copy"></i>
-                                </button>
-                            </div>
-                        `;
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-semibold">${noKK}</span>
+                        <button 
+                            type="button"
+                            class="btn btn-outline-secondary btn-xs btnCopyNoKK"
+                            data-value="${noKK}"
+                            title="Salin No KK">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                `;
                     }
                 },
 
@@ -283,49 +372,229 @@
                     data: 'alamat',
                     render: d => d || '-'
                 },
+
                 {
                     data: null,
-                    render: r => `<span class="badge bg-light text-dark border">RW ${r.rw}</span> / <span class="badge bg-info text-dark">RT ${r.rt}</span>`,
-                    className: 'text-center'
+                    className: 'text-center',
+                    render: r =>
+                        `<span class="badge bg-light text-dark border">RW ${r.rw}</span> /
+                 <span class="badge bg-info text-dark">RT ${r.rt}</span>`
                 },
+
+                // ================= STATUS =================
+                {
+                    data: 'usulan_status',
+                    className: 'text-center',
+                    render: function(status, type, row) {
+
+                        // 1️⃣ Tidak ada usulan sama sekali
+                        if (!status) {
+                            return `<span class="badge bg-secondary">Belum Ada Pembaruan</span>`;
+                        }
+
+                        // 2️⃣ Draft
+                        if (status === 'draft') {
+                            // Draft tapi sudah lengkap → dianggap Submitted
+                            if (row.is_submitted_ready == 1) {
+                                return `<span class="badge bg-info text-dark">Submitted</span>`;
+                            }
+                            return `<span class="badge bg-warning text-dark">Draft</span>`;
+                        }
+
+                        // 3️⃣ Submitted
+                        if (status === 'submitted') {
+                            return `<span class="badge bg-info text-dark">Submitted</span>`;
+                        }
+
+                        // 4️⃣ Verified
+                        if (status === 'verified' || status === 'diverifikasi') {
+                            return `<span class="badge bg-success">Verified</span>`;
+                        }
+
+                        // fallback aman
+                        return `<span class="badge bg-secondary">Belum Ada Pembaruan</span>`;
+                    }
+                },
+
+                // ================= DESIL =================
                 {
                     data: 'kategori_desil',
+                    className: 'text-center',
                     render: d => {
                         if (!d) return '<span class="badge bg-secondary">Belum</span>';
                         const n = parseInt(d);
-                        const warna = n <= 2 ? 'danger' : n <= 4 ? 'warning' : 'success';
+                        const warna = n <= 3 ? 'success' : n <= 5 ? 'warning' : 'danger';
                         return `<span class="badge bg-${warna}">${n}</span>`;
                     }
                 },
+
+                // ================= AKSI =================
                 {
                     data: null,
                     className: 'text-nowrap',
                     render: row => `
-                        <a href="/pembaruan-keluarga/detail/${row.id_kk}" class="btn btn-success btn-sm me-1" title="Pembaruan Keluarga">
-                            <i class="fas fa-users-cog"></i>
-                        </a>
-                        <button class="btn btn-primary btn-sm btnInputDesil"
-                            data-id="${row.id_kk}"
-                            data-nama="${row.kepala_keluarga}"
-                            data-nokk="${row.no_kk}"
-                            data-alamat="${row.alamat}"
-                            data-desil="${row.kategori_desil ?? ''}">
-                            <i class="fas fa-hand-holding-heart"></i>
-                        </button>
-                         <!-- 🔥 Tambahkan tombol hapus -->
-                        <button class="btn btn-danger btn-sm btnDeleteKeluarga" data-id="${row.id_kk}">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    `
+                <a href="/pembaruan-keluarga/detail/${row.id_kk}" 
+                   class="btn btn-success btn-sm me-1">
+                    <i class="fas fa-users-cog"></i>
+                </a>
+                <button class="btn btn-primary btn-sm btnInputDesil"
+                    data-id="${row.id_kk}"
+                    data-nama="${row.kepala_keluarga}"
+                    data-nokk="${row.no_kk}"
+                    data-alamat="${row.alamat}"
+                    data-desil="${row.kategori_desil ?? ''}">
+                    <i class="fas fa-hand-holding-heart"></i>
+                </button>
+                <button class="btn btn-danger btn-sm btnDeleteKeluarga"
+                    data-id="${row.id_kk}">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            `
                 }
             ],
+
             responsive: true,
             pageLength: 10,
+
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
             },
+
             createdRow: row => $(row).find('td').css('text-align', 'left'),
             headerCallback: thead => $(thead).find('th').css('text-align', 'center')
+        });
+
+        // ========================= 🎛 FILTER HANDLER =========================
+        function reloadTableKeluarga() {
+            tableKeluarga.ajax.reload();
+        }
+
+        // Wilayah / Akses
+        $('#filterWilayah').on('change', function() {
+            filterKeluarga.wilayah = $(this).val() || null;
+            reloadTableKeluarga();
+        });
+
+        // RW
+        const $filterRW = $('#filterRW');
+        const $filterRT = $('#filterRT');
+
+        /**
+         * ===============================
+         * 🔁 FETCH RT BY RW
+         * ===============================
+         */
+        $(document).on('change', '#filterRW', function() {
+            const rw = $(this).val();
+
+            filterKeluarga.rw = rw || '';
+            filterKeluarga.rt = '';
+
+            const $rt = $('#filterRT');
+            $rt.prop('disabled', !rw)
+                .empty()
+                .append('<option value="">Semua RT</option>');
+
+            if (!rw) {
+                $('#tableKeluarga').DataTable().ajax.reload();
+                return;
+            }
+
+            $.getJSON(`/dtsen-se/list-rt/${rw}`, function(res) {
+                res.data.forEach(rt => {
+                    $rt.append(`<option value="${rt}">RT ${rt}</option>`);
+                });
+            });
+
+            $('#tableKeluarga').DataTable().ajax.reload();
+        });
+
+        $(document).on('change', '#filterRT', function() {
+            filterKeluarga.rt = $(this).val() || '';
+            $('#tableKeluarga').DataTable().ajax.reload();
+        });
+
+        // RT
+        $('#filterRT').on('change', function() {
+            filterKeluarga.rt = $(this).val() || null;
+            reloadTableKeluarga();
+        });
+
+        // Status
+        $('#filterStatus').on('change', function() {
+            filterKeluarga.status = $(this).val() || null;
+            reloadTableKeluarga();
+        });
+
+        // Desil
+        $('#filterDesil').on('change', function() {
+            filterKeluarga.desil = $(this).val() || null;
+            reloadTableKeluarga();
+        });
+
+        $('.filter-keluarga').on('change', function() {
+            const key = $(this).data('filter');
+            filterKeluarga[key] = $(this).val();
+
+            console.log('🧠 FILTER UPDATE:', filterKeluarga);
+
+            $('#tableKeluarga').DataTable().ajax.reload();
+        });
+
+
+        // Reset
+        $('#btnResetFilter').on('click', function() {
+
+            filterKeluarga.rw = '';
+            filterKeluarga.rt = '';
+            filterKeluarga.status = '';
+            filterKeluarga.desil = '';
+
+            // reset UI
+            $('.filter-keluarga').val('');
+
+            $('#tableKeluarga').DataTable().ajax.reload();
+        });
+
+        function reloadTableKeluarga() {
+            $('#tableKeluarga').DataTable().ajax.reload(null, false);
+        }
+
+        /* ======================================================
+         * 🔎 FILTER HANDLER — TABLE KELUARGA
+         * ====================================================== */
+
+        // Helper: ambil nilai filter (null jika kosong)
+        function getFilterValue(selector) {
+            const v = $(selector).val();
+            return (v === '' || v === null) ? null : v;
+        }
+
+        // Inject filter ke AJAX DataTables
+        function applyTableKeluargaFilter() {
+            tableKeluarga.ajax.reload();
+        }
+
+        // Bind auto-submit on change
+        $(document).on('change', `
+            #filterWilayah,
+            #filterRW,
+            #filterRT,
+            #filterStatus,
+            #filterDesil
+        `, function() {
+            applyTableKeluargaFilter();
+        });
+
+        // Reset filter
+        $(document).on('click', '#btnResetFilter', function() {
+            $('#filterWilayah').val('');
+            $('#filterRW').val('');
+            $('#filterRT').val('');
+            $('#filterStatus').val('');
+            $('#filterDesil').val('');
+
+            applyTableKeluargaFilter();
         });
 
         $('#filterRW').on('change', () => tableKeluarga.ajax.reload());
