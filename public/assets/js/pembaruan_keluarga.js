@@ -347,7 +347,7 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
         // $skillChecks.prop('checked', false);
     }
     function lockTenagaKerjaForUnder5() {
-        $bekerja.val('Belum Ditentukan').prop('disabled', true);
+        $bekerja.val('Tidak').prop('disabled', true);
         clearTenagaKerja();
         $lapanganUsaha.prop('disabled', true);
         $statusPekerjaan.prop('disabled', true);

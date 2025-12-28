@@ -469,8 +469,8 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         $('#modalAnggota').on('shown.bs.modal', initSelect2WilayahModal);
 
         /* ======================================================
-   💾 EVENT SUBMIT FORM ANGGOTA (Tambah / Edit)
-   ====================================================== */
+        💾 EVENT SUBMIT FORM ANGGOTA (Tambah / Edit)
+        ====================================================== */
         $(document).on('submit', '#formAnggota', function(e) {
             e.preventDefault();
 
@@ -556,116 +556,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 }
             });
         });
-
-        // /* ======================================================
-        // 💾 EVENT SUBMIT FORM ANGGOTA (Tambah / Edit)
-        // ====================================================== */
-        // $(document).on('submit', '#formAnggota', function(e) {
-        //     e.preventDefault();
-
-        //     console.log('🚀 Submitting formAnggota...');
-
-        //     const form = $(this);
-        //     let valid = true;
-
-        //     /* ======================================================
-        //        1) VALIDASI KOLOM REQUIRED
-        //     ====================================================== */
-        //     form.find('.required').each(function() {
-        //         if (!$(this).val().trim()) {
-        //             $(this).addClass('is-invalid');
-        //             valid = false;
-        //         } else {
-        //             $(this).removeClass('is-invalid');
-        //         }
-        //     });
-
-        //     /* ======================================================
-        //        2) VALIDASI 16 DIGIT UNTUK: NIK, No KK, Individu No KK
-        //     ====================================================== */
-        //     const digitFields = [
-        //         '#nik',
-        //         '#keluarga_no_kk', // jika tidak ada, otomatis dilewati
-        //         '#individu_no_kk'
-        //     ];
-
-        //     digitFields.forEach(selector => {
-        //         const el = form.find(selector);
-        //         if (el.length > 0) {
-        //             let value = el.val().replace(/\D/g, ''); // hanya angka
-        //             el.val(value); // bersihkan otomatis
-
-        //             if (value.length !== 16) {
-        //                 el.addClass('is-invalid');
-        //                 valid = false;
-        //             } else {
-        //                 el.removeClass('is-invalid');
-        //             }
-        //         }
-        //     });
-
-        //     if (!valid) {
-        //         Swal.fire(
-        //             "Isian Tidak Valid",
-        //             "Pastikan semua kolom wajib sudah diisi dan NIK/No KK terdiri dari 16 digit angka.",
-        //             "warning"
-        //         );
-        //         return;
-        //     }
-
-        //     /* ======================================================
-        //        3) KONFIRMASI SIMPAN
-        //     ====================================================== */
-        //     Swal.fire({
-        //         title: 'Simpan Data?',
-        //         text: 'Data individu akan disimpan ke draf pembaruan keluarga.',
-        //         icon: 'question',
-        //         showCancelButton: true,
-        //         confirmButtonText: 'Ya, Simpan',
-        //         cancelButtonText: 'Batal'
-        //     }).then(result => {
-        //         if (!result.isConfirmed) return;
-
-        //         Swal.fire({
-        //             title: 'Menyimpan...',
-        //             allowOutsideClick: false,
-        //             didOpen: () => Swal.showLoading()
-        //         });
-
-        //         $.ajax({
-        //             url: `${window.baseUrl}/pembaruan-keluarga/save-anggota`,
-        //             method: 'POST',
-        //             data: form.serialize(),
-        //             dataType: 'json',
-        //             success: function(res) {
-        //                 Swal.close();
-        //                 if (res.status === 'success') {
-        //                     Swal.fire({
-        //                         icon: 'success',
-        //                         title: 'Berhasil!',
-        //                         text: res.message,
-        //                         timer: 1200,
-        //                         showConfirmButton: false,
-        //                         willClose: () => {
-        //                             // 🔄 Reload tabel anggota
-        //                             // loadTableAnggota();
-        //                             initTableAnggota();
-        //                             // Tutup modal
-        //                             $(document).trigger('anggota:saved');
-        //                         }
-        //                     });
-        //                 } else {
-        //                     Swal.fire('Gagal', res.message || 'Tidak dapat menyimpan data.', 'error');
-        //                 }
-        //             },
-        //             error: function(xhr) {
-        //                 Swal.close();
-        //                 console.error('❌ Error saat simpan:', xhr.responseText);
-        //                 Swal.fire('Error', 'Terjadi kesalahan saat menyimpan data individu.', 'error');
-        //             }
-        //         });
-        //     });
-        // });
 
         $('#modalAnggota').on('shown.bs.modal', function() {
             console.log('🧾 Modal Anggota terbuka, event submit aktif');
