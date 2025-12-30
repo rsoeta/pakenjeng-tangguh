@@ -472,37 +472,40 @@ $san = $perumahan['sanitasi'] ?? [];
             const formData = new FormData(form);
 
             // convert luas_lantai to numeric string if empty => null
-            if (!formData.get('luas_lantai')) formData.set('luas_lantai', '');
+            if (!formData.get('luas_lantai')) {
+                formData.set('luas_lantai', '');
+            }
 
+            // optional: loading indicator
             Swal.fire({
-                title: 'Simpan Data Rumah?',
-                text: 'Data akan disimpan sebagai draft usulan.',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Simpan',
-                preConfirm: () => {
-                    return fetch('/pembaruan-keluarga/save-rumah', {
-                        method: 'POST',
-                        credentials: 'same-origin',
-                        body: formData
-                    }).then(resp => {
-                        if (!resp.ok) throw new Error('Gagal menyimpan');
-                        return resp.json();
-                    });
+                title: 'Menyimpan data...',
+                text: 'Mohon tunggu',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
-            }).then(result => {
-                if (result.isConfirmed) {
-                    const res = result.value;
+            });
+
+            fetch('/pembaruan-keluarga/save-rumah', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    body: formData
+                })
+                .then(resp => {
+                    if (!resp.ok) throw new Error('Gagal menyimpan');
+                    return resp.json();
+                })
+                .then(res => {
                     if (res.status === 'success') {
                         Swal.fire('Berhasil', res.message, 'success');
                         // reload or update UI if necessary
                     } else {
                         Swal.fire('Gagal', res.message || 'Terjadi kesalahan', 'error');
                     }
-                }
-            }).catch(err => {
-                Swal.fire('Error', err.message || 'Terjadi kesalahan jaringan', 'error');
-            });
+                })
+                .catch(err => {
+                    Swal.fire('Error', err.message || 'Terjadi kesalahan jaringan', 'error');
+                });
         });
 
     });
