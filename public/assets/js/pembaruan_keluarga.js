@@ -679,7 +679,7 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
     📤 Submit Data Form
     ======================================================= */
 
-    // =============================
+    // ============================= 
     // 🛡️ VALIDASI WAJIB FORM KELUARGA
     // =============================
     $('#formDataKeluarga').on('submit', function (e) {
@@ -700,7 +700,7 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
         $('#keluarga_no_kk').val(noKK);
 
         // ===========================================
-        // 🔒 2) VALIDASI KHUSUS No KK (16 digit + tidak boleh 000)
+        // 🔒 2) VALIDASI KHUSUS No KK
         // ===========================================
         if (noKK.length !== 16) {
             Swal.fire({
@@ -721,7 +721,7 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
         }
 
         // ===========================================
-        // 🔒 3) VALIDASI DASAR FIELD WAJIB
+        // 🔒 3) VALIDASI FIELD WAJIB
         // ===========================================
         if (!noKK || !kepala || !alamat || !rw || !rt || !kategoriAdat) {
             Swal.fire({
@@ -745,69 +745,65 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
         }
 
         // =============================
-        // 🟢 5) KONFIRMASI SIMPAN
+        // 🟢 5) SIMPAN LANGSUNG (tanpa konfirmasi)
         // =============================
+        const sumber = $('#sumber').val();
+
         Swal.fire({
-            title: 'Simpan Perubahan?',
-            text: 'Data keluarga akan disimpan sebagai draft pembaruan.',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Simpan',
-            cancelButtonText: 'Batal'
-        }).then(result => {
-            if (!result.isConfirmed) return;
-
-            const sumber = $('#sumber').val();
-
-            $.ajax({
-                url: baseUrl + '/pembaruan-keluarga/save-keluarga',
-                method: 'POST',
-                data: $('#formDataKeluarga').serialize(),
-                dataType: 'json',
-                success: res => {
-                    if (res.status === 'success') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: res.message,
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
-
-                        if (res.id_kk) {
-                            $('#id_kk').val(res.id_kk);
-                        }
-
-                        if (sumber === 'baru' && res.id_kk) {
-                            setTimeout(() => {
-                                window.location.href = `${baseUrl}/pembaruan-keluarga/detail/${res.id_kk}`;
-                            }, 1200);
-                            return;
-                        }
-
-                        $('#sumber').val('utama');
-                        setTimeout(() => location.reload(), 1000);
-
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal',
-                            text: res.message || 'Tidak dapat menyimpan data.'
-                        });
-                    }
-                },
-                error: xhr => {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Terjadi kesalahan saat menyimpan data.'
-                    });
-                }
-            });
-
+            title: 'Menyimpan data...',
+            text: 'Mohon tunggu',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
         });
 
+        $.ajax({
+            url: baseUrl + '/pembaruan-keluarga/save-keluarga',
+            method: 'POST',
+            data: $('#formDataKeluarga').serialize(),
+            dataType: 'json',
+            success: res => {
+                if (res.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: res.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+
+                    if (res.id_kk) {
+                        $('#id_kk').val(res.id_kk);
+                    }
+
+                    if (sumber === 'baru' && res.id_kk) {
+                        setTimeout(() => {
+                            window.location.href =
+                                `${baseUrl}/pembaruan-keluarga/detail/${res.id_kk}`;
+                        }, 1200);
+                        return;
+                    }
+
+                    $('#sumber').val('utama');
+                    setTimeout(() => location.reload(), 1000);
+
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: res.message || 'Tidak dapat menyimpan data.'
+                    });
+                }
+            },
+            error: () => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Terjadi kesalahan saat menyimpan data.'
+                });
+            }
+        });
     });
+
 
     // 🔹 Simpan Data Rumah
     $('#formRumah').on('submit', function (e) {

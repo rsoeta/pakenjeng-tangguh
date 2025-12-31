@@ -9,11 +9,20 @@
             <form id="formUsulanBansos">
                 <div class="modal-body">
                     <div class="mb-3 text-center">
-                        <?php if (!empty($wilayah_rw) && !empty($wilayah_rts)) : ?>
+                        <?php if (!empty($wilayah_aktif)) : ?>
                             <span class="badge bg-primary px-4 py-2 fs-6 shadow-sm">
                                 <i class="fas fa-map-marker-alt me-1"></i>
-                                Wilayah Aktif: RW <strong><?= esc($wilayah_rw) ?></strong>,
-                                RT <?= implode(', ', array_map('trim', $wilayah_rts)) ?>
+                                Wilayah Aktif:
+                                <?php
+                                $wilayahText = [];
+                                foreach ($wilayah_aktif as $w) {
+                                    $rtText = !empty($w['rts'])
+                                        ? 'RT ' . implode(', ', $w['rts'])
+                                        : 'RT -';
+                                    $wilayahText[] = 'RW ' . esc($w['rw']) . ' (' . $rtText . ')';
+                                }
+                                echo implode(', ', $wilayahText);
+                                ?>
                             </span>
                         <?php else : ?>
                             <span class="badge bg-secondary px-4 py-2 fs-6">
@@ -65,5 +74,3 @@
         </div>
     </div>
 </div>
-
-<!-- <script src="<?= base_url('assets/js/usulan_bansos.js'); ?>"></script> -->

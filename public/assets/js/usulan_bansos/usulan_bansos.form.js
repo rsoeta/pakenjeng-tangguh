@@ -69,66 +69,40 @@ $(document).ready(function () {
     /* ---------------------------------------------
        RULE GABUNGAN (SHDK + DESIL + VALIDASI)
     --------------------------------------------- */
-    // function applyProgramFilters(shdk, desil) {
-    //     resetProgramBansos();
-
-    //     // Tidak layak → Desil > 5
-    //     if (desil > 5) {
-    //         Swal.fire({
-    //             icon: 'warning',
-    //             title: 'Tidak Layak',
-    //             text: 'Kategori desil di atas 5 tidak dapat mengajukan.'
-    //         });
-    //         $('#program_bansos option').not('[value=""]').hide();
-    //         return;
-    //     }
-
-    //     // SHDK (hanya PBI)
-    //     const allowContinue = filterBySHDK(shdk);
-    //     if (!allowContinue) return;
-
-    //     // DESIL 5
-    //     filterByDesil(desil);
-    // }
-
     function applyProgramFilters(shdk, desil) {
 
         resetProgramBansos();
 
-        // Jika SHDK tidak valid → anggap 1 (Kepala Keluarga)
-        // agar user tidak terkunci hanya ke PBI
-        if (!shdk || isNaN(shdk)) {
-            console.warn("⚠ SHDK NULL → fallback sebagai KK");
-            shdk = 1;
-        }
-
         const select = $('#program_bansos');
         const options = select.find('option');
 
-        // DESIL > 5 → Tidak layak
-        if (desil > 5) {
-            Swal.fire('Tidak Layak', 'Kategori desil di atas 5 tidak dapat mengajukan.', 'warning');
+        // 🔴 DESIL tidak valid → tidak layak
+        if (desil === null || desil === 0 || isNaN(desil) || desil > 5) {
+            Swal.fire(
+                'Tidak Layak',
+                'Kategori desil tidak valid atau di atas 5.',
+                'warning'
+            );
             options.not('[value=""]').hide();
             return;
         }
 
-        // DESIL 5
+        // 🔵 DESIL 5
         if (desil === 5) {
             options.each(function () {
                 const text = $(this).text().toUpperCase();
                 if (
-                    !text.includes('BPNT') &&
-                    !text.includes('SEMBAKO') &&   //<-- tambahan penting
                     !text.includes('PBI') &&
+                    !text.includes('BPNT') &&
+                    !text.includes('SEMBAKO') &&
                     $(this).val() !== ''
-                )
-                    {
+                ) {
                     $(this).hide();
                 }
             });
         }
 
-        // SHDK filter
+        // 🔵 SHDK LAIN / NULL / 0 → hanya PBI
         if (shdk !== 1 && shdk !== 3) {
             options.each(function () {
                 const text = $(this).text().toUpperCase();
@@ -188,11 +162,10 @@ $(document).ready(function () {
     /* ========================================================================
        🟦 SELECT2 — Pencarian Individu
        ======================================================================== */
-
     $('#nik_peserta').select2({
         dropdownParent: $('#modalUsulanBansos'),
         theme: 'bootstrap-5',
-        placeholder: 'Ketik NIK atau Nama (min 3 huruf)',
+        placeholder: 'Ketik NIK (min 3 digit)...',
         minimumInputLength: 3,
         width: '100%',
 

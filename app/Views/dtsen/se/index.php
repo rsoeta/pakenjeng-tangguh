@@ -148,7 +148,7 @@
                     </div>
 
                     <table id="tableKeluarga" class="table table-striped table-hover nowrap w-100">
-                        <thead class="text-center">
+                        <thead class="text-light bg-primary text-center">
                             <tr>
                                 <th></th>
                                 <th>No.</th>
@@ -333,24 +333,40 @@
                 dataSrc: 'data'
             },
 
-            columns: [{
-                    data: null,
-                    defaultContent: ''
-                },
+            responsive: true,
+            pageLength: 10,
+            autoWidth: false,
 
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
+            },
+
+            columns: [
+                // 🔹 Responsive control
                 {
                     data: null,
-                    render: (d, t, r, m) => m.row + 1
+                    defaultContent: '',
+                    className: 'control text-center',
+                    orderable: false
                 },
 
+                // 🔹 No
+                {
+                    data: null,
+                    render: (d, t, r, m) => m.row + 1,
+                    className: 'text-center'
+                },
+
+                // 🔹 Kepala Keluarga
                 {
                     data: 'kepala_keluarga',
-                    className: 'text-capitalize'
+                    className: 'text-start text-capitalize'
                 },
 
+                // 🔹 No KK
                 {
                     data: 'no_kk',
-                    className: 'text-nowrap',
+                    className: 'text-nowrap text-start',
                     render: function(noKK) {
                         if (!noKK) return '-';
                         return `
@@ -368,55 +384,54 @@
                     }
                 },
 
+                // 🔹 Alamat
                 {
                     data: 'alamat',
+                    className: 'text-start',
                     render: d => d || '-'
                 },
 
+                // 🔹 Wilayah
                 {
                     data: null,
                     className: 'text-center',
-                    render: r =>
-                        `<span class="badge bg-light text-dark border">RW ${r.rw}</span> /
-                 <span class="badge bg-info text-dark">RT ${r.rt}</span>`
+                    render: r => `
+                <span class="badge bg-light text-dark border">RW ${r.rw}</span>
+                <span class="mx-1">/</span>
+                <span class="badge bg-info text-dark">RT ${r.rt}</span>
+            `
                 },
 
-                // ================= STATUS =================
+                // 🔹 Status
                 {
                     data: 'usulan_status',
                     className: 'text-center',
                     render: function(status, type, row) {
 
-                        // 1️⃣ Tidak ada usulan sama sekali
                         if (!status) {
                             return `<span class="badge bg-secondary">Belum Ada Pembaruan</span>`;
                         }
 
-                        // 2️⃣ Draft
                         if (status === 'draft') {
-                            // Draft tapi sudah lengkap → dianggap Submitted
                             if (row.is_submitted_ready == 1) {
                                 return `<span class="badge bg-info text-dark">Submitted</span>`;
                             }
                             return `<span class="badge bg-warning text-dark">Draft</span>`;
                         }
 
-                        // 3️⃣ Submitted
                         if (status === 'submitted') {
                             return `<span class="badge bg-info text-dark">Submitted</span>`;
                         }
 
-                        // 4️⃣ Verified
                         if (status === 'verified' || status === 'diverifikasi') {
-                            return `<span class="badge bg-success">Verified</span>`;
+                            return `<span class="badge bg-primary">Verified</span>`;
                         }
 
-                        // fallback aman
                         return `<span class="badge bg-secondary">Belum Ada Pembaruan</span>`;
                     }
                 },
 
-                // ================= DESIL =================
+                // 🔹 Desil
                 {
                     data: 'kategori_desil',
                     className: 'text-center',
@@ -428,16 +443,19 @@
                     }
                 },
 
-                // ================= AKSI =================
+                // 🔹 Aksi
                 {
                     data: null,
-                    className: 'text-nowrap',
+                    className: 'text-start text-nowrap',
+                    orderable: false,
+                    searchable: false,
                     render: row => `
                 <a href="/pembaruan-keluarga/detail/${row.id_kk}" 
-                   class="btn btn-success btn-sm me-1">
+                   class="btn btn-outline-dark btn-sm me-1">
                     <i class="fas fa-users-cog"></i>
                 </a>
-                <button class="btn btn-primary btn-sm btnInputDesil"
+
+                <button class="btn btn-outline-primary btn-sm btnInputDesil me-1"
                     data-id="${row.id_kk}"
                     data-nama="${row.kepala_keluarga}"
                     data-nokk="${row.no_kk}"
@@ -445,23 +463,14 @@
                     data-desil="${row.kategori_desil ?? ''}">
                     <i class="fas fa-hand-holding-heart"></i>
                 </button>
-                <button class="btn btn-danger btn-sm btnDeleteKeluarga"
+
+                <button class="btn btn-outline-danger btn-sm btnDeleteKeluarga"
                     data-id="${row.id_kk}">
                     <i class="fas fa-trash-alt"></i>
                 </button>
             `
                 }
-            ],
-
-            responsive: true,
-            pageLength: 10,
-
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
-            },
-
-            createdRow: row => $(row).find('td').css('text-align', 'left'),
-            headerCallback: thead => $(thead).find('th').css('text-align', 'center')
+            ]
         });
 
         // ========================= 🎛 FILTER HANDLER =========================

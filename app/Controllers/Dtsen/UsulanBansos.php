@@ -57,15 +57,26 @@ class UsulanBansos extends Controller
 
         // dd($bansos);
 
-        // 🔹 Parsing wilayah_tugas
-        $wilayahTugas = $userInfo['wilayah_tugas'] ?? '';
-        $rw = '-';
-        $rts = [];
+        // 🔹 Parsing wilayah_tugas → multi RW–RT (FINAL)
+        $wilayahTugas = trim($userInfo['wilayah_tugas'] ?? '');
+        $wilayahAktif = [];
 
         if (!empty($wilayahTugas)) {
-            [$rwPart, $rtPart] = array_pad(explode(':', $wilayahTugas), 2, '');
-            $rw = trim($rwPart) ?: '-';
-            $rts = !empty($rtPart) ? array_map('trim', explode(',', $rtPart)) : [];
+            // contoh: 001:005,007|004:002
+            $blocks = explode('|', $wilayahTugas);
+
+            foreach ($blocks as $block) {
+                [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
+                $rw = trim($rw);
+
+                if ($rw !== '') {
+                    $rts = array_filter(array_map('trim', explode(',', $rtList)));
+                    $wilayahAktif[] = [
+                        'rw'  => $rw,
+                        'rts' => $rts
+                    ];
+                }
+            }
         }
 
         // 🔹 Gabungkan data session dan database user
@@ -82,78 +93,104 @@ class UsulanBansos extends Controller
             is_array($userInfo) ? $userInfo : []
         );
 
-        // 🔹 Siapkan data untuk view
         $data = [
-            'title'         => 'Usulan Bansos',
-            'namaApp'       => nameApp(),
-            'bansos'        => $bansos,
-            'user_login'    => $userData,
-            'wilayah_rw'    => $rw,
-            'wilayah_rts'   => $rts,
-            'statusRole'    => $this->GenModel->getStatusRole(),
+            'title'           => 'Usulan Bansos',
+            'namaApp'         => nameApp(),
+            'bansos'          => $bansos,
+            'user_login'      => $userData,
+            'wilayah_aktif'   => $wilayahAktif, // ✅ GANTI INI
+            'statusRole'      => $this->GenModel->getStatusRole(),
         ];
 
         return view('dtsen/usulan_bansos/index', $data);
     }
 
     /**
-     * 🔍 Cari individu berdasarkan NIK/Nama dengan filter wilayah_tugas user login
+     * 🔍 Cari individu berdasarkan NIK/Nama
+     * 🔐 Dibatasi wilayah_tugas user login (multi RW–RT)
      */
     public function searchArt()
     {
-        $term = $this->request->getGet('q');
+        $term = trim($this->request->getGet('q'));
         $user = $this->AuthModel->getUserId();
         $wilayahTugas = trim($user['wilayah_tugas'] ?? '');
 
         $builder = $this->artModel
-            ->select('
+            ->select("
             dtsen_art.nik,
             dtsen_art.nama,
             dtsen_art.shdk,
-            (SELECT jenis_shdk FROM tb_shdk WHERE id=dtsen_art.shdk) AS shdk_nama,
+            (SELECT jenis_shdk FROM tb_shdk WHERE id = dtsen_art.shdk) AS shdk_nama,
             dtsen_rt.rw,
             dtsen_rt.rt
-        ')
+        ")
             ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk', 'left')
             ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
+            ->where('dtsen_art.deleted_at', null)
             ->groupStart()
             ->like('dtsen_art.nik', $term)
             ->orLike('dtsen_art.nama', $term)
-            ->where('dtsen_art.deleted_at', null)
             ->groupEnd()
             ->limit(10);
 
-        // 🔹 Filter wilayah_tugas
+        /* =====================================================
+       🔐 PARSE wilayah_tugas → pasangan RW–RT (KUNCI)
+       ===================================================== */
         if (!empty($wilayahTugas)) {
-            [$rwPart, $rtPart] = array_pad(explode(':', $wilayahTugas), 2, '');
-            $rw = trim($rwPart);
-            $rts = array_filter(array_map('trim', explode(',', $rtPart)));
 
-            if ($rw && $rts) {
-                $builder->groupStart()
-                    ->where('dtsen_rt.rw', $rw)
-                    ->whereIn('dtsen_rt.rt', $rts)
-                    ->groupEnd();
+            $wilayahPairs = [];
+
+            // contoh: 001:005,007|004:002
+            $blocks = explode('|', $wilayahTugas);
+
+            foreach ($blocks as $block) {
+                [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
+                $rw = trim($rw);
+
+                foreach (explode(',', $rtList) as $rt) {
+                    $rt = trim($rt);
+                    if ($rw !== '' && $rt !== '') {
+                        $wilayahPairs[] = [
+                            'rw' => $rw,
+                            'rt' => $rt
+                        ];
+                    }
+                }
+            }
+
+            if (!empty($wilayahPairs)) {
+                $builder->groupStart();
+                foreach ($wilayahPairs as $pair) {
+                    $builder->orGroupStart()
+                        ->where('dtsen_rt.rw', $pair['rw'])
+                        ->where('dtsen_rt.rt', $pair['rt'])
+                        ->groupEnd();
+                }
+                $builder->groupEnd();
             }
         }
 
-        $data = $builder->get()->getResultArray();
+        $rows = $builder->get()->getResultArray();
 
+        /* =====================================================
+       🎯 Format JSON sesuai standar Select2
+       ===================================================== */
         $results = array_map(function ($row) {
             return [
-                'id' => $row['nik'],
-                'text' => $row['nik'] . ' - ' . strtoupper($row['nama']),
-                'nik' => $row['nik'],
-                'nama' => $row['nama'],
-                'shdk' => (int)($row['shdk'] ?? 0),
-                'shdk_nama' => $row['shdk_nama'] ?? '-',
-                'rw' => $row['rw'] ?? '',
-                'rt' => $row['rt'] ?? ''
+                'id'         => $row['nik'],
+                'text'       => $row['nik'] . ' - ' . strtoupper($row['nama']),
+                'nik'        => $row['nik'],
+                'nama'       => $row['nama'],
+                'shdk'       => (int) ($row['shdk'] ?? 0),
+                'shdk_nama'  => $row['shdk_nama'] ?? '-',
+                'rw'         => $row['rw'] ?? '',
+                'rt'         => $row['rt'] ?? ''
             ];
-        }, $data);
+        }, $rows);
 
-        // 🔹 Pastikan format JSON Select2 benar
-        return $this->response->setJSON(['results' => $results]);
+        return $this->response->setJSON([
+            'results' => $results
+        ]);
     }
 
     /**
@@ -225,16 +262,26 @@ class UsulanBansos extends Controller
 
     /**
      * 💾 Simpan usulan bansos baru
+     * 🔐 Dilengkapi validasi SHDK–DESIL–PROGRAM
      */
     public function save()
     {
         $request = service('request');
-        $nik = $request->getPost('nik_peserta');
-        $program = $request->getPost('program_bansos');
-        $catatan = $request->getPost('catatan');
+
+        $nik      = $request->getPost('nik_peserta');
+        $program  = (int) $request->getPost('program_bansos');
+        $catatan  = $request->getPost('catatan');
 
         $db = db_connect();
-        $art = $db->table('dtsen_art')->where('nik', $nik)->get()->getRowArray();
+
+        /* =====================================================
+       1️⃣ Validasi ART
+       ===================================================== */
+        $art = $db->table('dtsen_art')
+            ->where('nik', $nik)
+            ->where('deleted_at', null)
+            ->get()
+            ->getRowArray();
 
         if (!$art) {
             return $this->response->setJSON([
@@ -243,21 +290,53 @@ class UsulanBansos extends Controller
             ]);
         }
 
-        $se = $db->table('dtsen_se')->where('id_kk', $art['id_kk'])->get()->getRowArray();
-        if (!$se || $se['kategori_desil'] > 5) {
+        /* =====================================================
+       2️⃣ Validasi DESIL
+       ===================================================== */
+        $se = $db->table('dtsen_se')
+            ->where('id_kk', $art['id_kk'])
+            ->get()
+            ->getRowArray();
+
+        $desil = (int) ($se['kategori_desil'] ?? 0);
+
+        if ($desil <= 0 || $desil > 5) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Kategori desil tidak memenuhi syarat (≤5).'
+                'message' => 'Kategori desil tidak memenuhi syarat.'
             ]);
         }
 
-        // 🔎 Cek duplikasi NIK di bulan & tahun berjalan
-        $bulan = date('m');
-        $tahun = date('Y');
+        /* =====================================================
+       3️⃣ VALIDASI SHDK × DESIL × PROGRAM (KUNCI)
+       ===================================================== */
+        $shdk = (int) ($art['shdk'] ?? 0);
+
+        // SHDK selain KK & Istri → hanya PBI
+        if ($shdk !== 1 && $shdk !== 3) {
+            if ($program !== 5) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Program hanya diperbolehkan PBI untuk individu ini.'
+                ]);
+            }
+        }
+
+        // DESIL 5 → hanya BPNT/SEMBAKO + PBI
+        if ($desil === 5 && !in_array($program, [2, 5])) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Kategori desil 5 hanya dapat mengajukan BPNT/SEMBAKO atau PBI.'
+            ]);
+        }
+
+        /* =====================================================
+       4️⃣ Cek Duplikasi Bulan Berjalan
+       ===================================================== */
         $cekDuplikat = $db->table('dtsen_usulan_bansos')
             ->where('nik', $nik)
-            ->where('MONTH(created_at)', $bulan)
-            ->where('YEAR(created_at)', $tahun)
+            ->where('MONTH(created_at)', date('m'))
+            ->where('YEAR(created_at)', date('Y'))
             ->countAllResults();
 
         if ($cekDuplikat > 0) {
@@ -267,24 +346,26 @@ class UsulanBansos extends Controller
             ]);
         }
 
-        // ✅ Simpan data baru
-        $data = [
-            'id_kk' => $art['id_kk'],
-            'nik' => $nik,
+        /* =====================================================
+       5️⃣ Simpan Data
+       ===================================================== */
+        $this->DtsenUsulanBansosModel->insert([
+            'id_kk'          => $art['id_kk'],
+            'nik'            => $nik,
             'program_bansos' => $program,
-            'catatan' => $catatan,
-            'status' => 'draft',
-            'created_at' => date('Y-m-d H:i:s'),
-            'created_by' => session()->get('nik') ?? 'system',
-        ];
+            'catatan'        => $catatan,
+            'status'         => 'draft',
+            'created_at'     => date('Y-m-d H:i:s'),
+            'created_by'     => session()->get('nik') ?? 'system',
+        ]);
 
-        $this->DtsenUsulanBansosModel->insert($data);
-
-        // 🔄 update flag individu
+        /* =====================================================
+       6️⃣ Update Flag ART
+       ===================================================== */
         $db->table('dtsen_art')
             ->where('id_art', $art['id_art'])
             ->update([
-                'usulan_status' => 'draft',
+                'usulan_status'    => 'draft',
                 'is_usulan_bansos' => 1
             ]);
 

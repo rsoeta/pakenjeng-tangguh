@@ -4,6 +4,13 @@ $roleId = $user['role_id'] ?? 99;
 $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 ?>
 
+<style>
+    /* Pastikan child row DataTables rata kiri */
+    table.dataTable>tbody>tr.child td {
+        text-align: left !important;
+        vertical-align: top;
+    }
+</style>
 <!-- <div class="p-1"> -->
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h5 class="fw-bold mb-0">👨‍👩‍👧 Daftar Anggota Keluarga</h5>
@@ -20,7 +27,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
     <?php endif; ?>
 </div>
 <table class="table table-bordered table-sm table-striped w-100" id="tableAnggota">
-    <thead class="table-light text-center">
+    <thead class="table-light text-start">
         <tr>
             <th></th> <!-- Responsive control -->
             <th>No</th>
@@ -32,7 +39,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             <th>Aksi</th>
         </tr>
     </thead>
-
 </table>
 <!-- </div> -->
 
@@ -562,7 +568,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         });
 
         /* ============================================================
-         * 📋 LOAD TABLE ANGGOTA
+         * 📋 LOAD TABLE ANGGOTA (FINAL – LEFT ALIGNED & RESPONSIVE)
          * ============================================================ */
         let tableAnggota;
 
@@ -570,85 +576,139 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             const idKk = $('#id_kk').val();
             if (!idKk) return;
 
+            // Jika sudah ada → reload saja
             if ($.fn.DataTable.isDataTable('#tableAnggota')) {
-                tableAnggota.ajax.reload();
+                tableAnggota.ajax.reload(null, false);
                 return;
             }
 
             tableAnggota = $('#tableAnggota').DataTable({
                 destroy: true,
+                processing: true,
+                responsive: {
+                    details: {
+                        type: 'column',
+                        target: 0
+                    }
+                },
+                autoWidth: false,
+                pageLength: 10,
+
                 ajax: {
                     url: `${window.baseUrl}/pembaruan-keluarga/get-anggota-list/${idKk}`,
+                    type: 'GET',
                     dataSrc: function(json) {
-                        if (json.status !== 'success') {
-                            Swal.fire('Error', json.message || 'Gagal memuat anggota', 'error');
+                        if (!json || json.status !== 'success') {
+                            Swal.fire('Error', json?.message || 'Gagal memuat anggota', 'error');
                             return [];
                         }
                         return json.data;
                     }
                 },
-                responsive: true,
-                autoWidth: false,
-                pageLength: 10,
+
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
                 },
-                columns: [{
+
+                /* ===============================
+                 * DEFINISI KOLOM
+                 * =============================== */
+                columns: [
+                    // 🔹 Control (+)
+                    {
                         data: null,
                         defaultContent: '',
-                        className: 'control',
-                        orderable: false
+                        className: 'dtr-control text-start',
+                        orderable: false,
+                        width: '20px'
                     },
+
+                    // 🔹 No
                     {
                         data: null,
+                        className: 'text-start',
+                        width: '40px',
                         render: (d, t, r, m) => m.row + 1
                     },
+
+                    // 🔹 No KK
                     {
                         data: 'no_kk',
+                        className: 'text-start',
                         defaultContent: '-'
                     },
+
+                    // 🔹 NIK
                     {
                         data: 'nik',
+                        className: 'text-start',
                         defaultContent: '-'
                     },
+
+                    // 🔹 Nama
                     {
                         data: 'nama',
+                        className: 'text-start',
                         defaultContent: '-'
                     },
+
+                    // 🔹 Tanggal Lahir
                     {
                         data: 'tanggal_lahir',
-                        render: d => d ?
+                        className: 'text-start',
+                        render: d =>
+                            d ?
                             new Date(d).toLocaleDateString('id-ID', {
                                 day: '2-digit',
                                 month: 'short',
                                 year: 'numeric'
                             }) : '-'
                     },
-                    { // Hubungan
+
+                    // 🔹 Hubungan
+                    {
                         data: null,
+                        className: 'text-start',
                         render: row =>
                             row.hubungan_keluarga_label ??
                             row.jenis_shdk ??
                             row.hubungan_keluarga ??
                             '-'
                     },
+
+                    // 🔹 Aksi
                     {
                         data: null,
                         orderable: false,
                         searchable: false,
+                        className: 'text-start',
+                        width: '140px',
                         render: r => `
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-primary btnEditAnggota" data-id="${r.id_art ?? r.id}">
-                                <i class="fas fa-edit"></i>
-                                Edit
-                            </button>
-                            <button class="btn btn-danger btnHapusAnggota" data-id="${r.id_art ?? r.id}">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </div>`
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-primary btnEditAnggota"
+                            data-id="${r.id_art ?? r.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btnHapusAnggota"
+                            data-id="${r.id_art ?? r.id}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                `
                     }
-                ]
+                ],
 
+                /* ===============================
+                 * COLUMN DEFS (INI KUNCI UTAMA)
+                 * =============================== */
+                columnDefs: [{
+                    targets: '_all',
+                    className: 'text-start align-middle'
+                }],
+
+                order: [
+                    [1, 'asc']
+                ]
             });
         }
 
