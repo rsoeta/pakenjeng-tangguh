@@ -53,6 +53,7 @@ yarn-error.log*
 !public/data/
 !public/data/**
 public/data/*
+public/error_log
 
 # ----------------------------------------------------------------------
 # LARAGON / LOCAL TOOLS
