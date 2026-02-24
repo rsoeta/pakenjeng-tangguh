@@ -65,6 +65,14 @@ class BaseController extends Controller
 		]);
 	}
 
+	protected function render(string $view, array $data = [])
+	{
+		if (! isset($data['title'])) {
+			$data['title'] = '';
+		}
+
+		return view($view, $data);
+	}
 	// Optional helper render agar bisa include variabel user_login otomatis
 	// protected function render($view, $data = [])
 	// {

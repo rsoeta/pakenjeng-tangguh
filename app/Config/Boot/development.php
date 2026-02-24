@@ -1,5 +1,10 @@
 <?php
 
+// FORCE FIX KINT FOR PHP 8.2+
+// if (class_exists(\Kint\Kint::class)) {
+//     \Kint\Kint::$file_link_format = '%f:%l';
+// }
+
 /*
  |--------------------------------------------------------------------------
  | ERROR DISPLAY
@@ -34,3 +39,7 @@ defined('CI_DEBUG') || define('CI_DEBUG', true);
 
 // Kint\Renderer\RichRenderer::$theme = 'aante-light.css';
 // Kint::$enabled_mode = false;
+
+// if (class_exists(\Kint\Kint::class)) {
+//     \Kint\Kint::$file_link_format = '';
+// }

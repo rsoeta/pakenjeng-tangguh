@@ -20,9 +20,9 @@ $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultController('Landing');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
-$routes->set404Override(function () {
-	return view('maintenance2');
-});
+// $routes->set404Override(function () {
+// 	return view('maintenance2');
+// });
 // $routes->setAutoRoute(true);
 $routes->setAutoRoute(false);
 
@@ -74,6 +74,8 @@ $routes->get('redirect', 'Auth\Auth::redirectToExternalLink');
 // ====================================================================
 // === SINDEN (Sistem Informasi Data Ekonomi dan Sosial Desa) === //
 // ====================================================================
+
+$routes->get('dropdown-rwrt', 'Dtks\Wil::dropdownRwRt');
 
 // USULAN DTSEN
 $routes->group('dtsen-usulan', ['namespace' => 'App\Controllers', 'filter' => ['authfilterdtks', 'menufilterdtks']], function ($routes) {
@@ -290,7 +292,54 @@ $routes->post('saveInactive', 'Dtks\Pbi\Inactive::saveInactive', ['filter' => 'a
 $routes->post('editInactive', 'Dtks\Pbi\Inactive::formEditInactive', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updateInactive', 'Dtks\Pbi\Inactive::updateInactive', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('dltInactive', 'Dtks\Pbi\Inactive::hapus', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->get('pbi/reaktivasi/summary', 'Dtks\Pbi\Reaktivasi::summary');
+
+// REAKTIVASI PBI
+$routes->group('pbi', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
+
+	$routes->group('reaktivasi', function ($routes) {
+
+		// Halaman utama (Daftar Pengajuan)
+		$routes->GET('/', 'Dtks\Pbi\Reaktivasi::index');
+
+		// 🔥 TAMBAHKAN INI
+		$routes->match(['GET', 'POST'], 'tabel', 'Dtks\Pbi\Reaktivasi::tabel_data');
+
+		// Form Ajukan
+		$routes->POST('ajukan', 'Dtks\Pbi\Reaktivasi::ajukan');
+
+		// Simpan draft
+		$routes->post('store', 'Dtks\Pbi\Reaktivasi::store');
+
+		// DataTables
+		$routes->post('tabel', 'Dtks\Pbi\Reaktivasi::tabel_data');
+
+		// Summary cards
+		$routes->GET('summary', 'Dtks\Pbi\Reaktivasi::summary');
+
+		// Lifecycle actions
+		$routes->post('submit/(:num)', 'Dtks\Pbi\Reaktivasi::submit/$1');
+		$routes->post('verify/(:num)', 'Dtks\Pbi\Reaktivasi::verify/$1');
+		$routes->post('approve/(:num)', 'Dtks\Pbi\Reaktivasi::approve/$1');
+		$routes->post('reject/(:num)', 'Dtks\Pbi\Reaktivasi::reject/$1');
+		$routes->post('kirim-siks/(:num)', 'Dtks\Pbi\Reaktivasi::kirimSiks/$1');
+
+		// Riwayat
+		$routes->GET('riwayat', 'Dtks\Pbi\Reaktivasi::riwayat');
+
+		// Upload Excel Verivali
+		$routes->post('upload-excel', 'Dtks\Pbi\Reaktivasi::uploadExcel');
+
+		// Detail view
+		$routes->get('detail/(:num)', 'Dtks\Pbi\Reaktivasi::detail/$1');
+
+		// Dropdown untuk filter status di DataTables
+		$routes->get('dropdown-status', 'Dtks\Pbi\Reaktivasi::dropdownStatus');
+
+		$routes->post('verifikasi/(:num)', 'Dtks\Pbi\Reaktivasi::verifikasi/$1');
+		$routes->post('setujui/(:num)', 'Dtks\Pbi\Reaktivasi::setujui/$1');
+		$routes->post('tolak/(:num)', 'Dtks\Pbi\Reaktivasi::tolak/$1');
+	});
+});
 
 // USULAN
 $routes->get('usulan', 'Dtks\Usulan22::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);

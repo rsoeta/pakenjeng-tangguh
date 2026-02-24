@@ -3,15 +3,18 @@
   "description": "SINDEN DTSEN CI4 project for PHP 8.1 hosting",
   "require": {
     "php": ">=8.1",
-    "codeigniter4/framework": "4.5.8",
+    "codeigniter4/framework": "^4.6.2",
     "kint-php/kint": "5.0",
-    "laminas/laminas-escaper": "2.12.0 as 2.13.0"
+    "phpoffice/phpspreadsheet": "*"
   },
   "config": {
     "optimize-autoloader": true,
     "sort-packages": true,
     "platform": {
       "php": "8.1.0"
+    },
+     "audit": {
+        "block-insecure": false
     }
   },
   "scripts": {
@@ -20,10 +23,6 @@
       "php spark commands"
     ],
     "post-install-cmd": [
-        "php scripts/fix_kint.php"
-    ],
-    "post-update-cmd": [
-        "php scripts/fix_kint.php"
     ],
     "auto-fix-kint": "php scripts/fix_kint.php"
   }

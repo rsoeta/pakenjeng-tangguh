@@ -21,6 +21,7 @@ class Kint extends \CodeIgniter\Config\BaseConfig
 
     /** Folder output untuk RichRenderer */
     public $richFolder = false;
+    // public $richFolder = '';
 
     /** Urutkan hasil RichRenderer */
     public $richSort = true;
@@ -37,13 +38,28 @@ class Kint extends \CodeIgniter\Config\BaseConfig
     /** Lebar minimum kolom CLI */
     public $cliMinWidth = 40;
 
+    // public function __construct()
+    // {
+    //     // Setup untuk RichRenderer (browser)
+    //     RichRenderer::$folder = $this->richFolder;
+    //     RichRenderer::$theme  = $this->richTheme;
+
+    //     \Kint\Kint::$file_link_format = '%f:%l';
+
+    //     // Setup untuk TextRenderer (CLI)
+    //     if (property_exists(TextRenderer::class, 'decorations')) {
+    //         TextRenderer::$decorations = false;
+    //     }
+    // }
+
     public function __construct()
     {
-        // Setup untuk RichRenderer (browser)
         RichRenderer::$folder = $this->richFolder;
         RichRenderer::$theme  = $this->richTheme;
 
-        // Setup untuk TextRenderer (CLI)
+        // FIX PHP 8.x strict typing
+        \Kint\Kint::$file_link_format = '%f:%l';
+
         if (property_exists(TextRenderer::class, 'decorations')) {
             TextRenderer::$decorations = false;
         }

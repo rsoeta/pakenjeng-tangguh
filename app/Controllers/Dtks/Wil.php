@@ -14,6 +14,13 @@ use CodeIgniter\Config\Services;
 
 class Wil extends BaseController
 {
+    protected $model;
+    protected $db;
+
+    private const ROLE_KECAMATAN = 2;
+    private const ROLE_DESA = 3;
+    private const ROLE_PENTRI = 4;
+
     public function __construct()
     {
         $this->db = db_connect();
@@ -583,5 +590,75 @@ class Wil extends BaseController
         session()->setFlashdata('pesan', 'Data berhasil diubah.');
 
         return redirect()->to('/admin');
+    }
+
+    private function parseWilayahTugas(string $wilayah): array
+    {
+        $result = [];
+
+        $pairs = explode('|', $wilayah);
+
+        foreach ($pairs as $pair) {
+
+            if (strpos($pair, ':') === false) continue;
+
+            [$rw, $rts] = explode(':', $pair);
+
+            $rtArray = explode(',', $rts);
+
+            $result[trim($rw)] = array_map('trim', $rtArray);
+        }
+
+        return $result;
+    }
+
+    public function dropdownRwRt()
+    {
+        $roleId       = (int) session('role_id');
+        $kodeDesa     = session('kode_desa');
+        $wilayahTugas = session('wilayah_tugas');
+
+        if (!$kodeDesa) {
+            return $this->response->setJSON([]);
+        }
+
+        $builder = $this->db->table('tb_rt')
+            ->select('no_rw, no_rt')
+            ->where('kode_desa', $kodeDesa)
+            ->orderBy('no_rw', 'ASC')
+            ->orderBy('no_rt', 'ASC');
+
+        $rows = $builder->get()->getResultArray();
+
+        /*
+        |--------------------------------------------------------------------------
+        | FILTER KHUSUS ROLE_PENTRI
+        |--------------------------------------------------------------------------
+        */
+        if ($roleId === self::ROLE_PENTRI && !empty($wilayahTugas)) {
+
+            $allowed = $this->parseWilayahTugas($wilayahTugas);
+
+            $rows = array_filter($rows, function ($row) use ($allowed) {
+
+                $rw = $row['no_rw'];
+                $rt = $row['no_rt'];
+
+                return isset($allowed[$rw]) && in_array($rt, $allowed[$rw]);
+            });
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Format JSON Response
+        |--------------------------------------------------------------------------
+        */
+        $result = [];
+
+        foreach ($rows as $row) {
+            $result[$row['no_rw']][] = $row['no_rt'];
+        }
+
+        return $this->response->setJSON($result);
     }
 }
