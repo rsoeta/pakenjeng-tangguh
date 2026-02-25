@@ -5,7 +5,7 @@
 # ----------------------------------------------------------------------
 # CORE FOLDERS TO IGNORE
 # ----------------------------------------------------------------------
-/vendor/              # Composer dependencies
+# /vendor/              # Composer dependencies
 /node_modules/        # NodeJS packages
 /.idea/               # JetBrains IDE metadata
 /.vscode/             # VSCode project configs
@@ -13,7 +13,7 @@
 /.history/            # VSCode local history
 /.DS_Store            # macOS file metadata
 Thumbs.db             # Windows thumbnail cache
-vendor/*
+# vendor/*
 node_modules
 node_modules/**
 
@@ -58,7 +58,7 @@ public/error_log
 # ----------------------------------------------------------------------
 # LARAGON / LOCAL TOOLS
 # ----------------------------------------------------------------------
-/vendor.zip
+# /vendor.zip
 /laragon
 *.sql
 *.bak

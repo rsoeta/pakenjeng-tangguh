@@ -962,6 +962,30 @@
 
             });
         });
+
+        /* =========================================================
+           UPLOAD EXCEL
+        ========================================================= */
+        $('#formUploadExcel').submit(function(e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+
+            $.ajax({
+                url: '/pbi/reaktivasi/upload-excel',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(res) {
+                    if (res.success) {
+                        Swal.fire('Berhasil', res.message + ' (' + res.total + ' data)', 'success');
+                    } else {
+                        Swal.fire('Gagal', res.message, 'error');
+                    }
+                }
+            });
+        });
     });
 
     /* =========================================================
