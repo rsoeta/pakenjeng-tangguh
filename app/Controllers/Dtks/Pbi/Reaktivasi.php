@@ -424,7 +424,9 @@ class Reaktivasi extends BaseController
             $compressed = $this->processPdfUpload($fullPath, $nik, $rw, $rt);
 
             if (!$compressed) {
-                unlink($fullPath);
+                if (is_file($fullPath)) {
+                    unlink($fullPath);
+                }
                 return $this->response->setJSON([
                     'success' => false,
                     'message' => 'PDF tetap lebih dari 450KB setelah kompresi'
@@ -460,7 +462,10 @@ class Reaktivasi extends BaseController
 
         if ($existing) {
             $this->db->transRollback();
-            unlink($uploadDir . $finalName);
+            $target = $uploadDir . $finalName;
+            if (is_file($target)) {
+                unlink($target);
+            }
 
             return $this->response->setJSON([
                 'success' => false,
@@ -482,7 +487,10 @@ class Reaktivasi extends BaseController
         $this->db->transComplete();
 
         if (!$this->db->transStatus()) {
-            unlink($uploadDir . $finalName);
+            $target = $uploadDir . $finalName;
+            if (is_file($target)) {
+                unlink($target);
+            }
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Gagal menyimpan data'
@@ -515,9 +523,10 @@ class Reaktivasi extends BaseController
     private function processPdfUpload(string $originalPath, string $nik, string $rw, string $rt): ?string
     {
         clearstatcache();
-        $initialSize = filesize($originalPath);
 
-        log_message('info', "PDF BEFORE COMPRESSION: {$initialSize} bytes");
+        if (!is_file($originalPath)) {
+            return null;
+        }
 
         $currentPath = $originalPath;
 
@@ -527,13 +536,19 @@ class Reaktivasi extends BaseController
 
             if ($this->compressPdf($currentPath, $compressedPath, $mode)) {
 
-                unlink($currentPath);
+                if (is_file($currentPath)) {
+                    unlink($currentPath);
+                }
+
                 $currentPath = $compressedPath;
 
                 clearstatcache();
-                $sizeAfter = filesize($currentPath);
 
-                log_message('info', "PDF AFTER {$mode}: {$sizeAfter} bytes");
+                if (!is_file($currentPath)) {
+                    return null;
+                }
+
+                $sizeAfter = filesize($currentPath);
 
                 if ($sizeAfter <= self::MAX_FINAL_KB * 1024) {
                     break;
@@ -542,8 +557,15 @@ class Reaktivasi extends BaseController
         }
 
         clearstatcache();
+
+        if (!is_file($currentPath)) {
+            return null;
+        }
+
         if (filesize($currentPath) > self::MAX_FINAL_KB * 1024) {
-            unlink($currentPath);
+            if (is_file($currentPath)) {
+                unlink($currentPath);
+            }
             return null;
         }
 
@@ -556,7 +578,13 @@ class Reaktivasi extends BaseController
         );
 
         $finalPath = FCPATH . 'uploads/pbi/' . $finalName;
-        rename($currentPath, $finalPath);
+
+        if (!rename($currentPath, $finalPath)) {
+            if (is_file($currentPath)) {
+                unlink($currentPath);
+            }
+            return null;
+        }
 
         return $finalName;
     }
