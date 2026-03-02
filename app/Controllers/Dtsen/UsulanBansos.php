@@ -24,6 +24,7 @@ class UsulanBansos extends Controller
     protected $request;
     protected $response;
     protected $validation;
+    protected $db;
 
     public function __construct()
     {
@@ -34,6 +35,7 @@ class UsulanBansos extends Controller
         $this->DtsenUsulanBansosModel = new DtsenUsulanBansosModel();
         $this->BansosModel = new BansosModel();
         $this->GenModel = new GenModel();
+        $this->db = \Config\Database::connect();
 
         helper(['opdtks_helper', 'opdtsen_helper']);
     }
@@ -429,46 +431,6 @@ class UsulanBansos extends Controller
         }
     }
 
-    /**
-     * 📊 Ambil data usulan bansos (bisa difilter berdasarkan status)
-     */
-    // public function getDataBulanIni()
-    // {
-    //     $bulan  = date('m');
-    //     $tahun  = date('Y');
-    //     $status = $this->request->getGet('status'); // bisa 'draft' atau 'diverifikasi'
-
-    //     $builder = $this->DtsenUsulanBansosModel
-    //         ->select("
-    //         dtsen_usulan_bansos.*,
-    //         dtsen_art.nama,
-    //         dbj.dbj_nama_bansos,
-    //         u1.fullname AS created_by_name,
-    //         u2.fullname AS updated_by_name
-    //     ")
-    //         ->join('dtsen_art', 'dtsen_art.nik = dtsen_usulan_bansos.nik', 'left')
-    //         ->join('dtks_bansos_jenis dbj', 'dbj.dbj_id = dtsen_usulan_bansos.program_bansos', 'left')
-    //         ->join('dtks_users u1', 'u1.nik = dtsen_usulan_bansos.created_by', 'left')
-    //         ->join('dtks_users u2', 'u2.nik = dtsen_usulan_bansos.updated_by', 'left')
-    //         ->where('MONTH(dtsen_usulan_bansos.created_at)', $bulan)
-    //         ->where('YEAR(dtsen_usulan_bansos.created_at)', $tahun);
-
-    //     if ($status) {
-    //         $builder->where('dtsen_usulan_bansos.status', $status);
-    //     }
-
-    //     $builder->orderBy('dtsen_usulan_bansos.created_at', 'ASC');
-
-    //     try {
-    //         $data = $builder->findAll();
-
-    //         log_message('info', "✅ getDataBulanIni() memuat " . count($data) . " data untuk status={$status}");
-    //         return $this->response->setJSON(['data' => $data]);
-    //     } catch (\Throwable $e) {
-    //         log_message('error', "❌ getDataBulanIni() error: " . $e->getMessage());
-    //         return $this->response->setJSON(['data' => [], 'error' => $e->getMessage()]);
-    //     }
-    // }
     public function getDataBulanIni()
     {
         $session = session();
@@ -477,7 +439,11 @@ class UsulanBansos extends Controller
 
         $bulan  = date('m');
         $tahun  = date('Y');
-        $status = $this->request->getGet('status'); // 'draft' atau 'diverifikasi'
+        $status = $this->request->getVar('status'); // 'draft' atau 'diverifikasi'
+        $program   = $this->request->getVar('program');
+        $createdBy = $this->request->getVar('created_by');
+        $rw        = $this->request->getVar('rw');
+        $rt        = $this->request->getVar('rt');
 
         $builder = $this->DtsenUsulanBansosModel
             ->select("
@@ -488,6 +454,8 @@ class UsulanBansos extends Controller
                 u1.nope    AS created_by_nope,
                 u2.fullname AS updated_by_name
             ")
+            ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_usulan_bansos.id_kk', 'left')
+            ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
             ->join('dtsen_art', 'dtsen_art.nik = dtsen_usulan_bansos.nik', 'left')
             ->join('dtks_bansos_jenis dbj', 'dbj.dbj_id = dtsen_usulan_bansos.program_bansos', 'left')
             ->join('dtks_users u1', 'u1.nik = dtsen_usulan_bansos.created_by', 'left')
@@ -498,6 +466,21 @@ class UsulanBansos extends Controller
         // Filter status jika diminta
         if ($status) {
             $builder->where('dtsen_usulan_bansos.status', $status);
+        }
+        if ($program) {
+            $builder->where('dtsen_usulan_bansos.program_bansos', $program);
+        }
+
+        if ($createdBy) {
+            $builder->where('dtsen_usulan_bansos.created_by', $createdBy);
+        }
+
+        if ($rw) {
+            $builder->where('dtsen_rt.rw', $rw);
+        }
+
+        if ($rt) {
+            $builder->where('dtsen_rt.rt', $rt);
         }
 
         // RULE: role 1,2,3 lihat semua
@@ -566,33 +549,6 @@ class UsulanBansos extends Controller
         }
     }
 
-    /**
-     * ✅ Verifikasi usulan bansos oleh admin
-     */
-    // public function verifikasi($id)
-    // {
-    //     try {
-    //         $usulan = $this->DtsenUsulanBansosModel->find($id);
-    //         if (!$usulan) {
-    //             return $this->response->setJSON(['success' => false, 'message' => 'Data tidak ditemukan.']);
-    //         }
-
-    //         $this->DtsenUsulanBansosModel->update($id, [
-    //             'status' => 'diverifikasi',
-    //             'updated_at' => date('Y-m-d H:i:s'),
-    //             'updated_by' => session()->get('nik') ?? session()->get('user_nik') ?? null
-    //         ]);
-
-    //         log_message('info', "[verifikasi] ID {$id} diverifikasi oleh " . (session()->get('fullname') ?? 'Admin'));
-    //         return $this->response->setJSON(['success' => true, 'message' => 'Usulan berhasil diverifikasi.']);
-    //     } catch (\Throwable $e) {
-    //         log_message('error', "[verifikasi] Error: " . $e->getMessage());
-    //         return $this->response->setJSON(['success' => false, 'message' => 'Terjadi kesalahan server.']);
-    //     }
-    // }
-    /**
-     * ✅ Verifikasi usulan bansos oleh admin (hanya role_id <= 3)
-     */
     public function verifikasi($id)
     {
         try {
@@ -617,17 +573,177 @@ class UsulanBansos extends Controller
             // Optional: jika ingin membatasi verifikasi hanya untuk usulan di bulan ini juga, cek tanggal created_at
             // $bulan = date('m'); $tahun = date('Y'); if (date('m', strtotime($usulan['created_at'])) != $bulan) { ... }
 
+            // Update status
             $this->DtsenUsulanBansosModel->update($id, [
-                'status' => 'diverifikasi',
+                'status'     => 'diverifikasi',
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updated_by' => $userNik
             ]);
+
+            // Ambil ulang data lengkap untuk WA
+            $usulanLengkap = $this->DtsenUsulanBansosModel
+                ->select("
+                            dtsen_usulan_bansos.*,
+                            dtsen_art.nama,
+                            dbj.dbj_nama_bansos,
+                            u1.fullname AS created_by_name,
+                            u1.nope    AS created_by_nope
+                        ")
+                ->join('dtsen_art', 'dtsen_art.nik = dtsen_usulan_bansos.nik', 'left')
+                ->join('dtks_bansos_jenis dbj', 'dbj.dbj_id = dtsen_usulan_bansos.program_bansos', 'left')
+                ->join('dtks_users u1', 'u1.nik = dtsen_usulan_bansos.created_by', 'left')
+                ->where('dtsen_usulan_bansos.id', $id)
+                ->first();
+
+            // Kirim WA ke petugas entri
+            try {
+                if (!empty($usulanLengkap['created_by_nope'])) {
+                    $this->sendWaVerified($usulanLengkap);
+                } else {
+                    log_message('warning', "[WA Verified] Nomor petugas kosong untuk usulan ID {$id}");
+                }
+            } catch (\Throwable $waError) {
+                log_message('error', '[WA Verified] Gagal kirim WA: ' . $waError->getMessage());
+            }
 
             log_message('info', "[verifikasi] ID {$id} diverifikasi oleh " . ($session->get('fullname') ?? $userNik));
             return $this->response->setJSON(['success' => true, 'message' => 'Usulan berhasil diverifikasi.']);
         } catch (\Throwable $e) {
             log_message('error', "[verifikasi] Error: " . $e->getMessage());
             return $this->response->setJSON(['success' => false, 'message' => 'Terjadi kesalahan server.']);
+        }
+    }
+
+    private function sendWaVerified(array $usulan)
+    {
+        $nomorWA = preg_replace('/[^0-9]/', '', $usulan['created_by_nope']);
+
+        // Normalisasi ke format 62
+        if (substr($nomorWA, 0, 1) === '0') {
+            $nomorWA = '62' . substr($nomorWA, 1);
+        }
+
+        // $tanggal = date('d-m-Y H:i');
+        // === Format tanggal Indonesia ===
+        $hari = [
+            'Sunday'    => 'Minggu',
+            'Monday'    => 'Senin',
+            'Tuesday'   => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday'  => 'Kamis',
+            'Friday'    => 'Jumat',
+            'Saturday'  => 'Sabtu'
+        ];
+
+        $bulan = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
+        ];
+
+        $now  = date('Y-m-d H:i:s');
+        $hariIndo = $hari[date('l', strtotime($now))];
+        $tgl      = date('d', strtotime($now));
+        $bln      = $bulan[intval(date('m', strtotime($now)))];
+        $thn      = date('Y', strtotime($now));
+        $jam      = date('H:i', strtotime($now)) . " WIB";
+
+        $tanggalLengkap = "{$hariIndo}, {$tgl} {$bln} {$thn}, {$jam}";
+
+        $pesan = "== SINDEN System ==\n"
+            . "🔔 *Notifikasi Verifikasi Usulan Bansos*\n\n"
+            . "Halo {$usulan['created_by_name']},\n\n"
+            . "Usulan atas nama:\n"
+            . "> Nama   : *{$usulan['nama']}*\n"
+            . "> NIK    : {$usulan['nik']}\n"
+            . "> Program: {$usulan['dbj_nama_bansos']}\n"
+            . "> Status : *Berhasil diverifikasi*\n\n"
+            . "*_Waktu: {$tanggalLengkap}_*";
+
+        $wa = new \App\Libraries\WaService();
+        $send = $wa->sendText($nomorWA, $pesan);
+
+        log_message('info', "[WA Verified] Terkirim ke {$nomorWA}");
+    }
+
+    public function getFilterOptions()
+    {
+        try {
+
+            $bulan = date('m');
+            $tahun = date('Y');
+
+            /* ==============================
+           1️⃣ PROGRAM BANSOS
+        ============================== */
+            $program = $this->db->table('dtks_bansos_jenis')
+                ->select('dbj_id, dbj_nama_bansos')
+                ->orderBy('dbj_nama_bansos', 'ASC')
+                ->get()
+                ->getResult();
+
+
+            /* ==============================
+           2️⃣ PENGUSUL (CREATED BY)
+        ============================== */
+            $createdBy = $this->db->table('dtsen_usulan_bansos')
+                ->select('dtsen_usulan_bansos.created_by, dtks_users.fullname')
+                ->join('dtks_users', 'dtks_users.nik = dtsen_usulan_bansos.created_by', 'left')
+                ->where('MONTH(dtsen_usulan_bansos.created_at)', $bulan)
+                ->where('YEAR(dtsen_usulan_bansos.created_at)', $tahun)
+                ->where('dtsen_usulan_bansos.created_by IS NOT NULL')
+                ->groupBy('dtsen_usulan_bansos.created_by')
+                ->orderBy('dtks_users.fullname', 'ASC')
+                ->get()
+                ->getResult();
+
+
+            /* ==============================
+           3️⃣ RW (UNIQUE)
+        ============================== */
+            $rw = $this->db->table('dtsen_rt')
+                ->select('rw')
+                ->where('rw IS NOT NULL')
+                ->groupBy('rw')
+                ->orderBy('rw', 'ASC')
+                ->get()
+                ->getResult();
+
+
+            /* ==============================
+           4️⃣ RT (UNIQUE)
+        ============================== */
+            $rt = $this->db->table('dtsen_rt')
+                ->select('rt')
+                ->where('rt IS NOT NULL')
+                ->groupBy('rt')
+                ->orderBy('rt', 'ASC')
+                ->get()
+                ->getResult();
+
+
+            return $this->response->setJSON([
+                'program'    => $program,
+                'created_by' => $createdBy,
+                'rw'         => $rw,
+                'rt'         => $rt
+            ]);
+        } catch (\Throwable $e) {
+
+            log_message('error', '[FilterOptions] ' . $e->getMessage());
+
+            return $this->response->setJSON([
+                'error' => $e->getMessage()
+            ]);
         }
     }
 }

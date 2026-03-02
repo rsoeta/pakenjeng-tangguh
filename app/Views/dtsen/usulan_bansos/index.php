@@ -195,6 +195,41 @@
                             id="csrfToken"
                             name="<?= csrf_token() ?>"
                             value="<?= csrf_hash() ?>" />
+
+
+                        <div class="row mb-3">
+
+                            <div class="col-md-3 col-6">
+                                <select id="filterProgram" class="form-control">
+                                    <option value="">-- Semua Program --</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3 col-6">
+                                <select id="filterCreatedBy" class="form-control">
+                                    <option value="">-- Semua Pengusul --</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2 col-6">
+                                <select id="filterRW" class="form-control">
+                                    <option value="">-- RW --</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2 col-6">
+                                <select id="filterRT" class="form-control">
+                                    <option value="">-- RT --</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2 d-flex gap-2">
+                                <button id="btnApplyFilter" class="btn btn-primary w-100">Filter</button>
+                                <button id="btnResetFilter" class="btn btn-secondary w-100">Reset</button>
+                            </div>
+
+                        </div>
+
                         <table id="tableUsulanBansosDraft" class="table table-striped table-bordered w-100"></table>
                     </div>
 
@@ -205,7 +240,6 @@
                                 <i class="fas fa-sync-alt"></i> Reload
                             </button>
                         </div>
-
                         <table id="tableUsulanBansosVerified" class="table table-striped table-bordered w-100"></table>
                     </div>
                 </div>

@@ -118,6 +118,8 @@ $routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview']], 
 
 	// NEW: check deadline API untuk modal + countdown
 	$routes->get('check-deadline', 'Dtsen\UsulanBansos::checkDeadline');
+
+	$routes->get('filter-options', 'Dtsen\UsulanBansos::getFilterOptions');
 });
 
 // === DTSEN - Pembaruan Data Keluarga ===

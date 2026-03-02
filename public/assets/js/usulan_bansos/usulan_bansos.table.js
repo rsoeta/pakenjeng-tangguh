@@ -50,15 +50,76 @@ $(document).ready(function () {
         return escapeHtml(name);
     }
 
+    function loadFilterOptions() {
+        $.ajax({
+            url: '/usulan-bansos/filter-options',
+            type: 'GET',
+            dataType: 'json',
+            success: function(res) {
+
+                console.log("Filter Options Response:", res);
+
+                if (!res || res.error) {
+                    console.error("Filter options error:", res?.error);
+                    return;
+                }
+
+                if (res.program && Array.isArray(res.program)) {
+                    res.program.forEach(p => {
+                        $('#filterProgram').append(
+                            `<option value="${p.dbj_id}">${p.dbj_nama_bansos}</option>`
+                        );
+                    });
+                }
+
+                if (res.created_by && Array.isArray(res.created_by)) {
+                    res.created_by.forEach(u => {
+                        $('#filterCreatedBy').append(
+                            `<option value="${u.created_by}">${u.fullname}</option>`
+                        );
+                    });
+                }
+
+                if (res.rw && Array.isArray(res.rw)) {
+                    res.rw.forEach(r => {
+                        $('#filterRW').append(
+                            `<option value="${r.rw}">RW ${r.rw}</option>`
+                        );
+                    });
+                }
+
+                if (res.rt && Array.isArray(res.rt)) {
+                    res.rt.forEach(r => {
+                        $('#filterRT').append(
+                            `<option value="${r.rt}">RT ${r.rt}</option>`
+                        );
+                    });
+                }
+            },
+            error: function(xhr) {
+                console.error("AJAX error:", xhr.responseText);
+            }
+        });
+    }
+    
+    loadFilterOptions();
+
     /* ============================================================
        📊 DATATABLE — DRAFT
        ============================================================ */
 
     const tableDraft = $('#tableUsulanBansosDraft').DataTable({
-        ajax: {
-            url: '/usulan-bansos/data?status=draft',
+       ajax: {
+            url: '/usulan-bansos/data',
             type: 'GET',
             dataType: 'json',
+            data: function(d) {
+                d.status = 'draft';
+                d.program = $('#filterProgram').val();
+                d.created_by = $('#filterCreatedBy').val();
+                d.rw = $('#filterRW').val();
+                d.rt = $('#filterRT').val();
+            },
             dataSrc: json => json.data || []
         },
         columns: [
@@ -255,16 +316,22 @@ Demikian kami sampaikan. Atas perhatian dan pemahamannya, kami ucapkan terima ka
         window.open(url, '_blank');
     }
 
-
     /* ============================================================
        📊 DATATABLE — VERIFIED
        ============================================================ */
 
     const tableVerified = $('#tableUsulanBansosVerified').DataTable({
-        ajax: {
-            url: '/usulan-bansos/data?status=diverifikasi',
+       ajax: {
+            url: '/usulan-bansos/data',
             type: 'GET',
             dataType: 'json',
+            data: function(d) {
+                d.status = 'diverifikasi';
+                d.program = $('#filterProgram').val();
+                d.created_by = $('#filterCreatedBy').val();
+                d.rw = $('#filterRW').val();
+                d.rt = $('#filterRT').val();
+            },
             dataSrc: json => json.data || []
         },
         columns: [
@@ -500,6 +567,23 @@ Demikian kami sampaikan. Atas perhatian dan pemahamannya, kami ucapkan terima ka
                 showConfirmButton: false
             });
         }
+    });
+
+    /* ============================================================
+    🔍 FILTER HANDLER
+    ============================================================ */
+    $('#btnApplyFilter').on('click', function () {
+        tableDraft.ajax.reload();
+        tableVerified.ajax.reload();
+    });
+
+    $('#btnResetFilter').on('click', function () {
+        $('#filterProgram').val('');
+        $('#filterCreatedBy').val('');
+        $('#filterRW').val('');
+        $('#filterRT').val('');
+        tableDraft.ajax.reload();
+        tableVerified.ajax.reload();
     });
 
 });
