@@ -37,20 +37,14 @@ $disabled = $editable ? '' : 'disabled';
                     </div>
                 </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-8">
-                        <label for="alamat" class="form-label fw-bold">Alamat Lengkap</label>
-                        <textarea class="form-control upper" id="alamat" name="alamat" rows="2" <?= $disabled ?>><?= esc($perumahan['alamat'] ?? '') ?></textarea>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="rw" class="form-label fw-bold">RW</label>
-                        <input type="text" class="form-control" id="rw" name="rw"
-                            value="<?= esc($perumahan['rw'] ?? '') ?>" <?= $disabled ?>>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="rt" class="form-label fw-bold">RT</label>
-                        <input type="text" class="form-control" id="rt" name="rt"
-                            value="<?= esc($perumahan['rt'] ?? '') ?>" <?= $disabled ?>>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Alamat Domisili</label>
+                    <div class="bg-light border rounded-3 p-3 small">
+                        <div>
+                            <strong>RW:</strong> <?= esc($perumahan['rw'] ?? '-') ?> |
+                            <strong>RT:</strong> <?= esc($perumahan['rt'] ?? '-') ?> |
+                            <?= esc($perumahan['alamat'] ?? '-') ?>
+                        </div>
                     </div>
                 </div>
 

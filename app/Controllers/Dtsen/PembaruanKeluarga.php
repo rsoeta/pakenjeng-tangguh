@@ -386,9 +386,9 @@ class PembaruanKeluarga extends BaseController
             $perumahanBaru = [
                 'no_kk'              => $post['no_kk'] ?? $kkData['no_kk'],
                 'kepala_keluarga'    => $post['kepala_keluarga'] ?? $kkData['kepala_keluarga'],
-                'alamat'             => trim($post['alamat'] ?? $kkData['alamat']),
-                'rw'                 => $post['rw'] ?? '',
-                'rt'                 => $post['rt'] ?? '',
+                // 'alamat'             => trim($post['alamat'] ?? $kkData['alamat']),
+                // 'rw'                 => $post['rw'] ?? '',
+                // 'rt'                 => $post['rt'] ?? '',
                 'status_kepemilikan' => $post['status_rumah'] ?? $kkData['status_kepemilikan_rumah'] ?? '',
                 'kategori_adat'      => $post['kategori_adat'] ?? 'Tidak',
                 'nama_suku'          => $post['nama_suku'] ?? ''
@@ -658,7 +658,12 @@ class PembaruanKeluarga extends BaseController
 
             // 💾 Siapkan struktur baru
             $perumahanBaru = [
+                'alamat' => trim($post['alamat'] ?? ''),
+                'rw'     => trim($post['rw'] ?? ''),
+                'rt'     => trim($post['rt'] ?? ''),
+
                 'status_kepemilikan' => $post['status_kepemilikan'] ?? null, // simpan di level utama
+
                 'wilayah' => [
                     'provinsi'   => $post['provinsi'] ?? null,
                     'kabupaten'  => $post['regency'] ?? null,
@@ -686,7 +691,13 @@ class PembaruanKeluarga extends BaseController
             ];
 
             // ⚙️ Gabungkan data lama & baru
-            $gabungan = $payloadLama['perumahan'];
+            $gabungan = $payloadLama['perumahan'] ?? [];
+
+            // overwrite root level
+            $gabungan['alamat'] = $perumahanBaru['alamat'];
+            $gabungan['rw']     = $perumahanBaru['rw'];
+            $gabungan['rt']     = $perumahanBaru['rt'];
+
             $gabungan['status_kepemilikan'] = $perumahanBaru['status_kepemilikan']; // overwrite langsung di level utama
 
             $gabungan['wilayah']  = array_merge($gabungan['wilayah'] ?? [], $perumahanBaru['wilayah']);
@@ -722,15 +733,18 @@ class PembaruanKeluarga extends BaseController
 
                 if ($kkRow) {
                     $updateRT = [
+                        'alamat'            => trim($post['alamat'] ?? ''),
+                        'rw'                => trim($post['rw'] ?? ''),
+                        'rt'                => trim($post['rt'] ?? ''),
                         'kepemilikan_rumah' => $post['status_kepemilikan'] ?? null,
-                        'luas_lantai'    => (float)($post['luas_lantai'] ?? 0),
-                        'jenis_lantai'    => $post['jenis_lantai'] ?? null,
-                        'jenis_dinding'    => $post['jenis_dinding'] ?? null,
-                        'bahan_bakar'    => $post['bahan_bakar'] ?? null,
-                        'sumber_air'     => $post['sumber_air'] ?? null,
-                        'sumber_listrik' => $post['sumber_listrik'] ?? null,
-                        'updated_at'     => date('Y-m-d H:i:s'),
-                        'updated_by'     => $user['nama'] ?? 'system'
+                        'luas_lantai'       => (float)($post['luas_lantai'] ?? 0),
+                        'jenis_lantai'      => $post['jenis_lantai'] ?? null,
+                        'jenis_dinding'     => $post['jenis_dinding'] ?? null,
+                        'bahan_bakar'       => $post['bahan_bakar'] ?? null,
+                        'sumber_air'        => $post['sumber_air'] ?? null,
+                        'sumber_listrik'    => $post['sumber_listrik'] ?? null,
+                        'updated_at'        => date('Y-m-d H:i:s'),
+                        'updated_by'        => $user['nama'] ?? 'system'
                     ];
                     $this->db->table('dtsen_rt')
                         ->where('id_rt', $kkRow['id_rt'])
@@ -761,6 +775,8 @@ class PembaruanKeluarga extends BaseController
     public function saveAset()
     {
         try {
+            log_message('error', 'POST DATA: ' . json_encode($this->request->getPost()));
+
             $request  = service('request');
             $usulanId = $request->getPost('dtsen_usulan_id');
             $userId   = session()->get('id_user') ?? session()->get('user_id') ?? session()->get('id') ?? 0;
@@ -770,6 +786,23 @@ class PembaruanKeluarga extends BaseController
                 return $this->response->setJSON([
                     'status'  => 'error',
                     'message' => 'ID usulan tidak ditemukan.'
+                ]);
+            }
+
+            $luasSawah  = trim($request->getPost('luas_sawah') ?? '');
+            $rumahLain  = trim($request->getPost('rumah_lain') ?? '');
+
+            if ($luasSawah === '') {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Luas sawah / kebun wajib dipilih.'
+                ]);
+            }
+
+            if ($rumahLain === '') {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Kepemilikan rumah lain wajib dipilih.'
                 ]);
             }
 

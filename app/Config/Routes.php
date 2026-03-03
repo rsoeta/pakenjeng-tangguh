@@ -20,10 +20,10 @@ $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultController('Landing');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
-// $routes->set404Override(function () {
-// 	return view('maintenance2');
-// });
-// $routes->setAutoRoute(true);
+$routes->set404Override(function () {
+	return view('maintenance2');
+});
+$routes->setAutoRoute(true);
 $routes->setAutoRoute(false);
 
 /*
@@ -91,7 +91,7 @@ $routes->group('dtsen-usulan', ['namespace' => 'App\Controllers', 'filter' => ['
 });
 
 // === DTSEN - Sosial Ekonomi (Data Keluarga / Input Desil) ===
-$routes->group('dtsen-se', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
+$routes->group('dtsen-se', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
 	$routes->get('/', 'Dtsen\DtsenSe::index');
 	$routes->post('update-desil', 'Dtsen\DtsenSe::updateDesil');
 	$routes->post('tabel_data', 'Dtsen\DtsenSe::tabel_data');
@@ -125,7 +125,7 @@ $routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview']], 
 });
 
 // === DTSEN - Pembaruan Data Keluarga ===
-$routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
+$routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
 	$routes->get('/', 'Dtsen\PembaruanKeluarga::index');
 	$routes->get('detail/(:num)', 'Dtsen\PembaruanKeluarga::detail/$1');
 	$routes->get('tambah', 'Dtsen\PembaruanKeluarga::tambah');  // 🆕 Form tambah keluarga baru

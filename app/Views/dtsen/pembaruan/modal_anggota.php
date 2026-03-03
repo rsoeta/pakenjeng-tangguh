@@ -180,6 +180,18 @@
                                                     <select class="form-select required" id="ind_desa" name="desa"></select>
                                                 </div>
                                             </div>
+
+                                            <div class="mb-3 mt-3">
+                                                <label class="form-label fw-semibold">Alamat Domisili</label>
+                                                <div class="bg-light border rounded-3 p-3 small">
+                                                    <div>
+                                                        <strong>RW:</strong> <?= esc($perumahan['rw'] ?? '-') ?> |
+                                                        <strong>RT:</strong> <?= esc($perumahan['rt'] ?? '-') ?> |
+                                                        <?= esc($perumahan['alamat'] ?? '-') ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                         </div>
 
                                     </div>

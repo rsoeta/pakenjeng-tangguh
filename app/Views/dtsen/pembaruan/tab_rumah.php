@@ -54,6 +54,37 @@ $san = $perumahan['sanitasi'] ?? [];
                             <option value="">[Pilih Desa]</option>
                         </select>
                     </div>
+
+                    <div class="row g-2 mt-3">
+                        <div class="col-md-8 col-12">
+                            <label class="form-label">Alamat Lengkap</label>
+                            <input name="alamat"
+                                class="form-control upper"
+                                rows="2"
+                                <?= $editable ? '' : 'readonly' ?>
+                                value="<?= esc($perumahan['alamat'] ?? '') ?>"
+                                placeholder="Masukkan alamat lengkap sesuai KTP">
+                        </div>
+
+                        <div class="col-md-2 col-6">
+                            <label class="form-label">RT</label>
+                            <input type="text"
+                                name="rt"
+                                class="form-control"
+                                value="<?= esc($perumahan['rt'] ?? '') ?>"
+                                <?= $editable ? '' : 'readonly' ?>>
+                        </div>
+
+                        <div class="col-md-2 col-6">
+                            <label class="form-label">RW</label>
+                            <input type="text"
+                                name="rw"
+                                class="form-control"
+                                value="<?= esc($perumahan['rw'] ?? '') ?>"
+                                <?= $editable ? '' : 'readonly' ?>>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>

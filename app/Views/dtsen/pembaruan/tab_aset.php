@@ -116,8 +116,10 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="form-label">Luas Sawah / Kebun</label>
-                                <select name="luas_sawah" class="form-select form-select-sm" <?= $disabled ?>>
+                                <label class="form-label">Luas Sawah / Kebun <span class="text-danger">*</span></label>
+                                <select name="luas_sawah"
+                                    class="form-select form-select-sm <?= $disabled ? '' : 'required-field' ?>"
+                                    <?= $disabled ?> <?= $disabled ? '' : 'required' ?>>
                                     <option value="">Pilih</option>
                                     <option <?= ($aset['luas_sawah'] ?? '') === 'TIDAK MEMILIKI' ? 'selected' : '' ?>>TIDAK MEMILIKI</option>
                                     <option <?= ($aset['luas_sawah'] ?? '') === 'KURANG DARI 1000 M2' ? 'selected' : '' ?>>KURANG DARI 1000 M2</option>
@@ -125,6 +127,11 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                                     <option <?= ($aset['luas_sawah'] ?? '') === '5000-10000 M2' ? 'selected' : '' ?>>5000-10000 M2</option>
                                     <option <?= ($aset['luas_sawah'] ?? '') === 'LEBIH DARI 10000 M2' ? 'selected' : '' ?>>LEBIH DARI 10000 M2</option>
                                 </select>
+                                <?php if (!$disabled): ?>
+                                    <div class="invalid-feedback">
+                                        Wajib memilih luas sawah / kebun.
+                                    </div>
+                                <?php endif; ?>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Memiliki Lahan (selain yang ditempati)</label>
@@ -139,12 +146,19 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">Rumah / Bangunan Ditempati Lain</label>
-                                <select name="rumah_lain" class="form-select form-select-sm" <?= $disabled ?>>
+                                <label class="form-label">Rumah / Bangunan Ditempati Lain <span class="text-danger">*</span></label>
+                                <select name="rumah_lain"
+                                    class="form-select form-select-sm <?= $disabled ? '' : 'required-field' ?>"
+                                    <?= $disabled ?> <?= $disabled ? '' : 'required' ?>>
                                     <option value="">Pilih</option>
                                     <option value="YA" <?= ($aset['rumah_lain'] ?? '') === 'YA' ? 'selected' : '' ?>>YA</option>
                                     <option value="TIDAK" <?= ($aset['rumah_lain'] ?? '') === 'TIDAK' ? 'selected' : '' ?>>TIDAK</option>
                                 </select>
+                                <?php if (!$disabled): ?>
+                                    <div class="invalid-feedback">
+                                        Wajib memilih kepemilikan rumah lain.
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

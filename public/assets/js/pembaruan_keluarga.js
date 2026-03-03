@@ -687,9 +687,9 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
 
         let noKK           = $('#keluarga_no_kk').val().trim();
         const kepala       = $('#kepala_keluarga').val().trim();
-        const alamat       = $('#alamat').val().trim();
-        const rw           = $('#rw').val().trim();
-        const rt           = $('#rt').val().trim();
+        // const alamat       = $('#alamat').val().trim();
+        // const rw           = $('#rw').val().trim();
+        // const rt           = $('#rt').val().trim();
         // const kategoriAdat = $('#kategori_adat').val().trim();
         // const namaSuku     = $('#nama_suku').val().trim();
 
@@ -723,8 +723,8 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
         // ===========================================
         // 🔒 3) VALIDASI FIELD WAJIB
         // ===========================================
-        if (!noKK || !kepala || !alamat || !rw || !rt) {
-            //  || !kategoriAdat
+        if (!noKK || !kepala) {
+            //  || !alamat || !rw || !rt || !kategoriAdat
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal',
@@ -857,6 +857,37 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
         });
     });
 
+    // Validasi form tambah/edit anggota (pastikan semua field required di form memiliki class .required-field)
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const formAset = document.querySelector("#formAset"); // pastikan ID sesuai
+
+        if (!formAset) return;
+
+        formAset.addEventListener("submit", function (e) {
+
+            const requiredFields = formAset.querySelectorAll(".required-field");
+
+            let valid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value) {
+                    field.classList.add("is-invalid");
+                    valid = false;
+                } else {
+                    field.classList.remove("is-invalid");
+                }
+            });
+
+            if (!valid) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+        });
+
+    });
+    
     /* ======================================================
      🚀 Inisialisasi Saat Halaman Siap
     ======================================================= */
