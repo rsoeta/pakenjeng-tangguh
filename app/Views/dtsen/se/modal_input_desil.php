@@ -17,7 +17,7 @@
 
                     <div class="mb-2">
                         <label class="form-label fw-bold">Kepala Keluarga</label>
-                        <input type="text" class="form-control" id="nama_kepala" readonly>
+                        <input type="text" class="form-control" id="kepala_keluarga" readonly>
                     </div>
 
                     <div class="mb-2">

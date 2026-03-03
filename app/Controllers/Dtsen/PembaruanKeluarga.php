@@ -2654,6 +2654,31 @@ class PembaruanKeluarga extends BaseController
 
             $db->transComplete();
 
+            // 🔒 COOLDOWN CHECK
+            $lastSync = cache('desil_global_last_sync');
+
+            if ($lastSync) {
+
+                $elapsed = time() - $lastSync;
+                $cooldown = 60; // 1 menit
+
+                if ($elapsed < $cooldown) {
+
+                    $remaining = $cooldown - $elapsed;
+
+                    return $this->response->setJSON([
+                        'status' => 'cooldown',
+                        'message' => 'Sinkronisasi global masih dalam masa cooldown.',
+                        'remaining_seconds' => $remaining
+                    ]);
+                }
+            }
+
+            // ===== PROSES SYNC DI SINI =====
+
+            // setelah selesai
+            cache()->save('desil_global_last_sync', time(), 60);
+
             return $this->response->setJSON([
                 'status' => 'success',
                 'total'  => $totalKK,
@@ -2751,6 +2776,81 @@ class PembaruanKeluarga extends BaseController
             return $this->response->setJSON([
                 'status' => 'error',
                 'message' => 'Gagal mengambil histori desil.'
+            ]);
+        }
+    }
+
+    public function addHistoricalDesil()
+    {
+        try {
+
+            $session = session();
+            $roleId = $session->get('role_id') ?? 99;
+
+            // 🔒 Hanya role <= 3 yang boleh
+            if ($roleId > 3) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Anda tidak memiliki akses untuk menambahkan snapshot historis.'
+                ]);
+            }
+
+            $post = $this->request->getPost();
+            $userId = $session->get('id_user') ?? 0;
+
+            $post = $this->request->getPost();
+            $userId = session()->get('id_user') ?? 0;
+
+            $idKk     = $post['id_kk'] ?? null;
+            $desil    = (int) ($post['desil'] ?? 0);
+            $tahun    = (int) ($post['tahun'] ?? 0);
+            $triwulan = (int) ($post['triwulan'] ?? 0);
+
+            if (!$idKk || !$desil || !$tahun || !$triwulan) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Data tidak lengkap.'
+                ]);
+            }
+
+            // 🔍 Cek apakah sudah ada periode ini
+            $existing = $this->db->table('dtsen_desil_history')
+                ->where([
+                    'id_kk'    => $idKk,
+                    'tahun'    => $tahun,
+                    'triwulan' => $triwulan
+                ])
+                ->get()
+                ->getRowArray();
+
+            if ($existing) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Snapshot periode ini sudah ada.'
+                ]);
+            }
+
+            $label = 'TW' . $triwulan . ' ' . $tahun;
+
+            $this->db->table('dtsen_desil_history')->insert([
+                'id_kk'        => $idKk,
+                'desil'        => $desil,
+                'tahun'        => $tahun,
+                'triwulan'     => $triwulan,
+                'periode_label' => $label,
+                'source'       => 'historical_manual',
+                'created_by'   => $userId
+            ]);
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Snapshot historis berhasil ditambahkan.'
+            ]);
+        } catch (\Throwable $e) {
+
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => $e->getMessage()
             ]);
         }
     }

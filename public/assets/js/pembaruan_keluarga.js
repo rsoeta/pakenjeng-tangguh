@@ -888,6 +888,54 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
 
     });
     
+    // Simpan Data Historis Desil
+    $('#btnSaveHistorical').on('click', function() {
+
+        const form = $('#formHistoricalDesil');
+
+        $.ajax({
+            url: '/pembaruan-keluarga/add-historical-desil',
+            type: 'POST',
+            data: form.serialize(),
+            success: function(res) {
+
+                if (res.status === 'success') {
+
+                    Swal.fire('Berhasil', res.message, 'success');
+
+                    $('#modalHistoricalDesil').modal('hide');
+
+                    // reload grafik
+                    // loadDesilHistory($('#id_kk').val());
+                    if (res.status === 'success') {
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: res.message,
+                            timer: 1200,
+                            showConfirmButton: false
+                        });
+
+                        // setTimeout(() => {
+                        //     window.location.reload(true);
+                        // }, 1200);
+                        setTimeout(() => {
+                            window.location.href = window.location.pathname + '?v=' + new Date().getTime();
+                        }, 1200);
+
+                    }
+
+                } else {
+
+                    Swal.fire('Gagal', res.message, 'error');
+
+                }
+            }
+        });
+
+    });
+
     /* ======================================================
      🚀 Inisialisasi Saat Halaman Siap
     ======================================================= */

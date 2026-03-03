@@ -153,6 +153,8 @@ $routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview
 	$routes->post('sync-desil-global', 'Dtsen\PembaruanKeluarga::syncDesilGlobal');
 
 	$routes->get('desil-history/(:num)', 'Dtsen\PembaruanKeluarga::desilHistory/$1');
+
+	$routes->post('add-historical-desil', 'Dtsen\PembaruanKeluarga::addHistoricalDesil');
 });
 
 

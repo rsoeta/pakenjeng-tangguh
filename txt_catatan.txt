@@ -1375,3 +1375,9 @@ CREATE TABLE dtsen_desil_sync_log (
     INDEX idx_sync_created (created_at),
     INDEX idx_sync_periode (tahun, triwulan)
 );
+
+ALTER TABLE dtsen_desil_history
+ADD COLUMN source VARCHAR(30) DEFAULT 'sync' AFTER periode_label;
+
+ALTER TABLE dtsen_desil_history
+ADD UNIQUE KEY uniq_kk_periode (id_kk, tahun, triwulan);

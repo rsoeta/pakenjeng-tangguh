@@ -79,11 +79,18 @@ $disabled = $editable ? '' : 'disabled';
         <div class="d-flex align-items-center gap-2">
 
             <?php if ($editable): ?>
-                <button type="button"
-                    id="btnSyncDesil"
-                    class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                    <i class="fas fa-sync-alt me-1"></i> Sync
-                </button>
+                <?php if (($user['role_id'] ?? 99) <= 3): ?>
+                    <div class="text-end mb-2">
+                        <button class="btn btn-outline-dark btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalHistoricalDesil">
+                            <i class="fas fa-history me-1"></i> Tambah Snapshot Historis
+                        </button>
+                        <button type="button"
+                            id="btnSyncDesil"
+                            class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                            <i class="fas fa-sync-alt me-1"></i> Sync
+                        </button>
+                    </div>
+                <?php endif; ?>
             <?php endif; ?>
 
         </div>
@@ -94,7 +101,58 @@ $disabled = $editable ? '' : 'disabled';
     <div id="desilTrendInfo" class="mt-3 small text-muted"></div>
 
 </div>
+<div class="modal fade" id="modalHistoricalDesil" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content shadow">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Snapshot Historis</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
 
+            <div class="modal-body">
+                <form id="formHistoricalDesil">
+
+                    <input type="hidden" name="id_kk" value="<?= $id_kk ?>">
+
+                    <div class="mb-3">
+                        <label class="form-label">Tahun</label>
+                        <select name="tahun" class="form-select" required>
+                            <option value="2025">2025</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Triwulan</label>
+                        <select name="triwulan" class="form-select" required>
+                            <option value="">Pilih TW</option>
+                            <option value="1">TW 1</option>
+                            <option value="2">TW 2</option>
+                            <option value="3">TW 3</option>
+                            <option value="4">TW 4</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Desil</label>
+                        <select name="desil" class="form-select" required>
+                            <option value="">Pilih Desil</option>
+                            <?php for ($i = 1; $i <= 10; $i++): ?>
+                                <option value="<?= $i ?>">Desil <?= $i ?></option>
+                            <?php endfor; ?>
+                        </select>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="btnSaveHistorical" class="btn btn-primary">
+                    Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- ============================= -->
 <!-- 📊 APEXCHARTS SCRIPT -->
 <!-- ============================= -->

@@ -132,7 +132,14 @@
                                 <!-- ================= ACTION BUTTON ================= -->
                                 <div class="col-lg-auto ms-lg-auto">
                                     <div class="btn-group w-100" role="group">
-                                        <button id="btnReloadKeluarga" class="btn btn-outline-success btn-sm">
+                                        <!-- batasi akses hanya untuk role_id <4 -->
+                                        <?php if ($role_id < 4): ?>
+                                            <button id="btnSyncGlobal"
+                                                class="btn btn-success btn-sm shadow-sm">
+                                                <i class="fas fa-sync-alt me-1"></i> Sync Desil Nasional
+                                            </button>
+                                        <?php endif; ?>
+                                        <button id="btnReloadKeluarga" class="btn btn-outline-info btn-sm">
                                             <i class="fas fa-sync-alt"></i> Muat Ulang
                                         </button>
                                         <button id="btnTambahKeluarga" class="btn btn-primary btn-sm">
@@ -292,7 +299,6 @@
 
 <!-- 🔹 Modal Input Desil -->
 <?= $this->include('dtsen/se/modal_input_desil'); ?>
-
 <script src="<?= base_url('assets/js/input_desil.js'); ?>"></script>
 
 <script>
@@ -449,26 +455,37 @@
                     className: 'text-start text-nowrap',
                     orderable: false,
                     searchable: false,
-                    render: row => `
-                <a href="/pembaruan-keluarga/detail/${row.id_kk}" 
-                   class="btn btn-outline-dark btn-sm me-1">
-                    <i class="fas fa-users-cog"></i>
-                </a>
+                    render: row => {
 
-                <button class="btn btn-outline-primary btn-sm btnInputDesil me-1"
-                    data-id="${row.id_kk}"
-                    data-nama="${row.kepala_keluarga}"
-                    data-nokk="${row.no_kk}"
-                    data-alamat="${row.alamat}"
-                    data-desil="${row.kategori_desil ?? ''}">
-                    <i class="fas fa-hand-holding-heart"></i>
-                </button>
+                        let btnInputDesil = '';
 
-                <button class="btn btn-outline-danger btn-sm btnDeleteKeluarga"
-                    data-id="${row.id_kk}">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-            `
+                        if (row.can_input_desil) {
+                            btnInputDesil = `
+                                <button class="btn btn-outline-primary btn-sm btnInputDesil me-1"
+                                    data-id="${row.id_kk}"
+                                    data-nama="${row.kepala_keluarga}"
+                                    data-nokk="${row.no_kk}"
+                                    data-alamat="${row.alamat}"
+                                    data-desil="${row.kategori_desil ?? ''}">
+                                    <i class="fas fa-hand-holding-heart"></i>
+                                </button>
+                            `;
+                        }
+
+                        return `
+                            <a href="/pembaruan-keluarga/detail/${row.id_kk}" 
+                            class="btn btn-outline-dark btn-sm me-1">
+                                <i class="fas fa-users-cog"></i>
+                            </a>
+
+                            ${btnInputDesil}
+
+                            <button class="btn btn-outline-danger btn-sm btnDeleteKeluarga"
+                                data-id="${row.id_kk}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        `;
+                    }
                 }
             ]
         });
@@ -1176,6 +1193,115 @@
                 });
             }, 150);
         }
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+
+        const btn = document.getElementById("btnSyncGlobal");
+        if (!btn) return;
+
+        btn.addEventListener("click", function() {
+
+            Swal.fire({
+                title: 'Sinkronisasi Global?',
+                text: 'Proses ini akan membandingkan seluruh desil nasional dengan histori SINDEN.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Sinkronkan',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+
+                if (!result.isConfirmed) return;
+
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sync berjalan...';
+
+                fetch('/pembaruan-keluarga/sync-desil-global', {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Sync Desil Nasional';
+
+                        if (res.status === 'cooldown') {
+
+                            let seconds = res.remaining_seconds || 60;
+
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Cooldown Aktif',
+                                html: `
+                                        <div>
+                                            Sinkronisasi hanya dapat dilakukan setiap 1 menit.<br><br>
+                                            Silakan tunggu <b><span id="cooldownTimer">${seconds}</span></b> detik lagi.
+                                        </div>
+                                    `,
+                                showConfirmButton: false
+                            });
+
+                            const interval = setInterval(() => {
+
+                                seconds--;
+
+                                const timerEl = document.getElementById('cooldownTimer');
+                                if (timerEl) timerEl.textContent = seconds;
+
+                                if (seconds <= 0) {
+                                    clearInterval(interval);
+                                    Swal.close();
+                                }
+
+                            }, 1000);
+
+                            return;
+                        }
+
+                        if (res.status === 'success') {
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sinkronisasi Selesai',
+                                html: `
+                                    <div class="text-start small">
+                                        <b>Periode:</b> ${res.periode}<br>
+                                        <b>Total KK dicek:</b> ${res.total}<br>
+                                        <b>Berubah:</b> <span class="text-danger">${res.changed}</span><br>
+                                        <b>Tidak berubah:</b> <span class="text-success">${res.unchanged}</span>
+                                    </div>
+                                    `
+                            });
+
+                        } else {
+
+                            Swal.fire(
+                                'Gagal',
+                                res.message || 'Terjadi kesalahan.',
+                                'error'
+                            );
+                        }
+
+                    })
+                    .catch(err => {
+
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Sync Desil Nasional';
+
+                        Swal.fire(
+                            'Error',
+                            'Gagal menghubungi server.',
+                            'error'
+                        );
+                    });
+
+            });
+
+        });
+
     });
 </script>
 

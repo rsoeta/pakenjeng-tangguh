@@ -62,7 +62,7 @@ class DtsenSe extends Controller
             // =============================
             $kodeDesa     = $session->get('kode_desa');
             $roleId       = (int) $session->get('role_id');
-            $rwUser       = $session->get('level'); // RW user (untuk petugas RW)
+            $rwUser       = $session->get('level');
             $wilayahTugas = $session->get('wilayah_tugas');
 
             // =============================
@@ -70,17 +70,9 @@ class DtsenSe extends Controller
             // =============================
             $filterClient = $this->request->getPost('filter') ?? [];
 
-            // Debug penting (aktifkan saat perlu)
-            // log_message('debug', '📥 FILTER FE: ' . json_encode($filterClient));
-
-            // =============================
-            // 3️⃣ NORMALISASI FILTER
-            // =============================
             $filter = [
                 'kode_desa'     => $kodeDesa,
                 'wilayah_tugas' => $wilayahTugas,
-
-                // filter UI
                 'rw'     => $filterClient['rw']     ?? null,
                 'rt'     => $filterClient['rt']     ?? null,
                 'status' => $filterClient['status'] ?? null,
@@ -88,17 +80,25 @@ class DtsenSe extends Controller
             ];
 
             // =============================
-            // 4️⃣ FILTER AKSES (ROLE-BASED)
+            // 4️⃣ FILTER AKSES (ROLE)
             // =============================
-            // Petugas RW (role >= 4) TIDAK BOLEH melihat RW lain
             if ($roleId >= 4) {
-                $filter['rw'] = $rwUser; // paksa RW sesuai akun
+                $filter['rw'] = $rwUser;
             }
 
             // =============================
             // 5️⃣ AMBIL DATA
             // =============================
             $dataKeluarga = $this->kkModel->getFilteredData($filter);
+
+            // =============================
+            // 6️⃣ TAMBAHKAN FLAG AKSES
+            // =============================
+            $canInputDesil = ($roleId <= 3);
+
+            foreach ($dataKeluarga as &$row) {
+                $row['can_input_desil'] = $canInputDesil;
+            }
 
             return $this->response->setJSON([
                 'data' => $dataKeluarga
