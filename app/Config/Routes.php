@@ -147,6 +147,12 @@ $routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview
 	$routes->get('data', 'Dtsen\PembaruanKeluarga::data');
 	$routes->get('lanjutkan/(:num)', 'Dtsen\PembaruanKeluarga::lanjutkan/$1');
 	$routes->get('get-anggota-list/(:num)', 'Dtsen\PembaruanKeluarga::getAnggotaList/$1');
+
+	// 🔥 API untuk sinkronisasi desil (manual trigger dari UI)
+	$routes->post('sync-desil/(:num)', 'Dtsen\PembaruanKeluarga::syncDesilPerKK/$1');
+	$routes->post('sync-desil-global', 'Dtsen\PembaruanKeluarga::syncDesilGlobal');
+
+	$routes->get('desil-history/(:num)', 'Dtsen\PembaruanKeluarga::desilHistory/$1');
 });
 
 

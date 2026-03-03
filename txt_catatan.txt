@@ -1335,3 +1335,43 @@ dihapus dari app\Views\dtsen\pembaruan\detail.php
 <script src="<?= base_url('assets/vendor/datatables/datatables.min.js') ?>"
     onerror="this.onerror=null; this.src='https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js'">
 </script>
+
+========================================================================================================================================================
+Grafik Riwayat Desil Keluarga DTSEN
+========================================================================================================================================================
+🗄 1️⃣ TABEL HISTORI DESIL
+CREATE TABLE dtsen_desil_history (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_kk BIGINT NOT NULL,
+    desil INT NOT NULL,
+
+    tahun INT NOT NULL,
+    triwulan TINYINT NOT NULL,
+    periode_label VARCHAR(20) NOT NULL,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by BIGINT NULL,
+
+    INDEX idx_hist_idkk (id_kk),
+    INDEX idx_hist_tahun_tw (tahun, triwulan),
+    INDEX idx_hist_created (created_at),
+    INDEX idx_hist_idkk_created (id_kk, created_at)
+);
+
+🗄 2️⃣ TABEL LOG SYNC GLOBAL
+CREATE TABLE dtsen_desil_sync_log (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+    total_keluarga INT NOT NULL,
+    total_berubah INT NOT NULL,
+    total_tidak_berubah INT NOT NULL,
+
+    tahun INT NOT NULL,
+    triwulan TINYINT NOT NULL,
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_by BIGINT NOT NULL,
+
+    INDEX idx_sync_created (created_at),
+    INDEX idx_sync_periode (tahun, triwulan)
+);

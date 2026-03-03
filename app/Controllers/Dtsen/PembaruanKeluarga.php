@@ -2453,4 +2453,272 @@ class PembaruanKeluarga extends BaseController
             ], 500);
         }
     }
+
+    public function syncDesilPerKK($id_kk)
+    {
+        helper('dtsen');
+
+        $db = \Config\Database::connect();
+
+        try {
+
+            // Ambil desil nasional terbaru
+            $seData = $db->table('dtsen_se')
+                ->select('kategori_desil')
+                ->where('id_kk', $id_kk)
+                ->orderBy('id_se', 'DESC')
+                ->get()
+                ->getRowArray();
+
+            if (!$seData) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Data desil nasional tidak ditemukan.'
+                ]);
+            }
+
+            $desilNasional = (int) $seData['kategori_desil'];
+
+            // Ambil histori terakhir
+            $lastHistory = $db->table('dtsen_desil_history')
+                ->select('desil')
+                ->where('id_kk', $id_kk)
+                ->orderBy('created_at', 'DESC')
+                ->get()
+                ->getRowArray();
+
+            $lastDesil = $lastHistory['desil'] ?? null;
+
+            // Jika belum pernah ada histori atau berubah
+            if ($lastDesil === null || $lastDesil !== $desilNasional) {
+
+                $periode = getPeriodeDesil();
+
+                $db->table('dtsen_desil_history')->insert([
+                    'id_kk'        => $id_kk,
+                    'desil'        => $desilNasional,
+                    'tahun'        => $periode['tahun'],
+                    'triwulan'     => $periode['triwulan'],
+                    'periode_label' => $periode['label'],
+                    'created_by'   => session()->get('id') ?? null
+                ]);
+
+                return $this->response->setJSON([
+                    'status' => 'changed',
+                    'from'   => $lastDesil,
+                    'to'     => $desilNasional,
+                    'periode' => $periode['label']
+                ]);
+            }
+
+            return $this->response->setJSON([
+                'status' => 'unchanged',
+                'message' => 'Tidak ada perubahan desil.'
+            ]);
+        } catch (\Throwable $e) {
+
+            log_message('error', '❌ [syncDesilPerKK] ' . $e->getMessage());
+
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan saat sinkronisasi.'
+            ]);
+        }
+    }
+
+    public function syncDesilGlobal()
+    {
+        helper('dtsen');
+        $db = \Config\Database::connect();
+
+        try {
+
+            // ==============================
+            // 1️⃣ COOLDOWN CHECK (1 menit)
+            // ==============================
+
+            $lastSync = $db->table('dtsen_desil_sync_log')
+                ->orderBy('created_at', 'DESC')
+                ->get()
+                ->getRowArray();
+
+            if ($lastSync) {
+                $lastTime = strtotime($lastSync['created_at']);
+                if ((time() - $lastTime) < 60) {
+                    return $this->response->setJSON([
+                        'status' => 'blocked',
+                        'message' => 'Sync baru saja dilakukan. Tunggu 1 menit.'
+                    ]);
+                }
+            }
+
+            $periode = getPeriodeDesil();
+
+            // ==============================
+            // 2️⃣ TOTAL KK
+            // ==============================
+
+            $totalKK = $db->table('dtsen_kk')->countAllResults();
+
+            // ==============================
+            // 3️⃣ SUBQUERY LAST HISTORY
+            // ==============================
+
+            $subQuery = "
+            SELECT h1.id_kk, h1.desil
+            FROM dtsen_desil_history h1
+            INNER JOIN (
+                SELECT id_kk, MAX(created_at) as max_date
+                FROM dtsen_desil_history
+                GROUP BY id_kk
+            ) h2
+            ON h1.id_kk = h2.id_kk
+            AND h1.created_at = h2.max_date
+        ";
+
+            // ==============================
+            // 4️⃣ AMBIL YANG BERUBAH
+            // ==============================
+
+            $changedData = $db->query("
+            SELECT se.id_kk, se.kategori_desil
+            FROM dtsen_se se
+            LEFT JOIN ($subQuery) last
+            ON se.id_kk = last.id_kk
+            WHERE last.desil IS NULL
+               OR se.kategori_desil != last.desil
+        ")->getResultArray();
+
+            $totalBerubah = count($changedData);
+            $totalTidakBerubah = $totalKK - $totalBerubah;
+
+            // ==============================
+            // 5️⃣ TRANSACTION INSERT
+            // ==============================
+
+            $db->transStart();
+
+            foreach ($changedData as $row) {
+                $db->table('dtsen_desil_history')->insert([
+                    'id_kk'        => $row['id_kk'],
+                    'desil'        => (int) $row['kategori_desil'],
+                    'tahun'        => $periode['tahun'],
+                    'triwulan'     => $periode['triwulan'],
+                    'periode_label' => $periode['label'],
+                    'created_by'   => session()->get('id')
+                ]);
+            }
+
+            // Insert log aktivitas
+            $db->table('dtsen_desil_sync_log')->insert([
+                'total_keluarga'       => $totalKK,
+                'total_berubah'        => $totalBerubah,
+                'total_tidak_berubah'  => $totalTidakBerubah,
+                'tahun'                => $periode['tahun'],
+                'triwulan'             => $periode['triwulan'],
+                'created_by'           => session()->get('id')
+            ]);
+
+            $db->transComplete();
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'total'  => $totalKK,
+                'changed' => $totalBerubah,
+                'unchanged' => $totalTidakBerubah,
+                'periode' => $periode['label']
+            ]);
+        } catch (\Throwable $e) {
+
+            log_message('error', '❌ [syncDesilGlobal] ' . $e->getMessage());
+
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan saat sync global.'
+            ]);
+        }
+    }
+
+    public function desilHistory($id_kk)
+    {
+        $db = \Config\Database::connect();
+
+        try {
+
+            // Subquery ambil snapshot terakhir per TW
+            $subQuery = "
+            SELECT id_kk, tahun, triwulan, MAX(created_at) as max_date
+            FROM dtsen_desil_history
+            WHERE id_kk = ?
+            GROUP BY tahun, triwulan
+        ";
+
+            $query = $db->query("
+            SELECT h.id_kk, h.desil, h.tahun, h.triwulan, h.periode_label, h.created_at
+            FROM dtsen_desil_history h
+            INNER JOIN ($subQuery) last
+                ON h.id_kk = last.id_kk
+                AND h.tahun = last.tahun
+                AND h.triwulan = last.triwulan
+                AND h.created_at = last.max_date
+            ORDER BY h.tahun ASC, h.triwulan ASC
+        ", [$id_kk]);
+
+            $results = $query->getResultArray();
+
+            if (empty($results)) {
+                return $this->response->setJSON([
+                    'status' => 'empty',
+                    'data' => []
+                ]);
+            }
+
+            // Hitung delta change
+            $formatted = [];
+            $previousDesil = null;
+
+            foreach ($results as $row) {
+
+                $currentDesil = (int) $row['desil'];
+
+                $delta = null;
+                $trend = 'stabil';
+
+                if ($previousDesil !== null) {
+                    $delta = $currentDesil - $previousDesil;
+
+                    if ($delta < 0) {
+                        $trend = 'naik';      // kesejahteraan naik
+                    } elseif ($delta > 0) {
+                        $trend = 'turun';     // kesejahteraan turun
+                    }
+                }
+
+                $formatted[] = [
+                    'periode' => $row['periode_label'],
+                    'tahun'   => (int) $row['tahun'],
+                    'triwulan' => (int) $row['triwulan'],
+                    'desil'   => $currentDesil,
+                    'delta'   => $delta,
+                    'trend'   => $trend,
+                    'created_at' => $row['created_at']
+                ];
+
+                $previousDesil = $currentDesil;
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data'   => $formatted
+            ]);
+        } catch (\Throwable $e) {
+
+            log_message('error', '❌ [desilHistory] ' . $e->getMessage());
+
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Gagal mengambil histori desil.'
+            ]);
+        }
+    }
 }

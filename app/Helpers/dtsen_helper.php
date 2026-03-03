@@ -158,3 +158,34 @@ function recompressImageToTarget(
     file_put_contents($filePath, $data);
     imagedestroy($image);
 }
+
+
+if (!function_exists('getTriwulanFromDate')) {
+    function getTriwulanFromDate($date = null)
+    {
+        $date = $date ?? date('Y-m-d');
+        $bulan = (int) date('n', strtotime($date));
+
+        if ($bulan <= 3) return 1;
+        if ($bulan <= 6) return 2;
+        if ($bulan <= 9) return 3;
+        return 4;
+    }
+}
+
+if (!function_exists('getPeriodeDesil')) {
+    function getPeriodeDesil($date = null)
+    {
+        $date = $date ?? date('Y-m-d');
+
+        $tahun = (int) date('Y', strtotime($date));
+        $triwulan = getTriwulanFromDate($date);
+        $label = "TW{$triwulan} {$tahun}";
+
+        return [
+            'tahun' => $tahun,
+            'triwulan' => $triwulan,
+            'label' => $label
+        ];
+    }
+}

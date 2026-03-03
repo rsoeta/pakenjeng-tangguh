@@ -690,8 +690,8 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
         const alamat       = $('#alamat').val().trim();
         const rw           = $('#rw').val().trim();
         const rt           = $('#rt').val().trim();
-        const kategoriAdat = $('#kategori_adat').val().trim();
-        const namaSuku     = $('#nama_suku').val().trim();
+        // const kategoriAdat = $('#kategori_adat').val().trim();
+        // const namaSuku     = $('#nama_suku').val().trim();
 
         // ===========================================
         // 🔒 1) Bersihkan input: hanya angka
@@ -723,7 +723,8 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
         // ===========================================
         // 🔒 3) VALIDASI FIELD WAJIB
         // ===========================================
-        if (!noKK || !kepala || !alamat || !rw || !rt || !kategoriAdat) {
+        if (!noKK || !kepala || !alamat || !rw || !rt) {
+            //  || !kategoriAdat
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal',
@@ -735,14 +736,14 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
         // ===========================================
         // 🔒 4) VALIDASI SUKU TAMBAHAN
         // ===========================================
-        if (kategoriAdat === 'Ya' && !namaSuku) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: 'Nama Suku wajib diisi karena Keluarga Adat = Ya.'
-            });
-            return;
-        }
+        // if (kategoriAdat === 'Ya' && !namaSuku) {
+        //     Swal.fire({
+        //         icon: 'error',
+        //         title: 'Gagal',
+        //         text: 'Nama Suku wajib diisi karena Keluarga Adat = Ya.'
+        //     });
+        //     return;
+        // }
 
         // =============================
         // 🟢 5) SIMPAN LANGSUNG (tanpa konfirmasi)
