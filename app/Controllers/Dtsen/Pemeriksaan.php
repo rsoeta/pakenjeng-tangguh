@@ -151,7 +151,7 @@ class Pemeriksaan extends BaseController
             a.id_kk,
             a.nik,
             a.nama,
-            a.shdk,
+            a.hubungan_keluarga,
             a.jenis_kelamin,
             a.tanggal_lahir,
             a.status_hamil,
@@ -168,7 +168,7 @@ class Pemeriksaan extends BaseController
         ")
             ->where('a.deleted_at', null)
             ->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'left')
-            ->join('tb_shdk s', 's.id = a.shdk', 'left')
+            ->join('tb_shdk s', 's.id = a.hubungan_keluarga', 'left')
             ->join('dtks_bansos_jenis b', 'b.dbj_id = a.program_bansos', 'left')
             ->join('pendidikan_kk p', 'p.pk_id = a.pendidikan_terakhir', 'left')
             ->join('tb_penduduk_pekerjaan k', 'k.pk_id = a.pekerjaan', 'left')
@@ -201,7 +201,7 @@ class Pemeriksaan extends BaseController
             $columns = [
                 'nik',
                 'nama',
-                'shdk',
+                'hubungan_keluarga',
                 'jenis_kelamin',
                 'tanggal_lahir',
                 'pendidikan',

@@ -586,4 +586,27 @@ Demikian kami sampaikan. Atas perhatian dan pemahamannya, kami ucapkan terima ka
         tableVerified.ajax.reload();
     });
 
+    $('#filterRW').on('change', function () {
+
+        const rw = $(this).val();
+
+        // Reset RT dulu
+        $('#filterRT').html('<option value="">-- RT --</option>');
+
+        if (!rw) return;
+
+        $.get(`/usulan-bansos/rt-by-rw/${rw}`, function(res) {
+
+            if (!res || res.error) return;
+
+            res.rt.forEach(item => {
+                $('#filterRT').append(
+                    `<option value="${item.rt}">RT ${item.rt}</option>`
+                );
+            });
+
+        });
+
+    });
+
 });

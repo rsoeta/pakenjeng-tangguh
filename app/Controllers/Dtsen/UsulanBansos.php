@@ -121,8 +121,8 @@ class UsulanBansos extends Controller
             ->select("
             dtsen_art.nik,
             dtsen_art.nama,
-            dtsen_art.shdk,
-            (SELECT jenis_shdk FROM tb_shdk WHERE id = dtsen_art.shdk) AS shdk_nama,
+            dtsen_art.hubungan_keluarga AS shdk,
+            (SELECT jenis_shdk FROM tb_shdk WHERE id = dtsen_art.hubungan_keluarga) AS shdk_nama,
             dtsen_rt.rw,
             dtsen_rt.rt
         ")
@@ -679,8 +679,9 @@ class UsulanBansos extends Controller
     {
         try {
 
-            $bulan = date('m');
-            $tahun = date('Y');
+            $bulan     = date('m');
+            $tahun     = date('Y');
+            $kodeDesa  = session()->get('kode_desa');
 
             /* ==============================
            1️⃣ PROGRAM BANSOS
@@ -698,8 +699,11 @@ class UsulanBansos extends Controller
             $createdBy = $this->db->table('dtsen_usulan_bansos')
                 ->select('dtsen_usulan_bansos.created_by, dtks_users.fullname')
                 ->join('dtks_users', 'dtks_users.nik = dtsen_usulan_bansos.created_by', 'left')
+                ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_usulan_bansos.id_kk', 'left')
+                ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
                 ->where('MONTH(dtsen_usulan_bansos.created_at)', $bulan)
                 ->where('YEAR(dtsen_usulan_bansos.created_at)', $tahun)
+                ->where('dtsen_rt.kode_desa', $kodeDesa)
                 ->where('dtsen_usulan_bansos.created_by IS NOT NULL')
                 ->groupBy('dtsen_usulan_bansos.created_by')
                 ->orderBy('dtks_users.fullname', 'ASC')
@@ -708,10 +712,11 @@ class UsulanBansos extends Controller
 
 
             /* ==============================
-           3️⃣ RW (UNIQUE)
+           3️⃣ RW (UNIQUE, by desa)
         ============================== */
             $rw = $this->db->table('dtsen_rt')
                 ->select('rw')
+                ->where('kode_desa', $kodeDesa)
                 ->where('rw IS NOT NULL')
                 ->groupBy('rw')
                 ->orderBy('rw', 'ASC')
@@ -720,10 +725,11 @@ class UsulanBansos extends Controller
 
 
             /* ==============================
-           4️⃣ RT (UNIQUE)
+           4️⃣ RT (UNIQUE, by desa)
         ============================== */
             $rt = $this->db->table('dtsen_rt')
                 ->select('rt')
+                ->where('kode_desa', $kodeDesa)
                 ->where('rt IS NOT NULL')
                 ->groupBy('rt')
                 ->orderBy('rt', 'ASC')
@@ -740,6 +746,27 @@ class UsulanBansos extends Controller
         } catch (\Throwable $e) {
 
             log_message('error', '[FilterOptions] ' . $e->getMessage());
+
+            return $this->response->setJSON([
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function getRTByRW($rw)
+    {
+        try {
+
+            $kodeDesa = session()->get('kode_desa');
+
+            $rtList = $this->GenModel->getRTByDesaRW($kodeDesa, $rw);
+
+            return $this->response->setJSON([
+                'rt' => $rtList
+            ]);
+        } catch (\Throwable $e) {
+
+            log_message('error', '[getRTByRW] ' . $e->getMessage());
 
             return $this->response->setJSON([
                 'error' => $e->getMessage()
