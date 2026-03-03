@@ -312,7 +312,7 @@ class UsulanBansos extends Controller
         /* =====================================================
        3️⃣ VALIDASI SHDK × DESIL × PROGRAM (KUNCI)
        ===================================================== */
-        $shdk = (int) ($art['shdk'] ?? 0);
+        $shdk = (int) ($art['hubungan_keluarga'] ?? 0);
 
         // SHDK selain KK & Istri → hanya PBI
         if ($shdk !== 1 && $shdk !== 3) {
