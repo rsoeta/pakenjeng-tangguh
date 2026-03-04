@@ -62,7 +62,7 @@ class ReminderMonitor extends BaseController
         }
 
         // simple pagination for DataTables client-side processing
-        $data = $builder->orderBy('r.due_date', 'DESC')->get()->getResultArray();
+        $data = $builder->orderBy('r.due_date', 'ASC')->get()->getResultArray();
 
         // format response for DataTables (client-side)
         $rows = [];

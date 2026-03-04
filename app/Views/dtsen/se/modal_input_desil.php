@@ -8,21 +8,21 @@
 
             <form id="formInputDesil" method="POST" action="<?= site_url('dtsen-se/update-desil'); ?>">
                 <div class="modal-body">
-                    <input type="hidden" name="id_kk" id="id_kk">
+                    <input type="hidden" name="id_kk" id="modal_id_kk">
 
                     <div class="mb-2">
                         <label class="form-label fw-bold">No. KK</label>
-                        <input type="text" class="form-control" id="no_kk" readonly>
+                        <input type="text" class="form-control" id="modal_no_kk" readonly>
                     </div>
 
                     <div class="mb-2">
                         <label class="form-label fw-bold">Kepala Keluarga</label>
-                        <input type="text" class="form-control" id="kepala_keluarga" readonly>
+                        <input type="text" class="form-control" id="modal_kepala_keluarga" readonly>
                     </div>
 
                     <div class="mb-2">
                         <label class="form-label fw-bold">Alamat</label>
-                        <input type="text" class="form-control" id="alamat" readonly>
+                        <input type="text" class="form-control" id="modal_alamat" readonly>
                     </div>
 
                     <div class="mb-3">

@@ -7,11 +7,11 @@ $(document).ready(function () {
         const alamat = $(this).data('alamat');
         const desil = $(this).data('desil') || '';
 
-        $('#id_kk').val(idKk);
-        $('#no_kk').val(noKk);
-        $('#kepala_keluarga').val(kepala);
-        $('#alamat').val(alamat);
-        $('#kategori_desil').val(desil);
+        $('#modal_id_kk').val(idKk);
+        $('#modal_no_kk').val(noKk);
+        $('#modal_kepala_keluarga').val(kepala);
+        $('#modal_alamat').val(alamat);
+        $('#modal_kategori_desil').val(desil);
 
         $('#modalInputDesil').modal('show');
     });

@@ -2527,14 +2527,36 @@ class PembaruanKeluarga extends BaseController
 
                 $periode = getPeriodeDesil();
 
-                $db->table('dtsen_desil_history')->insert([
-                    'id_kk'        => $id_kk,
-                    'desil'        => $desilNasional,
-                    'tahun'        => $periode['tahun'],
-                    'triwulan'     => $periode['triwulan'],
-                    'periode_label' => $periode['label'],
-                    'created_by'   => session()->get('id') ?? null
-                ]);
+                $exists = $db->table('dtsen_desil_history')
+                    ->where([
+                        'id_kk'    => $id_kk,
+                        'tahun'    => $periode['tahun'],
+                        'triwulan' => $periode['triwulan']
+                    ])
+                    ->get()
+                    ->getRow();
+
+                if ($exists) {
+
+                    $db->table('dtsen_desil_history')
+                        ->where('id', $exists->id)
+                        ->update([
+                            'desil' => $desilNasional,
+                            'source' => 'sync'
+                        ]);
+                } else {
+
+                    $db->table('dtsen_desil_history')
+                        ->insert([
+                            'id_kk'        => $id_kk,
+                            'desil'        => $desilNasional,
+                            'tahun'        => $periode['tahun'],
+                            'triwulan'     => $periode['triwulan'],
+                            'periode_label' => $periode['label'],
+                            'created_by'   => session()->get('id') ?? null
+                        ]);
+                }
+
 
                 return $this->response->setJSON([
                     'status' => 'changed',

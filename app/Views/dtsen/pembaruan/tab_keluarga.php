@@ -84,6 +84,17 @@ $disabled = $editable ? '' : 'disabled';
                         <button class="btn btn-outline-dark btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalHistoricalDesil">
                             <i class="fas fa-history me-1"></i> Tambah Snapshot Historis
                         </button>
+                        <button class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalInputDesil"
+                            data-id="<?= $id_kk ?>"
+                            data-nokk="<?= esc($kkData['no_kk'] ?? '') ?>"
+                            data-nama="<?= esc($kkData['kepala_keluarga'] ?? '') ?>"
+                            data-alamat="<?= esc($kkData['alamat'] ?? '') ?>"
+                            data-desil="<?= esc($kategori_desil ?? '') ?>">
+                            <i class="fas fa-hand-holding-heart me-1"></i>
+                            Input / Update Desil
+                        </button>
                         <button type="button"
                             id="btnSyncDesil"
                             class="btn btn-outline-primary btn-sm rounded-pill px-3">
@@ -153,6 +164,9 @@ $disabled = $editable ? '' : 'disabled';
         </div>
     </div>
 </div>
+
+<?= $this->include('dtsen/se/modal_input_desil'); ?>
+
 <!-- ============================= -->
 <!-- 📊 APEXCHARTS SCRIPT -->
 <!-- ============================= -->
@@ -270,6 +284,23 @@ $disabled = $editable ? '' : 'disabled';
             });
 
         }
+    });
+
+    $(document).on('click', '[data-bs-target="#modalInputDesil"]', function() {
+
+        const id = $(this).attr('data-id');
+        const nama = $(this).attr('data-nama');
+        const nokk = $(this).attr('data-nokk');
+        const alamat = $(this).attr('data-alamat');
+        const desil = $(this).attr('data-desil');
+
+        const modal = $('#modalInputDesil');
+
+        modal.find('#modal_id_kk').val(id);
+        modal.find('#modal_no_kk').val(nokk);
+        modal.find('#modal_kepala_keluarga').val(nama);
+        modal.find('#modal_alamat').val(alamat);
+        modal.find('#kategori_desil').val(desil);
     });
 </script>
 

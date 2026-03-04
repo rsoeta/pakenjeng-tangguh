@@ -58,228 +58,228 @@ $(document).ready(function () {
     // FASILITAS BAB
     // ------------------------
     function toggleFasilitasBab() {
-    const val = $('#fasilitas_bab').val();
+        const val = $('#fasilitas_bab').val();
 
-    if (val === "Tidak ada fasilitas") {
+        if (val === "Tidak ada fasilitas") {
 
-        // Sembunyikan elemen
-        $('.fasilitas-extra').hide();
+            // Sembunyikan elemen
+            $('.fasilitas-extra').hide();
 
-        // Kosongkan value
-        $('#jenis_kloset').val("");
-        $('#pembuangan_tinja').val("");
+            // Kosongkan value
+            $('#jenis_kloset').val("");
+            $('#pembuangan_tinja').val("");
 
-        // Disable agar tidak terkirim
-        $('#jenis_kloset, #pembuangan_tinja').prop('disabled', true);
+            // Disable agar tidak terkirim
+            $('#jenis_kloset, #pembuangan_tinja').prop('disabled', true);
 
-    } else {
+        } else {
 
-        // Tampilkan elemen
-        $('.fasilitas-extra').show();
+            // Tampilkan elemen
+            $('.fasilitas-extra').show();
 
-        // Aktifkan kembali
-        $('#jenis_kloset, #pembuangan_tinja').prop('disabled', false);
-    }
-}
-
-// Event perubahan
-$('#fasilitas_bab').on('change', toggleFasilitasBab);
-
-// Trigger saat halaman load
-toggleFasilitasBab();
-
-// ===================================================================
-// 🎓 SMART EDUCATION MODULE — FINAL FIX (KELAS 8 + VALIDASI USIA)
-// ===================================================================
-
-// ------------------------
-// 1. LEVEL PENDIDIKAN
-// ------------------------
-const jenjangLevel = {
-    "Belum Ditentukan": 0,
-    "Tidak Punya Ijazah SD": 0,
-    "Paket A": 0, "SDLB": 0, "SD": 0, "MI": 0, "SPM/PDF Ula": 0,
-
-    "Paket B": 1, "SMP LB": 1, "SMP": 1, "MTS": 1, "SPM/PDF Wustha": 1,
-
-    "Paket C": 2, "SMLB": 2, "SMA": 2, "MA": 2,
-    "SMK": 2, "MAK": 2, "SPM/PDF Ulya": 2,
-
-    "DI/D2/D3": 3,
-    "D4/S1": 4, "Profesi": 4,
-    "S2": 5,
-    "S3": 6
-};
-
-// ------------------------
-// 2. VALIDASI KELAS
-// ------------------------
-const kelasValid = {
-    level0: [1,2,3,4,5,6],     // SD
-    level1: [1,2,3],          // SMP
-    level2: [1,2,3,4],        // SMA/SMK
-    levelPT: [1,2,3,4,5,6,7,8]
-};
-
-// ------------------------
-// 3. Hitung Usia dari Tanggal Lahir
-// ------------------------
-function getUsia() {
-    const tgl = $('#tanggal_lahir').val();
-    if (!tgl) return null;
-
-    const dob = new Date(tgl);
-    const now = new Date();
-    
-    let usia = now.getFullYear() - dob.getFullYear();
-    const m = now.getMonth() - dob.getMonth();
-
-    if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) usia--;
-
-    return usia;
-}
-
-// ===================================================================
-// 4. MASTER SWITCH — PARTISIPASI SEKOLAH
-// ===================================================================
-function handlePartisipasiSekolah() {
-    const ps = $('#partisipasi_sekolah').val();
-    const fJenjang = $('#jenjang_pendidikan');
-    const fKelas = $('#kelas_tertinggi');
-    const fIjazah = $('#ijazah_tertinggi');
-
-    if (ps === "") {
-        fJenjang.prop('disabled', true).val("");
-        fKelas.prop('disabled', true).val("");
-        fIjazah.prop('disabled', true).val("");
-        return;
+            // Aktifkan kembali
+            $('#jenis_kloset, #pembuangan_tinja').prop('disabled', false);
+        }
     }
 
-    if (ps === "Belum Pernah Sekolah") {
-        fJenjang.val("Belum Ditentukan").prop('disabled', true);
-        fKelas.val("").prop('disabled', true);
-        fIjazah.val("Tidak Punya Ijazah SD").prop('disabled', true);
-        return;
+    // Event perubahan
+    $('#fasilitas_bab').on('change', toggleFasilitasBab);
+
+    // Trigger saat halaman load
+    toggleFasilitasBab();
+
+    // ===================================================================
+    // 🎓 SMART EDUCATION MODULE — FINAL FIX (KELAS 8 + VALIDASI USIA)
+    // ===================================================================
+
+    // ------------------------
+    // 1. LEVEL PENDIDIKAN
+    // ------------------------
+    const jenjangLevel = {
+        "Belum Ditentukan": 0,
+        "Tidak Punya Ijazah SD": 0,
+        "Paket A": 0, "SDLB": 0, "SD": 0, "MI": 0, "SPM/PDF Ula": 0,
+
+        "Paket B": 1, "SMP LB": 1, "SMP": 1, "MTS": 1, "SPM/PDF Wustha": 1,
+
+        "Paket C": 2, "SMLB": 2, "SMA": 2, "MA": 2,
+        "SMK": 2, "MAK": 2, "SPM/PDF Ulya": 2,
+
+        "DI/D2/D3": 3,
+        "D4/S1": 4, "Profesi": 4,
+        "S2": 5,
+        "S3": 6
+    };
+
+    // ------------------------
+    // 2. VALIDASI KELAS
+    // ------------------------
+    const kelasValid = {
+        level0: [1,2,3,4,5,6],     // SD
+        level1: [1,2,3],          // SMP
+        level2: [1,2,3,4],        // SMA/SMK
+        levelPT: [1,2,3,4,5,6,7,8]
+    };
+
+    // ------------------------
+    // 3. Hitung Usia dari Tanggal Lahir
+    // ------------------------
+    function getUsia() {
+        const tgl = $('#tanggal_lahir').val();
+        if (!tgl) return null;
+
+        const dob = new Date(tgl);
+        const now = new Date();
+        
+        let usia = now.getFullYear() - dob.getFullYear();
+        const m = now.getMonth() - dob.getMonth();
+
+        if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) usia--;
+
+        return usia;
     }
 
-    // Selain itu aktifkan
-    fJenjang.prop('disabled', false);
-    fKelas.prop('disabled', false);
-    fIjazah.prop('disabled', false);
-}
+    // ===================================================================
+    // 4. MASTER SWITCH — PARTISIPASI SEKOLAH
+    // ===================================================================
+    function handlePartisipasiSekolah() {
+        const ps = $('#partisipasi_sekolah').val();
+        const fJenjang = $('#jenjang_pendidikan');
+        const fKelas = $('#kelas_tertinggi');
+        const fIjazah = $('#ijazah_tertinggi');
 
-$('#partisipasi_sekolah').on('change', handlePartisipasiSekolah);
+        if (ps === "") {
+            fJenjang.prop('disabled', true).val("");
+            fKelas.prop('disabled', true).val("");
+            fIjazah.prop('disabled', true).val("");
+            return;
+        }
 
+        if (ps === "Belum Pernah Sekolah") {
+            fJenjang.val("Belum Ditentukan").prop('disabled', true);
+            fKelas.val("").prop('disabled', true);
+            fIjazah.val("Tidak Punya Ijazah SD").prop('disabled', true);
+            return;
+        }
 
-
-// ===================================================================
-// 5. VALIDASI USIA MINIMAL BERDASARKAN JENJANG
-// ===================================================================
-
-function validateUsiaJenjang() {
-    const usia = getUsia();
-    const jenjang = $('#jenjang_pendidikan').val();
-
-    if (!usia || !jenjang) return;
-
-    let minUsia = 0;
-
-    if (["SD", "MI", "Paket A", "SDLB", "SPM/PDF Ula"].includes(jenjang)) minUsia = 6;
-    if (["SMP", "MTS", "Paket B", "SMP LB", "SPM/PDF Wustha"].includes(jenjang)) minUsia = 12;
-    if (["SMA", "MA", "SMK", "MAK", "Paket C", "SMLB", "SPM/PDF Ulya"].includes(jenjang)) minUsia = 15;
-    if (["DI/D2/D3"].includes(jenjang)) minUsia = 18;
-    if (["D4/S1", "Profesi"].includes(jenjang)) minUsia = 18;
-    if (jenjang === "S2") minUsia = 22;
-    if (jenjang === "S3") minUsia = 25;
-
-    if (usia < minUsia) {
-        Swal.fire("Validasi Usia", 
-            `Usia ${usia} tahun terlalu muda untuk jenjang ${jenjang}. Minimal usia adalah ${minUsia} tahun.`,
-            "warning"
-        );
-        $('#jenjang_pendidikan').val("");
+        // Selain itu aktifkan
+        fJenjang.prop('disabled', false);
+        fKelas.prop('disabled', false);
+        fIjazah.prop('disabled', false);
     }
-}
 
-$('#tanggal_lahir, #jenjang_pendidikan').on('change', validateUsiaJenjang);
-
+    $('#partisipasi_sekolah').on('change', handlePartisipasiSekolah);
 
 
-// ===================================================================
-// 6. VALIDASI IJAZAH BERDASARKAN JENJANG
-// ===================================================================
-function validateJenjangIjazah() {
-    const ps = $('#partisipasi_sekolah').val();
-    const jenjang = $('#jenjang_pendidikan').val();
-    const ijazah = $('#ijazah_tertinggi').val();
 
-    if (!jenjang || !ijazah) return;
+    // ===================================================================
+    // 5. VALIDASI USIA MINIMAL BERDASARKAN JENJANG
+    // ===================================================================
 
-    // ✔ Abaikan validasi jika ijazah = Belum Ditentukan
-    if (ijazah === "Belum Ditentukan") return;
+    function validateUsiaJenjang() {
+        const usia = getUsia();
+        const jenjang = $('#jenjang_pendidikan').val();
 
-    const levelJenjang = jenjangLevel[jenjang] ?? 0;
-    const levelIjazah = jenjangLevel[ijazah] ?? 0;
+        if (!usia || !jenjang) return;
 
-    // Masih sekolah → ijazah harus lebih rendah
-    if (ps === "Masih Sekolah") {
+        let minUsia = 0;
 
-        // ✔ Jika ijazah = placeholder ("Belum Ditentukan") → valid
+        if (["SD", "MI", "Paket A", "SDLB", "SPM/PDF Ula"].includes(jenjang)) minUsia = 6;
+        if (["SMP", "MTS", "Paket B", "SMP LB", "SPM/PDF Wustha"].includes(jenjang)) minUsia = 12;
+        if (["SMA", "MA", "SMK", "MAK", "Paket C", "SMLB", "SPM/PDF Ulya"].includes(jenjang)) minUsia = 15;
+        if (["DI/D2/D3"].includes(jenjang)) minUsia = 18;
+        if (["D4/S1", "Profesi"].includes(jenjang)) minUsia = 18;
+        if (jenjang === "S2") minUsia = 22;
+        if (jenjang === "S3") minUsia = 25;
+
+        if (usia < minUsia) {
+            Swal.fire("Validasi Usia", 
+                `Usia ${usia} tahun terlalu muda untuk jenjang ${jenjang}. Minimal usia adalah ${minUsia} tahun.`,
+                "warning"
+            );
+            $('#jenjang_pendidikan').val("");
+        }
+    }
+
+    $('#tanggal_lahir, #jenjang_pendidikan').on('change', validateUsiaJenjang);
+
+
+
+    // ===================================================================
+    // 6. VALIDASI IJAZAH BERDASARKAN JENJANG
+    // ===================================================================
+    function validateJenjangIjazah() {
+        const ps = $('#partisipasi_sekolah').val();
+        const jenjang = $('#jenjang_pendidikan').val();
+        const ijazah = $('#ijazah_tertinggi').val();
+
+        if (!jenjang || !ijazah) return;
+
+        // ✔ Abaikan validasi jika ijazah = Belum Ditentukan
         if (ijazah === "Belum Ditentukan") return;
 
-        if (levelIjazah >= levelJenjang) {
+        const levelJenjang = jenjangLevel[jenjang] ?? 0;
+        const levelIjazah = jenjangLevel[ijazah] ?? 0;
+
+        // Masih sekolah → ijazah harus lebih rendah
+        if (ps === "Masih Sekolah") {
+
+            // ✔ Jika ijazah = placeholder ("Belum Ditentukan") → valid
+            if (ijazah === "Belum Ditentukan") return;
+
+            if (levelIjazah >= levelJenjang) {
+                Swal.fire("Validasi Pendidikan",
+                    "Ijazah tidak boleh sama atau lebih tinggi dari jenjang yang sedang ditempuh.",
+                    "warning"
+                );
+                $('#ijazah_tertinggi').val("");
+            }
+        }
+
+        // Tidak sekolah lagi → ijazah ≤ jenjang
+        if (ps === "Tidak Bersekolah Lagi" && levelIjazah > levelJenjang) {
             Swal.fire("Validasi Pendidikan",
-                "Ijazah tidak boleh sama atau lebih tinggi dari jenjang yang sedang ditempuh.",
+                "Ijazah tidak boleh lebih tinggi dari jenjang pendidikan terakhir.",
                 "warning"
             );
             $('#ijazah_tertinggi').val("");
         }
     }
 
-    // Tidak sekolah lagi → ijazah ≤ jenjang
-    if (ps === "Tidak Bersekolah Lagi" && levelIjazah > levelJenjang) {
-        Swal.fire("Validasi Pendidikan",
-            "Ijazah tidak boleh lebih tinggi dari jenjang pendidikan terakhir.",
-            "warning"
-        );
-        $('#ijazah_tertinggi').val("");
+    $('#jenjang_pendidikan, #ijazah_tertinggi, #partisipasi_sekolah')
+        .on('change', validateJenjangIjazah);
+
+
+    // ===================================================================
+    // 7. VALIDASI KELAS — FIX TAMAT & LULUS (KELAS 8 ALWAYS VALID)
+    // ===================================================================
+    function validateKelas() {
+        const jenjang = $('#jenjang_pendidikan').val();
+        const kelas = parseInt($('#kelas_tertinggi').val());
+
+        if (!kelas || !jenjang) return;
+
+        // FIX: Jika kelas = 8 → anggap "Tamat & Lulus", SELALU VALID
+        if (kelas === 8) return;
+
+        let allowed = [];
+        const lv = jenjangLevel[jenjang] ?? 0;
+
+        if (lv === 0) allowed = kelasValid.level0;
+        else if (lv === 1) allowed = kelasValid.level1;
+        else if (lv === 2) allowed = kelasValid.level2;
+        else if (lv >= 3) allowed = kelasValid.levelPT;
+
+        if (!allowed.includes(kelas)) {
+            Swal.fire("Validasi Kelas",
+                `Kelas ${kelas} tidak valid untuk jenjang ${jenjang}.`,
+                "warning"
+            );
+            $('#kelas_tertinggi').val("");
+        }
     }
-}
 
-$('#jenjang_pendidikan, #ijazah_tertinggi, #partisipasi_sekolah')
-    .on('change', validateJenjangIjazah);
-
-
-// ===================================================================
-// 7. VALIDASI KELAS — FIX TAMAT & LULUS (KELAS 8 ALWAYS VALID)
-// ===================================================================
-function validateKelas() {
-    const jenjang = $('#jenjang_pendidikan').val();
-    const kelas = parseInt($('#kelas_tertinggi').val());
-
-    if (!kelas || !jenjang) return;
-
-    // FIX: Jika kelas = 8 → anggap "Tamat & Lulus", SELALU VALID
-    if (kelas === 8) return;
-
-    let allowed = [];
-    const lv = jenjangLevel[jenjang] ?? 0;
-
-    if (lv === 0) allowed = kelasValid.level0;
-    else if (lv === 1) allowed = kelasValid.level1;
-    else if (lv === 2) allowed = kelasValid.level2;
-    else if (lv >= 3) allowed = kelasValid.levelPT;
-
-    if (!allowed.includes(kelas)) {
-        Swal.fire("Validasi Kelas",
-            `Kelas ${kelas} tidak valid untuk jenjang ${jenjang}.`,
-            "warning"
-        );
-        $('#kelas_tertinggi').val("");
-    }
-}
-
-$('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
+    $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
 
 
     /* ======================================================
@@ -588,91 +588,91 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
      🌍 Inisialisasi Select2 Wilayah AJAX Berantai
     ======================================================= */
     function initSelect2Wilayah() {
-    const select2Base = {
-        theme: 'bootstrap-5',
-        width: '100%',
-        placeholder: 'Pilih...',
-        allowClear: true,
-        ajax: {
-            delay: 250,
-            dataType: 'json',
-            processResults: data => ({ results: data.map(item => ({ id: item.id, text: item.name })) })
+        const select2Base = {
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: 'Pilih...',
+            allowClear: true,
+            ajax: {
+                delay: 250,
+                dataType: 'json',
+                processResults: data => ({ results: data.map(item => ({ id: item.id, text: item.name })) })
+            }
+        };
+
+        // Helper: buat select2 dengan opsi, optional dropdownParent
+        function attachSelect2(selector, ajaxUrl, dropdownParentEl = null, transportFn = null) {
+            const cfg = $.extend(true, {}, select2Base);
+            if (ajaxUrl) cfg.ajax = $.extend({}, cfg.ajax, { url: ajaxUrl });
+            if (transportFn) cfg.ajax.transport = transportFn;
+            if (dropdownParentEl && dropdownParentEl.length) cfg.dropdownParent = dropdownParentEl;
+            $(selector).select2(cfg);
         }
-    };
 
-    // Helper: buat select2 dengan opsi, optional dropdownParent
-    function attachSelect2(selector, ajaxUrl, dropdownParentEl = null, transportFn = null) {
-        const cfg = $.extend(true, {}, select2Base);
-        if (ajaxUrl) cfg.ajax = $.extend({}, cfg.ajax, { url: ajaxUrl });
-        if (transportFn) cfg.ajax.transport = transportFn;
-        if (dropdownParentEl && dropdownParentEl.length) cfg.dropdownParent = dropdownParentEl;
-        $(selector).select2(cfg);
-    }
+        // elemen modal (jika ada)
+        const $modal = $('#modalAnggota');
 
-    // elemen modal (jika ada)
-    const $modal = $('#modalAnggota');
+        // Provinsi
+        attachSelect2('#rumah_provinsi, #provinsi', baseUrl + '/api/villages/provinces', null);
 
-    // Provinsi
-    attachSelect2('#rumah_provinsi, #provinsi', baseUrl + '/api/villages/provinces', null);
-
-    // Kabupaten (bergantung prov)
-    attachSelect2('#rumah_regency, #kabupaten', null, null, function(params, success, failure) {
-        const provID = $('#rumah_provinsi').val() || $('#provinsi').val();
-        if (!provID) return success([]);
-        $.ajax({ url: baseUrl + '/api/villages/regencies/' + provID, dataType: 'json', success, error: failure });
-    });
-
-    // Kecamatan
-    attachSelect2('#rumah_district, #kecamatan', null, null, function(params, success, failure) {
-        const kabID = $('#rumah_regency').val() || $('#kabupaten').val();
-        if (!kabID) return success([]);
-        $.ajax({ url: baseUrl + '/api/villages/districts/' + kabID, dataType: 'json', success, error: failure });
-    });
-
-    // Desa
-    attachSelect2('#rumah_village, #desa', null, null, function(params, success, failure) {
-        const kecID = $('#rumah_district').val() || $('#kecamatan').val();
-        if (!kecID) return success([]);
-        $.ajax({ url: baseUrl + '/api/villages/villages/' + kecID, dataType: 'json', success, error: failure });
-    });
-
-    // ---- IMPORTANT: re-initialize selects that are *inside modal* with dropdownParent to ensure dropdown appears above modal ----
-    if ($modal.length) {
-        ['#provinsi', '#kabupaten', '#kecamatan', '#desa'].forEach(sel => {
-            // destroy existing select2 (if initialized), then re-init with dropdownParent
-            if ($(sel).data('select2')) $(sel).select2('destroy');
-        });
-
-        // attach with dropdownParent = modal
-        attachSelect2('#provinsi', baseUrl + '/api/villages/provinces', $modal);
-        attachSelect2('#kabupaten', null, $modal, function(params, success, failure) {
-            const provID = $('#provinsi').val();
+        // Kabupaten (bergantung prov)
+        attachSelect2('#rumah_regency, #kabupaten', null, null, function(params, success, failure) {
+            const provID = $('#rumah_provinsi').val() || $('#provinsi').val();
             if (!provID) return success([]);
             $.ajax({ url: baseUrl + '/api/villages/regencies/' + provID, dataType: 'json', success, error: failure });
         });
-        attachSelect2('#kecamatan', null, $modal, function(params, success, failure) {
-            const kabID = $('#kabupaten').val();
+
+        // Kecamatan
+        attachSelect2('#rumah_district, #kecamatan', null, null, function(params, success, failure) {
+            const kabID = $('#rumah_regency').val() || $('#kabupaten').val();
             if (!kabID) return success([]);
             $.ajax({ url: baseUrl + '/api/villages/districts/' + kabID, dataType: 'json', success, error: failure });
         });
-        attachSelect2('#desa', null, $modal, function(params, success, failure) {
-            const kecID = $('#kecamatan').val();
+
+        // Desa
+        attachSelect2('#rumah_village, #desa', null, null, function(params, success, failure) {
+            const kecID = $('#rumah_district').val() || $('#kecamatan').val();
             if (!kecID) return success([]);
             $.ajax({ url: baseUrl + '/api/villages/villages/' + kecID, dataType: 'json', success, error: failure });
         });
-    }
 
-    // Reset dependensi saat ganti
-    $('#rumah_provinsi, #provinsi').on('change', function () {
-        $('#rumah_regency, #kabupaten, #rumah_district, #kecamatan, #rumah_village, #desa').val(null).trigger('change');
-    });
-    $('#rumah_regency, #kabupaten').on('change', function () {
-        $('#rumah_district, #kecamatan, #rumah_village, #desa').val(null).trigger('change');
-    });
-    $('#rumah_district, #kecamatan').on('change', function () {
-        $('#rumah_village, #desa').val(null).trigger('change');
-    });
-}
+        // ---- IMPORTANT: re-initialize selects that are *inside modal* with dropdownParent to ensure dropdown appears above modal ----
+        if ($modal.length) {
+            ['#provinsi', '#kabupaten', '#kecamatan', '#desa'].forEach(sel => {
+                // destroy existing select2 (if initialized), then re-init with dropdownParent
+                if ($(sel).data('select2')) $(sel).select2('destroy');
+            });
+
+            // attach with dropdownParent = modal
+            attachSelect2('#provinsi', baseUrl + '/api/villages/provinces', $modal);
+            attachSelect2('#kabupaten', null, $modal, function(params, success, failure) {
+                const provID = $('#provinsi').val();
+                if (!provID) return success([]);
+                $.ajax({ url: baseUrl + '/api/villages/regencies/' + provID, dataType: 'json', success, error: failure });
+            });
+            attachSelect2('#kecamatan', null, $modal, function(params, success, failure) {
+                const kabID = $('#kabupaten').val();
+                if (!kabID) return success([]);
+                $.ajax({ url: baseUrl + '/api/villages/districts/' + kabID, dataType: 'json', success, error: failure });
+            });
+            attachSelect2('#desa', null, $modal, function(params, success, failure) {
+                const kecID = $('#kecamatan').val();
+                if (!kecID) return success([]);
+                $.ajax({ url: baseUrl + '/api/villages/villages/' + kecID, dataType: 'json', success, error: failure });
+            });
+        }
+
+        // Reset dependensi saat ganti
+        $('#rumah_provinsi, #provinsi').on('change', function () {
+            $('#rumah_regency, #kabupaten, #rumah_district, #kecamatan, #rumah_village, #desa').val(null).trigger('change');
+        });
+        $('#rumah_regency, #kabupaten').on('change', function () {
+            $('#rumah_district, #kecamatan, #rumah_village, #desa').val(null).trigger('change');
+        });
+        $('#rumah_district, #kecamatan').on('change', function () {
+            $('#rumah_village, #desa').val(null).trigger('change');
+        });
+    }
 
 
     /* ======================================================
@@ -1013,6 +1013,7 @@ $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
             setTimeout(() => lastRow.css('background-color', ''), 2000);
         }
     }
+
 });
 
 /* ======================================================
@@ -1039,3 +1040,69 @@ $(document).on('anggota:saved', function() {
     }, 800); // beri jeda 0,8 detik supaya modal benar-benar tertutup
 });
 
+
+    $(document).on('submit', '#formInputDesil', function(e) {
+
+        e.preventDefault(); // ⛔ cegah reload default
+
+        const form = $(this);
+        const actionUrl = form.attr('action');
+        const formData = form.serialize();
+
+        $.ajax({
+            url: actionUrl,
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            beforeSend: function() {
+                Swal.fire({
+                    title: 'Memproses...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            },
+            success: function(response) {
+
+                if (response.status === 'success') {
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: 'Kategori desil berhasil diperbarui.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        // location.reload(); // 🔄 reload setelah sukses
+                        location.href = location.href; // alternatif reload dengan cache-busting
+                    });
+
+                } else if (response.status === 'forbidden') {
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Akses Ditolak',
+                        text: response.message
+                    });
+
+                } else {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: response.message || 'Terjadi kesalahan.'
+                    });
+
+                }
+            },
+            error: function() {
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Server Error',
+                    text: 'Tidak dapat menghubungi server.'
+                });
+            }
+        });
+    });
