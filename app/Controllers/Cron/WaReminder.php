@@ -10,6 +10,12 @@ class WaReminder extends BaseController
 {
     public function index()
     {
+        date_default_timezone_set('Asia/Jakarta');
+
+        log_message('error', 'CRON HIT');
+        log_message('error', 'APP TIME: ' . date('Y-m-d H:i:s'));
+        log_message('error', 'SERVER TZ: ' . date_default_timezone_get());
+
         $db = \Config\Database::connect();
         CLI::write("Starting WA Reminder (debug mode)...", 'yellow');
 
