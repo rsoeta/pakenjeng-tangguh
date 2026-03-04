@@ -5,11 +5,56 @@
     <section class="content-header">
         <div class="container-fluid">
             <h1>Monitoring Reminder WA</h1>
+            <!-- tampilkan session id -->
+            <?php
+            $adminId = session()->get('id');
+            echo "<p class='text-muted'>Admin ID: $adminId</p>";
+            ?>
         </div>
     </section>
 
     <section class="content">
         <div class="container-fluid">
+
+            <div class="row mb-3">
+
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-left-warning">
+                        <div class="card-body">
+                            <h6>Total Pending</h6>
+                            <h3 id="cardPending" class="text-warning">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-left-success">
+                        <div class="card-body">
+                            <h6>Sent Today</h6>
+                            <h3 id="cardSentToday" class="text-success">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-left-danger">
+                        <div class="card-body">
+                            <h6>Failed</h6>
+                            <h3 id="cardFailed" class="text-danger">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-left-primary">
+                        <div class="card-body">
+                            <h6>Due Next 1 Hour</h6>
+                            <h3 id="cardNextHour" class="text-primary">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
 
             <div class="card shadow">
                 <div class="card-body">
@@ -59,11 +104,23 @@
 <script>
     const baseUrl = "<?= base_url() ?>";
 
+    function loadSummary() {
+        $.get(baseUrl + '/dtsen/reminder-monitor/summary', function(resp) {
+            $('#cardPending').text(resp.pending);
+            $('#cardSentToday').text(resp.sent_today);
+            $('#cardFailed').text(resp.failed);
+            $('#cardNextHour').text(resp.due_next_hour);
+        });
+    }
+
     $(function() {
+
+        loadSummary();
+
         const table = $('#tblReminder').DataTable({
             responsive: true,
             processing: true,
-            serverSide: false, // client-side as we returned all rows
+            serverSide: false,
             ajax: {
                 url: baseUrl + '/dtsen/reminder-monitor/list',
                 dataSrc: 'data',
@@ -98,6 +155,7 @@
                     render: function(d) {
                         if (d === 'pending') return '<span class="badge badge-warning">Pending</span>';
                         if (d === 'sent') return '<span class="badge badge-success">Sent</span>';
+                        if (d === 'failed') return '<span class="badge badge-danger">Failed</span>';
                         return d;
                     }
                 },
@@ -108,24 +166,29 @@
                     data: null,
                     orderable: false,
                     render: function(data) {
-                        let btn = `<button class="btn btn-sm btn-primary btn-resend" data-id="${data.id}"><i class="fa fa-paper-plane"></i> Resend</button>`;
-                        return btn;
+                        return `<button class="btn btn-sm btn-primary btn-resend" data-id="${data.id}">
+                                    <i class="fa fa-paper-plane"></i> Resend
+                                </button>`;
                     }
                 }
             ]
         });
 
+        // Filter & Refresh
         $('#filterStatus, #filterQ').on('change keyup', function() {
             table.ajax.reload();
+            loadSummary();
         });
 
         $('#btnRefresh').on('click', function() {
             table.ajax.reload();
+            loadSummary();
         });
 
         // Resend action
         $('#tblReminder').on('click', '.btn-resend', function() {
             const id = $(this).data('id');
+
             Swal.fire({
                 title: 'Kirim ulang reminder?',
                 text: 'Pesan akan dikirim ulang ke Admin Desa.',
@@ -134,6 +197,7 @@
                 confirmButtonText: 'Kirim'
             }).then((res) => {
                 if (!res.isConfirmed) return;
+
                 $.ajax({
                     url: baseUrl + '/dtsen/reminder-monitor/resend',
                     type: 'POST',
@@ -145,16 +209,18 @@
                         if (resp.status) {
                             Swal.fire('Berhasil', resp.message, 'success');
                             table.ajax.reload();
+                            loadSummary();
                         } else {
                             Swal.fire('Gagal', resp.message, 'error');
                         }
                     },
-                    error: function(xhr) {
+                    error: function() {
                         Swal.fire('Error', 'Koneksi server gagal.', 'error');
                     }
                 });
             });
         });
+
     });
 </script>
 

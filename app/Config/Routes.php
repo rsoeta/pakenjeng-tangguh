@@ -197,6 +197,9 @@ $routes->group('dtsen', [
 	$routes->get('reminder-monitor/list', 'ReminderMonitor::listAjax');
 	$routes->post('reminder-monitor/resend', 'ReminderMonitor::resend');
 
+	// SUMMARY
+	$routes->get('reminder-monitor/summary', 'ReminderMonitor::summary');
+
 	// Pemeriksaan Data
 	$routes->get('pemeriksaan', 'Pemeriksaan::index');
 	$routes->post('pemeriksaan/listKK', 'Pemeriksaan::listKK');

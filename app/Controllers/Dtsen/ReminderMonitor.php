@@ -161,4 +161,50 @@ class ReminderMonitor extends BaseController
         }
         return $template;
     }
+
+    public function summary()
+    {
+        $db = \Config\Database::connect();
+        $adminId = session()->get('id');
+
+        $now = date('Y-m-d H:i:s');
+        $todayStart = date('Y-m-d 00:00:00');
+        $todayEnd   = date('Y-m-d 23:59:59');
+        $nextHour   = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+        // Total Pending
+        $pending = $db->table('dtsen_kk_reminder_log')
+            ->where('admin_id', $adminId)
+            ->where('status', 'pending')
+            ->countAllResults();
+
+        // Sent Today
+        $sentToday = $db->table('dtsen_kk_reminder_log')
+            ->where('admin_id', $adminId)
+            ->where('status', 'sent')
+            ->where('sent_at >=', $todayStart)
+            ->where('sent_at <=', $todayEnd)
+            ->countAllResults();
+
+        // Failed (future-ready)
+        $failed = $db->table('dtsen_kk_reminder_log')
+            ->where('admin_id', $adminId)
+            ->where('status', 'failed')
+            ->countAllResults();
+
+        // Due Next 1 Hour
+        $dueNextHour = $db->table('dtsen_kk_reminder_log')
+            ->where('admin_id', $adminId)
+            ->where('status', 'pending')
+            ->where('due_date >=', $now)
+            ->where('due_date <=', $nextHour)
+            ->countAllResults();
+
+        return $this->response->setJSON([
+            'pending' => $pending,
+            'sent_today' => $sentToday,
+            'failed' => $failed,
+            'due_next_hour' => $dueNextHour
+        ]);
+    }
 }
