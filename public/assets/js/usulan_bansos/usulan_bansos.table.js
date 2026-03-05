@@ -282,19 +282,20 @@ $(document).ready(function () {
         const periode = created
             ? created.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })
             : '-';
-
+        
+        const bansos = row.dbj_nama_bansos || '-';
         const nama = row.nama || '-';
         const nik = row.nik || '-';
 
         const message =
-`Assalamualaikum..
-Dengan ini kami informasikan bahwa Usulan Bansos Periode *${periode}* atas nama *${nama}* (NIK ${nik}) tidak dapat diproses ke tahap verifikasi.
+                `Assalamualaikum..
+                Dengan ini kami informasikan bahwa Usulan Program *${bansos}* Periode *${periode}* atas nama *${nama}* (NIK ${nik}) tidak dapat diproses ke tahap verifikasi.
 
-Alasan: *${alasan}*.
+                Alasan: *${alasan}*.
 
-Demikian kami sampaikan. Atas perhatian dan pemahamannya, kami ucapkan terima kasih.
+                Demikian kami sampaikan. Atas perhatian dan pemahamannya, kami ucapkan terima kasih.
 
-> _SINDEN System_`;
+                > _SINDEN System_`;
 
         return encodeURIComponent(message);
     }

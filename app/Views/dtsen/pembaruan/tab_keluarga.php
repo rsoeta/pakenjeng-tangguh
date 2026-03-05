@@ -4,6 +4,16 @@ $editable = ($roleId <= 4);
 $disabled = $editable ? '' : 'disabled';
 ?>
 
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    .btn-check:checked+.card {
+        background-color: #0d6efd10;
+        border-width: 2px;
+    }
+</style>
 <div class="p-3">
 
     <!-- ============================= -->
@@ -113,7 +123,7 @@ $disabled = $editable ? '' : 'disabled';
 
 </div>
 <div class="modal fade" id="modalHistoricalDesil" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content shadow">
             <div class="modal-header">
                 <h5 class="modal-title">Tambah Snapshot Historis</h5>
@@ -125,32 +135,110 @@ $disabled = $editable ? '' : 'disabled';
 
                     <input type="hidden" name="id_kk" value="<?= $id_kk ?>">
 
+                    <!-- Tahun -->
                     <div class="mb-3">
-                        <label class="form-label">Tahun</label>
+                        <label class="form-label fw-bold">Tahun</label>
                         <select name="tahun" class="form-select" required>
                             <option value="2025">2025</option>
                         </select>
                     </div>
 
+                    <!-- Triwulan -->
                     <div class="mb-3">
-                        <label class="form-label">Triwulan</label>
-                        <select name="triwulan" class="form-select" required>
-                            <option value="">Pilih TW</option>
-                            <option value="1">TW 1</option>
-                            <option value="2">TW 2</option>
-                            <option value="3">TW 3</option>
-                            <option value="4">TW 4</option>
-                        </select>
+                        <label class="form-label fw-bold">Periode Triwulan</label>
+
+                        <div class="row g-2 text-center">
+
+                            <!-- TW1 -->
+                            <div class="col-6 col-md-3">
+                                <input type="radio" class="btn-check" name="triwulan" id="tw1" value="1" required>
+
+                                <label class="card border-primary h-100 cursor-pointer p-2"
+                                    for="tw1">
+
+                                    <div class="fw-bold text-primary">TW 1</div>
+                                    <small class="text-muted">Jan – Mar</small>
+
+                                </label>
+                            </div>
+
+                            <!-- TW2 -->
+                            <div class="col-6 col-md-3">
+                                <input type="radio" class="btn-check" name="triwulan" id="tw2" value="2">
+
+                                <label class="card border-success h-100 cursor-pointer p-2"
+                                    for="tw2">
+
+                                    <div class="fw-bold text-success">TW 2</div>
+                                    <small class="text-muted">Apr – Jun</small>
+
+                                </label>
+                            </div>
+
+                            <!-- TW3 -->
+                            <div class="col-6 col-md-3">
+                                <input type="radio" class="btn-check" name="triwulan" id="tw3" value="3">
+
+                                <label class="card border-warning h-100 cursor-pointer p-2"
+                                    for="tw3">
+
+                                    <div class="fw-bold text-warning">TW 3</div>
+                                    <small class="text-muted">Jul – Sep</small>
+
+                                </label>
+                            </div>
+
+                            <!-- TW4 -->
+                            <div class="col-6 col-md-3">
+                                <input type="radio" class="btn-check" name="triwulan" id="tw4" value="4">
+
+                                <label class="card border-danger h-100 cursor-pointer p-2"
+                                    for="tw4">
+
+                                    <div class="fw-bold text-danger">TW 4</div>
+                                    <small class="text-muted">Okt – Des</small>
+
+                                </label>
+                            </div>
+
+                        </div>
                     </div>
 
+                    <!-- Desil -->
                     <div class="mb-3">
-                        <label class="form-label">Desil</label>
-                        <select name="desil" class="form-select" required>
-                            <option value="">Pilih Desil</option>
+                        <label class="form-label fw-bold">Desil</label>
+
+                        <div class="d-flex flex-wrap gap-2">
+
                             <?php for ($i = 1; $i <= 10; $i++): ?>
-                                <option value="<?= $i ?>">Desil <?= $i ?></option>
+
+                                <?php
+                                if ($i <= 3) {
+                                    $warna = 'success'; // hijau
+                                } elseif ($i <= 5) {
+                                    $warna = 'warning'; // kuning
+                                } else {
+                                    $warna = 'danger'; // merah
+                                }
+                                ?>
+
+                                <input
+                                    type="radio"
+                                    class="btn-check"
+                                    name="desil"
+                                    id="desil<?= $i ?>"
+                                    value="<?= $i ?>"
+                                    required>
+
+                                <label
+                                    class="btn btn-outline-<?= $warna ?> rounded-pill px-3"
+                                    for="desil<?= $i ?>">
+                                    Desil <?= $i ?>
+                                </label>
+
                             <?php endfor; ?>
-                        </select>
+
+                        </div>
                     </div>
 
                 </form>
