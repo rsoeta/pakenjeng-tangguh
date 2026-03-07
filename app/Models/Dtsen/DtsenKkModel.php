@@ -345,4 +345,137 @@ class DtsenKkModel extends Model
 
         return (int) $builder->countAllResults();
     }
+
+    public function getPenentuanKemiskinan(array $filter)
+    {
+        $db = $this->db;
+
+        /**
+         * ======================================================
+         * 1️⃣ QUERY DASAR KK
+         * ======================================================
+         */
+
+        $builder = $db->table('dtsen_kk kk')
+            ->select('
+            kk.id_kk,
+            kk.no_kk,
+            kk.kepala_keluarga,
+            kk.alamat,
+            rt.rw,
+            rt.rt,
+            se.kategori_desil
+        ')
+            ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
+            ->join('dtsen_se se', 'se.id_kk = kk.id_kk', 'left')
+            ->where('kk.deleted_at', null);
+
+        /**
+         * ======================================================
+         * 🔐 FILTER DESA
+         * ======================================================
+         */
+
+        if (!empty($filter['kode_desa'])) {
+            $builder->where('rt.kode_desa', $filter['kode_desa']);
+        }
+
+        /**
+         * ======================================================
+         * 🔐 FILTER WILAYAH TUGAS (COPY DARI LOGIKA LAMA)
+         * ======================================================
+         */
+
+        if (!empty($filter['wilayah_tugas'])) {
+
+            $wilayahTugas = str_replace('RW:', '', trim($filter['wilayah_tugas']));
+            $blokRW = preg_split('/[|;]/', $wilayahTugas);
+
+            $builder->groupStart();
+
+            foreach ($blokRW as $blok) {
+
+                $blok = trim($blok);
+                if (!$blok) continue;
+
+                [$rw, $rtStr] = array_pad(explode(':', $blok), 2, null);
+                $rtList = $rtStr ? explode(',', $rtStr) : [];
+
+                $builder->orGroupStart()
+                    ->groupStart()
+                    ->where('rt.rw', $rw)
+                    ->orWhere('rt.rw', str_pad($rw, 2, '0', STR_PAD_LEFT))
+                    ->groupEnd();
+
+                if (!empty($rtList)) {
+
+                    $rtVariants = [];
+
+                    foreach ($rtList as $rt) {
+                        $rtVariants[] = $rt;
+                        $rtVariants[] = str_pad($rt, 2, '0', STR_PAD_LEFT);
+                    }
+
+                    $builder->whereIn('rt.rt', $rtVariants);
+                }
+
+                $builder->groupEnd();
+            }
+
+            $builder->groupEnd();
+        }
+
+        /**
+         * ======================================================
+         * 2️⃣ HANYA KK VERIFIED
+         * ======================================================
+         */
+
+        $builder->whereIn('kk.id_kk', function ($sub) {
+
+            $sub->select('dtsen_kk_id')
+                ->from('dtsen_usulan')
+                ->whereIn('status', ['verified', 'diverifikasi']);
+        });
+
+        /**
+         * ======================================================
+         * 3️⃣ HILANGKAN YANG SUDAH DIPROSES
+         * ======================================================
+         */
+
+        $builder->whereNotIn('kk.id_kk', function ($sub) {
+
+            $sub->select('dtsen_kk_id')
+                ->from('dtks_penentuan_kemiskinan');
+        });
+
+        /**
+         * ======================================================
+         * 4️⃣ FILTER RW / RT / DESIL
+         * ======================================================
+         */
+
+        if (!empty($filter['rw']) && $filter['rw'] !== 'all') {
+            $builder->where('rt.rw', $filter['rw']);
+        }
+
+        if (!empty($filter['rt']) && $filter['rt'] !== 'all') {
+            $builder->where('rt.rt', $filter['rt']);
+        }
+
+        if (!empty($filter['desil']) && $filter['desil'] !== 'all') {
+
+            if ($filter['desil'] === 'none') {
+                $builder->where('se.kategori_desil', null);
+            } else {
+                $builder->where('se.kategori_desil', $filter['desil']);
+            }
+        }
+
+        return $builder
+            ->orderBy('kk.no_kk', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
 }

@@ -73,10 +73,10 @@ class DtsenSe extends Controller
             $filter = [
                 'kode_desa'     => $kodeDesa,
                 'wilayah_tugas' => $wilayahTugas,
-                'rw'     => $filterClient['rw']     ?? null,
-                'rt'     => $filterClient['rt']     ?? null,
-                'status' => $filterClient['status'] ?? null,
-                'desil'  => $filterClient['desil']  ?? null,
+                'rw'            => $filterClient['rw']     ?? null,
+                'rt'            => $filterClient['rt']     ?? null,
+                'status'        => $filterClient['status'] ?? null,
+                'desil'         => $filterClient['desil']  ?? null,
             ];
 
             // =============================
