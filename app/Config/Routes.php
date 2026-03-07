@@ -223,6 +223,16 @@ $routes->group('dtsen', [
 	$routes->post('art/delete/(:num)', 'Pemeriksaan::ajaxDeleteART/$1');
 });
 
+// PENENTUAN KEMISKINAN
+$routes->group('dtsen/kemiskinan', function ($routes) {
+
+	$routes->get('penentuan', 'Dtsen\PenentuanKemiskinan::index');
+
+	$routes->get('alasan', 'Dtsen\PenentuanKemiskinan::getAlasan');
+
+	$routes->post('simpan', 'Dtsen\PenentuanKemiskinan::simpan');
+});
+
 // public CMS / admin
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => ['authfilterdtks', 'menufilterdtks']], function ($routes) {
 	$routes->get('articles/data', 'ArticleController::data');
