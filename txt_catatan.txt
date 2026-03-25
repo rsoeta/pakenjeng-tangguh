@@ -1381,3 +1381,9 @@ ADD COLUMN source VARCHAR(30) DEFAULT 'sync' AFTER periode_label;
 
 ALTER TABLE dtsen_desil_history
 ADD UNIQUE KEY uniq_kk_periode (id_kk, tahun, triwulan);
+
+========================================================================================================================================================
+Menu: Penentuan Kemiskinan
+========================================================================================================================================================
+ALTER TABLE dtsen_art
+ADD INDEX idx_art_kk_hubungan_keluarga (id_kk, hubungan_keluarga);

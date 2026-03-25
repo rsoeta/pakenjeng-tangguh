@@ -30,7 +30,7 @@ class CreatePenentuanKemiskinanAlasan extends Migration
 
         $this->forge->addForeignKey(
             'penentuan_id',
-            'dtks_penentuan_kemiskinan',
+            'dtsen_penentuan_kemiskinan',
             'id',
             'CASCADE',
             'CASCADE'
@@ -38,17 +38,17 @@ class CreatePenentuanKemiskinanAlasan extends Migration
 
         $this->forge->addForeignKey(
             'alasan_id',
-            'dtks_kemiskinan_alasan_master',
+            'dtsen_kemiskinan_alasan_master',
             'id',
             'CASCADE',
             'CASCADE'
         );
 
-        $this->forge->createTable('dtks_penentuan_kemiskinan_alasan');
+        $this->forge->createTable('dtsen_penentuan_kemiskinan_alasan');
     }
 
     public function down()
     {
-        $this->forge->dropTable('dtks_penentuan_kemiskinan_alasan');
+        $this->forge->dropTable('dtsen_penentuan_kemiskinan_alasan');
     }
 }

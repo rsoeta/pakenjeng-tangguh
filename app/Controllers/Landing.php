@@ -38,7 +38,7 @@ class Landing extends BaseController
 		// Footer text: bisa diset manual, atau auto-generate dari data wilayah
 		$footerText = $settingsModel->getSetting('footer_text');
 		if (!$footerText) {
-			$footerText = "Dikembangkan oleh Pemerintah Desa {$namaDesa}, Kecamatan {$namaKecamatan}, Kabupaten {$namaKabupaten}. " .
+			$footerText = "Powered by Pemerintah Desa {$namaDesa}, Kec. {$namaKecamatan}, Kab. {$namaKabupaten}. " .
 				"Mendukung implementasi Data Tunggal Sosial dan Ekonomi Nasional (DTSEN).";
 		}
 

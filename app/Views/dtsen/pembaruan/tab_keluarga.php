@@ -411,22 +411,57 @@ $disabled = $editable ? '' : 'disabled';
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Sync';
 
+                // ✅ SUCCESS - ADA PERUBAHAN
                 if (res.status === 'changed') {
                     Swal.fire({
                         icon: 'success',
                         title: 'Desil Berubah',
-                        html: `Dari <b>${res.from ?? '-'}</b> menjadi <b>${res.to}</b><br>${res.periode}`,
-                    }).then(() => location.reload());
-                } else if (res.status === 'unchanged') {
-                    Swal.fire('Tidak Ada Perubahan', 'Desil tetap sama.', 'info');
-                } else {
-                    Swal.fire('Gagal', res.message || 'Terjadi kesalahan', 'error');
+                        html: `Dari <b>${res.from ?? '-'}</b> menjadi <b>${res.to}</b><br><small>${res.periode}</small>`,
+                        showConfirmButton: false,
+                        timer: 1800,
+                        timerProgressBar: true
+                    });
+
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1800);
+                }
+
+                // ℹ️ TIDAK BERUBAH
+                else if (res.status === 'unchanged') {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Tidak Ada Perubahan',
+                        text: 'Desil tetap sama.',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        timerProgressBar: true
+                    });
+                }
+
+                // ❌ ERROR DARI SERVER
+                else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: res.message || 'Terjadi kesalahan',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
                 }
             })
             .catch(() => {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Sync';
-                Swal.fire('Error', 'Gagal melakukan sinkronisasi.', 'error');
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Gagal melakukan sinkronisasi.',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
             });
+
     });
 </script>

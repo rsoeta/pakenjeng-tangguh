@@ -6,22 +6,68 @@ use App\Controllers\BaseController;
 
 class PenentuanKemiskinan extends BaseController
 {
-    protected $kkModel;
     protected $db;
+    protected $kkModel;
+    protected $model;
+
 
     public function __construct()
     {
-        $this->kkModel = new \App\Models\Dtsen\DtsenKkModel();
         $this->db = \Config\Database::connect();
+        $this->kkModel = new \App\Models\Dtsen\DtsenKkModel();
+        $this->model = new \App\Models\Dtsen\PenentuanKemiskinanModel();
     }
 
-    /**
-     * ======================================================
-     * HALAMAN INDEX
-     * ======================================================
-     */
+    /*
+    =================================
+    HALAMAN PENENTUAN
+    =================================
+    */
 
-    public function index()
+    public function penentuan()
+    {
+        $filter = [
+            'kode_desa'     => session()->kode_desa,
+            'wilayah_tugas' => session()->wilayah_tugas,
+            'rw'            => $this->request->getGet('rw'),
+            'rt'            => $this->request->getGet('rt'),
+            'desil'         => $this->request->getGet('desil'),
+        ];
+
+        $userRole = session()->get('role_id');
+
+        $data = [
+            'title' => 'Penentuan Kemiskinan',
+            // 'keluarga' => $this->model->getPenentuanKemiskinan($filter)
+        ];
+
+        return view('dtsen/penentuan_kemiskinan/penentuan', $data);
+    }
+
+    public function datatable()
+    {
+        $filter = [
+            'rw'    => $this->request->getGet('rw'),
+            'rt'    => $this->request->getGet('rt'),
+            'desil' => $this->request->getGet('desil'),
+            'kode_desa' => session()->kode_desa,
+            'wilayah_tugas' => session()->wilayah_tugas
+        ];
+
+        $data = $this->model->getPenentuanKemiskinan($filter);
+
+        return $this->response->setJSON([
+            'data' => $data
+        ]);
+    }
+
+    /*
+    =================================
+    HALAMAN VERIFIKASI
+    =================================
+    */
+
+    public function verifikasi()
     {
         $filter = [
             'kode_desa'     => session()->kode_desa,
@@ -31,9 +77,37 @@ class PenentuanKemiskinan extends BaseController
             'desil'         => $this->request->getGet('desil')
         ];
 
-        $data['keluarga'] = $this->kkModel->getPenentuanKemiskinan($filter);
+        $data = [
+            'title' => 'Verifikasi Kemiskinan',
+            'verifikasi' => $this->model->getVerifikasiKemiskinan($filter)
+        ];
 
-        return view('dtsen/penentuan_kemiskinan/index', $data);
+        return view('dtsen/penentuan_kemiskinan/verifikasi', $data);
+    }
+
+
+    /*
+    =================================
+    HALAMAN DATA FINAL
+    =================================
+    */
+
+    public function final()
+    {
+        $filter = [
+            'kode_desa'     => session()->kode_desa,
+            'wilayah_tugas' => session()->wilayah_tugas,
+            'rw'            => $this->request->getGet('rw'),
+            'rt'            => $this->request->getGet('rt'),
+            'desil'         => $this->request->getGet('desil')
+        ];
+
+        $data = [
+            'title' => 'Data Final Kemiskinan',
+            'final' => $this->model->getDataKemiskinanFinal($filter)
+        ];
+
+        return view('dtsen/penentuan_kemiskinan/final', $data);
     }
 
     /**
@@ -47,7 +121,7 @@ class PenentuanKemiskinan extends BaseController
         $status = $this->request->getGet('status');
 
         $rows = $this->db
-            ->table('dtks_kemiskinan_alasan_master')
+            ->table('dtsen_kemiskinan_alasan_master')
             ->where('status_kemiskinan', $status)
             ->where('is_active', 1)
             ->orderBy('kategori', 'ASC')
@@ -60,7 +134,6 @@ class PenentuanKemiskinan extends BaseController
         foreach ($rows as $row) {
             $grouped[$row['kategori']][] = $row;
         }
-
         return $this->response->setJSON($grouped);
     }
 
@@ -86,28 +159,29 @@ class PenentuanKemiskinan extends BaseController
 
         $this->db->transStart();
 
-        $this->db->table('dtks_penentuan_kemiskinan')->insert([
+        $this->db->table('dtsen_penentuan_kemiskinan')->insert([
             'dtsen_kk_id'       => $kkId,
             'status_kemiskinan' => $status,
             'catatan'           => $catatan,
-            'created_by'        => session()->user_id
+            'created_by'        => session()->get('id'),
         ]);
 
         $penentuanId = $this->db->insertID();
 
         foreach ($alasan as $id) {
 
-            $this->db->table('dtks_penentuan_kemiskinan_alasan')->insert([
+            $this->db->table('dtsen_penentuan_kemiskinan_alasan')->insert([
                 'penentuan_id' => $penentuanId,
                 'alasan_id'    => $id
             ]);
         }
 
-        $this->db->table('dtks_penentuan_kemiskinan_log')->insert([
+        $this->db->table('dtsen_penentuan_kemiskinan_log')->insert([
             'penentuan_id'       => $penentuanId,
             'aksi'               => 'create',
             'status_kemiskinan'  => $status,
-            'user_id'            => session()->user_id
+            'user_id'            => session()->get('id'),
+            'catatan'            => $catatan
         ]);
 
         $this->db->transComplete();
@@ -115,5 +189,78 @@ class PenentuanKemiskinan extends BaseController
         return $this->response->setJSON([
             'success' => true
         ]);
+    }
+
+    public function detail()
+    {
+        $id = $this->request->getGet('id');
+
+        $db = \Config\Database::connect();
+
+        $row = $db->table('dtsen_penentuan_kemiskinan')
+            ->select('status_kemiskinan, catatan')
+            ->where('id', $id)
+            ->get()
+            ->getRowArray();
+
+        if (!$row) {
+            return $this->response->setJSON([
+                'status' => '',
+                'alasan' => [],
+                'catatan' => ''
+            ]);
+        }
+
+        $alasanRows = $db->table('dtsen_penentuan_kemiskinan_alasan pa')
+            ->select('m.kategori, m.label')
+            ->join('dtsen_kemiskinan_alasan_master m', 'm.id = pa.alasan_id')
+            ->where('pa.penentuan_id', $id)
+            ->orderBy('m.kategori', 'ASC')
+            ->orderBy('m.urutan', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        $grouped = [];
+
+        foreach ($alasanRows as $a) {
+
+            $kategori = ucfirst($a['kategori']);
+
+            $grouped[$kategori][] = $a['label'];
+        }
+
+        return $this->response->setJSON([
+            'status' => $row['status_kemiskinan'],
+            'alasan' => $grouped,
+            'catatan' => $row['catatan']
+        ]);
+    }
+
+    public function validasi()
+    {
+        $id = $this->request->getPost('id');
+
+        $this->db->table('dtsen_penentuan_kemiskinan')
+            ->where('id', $id)
+            ->update([
+                'status_verifikasi' => 'approved',
+                'verified_by' => session()->get('id'),
+                'verified_at' => date('Y-m-d H:i:s')
+            ]);
+
+        return $this->response->setJSON(['success' => true]);
+    }
+
+    public function tolak()
+    {
+        $id = $this->request->getPost('id');
+
+        $this->db->table('dtsen_penentuan_kemiskinan')
+            ->where('id', $id)
+            ->update([
+                'status_verifikasi' => 'rejected'
+            ]);
+
+        return $this->response->setJSON(['success' => true]);
     }
 }

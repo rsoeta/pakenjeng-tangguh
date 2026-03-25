@@ -40,11 +40,11 @@ class CreatePenentuanKemiskinanLog extends Migration
         $this->forge->addKey('id', true);
         $this->forge->addKey('penentuan_id');
 
-        $this->forge->createTable('dtks_penentuan_kemiskinan_log');
+        $this->forge->createTable('dtsen_penentuan_kemiskinan_log');
     }
 
     public function down()
     {
-        $this->forge->dropTable('dtks_penentuan_kemiskinan_log');
+        $this->forge->dropTable('dtsen_penentuan_kemiskinan_log');
     }
 }

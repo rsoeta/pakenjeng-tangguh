@@ -49,7 +49,7 @@ class CreatePenentuanKemiskinan extends Migration
         ]);
 
         $this->forge->addKey('id', true);
-        $this->forge->addKey('dtsen_kk_id');
+        $this->forge->addUniqueKey('dtsen_kk_id');
 
         $this->forge->addForeignKey(
             'dtsen_kk_id',
@@ -59,11 +59,11 @@ class CreatePenentuanKemiskinan extends Migration
             'CASCADE'
         );
 
-        $this->forge->createTable('dtks_penentuan_kemiskinan');
+        $this->forge->createTable('dtsen_penentuan_kemiskinan');
     }
 
     public function down()
     {
-        $this->forge->dropTable('dtks_penentuan_kemiskinan');
+        $this->forge->dropTable('dtsen_penentuan_kemiskinan');
     }
 }

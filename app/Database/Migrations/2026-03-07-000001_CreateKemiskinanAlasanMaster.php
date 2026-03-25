@@ -43,11 +43,11 @@ class CreateKemiskinanAlasanMaster extends Migration
         ]);
 
         $this->forge->addKey('id', true);
-        $this->forge->createTable('dtks_kemiskinan_alasan_master');
+        $this->forge->createTable('dtsen_kemiskinan_alasan_master');
     }
 
     public function down()
     {
-        $this->forge->dropTable('dtks_kemiskinan_alasan_master');
+        $this->forge->dropTable('dtsen_kemiskinan_alasan_master');
     }
 }

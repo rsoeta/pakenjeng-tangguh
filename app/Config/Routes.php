@@ -226,11 +226,18 @@ $routes->group('dtsen', [
 // PENENTUAN KEMISKINAN
 $routes->group('dtsen/kemiskinan', function ($routes) {
 
-	$routes->get('penentuan', 'Dtsen\PenentuanKemiskinan::index');
+	$routes->get('penentuan', 'Dtsen\PenentuanKemiskinan::penentuan');
+	$routes->get('datatable', 'Dtsen\PenentuanKemiskinan::datatable');
+	$routes->get('verifikasi', 'Dtsen\PenentuanKemiskinan::verifikasi');
+	$routes->get('final', 'Dtsen\PenentuanKemiskinan::final');
 
 	$routes->get('alasan', 'Dtsen\PenentuanKemiskinan::getAlasan');
 
 	$routes->post('simpan', 'Dtsen\PenentuanKemiskinan::simpan');
+
+	$routes->post('validasi', 'Dtsen\PenentuanKemiskinan::validasi');
+
+	$routes->get('detail', 'Dtsen\PenentuanKemiskinan::detail');
 });
 
 // public CMS / admin

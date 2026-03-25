@@ -204,7 +204,7 @@
 </div>
 
 <footer>
-    Dikembangkan oleh Pemerintah Desa Pasirlangu, Kecamatan Pakenjeng, Kabupaten Garut.<br>
+    Powered by Pemerintah Desa Pasirlangu, Kec. Pakenjeng, Kab. Garut.<br>
     Mendukung implementasi Data Tunggal Sosial dan Ekonomi Nasional (DTSEN).
 </footer>
 
