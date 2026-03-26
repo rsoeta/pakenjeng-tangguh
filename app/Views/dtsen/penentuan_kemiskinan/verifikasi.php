@@ -33,79 +33,6 @@
                                 </tr>
 
                             </thead>
-
-                            <tbody>
-
-                                <?php $no = 1;
-                                foreach ($verifikasi as $row): ?>
-
-                                    <tr data-id="<?= $row['id'] ?>">
-
-                                        <td><?= $no++ ?></td>
-
-                                        <td><?= esc($row['kepala_keluarga']) ?></td>
-                                        <td>
-
-                                            <span class="no-nik"><?= esc($row['nik']) ?></span>
-
-                                            <button
-                                                class="btn btn-xs btn-light btn-copy"
-                                                data-nik="<?= $row['nik'] ?>"
-                                                title="Salin">
-
-                                                <i class="fas fa-copy"></i>
-
-                                            </button>
-
-                                        </td>
-                                        <td>
-
-                                            <span class="no-kk"><?= esc($row['no_kk']) ?></span>
-
-                                            <button
-                                                class="btn btn-xs btn-light btn-copy"
-                                                data-kk="<?= $row['no_kk'] ?>"
-                                                title="Salin">
-
-                                                <i class="fas fa-copy"></i>
-
-                                            </button>
-
-                                        </td>
-                                        <td><?= esc($row['rw']) ?></td>
-                                        <td><?= esc($row['rt']) ?></td>
-                                        <td>
-                                            <?php if ($row['kategori_desil']): ?>
-                                                <span class="badge bg-info">
-                                                    Desil <?= $row['kategori_desil'] ?>
-                                                </span>
-                                            <?php else: ?>
-                                                <span class="badge bg-secondary">-</span>
-                                            <?php endif ?>
-                                        </td>
-                                        <td>
-                                            <?php if ($row['status_kemiskinan'] == 'miskin'): ?>
-                                                <span class="badge bg-danger">Miskin</span>
-                                            <?php else: ?>
-                                                <span class="badge bg-success">Tidak Miskin</span>
-                                            <?php endif ?>
-                                        </td>
-                                        <td><?= esc($row['petugas_entri']) ?></td>
-                                        <td>
-                                            <button
-                                                class="btn btn-sm btn-info btn-detail"
-                                                data-id="<?= $row['id'] ?>">
-                                                <i class="fas fa-eye"></i>
-                                                Detail
-                                            </button>
-                                        </td>
-
-                                    </tr>
-
-                                <?php endforeach ?>
-
-                            </tbody>
-
                         </table>
 
                     </div>
@@ -128,6 +55,9 @@
                 <div id="detail-kemiskinan"></div>
             </div>
             <div class="modal-footer d-flex justify-content-between w-100">
+                <button class="btn btn-warning btn-rollback" id="btnRollbackDetail">
+                    <i class="fas fa-undo"></i> Rollback
+                </button>
                 <?php if (session()->role_id < 4): ?>
                     <button
                         class="btn btn-danger btn-tolak"
@@ -153,20 +83,66 @@
 
         $('#tableVerifikasi').DataTable({
             responsive: true,
-            pageLength: 25,
-            order: [
-                [0, 'asc']
-            ],
-            columnDefs: [{
-                orderable: false,
-                targets: 7
-            }],
+            processing: true,
+            serverSide: false,
+            ajax: {
+                url: '/dtsen/kemiskinan/verifikasi-data',
+                dataSrc: 'data'
+            },
             language: {
                 search: "Cari:",
                 lengthMenu: "Tampilkan _MENU_ data",
                 zeroRecords: "Data tidak ditemukan",
                 info: "Menampilkan _START_ - _END_ dari _TOTAL_ data"
-            }
+            },
+            columns: [{
+                    data: null,
+                    render: (data, type, row, meta) => meta.row + 1
+                },
+
+                {
+                    data: 'kepala_keluarga'
+                },
+                {
+                    data: 'nik'
+                },
+                {
+                    data: 'no_kk'
+                },
+                {
+                    data: 'rw'
+                },
+                {
+                    data: 'rt'
+                },
+
+                {
+                    data: 'kategori_desil',
+                    render: d => d ? `<span class="badge bg-info">Desil ${d}</span>` : `<span class="badge bg-secondary">-</span>`
+                },
+
+                {
+                    data: 'status_kemiskinan',
+                    render: d => d === 'miskin' ?
+                        `<span class="badge bg-danger">Miskin</span>` : `<span class="badge bg-success">Tidak Miskin</span>`
+                },
+
+                {
+                    data: 'petugas_entri'
+                },
+
+                {
+                    data: 'id',
+                    render: id => `
+                <button class="btn btn-sm btn-info btn-detail" data-id="${id}">
+                    <i class="fas fa-eye"></i> Detail
+                </button>
+                <button class="btn btn-sm btn-warning btn-rollback" data-id="${id}">
+                    <i class="fas fa-undo"></i> Rollback
+                </button>
+            `
+                }
+            ]
         });
     });
 
@@ -175,53 +151,89 @@
     $(document).on('click', '.btn-detail', function() {
 
         let id = $(this).data('id');
-
         currentVerifikasiId = id;
 
-        $('#detail-kemiskinan').html('<div class="text-center">Loading...</div>');
+        // 🔥 Inject ID ke tombol modal (PENTING)
+        $('#btnRollbackDetail').data('id', id);
+        $('#btnTolakDetail').data('id', id);
+        $('#btnValidasiDetail').data('id', id);
+
+        // 🔥 Loading state
+        $('#detail-kemiskinan').html(`
+        <div class="text-center py-4">
+            <i class="fas fa-spinner fa-spin"></i><br>
+            Memuat data...
+        </div>
+    `);
 
         $('#modalDetail').modal('show');
 
         $.get('/dtsen/kemiskinan/detail', {
-            id: id
-        }, function(res) {
+                id: id
+            })
+            .done(function(res) {
 
-            let html = '';
+                let html = '';
 
-            html += `
+                // ======================
+                // STATUS
+                // ======================
+                html += `
             <h6>Status</h6>
             <p>
-            <span class="badge ${res.status=='miskin'?'bg-danger':'bg-success'}">
-            ${res.status=='miskin'?'Miskin':'Tidak Miskin'}
-            </span>
+                <span class="badge ${res.status === 'miskin' ? 'bg-danger' : 'bg-success'}">
+                    ${res.status === 'miskin' ? 'Miskin' : 'Tidak Miskin'}
+                </span>
             </p>
-            `;
+        `;
 
-            Object.keys(res.alasan).forEach(function(kategori) {
+                // ======================
+                // ALASAN
+                // ======================
+                if (res.alasan && Object.keys(res.alasan).length > 0) {
 
-                html += `<h6 class="mt-3">${kategori}</h6><ul>`;
+                    Object.keys(res.alasan).forEach(function(kategori) {
 
-                res.alasan[kategori].forEach(function(item) {
-                    html += `<li>${item}</li>`;
-                });
+                        html += `<h6 class="mt-3">${kategori}</h6><ul class="mb-2">`;
 
-                html += '</ul>';
+                        res.alasan[kategori].forEach(function(item) {
+                            html += `<li>${item}</li>`;
+                        });
 
-            });
+                        html += '</ul>';
 
-            if (res.catatan) {
+                    });
 
-                html += `
+                } else {
+                    html += `<p class="text-muted">Tidak ada data alasan</p>`;
+                }
+
+                // ======================
+                // CATATAN
+                // ======================
+                if (res.catatan) {
+                    html += `
                 <hr>
                 <h6>Catatan Petugas</h6>
                 <p>${res.catatan}</p>
-                `;
+            `;
+                }
 
-            }
+                // ======================
+                // RENDER
+                // ======================
+                $('#detail-kemiskinan').html(html);
 
-            $('#detail-kemiskinan').html(html);
+            })
+            .fail(function() {
 
-        });
+                $('#detail-kemiskinan').html(`
+            <div class="text-center text-danger py-4">
+                Gagal memuat data
+            </div>
+        `);
+
+            });
 
     });
 
@@ -284,6 +296,87 @@
                         }
 
                     });
+
+            }
+
+        });
+
+    });
+
+    $(document).on('click', '.btn-rollback', function() {
+
+        let id = $(this).data('id');
+
+        Swal.fire({
+            title: 'Kembalikan Data?',
+            text: 'Data akan dikembalikan ke Penentuan',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Kembalikan'
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                $.post('/dtsen/kemiskinan/rollback', {
+                    id: id
+                }, function(res) {
+
+                    if (res.success) {
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Data dikembalikan',
+                            timer: 1200,
+                            showConfirmButton: false
+                        });
+
+                        // 🔥 CLOSE MODAL
+                        $('#modalDetail').modal('hide');
+
+                        // 🔥 RELOAD DATATABLE
+                        $('#tableVerifikasi').DataTable().ajax.reload(null, false);
+
+                    }
+
+                });
+
+            }
+
+        });
+
+    });
+
+    $(document).on('click', '#btnRollbackDetail', function() {
+
+        let id = $(this).data('id');
+
+        Swal.fire({
+            title: 'Kembalikan Data?',
+            icon: 'warning',
+            showCancelButton: true
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                $.post('/dtsen/kemiskinan/rollback', {
+                    id: id
+                }, function(res) {
+
+                    if (res.success) {
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Data dikembalikan',
+                            timer: 1200,
+                            showConfirmButton: false
+                        });
+
+                        $('#modalDetail').modal('hide');
+                        $('#tableVerifikasi').DataTable().ajax.reload(null, false);
+
+                    }
+
+                });
 
             }
 

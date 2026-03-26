@@ -18,8 +18,11 @@ class PenentuanKemiskinanModel extends Model
         'status_verifikasi',
         'catatan',
         'created_by',
+        'updated_by',
         'verified_by',
-        'verified_at'
+        'verified_at',
+        'created_at',
+        'updated_at'
     ];
 
 
@@ -78,14 +81,15 @@ class PenentuanKemiskinanModel extends Model
 
         /**
          * ======================================================
-         * 3️⃣ HILANGKAN YANG SUDAH DIPROSES
+         * 3️⃣ HILANGKAN YANG MASIH AKTIF (pending & approved)
          * ======================================================
          */
 
         $builder->whereNotIn('kk.id_kk', function ($sub) {
 
             $sub->select('dtsen_kk_id')
-                ->from('dtsen_penentuan_kemiskinan');
+                ->from('dtsen_penentuan_kemiskinan')
+                ->whereIn('status_verifikasi', ['pending', 'approved']);
         });
 
         /**
@@ -112,7 +116,6 @@ class PenentuanKemiskinanModel extends Model
         }
 
         return $builder
-            // ->orderBy('kk.no_kk', 'ASC')
             ->get()
             ->getResultArray();
     }
@@ -210,9 +213,8 @@ class PenentuanKemiskinanModel extends Model
         return $builder
             ->orderBy('pk.created_at', 'ASC')
             ->get()
-            ->getResultArray();
+            ->getResultArray() ?? [];
     }
-
 
     /*
     ====================================

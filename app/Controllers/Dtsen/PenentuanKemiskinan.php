@@ -85,6 +85,22 @@ class PenentuanKemiskinan extends BaseController
         return view('dtsen/penentuan_kemiskinan/verifikasi', $data);
     }
 
+    public function verifikasiData()
+    {
+        $filter = [
+            'kode_desa'     => session()->kode_desa,
+            'wilayah_tugas' => session()->wilayah_tugas,
+            'rw'            => $this->request->getGet('rw'),
+            'rt'            => $this->request->getGet('rt'),
+            'desil'         => $this->request->getGet('desil')
+        ];
+
+        $data = $this->model->getVerifikasiKemiskinan($filter);
+
+        return $this->response->setJSON([
+            'data' => $data
+        ]);
+    }
 
     /*
     =================================
@@ -145,7 +161,9 @@ class PenentuanKemiskinan extends BaseController
 
     public function simpan()
     {
-        $kkId    = $this->request->getPost('kk_id');
+        // var_dump($_POST);
+        // die;
+        $kkId = (int) trim($this->request->getPost('kk_id'));
         $status  = $this->request->getPost('status');
         $alasan  = $this->request->getPost('alasan');
         $catatan = $this->request->getPost('catatan');
@@ -159,29 +177,74 @@ class PenentuanKemiskinan extends BaseController
 
         $this->db->transStart();
 
-        $this->db->table('dtsen_penentuan_kemiskinan')->insert([
-            'dtsen_kk_id'       => $kkId,
-            'status_kemiskinan' => $status,
-            'catatan'           => $catatan,
-            'created_by'        => session()->get('id'),
-        ]);
+        /**
+         * 🔍 CEK SUDAH ADA BELUM
+         */
+        $existing = $this->db->table('dtsen_penentuan_kemiskinan')
+            ->where('dtsen_kk_id', $kkId)
+            ->get()
+            ->getRowArray();
 
-        $penentuanId = $this->db->insertID();
+        /**
+         * 🧪 DEBUG WAJIB (TARUH DI SINI)
+         */
+        log_message('error', 'KKID: ' . $kkId);
+        log_message('error', 'EXISTING: ' . json_encode($existing));
 
+        // var_dump($existing);
+        // die;
+        if ($existing) {
+
+            // 🔄 UPDATE (kasus rollback)
+            $penentuanId = $existing['id'];
+
+            $this->db->table('dtsen_penentuan_kemiskinan')
+                ->where('id', $penentuanId)
+                ->update([
+                    'status_kemiskinan' => $status,
+                    'catatan'           => $catatan,
+                    'status_verifikasi' => 'pending', // 🔥 penting
+                    'updated_by'        => session()->get('id'),
+                    'updated_at'        => date('Y-m-d H:i:s')
+                ]);
+
+            // 🧹 HAPUS alasan lama
+            $this->db->table('dtsen_penentuan_kemiskinan_alasan')
+                ->where('penentuan_id', $penentuanId)
+                ->delete();
+        } else {
+
+            // ➕ INSERT BARU
+            $this->db->table('dtsen_penentuan_kemiskinan')->insert([
+                'dtsen_kk_id'       => $kkId,
+                'status_kemiskinan' => $status,
+                'catatan'           => $catatan,
+                'status_verifikasi' => 'pending',
+                'created_by'        => session()->get('id'),
+            ]);
+
+            $penentuanId = $this->db->insertID();
+        }
+
+        /**
+         * 💾 INSERT ALASAN BARU
+         */
         foreach ($alasan as $id) {
-
             $this->db->table('dtsen_penentuan_kemiskinan_alasan')->insert([
                 'penentuan_id' => $penentuanId,
                 'alasan_id'    => $id
             ]);
         }
 
+        /**
+         * 🧾 LOG
+         */
         $this->db->table('dtsen_penentuan_kemiskinan_log')->insert([
-            'penentuan_id'       => $penentuanId,
-            'aksi'               => 'create',
-            'status_kemiskinan'  => $status,
-            'user_id'            => session()->get('id'),
-            'catatan'            => $catatan
+            'penentuan_id'      => $penentuanId,
+            'aksi'              => $existing ? 'update' : 'create',
+            'status_kemiskinan' => $status,
+            'user_id'           => session()->get('id'),
+            'catatan'           => $catatan
         ]);
 
         $this->db->transComplete();
@@ -262,5 +325,33 @@ class PenentuanKemiskinan extends BaseController
             ]);
 
         return $this->response->setJSON(['success' => true]);
+    }
+
+    public function rollback()
+    {
+        $id = $this->request->getPost('id');
+        $userId = session()->get('user_id');
+
+        $data = $this->model->find($id);
+
+        // update status
+        $this->model->update($id, [
+            'status_verifikasi' => 'rollback',
+            'verified_by' => null,
+            'verified_at' => null
+        ]);
+
+        // log aktivitas
+        $this->db->table('dtsen_penentuan_kemiskinan_log')->insert([
+            'penentuan_id' => $id,
+            'aksi' => 'rollback',
+            'status_kemiskinan' => $data['status_kemiskinan'], // WAJIB
+            'user_id' => $userId,
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
+
+        return $this->response->setJSON([
+            'success' => true
+        ]);
     }
 }

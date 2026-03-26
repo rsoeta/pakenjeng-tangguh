@@ -1387,3 +1387,11 @@ Menu: Penentuan Kemiskinan
 ========================================================================================================================================================
 ALTER TABLE dtsen_art
 ADD INDEX idx_art_kk_hubungan_keluarga (id_kk, hubungan_keluarga);
+
+berhasil update migrasi AlterStatusVerifikasiRollback
+
+ALTER TABLE dtsen_penentuan_kemiskinan 
+ADD INDEX idx_status_verifikasi (status_verifikasi);
+
+ALTER TABLE dtsen_penentuan_kemiskinan_log 
+MODIFY aksi ENUM('create','update','validate','reject','rollback') NOT NULL;

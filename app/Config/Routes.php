@@ -224,20 +224,26 @@ $routes->group('dtsen', [
 });
 
 // PENENTUAN KEMISKINAN
-$routes->group('dtsen/kemiskinan', function ($routes) {
+$routes->group('dtsen/kemiskinan', [
+	'filter' => ['authfilterdtks', 'menufilterdtks']
+], function ($routes) {
 
 	$routes->get('penentuan', 'Dtsen\PenentuanKemiskinan::penentuan');
 	$routes->get('datatable', 'Dtsen\PenentuanKemiskinan::datatable');
 	$routes->get('verifikasi', 'Dtsen\PenentuanKemiskinan::verifikasi');
+	$routes->get('verifikasi-data', 'Dtsen\PenentuanKemiskinan::verifikasiData');
 	$routes->get('final', 'Dtsen\PenentuanKemiskinan::final');
 
 	$routes->get('alasan', 'Dtsen\PenentuanKemiskinan::getAlasan');
 
 	$routes->post('simpan', 'Dtsen\PenentuanKemiskinan::simpan');
 
+	$routes->post('tolak', 'Dtsen\PenentuanKemiskinan::tolak');
 	$routes->post('validasi', 'Dtsen\PenentuanKemiskinan::validasi');
 
 	$routes->get('detail', 'Dtsen\PenentuanKemiskinan::detail');
+
+	$routes->post('rollback', 'Dtsen\PenentuanKemiskinan::rollback');
 });
 
 // public CMS / admin
