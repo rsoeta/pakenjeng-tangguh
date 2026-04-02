@@ -53,9 +53,12 @@ $disabled = $editable ? '' : 'disabled';
                         <div>
                             <strong>RW:</strong> <?= esc($perumahan['rw'] ?? '-') ?> |
                             <strong>RT:</strong> <?= esc($perumahan['rt'] ?? '-') ?> |
-                            <?= esc($perumahan['alamat'] ?? '-') ?>
+                            <?= esc($perumahan['alamat'] ?? ($kkData['alamat'] ?? '-')) ?>
                         </div>
                     </div>
+                    <small class="text-muted">
+                        Data alamat diubah melalui tab "Rumah"
+                    </small>
                 </div>
 
                 <?php if ($editable): ?>
@@ -139,7 +142,15 @@ $disabled = $editable ? '' : 'disabled';
                     <div class="mb-3">
                         <label class="form-label fw-bold">Tahun</label>
                         <select name="tahun" class="form-select" required>
-                            <option value="2025">2025</option>
+                            <?php
+                            $startYear = 2025; // bisa kamu sesuaikan
+                            $currentYear = date('Y');
+                            for ($year = $currentYear; $year >= $startYear; $year--):
+                            ?>
+                                <option value="<?= $year ?>" <?= $year == date('Y') ? 'selected' : '' ?>>
+                                    <?= $year ?>
+                                </option>
+                            <?php endfor; ?>
                         </select>
                     </div>
 

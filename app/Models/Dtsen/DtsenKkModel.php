@@ -225,7 +225,28 @@ class DtsenKkModel extends Model
 
             if (!isset($usulanMap[$row['id_kk']])) continue;
 
-            $u = $usulanMap[$row['id_kk']];
+            $u = $usulanMap[$row['id_kk']] ?? null;
+
+            if ($u) {
+                $payload = json_decode($u['payload'], true);
+                $p = $payload['perumahan'] ?? [];
+
+                // 🔥 OVERRIDE RW/RT
+                if (!empty($p['rw'])) {
+                    $row['rw'] = $p['rw'];
+                }
+                if (!empty($p['rt'])) {
+                    $row['rt'] = $p['rt'];
+                }
+
+                // 🔥 TAMBAHKAN INI (FIX ALAMAT)
+                if (!empty($p['alamat'])) {
+                    // $row['alamat'] = $p['alamat'];
+                    $row['alamat'] = $p['alamat'] ?? $row['alamat'];
+                }
+            }
+
+            // $u = $usulanMap[$row['id_kk']];
             $row['usulan_status'] = $u['status'];
 
             if ($u['status'] === 'draft') {

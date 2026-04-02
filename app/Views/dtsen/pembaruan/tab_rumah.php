@@ -446,9 +446,9 @@ $san = $perumahan['sanitasi'] ?? [];
             '#sumber_air',
             '#sumber_listrik',
             '#fasilitas_bab',
-            '#jenis_kloset',
-            '#pembuangan_tinja',
-            '#jarak_air_ke_limbah'
+            // '#jenis_kloset',
+            // '#pembuangan_tinja',
+            // '#jarak_air_ke_limbah'
         ];
 
         function checkKelengkapanRumah() {
@@ -502,6 +502,10 @@ $san = $perumahan['sanitasi'] ?? [];
             const form = document.getElementById('formRumahFull');
             const formData = new FormData(form);
 
+            // 🔍 DEBUG DI SINI
+            console.log("FORM DATA RUMAH:");
+            console.log([...formData.entries()]);
+
             // convert luas_lantai to numeric string if empty => null
             if (!formData.get('luas_lantai')) {
                 formData.set('luas_lantai', '');
@@ -527,6 +531,7 @@ $san = $perumahan['sanitasi'] ?? [];
                     return resp.json();
                 })
                 .then(res => {
+                    console.log("RESPONSE:", res);
                     if (res.status === 'success') {
                         Swal.fire('Berhasil', res.message, 'success');
                         // reload or update UI if necessary

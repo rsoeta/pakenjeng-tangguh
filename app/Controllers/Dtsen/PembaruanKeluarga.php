@@ -322,7 +322,7 @@ class PembaruanKeluarga extends BaseController
                     'kode_desa'         => $kodeDesa,
                     'rw'                => $rw,
                     'rt'                => $rt,
-                    'alamat'            => trim($post['alamat']),
+                    // 'alamat'            => trim($post['alamat']),
                     'kepemilikan_rumah' => $post['status_rumah'] ?? 'Lainnya',
                     'source_name'       => 'saveKeluarga_baru',
                     'created_by'        => $userId,
@@ -337,7 +337,7 @@ class PembaruanKeluarga extends BaseController
                     'id_rt'                    => $idRt,
                     'no_kk'                    => trim($post['no_kk']),
                     'kepala_keluarga'          => trim($post['kepala_keluarga']),
-                    'alamat'                   => trim($post['alamat']),
+                    // 'alamat'                   => trim($post['alamat']),
                     'status_kepemilikan_rumah' => $post['status_rumah'] ?? 'Lainnya',
                     'kategori_adat'            => $post['kategori_adat'] ?? 'Tidak',
                     'nama_suku'                => $post['nama_suku'] ?? '',
@@ -608,6 +608,13 @@ class PembaruanKeluarga extends BaseController
                 }
             }
 
+            if (empty($post['alamat']) || empty($post['rt']) || empty($post['rw'])) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Alamat, RT, dan RW wajib diisi.'
+                ]);
+            }
+
             // Jika bukan PLN dengan meteran → validasi hanya jika diisi saja
             else {
 
@@ -723,6 +730,25 @@ class PembaruanKeluarga extends BaseController
                     'summary' => 'Data rumah diperbarui oleh ' . ($user['nama'] ?? 'Sistem')
                 ]);
 
+            // 🔥 SYNC KE dtsen_rt AGAR WILAYAH KERJA TERBACA
+            $kkRow = $this->db->table('dtsen_kk')
+                ->select('id_rt')
+                ->where('id_kk', $usulanRow['dtsen_kk_id'])
+                ->get()
+                ->getRowArray();
+
+            if ($kkRow && !empty($kkRow['id_rt'])) {
+                $this->db->table('dtsen_rt')
+                    ->where('id_rt', $kkRow['id_rt'])
+                    ->update([
+                        'rw' => trim($post['rw'] ?? ''),
+                        'rt' => trim($post['rt'] ?? ''),
+                        'kode_desa' => $post['village'] ?? null,
+                        'updated_at' => date('Y-m-d H:i:s'),
+                        'updated_by' => $user['nama'] ?? 'system'
+                    ]);
+            }
+
             // ⚡ Jika status sudah "applied", update juga dtsen_rt
             if ($usulanRow['status'] === 'applied') {
                 $kkRow = $this->db->table('dtsen_kk')
@@ -823,6 +849,7 @@ class PembaruanKeluarga extends BaseController
             // 🔄 Decode payload lama
             $payloadLama = json_decode($usulan['payload'] ?? '{}', true);
             if (!is_array($payloadLama)) $payloadLama = [];
+            log_message('error', 'PAYLOAD BARU: ' . json_encode($payloadLama));
 
             // Siapkan struktur minimum
             $payloadLama['aset'] = $payloadLama['aset'] ?? [];
@@ -839,6 +866,7 @@ class PembaruanKeluarga extends BaseController
                 'emas'          => $request->getPost('emas') ?? 0,
                 'laptop'        => $request->getPost('laptop') ?? 0,
                 'sepeda_motor'  => $request->getPost('sepeda_motor') ?? 0,
+                'sepeda'        => $request->getPost('sepeda') ?? 0,
                 'mobil'         => $request->getPost('mobil') ?? 0,
                 'perahu'        => $request->getPost('perahu') ?? 0,
                 'kapal_motor'   => $request->getPost('kapal_motor') ?? 0,
@@ -872,6 +900,7 @@ class PembaruanKeluarga extends BaseController
                 ]);
 
             return $this->response->setJSON([
+                'debug_payload' => $payloadLama,
                 'status'  => 'success',
                 'message' => 'Data aset berhasil disimpan.'
             ]);
