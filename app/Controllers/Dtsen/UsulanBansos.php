@@ -302,7 +302,7 @@ class UsulanBansos extends Controller
 
         $desil = (int) ($se['kategori_desil'] ?? 0);
 
-        if ($desil <= 0 || $desil > 5) {
+        if ($desil <= 0 || $desil > 4) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Kategori desil tidak memenuhi syarat.'
@@ -324,13 +324,13 @@ class UsulanBansos extends Controller
             }
         }
 
-        // DESIL 5 → hanya BPNT/SEMBAKO + PBI
-        if ($desil === 5 && !in_array($program, [2, 5])) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Kategori desil 5 hanya dapat mengajukan BPNT/SEMBAKO atau PBI.'
-            ]);
-        }
+        // // DESIL 5 → hanya BPNT/SEMBAKO + PBI
+        // if ($desil === 5 && !in_array($program, [2, 5])) {
+        //     return $this->response->setJSON([
+        //         'success' => false,
+        //         'message' => 'Kategori desil 5 hanya dapat mengajukan BPNT/SEMBAKO atau PBI.'
+        //     ]);
+        // }
 
         /* =====================================================
        4️⃣ Cek Duplikasi Bulan Berjalan
@@ -430,68 +430,79 @@ class UsulanBansos extends Controller
             ]);
         }
     }
-
     public function getDataBulanIni()
     {
         $session = session();
         $roleId = (int) $session->get('role_id');
         $nik = $session->get('nik');
 
-        $bulan  = date('m');
-        $tahun  = date('Y');
-        $status = $this->request->getVar('status'); // 'draft' atau 'diverifikasi'
-        $program   = $this->request->getVar('program');
-        $createdBy = $this->request->getVar('created_by');
-        $rw        = $this->request->getVar('rw');
-        $rt        = $this->request->getVar('rt');
+        $bulan  = $this->request->getVar('bulan');
+        $tahun  = $this->request->getVar('tahun');
 
+        $status     = $this->request->getVar('status');
+        $program    = $this->request->getVar('program');
+        $createdBy  = $this->request->getVar('created_by');
+        $rw         = $this->request->getVar('rw');
+        $rt         = $this->request->getVar('rt');
+
+        // 🔧 INIT BUILDER DULU (WAJIB DI ATAS)
         $builder = $this->DtsenUsulanBansosModel
             ->select("
-                dtsen_usulan_bansos.*,
-                dtsen_art.nama,
-                dbj.dbj_nama_bansos,
-                u1.fullname AS created_by_name,
-                u1.nope    AS created_by_nope,
-                u2.fullname AS updated_by_name
-            ")
+            dtsen_usulan_bansos.*,
+            dtsen_art.nama,
+            dbj.dbj_nama_bansos,
+            u1.fullname AS created_by_name,
+            u1.nope    AS created_by_nope,
+            u2.fullname AS updated_by_name
+        ")
             ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_usulan_bansos.id_kk', 'left')
             ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
             ->join('dtsen_art', 'dtsen_art.nik = dtsen_usulan_bansos.nik', 'left')
             ->join('dtks_bansos_jenis dbj', 'dbj.dbj_id = dtsen_usulan_bansos.program_bansos', 'left')
             ->join('dtks_users u1', 'u1.nik = dtsen_usulan_bansos.created_by', 'left')
-            ->join('dtks_users u2', 'u2.nik = dtsen_usulan_bansos.updated_by', 'left')
-            ->where('MONTH(dtsen_usulan_bansos.created_at)', $bulan)
-            ->where('YEAR(dtsen_usulan_bansos.created_at)', $tahun);
+            ->join('dtks_users u2', 'u2.nik = dtsen_usulan_bansos.updated_by', 'left');
 
-        // Filter status jika diminta
-        if ($status) {
+        // 👉 DEFAULT hanya jika dua-duanya kosong
+        if (empty($bulan) && empty($tahun)) {
+            $bulan = date('m');
+            $tahun = date('Y');
+        }
+
+        // 👉 FILTER DINAMIS
+        if (!empty($bulan)) {
+            $builder->where('MONTH(dtsen_usulan_bansos.created_at)', $bulan);
+        }
+
+        if (!empty($tahun)) {
+            $builder->where('YEAR(dtsen_usulan_bansos.created_at)', $tahun);
+        }
+
+        // 👉 FILTER TAMBAHAN
+        if (!empty($status)) {
             $builder->where('dtsen_usulan_bansos.status', $status);
         }
-        if ($program) {
+
+        if (!empty($program)) {
             $builder->where('dtsen_usulan_bansos.program_bansos', $program);
         }
 
-        if ($createdBy) {
+        if (!empty($createdBy)) {
             $builder->where('dtsen_usulan_bansos.created_by', $createdBy);
         }
 
-        if ($rw) {
+        if (!empty($rw)) {
             $builder->where('dtsen_rt.rw', $rw);
         }
 
-        if ($rt) {
+        if (!empty($rt)) {
             $builder->where('dtsen_rt.rt', $rt);
         }
 
-        // RULE: role 1,2,3 lihat semua
-        // role 4 lihat hanya data yang dia buat
-        // role >4 tidak dapat melihat data sama sekali -> return empty
+        // 👉 ROLE FILTER
         if ($roleId > 4) {
-            // langsung return empty dataset
             log_message('info', "[getDataBulanIni] role_id={$roleId} tidak diizinkan melihat data.");
             return $this->response->setJSON(['data' => []]);
         } elseif ($roleId === 4) {
-            // hanya data yang dibuat oleh dirinya sendiri
             $builder->where('dtsen_usulan_bansos.created_by', $nik);
         }
 
@@ -499,7 +510,7 @@ class UsulanBansos extends Controller
 
         try {
             $data = $builder->findAll();
-            log_message('info', "✅ getDataBulanIni() memuat " . count($data) . " data untuk role={$roleId}, status={$status}");
+            log_message('info', "✅ getDataBulanIni() memuat " . count($data) . " data untuk role={$roleId}, status={$status}, bulan={$bulan}, tahun={$tahun}");
             return $this->response->setJSON(['data' => $data]);
         } catch (\Throwable $e) {
             log_message('error', "❌ getDataBulanIni() error: " . $e->getMessage());

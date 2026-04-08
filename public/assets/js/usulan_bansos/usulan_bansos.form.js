@@ -77,10 +77,10 @@ $(document).ready(function () {
         const options = select.find('option');
 
         // 🔴 DESIL tidak valid → tidak layak
-        if (desil === null || desil === 0 || isNaN(desil) || desil > 5) {
+        if (desil === null || desil === 0 || isNaN(desil) || desil > 4) {
             Swal.fire(
                 'Tidak Layak',
-                'Kategori desil tidak valid atau di atas 5.',
+                'Kategori desil tidak valid atau di atas 4.',
                 'warning'
             );
             options.not('[value=""]').hide();
@@ -88,19 +88,19 @@ $(document).ready(function () {
         }
 
         // 🔵 DESIL 5
-        if (desil === 5) {
-            options.each(function () {
-                const text = $(this).text().toUpperCase();
-                if (
-                    !text.includes('PBI') &&
-                    !text.includes('BPNT') &&
-                    !text.includes('SEMBAKO') &&
-                    $(this).val() !== ''
-                ) {
-                    $(this).hide();
-                }
-            });
-        }
+        // if (desil === 5) {
+        //     options.each(function () {
+        //         const text = $(this).text().toUpperCase();
+        //         if (
+        //             !text.includes('PBI') &&
+        //             !text.includes('BPNT') &&
+        //             !text.includes('SEMBAKO') &&
+        //             $(this).val() !== ''
+        //         ) {
+        //             $(this).hide();
+        //         }
+        //     });
+        // }
 
         // 🔵 SHDK LAIN / NULL / 0 → hanya PBI
         if (shdk !== 1 && shdk !== 3) {
@@ -227,7 +227,7 @@ $(document).ready(function () {
                 // Apply rule gabungan
                 applyProgramFilters(shdk, desil);
 
-                if (desil <= 5) {
+                if (desil <= 4) {
                     Swal.fire('Layak Diusulkan', `Kategori desil ${desil} memenuhi syarat.`, 'success');
                 } else {
                     Swal.fire('Tidak Layak', `Kategori desil ${desil} di atas batas kelayakan.`, 'warning');

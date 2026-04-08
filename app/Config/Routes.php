@@ -122,6 +122,8 @@ $routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview']], 
 	$routes->get('filter-options', 'Dtsen\UsulanBansos::getFilterOptions');
 
 	$routes->get('rt-by-rw/(:any)', 'Dtsen\UsulanBansos::getRTByRW/$1');
+
+	$routes->get('data-filter', 'Dtsen\UsulanBansos::getDataByFilter');
 });
 
 // === DTSEN - Pembaruan Data Keluarga ===

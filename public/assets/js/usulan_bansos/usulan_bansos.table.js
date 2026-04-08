@@ -8,6 +8,13 @@ $(document).ready(function () {
     const userRole = window.userRole || 99;
     console.log("User Role:", userRole);
 
+    let tableDraft;
+    let tableVerified;
+
+    // const now = new Date();
+    // $('#filterBulan').val(String(now.getMonth() + 1).padStart(2, '0'));
+    // $('#filterTahun').val(now.getFullYear());
+
     /* ============================================================
        🔧 UTILITIES
        ============================================================ */
@@ -50,149 +57,267 @@ $(document).ready(function () {
         return escapeHtml(name);
     }
 
+    // function loadFilterOptions() {
+    //     $.ajax({
+    //         url: '/usulan-bansos/filter-options',
+    //         type: 'GET',
+    //         dataType: 'json',
+    //         success: function(res) {
+
+    //             console.log("Filter Options Response:", res);
+
+    //             if (!res || res.error) {
+    //                 console.error("Filter options error:", res?.error);
+    //                 return;
+    //             }
+
+    //             if (res.program && Array.isArray(res.program)) {
+    //                 res.program.forEach(p => {
+    //                     $('#filterProgram').append(
+    //                         `<option value="${p.dbj_id}">${p.dbj_nama_bansos}</option>`
+    //                     );
+    //                 });
+    //             }
+
+    //             if (res.created_by && Array.isArray(res.created_by)) {
+    //                 res.created_by.forEach(u => {
+    //                     $('#filterCreatedBy').append(
+    //                         `<option value="${u.created_by}">${u.fullname}</option>`
+    //                     );
+    //                 });
+    //             }
+
+    //             if (res.rw && Array.isArray(res.rw)) {
+    //                 res.rw.forEach(r => {
+    //                     $('#filterRW').append(
+    //                         `<option value="${r.rw}">RW ${r.rw}</option>`
+    //                     );
+    //                 });
+    //             }
+
+    //             if (res.rt && Array.isArray(res.rt)) {
+    //                 res.rt.forEach(r => {
+    //                     $('#filterRT').append(
+    //                         `<option value="${r.rt}">RT ${r.rt}</option>`
+    //                     );
+    //                 });
+    //             }
+
+    //             // BULAN
+    //             for (let i = 1; i <= 12; i++) {
+    //                 const val = i.toString().padStart(2, '0');
+    //                 $('#filterBulan').append(`<option value="${val}">${val}</option>`);
+    //             }
+
+    //             // TAHUN (misal 2023–sekarang+1)
+    //             const currentYear = new Date().getFullYear();
+    //             for (let y = currentYear - 2; y <= currentYear + 1; y++) {
+    //                 $('#filterTahun').append(`<option value="${y}">${y}</option>`);
+    //             }
+    //         },
+    //         error: function(xhr) {
+    //             console.error("AJAX error:", xhr.responseText);
+    //         }
+    //     });
+    // }
+
     function loadFilterOptions() {
-        $.ajax({
+        return $.ajax({
             url: '/usulan-bansos/filter-options',
             type: 'GET',
-            dataType: 'json',
-            success: function(res) {
+            dataType: 'json'
+        }).done(function(res) {
 
-                console.log("Filter Options Response:", res);
-
-                if (!res || res.error) {
-                    console.error("Filter options error:", res?.error);
-                    return;
-                }
-
-                if (res.program && Array.isArray(res.program)) {
-                    res.program.forEach(p => {
-                        $('#filterProgram').append(
-                            `<option value="${p.dbj_id}">${p.dbj_nama_bansos}</option>`
-                        );
-                    });
-                }
-
-                if (res.created_by && Array.isArray(res.created_by)) {
-                    res.created_by.forEach(u => {
-                        $('#filterCreatedBy').append(
-                            `<option value="${u.created_by}">${u.fullname}</option>`
-                        );
-                    });
-                }
-
-                if (res.rw && Array.isArray(res.rw)) {
-                    res.rw.forEach(r => {
-                        $('#filterRW').append(
-                            `<option value="${r.rw}">RW ${r.rw}</option>`
-                        );
-                    });
-                }
-
-                if (res.rt && Array.isArray(res.rt)) {
-                    res.rt.forEach(r => {
-                        $('#filterRT').append(
-                            `<option value="${r.rt}">RT ${r.rt}</option>`
-                        );
-                    });
-                }
-            },
-            error: function(xhr) {
-                console.error("AJAX error:", xhr.responseText);
+            if (!res || res.error) {
+                console.error("Filter options error:", res?.error);
+                return;
             }
+
+            // PROGRAM
+            if (res.program) {
+                res.program.forEach(p => {
+                    $('#filterProgram').append(
+                        `<option value="${p.dbj_id}">${p.dbj_nama_bansos}</option>`
+                    );
+                });
+            }
+
+            // CREATED BY
+            if (res.created_by) {
+                res.created_by.forEach(u => {
+                    $('#filterCreatedBy').append(
+                        `<option value="${u.created_by}">${u.fullname}</option>`
+                    );
+                });
+            }
+
+            // RW
+            if (res.rw) {
+                res.rw.forEach(r => {
+                    $('#filterRW').append(
+                        `<option value="${r.rw}">RW ${r.rw}</option>`
+                    );
+                });
+            }
+
+            // RT
+            if (res.rt) {
+                res.rt.forEach(r => {
+                    $('#filterRT').append(
+                        `<option value="${r.rt}">RT ${r.rt}</option>`
+                    );
+                });
+            }
+
+            // 👉 TAMBAHAN BULAN
+            const namaBulan = [
+                "Januari", "Februari", "Maret", "April",
+                "Mei", "Juni", "Juli", "Agustus",
+                "September", "Oktober", "November", "Desember"
+            ];
+
+            for (let i = 1; i <= 12; i++) {
+                const val = i.toString().padStart(2, '0');
+                const label = namaBulan[i - 1];
+
+                $('#filterBulan').append(
+                    `<option value="${val}">${label}</option>`
+                );
+            }
+
+            // 👉 TAMBAHAN TAHUN
+            const now = new Date();
+            const currentYear = now.getFullYear();
+
+            for (let y = currentYear - 2; y <= currentYear + 1; y++) {
+                $('#filterTahun').append(`<option value="${y}">${y}</option>`);
+            }
+
+        }).fail(function(xhr) {
+            console.error("AJAX error:", xhr.responseText);
         });
     }
     
-    loadFilterOptions();
+    function setDefaultPeriode() {
+        const now = new Date();
 
-    /* ============================================================
-       📊 DATATABLE — DRAFT
-       ============================================================ */
+        const bulan = String(now.getMonth() + 1).padStart(2, '0');
+        const tahun = now.getFullYear();
 
-    const tableDraft = $('#tableUsulanBansosDraft').DataTable({
-       ajax: {
-            url: '/usulan-bansos/data',
-            type: 'GET',
-            dataType: 'json',
-            data: function(d) {
-                d.status = 'draft';
-                d.program = $('#filterProgram').val();
-                d.created_by = $('#filterCreatedBy').val();
-                d.rw = $('#filterRW').val();
-                d.rt = $('#filterRT').val();
+        $('#filterBulan').val(bulan);
+        $('#filterTahun').val(tahun);
+    }
+
+     loadFilterOptions().then(() => {
+
+        // 1. Set default dulu
+        setDefaultPeriode();
+
+        // 2. Baru init DataTable
+        initDataTable();
+
+    });
+
+    // loadFilterOptions();
+
+    function getFilterParams(status) {
+        return {
+            status: status,
+            program: $('#filterProgram').val() || null,
+            created_by: $('#filterCreatedBy').val() || null,
+            rw: $('#filterRW').val() || null,
+            rt: $('#filterRT').val() || null,
+            bulan: $('#filterBulan').val() || null,
+            tahun: $('#filterTahun').val() || null
+        };
+    }
+
+    function initDataTable() {
+
+        /* ============================================================
+        📊 DATATABLE — DRAFT
+        ============================================================ */
+
+        tableDraft = $('#tableUsulanBansosDraft').DataTable({
+            ajax: {
+                url: '/usulan-bansos/data',
+                type: 'GET',
+                dataType: 'json',
+                data: function (d) {
+                    return Object.assign(d, getFilterParams('draft'));
+                },
+                dataSrc: json => json.data || []
             },
-            dataSrc: json => json.data || []
-        },
-        columns: [
-            { data: null, defaultContent: '' },
+            columns: [
+                { data: null, defaultContent: '' },
 
-            {
-                data: null,
-                title: 'No',
-                render: (d, t, r, m) => m.row + 1
-            },
+                {
+                    data: null,
+                    title: 'No',
+                    render: (d, t, r, m) => m.row + 1
+                },
 
-            {
-                data: 'nik',
-                title: 'NIK',
-                render: nik => `
-                    <div class="d-flex justify-content-between align-items-center w-100">
-                        <span class="me-2 nik-text">${nik}</span>
-                        <button class="btn btn-outline-primary btn-sm btnCopyNIK" 
-                                data-nik="${nik}"
-                                title="Salin NIK">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
-                `
-            },
-            
-            {
-                data: 'nama',
-                title: 'Nama',
-                render: nama => `
-                    <div class="d-flex justify-content-between align-items-center w-100">
-                        <span class="nama-text">${nama}</span>
-                        <button class="btn btn-outline-primary btn-sm btnCopyNama" 
-                                data-nama="${nama}" 
-                                title="Salin Nama">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
-                `
-            },
+                {
+                    data: 'nik',
+                    title: 'NIK',
+                    render: nik => `
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <span class="me-2 nik-text">${nik}</span>
+                            <button class="btn btn-outline-primary btn-sm btnCopyNIK" 
+                                    data-nik="${nik}">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    `
+                },
 
-            {
-                data: 'dbj_nama_bansos',
-                title: 'Program',
-                defaultContent: '-'
-            },
+                {
+                    data: 'nama',
+                    title: 'Nama',
+                    render: nama => `
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <span class="nama-text">${nama}</span>
+                            <button class="btn btn-outline-primary btn-sm btnCopyNama" 
+                                    data-nama="${nama}">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    `
+                },
 
-            {
-                data: 'status',
-                title: 'Status',
-                render: s => {
-                    const cls = { draft: 'secondary', diverifikasi: 'success' }[s] || 'secondary';
-                    return `<span class="badge bg-${cls}">${(s || 'draft').toUpperCase()}</span>`;
-                }
-            },
+                {
+                    data: 'dbj_nama_bansos',
+                    title: 'Program',
+                    defaultContent: '-'
+                },
 
-            {
-                data: 'created_at',
-                title: 'Tanggal Dibuat',
-                render: d => d ? new Date(d).toLocaleString('id-ID') : '-'
-            },
+                {
+                    data: 'status',
+                    title: 'Status',
+                    render: s => {
+                        const cls = { draft: 'secondary', diverifikasi: 'success' }[s] || 'secondary';
+                        return `<span class="badge bg-${cls}">${(s || 'draft').toUpperCase()}</span>`;
+                    }
+                },
 
-            {
-                data: null,
-                title: 'Dibuat Oleh',
-                render: (d, t, row) => renderCreatorWithWA(row)
-            },
+                {
+                    data: 'created_at',
+                    title: 'Tanggal Dibuat',
+                    render: d => d ? new Date(d).toLocaleString('id-ID') : '-'
+                },
 
-            {
-                data: 'id',
-                title: 'Aksi',
-                orderable: false,
-                render: function (id, type, row) {
+                {
+                    data: null,
+                    title: 'Dibuat Oleh',
+                    render: (d, t, row) => renderCreatorWithWA(row)
+                },
+
+                {
+                    data: 'id',
+                    title: 'Aksi',
+                    orderable: false,
+                    render: function (id, type, row) {
+
                         let btn = `
                             <button class="btn btn-danger btn-sm btnHapusUsulan" data-id="${id}">
                                 <i class="fas fa-trash-alt"></i> Hapus
@@ -213,14 +338,210 @@ $(document).ready(function () {
 
                         return btn;
                     }
+                }
+            ],
+            createdRow: row => $(row).find('td').css('text-align', 'left'),
+            headerCallback: thead => $(thead).find('th').css('text-align', 'center')
+        });
 
-            }
-        ],
-        createdRow: row => $(row).find('td').css('text-align', 'left'),
-        headerCallback: thead => $(thead).find('th').css('text-align', 'center')
-    });
+
+        /* ============================================================
+        📊 DATATABLE — VERIFIED
+        ============================================================ */
+
+        tableVerified = $('#tableUsulanBansosVerified').DataTable({
+            ajax: {
+                url: '/usulan-bansos/data',
+                type: 'GET',
+                dataType: 'json',
+                data: function (d) {
+                    return Object.assign(d, getFilterParams('diverifikasi'));
+                },
+                dataSrc: json => json.data || []
+            },
+            columns: [
+                { data: null, defaultContent: '' },
+
+                {
+                    data: null,
+                    title: 'No',
+                    render: (d, t, r, m) => m.row + 1
+                },
+
+                {
+                    data: 'nik',
+                    title: 'NIK',
+                    render: nik => `
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <span class="me-2 nik-text">${nik}</span>
+                            <button class="btn btn-outline-primary btn-sm btnCopyNIK"
+                                    data-nik="${nik}">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    `
+                },
+
+                {
+                    data: 'nama',
+                    title: 'Nama',
+                    render: nama => `
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <span class="nama-text">${nama}</span>
+                            <button class="btn btn-outline-primary btn-sm btnCopyNama" 
+                                    data-nama="${nama}">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    `
+                },
+
+                {
+                    data: 'dbj_nama_bansos',
+                    title: 'Program',
+                    defaultContent: '-'
+                },
+
+                {
+                    data: 'status',
+                    title: 'Status',
+                    render: s => {
+                        const cls = { diverifikasi: 'success', ditolak: 'danger' }[s] || 'secondary';
+                        return `<span class="badge bg-${cls}">${(s || '').toUpperCase()}</span>`;
+                    }
+                },
+
+                {
+                    data: 'updated_at',
+                    title: 'Tanggal Diverifikasi',
+                    render: d => d ? new Date(d).toLocaleString('id-ID') : '-'
+                },
+
+                {
+                    data: 'updated_by_name',
+                    title: 'Verifikator',
+                    defaultContent: '-'
+                }
+            ],
+            createdRow: row => $(row).find('td').css('text-align', 'left'),
+            headerCallback: thead => $(thead).find('th').css('text-align', 'center')
+        });
+
+    }
+
+    /* ============================================================
+       📊 DATATABLE — DRAFT (Tergantikan Oleh initDataTable)
+       ============================================================ */
+    // const tableDraft = $('#tableUsulanBansosDraft').DataTable({
+    //    ajax: {
+    //         url: '/usulan-bansos/data',
+    //         type: 'GET',
+    //         dataType: 'json',
+    //         data: function(d) {
+    //             return Object.assign(d, getFilterParams('draft'));
+    //         },
+    //         dataSrc: json => json.data || []
+    //     },
+    //     columns: [
+    //         { data: null, defaultContent: '' },
+
+    //         {
+    //             data: null,
+    //             title: 'No',
+    //             render: (d, t, r, m) => m.row + 1
+    //         },
+
+    //         {
+    //             data: 'nik',
+    //             title: 'NIK',
+    //             render: nik => `
+    //                 <div class="d-flex justify-content-between align-items-center w-100">
+    //                     <span class="me-2 nik-text">${nik}</span>
+    //                     <button class="btn btn-outline-primary btn-sm btnCopyNIK" 
+    //                             data-nik="${nik}"
+    //                             title="Salin NIK">
+    //                         <i class="fas fa-copy"></i>
+    //                     </button>
+    //                 </div>
+    //             `
+    //         },
+            
+    //         {
+    //             data: 'nama',
+    //             title: 'Nama',
+    //             render: nama => `
+    //                 <div class="d-flex justify-content-between align-items-center w-100">
+    //                     <span class="nama-text">${nama}</span>
+    //                     <button class="btn btn-outline-primary btn-sm btnCopyNama" 
+    //                             data-nama="${nama}" 
+    //                             title="Salin Nama">
+    //                         <i class="fas fa-copy"></i>
+    //                     </button>
+    //                 </div>
+    //             `
+    //         },
+
+    //         {
+    //             data: 'dbj_nama_bansos',
+    //             title: 'Program',
+    //             defaultContent: '-'
+    //         },
+
+    //         {
+    //             data: 'status',
+    //             title: 'Status',
+    //             render: s => {
+    //                 const cls = { draft: 'secondary', diverifikasi: 'success' }[s] || 'secondary';
+    //                 return `<span class="badge bg-${cls}">${(s || 'draft').toUpperCase()}</span>`;
+    //             }
+    //         },
+
+    //         {
+    //             data: 'created_at',
+    //             title: 'Tanggal Dibuat',
+    //             render: d => d ? new Date(d).toLocaleString('id-ID') : '-'
+    //         },
+
+    //         {
+    //             data: null,
+    //             title: 'Dibuat Oleh',
+    //             render: (d, t, row) => renderCreatorWithWA(row)
+    //         },
+
+    //         {
+    //             data: 'id',
+    //             title: 'Aksi',
+    //             orderable: false,
+    //             render: function (id, type, row) {
+    //                     let btn = `
+    //                         <button class="btn btn-danger btn-sm btnHapusUsulan" data-id="${id}">
+    //                             <i class="fas fa-trash-alt"></i> Hapus
+    //                         </button>
+    //                     `;
+
+    //                     if (userRole <= 3) {
+    //                         btn += `
+    //                             <button class="btn btn-success btn-sm btnVerifikasiUsulan ms-1" data-id="${id}">
+    //                                 <i class="fas fa-check-circle"></i> Verify
+    //                             </button>
+
+    //                             <button class="btn btn-warning btn-sm btnTolakUsulan ms-1" data-id="${id}">
+    //                                 <i class="fas fa-times-circle"></i> Tolak
+    //                             </button>
+    //                         `;
+    //                     }
+
+    //                     return btn;
+    //                 }
+
+    //         }
+    //     ],
+    //     createdRow: row => $(row).find('td').css('text-align', 'left'),
+    //     headerCallback: thead => $(thead).find('th').css('text-align', 'center')
+    // });
 
     // Tombol Salin NIK
+    
     $(document).on('click', '.btnCopyNIK', function () {
         const nik = $(this).data('nik');
 
@@ -318,96 +639,93 @@ $(document).ready(function () {
     }
 
     /* ============================================================
-       📊 DATATABLE — VERIFIED
+       📊 DATATABLE — VERIFIED (Tergantikan Oleh initDataTable)
        ============================================================ */
 
-    const tableVerified = $('#tableUsulanBansosVerified').DataTable({
-       ajax: {
-            url: '/usulan-bansos/data',
-            type: 'GET',
-            dataType: 'json',
-            data: function(d) {
-                d.status = 'diverifikasi';
-                d.program = $('#filterProgram').val();
-                d.created_by = $('#filterCreatedBy').val();
-                d.rw = $('#filterRW').val();
-                d.rt = $('#filterRT').val();
-            },
-            dataSrc: json => json.data || []
-        },
-        columns: [
-            { data: null, defaultContent: '' },
+    // const tableVerified = $('#tableUsulanBansosVerified').DataTable({
+    //    ajax: {
+    //         url: '/usulan-bansos/data',
+    //         type: 'GET',
+    //         dataType: 'json',
+    //         data: function(d) {
+    //             return Object.assign(d, getFilterParams('diverifikasi'));
+    //         },
+    //         dataSrc: json => json.data || []
+    //     },
+    //     columns: [
+    //         { data: null, defaultContent: '' },
 
-            {
-                data: null,
-                title: 'No',
-                render: (d, t, r, m) => m.row + 1
-            },
+    //         {
+    //             data: null,
+    //             title: 'No',
+    //             render: (d, t, r, m) => m.row + 1
+    //         },
 
-             {
-                data: 'nik',
-                title: 'NIK',
-                render: nik => `
-                    <div class="d-flex justify-content-between align-items-center w-100">
-                        <span class="me-2 nik-text">${nik}</span>
-                        <button class="btn btn-outline-primary btn-sm btnCopyNIK"
-                                data-nik="${nik}"
-                                title="Salin NIK">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
-                `
-            },
+    //          {
+    //             data: 'nik',
+    //             title: 'NIK',
+    //             render: nik => `
+    //                 <div class="d-flex justify-content-between align-items-center w-100">
+    //                     <span class="me-2 nik-text">${nik}</span>
+    //                     <button class="btn btn-outline-primary btn-sm btnCopyNIK"
+    //                             data-nik="${nik}"
+    //                             title="Salin NIK">
+    //                         <i class="fas fa-copy"></i>
+    //                     </button>
+    //                 </div>
+    //             `
+    //         },
             
-            {
-                data: 'nama',
-                title: 'Nama',
-                render: nama => `
-                    <div class="d-flex justify-content-between align-items-center w-100">
-                        <span class="nama-text">${nama}</span>
-                        <button class="btn btn-outline-primary btn-sm btnCopyNama" 
-                                data-nama="${nama}" 
-                                title="Salin Nama">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
-                `
-            },
+    //         {
+    //             data: 'nama',
+    //             title: 'Nama',
+    //             render: nama => `
+    //                 <div class="d-flex justify-content-between align-items-center w-100">
+    //                     <span class="nama-text">${nama}</span>
+    //                     <button class="btn btn-outline-primary btn-sm btnCopyNama" 
+    //                             data-nama="${nama}" 
+    //                             title="Salin Nama">
+    //                         <i class="fas fa-copy"></i>
+    //                     </button>
+    //                 </div>
+    //             `
+    //         },
 
-            {
-                data: 'dbj_nama_bansos',
-                title: 'Program',
-                defaultContent: '-'
-            },
+    //         {
+    //             data: 'dbj_nama_bansos',
+    //             title: 'Program',
+    //             defaultContent: '-'
+    //         },
 
-            {
-                data: 'status',
-                title: 'Status',
-                render: s => {
-                    const cls = { diverifikasi: 'success', ditolak: 'danger' }[s] || 'secondary';
-                    return `<span class="badge bg-${cls}">${(s || '').toUpperCase()}</span>`;
-                }
-            },
+    //         {
+    //             data: 'status',
+    //             title: 'Status',
+    //             render: s => {
+    //                 const cls = { diverifikasi: 'success', ditolak: 'danger' }[s] || 'secondary';
+    //                 return `<span class="badge bg-${cls}">${(s || '').toUpperCase()}</span>`;
+    //             }
+    //         },
 
-            {
-                data: 'updated_at',
-                title: 'Tanggal Diverifikasi',
-                render: d => d ? new Date(d).toLocaleString('id-ID') : '-'
-            },
+    //         {
+    //             data: 'updated_at',
+    //             title: 'Tanggal Diverifikasi',
+    //             render: d => d ? new Date(d).toLocaleString('id-ID') : '-'
+    //         },
 
-            {
-                data: 'updated_by_name',
-                title: 'Verifikator',
-                defaultContent: '-'
-            }
-        ],
-        createdRow: row => $(row).find('td').css('text-align', 'left'),
-        headerCallback: thead => $(thead).find('th').css('text-align', 'center')
-    });
+    //         {
+    //             data: 'updated_by_name',
+    //             title: 'Verifikator',
+    //             defaultContent: '-'
+    //         }
+    //     ],
+    //     createdRow: row => $(row).find('td').css('text-align', 'left'),
+    //     headerCallback: thead => $(thead).find('th').css('text-align', 'center')
+    // });
 
     // // ============================================================
     // === Tombol Tolak Usulan (Kirim WA + Delete Data + CSRF) ===
     // ============================================================
+
     $(document).on('click', '.btnTolakUsulan', function () {
         const id = $(this).data('id');
         const row = tableDraft.row($(this).closest('tr')).data();
@@ -574,15 +892,26 @@ $(document).ready(function () {
     🔍 FILTER HANDLER
     ============================================================ */
     $('#btnApplyFilter').on('click', function () {
+        // tableDraft.ajax.reload();
+        // tableVerified.ajax.reload();
         tableDraft.ajax.reload();
         tableVerified.ajax.reload();
     });
 
     $('#btnResetFilter').on('click', function () {
+        // $('#filterProgram').val('');
+        // $('#filterCreatedBy').val('');
+        // $('#filterRW').val('');
+        // $('#filterRT').val('');
+        // tableDraft.ajax.reload();
+        // tableVerified.ajax.reload();
         $('#filterProgram').val('');
         $('#filterCreatedBy').val('');
         $('#filterRW').val('');
         $('#filterRT').val('');
+        $('#filterBulan').val('');
+        $('#filterTahun').val('');
+
         tableDraft.ajax.reload();
         tableVerified.ajax.reload();
     });
@@ -609,5 +938,6 @@ $(document).ready(function () {
         });
 
     });
+    
 
 });
