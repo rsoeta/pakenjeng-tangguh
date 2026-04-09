@@ -423,6 +423,36 @@ class PenentuanKemiskinanModel extends Model
             $builder->groupEnd();
         }
 
+        /**
+         * ======================================================
+         * 🔎 FILTER RW / RT (PRIORITAS USER)
+         * ======================================================
+         */
+
+        if (!empty($filter['rw'])) {
+            $builder->whereIn('rt.rw', [
+                $filter['rw'],
+                str_pad($filter['rw'], 2, '0', STR_PAD_LEFT)
+            ]);
+        }
+
+        if (!empty($filter['rt'])) {
+            $builder->whereIn('rt.rt', [
+                $filter['rt'],
+                str_pad($filter['rt'], 2, '0', STR_PAD_LEFT)
+            ]);
+        }
+
+        /**
+         * ======================================================
+         * 🔎 FILTER STATUS
+         * ======================================================
+         */
+
+        if (!empty($filter['status'])) {
+            $builder->where('pk.status_kemiskinan', $filter['status']);
+        }
+
         return $builder
             ->orderBy('pk.verified_at', 'DESC')
             ->get()

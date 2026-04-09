@@ -235,6 +235,7 @@ $routes->group('dtsen/kemiskinan', [
 	$routes->get('verifikasi', 'Dtsen\PenentuanKemiskinan::verifikasi');
 	$routes->get('verifikasi-data', 'Dtsen\PenentuanKemiskinan::verifikasiData');
 	$routes->get('final', 'Dtsen\PenentuanKemiskinan::final');
+	$routes->get('final-data', 'Dtsen\PenentuanKemiskinan::finalData');
 
 	$routes->get('alasan', 'Dtsen\PenentuanKemiskinan::getAlasan');
 

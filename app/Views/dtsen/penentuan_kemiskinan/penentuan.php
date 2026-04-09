@@ -193,10 +193,42 @@
                     data: 'kepala_keluarga'
                 }, // Kepala Keluarga
                 {
-                    data: 'nik'
+                    data: 'nik',
+                    className: 'text-nowrap text-start',
+                    render: function(nik) {
+                        if (!nik) return '-';
+                        return `
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-semibold">${nik}</span>
+                        <button 
+                            type="button"
+                            class="btn btn-outline-secondary btn-xs btnCopyNIK"
+                            data-value="${nik}"
+                            title="Salin NIK">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                `;
+                    }
                 }, // NIK
                 {
-                    data: 'no_kk'
+                    data: 'no_kk',
+                    className: 'text-nowrap text-start',
+                    render: function(noKK) {
+                        if (!noKK) return '-';
+                        return `
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-semibold">${noKK}</span>
+                        <button 
+                            type="button"
+                            class="btn btn-outline-secondary btn-xs btnCopyNoKK"
+                            data-value="${noKK}"
+                            title="Salin No KK">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                `;
+                    }
                 }, // No KK
                 {
                     data: 'alamat'
@@ -386,6 +418,49 @@
         $('#status').val('tidak_miskin');
         loadAlasan('tidak_miskin');
         $('#modalKemiskinan').modal('show');
+    });
+
+
+    // ========================= 📋 COPY NO KK =========================
+    $(document).on('click', '.btnCopyNoKK', function() {
+        const value = $(this).data('value');
+
+        if (!value) return;
+
+        navigator.clipboard.writeText(value).then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Tersalin',
+                text: 'No. KK berhasil disalin ke clipboard',
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top'
+            });
+        }).catch(() => {
+            Swal.fire('Gagal', 'Tidak dapat menyalin No. KK', 'error');
+        });
+    });
+
+    // ========================= 📋 COPY NIK =========================
+    $(document).on('click', '.btnCopyNIK', function() {
+        const value = $(this).data('value');
+
+        if (!value) return;
+
+        navigator.clipboard.writeText(value).then(() => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Tersalin',
+                text: 'NIK berhasil disalin ke clipboard',
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top'
+            });
+        }).catch(() => {
+            Swal.fire('Gagal', 'Tidak dapat menyalin NIK', 'error');
+        });
     });
 
     $('#formKemiskinan').submit(function(e) {

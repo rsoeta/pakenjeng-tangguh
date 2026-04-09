@@ -130,6 +130,23 @@ class PenentuanKemiskinan extends BaseController
         return view('dtsen/penentuan_kemiskinan/final', $data);
     }
 
+    public function finalData()
+    {
+        $filter = [
+            'kode_desa'     => session()->kode_desa,
+            'wilayah_tugas' => session()->wilayah_tugas,
+            'rw'            => $this->request->getGet('rw'),
+            'rt'            => $this->request->getGet('rt'),
+            'status'        => $this->request->getGet('status'),
+        ];
+
+        $data = $this->model->getDataKemiskinanFinal($filter);
+
+        return $this->response->setJSON([
+            'data' => $data
+        ]);
+    }
+
     /**
      * ======================================================
      * AJAX AMBIL ALASAN KEMISKINAN
