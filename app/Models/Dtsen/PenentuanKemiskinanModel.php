@@ -167,51 +167,6 @@ class PenentuanKemiskinanModel extends Model
 
         /**
          * ======================================================
-         * 🔐 FILTER WILAYAH TUGAS (LOGIKA SAMA DENGAN KK MODEL)
-         * ======================================================
-         */
-
-        // if (!empty($filter['wilayah_tugas'])) {
-
-        //     $wilayahTugas = str_replace('RW:', '', trim($filter['wilayah_tugas']));
-        //     $blokRW = preg_split('/[|;]/', $wilayahTugas);
-
-        //     $builder->groupStart();
-
-        //     foreach ($blokRW as $blok) {
-
-        //         $blok = trim($blok);
-        //         if (!$blok) continue;
-
-        //         [$rw, $rtStr] = array_pad(explode(':', $blok), 2, null);
-        //         $rtList = $rtStr ? explode(',', $rtStr) : [];
-
-        //         $builder->orGroupStart()
-        //             ->groupStart()
-        //             ->where('rt.rw', $rw)
-        //             ->orWhere('rt.rw', str_pad($rw, 2, '0', STR_PAD_LEFT))
-        //             ->groupEnd();
-
-        //         if (!empty($rtList)) {
-
-        //             $rtVariants = [];
-
-        //             foreach ($rtList as $rt) {
-        //                 $rtVariants[] = $rt;
-        //                 $rtVariants[] = str_pad($rt, 2, '0', STR_PAD_LEFT);
-        //             }
-
-        //             $builder->whereIn('rt.rt', $rtVariants);
-        //         }
-
-        //         $builder->groupEnd();
-        //     }
-
-        //     $builder->groupEnd();
-        // }
-
-        /**
-         * ======================================================
          * 🔐 FILTER WILAYAH TUGAS (SMART OVERRIDE)
          * ======================================================
          */
@@ -257,28 +212,6 @@ class PenentuanKemiskinanModel extends Model
                 $builder->groupEnd();
             }
         }
-
-        /**
-         * ======================================================
-         * 🔎 FILTER RW / RT / DESIL
-         * ======================================================
-         */
-
-        // // FILTER RW
-        // if (!empty($filter['rw'])) {
-        //     $builder->groupStart()
-        //         ->where('rt.rw', $filter['rw'])
-        //         ->orWhere('rt.rw', str_pad($filter['rw'], 2, '0', STR_PAD_LEFT))
-        //         ->groupEnd();
-        // }
-
-        // // FILTER RT
-        // if (!empty($filter['rt'])) {
-        //     $builder->groupStart()
-        //         ->where('rt.rt', $filter['rt'])
-        //         ->orWhere('rt.rt', str_pad($filter['rt'], 2, '0', STR_PAD_LEFT))
-        //         ->groupEnd();
-        // }
 
         /**
          * ======================================================
@@ -333,7 +266,7 @@ class PenentuanKemiskinanModel extends Model
         }
 
         return $builder
-            ->orderBy('pk.created_at', 'ASC')
+            ->orderBy('pk.updated_at', 'ASC')
             ->get()
             ->getResultArray() ?? [];
     }
