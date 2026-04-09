@@ -171,43 +171,165 @@ class PenentuanKemiskinanModel extends Model
          * ======================================================
          */
 
-        if (!empty($filter['wilayah_tugas'])) {
+        // if (!empty($filter['wilayah_tugas'])) {
 
-            $wilayahTugas = str_replace('RW:', '', trim($filter['wilayah_tugas']));
-            $blokRW = preg_split('/[|;]/', $wilayahTugas);
+        //     $wilayahTugas = str_replace('RW:', '', trim($filter['wilayah_tugas']));
+        //     $blokRW = preg_split('/[|;]/', $wilayahTugas);
 
-            $builder->groupStart();
+        //     $builder->groupStart();
 
-            foreach ($blokRW as $blok) {
+        //     foreach ($blokRW as $blok) {
 
-                $blok = trim($blok);
-                if (!$blok) continue;
+        //         $blok = trim($blok);
+        //         if (!$blok) continue;
 
-                [$rw, $rtStr] = array_pad(explode(':', $blok), 2, null);
-                $rtList = $rtStr ? explode(',', $rtStr) : [];
+        //         [$rw, $rtStr] = array_pad(explode(':', $blok), 2, null);
+        //         $rtList = $rtStr ? explode(',', $rtStr) : [];
 
-                $builder->orGroupStart()
-                    ->groupStart()
-                    ->where('rt.rw', $rw)
-                    ->orWhere('rt.rw', str_pad($rw, 2, '0', STR_PAD_LEFT))
-                    ->groupEnd();
+        //         $builder->orGroupStart()
+        //             ->groupStart()
+        //             ->where('rt.rw', $rw)
+        //             ->orWhere('rt.rw', str_pad($rw, 2, '0', STR_PAD_LEFT))
+        //             ->groupEnd();
 
-                if (!empty($rtList)) {
+        //         if (!empty($rtList)) {
 
-                    $rtVariants = [];
+        //             $rtVariants = [];
 
-                    foreach ($rtList as $rt) {
-                        $rtVariants[] = $rt;
-                        $rtVariants[] = str_pad($rt, 2, '0', STR_PAD_LEFT);
+        //             foreach ($rtList as $rt) {
+        //                 $rtVariants[] = $rt;
+        //                 $rtVariants[] = str_pad($rt, 2, '0', STR_PAD_LEFT);
+        //             }
+
+        //             $builder->whereIn('rt.rt', $rtVariants);
+        //         }
+
+        //         $builder->groupEnd();
+        //     }
+
+        //     $builder->groupEnd();
+        // }
+
+        /**
+         * ======================================================
+         * 🔐 FILTER WILAYAH TUGAS (SMART OVERRIDE)
+         * ======================================================
+         */
+
+        if (empty($filter['rw']) && empty($filter['rt'])) {
+
+            if (!empty($filter['wilayah_tugas'])) {
+
+                $wilayahTugas = str_replace('RW:', '', trim($filter['wilayah_tugas']));
+                $blokRW = preg_split('/[|;]/', $wilayahTugas);
+
+                $builder->groupStart();
+
+                foreach ($blokRW as $blok) {
+
+                    $blok = trim($blok);
+                    if (!$blok) continue;
+
+                    [$rw, $rtStr] = array_pad(explode(':', $blok), 2, null);
+                    $rtList = $rtStr ? explode(',', $rtStr) : [];
+
+                    $builder->orGroupStart()
+                        ->groupStart()
+                        ->where('rt.rw', $rw)
+                        ->orWhere('rt.rw', str_pad($rw, 2, '0', STR_PAD_LEFT))
+                        ->groupEnd();
+
+                    if (!empty($rtList)) {
+
+                        $rtVariants = [];
+
+                        foreach ($rtList as $rt) {
+                            $rtVariants[] = $rt;
+                            $rtVariants[] = str_pad($rt, 2, '0', STR_PAD_LEFT);
+                        }
+
+                        $builder->whereIn('rt.rt', $rtVariants);
                     }
 
-                    $builder->whereIn('rt.rt', $rtVariants);
+                    $builder->groupEnd();
                 }
 
                 $builder->groupEnd();
             }
+        }
 
-            $builder->groupEnd();
+        /**
+         * ======================================================
+         * 🔎 FILTER RW / RT / DESIL
+         * ======================================================
+         */
+
+        // // FILTER RW
+        // if (!empty($filter['rw'])) {
+        //     $builder->groupStart()
+        //         ->where('rt.rw', $filter['rw'])
+        //         ->orWhere('rt.rw', str_pad($filter['rw'], 2, '0', STR_PAD_LEFT))
+        //         ->groupEnd();
+        // }
+
+        // // FILTER RT
+        // if (!empty($filter['rt'])) {
+        //     $builder->groupStart()
+        //         ->where('rt.rt', $filter['rt'])
+        //         ->orWhere('rt.rt', str_pad($filter['rt'], 2, '0', STR_PAD_LEFT))
+        //         ->groupEnd();
+        // }
+
+        /**
+         * ======================================================
+         * 🔎 FILTER RW / RT (PRIORITAS USER)
+         * ======================================================
+         */
+
+        // FILTER RW
+        if (!empty($filter['rw'])) {
+
+            $rwVariants = [
+                $filter['rw'],
+                str_pad($filter['rw'], 2, '0', STR_PAD_LEFT)
+            ];
+
+            $builder->whereIn('rt.rw', $rwVariants);
+        }
+
+        // FILTER RT
+        if (!empty($filter['rt'])) {
+
+            $rtVariants = [
+                $filter['rt'],
+                str_pad($filter['rt'], 2, '0', STR_PAD_LEFT)
+            ];
+
+            $builder->whereIn('rt.rt', $rtVariants);
+        }
+
+        /**
+         * ======================================================
+         * 🔎 DESIL
+         * ======================================================
+         */
+        if (!empty($filter['desil'])) {
+
+            if ($filter['desil'] === 'none') {
+                $builder->where('se.kategori_desil', null);
+            } else {
+                $builder->where('se.kategori_desil', $filter['desil']);
+            }
+        }
+
+        // FILTER STATUS
+        if (!empty($filter['status'])) {
+            $builder->where('pk.status_kemiskinan', $filter['status']);
+        }
+
+        // FILTER PETUGAS
+        if (!empty($filter['petugas'])) {
+            $builder->like('u.fullname', $filter['petugas']);
         }
 
         return $builder

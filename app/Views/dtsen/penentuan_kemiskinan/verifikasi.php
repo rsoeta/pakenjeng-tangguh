@@ -1,11 +1,48 @@
 <?= $this->extend('templates/index') ?>
 <?= $this->section('content') ?>
 
-<div class="content-wrapper">
-
+<style>
+    .btn.disabled {
+        pointer-events: none;
+        opacity: 0.65;
+    }
+</style>
+<div class="content-wrapper mt-1">
     <div class="content-header">
         <div class="container-fluid">
-            <h1 class="m-0">Verifikasi Kemiskinan</h1>
+            <?php
+            $uri = service('uri');
+            $segment = $uri->getSegment(3);
+            ?>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <!-- TITLE -->
+                <h5 class="m-0">
+                    <?= $title ?>
+                </h5>
+
+                <!-- NAV FLOW BUTTON -->
+                <div class="btn-group" role="group">
+
+                    <a href="<?= base_url('dtsen/kemiskinan/penentuan') ?>"
+                        class="btn btn-sm <?= $segment == 'penentuan' ? 'btn-primary disabled' : 'btn-outline-primary' ?>">
+                        <i class="fas fa-edit me-1"></i> Penentuan
+                    </a>
+
+                    <a href="<?= base_url('dtsen/kemiskinan/verifikasi') ?>"
+                        class="btn btn-sm <?= $segment == 'verifikasi' ? 'btn-warning disabled' : 'btn-outline-warning' ?>">
+                        <i class="fas fa-check-circle me-1"></i> Verifikasi
+                    </a>
+
+                    <a href="<?= base_url('dtsen/kemiskinan/final') ?>"
+                        class="btn btn-sm <?= $segment == 'final' ? 'btn-success disabled' : 'btn-outline-success' ?>">
+                        <i class="fas fa-database me-1"></i> Final
+                    </a>
+
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -13,6 +50,45 @@
         <div class="container-fluid">
             <div class="card">
                 <div class="card-body">
+
+                    <div class="row mb-3">
+
+                        <div class="col-md-2">
+                            <select id="filterRw" class="form-control form-control-sm">
+                                <option value="">Semua RW</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <select id="filterRt" class="form-control form-control-sm">
+                                <option value="">Semua RT</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <select id="filterDesil" class="form-control form-control-sm">
+                                <option value="">Semua Desil</option>
+                                <option value="none">Tanpa Desil</option>
+                                <?php for ($i = 1; $i <= 10; $i++): ?>
+                                    <option value="<?= $i ?>">Desil <?= $i ?></option>
+                                <?php endfor ?>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <select id="filterStatus" class="form-control form-control-sm">
+                                <option value="">Semua Status</option>
+                                <option value="miskin">Miskin</option>
+                                <option value="tidak_miskin">Tidak Miskin</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <input type="text" id="filterPetugas" class="form-control form-control-sm" placeholder="Cari Petugas Entri">
+                        </div>
+
+                    </div>
+
                     <div class="table-responsive">
 
                         <table id="tableVerifikasi" class="table table-bordered table-striped table-hover">
@@ -79,27 +155,35 @@
 </div>
 
 <script>
+    let tableVerifikasi;
+    let dropdownData = {};
+
+    let filters = {
+        rw: null,
+        rt: null,
+        desil: null
+    };
+
     $(document).ready(function() {
 
-        $('#tableVerifikasi').DataTable({
-            responsive: true,
+        tableVerifikasi = $('#tableVerifikasi').DataTable({
             processing: true,
             serverSide: false,
             ajax: {
                 url: '/dtsen/kemiskinan/verifikasi-data',
+                data: function(d) {
+                    d.rw = $('#filterRw').val();
+                    d.rt = $('#filterRt').val();
+                    d.desil = $('#filterDesil').val();
+                    d.status = $('#filterStatus').val();
+                    d.petugas = $('#filterPetugas').val();
+                },
                 dataSrc: 'data'
-            },
-            language: {
-                search: "Cari:",
-                lengthMenu: "Tampilkan _MENU_ data",
-                zeroRecords: "Data tidak ditemukan",
-                info: "Menampilkan _START_ - _END_ dari _TOTAL_ data"
             },
             columns: [{
                     data: null,
-                    render: (data, type, row, meta) => meta.row + 1
+                    render: (d, t, r, m) => m.row + 1
                 },
-
                 {
                     data: 'kepala_keluarga'
                 },
@@ -115,22 +199,18 @@
                 {
                     data: 'rt'
                 },
-
                 {
                     data: 'kategori_desil',
                     render: d => d ? `<span class="badge bg-info">Desil ${d}</span>` : `<span class="badge bg-secondary">-</span>`
                 },
-
                 {
                     data: 'status_kemiskinan',
                     render: d => d === 'miskin' ?
                         `<span class="badge bg-danger">Miskin</span>` : `<span class="badge bg-success">Tidak Miskin</span>`
                 },
-
                 {
                     data: 'petugas_entri'
                 },
-
                 {
                     data: 'id',
                     render: id => `
@@ -144,7 +224,76 @@
                 }
             ]
         });
+
+        loadRwRtDropdown();
+
+        $('#filterRw, #filterRt, #filterDesil, #filterStatus').on('change', function() {
+            tableVerifikasi.ajax.reload();
+        });
+
+        $('#filterPetugas').on('keyup', function() {
+            tableVerifikasi.ajax.reload();
+        });
+
     });
+
+    /* =========================================================
+       DROPDOWN RW RT
+    ========================================================= */
+    function loadRwRtDropdown() {
+
+        $.get('/dropdown-rwrt', function(res) {
+
+            dropdownData = res; // 🔥 simpan global
+
+            const rwSelect = $('#filterRw');
+            const rtSelect = $('#filterRt');
+
+            rwSelect.html('<option value="">Semua RW</option>');
+            rtSelect.html('<option value="">Semua RT</option>');
+
+            Object.keys(res).forEach(function(rw) {
+                rwSelect.append(`<option value="${rw}">RW ${rw}</option>`);
+            });
+
+            // =============================
+            // RW CHANGE
+            // =============================
+            rwSelect.off('change').on('change', function() {
+
+                const selectedRw = $(this).val();
+
+                rtSelect.html('<option value="">Semua RT</option>');
+
+                if (selectedRw && dropdownData[selectedRw]) {
+                    dropdownData[selectedRw].forEach(function(rt) {
+                        rtSelect.append(`<option value="${rt}">RT ${rt}</option>`);
+                    });
+                }
+
+                // reset RT
+                rtSelect.val('');
+
+                // reload table
+                if (tableVerifikasi) {
+                    tableVerifikasi.ajax.reload(null, false);
+                }
+
+            });
+
+            // =============================
+            // RT CHANGE
+            // =============================
+            rtSelect.off('change').on('change', function() {
+
+                if (tableVerifikasi) {
+                    tableVerifikasi.ajax.reload(null, false);
+                }
+
+            });
+
+        });
+    }
 
     let currentVerifikasiId = null;
 
@@ -153,12 +302,10 @@
         let id = $(this).data('id');
         currentVerifikasiId = id;
 
-        // 🔥 Inject ID ke tombol modal (PENTING)
         $('#btnRollbackDetail').data('id', id);
         $('#btnTolakDetail').data('id', id);
         $('#btnValidasiDetail').data('id', id);
 
-        // 🔥 Loading state
         $('#detail-kemiskinan').html(`
         <div class="text-center py-4">
             <i class="fas fa-spinner fa-spin"></i><br>
@@ -176,6 +323,39 @@
                 let html = '';
 
                 // ======================
+                // IDENTITAS KK 🔥 BARU
+                // ======================
+                html += `
+            <div class="mb-3">
+                <h6>Identitas</h6>
+                <table class="table table-sm">
+                    <tr>
+                        <td width="120"><b>Kepala</b></td>
+                        <td>${res.kepala_keluarga}</td>
+                    </tr>
+                    <tr>
+                        <td><b>NIK</b></td>
+                        <td>
+                            ${res.nik}
+                            <button class="btn btn-xs btn-light btn-copy" data-nik="${res.nik}">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>No KK</b></td>
+                        <td>
+                            ${res.no_kk}
+                            <button class="btn btn-xs btn-light btn-copy" data-kk="${res.no_kk}">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        `;
+
+                // ======================
                 // STATUS
                 // ======================
                 html += `
@@ -188,19 +368,32 @@
         `;
 
                 // ======================
-                // ALASAN
+                // URUTAN KATEGORI 🔥 FIX
                 // ======================
+                const urutanKategori = [
+                    'Aset',
+                    'Rumah',
+                    'Keluarga',
+                    'Pekerjaan',
+                    'Ekonomi',
+                    'Kesehatan'
+                ];
+
                 if (res.alasan && Object.keys(res.alasan).length > 0) {
 
-                    Object.keys(res.alasan).forEach(function(kategori) {
+                    urutanKategori.forEach(function(kategori) {
 
-                        html += `<h6 class="mt-3">${kategori}</h6><ul class="mb-2">`;
+                        if (res.alasan[kategori]) {
 
-                        res.alasan[kategori].forEach(function(item) {
-                            html += `<li>${item}</li>`;
-                        });
+                            html += `<h6 class="mt-3">${kategori}</h6><ul class="mb-2">`;
 
-                        html += '</ul>';
+                            res.alasan[kategori].forEach(function(item) {
+                                html += `<li>${item}</li>`;
+                            });
+
+                            html += '</ul>';
+
+                        }
 
                     });
 
@@ -219,9 +412,6 @@
             `;
                 }
 
-                // ======================
-                // RENDER
-                // ======================
                 $('#detail-kemiskinan').html(html);
 
             })

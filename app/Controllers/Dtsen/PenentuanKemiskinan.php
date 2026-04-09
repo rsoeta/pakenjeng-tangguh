@@ -82,17 +82,21 @@ class PenentuanKemiskinan extends BaseController
             'verifikasi' => $this->model->getVerifikasiKemiskinan($filter)
         ];
 
+
         return view('dtsen/penentuan_kemiskinan/verifikasi', $data);
     }
 
     public function verifikasiData()
     {
+
         $filter = [
             'kode_desa'     => session()->kode_desa,
             'wilayah_tugas' => session()->wilayah_tugas,
             'rw'            => $this->request->getGet('rw'),
             'rt'            => $this->request->getGet('rt'),
-            'desil'         => $this->request->getGet('desil')
+            'desil'         => $this->request->getGet('desil'),
+            'status'        => $this->request->getGet('status'),
+            'petugas'       => $this->request->getGet('petugas'),
         ];
 
         $data = $this->model->getVerifikasiKemiskinan($filter);
@@ -254,15 +258,76 @@ class PenentuanKemiskinan extends BaseController
         ]);
     }
 
+    // public function detail()
+    // {
+    //     $id = $this->request->getGet('id');
+
+    //     $db = \Config\Database::connect();
+
+    //     $row = $db->table('dtsen_penentuan_kemiskinan')
+    //         ->select('status_kemiskinan, catatan')
+    //         ->where('id', $id)
+    //         ->get()
+    //         ->getRowArray();
+
+    //     if (!$row) {
+    //         return $this->response->setJSON([
+    //             'status' => '',
+    //             'alasan' => [],
+    //             'catatan' => ''
+    //         ]);
+    //     }
+
+    //     $alasanRows = $db->table('dtsen_penentuan_kemiskinan_alasan pa')
+    //         ->select('m.kategori, m.label')
+    //         ->join('dtsen_kemiskinan_alasan_master m', 'm.id = pa.alasan_id')
+    //         ->where('pa.penentuan_id', $id)
+    //         ->orderBy('m.kategori', 'ASC')
+    //         ->orderBy('m.urutan', 'ASC')
+    //         ->get()
+    //         ->getResultArray();
+
+    //     $grouped = [];
+
+    //     foreach ($alasanRows as $a) {
+
+    //         $kategori = ucfirst($a['kategori']);
+
+    //         $grouped[$kategori][] = $a['label'];
+    //     }
+
+    //     return $this->response->setJSON([
+    //         'status' => $row['status_kemiskinan'],
+    //         'alasan' => $grouped,
+    //         'catatan' => $row['catatan']
+    //     ]);
+    // }
     public function detail()
     {
         $id = $this->request->getGet('id');
 
         $db = \Config\Database::connect();
 
-        $row = $db->table('dtsen_penentuan_kemiskinan')
-            ->select('status_kemiskinan, catatan')
-            ->where('id', $id)
+        /**
+         * ============================
+         * 🔥 JOIN DATA KK + ART
+         * ============================
+         */
+        $row = $db->table('dtsen_penentuan_kemiskinan pk')
+            ->select('
+            pk.status_kemiskinan,
+            pk.catatan,
+            kk.kepala_keluarga,
+            kk.no_kk,
+            art.nik
+        ')
+            ->join('dtsen_kk kk', 'kk.id_kk = pk.dtsen_kk_id')
+            ->join(
+                'dtsen_art art',
+                'art.id_kk = kk.id_kk AND art.hubungan_keluarga = 1',
+                'left'
+            )
+            ->where('pk.id', $id)
             ->get()
             ->getRowArray();
 
@@ -270,10 +335,18 @@ class PenentuanKemiskinan extends BaseController
             return $this->response->setJSON([
                 'status' => '',
                 'alasan' => [],
-                'catatan' => ''
+                'catatan' => '',
+                'kepala_keluarga' => '',
+                'nik' => '',
+                'no_kk' => ''
             ]);
         }
 
+        /**
+         * ============================
+         * 🔍 AMBIL ALASAN
+         * ============================
+         */
         $alasanRows = $db->table('dtsen_penentuan_kemiskinan_alasan pa')
             ->select('m.kategori, m.label')
             ->join('dtsen_kemiskinan_alasan_master m', 'm.id = pa.alasan_id')
@@ -286,16 +359,22 @@ class PenentuanKemiskinan extends BaseController
         $grouped = [];
 
         foreach ($alasanRows as $a) {
-
             $kategori = ucfirst($a['kategori']);
-
             $grouped[$kategori][] = $a['label'];
         }
 
+        /**
+         * ============================
+         * 🚀 RESPONSE FINAL
+         * ============================
+         */
         return $this->response->setJSON([
             'status' => $row['status_kemiskinan'],
             'alasan' => $grouped,
-            'catatan' => $row['catatan']
+            'catatan' => $row['catatan'],
+            'kepala_keluarga' => $row['kepala_keluarga'],
+            'nik' => $row['nik'],
+            'no_kk' => $row['no_kk']
         ]);
     }
 

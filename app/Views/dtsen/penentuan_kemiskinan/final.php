@@ -1,10 +1,48 @@
 <?= $this->extend('templates/index') ?>
 <?= $this->section('content') ?>
 
-<div class="content-wrapper">
+<style>
+    .btn.disabled {
+        pointer-events: none;
+        opacity: 0.65;
+    }
+</style>
+<div class="content-wrapper mt-1">
     <div class="content-header">
         <div class="container-fluid">
-            <h1 class="m-0">Data Kemiskinan Final</h1>
+            <?php
+            $uri = service('uri');
+            $segment = $uri->getSegment(3);
+            ?>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <!-- TITLE -->
+                <h5 class="m-0">
+                    <?= $title ?>
+                </h5>
+
+                <!-- NAV FLOW BUTTON -->
+                <div class="btn-group" role="group">
+
+                    <a href="<?= base_url('dtsen/kemiskinan/penentuan') ?>"
+                        class="btn btn-sm <?= $segment == 'penentuan' ? 'btn-primary disabled' : 'btn-outline-primary' ?>">
+                        <i class="fas fa-edit me-1"></i> Penentuan
+                    </a>
+
+                    <a href="<?= base_url('dtsen/kemiskinan/verifikasi') ?>"
+                        class="btn btn-sm <?= $segment == 'verifikasi' ? 'btn-warning disabled' : 'btn-outline-warning' ?>">
+                        <i class="fas fa-check-circle me-1"></i> Verifikasi
+                    </a>
+
+                    <a href="<?= base_url('dtsen/kemiskinan/final') ?>"
+                        class="btn btn-sm <?= $segment == 'final' ? 'btn-success disabled' : 'btn-outline-success' ?>">
+                        <i class="fas fa-database me-1"></i> Final
+                    </a>
+
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -54,5 +92,4 @@
         </div>
     </div>
 </div>
-
 <?= $this->endSection() ?>
