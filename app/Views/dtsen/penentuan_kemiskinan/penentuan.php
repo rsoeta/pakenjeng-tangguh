@@ -491,9 +491,12 @@
                     timer: 1200,
                     showConfirmButton: false
                 });
+                $('#modalKemiskinan').modal('hide');
 
                 setTimeout(function() {
-                    location.reload();
+                    // location.reload();
+                    // Jika ingin tetap di halaman penentuan tanpa reload, cukup hapus komentar pada baris di bawah ini
+                    table.ajax.reload(null, false);
                 }, 1200);
             }
         });

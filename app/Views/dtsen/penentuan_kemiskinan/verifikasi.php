@@ -481,7 +481,8 @@
 
                             $('#modalDetail').modal('hide');
 
-                            location.reload();
+                            // location.reload();
+                            $('#tableVerifikasi').DataTable().ajax.reload(null, false);
 
                         }
 
