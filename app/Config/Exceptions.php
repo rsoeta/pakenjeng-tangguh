@@ -3,6 +3,8 @@
 namespace Config;
 
 use CodeIgniter\Config\BaseConfig;
+// Tambahkan baris use ini jika belum ada
+use Psr\Log\LogLevel;
 
 /**
  * Setup how the exception handler works.
@@ -57,4 +59,12 @@ class Exceptions extends BaseConfig
 	 * @var array
 	 */
 	public $sensitiveDataInTrace = [];
+
+	/*
+     * --------------------------------------------------------------------------
+     * TAMBAHKAN DUA BARIS INI UNTUK PHP 8.2
+     * --------------------------------------------------------------------------
+     */
+	public bool $logDeprecations = true;
+	public string $deprecationLogLevel = LogLevel::WARNING;
 }

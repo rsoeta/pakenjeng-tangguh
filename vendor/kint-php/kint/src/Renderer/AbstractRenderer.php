@@ -164,14 +164,7 @@ abstract class AbstractRenderer implements RendererInterface
                     $containers[$item->access][] = $item;
                 }
 
-                $merged = [];
-foreach ($containers as $c) {
-    // ensure each bucket is an array before merging
-    if (is_array($c) && !empty($c)) {
-        $merged = array_merge($merged, $c);
-    }
-}
-return $merged;
+                return \call_user_func_array('array_merge', $containers);
             case self::SORT_FULL:
                 \usort($contents, [self::class, 'sortPropertiesFull']);
                 // no break

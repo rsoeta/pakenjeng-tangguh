@@ -401,9 +401,7 @@ $disabled = $editable ? '' : 'disabled';
         modal.find('#modal_alamat').val(alamat);
         modal.find('#kategori_desil').val(desil);
     });
-</script>
 
-<script>
     document.getElementById('btnSyncDesil')?.addEventListener('click', function() {
 
         const btn = this;

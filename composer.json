@@ -1,8 +1,8 @@
 {
   "name": "rsoeta/pakenjeng-tangguh",
-  "description": "SINDEN DTSEN CI4 project for PHP 8.1 hosting",
+  "description": "SINDEN DTSEN CI4 project for PHP 8.2 hosting",
   "require": {
-    "php": ">=8.1",
+    "php": ">=8.2",
     "codeigniter4/framework": "^4.6.2",
     "kint-php/kint": "5.0",
     "phpoffice/phpspreadsheet": "*"
@@ -11,7 +11,7 @@
     "optimize-autoloader": true,
     "sort-packages": true,
     "platform": {
-      "php": "8.1.0"
+      "php": "8.2.0"
     },
      "audit": {
         "block-insecure": false

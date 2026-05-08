@@ -33,5 +33,19 @@ class Routing extends BaseConfig
      * Whether to prioritize previously defined routes.
      * Added in CI 4.6.x
      */
+
+    /**
+     * If true, enables the use of Attributes to define routes.
+     */
+    public bool $useControllerAttributes = false;
+
+    /**
+     * If TRUE, will enable the use of prioritized routing.
+     */
     public bool $prioritize = false;
+
+    /**
+     * If TRUE, will enable the use of multiple filters in a route.
+     */
+    public array $multipleFilters = [];
 }

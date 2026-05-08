@@ -84,6 +84,28 @@
         <small>Terima kasih telah berkontribusi dalam memperbarui data kesejahteraan masyarakat desa.</small>
     </div>
 
+    <?php if (!empty($menu_pemulihan) && $total_masalah > 0): ?>
+        <div class="alert alert-danger shadow-sm my-2 border-0">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="<?= esc($menu_pemulihan['tm_icon']) ?> fa-3x"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h5 class="fw-bold mb-1">Aksi Diperlukan: Pemulihan Data Wilayah</h5>
+                    <p class="mb-0">
+                        Ditemukan <strong><?= $total_masalah ?> keluarga</strong> dengan format RT/RW tidak standar (kosong atau kurang dari 3 digit).
+                        Hal ini menyebabkan data tidak muncul di dashboard petugas.
+                    </p>
+                </div>
+                <div class="ms-3">
+                    <a href="<?= base_url($menu_pemulihan['tm_url']) ?>" class="btn btn-light fw-bold px-4">
+                        Perbaiki Sekarang
+                    </a>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <!-- Kartu Statistik -->
     <div class="stats-grid">
         <div class="stat-card" onclick="window.location='/dtsen-se'">

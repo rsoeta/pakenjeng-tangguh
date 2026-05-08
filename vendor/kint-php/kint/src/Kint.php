@@ -82,8 +82,7 @@ class Kint implements FacadeInterface
      *
      * Kint::$file_link_format = 'http://localhost:8091/?message=%f:%l';
      */
-    // public static $file_link_format = '';
-    public static $file_link_format = '%f:%l';
+    public static $file_link_format = '';
 
     /**
      * @var bool whether to display where kint was called from
@@ -390,10 +389,10 @@ class Kint implements FacadeInterface
                 $access_path = $param['path'];
 
                 if (!empty($param['expression'])) {
-                    $access_path = '(' . $access_path . ')';
+                    $access_path = '('.$access_path.')';
                 }
             } else {
-                $access_path = '$' . $i;
+                $access_path = '$'.$i;
             }
 
             $bases[] = Value::blank($name, $access_path);
@@ -623,11 +622,11 @@ class Kint implements FacadeInterface
 
         foreach ($file as $i => $part) {
             if (!isset($kint[$i]) || $kint[$i] !== $part) {
-                return ($i ? '.../' : '/') . \implode('/', \array_slice($file, $i));
+                return ($i ? '.../' : '/').\implode('/', \array_slice($file, $i));
             }
         }
 
-        return '/' . \implode('/', $file);
+        return '/'.\implode('/', $file);
     }
 
     public static function getIdeLink(string $file, int $line): string
@@ -683,8 +682,8 @@ class Kint implements FacadeInterface
 
                             foreach ($keys as $key) {
                                 $call['parameters'][] = [
-                                    'name' => \substr($param['name'], 3) . '[' . \var_export($key, true) . ']',
-                                    'path' => \substr($param['path'], 3) . '[' . \var_export($key, true) . ']',
+                                    'name' => \substr($param['name'], 3).'['.\var_export($key, true).']',
+                                    'path' => \substr($param['path'], 3).'['.\var_export($key, true).']',
                                     'expression' => false,
                                 ];
                             }
@@ -693,8 +692,8 @@ class Kint implements FacadeInterface
                             // through array_values so we can't access them directly at all
                             for ($j = 0; $j + $i < $argc; ++$j) {
                                 $call['parameters'][] = [
-                                    'name' => 'array_values(' . \substr($param['name'], 3) . ')[' . $j . ']',
-                                    'path' => 'array_values(' . \substr($param['path'], 3) . ')[' . $j . ']',
+                                    'name' => 'array_values('.\substr($param['name'], 3).')['.$j.']',
+                                    'path' => 'array_values('.\substr($param['path'], 3).')['.$j.']',
                                     'expression' => false,
                                 ];
                             }

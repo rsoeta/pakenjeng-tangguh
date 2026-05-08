@@ -46,8 +46,16 @@
                             🟢 Submitted
                         </button>
                     </li>
-                    <!-- Admin Only -->
+
                     <?php if ($role_id <= 3): ?>
+                        <li class="nav-item">
+                            <button class="nav-link text-danger fw-bold" id="tabPemulihan-tab" data-bs-toggle="tab" data-bs-target="#tabPemulihan" type="button" role="tab">
+                                🚨 Pemulihan
+                                <?php if (($total_masalah ?? 0) > 0): ?>
+                                    <span class="badge bg-danger ms-1"><?= $total_masalah ?></span>
+                                <?php endif; ?>
+                            </button>
+                        </li>
                         <li class="nav-item">
                             <button class="nav-link" id="tabArsip-tab" data-bs-toggle="tab" data-bs-target="#tabArsip" type="button" role="tab">
                                 🔴 Arsip
@@ -194,6 +202,7 @@
                         </thead>
                     </table>
                 </div>
+
                 <!-- ===================== TAB 2: SUBMITTED PEMBARUAN ===================== -->
                 <div class="tab-pane fade" id="tabSubmitted" role="tabpanel">
                     <div class="d-flex justify-content-end mb-2">
@@ -218,82 +227,140 @@
                     </table>
                 </div>
 
-                <!-- ===================== TAB 4: ARSIP ===================== -->
-                <div class="tab-pane fade" id="tabArsip" role="tabpanel">
-
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-light border-bottom pb-0">
-                            <!-- 🔥 TAB ATAS UNTUK ARSIP -->
-                            <ul class="nav nav-tabs" id="arsipTab" role="tablist">
-                                <li class="nav-item">
-                                    <button class="nav-link active" id="arsipKeluarga-tab"
-                                        data-bs-toggle="tab"
-                                        data-bs-target="#arsipKeluarga"
-                                        type="button" role="tab">
-                                        📁 Arsip Keluarga
-                                    </button>
-                                </li>
-
-                                <li class="nav-item">
-                                    <button class="nav-link" id="arsipAnggota-tab"
-                                        data-bs-toggle="tab"
-                                        data-bs-target="#arsipAnggota"
-                                        type="button" role="tab">
-                                        👤 Arsip Anggota
-                                    </button>
-                                </li>
-                            </ul>
+                <!-- ===================== TAB 3: PEMULIHAN ===================== -->
+                <div class="tab-pane fade" id="tabPemulihan" role="tabpanel">
+                    <div class="alert alert-danger shadow-sm border-0 mb-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-tools me-2"></i>
+                            <strong>Mode Pemulihan Aktif.</strong> Data di bawah memiliki anomali RT/RW (Kosong atau < 3 Digit).
+                                </div>
+                                <button id="btnReloadPemulihan" class="btn btn-outline-danger btn-sm bg-white">
+                                    <i class="fas fa-sync-alt"></i> Muat Ulang
+                                </button>
                         </div>
 
-                        <div class="card-body tab-content">
+                        <table id="tablePemulihan" class="table table-striped table-hover nowrap w-100">
+                            <thead class="text-center bg-danger text-white">
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Kepala Keluarga</th>
+                                    <th>No KK</th>
+                                    <th>Alamat</th>
+                                    <th>RT Lama</th>
+                                    <th>RW Lama</th>
+                                    <th>Aksi Pemulihan</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
 
-                            <!-- ===================== SUBTAB: ARSIP KELUARGA ===================== -->
-                            <div class="tab-pane fade show active" id="arsipKeluarga" role="tabpanel">
-                                <h5 class="fw-bold mb-3">📁 Arsip Keluarga</h5>
+                    <!-- ===================== TAB 4: ARSIP ===================== -->
+                    <div class="tab-pane fade" id="tabArsip" role="tabpanel">
 
-                                <table id="tableArsipKeluarga" class="table table-striped table-hover w-100">
-                                    <thead class="text-center">
-                                        <tr>
-                                            <th>No.</th>
-                                            <th>Kepala Keluarga</th>
-                                            <th>No KK</th>
-                                            <th>Alamat</th>
-                                            <th>RW/RT</th>
-                                            <th>Tanggal Hapus</th>
-                                            <th>Alasan</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                </table>
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-light border-bottom pb-0">
+                                <!-- 🔥 TAB ATAS UNTUK ARSIP -->
+                                <ul class="nav nav-tabs" id="arsipTab" role="tablist">
+                                    <li class="nav-item">
+                                        <button class="nav-link active" id="arsipKeluarga-tab"
+                                            data-bs-toggle="tab"
+                                            data-bs-target="#arsipKeluarga"
+                                            type="button" role="tab">
+                                            📁 Arsip Keluarga
+                                        </button>
+                                    </li>
+
+                                    <li class="nav-item">
+                                        <button class="nav-link" id="arsipAnggota-tab"
+                                            data-bs-toggle="tab"
+                                            data-bs-target="#arsipAnggota"
+                                            type="button" role="tab">
+                                            👤 Arsip Anggota
+                                        </button>
+                                    </li>
+                                </ul>
                             </div>
 
-                            <!-- ===================== SUBTAB: ARSIP ANGGOTA ===================== -->
-                            <div class="tab-pane fade" id="arsipAnggota" role="tabpanel">
-                                <h5 class="fw-bold mb-3">👤 Arsip Anggota Keluarga</h5>
+                            <div class="card-body tab-content">
 
-                                <table id="tableArsipAnggota" class="table table-striped table-hover w-100">
-                                    <thead class="text-center">
-                                        <tr>
-                                            <th>No.</th>
-                                            <th>NIK</th>
-                                            <th>Nama</th>
-                                            <th>Hubungan</th>
-                                            <th>ID KK</th>
-                                            <th>Tanggal Hapus</th>
-                                            <th>Alasan</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                </table>
+                                <!-- ===================== SUBTAB: ARSIP KELUARGA ===================== -->
+                                <div class="tab-pane fade show active" id="arsipKeluarga" role="tabpanel">
+                                    <h5 class="fw-bold mb-3">📁 Arsip Keluarga</h5>
+
+                                    <table id="tableArsipKeluarga" class="table table-striped table-hover w-100">
+                                        <thead class="text-center">
+                                            <tr>
+                                                <th>No.</th>
+                                                <th>Kepala Keluarga</th>
+                                                <th>No KK</th>
+                                                <th>Alamat</th>
+                                                <th>RW/RT</th>
+                                                <th>Tanggal Hapus</th>
+                                                <th>Alasan</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+
+                                <!-- ===================== SUBTAB: ARSIP ANGGOTA ===================== -->
+                                <div class="tab-pane fade" id="arsipAnggota" role="tabpanel">
+                                    <h5 class="fw-bold mb-3">👤 Arsip Anggota Keluarga</h5>
+
+                                    <table id="tableArsipAnggota" class="table table-striped table-hover w-100">
+                                        <thead class="text-center">
+                                            <tr>
+                                                <th>No.</th>
+                                                <th>NIK</th>
+                                                <th>Nama</th>
+                                                <th>Hubungan</th>
+                                                <th>ID KK</th>
+                                                <th>Tanggal Hapus</th>
+                                                <th>Alasan</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
+
                             </div>
-
                         </div>
                     </div>
-                </div>
 
+                </div>
+            </div>
+    </section>
+
+    <div class="modal fade" id="modalAutoFix" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-warning">
+                    <h6 class="modal-title fw-bold"><i class="fas fa-magic"></i> Auto-Fix Format (3 Digit)</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formAutoFix">
+                        <input type="hidden" id="fix_id_rt" name="id_rt">
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nomor RT <span class="text-muted fw-normal" id="label_rt_lama"></span></label>
+                            <input type="text" class="form-control text-center fw-bold text-success" id="fix_rt" name="rt_baru" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nomor RW <span class="text-muted fw-normal" id="label_rw_lama"></span></label>
+                            <input type="text" class="form-control text-center fw-bold text-success" id="fix_rw" name="rw_baru" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer p-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" id="btnSaveAutoFix" class="btn btn-primary btn-sm">
+                        <i class="fas fa-save"></i> Simpan Perbaikan
+                    </button>
+                </div>
             </div>
         </div>
-    </section>
+    </div>
 
 </div>
 
@@ -488,6 +555,157 @@
                     }
                 }
             ]
+        });
+
+        // ========================= 🚨 INITIALIZE TABLE PEMULIHAN =========================
+        let tablePemulihan;
+        if ($('#tablePemulihan').length) {
+            tablePemulihan = $('#tablePemulihan').DataTable({
+                ajax: {
+                    url: '/dtsen-se/tabel_pemulihan', // ✅ UBAH KE SINI sesuai dengan Routes.php
+                    type: 'POST',
+                    dataSrc: 'data'
+                },
+                columns: [{
+                        data: null,
+                        render: (d, t, r, m) => m.row + 1,
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'kepala_keluarga'
+                    },
+                    {
+                        data: 'no_kk'
+                    },
+                    {
+                        data: 'alamat_rt',
+                        render: (d, t, r) => d || r.alamat_kk || '-'
+                    },
+                    {
+                        data: 'rt',
+                        className: 'text-center fw-bold text-danger'
+                    },
+                    {
+                        data: 'rw',
+                        className: 'text-center fw-bold text-danger'
+                    },
+                    {
+                        data: null,
+                        render: function(row) {
+                            // Logika tombol Auto-Fix & Manual
+                            let btnManual = `<a href="/pembaruan-keluarga/detail/${row.id_kk}" class="btn btn-outline-dark btn-sm me-1"><i class="fas fa-users-cog"></i> Manual</a>`;
+                            let btnAuto = (row.rt && row.rw) ? `<button class="btn btn-warning btn-sm btnTriggerAutoFix" data-idrt="${row.id_rt}" data-rt="${row.rt}" data-rw="${row.rw}"><i class="fas fa-magic"></i> Auto-Fix</button>` : '';
+                            return btnManual + btnAuto;
+                        }
+                    }
+                ]
+            });
+        }
+
+        // ========================= 🔄 SYNC TAB & URL =========================
+        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+            const target = $(e.target).attr('data-bs-target');
+            let tabName = 'daftar';
+
+            if (target === '#tabDraft') tabName = 'draft';
+            if (target === '#tabSubmitted') tabName = 'submitted';
+            if (target === '#tabPemulihan') tabName = 'pemulihan';
+
+            history.replaceState(null, "", "?tab=" + tabName);
+
+            // Reload tabel agar data segar dan layout pas
+            if (tabName === 'daftar') tableKeluarga.ajax.reload(null, false);
+            if (tabName === 'draft') tableDraft.ajax.reload(null, false);
+            if (tabName === 'submitted') tableSubmitted.ajax.reload(null, false);
+
+            // Tambahkan ini jika belum ada
+            if (tabName === 'pemulihan' && typeof tablePemulihan !== 'undefined') {
+                tablePemulihan.ajax.reload(null, false);
+            }
+        });
+
+        // ========================= 🎯 AUTO-ACTIVATE FROM URL =========================
+        function activateTabFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab') || 'daftar';
+
+            const tabMap = {
+                'daftar': '#tabDaftar-tab',
+                'draft': '#tabDraft-tab',
+                'submitted': '#tabSubmitted-tab',
+                'pemulihan': '#tabPemulihan-tab'
+            };
+
+            const targetBtnSelector = tabMap[tab] || '#tabDaftar-tab';
+            const tabButton = document.querySelector(targetBtnSelector);
+
+            if (tabButton) {
+                // Biarkan Bootstrap 5 yang mengurus pembersihan dan transisi class active
+                const tabInstance = bootstrap.Tab.getOrCreateInstance(tabButton);
+                tabInstance.show();
+
+                // Paksa DataTables menyesuaikan ukuran kolom setelah animasi selesai
+                setTimeout(() => {
+                    $.fn.dataTable.tables({
+                        visible: true,
+                        api: true
+                    }).columns.adjust();
+                }, 300);
+            }
+        }
+
+        // Panggil fungsi setelah semua tabel ter-inisialisasi
+        activateTabFromURL();
+
+        // ========================= 🪄 LOGIKA FRONTEND AUTO-FIX =========================
+        $(document).on('click', '.btnTriggerAutoFix', function() {
+            let idRt = $(this).data('idrt');
+            let rtLama = String($(this).data('rt'));
+            let rwLama = String($(this).data('rw'));
+
+            // KECERDASAN FRONTEND: Tambahkan '0' di depan sampai jadi 3 digit
+            let rtBaru = rtLama.padStart(3, '0');
+            let rwBaru = rwLama.padStart(3, '0');
+
+            // Isi ke Modal
+            $('#fix_id_rt').val(idRt);
+            $('#label_rt_lama').text(`(Lama: ${rtLama})`);
+            $('#label_rw_lama').text(`(Lama: ${rwLama})`);
+
+            $('#fix_rt').val(rtBaru);
+            $('#fix_rw').val(rwBaru);
+
+            // Tampilkan Modal
+            $('#modalAutoFix').modal('show');
+        });
+
+        // Eksekusi Simpan
+        $('#btnSaveAutoFix').on('click', function() {
+            let formData = $('#formAutoFix').serialize();
+            let btn = $(this);
+
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Menyimpan...');
+
+            $.post('/dtsen-se/autofix_rt_rw', formData, function(res) {
+                btn.prop('disabled', false).html('<i class="fas fa-save"></i> Simpan Perbaikan');
+
+                if (res.status) {
+                    $('#modalAutoFix').modal('hide');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: res.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+
+                    // Reload Tabel Pemulihan & Tabel Keluarga Utama
+                    tablePemulihan.ajax.reload(null, false);
+                    tableKeluarga.ajax.reload(null, false);
+                } else {
+                    Swal.fire('Gagal', res.message, 'error');
+                }
+            }, 'json');
         });
 
         // ========================= 🎛 FILTER HANDLER =========================
@@ -1092,107 +1310,6 @@
             });
         });
 
-        // Saat user klik tab
-        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
-
-            const target = $(e.target).attr('data-bs-target'); // ex: #tabDraft
-
-            let tab = 'daftar';
-            if (target === '#tabDraft') tab = 'draft';
-            if (target === '#tabSubmitted') tab = 'submitted';
-            if (target === '#tabDaftar') tab = 'daftar';
-
-            // 1. Update URL TANPA reload halaman
-            history.replaceState(null, "", "?tab=" + tab);
-
-            // 2. Reload DataTable sesuai tab aktif
-            if (tab === 'daftar') {
-                tableKeluarga.ajax.reload();
-            }
-            if (tab === 'draft') {
-                tableDraft.ajax.reload();
-            }
-            if (tab === 'submitted') {
-                tableSubmitted.ajax.reload();
-            }
-        });
-
-        function activateTabFromURL() {
-            const url = new URL(window.location.href);
-            const tab = url.searchParams.get('tab') || 'daftar';
-
-            // Peta tab terhadap ID tombol dan tab-pane
-            const tabMap = {
-                daftar: {
-                    btn: '#tabDaftar-tab',
-                    pane: '#tabDaftar',
-                    table: tableKeluarga
-                },
-                draft: {
-                    btn: '#tabDraft-tab',
-                    pane: '#tabDraft',
-                    table: tableDraft
-                },
-                submitted: {
-                    btn: '#tabSubmitted-tab',
-                    pane: '#tabSubmitted',
-                    table: tableSubmitted
-                },
-            };
-
-            const target = tabMap[tab] || tabMap.daftar;
-
-            // Aktifkan tombol tab
-            $(target.btn).tab('show');
-
-            // Setelah pane ditampilkan, adjust kolom DataTables
-            setTimeout(() => {
-                if (target.table) {
-                    target.table.columns.adjust().draw(false);
-                }
-            }, 100);
-        }
-
-        // Jalankan otomatis ketika halaman load
-        activateTabFromURL();
-
-
-
-    });
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tab = urlParams.get("tab");
-
-        if (!tab) return;
-
-        // Mapping parameter → id tab
-        const tabMap = {
-            "draft": "#tabDraft",
-            "submitted": "#tabSubmitted"
-        };
-
-        const targetPane = tabMap[tab];
-        if (!targetPane) return;
-
-        // Cari tombol tab bootstrap-nya (bukan <a>, tapi <button>)
-        const tabButton = document.querySelector(`button[data-bs-target="${targetPane}"]`);
-
-        if (tabButton) {
-            // Trigger Bootstrap tab show
-            const tabInstance = new bootstrap.Tab(tabButton);
-            tabInstance.show();
-
-            // Scroll ke area tab (opsional)
-            setTimeout(() => {
-                tabButton.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center"
-                });
-            }, 150);
-        }
     });
 
     document.addEventListener("DOMContentLoaded", function() {

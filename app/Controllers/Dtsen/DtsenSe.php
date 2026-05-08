@@ -28,46 +28,109 @@ class DtsenSe extends Controller
         $this->genModel = new GenModel();
     }
 
-    // 🏠 Halaman utama Data Keluarga
+    // ========================================================
+    // 🛠️ FUNGSI BANTUAN (HELPER) UNTUK VIEW
+    // ========================================================
+
+    // Mengecek apakah fitur pemulihan sedang diaktifkan di tb_menu
+    private function checkMenuPemulihan()
+    {
+        // 💡 Tambahkan baris ini untuk menghubungkan ke database
+        $db = \Config\Database::connect();
+
+        return $db->table('tb_menu')
+            ->where('tm_url', 'pembaruan-keluarga/pemulihan') // sudah dipastikan sama dengan di DB
+            ->where('tm_status', 1)
+            ->get()
+            ->getRowArray();
+    }
+
+    // Mengumpulkan semua variabel wajib agar tidak ditulis berulang-ulang
+    private function getBaseData($title, $segment)
+    {
+        $session  = session();
+        $kodeDesa = $session->get('kode_desa');
+
+        return [
+            'title'          => $title,
+            'segment'        => $segment,
+            'namaApp'        => 'SINDEN',
+            'user_login'     => $session->get(),
+            'kode_desa'      => $kodeDesa,
+            'rwUser'         => $session->get('level'), // RW untuk pendata
+            'role_id'        => $session->get('role_id'),
+            'dataRW'         => $this->genModel->getRWByDesa($kodeDesa),
+            'menu_pemulihan' => $this->checkMenuPemulihan(),
+        ];
+    }
+
+    // ========================================================
+    // 🌐 ROUTING HALAMAN (NAV FLOW)
+    // ========================================================
+
+    // 🏠 Halaman 1: Daftar Keluarga Utama
     public function index()
     {
-        $session = session();
-        $kodeDesa = $session->get('kode_desa');
-        $roleId   = $session->get('role_id');
-        $rwUser   = $session->get('level'); // RW untuk pendata
-
-        // Ambil daftar RW di desa tersebut
-        $dataRW = $this->genModel->getRWByDesa($kodeDesa);
-
-        $data = [
-            'title'       => 'Data Keluarga',
-            'namaApp'     => 'SINDEN',
-            'user_login'  => $session->get(),
-            'kode_desa'   => $kodeDesa,
-            'rwUser'      => $rwUser,
-            'role_id'     => $roleId,
-            'dataRW'      => $dataRW,
-        ];
-
-        return view('dtsen/se/index', $data);
+        $data = $this->getBaseData('Data Keluarga', 'daftar');
+        return view('dtsen/se/v_daftar', $data);
     }
+
+    // 🟡 Halaman 2: Draft Pembaruan
+    public function draft()
+    {
+        $data = $this->getBaseData('Draft Pembaruan', 'draft');
+        return view('dtsen/se/v_draft', $data);
+    }
+
+    // 🟢 Halaman 3: Submitted
+    public function submitted()
+    {
+        $data = $this->getBaseData('Data Submitted', 'submitted');
+        return view('dtsen/se/v_submitted', $data);
+    }
+
+    // 🚨 Halaman 4: Pemulihan Data Wilayah (Hanya Admin)
+    public function pemulihan()
+    {
+        $data = $this->getBaseData('Pemulihan Data Wilayah', 'pemulihan');
+
+        // Proteksi Lapis Ganda: Jika saklar OFF atau bukan Admin, tendang ke index
+        if ($data['role_id'] > 3) {
+            return redirect()->to('/dtsen-se');
+        }
+
+        return view('dtsen/se/v_pemulihan', $data);
+    }
+
+    // 🔴 Halaman 5: Arsip (Hanya Admin)
+    public function arsip()
+    {
+        $data = $this->getBaseData('Arsip Keluarga & Anggota', 'arsip');
+
+        // Proteksi Lapis Ganda: Hanya Admin yang bisa akses Arsip
+        if ($data['role_id'] > 3) {
+            return redirect()->to('/dtsen-se');
+        }
+
+        return view('dtsen/se/v_arsip', $data);
+    }
+
+    // ========================================================
+    // 📡 AJAX DATATABLES
+    // ========================================================
 
     public function tabel_data()
     {
         try {
             $session = session();
 
-            // =============================
             // 1️⃣ DATA SESSION
-            // =============================
             $kodeDesa     = $session->get('kode_desa');
             $roleId       = (int) $session->get('role_id');
             $rwUser       = $session->get('level');
             $wilayahTugas = $session->get('wilayah_tugas');
 
-            // =============================
             // 2️⃣ FILTER DARI FRONTEND
-            // =============================
             $filterClient = $this->request->getPost('filter') ?? [];
 
             $filter = [
@@ -79,21 +142,15 @@ class DtsenSe extends Controller
                 'desil'         => $filterClient['desil']  ?? null,
             ];
 
-            // =============================
             // 4️⃣ FILTER AKSES (ROLE)
-            // =============================
             if ($roleId >= 4) {
                 $filter['rw'] = $rwUser;
             }
 
-            // =============================
             // 5️⃣ AMBIL DATA
-            // =============================
             $dataKeluarga = $this->kkModel->getFilteredData($filter);
 
-            // =============================
             // 6️⃣ TAMBAHKAN FLAG AKSES
-            // =============================
             $canInputDesil = ($roleId <= 3);
 
             foreach ($dataKeluarga as &$row) {
@@ -104,7 +161,6 @@ class DtsenSe extends Controller
                 'data' => $dataKeluarga
             ]);
         } catch (\Throwable $e) {
-
             log_message('error', '❌ tabel_data() error: ' . $e->getMessage());
 
             return $this->response->setJSON([
@@ -114,6 +170,93 @@ class DtsenSe extends Controller
             ]);
         }
     }
+
+    // // 🏠 Halaman utama Data Keluarga
+    // public function index()
+    // {
+    //     $session = session();
+    //     $kodeDesa = $session->get('kode_desa');
+    //     $roleId   = $session->get('role_id');
+    //     $rwUser   = $session->get('level'); // RW untuk pendata
+
+    //     // Ambil daftar RW di desa tersebut
+    //     $dataRW = $this->genModel->getRWByDesa($kodeDesa);
+
+    //     $data = [
+    //         'title'       => 'Data Keluarga',
+    //         'namaApp'     => 'SINDEN',
+    //         'user_login'  => $session->get(),
+    //         'kode_desa'   => $kodeDesa,
+    //         'rwUser'      => $rwUser,
+    //         'role_id'     => $roleId,
+    //         'dataRW'      => $dataRW,
+    //     ];
+
+    //     return view('dtsen/se/index', $data);
+    // }
+
+    // public function tabel_data()
+    // {
+    //     try {
+    //         $session = session();
+
+    //         // =============================
+    //         // 1️⃣ DATA SESSION
+    //         // =============================
+    //         $kodeDesa     = $session->get('kode_desa');
+    //         $roleId       = (int) $session->get('role_id');
+    //         $rwUser       = $session->get('level');
+    //         $wilayahTugas = $session->get('wilayah_tugas');
+
+    //         // =============================
+    //         // 2️⃣ FILTER DARI FRONTEND
+    //         // =============================
+    //         $filterClient = $this->request->getPost('filter') ?? [];
+
+    //         $filter = [
+    //             'kode_desa'     => $kodeDesa,
+    //             'wilayah_tugas' => $wilayahTugas,
+    //             'rw'            => $filterClient['rw']     ?? null,
+    //             'rt'            => $filterClient['rt']     ?? null,
+    //             'status'        => $filterClient['status'] ?? null,
+    //             'desil'         => $filterClient['desil']  ?? null,
+    //         ];
+
+    //         // =============================
+    //         // 4️⃣ FILTER AKSES (ROLE)
+    //         // =============================
+    //         if ($roleId >= 4) {
+    //             $filter['rw'] = $rwUser;
+    //         }
+
+    //         // =============================
+    //         // 5️⃣ AMBIL DATA
+    //         // =============================
+    //         $dataKeluarga = $this->kkModel->getFilteredData($filter);
+
+    //         // =============================
+    //         // 6️⃣ TAMBAHKAN FLAG AKSES
+    //         // =============================
+    //         $canInputDesil = ($roleId <= 3);
+
+    //         foreach ($dataKeluarga as &$row) {
+    //             $row['can_input_desil'] = $canInputDesil;
+    //         }
+
+    //         return $this->response->setJSON([
+    //             'data' => $dataKeluarga
+    //         ]);
+    //     } catch (\Throwable $e) {
+
+    //         log_message('error', '❌ tabel_data() error: ' . $e->getMessage());
+
+    //         return $this->response->setJSON([
+    //             'data'    => [],
+    //             'error'   => true,
+    //             'message' => $e->getMessage()
+    //         ]);
+    //     }
+    // }
 
     // 📝 Update kategori desil
     public function updateDesil()
@@ -457,5 +600,62 @@ class DtsenSe extends Controller
         $data = array_map(fn($r) => $r['no_rt'], $rows);
 
         return $this->response->setJSON(['data' => $data]);
+    }
+
+    // ========================================================
+    // 🚑 QUERY TABEL PEMULIHAN DATA WILAYAH
+    // ========================================================
+    public function tabel_pemulihan()
+    {
+        try {
+            $db = \Config\Database::connect();
+
+            // Ambil data KK dan join dengan dtsen_rt
+            $builder = $db->table('dtsen_kk k')
+                ->select('k.id_kk, k.no_kk, k.kepala_keluarga, k.alamat as alamat_kk, r.id_rt, r.rt, r.rw, r.alamat as alamat_rt')
+                ->join('dtsen_rt r', 'k.id_rt = r.id_rt', 'left')
+                ->groupStart()
+                ->where('r.rt', null)
+                ->orWhere('r.rt', '')
+                ->orWhere('r.rw', null)
+                ->orWhere('r.rw', '')
+                ->orWhere('LENGTH(r.rt) <', 3)
+                ->orWhere('LENGTH(r.rw) <', 3)
+                ->groupEnd();
+
+            $dataBermasalah = $builder->get()->getResultArray();
+
+            return $this->response->setJSON(['data' => $dataBermasalah]);
+        } catch (\Throwable $e) {
+            log_message('error', '❌ tabel_pemulihan() error: ' . $e->getMessage());
+            return $this->response->setJSON(['data' => [], 'error' => true]);
+        }
+    }
+
+    // ========================================================
+    // 🪄 EKSEKUSI AUTO-FIX DARI MODAL FRONTEND
+    // ========================================================
+    public function autofix_rt_rw()
+    {
+        $idRt  = $this->request->getPost('id_rt');
+        $rtFix = $this->request->getPost('rt_baru');
+        $rwFix = $this->request->getPost('rw_baru');
+
+        if (!$idRt) {
+            return $this->response->setJSON(['status' => false, 'message' => 'ID RT tidak valid.']);
+        }
+
+        try {
+            $this->db->table('dtsen_rt')->where('id_rt', $idRt)->update([
+                'rt' => $rtFix, // Sudah diformat 3 digit dari Frontend
+                'rw' => $rwFix,
+                'updated_at' => date('Y-m-d H:i:s'),
+                'updated_by' => session()->get('id') ?? 'system'
+            ]);
+
+            return $this->response->setJSON(['status' => true, 'message' => 'Format RT/RW berhasil dipulihkan!']);
+        } catch (\Throwable $e) {
+            return $this->response->setJSON(['status' => false, 'message' => 'Gagal memulihkan: ' . $e->getMessage()]);
+        }
     }
 }

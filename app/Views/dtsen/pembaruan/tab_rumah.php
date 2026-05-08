@@ -8,6 +8,22 @@ $san = $perumahan['sanitasi'] ?? [];
 
 ?>
 
+<style>
+    /* small spacing tweaks to match AdminLTE aesthetics */
+    .card .card-header {
+        font-size: .95rem;
+    }
+
+    .form-label {
+        font-size: .9rem;
+    }
+
+    .badge {
+        font-size: .85rem;
+        padding: .45em .6em;
+    }
+</style>
+
 <div class="p-3">
     <div class="d-flex justify-content-between align-items-center mb-2">
         <h5 class="mb-0">🏡 Keterangan Perumahan</h5>
@@ -546,19 +562,3 @@ $san = $perumahan['sanitasi'] ?? [];
 
     });
 </script>
-
-<style>
-    /* small spacing tweaks to match AdminLTE aesthetics */
-    .card .card-header {
-        font-size: .95rem;
-    }
-
-    .form-label {
-        font-size: .9rem;
-    }
-
-    .badge {
-        font-size: .85rem;
-        padding: .45em .6em;
-    }
-</style>

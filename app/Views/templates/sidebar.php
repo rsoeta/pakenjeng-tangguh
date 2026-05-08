@@ -52,6 +52,9 @@ $menus = menu()
                     // Validasi akses menu
                     if ($menu['tm_status'] != 1 || $menu['tm_grup_akses'] < $user) continue;
 
+                    // 👇 TAMBAHKAN BARIS INI UNTUK MENYEMBUNYIKANNYA DARI SIDEBAR 👇
+                    if ($menu['tm_url'] === 'pembaruan-keluarga/pemulihan') continue;
+
                     // Apakah menu ini punya child?
                     $children = menu_child($menu['tm_id']);
                     $hasChild = !empty($children);

@@ -20,9 +20,9 @@ $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultController('Landing');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
-$routes->set404Override(function () {
-	return view('maintenance2');
-});
+// $routes->set404Override(function () {
+// 	return view('maintenance2');
+// });
 $routes->setAutoRoute(true);
 $routes->setAutoRoute(false);
 
@@ -102,6 +102,10 @@ $routes->group('dtsen-se', ['filter' => ['authfilterdtks', 'globalview', 'menufi
 	$routes->post('restore-art', 'Dtsen\DtsenSe::restoreArt');
 	$routes->get('list-rw', 'Dtsen\DtsenSe::listRW');
 	$routes->get('list-rt/(:segment)', 'Dtsen\DtsenSe::listRT/$1');
+	// Gunakan rute POST khusus untuk data tabel (AJAX)
+	// Sesuaikan namanya agar konsisten dengan JS di View
+	$routes->post('tabel_pemulihan', 'Dtsen\DtsenSe::tabel_pemulihan');
+	$routes->post('autofix_rt_rw', 'Dtsen\DtsenSe::autofix_rt_rw');
 });
 
 // USULAN BANSOS
@@ -128,7 +132,16 @@ $routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview']], 
 
 // === DTSEN - Pembaruan Data Keluarga ===
 $routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
-	$routes->get('/', 'Dtsen\PembaruanKeluarga::index');
+	// $routes->get('/', 'Dtsen\PembaruanKeluarga::index');
+	$routes->get('draft', 'Dtsen\DtsenSe::draft'); // Halaman Draft
+	$routes->get('submitted', 'Dtsen\DtsenSe::submitted'); // Halaman Submitted
+	$routes->get('pemulihan', 'Dtsen\DtsenSe::pemulihan'); // Halaman Pemulihan
+	$routes->get('arsip', 'Dtsen\DtsenSe::arsip'); // Halaman Arsip
+	// 📡 Routing Data AJAX
+	$routes->post('tabel_data', 'Dtsen\DtsenSe::tabel_data');
+	// $routes->post('tabel_pemulihan', 'Dtsen\DtsenSe::tabel_pemulihan');
+	$routes->post('autofix_rt_rw', 'Dtsen\DtsenSe::autofix_rt_rw');
+
 	$routes->get('detail/(:num)', 'Dtsen\PembaruanKeluarga::detail/$1');
 	$routes->get('tambah', 'Dtsen\PembaruanKeluarga::tambah');  // 🆕 Form tambah keluarga baru
 	$routes->post('tambah', 'Dtsen\PembaruanKeluarga::store');  // 🆕 Simpan draft baru hasil input

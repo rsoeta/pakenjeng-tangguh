@@ -101,13 +101,18 @@ class Auth extends BaseController
                     'dul_du_id' => $user['id'],
                     'dul_last_activity' => date('Y-m-d H:i:s'),
                 ];
-                $last_id = $UsersLogin->where('dul_du_id', $user['id'])->first();
 
-                if (!empty($last_id)) {
-                    $UsersLogin->update_data($last_id, $data_login);
-                } else {
-                    $UsersLogin->save_data($data_login);
+                $last_login_record = $UsersLogin->where('dul_du_id', $user['id'])->first();
+
+                if (!empty($last_login_record)) {
+                    // Ambil nama kolom primary key dari model Anda
+                    $pkName = $UsersLogin->primaryKey;
+                    $data_login[$pkName] = $last_login_record[$pkName];
                 }
+
+                // Save akan otomatis UPDATE jika $data_login memiliki Primary Key,
+                // dan otomatis INSERT jika tidak memiliki Primary Key.
+                $UsersLogin->save($data_login);
 
                 // Cek status aktif
                 if ($user['status'] !== 1) {
@@ -124,8 +129,6 @@ class Auth extends BaseController
                     session()->remove('redirectUrl');
                     return redirect()->to(base_url($redirectUrl));
                 }
-
-                dd(session()->get());
 
                 // Default redirect ke dashboard
                 return redirect()->to('/dashboard');

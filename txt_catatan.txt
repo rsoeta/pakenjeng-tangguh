@@ -1395,3 +1395,26 @@ ADD INDEX idx_status_verifikasi (status_verifikasi);
 
 ALTER TABLE dtsen_penentuan_kemiskinan_log 
 MODIFY aksi ENUM('create','update','validate','reject','rollback') NOT NULL;
+
+===========================================================================================================================================================
+Fitur: Pemulihan Data Hilang (RT/RW = Null)
+============================================================================================================================================================
+konsep awal:
+oke ada beberapa yang aku setujui dan ada beberapa hal juga yang belum satu visi.
+
+untuk 1. Injeksi Data ke tb_menu (Sebagai Saklar) deal kita akan jalankan itu dengan sedikit koreksi dibagian "tm_grup_akses = 1" yang seharusnya "tm_grup_akses = 4", karena menu ini sebetulnya diperuntukan bagi petugas entri (lapangan) dimana mereka merasa kehilangan data keluarga pada wilayah tugas-nya maka mereka lah yang akan mendata, ini berhubungan dengan   "4. Halaman Eksekusi Pemulihan (Next Step)
+
+Nantinya di URL pemulihan-data, kita akan membuat antarmuka khusus yang menampilkan tabel data dari dtsen_kk yang di-join dengan dtsen_rt, difilter khusus untuk mencari RT atau RW yang kosong ('' atau NULL)" artinya sistem tidak perlu dibuat otomatis.
+
+tapi aku perlu otomatisasi guna mempermudah petugas entri adalah ketika petugas masuk ke menu yang telah kita sepakati pada poin 2. Pengecekan di Controller Dashboard & 3. Tampilan Dinamis di View Dashboard, mereka disediakan modal untuk tambah data dengan cara sebatas menginput nomor KK yang dimotori oleh plugin select2 (di dropdown select menampilkan No. KK - Nama Kepala Keluarga). ketika data yang dicari sudah ditentukan (klik data tersebut) maka otomatis masukkan ke tabel pemulihan.
+
+catatan: kita belum memiliki tabel pemulihan-nya dan menurutmu field apa saja yang perlu ada dalam tabel tersebut?
+
+ide AI:
+4. Halaman Eksekusi Pemulihan (Next Step)
+Nantinya di URL pemulihan-data, kita akan membuat antarmuka khusus yang menampilkan tabel data dari dtsen_kk yang di-join dengan dtsen_rt, difilter khusus untuk mencari RT atau RW yang kosong ('' atau NULL). Di sana Admin bisa langsung menembak (update) nomor RT/RW yang benar.
+
+INSERT INTO `tb_menu` 
+(`tm_nama`, `tm_class`, `tm_url`, `tm_icon`, `tm_parent_id`, `tm_status`, `tm_grup_akses`) 
+VALUES 
+('Pemulihan Data Wilayah', 'alert-danger', 'pemulihan/pemulihan', 'fas fa-mending-basket', 0, 1, 3);
