@@ -106,28 +106,8 @@ $routes->group('dtsen-se', ['filter' => ['authfilterdtks', 'globalview', 'menufi
 	// Sesuaikan namanya agar konsisten dengan JS di View
 	$routes->post('tabel_pemulihan', 'Dtsen\DtsenSe::tabel_pemulihan');
 	$routes->post('autofix_rt_rw', 'Dtsen\DtsenSe::autofix_rt_rw');
-});
-
-// USULAN BANSOS
-$routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
-	$routes->get('/', 'Dtsen\UsulanBansos::index');
-	$routes->get('data', 'Dtsen\UsulanBansos::getDataBulanIni');
-	$routes->post('verifikasi/(:num)', 'Dtsen\UsulanBansos::verifikasi/$1');
-	$routes->post('delete/(:num)', 'Dtsen\UsulanBansos::delete/$1');
-	$routes->delete('delete/(:num)', 'Dtsen\UsulanBansos::delete/$1');
-	$routes->get('check-desil', 'Dtsen\UsulanBansos::checkDesil');
-	$routes->get('search-art', 'Dtsen\UsulanBansos::searchArt');
-	$routes->post('save', 'Dtsen\UsulanBansos::save');
-	$routes->post('verifikasi/(:num)', 'Dtsen\UsulanBansos::verifikasi/$1');
-
-	// NEW: check deadline API untuk modal + countdown
-	$routes->get('check-deadline', 'Dtsen\UsulanBansos::checkDeadline');
-
-	$routes->get('filter-options', 'Dtsen\UsulanBansos::getFilterOptions');
-
-	$routes->get('rt-by-rw/(:any)', 'Dtsen\UsulanBansos::getRTByRW/$1');
-
-	$routes->get('data-filter', 'Dtsen\UsulanBansos::getDataByFilter');
+	$routes->post('search_kk_select2', 'Dtsen\DtsenSe::search_kk_select2');
+	$routes->post('tarik_ke_pemulihan', 'Dtsen\DtsenSe::tarik_ke_pemulihan');
 });
 
 // === DTSEN - Pembaruan Data Keluarga ===
@@ -172,6 +152,27 @@ $routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview
 	$routes->post('add-historical-desil', 'Dtsen\PembaruanKeluarga::addHistoricalDesil');
 });
 
+// USULAN BANSOS
+$routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
+	$routes->get('/', 'Dtsen\UsulanBansos::index');
+	$routes->get('data', 'Dtsen\UsulanBansos::getDataBulanIni');
+	$routes->post('verifikasi/(:num)', 'Dtsen\UsulanBansos::verifikasi/$1');
+	$routes->post('delete/(:num)', 'Dtsen\UsulanBansos::delete/$1');
+	$routes->delete('delete/(:num)', 'Dtsen\UsulanBansos::delete/$1');
+	$routes->get('check-desil', 'Dtsen\UsulanBansos::checkDesil');
+	$routes->get('search-art', 'Dtsen\UsulanBansos::searchArt');
+	$routes->post('save', 'Dtsen\UsulanBansos::save');
+	$routes->post('verifikasi/(:num)', 'Dtsen\UsulanBansos::verifikasi/$1');
+
+	// NEW: check deadline API untuk modal + countdown
+	$routes->get('check-deadline', 'Dtsen\UsulanBansos::checkDeadline');
+
+	$routes->get('filter-options', 'Dtsen\UsulanBansos::getFilterOptions');
+
+	$routes->get('rt-by-rw/(:any)', 'Dtsen\UsulanBansos::getRTByRW/$1');
+
+	$routes->get('data-filter', 'Dtsen\UsulanBansos::getDataByFilter');
+});
 
 // 🌍 API Wilayah Lokal (Dropdown berantai untuk DTSEN)
 $routes->group('api/villages', ['namespace' => 'App\Controllers\Api'], function ($routes) {

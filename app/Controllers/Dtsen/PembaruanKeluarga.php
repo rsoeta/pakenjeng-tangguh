@@ -783,6 +783,22 @@ class PembaruanKeluarga extends BaseController
                 }
             }
 
+            // ==========================================================
+            // ✅ 5️⃣ HAPUS BENDERA PEMULIHAN (WISUDA DATA)
+            // ==========================================================
+            // Karena validasi RT/RW di atas sudah lolos (tidak kosong), 
+            // kita pastikan keluarga ini dihapus dari daftar Pemulihan.
+            $this->db->table('dtsen_kk')
+                ->where('id_kk', $usulanRow['dtsen_kk_id'])
+                ->update(['is_recovery_needed' => 0]);
+
+            $this->db->transCommit();
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Data rumah dan sinkronisasi wilayah berhasil disimpan.'
+            ]);
+
             $this->db->transCommit();
 
             return $this->response->setJSON([
@@ -1389,6 +1405,9 @@ class PembaruanKeluarga extends BaseController
             $kkUpdate = [
                 // 👇 PASTIKAN ID_RT BARU MASUK KE SINI JIKA TERJADI PECAH ALAMAT
                 'id_rt'                    => $idRtSekarang,
+
+                // ✅ MATIKAN BENDERA PEMULIHAN KARENA DATA SUDAH SAH DI-APPLY
+                'is_recovery_needed'       => 0,
 
                 'no_kk'                    => !empty($rumah['no_kk']) ? $rumah['no_kk'] : $kkLama['no_kk'],
                 'kepala_keluarga'          => !empty($rumah['kepala_keluarga']) ? $rumah['kepala_keluarga'] : $kkLama['kepala_keluarga'],

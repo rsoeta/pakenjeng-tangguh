@@ -89,13 +89,14 @@ class DtsenSe extends Controller
         return view('dtsen/se/v_submitted', $data);
     }
 
-    // 🚨 Halaman 4: Pemulihan Data Wilayah (Hanya Admin)
+    // 🚨 Halaman 4: Pemulihan Data Wilayah
+    // 1. Buka Gembok Akses Halaman Pemulihan
     public function pemulihan()
     {
         $data = $this->getBaseData('Pemulihan Data Wilayah', 'pemulihan');
 
-        // Proteksi Lapis Ganda: Jika saklar OFF atau bukan Admin, tendang ke index
-        if ($data['role_id'] > 3) {
+        // Opsi B: Petugas Entri (role 4 & 5) sekarang diizinkan masuk
+        if (empty($data['menu_pemulihan'])) {
             return redirect()->to('/dtsen-se');
         }
 
@@ -170,93 +171,6 @@ class DtsenSe extends Controller
             ]);
         }
     }
-
-    // // 🏠 Halaman utama Data Keluarga
-    // public function index()
-    // {
-    //     $session = session();
-    //     $kodeDesa = $session->get('kode_desa');
-    //     $roleId   = $session->get('role_id');
-    //     $rwUser   = $session->get('level'); // RW untuk pendata
-
-    //     // Ambil daftar RW di desa tersebut
-    //     $dataRW = $this->genModel->getRWByDesa($kodeDesa);
-
-    //     $data = [
-    //         'title'       => 'Data Keluarga',
-    //         'namaApp'     => 'SINDEN',
-    //         'user_login'  => $session->get(),
-    //         'kode_desa'   => $kodeDesa,
-    //         'rwUser'      => $rwUser,
-    //         'role_id'     => $roleId,
-    //         'dataRW'      => $dataRW,
-    //     ];
-
-    //     return view('dtsen/se/index', $data);
-    // }
-
-    // public function tabel_data()
-    // {
-    //     try {
-    //         $session = session();
-
-    //         // =============================
-    //         // 1️⃣ DATA SESSION
-    //         // =============================
-    //         $kodeDesa     = $session->get('kode_desa');
-    //         $roleId       = (int) $session->get('role_id');
-    //         $rwUser       = $session->get('level');
-    //         $wilayahTugas = $session->get('wilayah_tugas');
-
-    //         // =============================
-    //         // 2️⃣ FILTER DARI FRONTEND
-    //         // =============================
-    //         $filterClient = $this->request->getPost('filter') ?? [];
-
-    //         $filter = [
-    //             'kode_desa'     => $kodeDesa,
-    //             'wilayah_tugas' => $wilayahTugas,
-    //             'rw'            => $filterClient['rw']     ?? null,
-    //             'rt'            => $filterClient['rt']     ?? null,
-    //             'status'        => $filterClient['status'] ?? null,
-    //             'desil'         => $filterClient['desil']  ?? null,
-    //         ];
-
-    //         // =============================
-    //         // 4️⃣ FILTER AKSES (ROLE)
-    //         // =============================
-    //         if ($roleId >= 4) {
-    //             $filter['rw'] = $rwUser;
-    //         }
-
-    //         // =============================
-    //         // 5️⃣ AMBIL DATA
-    //         // =============================
-    //         $dataKeluarga = $this->kkModel->getFilteredData($filter);
-
-    //         // =============================
-    //         // 6️⃣ TAMBAHKAN FLAG AKSES
-    //         // =============================
-    //         $canInputDesil = ($roleId <= 3);
-
-    //         foreach ($dataKeluarga as &$row) {
-    //             $row['can_input_desil'] = $canInputDesil;
-    //         }
-
-    //         return $this->response->setJSON([
-    //             'data' => $dataKeluarga
-    //         ]);
-    //     } catch (\Throwable $e) {
-
-    //         log_message('error', '❌ tabel_data() error: ' . $e->getMessage());
-
-    //         return $this->response->setJSON([
-    //             'data'    => [],
-    //             'error'   => true,
-    //             'message' => $e->getMessage()
-    //         ]);
-    //     }
-    // }
 
     // 📝 Update kategori desil
     public function updateDesil()
@@ -603,33 +517,37 @@ class DtsenSe extends Controller
     }
 
     // ========================================================
-    // 🚑 QUERY TABEL PEMULIHAN DATA WILAYAH
+    // 🚨 QUERY TABEL PEMULIHAN (MODE X-RAY / PUKAT HARIMAU)
     // ========================================================
+    // 2. Update Query Tabel Pemulihan (Masukkan data yang di-flag)
     public function tabel_pemulihan()
     {
-        try {
-            $db = \Config\Database::connect();
+        $db = \Config\Database::connect();
+        $builder = $db->table('dtsen_kk k')
+            ->select('k.id_kk, k.no_kk, k.kepala_keluarga, k.alamat as alamat_kk, r.id_rt, r.rt, r.rw, r.alamat as alamat_rt, k.is_recovery_needed')
+            ->join('dtsen_rt r', 'k.id_rt = r.id_rt', 'left')
+            ->where('k.deleted_at IS NULL')
+            ->groupStart()
+            ->where('r.rt', null)->orWhere('r.rt', '')
+            ->orWhere('LENGTH(TRIM(r.rt)) <', 3)
+            ->orWhere('k.is_recovery_needed', 1) // 🚩 Tarik data yang ditandai Pentri
+            ->groupEnd();
 
-            // Ambil data KK dan join dengan dtsen_rt
-            $builder = $db->table('dtsen_kk k')
-                ->select('k.id_kk, k.no_kk, k.kepala_keluarga, k.alamat as alamat_kk, r.id_rt, r.rt, r.rw, r.alamat as alamat_rt')
-                ->join('dtsen_rt r', 'k.id_rt = r.id_rt', 'left')
-                ->groupStart()
-                ->where('r.rt', null)
-                ->orWhere('r.rt', '')
-                ->orWhere('r.rw', null)
-                ->orWhere('r.rw', '')
-                ->orWhere('LENGTH(r.rt) <', 3)
-                ->orWhere('LENGTH(r.rw) <', 3)
-                ->groupEnd();
+        return $this->response->setJSON(['data' => $builder->get()->getResultArray()]);
+    }
 
-            $dataBermasalah = $builder->get()->getResultArray();
+    // 3. Fungsi untuk Pentri "Menarik" Data
+    public function tarik_ke_pemulihan()
+    {
+        $id_kk = $this->request->getPost('id_kk');
+        $db = \Config\Database::connect();
 
-            return $this->response->setJSON(['data' => $dataBermasalah]);
-        } catch (\Throwable $e) {
-            log_message('error', '❌ tabel_pemulihan() error: ' . $e->getMessage());
-            return $this->response->setJSON(['data' => [], 'error' => true]);
-        }
+        $db->table('dtsen_kk')->where('id_kk', $id_kk)->update([
+            'is_recovery_needed' => 1,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        return $this->response->setJSON(['status' => true, 'message' => 'Data berhasil dikirim ke tabel Pemulihan Admin.']);
     }
 
     // ========================================================
@@ -673,5 +591,34 @@ class DtsenSe extends Controller
                 'message' => 'Gagal menerapkan data: ' . $e->getMessage()
             ]);
         }
+    }
+
+    // ========================================================
+    // 🔍 SEARCH KK UNTUK SELECT2 (PENCARIAN GLOBAL)
+    // ========================================================
+    public function search_kk_select2()
+    {
+        $searchTerm = $this->request->getPost('searchTerm');
+        $db = \Config\Database::connect();
+
+        $data = $db->table('dtsen_kk k')
+            ->select('k.id_kk, k.no_kk, k.kepala_keluarga, r.rt, r.rw')
+            ->join('dtsen_rt r', 'k.id_rt = r.id_rt', 'left')
+            ->like('k.no_kk', $searchTerm)
+            ->orLike('k.kepala_keluarga', $searchTerm)
+            ->where('k.deleted_at IS NULL')
+            ->limit(10)
+            ->get()
+            ->getResultArray();
+
+        $result = [];
+        foreach ($data as $row) {
+            $result[] = [
+                "id"   => $row['id_kk'],
+                "text" => $row['no_kk'] . " - " . strtoupper($row['kepala_keluarga']) . " (Wilayah: RT " . ($row['rt'] ?? '-') . "/RW " . ($row['rw'] ?? '-') . ")"
+            ];
+        }
+
+        return $this->response->setJSON($result);
     }
 }

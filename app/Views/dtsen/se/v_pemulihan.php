@@ -8,13 +8,17 @@
         <div class="card shadow-sm border-danger">
             <div class="card-body">
                 <div class="alert alert-danger shadow-sm border-0 mb-3 d-flex justify-content-between align-items-center">
-                    <div>
+                    <div d-flex justify-content-between align-items-center mb-3>
                         <i class="fas fa-tools me-2"></i>
-                        <strong>Mode Pemulihan Aktif.</strong> Data di bawah memiliki anomali RT/RW (Kosong atau < 3 Digit).
+                        <strong>Mode Pemulihan Aktif.</strong> Data di bawah memiliki anomali RT/RW (Kosong atau < 3 Digit).</div>
+                            <div class="d-flex gap-2">
+                                <button id="btnReloadPemulihan" class="btn btn-outline-danger btn-sm bg-white">
+                                    <i class="fas fa-sync-alt"></i> Muat Ulang
+                                </button>
+                                <button type="button" class="btn btn-warning btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCariKK">
+                                    <i class="fas fa-search-plus me-1"></i> Tarik Data Hilang
+                                </button>
                             </div>
-                            <button id="btnReloadPemulihan" class="btn btn-outline-danger btn-sm bg-white">
-                                <i class="fas fa-sync-alt"></i> Muat Ulang
-                            </button>
 
                     </div>
 
@@ -62,6 +66,30 @@
                 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
                 <button type="button" id="btnSaveAutoFix" class="btn btn-primary btn-sm">
                     <i class="fas fa-save"></i> Simpan Perbaikan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCariKK" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h6 class="modal-title"><i class="fas fa-search"></i> Cari & Tarik Data Keluarga</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label small fw-bold">Cari No. KK atau Nama Kepala Keluarga</label>
+                <select id="selectKKGlobal" class="form-control" style="width: 100%"></select>
+                <div class="alert alert-info mt-3 small">
+                    <i class="fas fa-info-circle"></i> Gunakan fitur ini jika data tidak muncul di dashboard petugas namun Anda yakin data tersebut sudah ada di sistem.
+                </div>
+            </div>
+            <div class="modal-footer p-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                <button type="button" id="btnProsesTarik" class="btn btn-primary btn-sm">
+                    <i class="fas fa-file-import"></i> Tarik ke Pemulihan
                 </button>
             </div>
         </div>
@@ -130,18 +158,68 @@
                         data: 'rw',
                         className: 'text-center fw-bold text-danger'
                     },
+                    // ... kolom-kolom lainnya ...
                     {
                         data: null,
                         render: function(row) {
-                            // Logika tombol Auto-Fix & Manual
+                            // 🛡️ Tarik session role_id langsung secara aman
+                            let roleId = <?= (int) session()->get('role_id') ?>;
+
+                            // Jika bukan Admin (role_id 4 atau 5), hanya tampilkan label
+                            if (roleId > 3) {
+                                return '<span class="badge bg-secondary opacity-75"><i class="fas fa-hourglass-half"></i> Menunggu Admin</span>';
+                            }
+
+                            // Logika tombol eksklusif untuk Admin (role_id 1, 2, 3)
                             let btnManual = `<a href="/pembaruan-keluarga/detail/${row.id_kk}" class="btn btn-outline-dark btn-sm me-1"><i class="fas fa-users-cog"></i> Manual</a>`;
                             let btnAuto = (row.rt && row.rw) ? `<button class="btn btn-warning btn-sm btnTriggerAutoFix" data-idrt="${row.id_rt}" data-rt="${row.rt}" data-rw="${row.rw}"><i class="fas fa-magic"></i> Auto-Fix</button>` : '';
+
                             return btnManual + btnAuto;
                         }
                     }
                 ]
             });
         }
+
+        // Inisialisasi Select2 Global
+        $('#selectKKGlobal').select2({
+            dropdownParent: $('#modalCariKK'),
+            placeholder: 'Masukkan No. KK atau Nama...',
+            minimumInputLength: 3,
+            ajax: {
+                url: '<?= base_url('dtsen-se/search_kk_select2') ?>',
+                type: 'POST',
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        searchTerm: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: data
+                    };
+                },
+                cache: true
+            }
+        });
+
+        // Logika Tarik Data oleh Pentri
+        $('#btnProsesTarik').on('click', function() {
+            let id_kk = $('#selectKKGlobal').val();
+            if (!id_kk) return Swal.fire('Pilih data!', '', 'warning');
+
+            $.post('<?= base_url('dtsen-se/tarik_ke_pemulihan') ?>', {
+                id_kk: id_kk
+            }, function(res) {
+                if (res.status) {
+                    Swal.fire('Berhasil', 'Data sudah masuk ke daftar Pemulihan. Silakan lapor ke Admin untuk perbaikan wilayah.', 'success');
+                    $('#modalCariKK').modal('hide');
+                    tablePemulihan.ajax.reload(); // Refresh tabel agar muncul
+                }
+            });
+        });
 
         // ========================= 🔄 TOMBOL MUAT ULANG =========================
         $('#btnReloadPemulihan').on('click', function() {
@@ -164,9 +242,9 @@
             let rtLama = String($(this).data('rt'));
             let rwLama = String($(this).data('rw'));
 
-            // KECERDASAN FRONTEND: Tambahkan '0' di depan sampai jadi 3 digit
-            let rtBaru = rtLama.padStart(3, '0');
-            let rwBaru = rwLama.padStart(3, '0');
+            // Bersihkan spasi dulu dengan trim(), baru tambahkan 0 di depan
+            let rtBaru = rtLama.trim().padStart(3, '0');
+            let rwBaru = rwLama.trim().padStart(3, '0');
 
             // Isi ke Modal
             $('#fix_id_rt').val(idRt);

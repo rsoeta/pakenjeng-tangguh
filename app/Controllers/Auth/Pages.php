@@ -123,6 +123,7 @@ class Pages extends BaseController
             // Kita join dtsen_kk dengan dtsen_rt
             $query = $db->table('dtsen_kk k')
                 ->join('dtsen_rt r', 'k.id_rt = r.id_rt', 'left')
+                ->where('k.deleted_at IS NULL') // 👈 TAMBAHKAN BARIS INI
                 ->groupStart()
                 ->where('r.rt', null)
                 ->orWhere('r.rt', '')
