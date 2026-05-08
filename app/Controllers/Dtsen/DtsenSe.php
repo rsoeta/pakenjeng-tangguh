@@ -637,25 +637,41 @@ class DtsenSe extends Controller
     // ========================================================
     public function autofix_rt_rw()
     {
-        $idRt  = $this->request->getPost('id_rt');
-        $rtFix = $this->request->getPost('rt_baru');
-        $rwFix = $this->request->getPost('rw_baru');
+        // 1. Ambil data dari form (sesuaikan nama variabel dengan rapi)
+        $id_rt   = $this->request->getPost('id_rt');
+        $rt_baru = $this->request->getPost('rt_baru');
+        $rw_baru = $this->request->getPost('rw_baru');
 
-        if (!$idRt) {
+        // 2. Validasi
+        if (empty($id_rt)) {
             return $this->response->setJSON(['status' => false, 'message' => 'ID RT tidak valid.']);
         }
 
         try {
-            $this->db->table('dtsen_rt')->where('id_rt', $idRt)->update([
-                'rt' => $rtFix, // Sudah diformat 3 digit dari Frontend
-                'rw' => $rwFix,
-                'updated_at' => date('Y-m-d H:i:s'),
-                'updated_by' => session()->get('id') ?? 'system'
-            ]);
+            // 3. Panggil koneksi database
+            $db = \Config\Database::connect();
 
-            return $this->response->setJSON(['status' => true, 'message' => 'Format RT/RW berhasil dipulihkan!']);
+            // 4. Eksekusi Update ke tabel dtsen_rt
+            $db->table('dtsen_rt')
+                ->where('id_rt', $id_rt)
+                ->update([
+                    'rt'         => $rt_baru,
+                    'rw'         => $rw_baru,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                    'updated_by' => session()->get('id') ?? 'system'
+                ]);
+
+            // 5. Kembalikan respon sukses
+            return $this->response->setJSON([
+                'status'  => true,
+                'message' => 'Format RT/RW berhasil dipulihkan!'
+            ]);
         } catch (\Throwable $e) {
-            return $this->response->setJSON(['status' => false, 'message' => 'Gagal memulihkan: ' . $e->getMessage()]);
+            // Tangkap jika ada error server/database
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Gagal menerapkan data: ' . $e->getMessage()
+            ]);
         }
     }
 }

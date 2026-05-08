@@ -1417,4 +1417,5 @@ Nantinya di URL pemulihan-data, kita akan membuat antarmuka khusus yang menampil
 INSERT INTO `tb_menu` 
 (`tm_nama`, `tm_class`, `tm_url`, `tm_icon`, `tm_parent_id`, `tm_status`, `tm_grup_akses`) 
 VALUES 
-('Pemulihan Data Wilayah', 'alert-danger', 'pemulihan/pemulihan', 'fas fa-mending-basket', 0, 1, 3);
+('Pemulihan Data Wilayah', 'alert-danger', 'pembaruan-keluarga/pemulihan', 'fas fa-mending-basket', 0, 1, 3);
+

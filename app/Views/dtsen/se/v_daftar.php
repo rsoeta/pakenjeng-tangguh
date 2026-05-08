@@ -521,6 +521,7 @@
         });
 
     });
+
     document.addEventListener("DOMContentLoaded", function() {
 
         const btn = document.getElementById("btnSyncGlobal");

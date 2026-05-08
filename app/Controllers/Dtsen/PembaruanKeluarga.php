@@ -1470,7 +1470,7 @@ class PembaruanKeluarga extends BaseController
                     ]);
             } else {
                 $this->db->table('dtsen_se')->insert([
-                    'id_rt'        => $idRt,
+                    'id_rt'        => $idRtSekarang, // ✅ Sudah diperbaiki
                     'id_kk'        => $idKk,
                     'kepemilikan_aset'       => $kepemilikan_aset,
                     'kepemilikan_bantuan'    => $kepemilikan_bantuan,
