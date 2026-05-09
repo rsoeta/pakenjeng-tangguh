@@ -22,7 +22,7 @@ class Profil_Web extends BaseController
     protected $LembagaModel;
     protected $WilayahModel;
     protected $MenuModel;
-    
+
     public function __construct()
     {
         $this->AuthModel = new AuthModel();
@@ -112,11 +112,6 @@ class Profil_Web extends BaseController
             if ($file_gambar->getError() == 4) {
                 $nama_gambar = 'assets/dist/img/profile/default.png';
             } else {
-                // crop gambar
-
-                // $file_gambar = \Config\Services::image_handler()->withFile($file_gambar)->crop(200, 200);
-                // // generate nama file
-                // $nama_gambar = $file_gambar->getRandomName();
 
                 // pindahkan file ke folder profil
                 $file_gambar->move('data/profil', $namaFileGambar);
@@ -153,22 +148,6 @@ class Profil_Web extends BaseController
             $lp_kode_pos = $this->request->getPost('lp_kode_pos');
             $lp_email = $this->request->getPost('lp_email');
             $id_user = $this->request->getPost('id_user');
-
-            // ambil gambar
-            // $file_gambar = $this->request->getFile('fp_user');
-            // dd($file_gambar);
-
-            // if ($file_gambar->getError() == 4) {
-            //     $nama_gambar = 'assets/dist/img/profile/default.png';
-            // } else {
-            // // generate nama file
-            // $nama_gambar = $file_gambar->getRandomName();
-
-            // pindahkan file ke folder profil
-            // $file_gambar->move('data/profil');
-
-            //ambil nama file
-            // $nama_gambar = $file_gambar->getName();
         }
 
         $lembagaData = [
@@ -199,22 +178,6 @@ class Profil_Web extends BaseController
             $lp_kode_pos = $this->request->getPost('lp_kode_pos');
             $lp_email = $this->request->getPost('lp_email');
             $id_user = $this->request->getPost('id_user');
-
-            // ambil gambar
-            // $file_gambar = $this->request->getFile('fp_user');
-            // dd($file_gambar);
-
-            // if ($file_gambar->getError() == 4) {
-            //     $nama_gambar = 'assets/dist/img/profile/default.png';
-            // } else {
-            // // generate nama file
-            // $nama_gambar = $file_gambar->getRandomName();
-
-            // pindahkan file ke folder profil
-            // $file_gambar->move('data/profil');
-
-            //ambil nama file
-            // $nama_gambar = $file_gambar->getName();
         }
 
         $lembagaData = [

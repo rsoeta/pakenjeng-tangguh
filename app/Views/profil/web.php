@@ -131,7 +131,6 @@
                                 <div class="tab-pane fade active show" id="custom-tabs-three-home" role="tabpanel" aria-labelledby="custom-tabs-three-home-tab">
                                     <div class="col-12 col-md-4 col-lg-4 col-4">
                                         <form id="personal_form" method="POST" enctype="multipart/form-data">
-                                            <!-- Profile Image -->
                                             <ul class="list-group list-group-unbordered mb-3">
                                                 <li class="list-group-item" style="display: none;">
                                                     <b>ID Personal</b>
@@ -171,15 +170,28 @@
                                                 </li>
                                                 <li class="list-group-item mt-3">
                                                     <b><i class="fas fa-image mr-1"></i> Ubah Foto Profil</b>
+
+                                                    <div class="text-center mt-2 mb-3">
+                                                        <img id="preview_fp"
+                                                            class="profile-user-img img-fluid img-circle shadow-sm"
+                                                            src="<?= Foto_Profil($user_login['user_image'] ?? '', 'profil'); ?>"
+                                                            alt="<?= $user_login['fullname'] ?? 'User'; ?> profile picture"
+                                                            style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #adb5bd;">
+                                                    </div>
+
                                                     <div class="custom-file">
-                                                        <?= form_upload(['name' => 'fp_user', 'id' => 'fp_user', 'class' => 'form-control']); ?>
-                                                        <!-- <label class="custom-file-label" for="fp_user">Choose file</label> -->
+                                                        <?= form_upload([
+                                                            'name'   => 'fp_user',
+                                                            'id'     => 'fp_user',
+                                                            'class'  => 'form-control',
+                                                            'accept' => 'image/*'
+                                                        ]); ?>
                                                     </div>
                                                 </li>
                                             </ul>
 
                                             <button type="button" id="personalUpdate" class="btn btn-success btn-block">Update</button>
-                                            <!-- /.card-body -->
+                                            <div id="personalMsg" class="mt-2 text-center fw-bold text-success" style="display: none;"></div>
                                         </form>
                                     </div>
                                 </div>
@@ -568,21 +580,47 @@
             }
         });
 
-        $("#personalUpdate").click(function(event) {
-            //     alert('test');
-            // });
-            event.preventDefault();
-            var form_data = new FormData($('#personal_form')[0]);
-            var id_user = $('#id_user').val();
-            var fullname = $('#fullname').val();
-            var nik = $('#nik').val();
-            var email = $('#email').val();
-            var nope = $('#nope').val();
-            var user_lembaga_id = $('#user_lembaga_id').val();
-            var nama_pemerintah = $('#nama_pemerintah').val();
-            var fp_user = $('#fp_user').val();
+        // ==========================================
+        // 🖼️ LOGIKA PREVIEW GAMBAR (REAL-TIME)
+        // ==========================================
+        $('#fp_user').change(function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Mengganti src hasil helper dengan data URL file baru
+                    $('#preview_fp').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
 
-            if (fullname != '' || nik != '' || email != '' || nope != '' || user_lembaga_id != '') {
+        $("#personalUpdate").click(function(event) {
+            event.preventDefault();
+
+            // 1. Tarik Data dari Form
+            var form_data = new FormData($('#personal_form')[0]);
+
+            // 2. 🛡️ SUNTIKKAN CSRF TOKEN (Solusi 403 Forbidden)
+            form_data.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+            // 3. Masukkan nilai dropdown Lembaga secara manual karena dia 'disabled'
+            form_data.append('user_lembaga_id', $('#user_lembaga_id').val());
+
+            // 4. Ambil nilai untuk validasi frontend
+            var fullname = $('#fullname').val().trim();
+            var nik = $('#nik').val().trim();
+            var email = $('#email').val().trim();
+            var nope = $('#nope').val().trim();
+
+            // 5. Validasi: Wajib isi semua (menggunakan AND '&&' bukan OR '||')
+            if (fullname !== '' && nik !== '' && email !== '' && nope !== '') {
+
+                // Ubah status tombol menjadi loading
+                var btn = $(this);
+                var originalText = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Memproses...');
+
                 $.ajax({
                     type: "POST",
                     url: '<?= site_url('update_web_admin'); ?>',
@@ -591,18 +629,22 @@
                     processData: false,
                     contentType: false,
                     success: function(res) {
-                        // alert(res);
                         if (res) {
-                            $("#personalMsg").show();
-                            $("#personalMsg").html('Data berhasil diupdate.');
-                            setTimeout(function() {
-                                $("#personalMsg").hide();
-                            }, 2000);
+                            $("#personalMsg").html('Data berhasil diupdate!').show();
+
                             setTimeout(function() {
                                 location.reload();
-                            }, 2010);
-                            // alert (res)
+                            }, 1500);
+                        } else {
+                            btn.prop('disabled', false).html(originalText);
+                            alert("Gagal mengupdate data.");
                         }
+                    },
+                    error: function(xhr, status, error) {
+                        // Jika masih terjadi error (misal 500), tombol akan menyala kembali
+                        btn.prop('disabled', false).html(originalText);
+                        console.error("Error Response: ", xhr.responseText);
+                        alert("Terjadi kesalahan sistem! Coba lagi.");
                     }
                 });
             } else {
