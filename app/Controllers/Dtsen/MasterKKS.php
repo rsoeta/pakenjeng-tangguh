@@ -4,13 +4,13 @@ namespace App\Controllers\Dtsen;
 
 use App\Controllers\BaseController;
 use App\Models\Dtks\AuthModel;
-use App\Traits\WilayahFilterTrait; // 👈 1. Panggil Trait
+use App\Traits\WilayahFilterTrait;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 
 class MasterKKS extends BaseController
 {
-    use WilayahFilterTrait; // 👈 2. Gunakan Trait
+    use WilayahFilterTrait;
 
     protected $db;
     protected $authModel;

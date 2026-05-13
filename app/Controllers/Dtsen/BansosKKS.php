@@ -4,9 +4,13 @@ namespace App\Controllers\Dtsen;
 
 use App\Controllers\BaseController;
 use App\Models\Dtks\AuthModel;
+use App\Traits\WilayahFilterTrait;
+
 
 class BansosKKS extends BaseController
 {
+    use WilayahFilterTrait;
+
     protected $db;
     protected $authModel;
 
@@ -20,62 +24,46 @@ class BansosKKS extends BaseController
     {
         // Data dasar untuk view
         $data = [
-            'title' => 'Dokumentasi Penyaluran Bansos melalui KKS',
+            'title' => 'Dokumentasi Bansos',
             'user'  => session()->get(),
         ];
 
         // 👇 UBAH BARIS INI SESUAIKAN DENGAN NAMA FOLDER BARU ANDA 👇
-        return view('dtsen/bansos_kks/v_kks_form', $data);
+        return view('dtsen/bansos_kks/v_bansos_kks', $data);
     }
 
-    // ========================================================
-    // 🔍 PENCARIAN AJAX (Validasi Silang & Filter Wilayah Tugas)
-    // ========================================================
-    public function cari_nik_ajax()
+    public function datatable()
     {
-        $searchTerm = trim($this->request->getPost('searchTerm'));
-
-        // 1. Ambil wilayah_tugas dari user yang sedang login
-        // Gunakan authModel yang sudah di-load di __construct
         $user = $this->authModel->getUserId();
         $wilayahTugas = trim($user['wilayah_tugas'] ?? '');
+        $roleId = session()->get('role_id') ?? 4;
 
-        // ... (lanjutkan kode builder dan filter wilayah tugas di bawahnya)
+        // 🚀 TANGKAP REQUEST FILTER DARI VIEW
+        $filterRw = $this->request->getPost('filter_rw');
+        $filterRt = $this->request->getPost('filter_rt');
+        $filterTahap = $this->request->getPost('filter_tahap');
 
-        // 2. Build Query Utama (Join ART -> KK -> RT)
-        $builder = $this->db->table('dtsen_master_kks m')
-            ->select('a.nik, a.nama as nama_kpm, m.no_kks')
-            ->join('dtsen_art a', 'a.nik = m.nik') // Validasi dengan penduduk aktif
-            ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left') // Ambil ID RT dari KK
-            ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left') // Ambil data RW & RT
-            ->groupStart()
-            ->like('a.nik', $searchTerm)
-            ->orLike('m.no_kks', $searchTerm)
-            ->groupEnd()
-            ->limit(10);
+        // 🛡️ KUNCI UTAMA: Group by ID dokumentasi agar tidak tampil ganda
+        $builder = $this->db->table('dtsen_bansos_kks b')
+            ->select('b.*, m.alamat, r.rt, r.rw')
+            ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
+            ->join('dtsen_art a', 'a.nik = b.nik_kpm', 'left')
+            ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left')
+            ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left');
+        // 🛡️ KUNCI UTAMA: Group by ID dokumentasi agar tidak tampil ganda
 
-        // 3. 🔐 PARSE wilayah_tugas → pasangan RW–RT (KUNCI)
         if (!empty($wilayahTugas)) {
             $wilayahPairs = [];
-            // contoh: 001:005,007|004:002
             $blocks = explode('|', $wilayahTugas);
-
             foreach ($blocks as $block) {
                 [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
-                $rw = trim($rw);
-
                 foreach (explode(',', $rtList) as $rt) {
-                    $rt = trim($rt);
-                    if ($rw !== '' && $rt !== '') {
-                        $wilayahPairs[] = [
-                            'rw' => $rw,
-                            'rt' => $rt
-                        ];
+                    if (trim($rw) !== '' && trim($rt) !== '') {
+                        $wilayahPairs[] = ['rw' => trim($rw), 'rt' => trim($rt)];
                     }
                 }
             }
 
-            // 4. Terapkan Filter Wilayah ke dalam Query
             if (!empty($wilayahPairs)) {
                 $builder->groupStart();
                 foreach ($wilayahPairs as $pair) {
@@ -88,7 +76,132 @@ class BansosKKS extends BaseController
             }
         }
 
-        // 5. Eksekusi Query dan Format Hasil
+        // ==========================================
+        // 🚀 TERAPKAN FILTER PENCARIAN MANUAL
+        // ==========================================
+        if (!empty($filterRw)) {
+            $builder->where('r.rw', str_pad($filterRw, 3, '0', STR_PAD_LEFT));
+        }
+        if (!empty($filterRt)) {
+            $builder->where('r.rt', str_pad($filterRt, 3, '0', STR_PAD_LEFT));
+        }
+
+        // 🚀 PERBAIKAN: Gunakan WHERE persis (Exact Match) untuk Tahap
+        if (!empty($filterTahap)) {
+            $builder->where('b.tahap_salur', $filterTahap);
+        }
+
+        // Kunci Data Unik dan Urutkan
+        $builder->groupBy('b.id')->orderBy('b.created_at', 'DESC');
+
+        $query = $builder->get()->getResultArray();
+        $data = [];
+        $no = 1;
+
+        foreach ($query as $row) {
+            $fotoPath = !empty($row['foto_kpm_kks']) ? base_url('uploads/bansos/' . $row['foto_kpm_kks']) : base_url('assets/img/no-image.png');
+            // 🚀 PERBAIKAN: Bungkus dengan <a> untuk efek Lightbox
+            $colFoto = '
+                <a href="' . $fotoPath . '" data-lightbox="gallery-kpm" data-title="Foto KPM: ' . esc($row['nama_kpm']) . '">
+                    <img src="' . $fotoPath . '" class="rounded shadow-sm" style="width: 70px; height: 90px; object-fit: cover; border: 2px solid #fff; cursor: pointer;" title="Klik untuk memperbesar">
+                </a>';
+            $nominal = 'Rp ' . number_format($row['nominal_cair'], 0, ',', '.');
+
+            $colDetail = '
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-2 mb-md-0">
+                    <span class="fw-bold text-dark d-block" style="font-size:1.1rem;">' . esc($row['nama_kpm']) . '</span>
+                    <span class="text-muted small"><i class="fas fa-id-card"></i> ' . esc($row['nik_kpm']) . '</span>
+                </div>
+                <div class="col-md-6 d-none d-md-block text-md-right border-left">
+                    <div class="mb-1">
+                        <span class="badge bg-primary p-2 mr-1">' . esc($row['jenis_bansos']) . '</span>
+                        <span class="badge bg-success p-2">' . $nominal . '</span>
+                    </div>
+                    <div class="small text-muted mt-1">
+                         <i class="fas fa-credit-card"></i> ' . esc($row['nomor_kks']) . '
+                    </div>
+                </div>
+                <div class="col-12 mt-1">
+                    <small class="text-muted"><i class="fas fa-map-marker-alt text-danger"></i> ' . esc($row['alamat'] ?? '-') . ' RT' . ($row['rt'] ?? '00') . '/RW' . ($row['rw'] ?? '00') . '</small>
+                </div>
+            </div>';
+
+            // --- DI DALAM FUNGSI datatable() ---
+            // Ganti bagian $btnAction menjadi seperti ini:
+            $btnAction = '
+            <div class="d-flex flex-row justify-content-center align-items-center" style="gap: 5px;">
+                <button class="btn btn-sm btn-outline-warning btn-edit" 
+                        data-id="' . $row['id'] . '" 
+                        title="Edit Data">
+                    <i class="fas fa-edit"></i>
+                </button>
+                ' . ($roleId <= 3 ? '<button class="btn btn-sm btn-outline-danger btn-delete" data-id="' . $row['id'] . '" title="Hapus"><i class="fas fa-trash"></i></button>' : '') . '
+            </div>';
+
+            $data[] = [$no++, $colFoto, $colDetail, $btnAction];
+        }
+
+        return $this->response->setJSON(['data' => $data]);
+    }
+
+    // ========================================================
+    // 🔍 PENCARIAN AJAX (Validasi Silang & Filter Wilayah Tugas)
+    // ========================================================
+    public function cari_nik_ajax()
+    {
+        $searchTerm = trim($this->request->getPost('searchTerm'));
+
+        // 1. Ambil wilayah_tugas dari user yang sedang login
+        $user = $this->authModel->getUserId();
+        $wilayahTugas = trim($user['wilayah_tugas'] ?? '');
+
+        // 2. Build Query Utama (Join ART -> KK -> RT)
+        $builder = $this->db->table('dtsen_master_kks m')
+            ->select('a.nik, a.nama as nama_kpm, m.no_kks')
+            ->join('dtsen_art a', 'a.nik = m.nik') // Validasi dengan penduduk aktif
+            ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left') // Ambil ID RT dari KK
+            ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left') // Ambil data RW & RT
+            ->groupStart()
+            ->like('a.nik', $searchTerm)
+            ->orLike('m.no_kks', $searchTerm)
+            ->orLike('a.nama', $searchTerm)
+            ->groupEnd()
+            // 🛡️ KUNCI UTAMA: GroupBy NIK agar tidak muncul ganda jika ada data join yang double
+            ->groupBy('a.nik')
+            ->limit(15);
+
+        // 3. 🔐 PARSE wilayah_tugas → pasangan RW–RT (KUNCI VISIBILITAS)
+        if (!empty($wilayahTugas)) {
+            $wilayahPairs = [];
+            $blocks = explode('|', $wilayahTugas);
+
+            foreach ($blocks as $block) {
+                [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
+                $rw = trim($rw);
+
+                foreach (explode(',', $rtList) as $rt) {
+                    $rt = trim($rt);
+                    if ($rw !== '' && $rt !== '') {
+                        $wilayahPairs[] = ['rw' => $rw, 'rt' => $rt];
+                    }
+                }
+            }
+
+            // 4. Terapkan Filter Wilayah agar petugas hanya bisa mencari warga di wilayahnya
+            if (!empty($wilayahPairs)) {
+                $builder->groupStart();
+                foreach ($wilayahPairs as $pair) {
+                    $builder->orGroupStart()
+                        ->where('r.rw', $pair['rw'])
+                        ->where('r.rt', $pair['rt'])
+                        ->groupEnd();
+                }
+                $builder->groupEnd();
+            }
+        }
+
+        // 5. Eksekusi Query dan Format Hasil untuk Select2
         $query = $builder->get()->getResultArray();
 
         $data = [];
@@ -105,13 +218,13 @@ class BansosKKS extends BaseController
     }
 
     // ========================================================
-    // 💾 SIMPAN DOKUMENTASI (Watermark & Custom Filename)
+    // 💾 SIMPAN DATA (Insert & Update dalam 1 Fungsi, dengan Logika File yang Cerdas)
     // ========================================================
     public function simpan()
     {
         try {
-
             $post = $this->request->getPost();
+            $id = $post['id'] ?? null; // Ambil ID jika ada (untuk Update)
 
             if (empty($post['nik_kpm'])) {
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Data KPM tidak valid!']);
@@ -123,61 +236,70 @@ class BansosKKS extends BaseController
             $fotoKpm   = $this->request->getFile('foto_kpm_kks');
             $fotoBukti = $this->request->getFile('foto_bukti_transaksi');
 
-            // ========================================================
-            // 🛡️ LOGIKA ROBUSTNESS: CEK VALIDITAS FILE SEBELUM DIPROSES
-            // ========================================================
-            if ($fotoKpm && !$fotoKpm->isValid()) {
-                return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'Gagal Upload Foto KPM: ' . $fotoKpm->getErrorString() . ' (Kode: ' . $fotoKpm->getError() . ')'
-                ]);
+            // 1. Ambil data lama jika ini proses UPDATE
+            $oldData = null;
+            if ($id) {
+                $oldData = $this->db->table('dtsen_bansos_kks')->where('id', $id)->get()->getRowArray();
             }
-
-            if ($fotoBukti && !$fotoBukti->isValid()) {
-                return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'Gagal Upload Bukti: ' . $fotoBukti->getErrorString() . ' (Kode: ' . $fotoBukti->getError() . ')'
-                ]);
-            }
-            // ========================================================
 
             $nik = $post['nik_kpm'];
-            // ... (lanjutkan ke penamaan file $namaFotoKpm dan seterusnya)
-            $kks = $post['no_kks'] !== '-' && !empty($post['no_kks']) ? $post['no_kks'] : 'NOKKS';
+            $kks = ($post['no_kks'] !== '-' && !empty($post['no_kks'])) ? $post['no_kks'] : 'NOKKS';
             $lat = $post['latitude'] ?: '0';
             $lng = $post['longitude'] ?: '0';
-
-            // Tambahkan time() agar file selalu unik dan terhindar dari Cache Browser
             $timestamp = time();
-            $namaFotoKpm   = "KPM_{$nik}_{$kks}_{$timestamp}.jpg";
-            $namaFotoBukti = "STRUK_{$nik}_{$kks}_{$timestamp}.jpg";
 
+            // 2. LOGIKA FILE FOTO (Update vs Insert)
             $uploadPath = FCPATH . 'uploads/bansos/';
             if (!is_dir($uploadPath)) mkdir($uploadPath, 0777, true);
 
-            // Fungsi internal untuk memberi Watermark
-            $this->_applyWatermark($fotoKpm, $uploadPath . $namaFotoKpm, $post);
-            $this->_applyWatermark($fotoBukti, $uploadPath . $namaFotoBukti, $post);
+            // -- Foto KPM --
+            if ($fotoKpm && $fotoKpm->isValid()) {
+                $namaFotoKpm = "KPM_{$nik}_{$kks}_{$timestamp}.jpg";
+                $this->_applyWatermark($fotoKpm, $uploadPath . $namaFotoKpm, $post);
+                // Jika update, hapus foto lama jika perlu (opsional)
+            } else {
+                // Jika update dan tidak upload baru, pakai nama foto lama
+                $namaFotoKpm = ($id && $oldData) ? $oldData['foto_kpm_kks'] : '';
+            }
 
-            $dataInsert = [
+            // -- Foto Bukti --
+            if ($fotoBukti && $fotoBukti->isValid()) {
+                $namaFotoBukti = "STRUK_{$nik}_{$kks}_{$timestamp}.jpg";
+                $this->_applyWatermark($fotoBukti, $uploadPath . $namaFotoBukti, $post);
+            } else {
+                $namaFotoBukti = ($id && $oldData) ? $oldData['foto_bukti_transaksi'] : '';
+            }
+
+            // 3. PREPARASI DATA
+            $dataSave = [
                 'nik_kpm'              => $nik,
                 'nama_kpm'             => $post['nama_kpm'],
                 'nomor_kks'            => $kks,
                 'jenis_bansos'         => $post['jenis_bansos'],
                 'tahap_salur'          => $tahap_salur_final,
-                'nominal_cair'         => (int) ($post['nominal_cair'] ?? 0),
+                'nominal_cair'         => (int) str_replace('.', '', $post['nominal_cair'] ?? 0),
                 'status_salur'         => $post['status_salur'],
                 'foto_kpm_kks'         => $namaFotoKpm,
                 'foto_bukti_transaksi' => $namaFotoBukti,
                 'latitude'             => $lat,
                 'longitude'            => $lng,
-                'created_by'           => session()->get('id') ?? 0,
-                'created_at'           => date('Y-m-d H:i:s')
             ];
 
-            $this->db->table('dtsen_bansos_kks')->insert($dataInsert);
+            // 4. EKSEKUSI (INSERT vs UPDATE)
+            if ($id) {
+                // PROSES UPDATE
+                $dataSave['updated_at'] = date('Y-m-d H:i:s');
+                $this->db->table('dtsen_bansos_kks')->where('id', $id)->update($dataSave);
+                $msg = 'Dokumentasi berhasil diperbarui!';
+            } else {
+                // PROSES INSERT
+                $dataSave['created_by'] = session()->get('id') ?? 0;
+                $dataSave['created_at'] = date('Y-m-d H:i:s');
+                $this->db->table('dtsen_bansos_kks')->insert($dataSave);
+                $msg = 'Dokumentasi berhasil disimpan!';
+            }
 
-            return $this->response->setJSON(['status' => 'success', 'message' => 'Dokumentasi berhasil disimpan!']);
+            return $this->response->setJSON(['status' => 'success', 'message' => $msg]);
         } catch (\Throwable $e) {
             return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
         }
@@ -349,5 +471,173 @@ class BansosKKS extends BaseController
 
         imagedestroy($image);
         imagedestroy($layer);
+    }
+
+    // --- TAMBAHKAN FUNGSI BARU DI BAWAHNYA ---
+    public function edit_ajax($id)
+    {
+        // Ambil data detail beserta join wilayah agar Select2 bisa sinkron
+        $data = $this->db->table('dtsen_bansos_kks b')
+            ->select('b.*, m.no_kks')
+            ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
+            ->where('b.id', $id)
+            ->get()
+            ->getRowArray();
+
+        if ($data) {
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data'   => $data
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Data tidak ditemukan'
+        ]);
+    }
+
+    // ========================================================
+    // 🌍 GET DYNAMIC RW (Filter Role, Wilayah & Kode Desa)
+    // ========================================================
+    public function get_rw_ajax()
+    {
+        $user = $this->authModel->getUserId();
+        $wilayahTugas = trim($user['wilayah_tugas'] ?? '');
+        $roleId = session()->get('role_id') ?? 4;
+
+        // 🚀 SUPER AMAN: Cek di session, kalau tidak ada cek di data user db
+        $kodeDesa = session()->get('kode_desa') ?? ($user['kode_desa'] ?? '');
+
+        if ($roleId <= 3 || empty($wilayahTugas)) {
+
+            // 🛡️ PENCEGAHAN KEBOCORAN MUTLAK
+            if (empty($kodeDesa)) {
+                return $this->response->setJSON([]);
+            }
+
+            $query = $this->db->table('dtsen_rt')
+                ->select('rw')
+                ->distinct()
+                ->where('kode_desa', $kodeDesa) // 🔒 Gembok paten
+                ->orderBy('rw', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            $rwList = array_column($query, 'rw');
+        } else {
+            // Operator: Ekstrak RW dari string wilayah_tugas
+            $rwList = [];
+            $blocks = explode('|', $wilayahTugas);
+            foreach ($blocks as $block) {
+                [$rw,] = array_pad(explode(':', $block), 2, '');
+                if (trim($rw) !== '') {
+                    $rwList[] = str_pad(trim($rw), 3, '0', STR_PAD_LEFT);
+                }
+            }
+            $rwList = array_unique($rwList);
+            sort($rwList);
+        }
+
+        return $this->response->setJSON($rwList);
+    }
+
+    // ========================================================
+    // 🌍 GET DYNAMIC RT (Berdasarkan Pilihan RW & Kode Desa)
+    // ========================================================
+    public function get_rt_ajax()
+    {
+        $rw = $this->request->getGet('rw');
+        $user = $this->authModel->getUserId();
+        $wilayahTugas = trim($user['wilayah_tugas'] ?? '');
+        $roleId = session()->get('role_id') ?? 4;
+
+        // 🚀 SUPER AMAN: Cek di session, kalau tidak ada cek di data user db
+        $kodeDesa = session()->get('kode_desa') ?? ($user['kode_desa'] ?? '');
+
+        if ($roleId <= 3 || empty($wilayahTugas)) {
+
+            // 🛡️ PENCEGAHAN KEBOCORAN MUTLAK
+            if (empty($kodeDesa)) {
+                return $this->response->setJSON([]);
+            }
+
+            $builder = $this->db->table('dtsen_rt')
+                ->select('rt')
+                ->distinct()
+                ->where('kode_desa', $kodeDesa); // 🔒 Gembok paten
+
+            if (!empty($rw)) {
+                $builder->where('rw', str_pad($rw, 3, '0', STR_PAD_LEFT));
+            }
+
+            $query = $builder->orderBy('rt', 'ASC')->get()->getResultArray();
+            $rtList = array_column($query, 'rt');
+        } else {
+            // Operator: Ekstrak RT khusus untuk RW yang dipilih
+            $rtList = [];
+            $blocks = explode('|', $wilayahTugas);
+            foreach ($blocks as $block) {
+                [$blokRw, $rtCSV] = array_pad(explode(':', $block), 2, '');
+
+                if (str_pad(trim($blokRw), 3, '0', STR_PAD_LEFT) === str_pad($rw, 3, '0', STR_PAD_LEFT)) {
+                    $rts = explode(',', $rtCSV);
+                    foreach ($rts as $rt) {
+                        if (trim($rt) !== '') {
+                            $rtList[] = str_pad(trim($rt), 3, '0', STR_PAD_LEFT);
+                        }
+                    }
+                }
+            }
+            $rtList = array_unique($rtList);
+            sort($rtList);
+        }
+
+        return $this->response->setJSON($rtList);
+    }
+
+    // ========================================================
+    // 🗑️ HAPUS DOKUMENTASI (Termasuk Hapus Foto Fisik dari Server)
+    // ========================================================
+    public function hapus()
+    {
+        try {
+            $id = $this->request->getPost('id');
+            if (empty($id)) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'ID tidak valid!']);
+            }
+
+            // 🛡️ Cek Otorisasi (Hanya Admin & Kades / Role 1-3 yang bisa hapus)
+            $roleId = session()->get('role_id') ?? 4;
+            if ($roleId > 3) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Anda tidak memiliki akses untuk menghapus data!']);
+            }
+
+            // 1. Ambil data sebelum dihapus untuk mengetahui nama file fotonya
+            $data = $this->db->table('dtsen_bansos_kks')->where('id', $id)->get()->getRowArray();
+
+            if ($data) {
+                $uploadPath = FCPATH . 'uploads/bansos/';
+
+                // 2. Sapu bersih Foto KPM dari server (jika ada)
+                if (!empty($data['foto_kpm_kks']) && file_exists($uploadPath . $data['foto_kpm_kks'])) {
+                    unlink($uploadPath . $data['foto_kpm_kks']);
+                }
+
+                // 3. Sapu bersih Foto Bukti/Struk dari server (jika ada)
+                if (!empty($data['foto_bukti_transaksi']) && file_exists($uploadPath . $data['foto_bukti_transaksi'])) {
+                    unlink($uploadPath . $data['foto_bukti_transaksi']);
+                }
+
+                // 4. Hapus baris data permanen dari database
+                $this->db->table('dtsen_bansos_kks')->where('id', $id)->delete();
+
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Data dan foto dokumentasi berhasil dihapus permanen!']);
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak ditemukan di database!']);
+            }
+        } catch (\Throwable $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
+        }
     }
 }
