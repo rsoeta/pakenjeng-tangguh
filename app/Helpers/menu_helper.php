@@ -60,8 +60,9 @@ function menu()
     if ($menuCache === null) {
         $db = \Config\Database::connect();
         $menuCache = $db->table('tb_menu')
-            ->orderBy('tm_parent_id', 'asc')
-            ->orderBy('tm_id', 'asc')
+            ->orderBy('tm_parent_id', 'asc') // 1. Kelompokkan Induk & Anak dulu
+            ->orderBy('tm_urutan', 'asc')    // 2. LALU URUTKAN BERDASARKAN ANGKA URUTAN KITA 👈
+            ->orderBy('tm_id', 'asc')        // 3. Cadangan jika ada angka urut yang kembar
             ->get()
             ->getResultArray();
     }

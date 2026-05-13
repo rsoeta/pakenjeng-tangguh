@@ -1473,3 +1473,21 @@ CREATE TABLE `dtsen_master_kks` (
 INSERT INTO `tb_menu` (`tm_nama`, `tm_class`, `tm_url`, `tm_icon`, `tm_parent_id`, `tm_status`, `tm_grup_akses`) 
 VALUES 
 ('Master KKS', '', 'master-kks', 'fas fa-database', 0, 1, 3);
+
+==============================================================================================================================================================
+Perbaiki tabel menu (tambah urutan)
+==============================================================================================================================================================
+ALTER TABLE `tb_menu` 
+ADD COLUMN `tm_urutan` int NOT NULL DEFAULT '0' AFTER `tm_grup_akses`;
+
+UPDATE `tb_menu` SET `tm_urutan` = 1 WHERE `tm_nama` = 'Home';
+UPDATE `tb_menu` SET `tm_urutan` = 2 WHERE `tm_nama` = 'DTSEN';
+UPDATE `tb_menu` SET `tm_urutan` = 3 WHERE `tm_nama` = 'PBI-JKN';
+UPDATE `tb_menu` SET `tm_urutan` = 4 WHERE `tm_nama` = 'Penentuan Kemiskinan';
+UPDATE `tb_menu` SET `tm_urutan` = 5 WHERE `tm_nama` = 'Dokumentasi Bansos';
+UPDATE `tb_menu` SET `tm_urutan` = 99 WHERE `tm_nama` = 'Settings';
+
+ALTER TABLE `dtsen_master_kks` 
+ADD COLUMN `updated_at` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP AFTER `created_at`,
+ADD COLUMN `created_by` varchar(50) DEFAULT NULL AFTER `updated_at`,
+ADD COLUMN `updated_by` varchar(50) DEFAULT NULL AFTER `created_by`;

@@ -174,9 +174,17 @@ $routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview']], 
 	$routes->get('data-filter', 'Dtsen\UsulanBansos::getDataByFilter');
 });
 
+// MASTER KKS
 $routes->group('master-kks', ['filter' => 'authfilterdtks'], function ($routes) {
 	$routes->get('/', 'Dtsen\MasterKKS::index');
+	$routes->post('datatable', 'Dtsen\MasterKKS::datatable');
+	$routes->get('get-rw', 'Dtsen\MasterKKS::get_rw_ajax');
+	$routes->post('get-rt', 'Dtsen\MasterKKS::get_rt_ajax');
 	$routes->post('import', 'Dtsen\MasterKKS::import_excel');
+	$routes->post('get-kpm', 'Dtsen\MasterKKS::get_kpm');
+	$routes->post('save', 'Dtsen\MasterKKS::save');
+	$routes->post('search-penduduk', 'Dtsen\MasterKKS::search_penduduk');
+	$routes->post('delete', 'Dtsen\MasterKKS::delete');
 });
 
 // DOKUMENTASI BANSOS KKS
