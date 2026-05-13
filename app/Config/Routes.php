@@ -174,6 +174,18 @@ $routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview']], 
 	$routes->get('data-filter', 'Dtsen\UsulanBansos::getDataByFilter');
 });
 
+$routes->group('master-kks', ['filter' => 'authfilterdtks'], function ($routes) {
+	$routes->get('/', 'Dtsen\MasterKKS::index');
+	$routes->post('import', 'Dtsen\MasterKKS::import_excel');
+});
+
+// DOKUMENTASI BANSOS KKS
+$routes->group('bansos-kks', ['filter' => 'authfilterdtks'], function ($routes) {
+	$routes->get('/', 'Dtsen\BansosKKS::index');
+	$routes->post('cari-nik', 'Dtsen\BansosKKS::cari_nik_ajax');
+	$routes->post('simpan', 'Dtsen\BansosKKS::simpan'); // 👈 Tambahkan baris ini
+});
+
 // 🌍 API Wilayah Lokal (Dropdown berantai untuk DTSEN)
 $routes->group('api/villages', ['namespace' => 'App\Controllers\Api'], function ($routes) {
 	$routes->get('provinces', 'Villages::provinces');

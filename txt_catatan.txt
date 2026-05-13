@@ -1423,3 +1423,53 @@ VALUES
 Anda perlu menambahkan satu kolom di tabel dtsen_kk untuk menandai data yang sedang ditarik ke pemulihan. Jalankan perintah SQL ini di PHPMyAdmin:
 
 ALTER TABLE dtsen_kk ADD COLUMN is_recovery_needed TINYINT(1) DEFAULT 0;
+
+============================================================================================================================================================
+Fitur Dokumentasi Penyaluran Bansos melalui KKS (Kartu Keluarga Sejahtera)
+=============================================================================================================================================================
+1. Skema Database Final (dtsen_bansos_kks)
+CREATE TABLE `dtsen_bansos_kks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nik_kpm` varchar(16) NOT NULL,
+  `nama_kpm` varchar(150) NOT NULL,
+  `jenis_bansos` enum('PKH','SEMBAKO','PKH + SEMBAKO') NOT NULL,
+  `nomor_kks` varchar(20) DEFAULT NULL,
+  `tahap_salur` varchar(50) NOT NULL, -- Contoh: "Tahap 2 (Mei 2026)"
+  `nominal_cair` int(11) DEFAULT 0, -- Menyimpan nominal uang
+  `status_salur` enum('Sukses Salur','Saldo Kosong','KKS Rusak/Hilang','KPM Meninggal','Pindah/Tidak Ditemukan') NOT NULL,
+  `foto_kpm_kks` varchar(255) DEFAULT NULL, -- Wajah + KKS
+  `foto_bukti_transaksi` varchar(255) DEFAULT NULL, -- Struk EDC / Uang Tunai
+  `latitude` varchar(50) DEFAULT NULL,
+  `longitude` varchar(50) DEFAULT NULL,
+  `created_by` int(11) NOT NULL, -- ID Petugas Entri
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `tb_menu` (`tm_nama`, `tm_class`, `tm_url`, `tm_icon`, `tm_parent_id`, `tm_status`, `tm_grup_akses`) 
+VALUES 
+('Dokumentasi Bansos', '', 'bansos-kks', 'fas fa-hand-holding-usd', 0, 1, 3);
+
+1. Database Baru: dtsen_master_kks (Konversi dari Google Sheets)
+CREATE TABLE `dtsen_master_kks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nik` varchar(16) NOT NULL,
+  `nama_penerima` varchar(150) NOT NULL,
+  `no_kks` varchar(20) DEFAULT NULL,
+  `no_wa` varchar(15) DEFAULT NULL,
+  `kepesertaan` varchar(50) DEFAULT NULL,
+  `status_kks` varchar(50) DEFAULT NULL,
+  `alamat` varchar(255) DEFAULT NULL,
+  `rt` varchar(3) DEFAULT NULL,
+  `rw` varchar(3) DEFAULT NULL,
+  `foto_kks` varchar(255) DEFAULT NULL,
+  `foto_kepemilikan` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nik_unik` (`nik`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `tb_menu` (`tm_nama`, `tm_class`, `tm_url`, `tm_icon`, `tm_parent_id`, `tm_status`, `tm_grup_akses`) 
+VALUES 
+('Master KKS', '', 'master-kks', 'fas fa-database', 0, 1, 3);
