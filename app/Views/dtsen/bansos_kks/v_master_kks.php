@@ -4,21 +4,22 @@
 <div class="content-wrapper">
     <div class="content-header">
         <div class="container-fluid">
-            <div class="row mb-2">
+            <div class="row align-items-center mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0"><?= $title; ?></h1>
+                    <h1 class="m-0 font-weight-bold text-dark">
+                        <i class="fas fa-id-card text-primary mr-2"></i> <?= $title; ?>
+                    </h1>
                 </div>
-                <div class="col-sm-6 text-right">
+                <div class="col-sm-6 text-right mt-3 mt-sm-0">
                     <?php if (session()->get('role_id') <= 3): ?>
-                        <button type="button" class="btn btn-success btn-sm shadow-sm" data-toggle="modal" data-target="#modalImport">
-                            <i class="fas fa-file-excel mr-1"></i> Impor dari Google Sheets (Excel)
+                        <button type="button" class="btn btn-success btn-sm shadow-sm rounded-pill px-3 mr-1" data-toggle="modal" data-target="#modalImport">
+                            <i class="fas fa-file-excel mr-1"></i> Impor Data (Excel)
                         </button>
                     <?php endif; ?>
-                    <button type="button" class="btn btn-primary btn-sm" id="btnTambahKPM">
-                        <i class="fas fa-plus"></i> Tambah KPM
+                    <button type="button" class="btn btn-primary btn-sm shadow-sm rounded-pill px-3" id="btnTambahKPM">
+                        <i class="fas fa-plus-circle mr-1"></i> Tambah KPM
                     </button>
                 </div>
-
             </div>
         </div>
     </div>
@@ -26,59 +27,66 @@
     <section class="content">
         <div class="container-fluid">
             <?php if (session()->getFlashdata('success')) : ?>
-                <div class="alert alert-success alert-dismissible fade show"><?= session()->getFlashdata('success'); ?></div>
+                <div class="alert alert-success alert-dismissible fade show shadow-sm rounded border-0">
+                    <i class="fas fa-check-circle mr-2"></i> <?= session()->getFlashdata('success'); ?>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
             <?php endif; ?>
 
-            <div class="card card-dark">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-
-                        <div class="row mb-3 bg-light p-3 rounded border">
-                            <div class="col-6 col-md-3 mb-2">
-                                <label for="filter_rw" class="m-0 text-muted" style="font-size:0.85rem;">Filter RW</label>
-                                <select id="filter_rw" class="form-control form-control-sm">
-                                    <option value="">-- Semua RW --</option>
-                                </select>
-                            </div>
-                            <div class="col-6 col-md-3 mb-2">
-                                <label for="filter_rt" class="m-0 text-muted" style="font-size:0.85rem;">Filter RT</label>
-                                <select id="filter_rt" class="form-control form-control-sm">
-                                    <option value="">-- Semua RT --</option>
-                                </select>
-                            </div>
-                            <div class="col-6 col-md-3 mb-2 mb-md-0">
-                                <label for="filter_status" class="m-0 text-muted" style="font-size:0.85rem;">Status KKS</label>
-                                <select id="filter_status" class="form-control form-control-sm">
-                                    <option value="">-- Semua Status --</option>
-                                    <option value="Aktif">Aktif</option>
-                                    <option value="Non Aktif">Non Aktif</option>
-                                </select>
-                            </div>
-                            <div class="col-6 col-md-3 d-flex align-items-end mb-2 mb-md-0">
-                                <button id="btn_filter" class="btn btn-sm btn-primary w-100"><i class="fas fa-filter"></i> Terapkan</button>
-                            </div>
+            <div class="card card-outline card-primary shadow-sm border-0 rounded-lg">
+                <div class="card-header bg-light border-bottom p-3">
+                    <div class="row align-items-end">
+                        <div class="col-6 col-md-3 mb-2 mb-md-0">
+                            <label for="filter_rw" class="small font-weight-bold text-muted mb-1">Wilayah RW</label>
+                            <select id="filter_rw" class="form-control form-control-sm border-0 shadow-sm rounded-pill px-3">
+                                <option value="">-- Semua RW --</option>
+                            </select>
                         </div>
-
-                        <div class="table-responsive">
-                            <table id="tableMasterKKS" class="table table-bordered table-hover table-sm" style="width:100%;">
-                                <thead class="bg-secondary text-white">
-                                    <tr>
-                                        <th width="5%">No</th>
-                                        <th>NIK</th>
-                                        <th>Nama KPM</th>
-                                        <th>No. KKS</th>
-                                        <th>Alamat Lengkap</th>
-                                        <th>Status</th>
-                                        <th width="10%"><i class="fas fa-cogs"></i></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
+                        <div class="col-6 col-md-3 mb-2 mb-md-0">
+                            <label for="filter_rt" class="small font-weight-bold text-muted mb-1">Wilayah RT</label>
+                            <select id="filter_rt" class="form-control form-control-sm border-0 shadow-sm rounded-pill px-3">
+                                <option value="">-- Semua RT --</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-3 mb-2 mb-md-0">
+                            <label for="filter_status" class="small font-weight-bold text-muted mb-1">Status KKS</label>
+                            <select id="filter_status" class="form-control form-control-sm border-0 shadow-sm rounded-pill px-3">
+                                <option value="">-- Semua Status --</option>
+                                <option value="Aktif">Aktif</option>
+                                <option value="Non Aktif">Non Aktif</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <button id="btn_filter" class="btn btn-sm btn-dark btn-block shadow-sm rounded-pill">
+                                <i class="fas fa-filter mr-1"></i> Terapkan
+                            </button>
                         </div>
                     </div>
                 </div>
+
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table id="tableMasterKKS" class="table table-hover table-striped mb-0" style="width:100%;">
+                            <thead class="text-muted bg-white">
+                                <tr>
+                                    <th width="5%" class="text-center border-top-0">No</th>
+                                    <th class="border-top-0">NIK</th>
+                                    <th class="border-top-0">Nama KPM</th>
+                                    <th class="border-top-0">No. KKS</th>
+                                    <th class="border-top-0">Alamat Lengkap</th>
+                                    <th class="border-top-0 text-center">Status</th>
+                                    <th width="10%" class="text-center border-top-0"><i class="fas fa-cogs"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
+
         </div>
     </section>
 </div>

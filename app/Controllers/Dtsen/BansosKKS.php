@@ -50,7 +50,6 @@ class BansosKKS extends BaseController
             ->join('dtsen_art a', 'a.nik = b.nik_kpm', 'left')
             ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left')
             ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left');
-        // 🛡️ KUNCI UTAMA: Group by ID dokumentasi agar tidak tampil ganda
 
         if (!empty($wilayahTugas)) {
             $wilayahPairs = [];
@@ -85,8 +84,6 @@ class BansosKKS extends BaseController
         if (!empty($filterRt)) {
             $builder->where('r.rt', str_pad($filterRt, 3, '0', STR_PAD_LEFT));
         }
-
-        // 🚀 PERBAIKAN: Gunakan WHERE persis (Exact Match) untuk Tahap
         if (!empty($filterTahap)) {
             $builder->where('b.tahap_salur', $filterTahap);
         }
@@ -98,20 +95,45 @@ class BansosKKS extends BaseController
         $data = [];
         $no = 1;
 
+        // ==========================================
+        // 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF
+        // ==========================================
+        $maskNumber = function ($number) {
+            $number = trim($number ?? '');
+            if (empty($number) || $number === '-' || $number === 'NOKKS') return esc($number);
+
+            $full = esc($number);
+            $len = strlen($full);
+            if ($len <= 8) return $full; // Jika kurang dari 8 digit, biarkan normal
+
+            $masked = substr($full, 0, 8) . str_repeat('*', $len - 8);
+
+            // HTML Pembungkus dengan event Hover & Touch
+            return '<span class="fw-bold" style="cursor:pointer;" ' .
+                'onmouseenter="this.innerText=\'' . $full . '\'" ' .
+                'onmouseleave="this.innerText=\'' . $masked . '\'" ' .
+                'ontouchstart="this.innerText=\'' . $full . '\'" ' .
+                'ontouchend="this.innerText=\'' . $masked . '\'" ' .
+                'title="Tahan/Arahkan kursor untuk melihat utuh">' . $masked . '</span>';
+        };
+
         foreach ($query as $row) {
             $fotoPath = !empty($row['foto_kpm_kks']) ? base_url('uploads/bansos/' . $row['foto_kpm_kks']) : base_url('assets/img/no-image.png');
-            // 🚀 PERBAIKAN: Bungkus dengan <a> untuk efek Lightbox
             $colFoto = '
                 <a href="' . $fotoPath . '" data-lightbox="gallery-kpm" data-title="Foto KPM: ' . esc($row['nama_kpm']) . '">
                     <img src="' . $fotoPath . '" class="rounded shadow-sm" style="width: 70px; height: 90px; object-fit: cover; border: 2px solid #fff; cursor: pointer;" title="Klik untuk memperbesar">
                 </a>';
             $nominal = 'Rp ' . number_format($row['nominal_cair'], 0, ',', '.');
 
+            // 🚀 Menerapkan sensor NIK dan KKS
+            $nikMasked = $maskNumber($row['nik_kpm']);
+            $kksMasked = $maskNumber($row['nomor_kks']);
+
             $colDetail = '
             <div class="row align-items-center">
                 <div class="col-md-6 mb-2 mb-md-0">
                     <span class="fw-bold text-dark d-block" style="font-size:1.1rem;">' . esc($row['nama_kpm']) . '</span>
-                    <span class="text-muted small"><i class="fas fa-id-card"></i> ' . esc($row['nik_kpm']) . '</span>
+                    <span class="text-muted small"><i class="fas fa-id-card"></i> ' . $nikMasked . '</span>
                 </div>
                 <div class="col-md-6 d-none d-md-block text-md-right border-left">
                     <div class="mb-1">
@@ -119,7 +141,7 @@ class BansosKKS extends BaseController
                         <span class="badge bg-success p-2">' . $nominal . '</span>
                     </div>
                     <div class="small text-muted mt-1">
-                         <i class="fas fa-credit-card"></i> ' . esc($row['nomor_kks']) . '
+                         <i class="fas fa-credit-card"></i> ' . $kksMasked . '
                     </div>
                 </div>
                 <div class="col-12 mt-1">
@@ -127,8 +149,6 @@ class BansosKKS extends BaseController
                 </div>
             </div>';
 
-            // --- DI DALAM FUNGSI datatable() ---
-            // Ganti bagian $btnAction menjadi seperti ini:
             $btnAction = '
             <div class="d-flex flex-row justify-content-center align-items-center" style="gap: 5px;">
                 <button class="btn btn-sm btn-outline-warning btn-edit" 

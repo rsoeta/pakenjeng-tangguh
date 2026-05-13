@@ -47,23 +47,18 @@ class MasterKKS extends BaseController
         $filter_rt     = $request->getPost('filter_rt');
         $filter_status = $request->getPost('filter_status');
 
-        // 💡 CHEAT CODE: Beri alias 'rt' agar Trait mengenalinya
         $builder = $this->db->table('dtsen_master_kks rt');
 
         // =======================================================
         // 🔐 TERAPKAN TRAIT WILAYAH FILTER
         // =======================================================
         $user   = $this->authModel->getUserId();
-        // Cek Role ID (Biasanya Pentri = 4, Admin = 3)
         $roleId = session()->get('role_id') ?? $user['role_id'] ?? 4;
 
         $filterData = [
             'wilayah_tugas' => trim($user['wilayah_tugas'] ?? '')
-            // Catatan: 'kode_desa' TIDAK KITA MASUKKAN agar trait tidak 
-            // mencari kolom kode_desa di tabel dtsen_master_kks yang mana tidak ada.
         ];
 
-        // Boom! 💥 Kunci wilayah terpasang otomatis dari Trait!
         $this->applyWilayahFilter($builder, $filterData, $roleId);
 
         $totalRecords = $builder->countAllResults(false);
@@ -102,6 +97,27 @@ class MasterKKS extends BaseController
         $data = [];
         $no = $start + 1;
 
+        // ==========================================
+        // 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF
+        // ==========================================
+        $maskNumber = function ($number) {
+            $number = trim($number ?? '');
+            if (empty($number) || $number === '-' || $number === 'NOKKS') return esc($number);
+
+            $full = esc($number);
+            $len = strlen($full);
+            if ($len <= 8) return $full;
+
+            $masked = substr($full, 0, 8) . str_repeat('*', $len - 8);
+
+            return '<span class="text-primary fw-bold" style="cursor:pointer;" ' .
+                'onmouseenter="this.innerText=\'' . $full . '\'" ' .
+                'onmouseleave="this.innerText=\'' . $masked . '\'" ' .
+                'ontouchstart="this.innerText=\'' . $full . '\'" ' .
+                'ontouchend="this.innerText=\'' . $masked . '\'" ' .
+                'title="Tahan/Arahkan kursor untuk melihat utuh">' . $masked . '</span>';
+        };
+
         foreach ($query as $row) {
             $status_cek = strtolower(trim($row['status_kks']));
             $badge = ($status_cek == 'aktif')
@@ -110,23 +126,25 @@ class MasterKKS extends BaseController
                     ? '<span class="badge badge-danger">Non Aktif</span>'
                     : '<span class="badge badge-secondary">' . esc($row['status_kks']) . '</span>');
 
-            // Tombol Edit selalu muncul untuk semua
             $btnAction = '
                 <button class="btn btn-xs btn-warning btn-edit" data-id="' . $row['id'] . '" title="Edit KPM"><i class="fas fa-edit"></i></button>
             ';
 
-            // Tombol Hapus HANYA muncul jika role_id <= 3
             if ($roleId <= 3) {
                 $btnAction .= '
                 <button class="btn btn-xs btn-danger btn-delete" data-id="' . $row['id'] . '" data-nama="' . esc($row['nama_penerima']) . '" title="Hapus KPM"><i class="fas fa-trash"></i></button>
                 ';
             }
 
+            // 🚀 Menerapkan sensor NIK dan KKS
+            $nikMasked = $maskNumber($row['nik']);
+            $kksMasked = $maskNumber($row['no_kks']);
+
             $data[] = [
                 $no++,
-                esc($row['nik']),
+                $nikMasked, // Menggunakan variabel yang sudah disensor
                 esc($row['nama_penerima']),
-                esc($row['no_kks']),
+                $kksMasked, // Menggunakan variabel yang sudah disensor
                 esc($row['alamat']) . ' RT ' . esc($row['rt']) . ' RW ' . esc($row['rw']),
                 $badge,
                 $btnAction
