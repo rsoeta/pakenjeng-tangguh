@@ -123,7 +123,26 @@ class BansosKKS extends BaseController
             $fotoKpm   = $this->request->getFile('foto_kpm_kks');
             $fotoBukti = $this->request->getFile('foto_bukti_transaksi');
 
+            // ========================================================
+            // 🛡️ LOGIKA ROBUSTNESS: CEK VALIDITAS FILE SEBELUM DIPROSES
+            // ========================================================
+            if ($fotoKpm && !$fotoKpm->isValid()) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Gagal Upload Foto KPM: ' . $fotoKpm->getErrorString() . ' (Kode: ' . $fotoKpm->getError() . ')'
+                ]);
+            }
+
+            if ($fotoBukti && !$fotoBukti->isValid()) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Gagal Upload Bukti: ' . $fotoBukti->getErrorString() . ' (Kode: ' . $fotoBukti->getError() . ')'
+                ]);
+            }
+            // ========================================================
+
             $nik = $post['nik_kpm'];
+            // ... (lanjutkan ke penamaan file $namaFotoKpm dan seterusnya)
             $kks = $post['no_kks'] !== '-' && !empty($post['no_kks']) ? $post['no_kks'] : 'NOKKS';
             $lat = $post['latitude'] ?: '0';
             $lng = $post['longitude'] ?: '0';
@@ -169,46 +188,62 @@ class BansosKKS extends BaseController
     // ========================================================
     private function _applyWatermark($file, $destinationPath, $post)
     {
-        // 1. Pindahkan file mentah
+        // 1. Pindahkan file terlebih dahulu dari form ke folder uploads
         $file->move(dirname($destinationPath), basename($destinationPath), true);
 
-        // 2. LOGIKA AUTO-ROTATE (Perbaikan untuk HP)
-        // Membaca data EXIF untuk mengecek orientasi asli kamera
-        $imageType = exif_imagetype($destinationPath);
-        if ($imageType === IMAGETYPE_JPEG) {
-            $exif = @exif_read_data($destinationPath);
-            if ($exif && isset($exif['Orientation'])) {
-                $source = imagecreatefromjpeg($destinationPath);
-                $deg = 0;
-                switch ($exif['Orientation']) {
-                    case 3:
-                        $deg = 180;
-                        break;
-                    case 6:
-                        $deg = 270;
-                        break; // Sering terjadi di HP (Portrait)
-                    case 8:
-                        $deg = 90;
-                        break;
-                }
-                if ($deg) {
-                    $source = imagerotate($source, $deg, 0);
-                    imagejpeg($source, $destinationPath, 95); // Simpan kembali posisi tegaknya
-                }
-                imagedestroy($source);
-            }
+        // 2. Bersihkan cache server agar PHP tidak membaca status file lama
+        clearstatcache();
+
+        // 3. Cek fisik: Apakah file benar-benar sudah mendarat di folder?
+        if (!file_exists($destinationPath)) {
+            throw new \Exception("File foto menguap! Gagal ditulis ke dalam disk hosting.");
         }
 
-        // 3. Resize pakai CI4 (Sekarang gambar sudah dalam posisi tegak)
-        \Config\Services::image('gd')
-            ->withFile($destinationPath)
-            ->resize(1280, 1280, true, 'auto')
-            ->save($destinationPath);
+        // 4. AUTO-ROTATE (EXIF) dengan Pelindung Try-Catch
+        try {
+            if (function_exists('exif_imagetype') && exif_imagetype($destinationPath) === IMAGETYPE_JPEG) {
+                $exif = @exif_read_data($destinationPath); // Gunakan @ agar warning disembunyikan
+                if ($exif && isset($exif['Orientation'])) {
+                    $source = @imagecreatefromjpeg($destinationPath);
+                    if ($source) {
+                        $deg = 0;
+                        switch ($exif['Orientation']) {
+                            case 3:
+                                $deg = 180;
+                                break;
+                            case 6:
+                                $deg = 270;
+                                break;
+                            case 8:
+                                $deg = 90;
+                                break;
+                        }
+                        if ($deg) {
+                            $source = imagerotate($source, $deg, 0);
+                            imagejpeg($source, $destinationPath, 95);
+                        }
+                        imagedestroy($source);
+                    }
+                }
+            }
+        } catch (\Throwable $th) {
+            // Jika HP mengirim metadata EXIF yang cacat, abaikan saja, jangan hancurkan prosesnya
+            log_message('warning', 'Rotasi EXIF gagal (diabaikan): ' . $th->getMessage());
+        }
 
-        // ... (Sisa kode watermark premium Anda ke bawah tetap sama)
+        // 5. Resize awal pakai CI4 agar ukuran tidak terlalu raksasa (hemat hosting)
+        try {
+            \Config\Services::image('gd')
+                ->withFile($destinationPath)
+                ->resize(1280, 1280, true, 'auto')
+                ->save($destinationPath);
+        } catch (\Throwable $th) {
+            throw new \Exception("Gagal melakukan Resize Gambar: " . $th->getMessage());
+        }
 
         // ============================================================
-        // 3. MULAI NATIVE GD WATERMARK (Adaptasi applyWatermarkPremium)
+        // 6. MULAI NATIVE GD WATERMARK (Adaptasi applyWatermarkPremium)
+        // (Lanjutkan dengan kode watermark layer hitam transparan Anda di sini...)
         // ============================================================
         $info = getimagesize($destinationPath);
         $mime = $info['mime'];
