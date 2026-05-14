@@ -35,15 +35,14 @@ class BansosKKS extends BaseController
     public function datatable()
     {
         $user = $this->authModel->getUserId();
-        $wilayahTugas = trim($user['wilayah_tugas'] ?? '');
         $roleId = session()->get('role_id') ?? 4;
+        $kodeDesa = session()->get('kode_desa') ?? ($user['kode_desa'] ?? '');
 
         // 🚀 TANGKAP REQUEST FILTER DARI VIEW
         $filterRw = $this->request->getPost('filter_rw');
         $filterRt = $this->request->getPost('filter_rt');
         $filterTahap = $this->request->getPost('filter_tahap');
 
-        // 🛡️ KUNCI UTAMA: Group by ID dokumentasi agar tidak tampil ganda
         $builder = $this->db->table('dtsen_bansos_kks b')
             ->select('b.*, m.alamat, r.rt, r.rw')
             ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
@@ -51,32 +50,19 @@ class BansosKKS extends BaseController
             ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left')
             ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left');
 
-        if (!empty($wilayahTugas)) {
-            $wilayahPairs = [];
-            $blocks = explode('|', $wilayahTugas);
-            foreach ($blocks as $block) {
-                [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
-                foreach (explode(',', $rtList) as $rt) {
-                    if (trim($rw) !== '' && trim($rt) !== '') {
-                        $wilayahPairs[] = ['rw' => trim($rw), 'rt' => trim($rt)];
-                    }
-                }
-            }
+        // =======================================================
+        // 🔐 TERAPKAN TRAIT WILAYAH FILTER (Sama persis dengan MasterKKS)
+        // =======================================================
+        $filterData = [
+            'kode_desa'     => $kodeDesa, // 🛡️ Kunci desa agar tidak bocor
+            'wilayah_tugas' => trim($user['wilayah_tugas'] ?? '')
+        ];
 
-            if (!empty($wilayahPairs)) {
-                $builder->groupStart();
-                foreach ($wilayahPairs as $pair) {
-                    $builder->orGroupStart()
-                        ->where('r.rw', $pair['rw'])
-                        ->where('r.rt', $pair['rt'])
-                        ->groupEnd();
-                }
-                $builder->groupEnd();
-            }
-        }
+        // 💥 Boom! Gunakan mesin Trait untuk memproses pola wilayah_tugas yang rumit
+        $this->applyWilayahFilter($builder, $filterData, $roleId);
 
         // ==========================================
-        // 🚀 TERAPKAN FILTER PENCARIAN MANUAL
+        // 🔍 FILTER DINAMIS DARI FRONTEND (Manual)
         // ==========================================
         if (!empty($filterRw)) {
             $builder->where('r.rw', str_pad($filterRw, 3, '0', STR_PAD_LEFT));
@@ -88,44 +74,29 @@ class BansosKKS extends BaseController
             $builder->where('b.tahap_salur', $filterTahap);
         }
 
-        // Kunci Data Unik dan Urutkan
+        // Kunci Data Unik agar tidak duplikat dan Urutkan yang terbaru paling atas
         $builder->groupBy('b.id')->orderBy('b.created_at', 'DESC');
 
         $query = $builder->get()->getResultArray();
         $data = [];
         $no = 1;
 
-        // ==========================================
-        // 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF
-        // ==========================================
+        // --- 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF ---
         $maskNumber = function ($number) {
             $number = trim($number ?? '');
             if (empty($number) || $number === '-' || $number === 'NOKKS') return esc($number);
-
             $full = esc($number);
             $len = strlen($full);
-            if ($len <= 8) return $full; // Jika kurang dari 8 digit, biarkan normal
-
+            if ($len <= 8) return $full;
             $masked = substr($full, 0, 8) . str_repeat('*', $len - 8);
-
-            // HTML Pembungkus dengan event Hover & Touch
-            return '<span class="fw-bold" style="cursor:pointer;" ' .
-                'onmouseenter="this.innerText=\'' . $full . '\'" ' .
-                'onmouseleave="this.innerText=\'' . $masked . '\'" ' .
-                'ontouchstart="this.innerText=\'' . $full . '\'" ' .
-                'ontouchend="this.innerText=\'' . $masked . '\'" ' .
-                'title="Tahan/Arahkan kursor untuk melihat utuh">' . $masked . '</span>';
+            return '<span class="fw-bold" style="cursor:pointer;" onmouseenter="this.innerText=\'' . $full . '\'" onmouseleave="this.innerText=\'' . $masked . '\'" ontouchstart="this.innerText=\'' . $full . '\'" ontouchend="this.innerText=\'' . $masked . '\'" title="Tahan/Arahkan kursor untuk melihat utuh">' . $masked . '</span>';
         };
 
         foreach ($query as $row) {
             $fotoPath = !empty($row['foto_kpm_kks']) ? base_url('uploads/bansos/' . $row['foto_kpm_kks']) : base_url('assets/img/no-image.png');
-            $colFoto = '
-                <a href="' . $fotoPath . '" data-lightbox="gallery-kpm" data-title="Foto KPM: ' . esc($row['nama_kpm']) . '">
-                    <img src="' . $fotoPath . '" class="rounded shadow-sm" style="width: 70px; height: 90px; object-fit: cover; border: 2px solid #fff; cursor: pointer;" title="Klik untuk memperbesar">
-                </a>';
+            $colFoto = '<a href="' . $fotoPath . '" data-lightbox="gallery-kpm" data-title="Foto KPM: ' . esc($row['nama_kpm']) . '"><img src="' . $fotoPath . '" class="rounded shadow-sm" style="width: 70px; height: 90px; object-fit: cover; border: 2px solid #fff; cursor: pointer;" title="Klik untuk memperbesar"></a>';
             $nominal = 'Rp ' . number_format($row['nominal_cair'], 0, ',', '.');
 
-            // 🚀 Menerapkan sensor NIK dan KKS
             $nikMasked = $maskNumber($row['nik_kpm']);
             $kksMasked = $maskNumber($row['nomor_kks']);
 
@@ -151,11 +122,7 @@ class BansosKKS extends BaseController
 
             $btnAction = '
             <div class="d-flex flex-row justify-content-center align-items-center" style="gap: 5px;">
-                <button class="btn btn-sm btn-outline-warning btn-edit" 
-                        data-id="' . $row['id'] . '" 
-                        title="Edit Data">
-                    <i class="fas fa-edit"></i>
-                </button>
+                <button class="btn btn-sm btn-outline-warning btn-edit" data-id="' . $row['id'] . '" title="Edit Data"><i class="fas fa-edit"></i></button>
                 ' . ($roleId <= 3 ? '<button class="btn btn-sm btn-outline-danger btn-delete" data-id="' . $row['id'] . '" title="Hapus"><i class="fas fa-trash"></i></button>' : '') . '
             </div>';
 
