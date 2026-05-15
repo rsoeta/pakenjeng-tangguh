@@ -11,9 +11,15 @@ function nameApp()
 
 function logoApp()
 {
-    return base_url('assets/logo/SINDEN-logo.png');
-}
+    $filePath = 'assets/logo/SINDEN-logo.png';
+    $physicalPath = FCPATH . $filePath; // FCPATH menunjuk ke folder 'public'
 
+    // Cek kapan file terakhir diedit/ditimpa. Jika gagal, pakai waktu sekarang.
+    $version = file_exists($physicalPath) ? filemtime($physicalPath) : time();
+
+    // Hasilnya akan seperti: base_url/assets/logo/SINDEN-logo.png?v=1715689000
+    return base_url($filePath . '?v=' . $version);
+}
 // function version app from database
 function versionApp()
 {
