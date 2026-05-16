@@ -9,40 +9,29 @@ $uri = $request->getUri()->getSegment(1);
 $menus = menu()
 ?>
 
-<!-- <aside class="main-sidebar sidebar-dark-primary elevation-4" style="height: 100%;"> -->
 <aside class="main-sidebar sidebar-sinden elevation-4">
 
-    <!-- Brand Logo -->
-    <a href="/pages" class="brand-link">
-        <img src="<?= logoApp(); ?>" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-        <!-- <span class="brand-text font-weight-light"><?php //nameApp() . ' ' . ucwords(strtolower(Profil_Admin()['namaKec'])); 
-                                                        ?></span> -->
+    <a href="/pages" class="brand-link border-bottom border-secondary">
+        <img src="<?= logoApp(); ?>" alt="Logo SINDEN" class="brand-image img-circle elevation-3" style="opacity: .8">
     </a>
 
-    <!-- Sidebar -->
     <div class="sidebar">
-        <!-- SidebarSearch Form -->
-        <div class="form-inline mt-2" style="margin: auto; padding: 2%;">
-            <div class="input-group" data-widget="sidebar-search">
-                <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search" spellcheck="false" data-ms-editor="true">
-                <div class="input-group-append">
-                    <button class="btn btn-sidebar">
-                        <i class="fas fa-search fa-fw"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="sidebar-search-results">
-                <div class="list-group">
-                    <a href="#" class="list-group-item">
-                        <div class="search-title">
-                            <b class="text-light"></b>N<b class="text-light"></b>o<b class="text-light"></b> <b class="text-light"></b>e<b class="text-light"></b>l<b class="text-light"></b>e<b class="text-light"></b>m<b class="text-light"></b>e<b class="text-light"></b>n<b class="text-light"></b>t<b class="text-light"></b> <b class="text-light"></b>f<b class="text-light"></b>o<b class="text-light"></b>u<b class="text-light"></b>n<b class="text-light"></b>d<b class="text-light"></b>!<b class="text-light"></b>
-                        </div>
-                        <div class="search-path"></div>
-                    </a>
-                </div>
+
+        <div class="mt-3 pb-3 mb-3 border-bottom border-secondary text-center">
+            <div class="d-flex flex-column align-items-center">
+                <span class="text-white font-weight-bold text-uppercase" style="font-size: 0.95rem; letter-spacing: 1.5px;">
+                    <?= nameApp(); ?>
+                </span>
+                <span class="text-muted mt-1" style="font-size: 0.75rem;">
+                    <?= titleApp(); ?>
+                </span>
             </div>
         </div>
-        <!-- Sidebar Menu -->
+
+        <div class="px-3 mb-2">
+            <span class="text-uppercase text-muted text-xs font-weight-bold">Menu Utama</span>
+        </div>
+
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 

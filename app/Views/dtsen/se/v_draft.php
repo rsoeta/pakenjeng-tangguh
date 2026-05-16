@@ -12,7 +12,7 @@
                         <i class="fas fa-sync-alt"></i> Muat Ulang
                     </button>
                 </div>
-                
+
                 <table id="tableDraftKeluarga" class="table table-striped table-hover nowrap w-100">
                     <thead class="text-center">
                         <tr>
@@ -37,6 +37,25 @@
 <script>
     $(document).ready(function() {
 
+        // ==========================================
+        // 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF (JS)
+        // ==========================================
+        function maskNumberJS(number) {
+            if (!number || number === '-' || number === 'NOKKS') return number || '-';
+
+            let numStr = number.toString().trim();
+            if (numStr.length <= 8) return numStr;
+
+            let masked = numStr.substring(0, 8) + '*'.repeat(numStr.length - 8);
+
+            return `<span class="fw-bold text-primary" style="cursor:pointer;" 
+                      onmouseenter="this.innerText='${numStr}'" 
+                      onmouseleave="this.innerText='${masked}'" 
+                      ontouchstart="this.innerText='${numStr}'" 
+                      ontouchend="this.innerText='${masked}'" 
+                      title="Tahan/Arahkan kursor untuk melihat utuh">${masked}</span>`;
+        }
+
         // ========================= 🟡 TABLE DRAFT PEMBARUAN =========================
         const tableDraft = $('#tableDraftKeluarga').DataTable({
             ajax: {
@@ -59,7 +78,26 @@
                 },
                 {
                     data: 'no_kk_target',
-                    title: 'No KK'
+                    className: 'text-nowrap',
+                    render: function(noKK, type, row) {
+                        if (!noKK) return '-';
+
+                        // 🚀 Panggil fungsi penyensoran
+                        let maskedKK = maskNumberJS(noKK);
+
+                        return `
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-semibold">${maskedKK}</span>
+                                <button 
+                                    type="button"
+                                    class="btn btn-outline-secondary btn-xs btnCopyNoKK"
+                                    data-value="${noKK}"
+                                    title="Salin No KK">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
                 },
                 {
                     data: 'status',
@@ -105,6 +143,27 @@
             setTimeout(() => {
                 btn.prop('disabled', false).html('<i class="fas fa-sync-alt"></i> Muat Ulang');
             }, 800);
+        });
+
+        // ========================= 📋 COPY NO KK =========================
+        $(document).on('click', '.btnCopyNoKK', function() {
+            const value = $(this).data('value');
+
+            if (!value) return;
+
+            navigator.clipboard.writeText(value).then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Tersalin',
+                    text: 'No. KK berhasil disalin ke clipboard',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top'
+                });
+            }).catch(() => {
+                Swal.fire('Gagal', 'Tidak dapat menyalin No. KK', 'error');
+            });
         });
 
     });

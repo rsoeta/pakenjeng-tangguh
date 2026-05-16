@@ -170,6 +170,25 @@
 
         loadRwRtDropdown();
 
+        // ==========================================
+        // 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF (JS)
+        // ==========================================
+        function maskNumberJS(number) {
+            if (!number || number === '-' || number === 'NOKKS') return number || '-';
+
+            let numStr = number.toString().trim();
+            if (numStr.length <= 8) return numStr;
+
+            let masked = numStr.substring(0, 8) + '*'.repeat(numStr.length - 8);
+
+            return `<span class="fw-bold text-primary" style="cursor:pointer;" 
+                    onmouseenter="this.innerText='${numStr}'" 
+                    onmouseleave="this.innerText='${masked}'" 
+                    ontouchstart="this.innerText='${numStr}'" 
+                    ontouchend="this.innerText='${masked}'" 
+                    title="Tahan/Arahkan kursor untuk melihat utuh">${masked}</span>`;
+        }
+
         table = $('#tableKK').DataTable({
 
             processing: true,
@@ -196,10 +215,12 @@
                     data: 'nik',
                     className: 'text-nowrap text-start',
                     render: function(nik) {
-                        if (!nik) return '-';
+                        // 🚀 Panggil fungsi penyensoran
+                        let maskedNik = maskNumberJS(nik);
+                        if (!maskedNik) return '-';
                         return `
                     <div class="d-flex align-items-center gap-2">
-                        <span class="fw-semibold">${nik}</span>
+                        <span class="fw-semibold">${maskedNik}</span>
                         <button 
                             type="button"
                             class="btn btn-outline-secondary btn-xs btnCopyNIK"
@@ -215,10 +236,12 @@
                     data: 'no_kk',
                     className: 'text-nowrap text-start',
                     render: function(noKK) {
-                        if (!noKK) return '-';
+                            // 🚀 Panggil fungsi penyensoran
+                        let maskedNoKK = maskNumberJS(noKK);
+                        if (!maskedNoKK) return '-';
                         return `
                     <div class="d-flex align-items-center gap-2">
-                        <span class="fw-semibold">${noKK}</span>
+                        <span class="fw-semibold">${maskedNoKK}</span>
                         <button 
                             type="button"
                             class="btn btn-outline-secondary btn-xs btnCopyNoKK"

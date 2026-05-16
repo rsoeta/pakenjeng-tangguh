@@ -63,11 +63,6 @@ if (!function_exists('ensureUsulanFolders')) {
     }
 }
 
-function titleApp(): string
-{
-    return 'Sistem Informasi Data Ekonomi dan Sosial Desa';
-}
-
 function tampilWilayahHumanis($wilayah_tugas)
 {
     if (!$wilayah_tugas) return '-';

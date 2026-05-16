@@ -20,6 +20,12 @@ function logoApp()
     // Hasilnya akan seperti: base_url/assets/logo/SINDEN-logo.png?v=1715689000
     return base_url($filePath . '?v=' . $version);
 }
+
+function titleApp(): string
+{
+    return 'Sistem Informasi Data Ekonomi dan Sosial Desa';
+}
+
 // function version app from database
 function versionApp()
 {

@@ -151,6 +151,25 @@
 
         loadRW();
 
+        // ==========================================
+        // 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF (JS)
+        // ==========================================
+        function maskNumberJS(number) {
+            if (!number || number === '-' || number === 'NOKKS') return number || '-';
+
+            let numStr = number.toString().trim();
+            if (numStr.length <= 8) return numStr;
+
+            let masked = numStr.substring(0, 8) + '*'.repeat(numStr.length - 8);
+
+            return `<span class="fw-bold text-primary" style="cursor:pointer;" 
+                      onmouseenter="this.innerText='${numStr}'" 
+                      onmouseleave="this.innerText='${masked}'" 
+                      ontouchstart="this.innerText='${numStr}'" 
+                      ontouchend="this.innerText='${masked}'" 
+                      title="Tahan/Arahkan kursor untuk melihat utuh">${masked}</span>`;
+        }
+
         // ========================= 🔵 TABLE DAFTAR KELUARGA =========================
         const tableKeluarga = $('#tableKeluarga').DataTable({
             ajax: {
@@ -199,13 +218,18 @@
                     className: 'text-nowrap text-start',
                     render: function(noKK) {
                         if (!noKK) return '-';
+
+                        // 🚀 Panggil fungsi penyensoran
+                        let maskedKK = maskNumberJS(noKK);
+
                         return `
                     <div class="d-flex align-items-center gap-2">
-                        <span class="fw-semibold">${noKK}</span>
+                        <span class="fw-semibold">${maskedKK}</span>
+                        
                         <button 
                             type="button"
                             class="btn btn-outline-secondary btn-xs btnCopyNoKK"
-                            data-value="${noKK}"
+                            data-value="${noKK}" 
                             title="Salin No KK">
                             <i class="fas fa-copy"></i>
                         </button>

@@ -121,14 +121,14 @@
         </div>
 
         <!-- Card Draft Pembaruan -->
-        <div class="stat-card" onclick="window.location='/dtsen-se?tab=draft'">
+        <div class="stat-card" onclick="window.location='/pembaruan-keluarga/draft'">
             <div class="stat-icon text-warning"><i class="fas fa-clipboard-list"></i></div>
             <h6>Draft Pembaruan</h6>
             <h3><?= number_format($totalDraft ?? 0, 0, ',', '.'); ?></h3>
         </div>
 
         <!-- Card Submitted Pembaruan -->
-        <div class="stat-card" onclick="window.location='/dtsen-se?tab=submitted'">
+        <div class="stat-card" onclick="window.location='/pembaruan-keluarga/submitted'">
             <div class="stat-icon text-success"><i class="fas fa-file-upload"></i></div>
             <h6>Submitted Pembaruan</h6>
             <h3><?= number_format($totalSubmitted ?? 0, 0, ',', '.'); ?></h3>

@@ -2478,7 +2478,8 @@ class PembaruanKeluarga extends BaseController
     /**
      * Ambil data usulan (status = draft) yang sudah lengkap untuk DataTables (Submitted Pembaruan)
      * Route recommended: GET /pembaruan-keluarga/data?submitted=1
-     */    private function getSubmittedData()
+     */
+    private function getSubmittedData()
     {
         try {
             $session        = session();
