@@ -36,8 +36,6 @@
 
                     <!-- ===================== SUBTAB: ARSIP KELUARGA ===================== -->
                     <div class="tab-pane fade show active" id="arsipKeluarga" role="tabpanel">
-                        <h5 class="fw-bold mb-3">📁 Arsip Keluarga</h5>
-
                         <table id="tableArsipKeluarga" class="table table-striped table-hover w-100">
                             <thead class="text-center">
                                 <tr>
@@ -56,8 +54,6 @@
 
                     <!-- ===================== SUBTAB: ARSIP ANGGOTA ===================== -->
                     <div class="tab-pane fade" id="arsipAnggota" role="tabpanel">
-                        <h5 class="fw-bold mb-3">👤 Arsip Anggota Keluarga</h5>
-
                         <table id="tableArsipAnggota" class="table table-striped table-hover w-100">
                             <thead class="text-center">
                                 <tr>

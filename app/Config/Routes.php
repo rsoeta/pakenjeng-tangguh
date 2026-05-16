@@ -595,6 +595,10 @@ $routes->post('update_user', 'Profil\Profil_User::update_user', ['filter' => 'au
 $routes->post('submit_lembaga', 'Profil\Profil_User::submit_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('update_lembaga', 'Profil\Profil_User::update_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
+// DOKUMENTASI KEGIATAN PETUGAS ENTRI
+$routes->get('dokumentasi/kegiatan', 'Dokumentasi::get_kegiatan');
+$routes->post('dokumentasi/upload', 'Dokumentasi::upload');
+
 /*
  * --------------------------------------------------------------------
  * Additional Routing

@@ -23,12 +23,10 @@
                 🟢 Submitted
             </a>
 
-            <?php if ($role_id <= 3): ?>
-                <a href="<?= base_url('pembaruan-keluarga/pemulihan') ?>"
-                    class="btn btn-sm <?= $segment == 'pemulihan' ? 'btn-danger disabled' : 'btn-outline-danger bg-white' ?>">
-                    🚨 Pemulihan
-                </a>
-            <?php endif; ?>
+            <a href="<?= base_url('pembaruan-keluarga/pemulihan') ?>"
+                class="btn btn-sm <?= $segment == 'pemulihan' ? 'btn-danger disabled' : 'btn-outline-danger bg-white' ?>">
+                🚨 Pemulihan
+            </a>
 
             <?php if ($role_id <= 3): ?>
                 <a href="<?= base_url('pembaruan-keluarga/arsip') ?>"
