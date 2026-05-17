@@ -1522,8 +1522,8 @@ INSERT INTO `dtsen_jenis_kegiatan` (`nama_kegiatan`) VALUES
 ('Verifikasi Kemiskinan'),
 ('Dokumentasi Bansos');
 
-==============================================================================================================================================================
-Menu Timeline Dokumentasi
-==============================================================================================================================================================
+// =======================================================
+// 🟩 Menu Timeline Dokumentasi
+// =======================================================
 INSERT INTO `tb_menu` (`tm_nama`, `tm_class`, `tm_url`, `tm_icon`, `tm_parent_id`, `tm_status`, `tm_grup_akses`, `tm_urutan`)  
 VALUES ('Timeline Dokumentasi', '', 'dokumentasi/timeline', 'fas fa-fw fa-history', 0, 1, 4, 97);

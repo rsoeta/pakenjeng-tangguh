@@ -4,6 +4,7 @@ namespace App\Controllers\Dtsen;
 
 use App\Controllers\BaseController;
 use App\Models\GenModel;
+
 use CodeIgniter\Database\Exceptions\DatabaseException;
 use CodeIgniter\API\ResponseTrait;
 
@@ -11,13 +12,14 @@ class PembaruanKeluarga extends BaseController
 {
     use ResponseTrait;
 
-    protected $genModel;
     protected $db;
+    protected $genModel;
+    protected $kkModel;
 
     public function __construct()
     {
-        $this->genModel = new GenModel();
         $this->db = db_connect();
+        $this->genModel = new GenModel();
     }
 
     // 🏠 Halaman utama pembaruan (opsional, nanti bisa jadi list usulan)
@@ -31,6 +33,7 @@ class PembaruanKeluarga extends BaseController
         try {
             $db = \Config\Database::connect();
             $genModel = new \App\Models\GenModel();
+            $kkModel  = new \App\Models\Dtsen\DtsenKkModel(); // 🚀 TAMBAHKAN INI
 
             log_message('debug', "🚀 [detail] Memulai load detail untuk id_kk={$id_kk}");
 
@@ -87,6 +90,14 @@ class PembaruanKeluarga extends BaseController
                     $payloadPerumahan = $payload['perumahan'] ?? [];
                 } else {
                     log_message('warning', '[detail] payload usulan tidak dapat didecode sebagai array untuk usulan id=' . ($usulan['id'] ?? 'null'));
+                }
+            }
+
+            // 🚀 TAMBAHKAN INI: Cek apakah Draft sudah lengkap (Siap Submitted)
+            $is_submitted_ready = 0;
+            if (($usulan['status'] ?? '') === 'draft' && !empty($payload)) {
+                if ($kkModel->isPayloadLengkap($payload)) {
+                    $is_submitted_ready = 1;
                 }
             }
 
@@ -177,6 +188,8 @@ class PembaruanKeluarga extends BaseController
                     'id_kk'     => $kkData['id_kk'],
                     'sumber'    => 'utama',
                     'kategori_desil' => $kategoriDesil,
+                    // 🚀 PASTIKAN BARIS INI ADA DI SINI JUGA MBAH!
+                    'is_submitted_ready' => $is_submitted_ready
 
                 ];
 
@@ -236,6 +249,8 @@ class PembaruanKeluarga extends BaseController
                 'id_kk'     => $usulan['dtsen_kk_id'] ?? $kkData['id_kk'],
                 'sumber'    => 'usulan',
                 'kategori_desil' => $kategoriDesil,
+                // 🚀 PASTIKAN BARIS INI ADA DI SINI JUGA MBAH!
+                'is_submitted_ready' => $is_submitted_ready
 
             ];
 
@@ -2897,10 +2912,84 @@ class PembaruanKeluarga extends BaseController
         }
     }
 
+    // public function addHistoricalDesil()
+    // {
+    //     try {
+
+    //         $session = session();
+    //         $roleId = $session->get('role_id') ?? 99;
+
+    //         // 🔒 Hanya role <= 3 yang boleh
+    //         if ($roleId > 3) {
+    //             return $this->response->setJSON([
+    //                 'status' => 'error',
+    //                 'message' => 'Anda tidak memiliki akses untuk menambahkan snapshot historis.'
+    //             ]);
+    //         }
+
+    //         $post = $this->request->getPost();
+    //         $userId = $session->get('id_user') ?? 0;
+
+    //         $post = $this->request->getPost();
+    //         $userId = session()->get('id_user') ?? 0;
+
+    //         $idKk     = $post['id_kk'] ?? null;
+    //         $desil    = (int) ($post['desil'] ?? 0);
+    //         $tahun    = (int) ($post['tahun'] ?? 0);
+    //         $triwulan = (int) ($post['triwulan'] ?? 0);
+
+    //         if (!$idKk || !$desil || !$tahun || !$triwulan) {
+    //             return $this->response->setJSON([
+    //                 'status' => 'error',
+    //                 'message' => 'Data tidak lengkap.'
+    //             ]);
+    //         }
+
+    //         // 🔍 Cek apakah sudah ada periode ini
+    //         $existing = $this->db->table('dtsen_desil_history')
+    //             ->where([
+    //                 'id_kk'    => $idKk,
+    //                 'tahun'    => $tahun,
+    //                 'triwulan' => $triwulan
+    //             ])
+    //             ->get()
+    //             ->getRowArray();
+
+    //         if ($existing) {
+    //             return $this->response->setJSON([
+    //                 'status' => 'error',
+    //                 'message' => 'Snapshot periode ini sudah ada.'
+    //             ]);
+    //         }
+
+    //         $label = 'TW' . $triwulan . ' ' . $tahun;
+
+    //         $this->db->table('dtsen_desil_history')->insert([
+    //             'id_kk'        => $idKk,
+    //             'desil'        => $desil,
+    //             'tahun'        => $tahun,
+    //             'triwulan'     => $triwulan,
+    //             'periode_label' => $label,
+    //             'source'       => 'historical_manual',
+    //             'created_by'   => $userId
+    //         ]);
+
+    //         return $this->response->setJSON([
+    //             'status' => 'success',
+    //             'message' => 'Snapshot historis berhasil ditambahkan.'
+    //         ]);
+    //     } catch (\Throwable $e) {
+
+    //         return $this->response->setJSON([
+    //             'status' => 'error',
+    //             'message' => $e->getMessage()
+    //         ]);
+    //     }
+    // }
+
     public function addHistoricalDesil()
     {
         try {
-
             $session = session();
             $roleId = $session->get('role_id') ?? 99;
 
@@ -2915,20 +3004,23 @@ class PembaruanKeluarga extends BaseController
             $post = $this->request->getPost();
             $userId = $session->get('id_user') ?? 0;
 
-            $post = $this->request->getPost();
-            $userId = session()->get('id_user') ?? 0;
-
             $idKk     = $post['id_kk'] ?? null;
-            $desil    = (int) ($post['desil'] ?? 0);
             $tahun    = (int) ($post['tahun'] ?? 0);
             $triwulan = (int) ($post['triwulan'] ?? 0);
 
-            if (!$idKk || !$desil || !$tahun || !$triwulan) {
+            // 🚀 PERBAIKAN: Tangkap desil secara mentah dulu
+            $desilRaw = $post['desil'] ?? null;
+
+            // 🚀 PERBAIKAN: Validasi harus mengecek jika desil benar-benar tidak dikirim atau string kosong
+            if (!$idKk || $desilRaw === null || $desilRaw === '' || !$tahun || !$triwulan) {
                 return $this->response->setJSON([
                     'status' => 'error',
                     'message' => 'Data tidak lengkap.'
                 ]);
             }
+
+            // Pastikan desil menjadi integer (0 akan tetap 0)
+            $desil = (int) $desilRaw;
 
             // 🔍 Cek apakah sudah ada periode ini
             $existing = $this->db->table('dtsen_desil_history')
@@ -2950,13 +3042,13 @@ class PembaruanKeluarga extends BaseController
             $label = 'TW' . $triwulan . ' ' . $tahun;
 
             $this->db->table('dtsen_desil_history')->insert([
-                'id_kk'        => $idKk,
-                'desil'        => $desil,
-                'tahun'        => $tahun,
-                'triwulan'     => $triwulan,
+                'id_kk'         => $idKk,
+                'desil'         => $desil,
+                'tahun'         => $tahun,
+                'triwulan'      => $triwulan,
                 'periode_label' => $label,
-                'source'       => 'historical_manual',
-                'created_by'   => $userId
+                'source'        => 'historical_manual',
+                'created_by'    => $userId
             ]);
 
             return $this->response->setJSON([
@@ -2964,7 +3056,6 @@ class PembaruanKeluarga extends BaseController
                 'message' => 'Snapshot historis berhasil ditambahkan.'
             ]);
         } catch (\Throwable $e) {
-
             return $this->response->setJSON([
                 'status' => 'error',
                 'message' => $e->getMessage()

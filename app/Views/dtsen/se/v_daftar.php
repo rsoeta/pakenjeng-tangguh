@@ -61,7 +61,7 @@
                                             <select class="form-select form-select-sm" id="filterDesil">
                                                 <option value="">Semua</option>
                                                 <option value="belum">Belum</option>
-                                                <?php for ($i = 1; $i <= 10; $i++): ?>
+                                                <?php for ($i = 0; $i <= 10; $i++): ?>
                                                     <option value="<?= $i ?>">Desil <?= $i ?></option>
                                                 <?php endfor; ?>
                                             </select>
@@ -296,9 +296,18 @@
                     data: 'kategori_desil',
                     className: 'text-center',
                     render: d => {
-                        if (!d) return '<span class="badge bg-secondary">Belum</span>';
+                        // 🚀 PERBAIKAN: Pastikan 0 tidak terdeteksi sebagai "Belum"
+                        if (d === null || d === '' || d === undefined) {
+                            return '<span class="badge bg-secondary">Belum</span>';
+                        }
+
                         const n = parseInt(d);
-                        const warna = n <= 3 ? 'success' : n <= 5 ? 'warning' : 'danger';
+                        // 🚀 PERBAIKAN: Beri warna khusus (abu-abu/biru) untuk desil 0
+                        let warna = 'danger';
+                        if (n === 0) warna = 'secondary';
+                        else if (n <= 3) warna = 'success';
+                        else if (n <= 5) warna = 'warning';
+
                         return `<span class="badge bg-${warna}">${n}</span>`;
                     }
                 },

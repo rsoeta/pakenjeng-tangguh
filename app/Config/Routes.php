@@ -112,7 +112,6 @@ $routes->group('dtsen-se', ['filter' => ['authfilterdtks', 'globalview', 'menufi
 
 // === DTSEN - Pembaruan Data Keluarga ===
 $routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
-	// $routes->get('/', 'Dtsen\PembaruanKeluarga::index');
 	$routes->get('draft', 'Dtsen\DtsenSe::draft'); // Halaman Draft
 	$routes->get('submitted', 'Dtsen\DtsenSe::submitted'); // Halaman Submitted
 	$routes->get('pemulihan', 'Dtsen\DtsenSe::pemulihan'); // Halaman Pemulihan

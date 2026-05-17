@@ -115,6 +115,16 @@ $geo  = $payload['geo'] ?? [];
         e.preventDefault();
         const formData = new FormData(this);
 
+        // 🚀 Tambahan opsional: Tampilkan loading spinner agar terlihat lebih profesional saat upload foto
+        Swal.fire({
+            title: 'Menyimpan Foto...',
+            text: 'Mohon tunggu sebentar.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         $.ajax({
             url: '<?= base_url("pembaruan-keluarga/save-foto") ?>',
             type: 'POST',
@@ -127,8 +137,18 @@ $geo  = $payload['geo'] ?? [];
                         icon: 'success',
                         title: 'Berhasil!',
                         text: res.message,
-                        timer: 2000,
+                        timer: 1500, // Dipercepat sedikit agar user tidak menunggu lama
                         showConfirmButton: false
+                    }).then(() => {
+                        // 🚀 KUNCI SAKTINYA DI SINI MBAH!
+                        // Setelah pesan sukses tertutup, reload halaman secara otomatis.
+                        // Controller detail() akan mengecek ulang kelengkapan data,
+                        // dan menyulap badge "Draft" menjadi "Submitted" jika sudah lengkap.
+                        // 1. Bersihkan URL di address bar dari embel-embel #tab... tanpa me-refresh
+                        window.history.replaceState(null, null, window.location.pathname);
+
+                        // 2. Baru reload halamannya dengan URL yang sudah suci dan bersih
+                        window.location.reload();
                     });
                 } else {
                     Swal.fire('Gagal!', res.message, 'error');

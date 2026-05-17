@@ -119,7 +119,6 @@ class DtsenSe extends Controller
     // ========================================================
     // 📡 AJAX DATATABLES
     // ========================================================
-
     public function tabel_data()
     {
         try {
@@ -195,7 +194,7 @@ class DtsenSe extends Controller
             $kategoriDesil = (int) $this->request->getPost('kategori_desil');
 
             // 🔎 Validasi input
-            if (!$idKk || $kategoriDesil < 1 || $kategoriDesil > 10) {
+            if (!$idKk || $kategoriDesil < 0 || $kategoriDesil > 10) {
                 return $this->response->setJSON([
                     'status' => 'error',
                     'message' => 'Data desil tidak valid.'

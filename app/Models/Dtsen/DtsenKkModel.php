@@ -265,27 +265,40 @@ class DtsenKkModel extends Model
          */
         $keluarga = array_values(array_filter($keluarga, function ($row) use ($filter) {
 
-            // RW
-            if (!empty($filter['rw']) && $filter['rw'] !== 'all') {
+            // RW: Gunakan isset dan !== '' agar 0 (jika ada RW 0) tidak dianggap kosong
+            if (isset($filter['rw']) && $filter['rw'] !== '' && $filter['rw'] !== 'all') {
                 if ((string)$row['rw'] !== (string)$filter['rw']) {
                     return false;
                 }
             }
 
             // RT
-            if (!empty($filter['rt']) && $filter['rt'] !== 'all') {
+            if (isset($filter['rt']) && $filter['rt'] !== '' && $filter['rt'] !== 'all') {
                 if ((string)$row['rt'] !== (string)$filter['rt']) {
                     return false;
                 }
             }
 
-            // DESIL
-            if (!empty($filter['desil']) && $filter['desil'] !== 'all') {
-                if ($filter['desil'] === 'none') {
-                    return empty($row['kategori_desil']);
+            // 🚀 PERBAIKAN DESIL: Jangan gunakan empty(), karena empty("0") itu TRUE!
+            if (isset($filter['desil']) && $filter['desil'] !== '' && $filter['desil'] !== 'all') {
+
+                // Jika user memilih filter "Belum" (Singkronkan dengan value HTML)
+                if ($filter['desil'] === 'belum' || $filter['desil'] === 'none') {
+                    // Jika dia Punya desil (termasuk 0), maka singkirkan dari hasil filter "Belum"
+                    if ($row['kategori_desil'] !== null && $row['kategori_desil'] !== '') {
+                        return false;
+                    }
                 }
-                if ((int)$row['kategori_desil'] !== (int)$filter['desil']) {
-                    return false;
+                // Jika user memfilter angka (0, 1, 2, dst)
+                else {
+                    // Pastikan datanya tidak null/kosong sebelum dicocokkan angkanya
+                    if ($row['kategori_desil'] === null || $row['kategori_desil'] === '') {
+                        return false;
+                    }
+
+                    if ((int)$row['kategori_desil'] !== (int)$filter['desil']) {
+                        return false;
+                    }
                 }
             }
 
@@ -328,7 +341,8 @@ class DtsenKkModel extends Model
         return $keluarga;
     }
 
-    private function isPayloadLengkap(array $payload): bool
+    // 🚀 PERBAIKAN: Ubah private menjadi public
+    public function isPayloadLengkap(array $payload): bool
     {
         return !empty($payload['perumahan']['no_kk'])
             && !empty($payload['perumahan']['kepala_keluarga'])

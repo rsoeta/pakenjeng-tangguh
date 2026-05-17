@@ -18,16 +18,30 @@
                     <div class="d-flex justify-content-end align-items-center flex-wrap gap-1 mt-2">
 
                         <!-- BADGE STATUS -->
-                        <?php $status = $usulan['status'] ?? $sumber ?? ''; ?>
+                        <?php
+                        // Pastikan huruf kecil semua agar tidak case-sensitive
+                        $usulanStatus = strtolower(trim($usulan['status'] ?? ''));
+                        $isReady = (int) ($is_submitted_ready ?? 0);
+                        ?>
 
-                        <?php if (!empty($usulan['status']) && $usulan['status'] == 'draft'): ?>
-                            <span class="badge bg-warning text-dark px-2 py-1 small">Draft</span>
+                        <?php if (!$usulanStatus || $sumber === 'utama'): ?>
+                            <span class="badge bg-secondary px-2 py-1 small">Belum Ada Pembaruan</span>
 
-                        <?php elseif ($status == $sumber): ?>
-                            <span class="badge bg-success px-2 py-1 small">New</span>
+                        <?php elseif ($usulanStatus === 'draft'): ?>
+                            <?php if ($isReady === 1): ?>
+                                <span class="badge bg-info text-dark px-2 py-1 small">Submitted</span>
+                            <?php else: ?>
+                                <span class="badge bg-warning text-dark px-2 py-1 small">Draft</span>
+                            <?php endif; ?>
 
-                        <?php elseif (!empty($usulan['status'])): ?>
+                        <?php elseif ($usulanStatus === 'submitted'): ?>
+                            <span class="badge bg-info text-dark px-2 py-1 small">Submitted</span>
+
+                        <?php elseif ($usulanStatus === 'verified' || $usulanStatus === 'diverifikasi'): ?>
                             <span class="badge bg-primary px-2 py-1 small">Verified</span>
+
+                        <?php else: ?>
+                            <span class="badge bg-secondary px-2 py-1 small">Belum Ada Pembaruan</span>
                         <?php endif; ?>
 
                         <!-- BADGE DESIL -->
@@ -85,9 +99,9 @@
                 </div>
             </div>
         </div>
+    </section>
 </div>
 
-</section>
 </div>
 
 <!-- Variabel global -->
@@ -152,8 +166,6 @@
     });
 </script>
 
-<!-- browser-image-compression -->
-<!-- <script src="https://unpkg.com/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script> -->
 <script src="/assets/vendor/browser-image-compression.js"></script>
 
 <!-- Script utama -->

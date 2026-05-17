@@ -125,6 +125,7 @@ $disabled = $editable ? '' : 'disabled';
     <div id="desilTrendInfo" class="mt-3 small text-muted"></div>
 
 </div>
+
 <div class="modal fade" id="modalHistoricalDesil" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content shadow">
@@ -218,13 +219,15 @@ $disabled = $editable ? '' : 'disabled';
                     <!-- Desil -->
                     <div class="mb-3">
                         <label class="form-label fw-bold">Desil</label>
-
                         <div class="d-flex flex-wrap gap-2">
 
-                            <?php for ($i = 1; $i <= 10; $i++): ?>
+                            <?php for ($i = 0; $i <= 10; $i++): ?>
 
                                 <?php
-                                if ($i <= 3) {
+                                // 🚀 PERBAIKAN: Penentuan warna tombol
+                                if ($i == 0) {
+                                    $warna = 'secondary'; // abu-abu untuk belum diketahui / non-desil
+                                } elseif ($i <= 3) {
                                     $warna = 'success'; // hijau
                                 } elseif ($i <= 5) {
                                     $warna = 'warning'; // kuning
@@ -323,9 +326,10 @@ $disabled = $editable ? '' : 'disabled';
                         categories: categories
                     },
                     yaxis: {
-                        min: 1,
+                        // 🚀 PERBAIKAN: Ubah min jadi 0 dan tickAmount jadi 10
+                        min: 0,
                         max: 10,
-                        tickAmount: 9
+                        tickAmount: 10
                     },
                     stroke: {
                         curve: 'smooth',
@@ -359,6 +363,7 @@ $disabled = $editable ? '' : 'disabled';
     document.addEventListener("DOMContentLoaded", function() {
         setTimeout(loadDesilChart, 300);
     });
+
     // Render saat tab keluarga aktif
     document.addEventListener('shown.bs.tab', function(event) {
         const targetId = event.target.getAttribute('data-bs-target');
