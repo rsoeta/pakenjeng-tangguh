@@ -2,10 +2,21 @@
 
 namespace App\Controllers;
 
-use CodeIgniter\Controller;
+use App\Controllers\BaseController;
+use App\Models\Dtks\AuthModel;
+use App\Traits\WilayahFilterTrait;
 
-class Dokumentasi extends Controller
+class Dokumentasi extends BaseController
 {
+    protected $db;
+    protected $AuthModel;
+
+    public function __construct()
+    {
+        $this->db = \Config\Database::connect();
+        $this->authModel = new AuthModel();
+    }
+
     // 🚀 Fungsi baru untuk melempar data dropdown ke Frontend
     public function get_kegiatan()
     {
@@ -225,5 +236,53 @@ class Dokumentasi extends Controller
         ]);
 
         return $this->response->setJSON(['success' => true]);
+    }
+
+    // ========================================================
+    // 📅 FITUR GALERI TIMELINE DOKUMENTASI PETUGAS
+    // ========================================================
+    public function timeline()
+    {
+        $authModel = new AuthModel();
+        $user_login = $authModel->getUserId();
+
+        $user_image = $user_login['image'] ?? $user_login['user_image'] ?? 'default.jpg';
+
+        // Ambil ID dan Role User yang sedang login
+        $userId = session()->get('id') ?? session()->get('id_user') ?? $user_login['id'] ?? 0;
+        $roleId = session()->get('role_id') ?? $user_login['role_id'] ?? 4;
+
+        $db = \Config\Database::connect();
+        $builder = $db->table('dtsen_dokumentasi_petugas');
+
+        // ========================================================
+        // 🔐 PEMBATASAN AKSES (FILTER ROLE)
+        // ========================================================
+        if ($roleId == 4) {
+            // Jika dia Petugas (Role 4), kunci datanya HANYA untuk user_id miliknya
+            $builder->where('user_id', $userId);
+        }
+
+        // Tarik 100 data terbaru
+        $dokumentasi = $builder->orderBy('created_at', 'DESC')
+            ->limit(100)
+            ->get()
+            ->getResultArray();
+
+        // Kelompokkan data berdasarkan Tanggal
+        $timelineData = [];
+        foreach ($dokumentasi as $doc) {
+            $date = date('Y-m-d', strtotime($doc['created_at']));
+            $timelineData[$date][] = $doc;
+        }
+
+        $data = [
+            'title'        => 'Timeline Dokumentasi Petugas',
+            'timelineData' => $timelineData,
+            'user_login'   => $user_login,
+            'user_image'   => $user_image
+        ];
+
+        return view('dokumentasi/timeline', $data);
     }
 }
