@@ -98,24 +98,35 @@ class MasterKKS extends BaseController
         $no = $start + 1;
 
         // ==========================================
-        // 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF
+        // 🛡️ FUNGSI BANTUAN: SENSOR DATA + TOMBOL SALIN
         // ==========================================
-        $maskNumber = function ($number) {
+        $maskNumber = function ($number, $type) {
             $number = trim($number ?? '');
             if (empty($number) || $number === '-' || $number === 'NOKKS') return esc($number);
 
             $full = esc($number);
             $len = strlen($full);
-            if ($len <= 8) return $full;
 
-            $masked = substr($full, 0, 8) . str_repeat('*', $len - 8);
+            // Tentukan Class dan Title Tombol berdasarkan jenis data
+            $btnClass = ($type === 'nik') ? 'btnCopyNik' : 'btnCopyNoKK';
+            $btnTitle = ($type === 'nik') ? 'Salin NIK' : 'Salin No KK';
 
-            return '<span class="text-primary fw-bold" style="cursor:pointer;" ' .
-                'onmouseenter="this.innerText=\'' . $full . '\'" ' .
-                'onmouseleave="this.innerText=\'' . $masked . '\'" ' .
-                'ontouchstart="this.innerText=\'' . $full . '\'" ' .
-                'ontouchend="this.innerText=\'' . $masked . '\'" ' .
-                'title="Tahan/Arahkan kursor untuk melihat utuh">' . $masked . '</span>';
+            if ($len <= 8) {
+                $masked = $full;
+                $hoverAttr = '';
+            } else {
+                $masked = substr($full, 0, 8) . str_repeat('*', $len - 8);
+                $hoverAttr = ' onmouseenter="this.innerText=\'' . $full . '\'" onmouseleave="this.innerText=\'' . $masked . '\'" ontouchstart="this.innerText=\'' . $full . '\'" ontouchend="this.innerText=\'' . $masked . '\'" title="Tahan/Arahkan kursor untuk melihat utuh" ';
+            }
+
+            return '
+            <div class="d-flex justify-content-between align-items-center gap-2">
+                <span style="display: none;">' . $full . '</span>
+                <span class="text-primary fw-bold" style="cursor:pointer;"' . $hoverAttr . '>' . $masked . '</span>
+                <button type="button" class="btn btn-outline-secondary btn-xs ' . $btnClass . ' py-0 px-1" data-value="' . $full . '" title="' . $btnTitle . '">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>';
         };
 
         foreach ($query as $row) {
@@ -136,15 +147,15 @@ class MasterKKS extends BaseController
                 ';
             }
 
-            // 🚀 Menerapkan sensor NIK dan KKS
-            $nikMasked = $maskNumber($row['nik']);
-            $kksMasked = $maskNumber($row['no_kks']);
+            // 🚀 Menerapkan sensor NIK dan KKS beserta jenis tipenya
+            $nikMasked = $maskNumber($row['nik'], 'nik');
+            $kksMasked = $maskNumber($row['no_kks'], 'nokk');
 
             $data[] = [
                 $no++,
-                $nikMasked, // Menggunakan variabel yang sudah disensor
+                $nikMasked, // Menggunakan variabel yang sudah disensor + tombol
                 esc($row['nama_penerima']),
-                $kksMasked, // Menggunakan variabel yang sudah disensor
+                $kksMasked, // Menggunakan variabel yang sudah disensor + tombol
                 esc($row['alamat']) . ' RT ' . esc($row['rt']) . ' RW ' . esc($row['rw']),
                 $badge,
                 $btnAction
