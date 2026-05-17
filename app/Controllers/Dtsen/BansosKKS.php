@@ -51,10 +51,10 @@ class BansosKKS extends BaseController
             ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left');
 
         // =======================================================
-        // 🔐 TERAPKAN TRAIT WILAYAH FILTER (Sama persis dengan MasterKKS)
+        // 🔐 TERAPKAN TRAIT WILAYAH FILTER
         // =======================================================
         $filterData = [
-            'kode_desa'     => $kodeDesa, // 🛡️ Kunci desa agar tidak bocor
+            'kode_desa'     => $kodeDesa,
             'wilayah_tugas' => trim($user['wilayah_tugas'] ?? '')
         ];
 
@@ -81,15 +81,33 @@ class BansosKKS extends BaseController
         $data = [];
         $no = 1;
 
-        // --- 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF ---
-        $maskNumber = function ($number) {
+        // --- 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF + TOMBOL SALIN ---
+        $maskNumber = function ($number, $type) {
             $number = trim($number ?? '');
             if (empty($number) || $number === '-' || $number === 'NOKKS') return esc($number);
+
             $full = esc($number);
             $len = strlen($full);
-            if ($len <= 8) return $full;
-            $masked = substr($full, 0, 8) . str_repeat('*', $len - 8);
-            return '<span class="fw-bold" style="cursor:pointer;" onmouseenter="this.innerText=\'' . $full . '\'" onmouseleave="this.innerText=\'' . $masked . '\'" ontouchstart="this.innerText=\'' . $full . '\'" ontouchend="this.innerText=\'' . $masked . '\'" title="Tahan/Arahkan kursor untuk melihat utuh">' . $masked . '</span>';
+
+            // Tentukan Class dan Title Tombol berdasarkan jenis data
+            $btnClass = ($type === 'nik') ? 'btnCopyNik' : 'btnCopyNoKK';
+            $btnTitle = ($type === 'nik') ? 'Salin NIK' : 'Salin No KK';
+
+            if ($len <= 8) {
+                $masked = $full;
+                $hoverEffect = '';
+            } else {
+                $masked = substr($full, 0, 8) . str_repeat('*', $len - 8);
+                $hoverEffect = ' onmouseenter="this.innerText=\'' . $full . '\'" onmouseleave="this.innerText=\'' . $masked . '\'" ontouchstart="this.innerText=\'' . $full . '\'" ontouchend="this.innerText=\'' . $masked . '\'" title="Tahan/Arahkan kursor untuk melihat utuh" ';
+            }
+
+            return '
+            <div class="d-inline-flex align-items-center" style="gap: 5px;">
+                <span class="fw-bold text-primary" style="cursor:pointer;"' . $hoverEffect . '>' . $masked . '</span>
+                <button type="button" class="btn btn-outline-secondary btn-xs ' . $btnClass . ' py-0 px-1" data-value="' . $full . '" title="' . $btnTitle . '">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>';
         };
 
         foreach ($query as $row) {
@@ -97,26 +115,29 @@ class BansosKKS extends BaseController
             $colFoto = '<a href="' . $fotoPath . '" data-lightbox="gallery-kpm" data-title="Foto KPM: ' . esc($row['nama_kpm']) . '"><img src="' . $fotoPath . '" class="rounded shadow-sm" style="width: 70px; height: 90px; object-fit: cover; border: 2px solid #fff; cursor: pointer;" title="Klik untuk memperbesar"></a>';
             $nominal = 'Rp ' . number_format($row['nominal_cair'], 0, ',', '.');
 
-            $nikMasked = $maskNumber($row['nik_kpm']);
-            $kksMasked = $maskNumber($row['nomor_kks']);
+            $nikMasked = $maskNumber($row['nik_kpm'], 'nik');
+            $kksMasked = $maskNumber($row['nomor_kks'], 'nokk');
 
+            // 🚀 REVISI DI SINI: Selipkan NIK dan KKS asli di dalam span display:none
             $colDetail = '
             <div class="row align-items-center">
+                <span style="display: none;">' . esc($row['nik_kpm']) . ' ' . esc($row['nomor_kks']) . '</span>
+
                 <div class="col-md-6 mb-2 mb-md-0">
                     <span class="fw-bold text-dark d-block" style="font-size:1.1rem;">' . esc($row['nama_kpm']) . '</span>
-                    <span class="text-muted small"><i class="fas fa-id-card"></i> ' . $nikMasked . '</span>
+                    <div class="text-muted small mt-1 d-flex align-items-center"><i class="fas fa-id-card mr-2"></i> ' . $nikMasked . '</div>
                 </div>
                 <div class="col-md-6 d-none d-md-block text-md-right border-left">
                     <div class="mb-1">
                         <span class="badge bg-primary p-2 mr-1">' . esc($row['jenis_bansos']) . '</span>
                         <span class="badge bg-success p-2">' . $nominal . '</span>
                     </div>
-                    <div class="small text-muted mt-1">
-                         <i class="fas fa-credit-card"></i> ' . $kksMasked . '
+                    <div class="small text-muted mt-1 d-flex align-items-center justify-content-md-end">
+                         <i class="fas fa-credit-card mr-2"></i> ' . $kksMasked . '
                     </div>
                 </div>
                 <div class="col-12 mt-1">
-                    <small class="text-muted"><i class="fas fa-map-marker-alt text-danger"></i> ' . esc($row['alamat'] ?? '-') . ' RT' . ($row['rt'] ?? '00') . '/RW' . ($row['rw'] ?? '00') . '</small>
+                    <small class="text-muted"><i class="fas fa-map-marker-alt text-danger mr-1"></i> ' . esc($row['alamat'] ?? '-') . ' RT' . ($row['rt'] ?? '00') . '/RW' . ($row['rw'] ?? '00') . '</small>
                 </div>
             </div>';
 

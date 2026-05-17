@@ -641,6 +641,64 @@
             $('#prev_kpm, #prev_bukti').attr('src', "<?= base_url('assets/images/image_not_available.jpg'); ?>");
             $('.btn-group-toggle .btn').removeClass('active');
         });
+
+        // ==========================================
+        // 📋 FUNGSI COPY NIK & NO KK
+        // ==========================================
+
+        // Tombol Salin NIK
+        $(document).on('click', '.btnCopyNik', function() {
+            // 🚀 Ambil dari data-value (sesuai setting DataTables kita tadi)
+            // Tambahkan fallback || $(this).data('nik') untuk berjaga-jaga jika ada tombol versi lama
+            const nik = $(this).data('value') || $(this).data('nik');
+
+            navigator.clipboard.writeText(nik)
+                .then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'NIK Disalin!',
+                        text: `NIK ${nik} berhasil disalin ke clipboard`,
+                        timer: 1500,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end' // 🚀 Pindah ke pojok kanan atas agar lebih estetik
+                    });
+                })
+                .catch(err => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal menyalin',
+                        text: 'Clipboard tidak didukung oleh browser atau koneksi tidak aman (HTTPS/Localhost).',
+                    });
+                });
+        });
+
+        // Tombol Salin No. KK
+        $(document).on('click', '.btnCopyNoKK', function() {
+            // 🚀 Ambil dari data-value
+            const noKK = $(this).data('value');
+
+            navigator.clipboard.writeText(noKK)
+                .then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'No. KKS Disalin!', // 🚀 Teks disesuaikan
+                        text: `No. KKS ${noKK} berhasil disalin ke clipboard`, // 🚀 Teks disesuaikan
+                        timer: 1500,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                })
+                .catch(err => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal menyalin',
+                        text: 'Clipboard tidak didukung oleh browser atau koneksi tidak aman (HTTPS/Localhost).',
+                    });
+                });
+        });
+
     });
 </script>
 <?= $this->endSection(); ?>

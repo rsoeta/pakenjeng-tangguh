@@ -221,8 +221,16 @@ $(document).ready(function () {
                 {
                     data: 'nik',
                     title: 'NIK',
-                    render: function(nik) {
-                        // 🚀 Panggil fungsi penyensoran
+                    // 🚀 TAMBAHKAN type dan row DI SINI
+                    render: function(nik, type, row) { 
+                        if (!nik) return '-';
+
+                        // 🚀 KUNCI SAKTI: Kembalikan NIK utuh untuk filter dan sort
+                        if (type === 'filter' || type === 'sort') {
+                            return nik;
+                        }
+
+                        // 🚀 Panggil fungsi penyensoran untuk tampilan
                         let maskedNik = maskNumberJS(nik);
                         
                         return `
@@ -343,8 +351,16 @@ $(document).ready(function () {
                {
                     data: 'nik',
                     title: 'NIK',
-                    render: function(nik) {
-                        // 🚀 Panggil fungsi penyensoran
+                    // 🚀 TAMBAHKAN type dan row DI SINI
+                    render: function(nik, type, row) { 
+                        if (!nik) return '-';
+
+                        // 🚀 KUNCI SAKTI: Kembalikan NIK utuh untuk filter dan sort
+                        if (type === 'filter' || type === 'sort') {
+                            return nik;
+                        }
+
+                        // 🚀 Panggil fungsi penyensoran untuk tampilan
                         let maskedNik = maskNumberJS(nik);
                         
                         return `

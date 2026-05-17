@@ -216,20 +216,26 @@
                 {
                     data: 'no_kk',
                     className: 'text-nowrap text-start',
-                    render: function(noKK) {
-                        if (!noKK) return '-';
+                    // 🚀 TAMBAHKAN PARAMETER 'type' DI SINI
+                    render: function(data, type, row) {
+
+                        // 1. KUNCI SAKTINYA DI SINI MBAH! 
+                        // Jika DataTables sedang mencari (filter) atau mengurutkan (sort), berikan angka aslinya.
+                        if (type === 'filter' || type === 'sort') {
+                            return data;
+                        }
 
                         // 🚀 Panggil fungsi penyensoran
-                        let maskedKK = maskNumberJS(noKK);
+                        let maskedData = maskNumberJS(data);
 
                         return `
                     <div class="d-flex align-items-center gap-2">
-                        <span class="fw-semibold">${maskedKK}</span>
+                        <span class="fw-semibold">${maskedData}</span>
                         
                         <button 
                             type="button"
                             class="btn btn-outline-secondary btn-xs btnCopyNoKK"
-                            data-value="${noKK}" 
+                            data-value="${data}" 
                             title="Salin No KK">
                             <i class="fas fa-copy"></i>
                         </button>
@@ -533,7 +539,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Tersalin',
-                    text: 'No. KK berhasil disalin ke clipboard',
+                    text: 'No. KK ' + value + ' berhasil disalin ke clipboard',
                     timer: 1500,
                     showConfirmButton: false,
                     toast: true,

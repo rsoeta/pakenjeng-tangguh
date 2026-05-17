@@ -127,6 +127,13 @@
                     render: function(noKK, type, row) {
                         if (!noKK) return '-';
 
+                        // 🚀 KUNCI SAKTINYA DITARUH DI SINI MBAH!
+                        // Kembalikan No KK asli khusus untuk mesin pencari (filter) dan pengurut (sort) DataTables
+                        if (type === 'filter' || type === 'sort') {
+                            return noKK;
+                        }
+
+                        // 🚀 Panggil fungsi penyensoran untuk tampilan (display)
                         let maskedKK = maskNumberJS(noKK);
 
                         return `
@@ -221,6 +228,11 @@
                             render: function(nik, type, row) {
                                 if (!nik) return '-';
 
+                                // 🚀 KUNCI SAKTI: Kembalikan NIK asli untuk filter dan sort
+                                if (type === 'filter' || type === 'sort') {
+                                    return nik;
+                                }
+
                                 let maskedNik = maskNumberJS(nik);
 
                                 return `
@@ -297,7 +309,7 @@
             navigator.clipboard.writeText(value).then(() => {
                 Swal.fire({
                     icon: 'success',
-                    title: 'No. KK Tersalin',
+                    title: 'No. KK ' + value + ' Tersalin',
                     text: '',
                     timer: 1500,
                     showConfirmButton: false,
@@ -318,7 +330,7 @@
             navigator.clipboard.writeText(value).then(() => {
                 Swal.fire({
                     icon: 'success',
-                    title: 'NIK Tersalin',
+                    title: 'NIK ' + value + ' Tersalin',
                     text: '',
                     timer: 1500,
                     showConfirmButton: false,

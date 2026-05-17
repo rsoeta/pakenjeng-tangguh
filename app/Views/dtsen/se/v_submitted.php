@@ -81,7 +81,13 @@
                     render: function(noKK, type, row) {
                         if (!noKK) return '-';
 
-                        // 🚀 Panggil fungsi penyensoran
+                        // 🚀 KUNCI SAKTINYA DITARUH DI SINI MBAH!
+                        // Kembalikan No KK asli khusus untuk mesin pencari (filter) dan pengurut (sort) DataTables
+                        if (type === 'filter' || type === 'sort') {
+                            return noKK;
+                        }
+
+                        // 🚀 Panggil fungsi penyensoran untuk tampilan (display)
                         let maskedKK = maskNumberJS(noKK);
 
                         return `
@@ -161,7 +167,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Tersalin',
-                    text: 'No. KK berhasil disalin ke clipboard',
+                    text: 'No. KK ' + value + ' berhasil disalin ke clipboard',
                     timer: 1500,
                     showConfirmButton: false,
                     toast: true,

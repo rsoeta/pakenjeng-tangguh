@@ -214,10 +214,18 @@
                 {
                     data: 'nik',
                     className: 'text-nowrap text-start',
-                    render: function(nik) {
-                        // 🚀 Panggil fungsi penyensoran
+                    // 🚀 TAMBAHKAN type dan row DI SINI
+                    render: function(nik, type, row) {
+                        if (!nik) return '-';
+
+                        // 🚀 KUNCI SAKTI: Kembalikan NIK utuh untuk pencarian (filter) dan pengurutan (sort)
+                        if (type === 'filter' || type === 'sort') {
+                            return nik;
+                        }
+
+                        // 🚀 Panggil fungsi penyensoran untuk tampilan
                         let maskedNik = maskNumberJS(nik);
-                        if (!maskedNik) return '-';
+
                         return `
                     <div class="d-flex align-items-center gap-2">
                         <span class="fw-semibold">${maskedNik}</span>
@@ -235,10 +243,18 @@
                 {
                     data: 'no_kk',
                     className: 'text-nowrap text-start',
-                    render: function(noKK) {
-                            // 🚀 Panggil fungsi penyensoran
+                    // 🚀 TAMBAHKAN type dan row DI SINI
+                    render: function(noKK, type, row) {
+                        if (!noKK) return '-';
+
+                        // 🚀 KUNCI SAKTI: Kembalikan No KK utuh untuk pencarian (filter) dan pengurutan (sort)
+                        if (type === 'filter' || type === 'sort') {
+                            return noKK;
+                        }
+
+                        // 🚀 Panggil fungsi penyensoran untuk tampilan
                         let maskedNoKK = maskNumberJS(noKK);
-                        if (!maskedNoKK) return '-';
+
                         return `
                     <div class="d-flex align-items-center gap-2">
                         <span class="fw-semibold">${maskedNoKK}</span>
@@ -454,7 +470,7 @@
             Swal.fire({
                 icon: 'success',
                 title: 'Tersalin',
-                text: 'No. KK berhasil disalin ke clipboard',
+                text: 'No. KK ' + value + ' berhasil disalin ke clipboard',
                 timer: 1500,
                 showConfirmButton: false,
                 toast: true,

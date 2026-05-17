@@ -408,6 +408,25 @@
 
         loadRwRtDropdown();
 
+        // ==========================================
+        // 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF (JS)
+        // ==========================================
+        function maskNumberJS(number) {
+            if (!number || number === '-' || number === 'NOKKS') return number || '-';
+
+            let numStr = number.toString().trim();
+            if (numStr.length <= 8) return numStr;
+
+            let masked = numStr.substring(0, 8) + '*'.repeat(numStr.length - 8);
+
+            return `<span class="fw-bold text-primary" style="cursor:pointer;" 
+                      onmouseenter="this.innerText='${numStr}'" 
+                      onmouseleave="this.innerText='${masked}'" 
+                      ontouchstart="this.innerText='${numStr}'" 
+                      ontouchend="this.innerText='${masked}'" 
+                      title="Tahan/Arahkan kursor untuk melihat utuh">${masked}</span>`;
+        }
+
         table = $('#tabelReaktivasi').DataTable({
             processing: true,
             serverSide: true,
@@ -430,11 +449,58 @@
             columns: [{
                     data: 'nama'
                 },
+                // 🔹 Kolom NIK
                 {
-                    data: 'nik'
+                    data: 'nik',
+                    className: 'text-nowrap',
+                    render: function(data, type, row) {
+                        if (!data) return '-';
+
+                        // 🚀 KUNCI SAKTI: Kembalikan NIK asli untuk filter dan sort
+                        if (type === 'filter' || type === 'sort') {
+                            return data;
+                        }
+
+                        // 🚀 Panggil fungsi penyensoran untuk tampilan
+                        let maskedNik = maskNumberJS(data);
+
+                        return `
+                            <div class="d-flex justify-content-between align-items-center w-100 gap-2">
+                                <span class="fw-semibold">${maskedNik}</span>
+                                <button type="button" class="btn btn-outline-secondary btn-xs btnCopyNik" 
+                                        data-value="${data}" title="Salin NIK">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
                 },
+
+                // 🔹 Kolom No. KK
                 {
-                    data: 'no_kk'
+                    data: 'no_kk',
+                    className: 'text-nowrap',
+                    render: function(data, type, row) {
+                        if (!data) return '-';
+
+                        // 🚀 KUNCI SAKTI: Kembalikan No KK asli untuk filter dan sort
+                        if (type === 'filter' || type === 'sort') {
+                            return data;
+                        }
+
+                        // 🚀 Panggil fungsi penyensoran untuk tampilan
+                        let maskedKK = maskNumberJS(data);
+
+                        return `
+                            <div class="d-flex justify-content-between align-items-center w-100 gap-2">
+                                <span class="fw-semibold">${maskedKK}</span>
+                                <button type="button" class="btn btn-outline-secondary btn-xs btnCopyNoKK" 
+                                        data-value="${data}" title="Salin No KK">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
                 },
                 {
                     data: 'desil_nasional'
@@ -488,6 +554,63 @@
                     }
                 }
             ]
+        });
+
+        // ==========================================
+        // 📋 FUNGSI COPY NIK & NO KK
+        // ==========================================
+
+        // Tombol Salin NIK
+        $(document).on('click', '.btnCopyNik', function() {
+            // 🚀 Ambil dari data-value (sesuai setting DataTables kita tadi)
+            // Tambahkan fallback || $(this).data('nik') untuk berjaga-jaga jika ada tombol versi lama
+            const nik = $(this).data('value') || $(this).data('nik');
+
+            navigator.clipboard.writeText(nik)
+                .then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'NIK Disalin!',
+                        text: `NIK ${nik} berhasil disalin ke clipboard`,
+                        timer: 1500,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end' // 🚀 Pindah ke pojok kanan atas agar lebih estetik
+                    });
+                })
+                .catch(err => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal menyalin',
+                        text: 'Clipboard tidak didukung oleh browser atau koneksi tidak aman (HTTPS/Localhost).',
+                    });
+                });
+        });
+
+        // Tombol Salin No. KK
+        $(document).on('click', '.btnCopyNoKK', function() {
+            // 🚀 Ambil dari data-value
+            const noKK = $(this).data('value');
+
+            navigator.clipboard.writeText(noKK)
+                .then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'No. KK Disalin!', // 🚀 Teks disesuaikan
+                        text: `No. KK ${noKK} berhasil disalin ke clipboard`, // 🚀 Teks disesuaikan
+                        timer: 1500,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                })
+                .catch(err => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal menyalin',
+                        text: 'Clipboard tidak didukung oleh browser atau koneksi tidak aman (HTTPS/Localhost).',
+                    });
+                });
         });
 
         /* ==========================
