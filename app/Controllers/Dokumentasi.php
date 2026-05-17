@@ -277,7 +277,7 @@ class Dokumentasi extends BaseController
         }
 
         $data = [
-            'title'        => 'Timeline Dokumentasi Petugas',
+            'title'        => 'Timeline Pentri',
             'timelineData' => $timelineData,
             'user_login'   => $user_login,
             'user_image'   => $user_image
