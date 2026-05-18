@@ -567,6 +567,25 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             console.log('🧾 Modal Anggota terbuka, event submit aktif');
         });
 
+        // ==========================================
+        // 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF (JS)
+        // ==========================================
+        function maskNumberJS(number) {
+            if (!number || number === '-' || number === 'NOKKS') return number || '-';
+
+            let numStr = number.toString().trim();
+            if (numStr.length <= 8) return numStr;
+
+            let masked = numStr.substring(0, 8) + '*'.repeat(numStr.length - 8);
+
+            return `<span class="fw-bold text-primary" style="cursor:pointer;" 
+                      onmouseenter="this.innerText='${numStr}'" 
+                      onmouseleave="this.innerText='${masked}'" 
+                      ontouchstart="this.innerText='${numStr}'" 
+                      ontouchend="this.innerText='${masked}'" 
+                      title="Tahan/Arahkan kursor untuk melihat utuh">${masked}</span>`;
+        }
+
         /* ============================================================
          * 📋 LOAD TABLE ANGGOTA (FINAL – LEFT ALIGNED & RESPONSIVE)
          * ============================================================ */
@@ -634,15 +653,63 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     // 🔹 No KK
                     {
                         data: 'no_kk',
-                        className: 'text-start',
-                        defaultContent: '-'
+                        className: 'text-nowrap text-start',
+                        render: function(data, type, row) {
+                            // Tangani jika data kosong
+                            if (!data) return '-';
+
+                            // Biarkan DataTables mencari dan mengurutkan data asli
+                            if (type === 'filter' || type === 'sort') {
+                                return data;
+                            }
+
+                            // Terapkan sensor
+                            let maskedData = maskNumberJS(data);
+
+                            return `
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-semibold">${maskedData}</span>
+                                    <button 
+                                        type="button"
+                                        class="btn btn-outline-secondary btn-xs btnCopyNoKK"
+                                        data-value="${data}" 
+                                        title="Salin No KK">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
                     },
 
                     // 🔹 NIK
                     {
                         data: 'nik',
-                        className: 'text-start',
-                        defaultContent: '-'
+                        className: 'text-nowrap text-start',
+                        render: function(data, type, row) {
+                            // Tangani jika data kosong
+                            if (!data) return '-';
+
+                            // Biarkan DataTables mencari dan mengurutkan data asli
+                            if (type === 'filter' || type === 'sort') {
+                                return data;
+                            }
+
+                            // Terapkan sensor
+                            let maskedData = maskNumberJS(data);
+
+                            return `
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-semibold">${maskedData}</span>
+                                    <button 
+                                        type="button"
+                                        class="btn btn-outline-secondary btn-xs btnCopyNik"
+                                        data-value="${data}" 
+                                        title="Salin NIK">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
                     },
 
                     // 🔹 Nama
@@ -798,6 +865,59 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         Swal.fire('Gagal', res.message, 'error');
                     }
                 }, 'json');
+            });
+        });
+
+        // ========================================================
+        // 📋 FUNGSI SALIN KE CLIPBOARD (NIK & NO KK)
+        // ========================================================
+
+        // Konfigurasi SweetAlert untuk Toast (Notifikasi Pojok Kanan Atas)
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        // 🎯 Salin No. KK
+        $(document).on('click', '.btnCopyNoKK', function() {
+            const value = $(this).attr('data-value'); // Ambil nilai asli dari data-value
+
+            navigator.clipboard.writeText(value).then(() => {
+                Toast.fire({
+                    icon: 'success',
+                    title: 'No. KK berhasil disalin!'
+                });
+            }).catch(err => {
+                console.error('Gagal menyalin teks: ', err);
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Gagal menyalin No. KK'
+                });
+            });
+        });
+
+        // 🎯 Salin NIK
+        $(document).on('click', '.btnCopyNik', function() {
+            const value = $(this).attr('data-value'); // Ambil nilai asli dari data-value
+
+            navigator.clipboard.writeText(value).then(() => {
+                Toast.fire({
+                    icon: 'success',
+                    title: 'NIK berhasil disalin!'
+                });
+            }).catch(err => {
+                console.error('Gagal menyalin teks: ', err);
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Gagal menyalin NIK'
+                });
             });
         });
 
