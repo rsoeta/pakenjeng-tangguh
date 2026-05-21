@@ -26,16 +26,27 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         </div>
     <?php endif; ?>
 </div>
+<!-- <thead class="table-light text-start">
+        <tr>
+            <th></th>
+            <th>No</th>
+            <th>Nama</th>
+            <th>NIK</th>
+            <th>Tanggal Lahir</th>
+            <th>Hubungan Keluarga</th>
+            <th>Aksi</th>
+        </tr>
+    </thead> -->
 <table class="table table-bordered table-sm table-striped w-100" id="tableAnggota">
     <thead class="table-light text-start">
         <tr>
-            <th></th> <!-- Responsive control -->
+            <th></th>
             <th>No</th>
-            <th>No. KK</th>
-            <th>NIK</th>
             <th>Nama</th>
+            <th>NIK</th>
             <th>Tanggal Lahir</th>
             <th>Hubungan Keluarga</th>
+            <th>Pekerjaan</th>
             <th>Aksi</th>
         </tr>
     </thead>
@@ -632,6 +643,107 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 /* ===============================
                  * DEFINISI KOLOM
                  * =============================== */
+                // columns: [
+                //     // 🔹 Control (+)
+                //     {
+                //         data: null,
+                //         defaultContent: '',
+                //         className: 'dtr-control text-start',
+                //         orderable: false,
+                //         width: '20px'
+                //     },
+
+                //     // 🔹 No
+                //     {
+                //         data: null,
+                //         className: 'text-start',
+                //         width: '40px',
+                //         render: (d, t, r, m) => m.row + 1
+                //     },
+
+                //     // 🔹 Nama
+                //     {
+                //         data: 'nama',
+                //         className: 'text-start',
+                //         defaultContent: '-'
+                //     },
+
+                //     // 🔹 NIK
+                //     {
+                //         data: 'nik',
+                //         className: 'text-nowrap text-start',
+                //         render: function(data, type, row) {
+                //             // Tangani jika data kosong
+                //             if (!data) return '-';
+
+                //             // Biarkan DataTables mencari dan mengurutkan data asli
+                //             if (type === 'filter' || type === 'sort') {
+                //                 return data;
+                //             }
+
+                //             // Terapkan sensor
+                //             let maskedData = maskNumberJS(data);
+
+                //             return `
+                //                 <div class="d-flex align-items-center gap-2">
+                //                     <span class="fw-semibold">${maskedData}</span>
+                //                     <button 
+                //                         type="button"
+                //                         class="btn btn-outline-secondary btn-xs btnCopyNik"
+                //                         data-value="${data}" 
+                //                         title="Salin NIK">
+                //                         <i class="fas fa-copy"></i>
+                //                     </button>
+                //                 </div>
+                //             `;
+                //         }
+                //     },
+
+                //     // 🔹 Tanggal Lahir
+                //     {
+                //         data: 'tanggal_lahir',
+                //         className: 'text-start',
+                //         render: d =>
+                //             d ?
+                //             new Date(d).toLocaleDateString('id-ID', {
+                //                 day: '2-digit',
+                //                 month: 'short',
+                //                 year: 'numeric'
+                //             }) : '-'
+                //     },
+
+                //     // 🔹 Hubungan
+                //     {
+                //         data: null,
+                //         className: 'text-start',
+                //         render: row =>
+                //             row.hubungan_keluarga_label ??
+                //             row.jenis_shdk ??
+                //             row.hubungan_keluarga ??
+                //             '-'
+                //     },
+
+                //     // 🔹 Aksi
+                //     {
+                //         data: null,
+                //         orderable: false,
+                //         searchable: false,
+                //         className: 'text-start',
+                //         width: '140px',
+                //         render: r => `
+                //     <div class="btn-group btn-group-sm">
+                //         <button class="btn btn-primary btnEditAnggota"
+                //             data-id="${r.id_art ?? r.id}">
+                //             <i class="fas fa-edit"></i>
+                //         </button>
+                //         <button class="btn btn-danger btnHapusAnggota"
+                //             data-id="${r.id_art ?? r.id}">
+                //             <i class="fas fa-trash-alt"></i>
+                //         </button>
+                //     </div>
+                // `
+                //     }
+                // ],
                 columns: [
                     // 🔹 Control (+)
                     {
@@ -650,22 +762,23 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         render: (d, t, r, m) => m.row + 1
                     },
 
+                    // 🔹 Nama
+                    {
+                        data: 'nama',
+                        className: 'text-start',
+                        defaultContent: '-'
+                    },
+
                     // 🔹 NIK
                     {
                         data: 'nik',
                         className: 'text-nowrap text-start',
                         render: function(data, type, row) {
-                            // Tangani jika data kosong
                             if (!data) return '-';
-
-                            // Biarkan DataTables mencari dan mengurutkan data asli
                             if (type === 'filter' || type === 'sort') {
                                 return data;
                             }
-
-                            // Terapkan sensor
                             let maskedData = maskNumberJS(data);
-
                             return `
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="fw-semibold">${maskedData}</span>
@@ -679,44 +792,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                                 </div>
                             `;
                         }
-                    },
-
-                    // 🔹 No KK
-                    {
-                        data: 'no_kk',
-                        className: 'text-nowrap text-start',
-                        render: function(data, type, row) {
-                            // Tangani jika data kosong
-                            if (!data) return '-';
-
-                            // Biarkan DataTables mencari dan mengurutkan data asli
-                            if (type === 'filter' || type === 'sort') {
-                                return data;
-                            }
-
-                            // Terapkan sensor
-                            let maskedData = maskNumberJS(data);
-
-                            return `
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="fw-semibold">${maskedData}</span>
-                                    <button 
-                                        type="button"
-                                        class="btn btn-outline-secondary btn-xs btnCopyNoKK"
-                                        data-value="${data}" 
-                                        title="Salin No KK">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
-                                </div>
-                            `;
-                        }
-                    },
-
-                    // 🔹 Nama
-                    {
-                        data: 'nama',
-                        className: 'text-start',
-                        defaultContent: '-'
                     },
 
                     // 🔹 Tanggal Lahir
@@ -743,6 +818,13 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                             '-'
                     },
 
+                    // 🔹 Pekerjaan (🆕 Kolom Baru)
+                    {
+                        data: 'pekerjaan_label',
+                        className: 'text-start',
+                        defaultContent: '-'
+                    },
+
                     // 🔹 Aksi
                     {
                         data: null,
@@ -751,17 +833,17 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         className: 'text-start',
                         width: '140px',
                         render: r => `
-                    <div class="btn-group btn-group-sm">
-                        <button class="btn btn-primary btnEditAnggota"
-                            data-id="${r.id_art ?? r.id}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-danger btnHapusAnggota"
-                            data-id="${r.id_art ?? r.id}">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                `
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-primary btnEditAnggota"
+                                    data-id="${r.id_art ?? r.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btnHapusAnggota"
+                                    data-id="${r.id_art ?? r.id}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        `
                     }
                 ],
 
