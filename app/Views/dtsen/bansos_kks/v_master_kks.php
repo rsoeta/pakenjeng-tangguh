@@ -69,7 +69,7 @@
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table id="tableMasterKKS" class="table table-hover table-striped mb-0" style="width:100%;">
-                            <thead class="text-muted bg-white">
+                            <!-- <thead class="text-muted bg-white">
                                 <tr>
                                     <th width="5%" class="text-center border-top-0">No</th>
                                     <th class="border-top-0">NIK</th>
@@ -79,9 +79,20 @@
                                     <th class="border-top-0 text-center">Status</th>
                                     <th width="10%" class="text-center border-top-0"><i class="fas fa-cogs"></i></th>
                                 </tr>
+                            </thead> -->
+                            <thead>
+                                <tr>
+                                    <th class="text-center">No</th>
+                                    <th>Nama KPM</th>
+                                    <th>No. KKS</th>
+                                    <th>NIK</th>
+                                    <th>No. KK</th>
+                                    <th class="text-center">Alamat Lengkap</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center"><i class="fas fa-cog"></i></th>
+                                </tr>
                             </thead>
-                            <tbody>
-                            </tbody>
+                            <tbody></tbody>
                         </table>
                     </div>
                 </div>
@@ -260,11 +271,40 @@
         });
 
         // 3. Modifikasi inisialisasi DataTables (Tambahkan parameter d)
+        // var tableKKS = $('#tableMasterKKS').DataTable({
+        //     processing: true,
+        //     serverSide: true,
+        //     responsive: true,
+        //     // ... (setting processing, serverSide seperti instruksi sebelumnya)
+        //     ajax: {
+        //         url: "<?= base_url('master-kks/datatable') ?>",
+        //         type: "POST",
+        //         data: function(d) {
+        //             d.filter_rw = $('#filter_rw').val();
+        //             d.filter_rt = $('#filter_rt').val();
+        //             d.filter_status = $('#filter_status').val();
+        //             d['<?= csrf_token() ?>'] = '<?= csrf_hash() ?>';
+        //         }
+        //     },
+        //     columnDefs: [{
+        //             targets: [0, 6],
+        //             orderable: false,
+        //             className: 'text-center'
+        //         },
+        //         {
+        //             targets: [4, 5],
+        //             className: 'text-center'
+        //         }
+        //     ],
+        //     language: {
+        //         // Tambahkan https: secara eksplisit
+        //         url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
+        //     }
+        // });
         var tableKKS = $('#tableMasterKKS').DataTable({
             processing: true,
             serverSide: true,
             responsive: true,
-            // ... (setting processing, serverSide seperti instruksi sebelumnya)
             ajax: {
                 url: "<?= base_url('master-kks/datatable') ?>",
                 type: "POST",
@@ -276,17 +316,18 @@
                 }
             },
             columnDefs: [{
-                    targets: [0, 6],
+                    // 🚀 Digeser: 0 (No) dan 7 (Aksi)
+                    targets: [0, 7],
                     orderable: false,
                     className: 'text-center'
                 },
                 {
-                    targets: [4, 5],
+                    // 🚀 Digeser: 5 (Alamat Lengkap) dan 6 (Status)
+                    targets: [5, 6],
                     className: 'text-center'
                 }
             ],
             language: {
-                // Tambahkan https: secara eksplisit
                 url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
             }
         });
@@ -658,8 +699,8 @@
                 .then(() => {
                     Swal.fire({
                         icon: 'success',
-                        title: 'No. KKS Disalin!', // 🚀 Teks disesuaikan
-                        text: `No. KKS ${noKK} berhasil disalin ke clipboard`, // 🚀 Teks disesuaikan
+                        title: 'No. Disalin!', // 🚀 Teks disesuaikan
+                        text: `No. ${noKK} berhasil disalin ke clipboard`, // 🚀 Teks disesuaikan
                         timer: 1500,
                         showConfirmButton: false,
                         toast: true,

@@ -650,37 +650,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         render: (d, t, r, m) => m.row + 1
                     },
 
-                    // 🔹 No KK
-                    {
-                        data: 'no_kk',
-                        className: 'text-nowrap text-start',
-                        render: function(data, type, row) {
-                            // Tangani jika data kosong
-                            if (!data) return '-';
-
-                            // Biarkan DataTables mencari dan mengurutkan data asli
-                            if (type === 'filter' || type === 'sort') {
-                                return data;
-                            }
-
-                            // Terapkan sensor
-                            let maskedData = maskNumberJS(data);
-
-                            return `
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="fw-semibold">${maskedData}</span>
-                                    <button 
-                                        type="button"
-                                        class="btn btn-outline-secondary btn-xs btnCopyNoKK"
-                                        data-value="${data}" 
-                                        title="Salin No KK">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
-                                </div>
-                            `;
-                        }
-                    },
-
                     // 🔹 NIK
                     {
                         data: 'nik',
@@ -705,6 +674,37 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                                         class="btn btn-outline-secondary btn-xs btnCopyNik"
                                         data-value="${data}" 
                                         title="Salin NIK">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    },
+
+                    // 🔹 No KK
+                    {
+                        data: 'no_kk',
+                        className: 'text-nowrap text-start',
+                        render: function(data, type, row) {
+                            // Tangani jika data kosong
+                            if (!data) return '-';
+
+                            // Biarkan DataTables mencari dan mengurutkan data asli
+                            if (type === 'filter' || type === 'sort') {
+                                return data;
+                            }
+
+                            // Terapkan sensor
+                            let maskedData = maskNumberJS(data);
+
+                            return `
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-semibold">${maskedData}</span>
+                                    <button 
+                                        type="button"
+                                        class="btn btn-outline-secondary btn-xs btnCopyNoKK"
+                                        data-value="${data}" 
+                                        title="Salin No KK">
                                         <i class="fas fa-copy"></i>
                                     </button>
                                 </div>

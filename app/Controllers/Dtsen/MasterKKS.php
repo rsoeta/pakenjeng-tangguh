@@ -47,7 +47,11 @@ class MasterKKS extends BaseController
         $filter_rt     = $request->getPost('filter_rt');
         $filter_status = $request->getPost('filter_status');
 
-        $builder = $this->db->table('dtsen_master_kks rt');
+        // 🚀 SUNTIKAN JOIN UNTUK MENGAMBIL NO_KK
+        $builder = $this->db->table('dtsen_master_kks rt')
+            ->select('rt.*, kk.no_kk')
+            ->join('dtsen_art art', 'art.nik = rt.nik', 'left')
+            ->join('dtsen_kk kk', 'kk.id_kk = art.id_kk', 'left');
 
         // =======================================================
         // 🔐 TERAPKAN TRAIT WILAYAH FILTER
@@ -81,6 +85,7 @@ class MasterKKS extends BaseController
                 ->like('rt.nik', $search)
                 ->orLike('rt.nama_penerima', $search)
                 ->orLike('rt.no_kks', $search)
+                ->orLike('kk.no_kk', $search) // 🚀 Tambahkan agar No KK juga bisa dicari
                 ->groupEnd();
         }
 
@@ -107,7 +112,6 @@ class MasterKKS extends BaseController
             $full = esc($number);
             $len = strlen($full);
 
-            // Tentukan Class dan Title Tombol berdasarkan jenis data
             $btnClass = ($type === 'nik') ? 'btnCopyNik' : 'btnCopyNoKK';
             $btnTitle = ($type === 'nik') ? 'Salin NIK' : 'Salin No KK';
 
@@ -147,15 +151,20 @@ class MasterKKS extends BaseController
                 ';
             }
 
-            // 🚀 Menerapkan sensor NIK dan KKS beserta jenis tipenya
+            // 🚀 Menerapkan sensor
             $nikMasked = $maskNumber($row['nik'], 'nik');
             $kksMasked = $maskNumber($row['no_kks'], 'nokk');
 
+            // 🚀 Ambil no_kk dari hasil join, beri nilai default jika KPM tidak ada di dtsen_art
+            $noKkMasked = $maskNumber($row['no_kk'] ?? '-', 'nokk');
+
+            // 🚀 SUSUNAN BARU: No | Nama KPM | No. KKS | NIK | No. KK | Alamat Lengkap | Status | Aksi
             $data[] = [
                 $no++,
-                $nikMasked, // Menggunakan variabel yang sudah disensor + tombol
                 esc($row['nama_penerima']),
-                $kksMasked, // Menggunakan variabel yang sudah disensor + tombol
+                $kksMasked,
+                $nikMasked,
+                $noKkMasked,
                 esc($row['alamat']) . ' RT ' . esc($row['rt']) . ' RW ' . esc($row['rw']),
                 $badge,
                 $btnAction
@@ -169,6 +178,145 @@ class MasterKKS extends BaseController
             'data'            => $data
         ]);
     }
+
+    // // ========================================================
+    // // 📊 DATA TABLES: READ DATA & INTEGRASI TRAIT WILAYAH
+    // // ========================================================
+    // public function datatable()
+    // {
+    //     $request = \Config\Services::request();
+
+    //     $draw   = $request->getPost('draw');
+    //     $start  = $request->getPost('start');
+    //     $length = $request->getPost('length');
+    //     $search = $request->getPost('search')['value'] ?? '';
+
+    //     $filter_rw     = $request->getPost('filter_rw');
+    //     $filter_rt     = $request->getPost('filter_rt');
+    //     $filter_status = $request->getPost('filter_status');
+
+    //     $builder = $this->db->table('dtsen_master_kks rt');
+
+    //     // =======================================================
+    //     // 🔐 TERAPKAN TRAIT WILAYAH FILTER
+    //     // =======================================================
+    //     $user   = $this->authModel->getUserId();
+    //     $roleId = session()->get('role_id') ?? $user['role_id'] ?? 4;
+
+    //     $filterData = [
+    //         'wilayah_tugas' => trim($user['wilayah_tugas'] ?? '')
+    //     ];
+
+    //     $this->applyWilayahFilter($builder, $filterData, $roleId);
+
+    //     $totalRecords = $builder->countAllResults(false);
+
+    //     // =======================================================
+    //     // 🔍 FILTER DINAMIS DARI FRONTEND
+    //     // =======================================================
+    //     if (!empty($filter_rw)) {
+    //         $builder->where('rt.rw', str_pad($filter_rw, 3, '0', STR_PAD_LEFT));
+    //     }
+    //     if (!empty($filter_rt)) {
+    //         $builder->where('rt.rt', str_pad($filter_rt, 3, '0', STR_PAD_LEFT));
+    //     }
+    //     if (!empty($filter_status)) {
+    //         $builder->where('rt.status_kks', $filter_status);
+    //     }
+
+    //     if (!empty($search)) {
+    //         $builder->groupStart()
+    //             ->like('rt.nik', $search)
+    //             ->orLike('rt.nama_penerima', $search)
+    //             ->orLike('rt.no_kks', $search)
+    //             ->groupEnd();
+    //     }
+
+    //     $filteredRecords = $builder->countAllResults(false);
+
+    //     $builder->orderBy('rt.rw', 'ASC')->orderBy('rt.rt', 'ASC')->orderBy('rt.nama_penerima', 'ASC');
+
+    //     if ($length != -1) {
+    //         $builder->limit($length, $start);
+    //     }
+
+    //     $query = $builder->get()->getResultArray();
+
+    //     $data = [];
+    //     $no = $start + 1;
+
+    //     // ==========================================
+    //     // 🛡️ FUNGSI BANTUAN: SENSOR DATA + TOMBOL SALIN
+    //     // ==========================================
+    //     $maskNumber = function ($number, $type) {
+    //         $number = trim($number ?? '');
+    //         if (empty($number) || $number === '-' || $number === 'NOKKS') return esc($number);
+
+    //         $full = esc($number);
+    //         $len = strlen($full);
+
+    //         // Tentukan Class dan Title Tombol berdasarkan jenis data
+    //         $btnClass = ($type === 'nik') ? 'btnCopyNik' : 'btnCopyNoKK';
+    //         $btnTitle = ($type === 'nik') ? 'Salin NIK' : 'Salin No KK';
+
+    //         if ($len <= 8) {
+    //             $masked = $full;
+    //             $hoverAttr = '';
+    //         } else {
+    //             $masked = substr($full, 0, 8) . str_repeat('*', $len - 8);
+    //             $hoverAttr = ' onmouseenter="this.innerText=\'' . $full . '\'" onmouseleave="this.innerText=\'' . $masked . '\'" ontouchstart="this.innerText=\'' . $full . '\'" ontouchend="this.innerText=\'' . $masked . '\'" title="Tahan/Arahkan kursor untuk melihat utuh" ';
+    //         }
+
+    //         return '
+    //         <div class="d-flex justify-content-between align-items-center gap-2">
+    //             <span style="display: none;">' . $full . '</span>
+    //             <span class="text-primary fw-bold" style="cursor:pointer;"' . $hoverAttr . '>' . $masked . '</span>
+    //             <button type="button" class="btn btn-outline-secondary btn-xs ' . $btnClass . ' py-0 px-1" data-value="' . $full . '" title="' . $btnTitle . '">
+    //                 <i class="fas fa-copy"></i>
+    //             </button>
+    //         </div>';
+    //     };
+
+    //     foreach ($query as $row) {
+    //         $status_cek = strtolower(trim($row['status_kks']));
+    //         $badge = ($status_cek == 'aktif')
+    //             ? '<span class="badge badge-success">Aktif</span>'
+    //             : (($status_cek == 'non aktif' || $status_cek == 'non-aktif')
+    //                 ? '<span class="badge badge-danger">Non Aktif</span>'
+    //                 : '<span class="badge badge-secondary">' . esc($row['status_kks']) . '</span>');
+
+    //         $btnAction = '
+    //             <button class="btn btn-xs btn-warning btn-edit" data-id="' . $row['id'] . '" title="Edit KPM"><i class="fas fa-edit"></i></button>
+    //         ';
+
+    //         if ($roleId <= 3) {
+    //             $btnAction .= '
+    //             <button class="btn btn-xs btn-danger btn-delete" data-id="' . $row['id'] . '" data-nama="' . esc($row['nama_penerima']) . '" title="Hapus KPM"><i class="fas fa-trash"></i></button>
+    //             ';
+    //         }
+
+    //         // 🚀 Menerapkan sensor NIK dan KKS beserta jenis tipenya
+    //         $nikMasked = $maskNumber($row['nik'], 'nik');
+    //         $kksMasked = $maskNumber($row['no_kks'], 'nokk');
+
+    //         $data[] = [
+    //             $no++,
+    //             $nikMasked, // Menggunakan variabel yang sudah disensor + tombol
+    //             esc($row['nama_penerima']),
+    //             $kksMasked, // Menggunakan variabel yang sudah disensor + tombol
+    //             esc($row['alamat']) . ' RT ' . esc($row['rt']) . ' RW ' . esc($row['rw']),
+    //             $badge,
+    //             $btnAction
+    //         ];
+    //     }
+
+    //     return $this->response->setJSON([
+    //         'draw'            => $draw,
+    //         'recordsTotal'    => $totalRecords,
+    //         'recordsFiltered' => $filteredRecords,
+    //         'data'            => $data
+    //     ]);
+    // }
 
     // ========================================================
     // 🌐 AJAX API: GET RW & RT DINAMIS
