@@ -386,15 +386,32 @@ class GenModel extends Model
 			->getResultArray();
 	}
 
+	// /**
+	//  * Ambil daftar RT berdasarkan RW & kode desa (optional)
+	//  */
+	// public function getRTByDesaRW($kodeDesa, $rw)
+	// {
+	// 	return $this->db->table('dtsen_rt')
+	// 		->select('id_rt, rt, rw')
+	// 		->where('kode_desa', $kodeDesa)
+	// 		->where('rw', $rw)
+	// 		->orderBy('rt', 'ASC')
+	// 		->get()
+	// 		->getResultArray();
+	// }
+
 	/**
 	 * Ambil daftar RT berdasarkan RW & kode desa (optional)
+	 * 🚀 DIBUAT UNIK AGAR TIDAK DOUBLE DI DROPDOWN
 	 */
 	public function getRTByDesaRW($kodeDesa, $rw)
 	{
 		return $this->db->table('dtsen_rt')
-			->select('id_rt, rt, rw')
+			->select('rt, rw') // Hapus id_rt dari select agar Group By lebih aman
 			->where('kode_desa', $kodeDesa)
 			->where('rw', $rw)
+			->where('rt IS NOT NULL') // Pengaman tambahan
+			->groupBy('rt') // 🚀 KUNCI SAKTINYA DI SINI
 			->orderBy('rt', 'ASC')
 			->get()
 			->getResultArray();
