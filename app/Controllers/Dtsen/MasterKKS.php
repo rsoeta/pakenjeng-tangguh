@@ -47,11 +47,14 @@ class MasterKKS extends BaseController
         $filter_rt     = $request->getPost('filter_rt');
         $filter_status = $request->getPost('filter_status');
 
-        // 🚀 SUNTIKAN JOIN UNTUK MENGAMBIL NO_KK
+        // 🚀 SUNTIKAN JOIN UNTUK MENGAMBIL NO_KK (BUG FIX: DOUBLE DATA)
         $builder = $this->db->table('dtsen_master_kks rt')
             ->select('rt.*, kk.no_kk')
-            ->join('dtsen_art art', 'art.nik = rt.nik', 'left')
-            ->join('dtsen_kk kk', 'kk.id_kk = art.id_kk', 'left');
+            // 1️⃣ Tambahkan filter deleted_at langsung di dalam kondisi JOIN
+            ->join('dtsen_art art', 'art.nik = rt.nik AND art.deleted_at IS NULL', 'left')
+            ->join('dtsen_kk kk', 'kk.id_kk = art.id_kk AND kk.deleted_at IS NULL', 'left')
+            // 2️⃣ Sabuk pengaman: Kunci agar 1 ID Master KKS HANYA tampil 1 kali
+            ->groupBy('rt.id');
 
         // =======================================================
         // 🔐 TERAPKAN TRAIT WILAYAH FILTER
@@ -85,7 +88,7 @@ class MasterKKS extends BaseController
                 ->like('rt.nik', $search)
                 ->orLike('rt.nama_penerima', $search)
                 ->orLike('rt.no_kks', $search)
-                ->orLike('kk.no_kk', $search) // 🚀 Tambahkan agar No KK juga bisa dicari
+                ->orLike('kk.no_kk', $search)
                 ->groupEnd();
         }
 
