@@ -312,20 +312,14 @@
 <div class="container-fluid mb-5">
     <div class="infographic-container shadow-sm">
 
-        <div class="title-header">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="fw-bold mb-0">📸 Timeline Dokumentasi Petugas</h4>
-                    <small class="text-muted">Jejak historis kegiatan lapangan</small>
-                </div>
-
-                <div>
-                    <button type="button" class="btn-floating-camera" data-bs-toggle="modal" data-bs-target="#modalDokumentasi" title="Tambah Dokumentasi">
-                        <i class="fas fa-camera"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="title-header mb-5 text-center">
+            <h4 class="fw-bold mb-0">📸 Timeline Dokumentasi Petugas</h4>
+            <small class="text-muted">Jejak historis kegiatan lapangan</small>
         </div>
+
+        <button type="button" class="btn-floating-camera" data-bs-toggle="modal" data-bs-target="#modalDokumentasi" title="Tambah Dokumentasi">
+            <i class="fas fa-camera"></i>
+        </button>
 
         <?php if (empty($timelineData)): ?>
             <div class="text-center p-5">
