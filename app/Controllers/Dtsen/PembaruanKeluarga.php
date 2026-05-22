@@ -733,27 +733,33 @@ class PembaruanKeluarga extends BaseController
             // 4️⃣ SINKRONISASI KE TABEL dtsen_rt (Di dalam saveRumah)
             // ==========================================================
             if ($idRt) {
-                // Skenario A: Masih Draft, tapi butuh sinkronisasi wilayah (RT/RW)
+                // Skenario A: Masih Draft, tapi butuh sinkronisasi wilayah (RT/RW/Desa/Alamat)
                 if ($usulanRow['status'] !== 'applied') {
 
-                    $rtBaru = trim($post['rt'] ?? '');
-                    $rwBaru = trim($post['rw'] ?? '');
+                    $rtBaru     = trim($post['rt'] ?? '');
+                    $rwBaru     = trim($post['rw'] ?? '');
+                    $desaBaru   = trim($post['village'] ?? '');
+                    $alamatBaru = trim($post['alamat'] ?? ''); // 🚀 Ambil data alamat baru
 
-                    // Cek apakah ada perubahan RT atau RW dari data asli
-                    if ($rtBaru !== $rtLama['rt'] || $rwBaru !== $rtLama['rw']) {
+                    // 🚀 Cek apakah ada perubahan KODE DESA, RT, RW, atau ALAMAT LENGKAP
+                    if ($rtBaru !== $rtLama['rt'] || $rwBaru !== $rtLama['rw'] || ($desaBaru !== '' && $desaBaru !== $rtLama['kode_desa']) || $alamatBaru !== ($rtLama['alamat'] ?? '')) {
 
                         // Hitung apakah ada KK lain di id_rt yang sama
                         $jumlahPenghuni = $this->db->table('dtsen_kk')->where('id_rt', $idRt)->countAllResults();
 
-                        if ($jumlahPenghuni > 1) {
+                        // Deteksi apakah ini murni pindah wilayah atau cuma revisi typo alamat
+                        $isPindahWilayah = ($rtBaru !== $rtLama['rt'] || $rwBaru !== $rtLama['rw'] || ($desaBaru !== '' && $desaBaru !== $rtLama['kode_desa']));
+
+                        if ($jumlahPenghuni > 1 && $isPindahWilayah) {
                             // 🚨 PECAH ALAMAT DINI: 
                             // Buat "Rumah Kosong" baru di wilayah yang baru agar tidak menyeret KK lain
                             $this->db->table('dtsen_rt')->insert([
-                                'rw'         => $rwBaru,
-                                'rt'         => $rtBaru,
-                                'kode_desa'  => !empty($post['village']) ? $post['village'] : ($rtLama['kode_desa'] ?? null),
-                                'created_at' => date('Y-m-d H:i:s'),
-                                'created_by' => $user['id'] ?? 'system',
+                                'rw'          => $rwBaru,
+                                'rt'          => $rtBaru,
+                                'kode_desa'   => !empty($post['village']) ? $post['village'] : ($rtLama['kode_desa'] ?? null),
+                                'alamat'      => $alamatBaru, // 🚀 Simpan alamat lengkap
+                                'created_at'  => date('Y-m-d H:i:s'),
+                                'created_by'  => $user['id'] ?? 'system',
                                 'source_name' => 'pecah_alamat_draft_' . $usulanId
                             ]);
 
@@ -764,13 +770,14 @@ class PembaruanKeluarga extends BaseController
                                 'id_rt' => $idRtBaru
                             ]);
                         } else {
-                            // Cuma sendirian di id_rt ini, langsung update RT/RW-nya
+                            // Cuma sendirian di id_rt ini, ATAU hanya sekadar revisi tulisan alamat (typo)
                             $this->db->table('dtsen_rt')->where('id_rt', $idRt)->update([
-                                'rw'         => $rwBaru,
-                                'rt'         => $rtBaru,
-                                'kode_desa'  => !empty($post['village']) ? $post['village'] : ($rtLama['kode_desa'] ?? null),
-                                'updated_at' => date('Y-m-d H:i:s'),
-                                'updated_by' => $user['nama'] ?? 'system'
+                                'rw'          => $rwBaru,
+                                'rt'          => $rtBaru,
+                                'kode_desa'   => !empty($post['village']) ? $post['village'] : ($rtLama['kode_desa'] ?? null),
+                                'alamat'      => $alamatBaru, // 🚀 Update alamat lengkap
+                                'updated_at'  => date('Y-m-d H:i:s'),
+                                'updated_by'  => $user['nama'] ?? 'system'
                             ]);
                         }
                     }
@@ -779,8 +786,13 @@ class PembaruanKeluarga extends BaseController
                 // Skenario B: Jika status sudah "applied" (Update lengkap)
                 if ($usulanRow['status'] === 'applied') {
 
-                    $updateRT = []; // Inisialisasi array
+                    $updateRT = [];
 
+                    $updateRT['kode_desa']         = (!empty($post['village'])) ? $post['village'] : ($rtLama['kode_desa'] ?? null);
+                    $updateRT['rt']                = trim($post['rt'] ?? $rtLama['rt'] ?? '');
+                    $updateRT['rw']                = trim($post['rw'] ?? $rtLama['rw'] ?? '');
+
+                    // 🚀 Alamat Lengkap sudah ada di sini, aman!
                     $updateRT['alamat']            = trim($post['alamat']);
                     $updateRT['kepemilikan_rumah'] = (!empty($post['status_kepemilikan'])) ? $post['status_kepemilikan'] : ($rtLama['kepemilikan_rumah'] ?? '');
 
@@ -793,7 +805,6 @@ class PembaruanKeluarga extends BaseController
                     $updateRT['sumber_air']        = (!empty($post['sumber_air'])) ? $post['sumber_air'] : ($rtLama['sumber_air'] ?? '');
                     $updateRT['sumber_listrik']    = (!empty($post['sumber_listrik'])) ? $post['sumber_listrik'] : ($rtLama['sumber_listrik'] ?? '');
 
-                    // 👇 PINDAHKAN EKSEKUSI UPDATE KE DALAM BLOK INI 👇
                     $this->db->table('dtsen_rt')->where('id_rt', $idRt)->update($updateRT);
                 }
             }
@@ -801,18 +812,9 @@ class PembaruanKeluarga extends BaseController
             // ==========================================================
             // ✅ 5️⃣ HAPUS BENDERA PEMULIHAN (WISUDA DATA)
             // ==========================================================
-            // Karena validasi RT/RW di atas sudah lolos (tidak kosong), 
-            // kita pastikan keluarga ini dihapus dari daftar Pemulihan.
             $this->db->table('dtsen_kk')
                 ->where('id_kk', $usulanRow['dtsen_kk_id'])
                 ->update(['is_recovery_needed' => 0]);
-
-            $this->db->transCommit();
-
-            return $this->response->setJSON([
-                'status'  => 'success',
-                'message' => 'Data rumah dan sinkronisasi wilayah berhasil disimpan.'
-            ]);
 
             $this->db->transCommit();
 
@@ -829,6 +831,467 @@ class PembaruanKeluarga extends BaseController
             ]);
         }
     }
+    
+    // /**
+    //  * 🏠 Simpan data Tab “Keterangan Perumahan”
+    //  * - Data disimpan ke dtsen_usulan.payload (JSON)
+    //  * - Mengamankan data dari null-overwrite (Efek Domino)
+    //  * - Update dtsen_rt secara bertahap sesuai status
+    //  */
+    // public function saveRumah()
+    // {
+    //     try {
+    //         $post = $this->request->getPost();
+    //         $user = session()->get();
+
+    //         // ==========================================
+    //         // 1️⃣ VALIDASI INPUT 
+    //         // ==========================================
+    //         $sumberListrik  = trim($post['sumber_listrik'] ?? '');
+    //         $nomorPelanggan = trim($post['nomor_pelanggan'] ?? '');
+    //         $nomorMeter     = trim($post['nomor_meter'] ?? '');
+
+    //         if ($sumberListrik === 'Listrik PLN dengan meteran') {
+    //             if ($nomorPelanggan === '') {
+    //                 return $this->response->setJSON(['status' => 'error', 'message' => 'Nomor Pelanggan wajib diisi.']);
+    //             }
+    //             if ($nomorMeter === '') {
+    //                 return $this->response->setJSON(['status' => 'error', 'message' => 'Nomor Meter wajib diisi.']);
+    //             }
+    //             if (!preg_match('/^[0-9]{11,13}$/', $nomorPelanggan)) {
+    //                 return $this->response->setJSON(['status' => 'error', 'message' => 'Nomor Pelanggan harus 11-13 digit angka.']);
+    //             }
+    //             if (!preg_match('/^[0-9]{8,13}$/', $nomorMeter)) {
+    //                 return $this->response->setJSON(['status' => 'error', 'message' => 'Nomor Meter harus 8-13 digit angka.']);
+    //             }
+    //         }
+
+    //         if (empty($post['alamat']) || empty($post['rt']) || empty($post['rw'])) {
+    //             return $this->response->setJSON([
+    //                 'status'  => 'error',
+    //                 'message' => 'Alamat, RT, dan RW wajib diisi agar tidak hilang dari dashboard.'
+    //             ]);
+    //         } else {
+    //             if ($nomorPelanggan !== '' && !preg_match('/^[0-9]{11,13}$/', $nomorPelanggan)) {
+    //                 return $this->response->setJSON(['status' => 'error', 'message' => 'Nomor Pelanggan harus 11-13 digit.']);
+    //             }
+    //             if ($nomorMeter !== '' && !preg_match('/^[0-9]{8,13}$/', $nomorMeter)) {
+    //                 return $this->response->setJSON(['status' => 'error', 'message' => 'Nomor Meter harus 8-13 digit.']);
+    //             }
+    //         }
+
+    //         // ==========================================
+    //         // 2️⃣ PERSIAPAN DATA & AMBIL BACKUP LAMA
+    //         // ==========================================
+    //         $usulanId = $post['dtsen_usulan_id'] ?? null;
+    //         if (!$usulanId) {
+    //             return $this->response->setJSON(['status' => 'error', 'message' => 'ID usulan tidak ditemukan.']);
+    //         }
+
+    //         $this->db->transBegin();
+
+    //         // Ambil usulan aktif
+    //         $usulanRow = $this->db->table('dtsen_usulan')
+    //             ->select('id, payload, status, dtsen_kk_id')
+    //             ->where('id', $usulanId)
+    //             ->get()
+    //             ->getRowArray();
+
+    //         if (!$usulanRow) {
+    //             throw new \Exception('Data usulan tidak ditemukan.');
+    //         }
+
+    //         // Ambil id_rt dari dtsen_kk untuk sinkronisasi
+    //         $idRt = $this->db->table('dtsen_kk')->select('id_rt')->where('id_kk', $usulanRow['dtsen_kk_id'])->get()->getRow('id_rt');
+
+    //         // Ambil data dtsen_rt lama sebagai "Sabuk Pengaman" (Anti-Null)
+    //         $rtLama = [];
+    //         if ($idRt) {
+    //             $rtLama = $this->db->table('dtsen_rt')->where('id_rt', $idRt)->get()->getRowArray() ?? [];
+    //         }
+
+    //         $payloadLama = json_decode($usulanRow['payload'] ?? '{}', true);
+    //         if (!is_array($payloadLama)) $payloadLama = [];
+    //         $gabungan = $payloadLama['perumahan'] ?? [];
+
+    //         // ==========================================
+    //         // 3️⃣ MERGE KE PAYLOAD JSON
+    //         // ==========================================
+    //         // Overwrite level root
+    //         $gabungan['alamat']             = trim($post['alamat']);
+    //         $gabungan['rw']                 = trim($post['rw']);
+    //         $gabungan['rt']                 = trim($post['rt']);
+    //         $gabungan['status_kepemilikan'] = $post['status_kepemilikan'] ?? $gabungan['status_kepemilikan'] ?? '';
+
+    //         // Overwrite level array (wilayah, kondisi, sanitasi)
+    //         $gabungan['wilayah'] = array_merge($gabungan['wilayah'] ?? [], [
+    //             'provinsi'  => $post['provinsi'] ?? '',
+    //             'kabupaten' => $post['regency'] ?? '',
+    //             'kecamatan' => $post['district'] ?? '',
+    //             'desa'      => $post['village'] ?? ''
+    //         ]);
+
+    //         $gabungan['kondisi'] = array_merge($gabungan['kondisi'] ?? [], [
+    //             'luas_lantai'     => (float)($post['luas_lantai'] ?? 0),
+    //             'jenis_lantai'    => $post['jenis_lantai'] ?? '',
+    //             'jenis_dinding'   => $post['jenis_dinding'] ?? '',
+    //             'jenis_atap'      => $post['jenis_atap'] ?? '',
+    //             'bahan_bakar'     => $post['bahan_bakar'] ?? '',
+    //             'sumber_air'      => $post['sumber_air'] ?? '',
+    //             'sumber_listrik'  => $post['sumber_listrik'] ?? '',
+    //             'nomor_pelanggan' => $post['nomor_pelanggan'] ?? '',
+    //             'nomor_meter'     => $post['nomor_meter'] ?? '',
+    //             'daya_listrik'    => $post['daya_listrik'] ?? ''
+    //         ]);
+
+    //         $gabungan['sanitasi'] = array_merge($gabungan['sanitasi'] ?? [], [
+    //             'fasilitas_bab'       => $post['fasilitas_bab'] ?? '',
+    //             'jenis_kloset'        => $post['jenis_kloset'] ?? '',
+    //             'jarak_air_ke_limbah' => $post['jarak_air_ke_limbah'] ?? '',
+    //             'pembuangan_tinja'    => $post['pembuangan_tinja'] ?? ''
+    //         ]);
+
+    //         // Bersihkan properti konflik/redundant
+    //         unset($gabungan['kondisi']['kepemilikan_rumah'], $gabungan['kondisi']['status_kepemilikan'], $gabungan['wilayah']['alamat']);
+
+    //         // Simpan JSON ke database usulan
+    //         $payloadLama['perumahan'] = $gabungan;
+    //         $this->db->table('dtsen_usulan')->where('id', $usulanId)->update([
+    //             'payload'    => json_encode($payloadLama, JSON_UNESCAPED_UNICODE),
+    //             'updated_at' => date('Y-m-d H:i:s'),
+    //             'summary'    => 'Data rumah diperbarui oleh ' . ($user['nama'] ?? 'Sistem')
+    //         ]);
+
+    //         // ==========================================================
+    //         // 4️⃣ SINKRONISASI KE TABEL dtsen_rt (Di dalam saveRumah)
+    //         // ==========================================================
+    //         if ($idRt) {
+    //             // Skenario A: Masih Draft, tapi butuh sinkronisasi wilayah (RT/RW/Desa)
+    //             if ($usulanRow['status'] !== 'applied') {
+
+    //                 $rtBaru   = trim($post['rt'] ?? '');
+    //                 $rwBaru   = trim($post['rw'] ?? '');
+    //                 $desaBaru = trim($post['village'] ?? ''); // 🚀 Ambil data desa baru
+
+    //                 // 🚀 BUG FIX: Cek juga apakah ada perubahan KODE DESA, bukan cuma RT/RW
+    //                 if ($rtBaru !== $rtLama['rt'] || $rwBaru !== $rtLama['rw'] || ($desaBaru !== '' && $desaBaru !== $rtLama['kode_desa'])) {
+
+    //                     // Hitung apakah ada KK lain di id_rt yang sama
+    //                     $jumlahPenghuni = $this->db->table('dtsen_kk')->where('id_rt', $idRt)->countAllResults();
+
+    //                     if ($jumlahPenghuni > 1) {
+    //                         // 🚨 PECAH ALAMAT DINI: 
+    //                         // Buat "Rumah Kosong" baru di wilayah yang baru agar tidak menyeret KK lain
+    //                         $this->db->table('dtsen_rt')->insert([
+    //                             'rw'          => $rwBaru,
+    //                             'rt'          => $rtBaru,
+    //                             'kode_desa'   => !empty($post['village']) ? $post['village'] : ($rtLama['kode_desa'] ?? null),
+    //                             'created_at'  => date('Y-m-d H:i:s'),
+    //                             'created_by'  => $user['id'] ?? 'system',
+    //                             'source_name' => 'pecah_alamat_draft_' . $usulanId
+    //                         ]);
+
+    //                         $idRtBaru = $this->db->insertID();
+
+    //                         // Pindahkan HANYA KK ini ke id_rt yang baru
+    //                         $this->db->table('dtsen_kk')->where('id_kk', $usulanRow['dtsen_kk_id'])->update([
+    //                             'id_rt' => $idRtBaru
+    //                         ]);
+    //                     } else {
+    //                         // Cuma sendirian di id_rt ini, langsung update RT/RW/Desa-nya
+    //                         $this->db->table('dtsen_rt')->where('id_rt', $idRt)->update([
+    //                             'rw'          => $rwBaru,
+    //                             'rt'          => $rtBaru,
+    //                             'kode_desa'   => !empty($post['village']) ? $post['village'] : ($rtLama['kode_desa'] ?? null),
+    //                             'updated_at'  => date('Y-m-d H:i:s'),
+    //                             'updated_by'  => $user['nama'] ?? 'system'
+    //                         ]);
+    //                     }
+    //                 }
+    //             }
+
+    //             // Skenario B: Jika status sudah "applied" (Update lengkap)
+    //             if ($usulanRow['status'] === 'applied') {
+
+    //                 $updateRT = []; // Inisialisasi array
+
+    //                 // 🚀 BUG FIX: Masukkan kode_desa, rt, dan rw agar ikut tersimpan saat status Applied!
+    //                 $updateRT['kode_desa']         = (!empty($post['village'])) ? $post['village'] : ($rtLama['kode_desa'] ?? null);
+    //                 $updateRT['rt']                = trim($post['rt'] ?? $rtLama['rt'] ?? '');
+    //                 $updateRT['rw']                = trim($post['rw'] ?? $rtLama['rw'] ?? '');
+
+    //                 $updateRT['alamat']            = trim($post['alamat']);
+    //                 $updateRT['kepemilikan_rumah'] = (!empty($post['status_kepemilikan'])) ? $post['status_kepemilikan'] : ($rtLama['kepemilikan_rumah'] ?? '');
+
+    //                 // Gunakan !== '' untuk angka agar input 0 tidak ditolak
+    //                 $updateRT['luas_lantai']       = (isset($post['luas_lantai']) && $post['luas_lantai'] !== '') ? (float)$post['luas_lantai'] : ($rtLama['luas_lantai'] ?? 0);
+
+    //                 $updateRT['jenis_lantai']      = (!empty($post['jenis_lantai'])) ? $post['jenis_lantai'] : ($rtLama['jenis_lantai'] ?? '');
+    //                 $updateRT['jenis_dinding']     = (!empty($post['jenis_dinding'])) ? $post['jenis_dinding'] : ($rtLama['kondisi_dinding'] ?? '');
+    //                 $updateRT['bahan_bakar']       = (!empty($post['bahan_bakar'])) ? $post['bahan_bakar'] : ($rtLama['bahan_bakar'] ?? '');
+    //                 $updateRT['sumber_air']        = (!empty($post['sumber_air'])) ? $post['sumber_air'] : ($rtLama['sumber_air'] ?? '');
+    //                 $updateRT['sumber_listrik']    = (!empty($post['sumber_listrik'])) ? $post['sumber_listrik'] : ($rtLama['sumber_listrik'] ?? '');
+
+    //                 // 👇 PINDAHKAN EKSEKUSI UPDATE KE DALAM BLOK INI 👇
+    //                 $this->db->table('dtsen_rt')->where('id_rt', $idRt)->update($updateRT);
+    //             }
+    //         }
+
+    //         // ==========================================================
+    //         // ✅ 5️⃣ HAPUS BENDERA PEMULIHAN (WISUDA DATA)
+    //         // ==========================================================
+    //         // Karena validasi RT/RW di atas sudah lolos (tidak kosong), 
+    //         // kita pastikan keluarga ini dihapus dari daftar Pemulihan.
+    //         $this->db->table('dtsen_kk')
+    //             ->where('id_kk', $usulanRow['dtsen_kk_id'])
+    //             ->update(['is_recovery_needed' => 0]);
+
+    //         $this->db->transCommit();
+
+    //         return $this->response->setJSON([
+    //             'status'  => 'success',
+    //             'message' => 'Data rumah dan sinkronisasi wilayah berhasil disimpan.'
+    //         ]);
+    //     } catch (\Throwable $e) {
+    //         $this->db->transRollback();
+    //         log_message('error', '❌ saveRumah() error: ' . $e->getMessage());
+    //         return $this->response->setJSON([
+    //             'status'  => 'error',
+    //             'message' => 'Gagal menyimpan data rumah: ' . $e->getMessage()
+    //         ]);
+    //     }
+    // }
+
+    // /**
+    //  * 🏠 Simpan data Tab “Keterangan Perumahan”
+    //  * - Data disimpan ke dtsen_usulan.payload (JSON)
+    //  * - Mengamankan data dari null-overwrite (Efek Domino)
+    //  * - Update dtsen_rt secara bertahap sesuai status
+    //  */
+    // public function saveRumah()
+    // {
+    //     try {
+    //         $post = $this->request->getPost();
+    //         $user = session()->get();
+
+    //         // ==========================================
+    //         // 1️⃣ VALIDASI INPUT 
+    //         // ==========================================
+    //         $sumberListrik  = trim($post['sumber_listrik'] ?? '');
+    //         $nomorPelanggan = trim($post['nomor_pelanggan'] ?? '');
+    //         $nomorMeter     = trim($post['nomor_meter'] ?? '');
+
+    //         if ($sumberListrik === 'Listrik PLN dengan meteran') {
+    //             if ($nomorPelanggan === '') {
+    //                 return $this->response->setJSON(['status' => 'error', 'message' => 'Nomor Pelanggan wajib diisi.']);
+    //             }
+    //             if ($nomorMeter === '') {
+    //                 return $this->response->setJSON(['status' => 'error', 'message' => 'Nomor Meter wajib diisi.']);
+    //             }
+    //             if (!preg_match('/^[0-9]{11,13}$/', $nomorPelanggan)) {
+    //                 return $this->response->setJSON(['status' => 'error', 'message' => 'Nomor Pelanggan harus 11-13 digit angka.']);
+    //             }
+    //             if (!preg_match('/^[0-9]{8,13}$/', $nomorMeter)) {
+    //                 return $this->response->setJSON(['status' => 'error', 'message' => 'Nomor Meter harus 8-13 digit angka.']);
+    //             }
+    //         }
+
+    //         if (empty($post['alamat']) || empty($post['rt']) || empty($post['rw'])) {
+    //             return $this->response->setJSON([
+    //                 'status'  => 'error',
+    //                 'message' => 'Alamat, RT, dan RW wajib diisi agar tidak hilang dari dashboard.'
+    //             ]);
+    //         } else {
+    //             if ($nomorPelanggan !== '' && !preg_match('/^[0-9]{11,13}$/', $nomorPelanggan)) {
+    //                 return $this->response->setJSON(['status' => 'error', 'message' => 'Nomor Pelanggan harus 11-13 digit.']);
+    //             }
+    //             if ($nomorMeter !== '' && !preg_match('/^[0-9]{8,13}$/', $nomorMeter)) {
+    //                 return $this->response->setJSON(['status' => 'error', 'message' => 'Nomor Meter harus 8-13 digit.']);
+    //             }
+    //         }
+
+    //         // ==========================================
+    //         // 2️⃣ PERSIAPAN DATA & AMBIL BACKUP LAMA
+    //         // ==========================================
+    //         $usulanId = $post['dtsen_usulan_id'] ?? null;
+    //         if (!$usulanId) {
+    //             return $this->response->setJSON(['status' => 'error', 'message' => 'ID usulan tidak ditemukan.']);
+    //         }
+
+    //         $this->db->transBegin();
+
+    //         // Ambil usulan aktif
+    //         $usulanRow = $this->db->table('dtsen_usulan')
+    //             ->select('id, payload, status, dtsen_kk_id')
+    //             ->where('id', $usulanId)
+    //             ->get()
+    //             ->getRowArray();
+
+    //         if (!$usulanRow) {
+    //             throw new \Exception('Data usulan tidak ditemukan.');
+    //         }
+
+    //         // Ambil id_rt dari dtsen_kk untuk sinkronisasi
+    //         $idRt = $this->db->table('dtsen_kk')->select('id_rt')->where('id_kk', $usulanRow['dtsen_kk_id'])->get()->getRow('id_rt');
+
+    //         // Ambil data dtsen_rt lama sebagai "Sabuk Pengaman" (Anti-Null)
+    //         $rtLama = [];
+    //         if ($idRt) {
+    //             $rtLama = $this->db->table('dtsen_rt')->where('id_rt', $idRt)->get()->getRowArray() ?? [];
+    //         }
+
+    //         $payloadLama = json_decode($usulanRow['payload'] ?? '{}', true);
+    //         if (!is_array($payloadLama)) $payloadLama = [];
+    //         $gabungan = $payloadLama['perumahan'] ?? [];
+
+    //         // ==========================================
+    //         // 3️⃣ MERGE KE PAYLOAD JSON
+    //         // ==========================================
+    //         // Overwrite level root
+    //         $gabungan['alamat']             = trim($post['alamat']);
+    //         $gabungan['rw']                 = trim($post['rw']);
+    //         $gabungan['rt']                 = trim($post['rt']);
+    //         $gabungan['status_kepemilikan'] = $post['status_kepemilikan'] ?? $gabungan['status_kepemilikan'] ?? '';
+
+    //         // Overwrite level array (wilayah, kondisi, sanitasi)
+    //         $gabungan['wilayah'] = array_merge($gabungan['wilayah'] ?? [], [
+    //             'provinsi'  => $post['provinsi'] ?? '',
+    //             'kabupaten' => $post['regency'] ?? '',
+    //             'kecamatan' => $post['district'] ?? '',
+    //             'desa'      => $post['village'] ?? ''
+    //         ]);
+
+    //         $gabungan['kondisi'] = array_merge($gabungan['kondisi'] ?? [], [
+    //             'luas_lantai'     => (float)($post['luas_lantai'] ?? 0),
+    //             'jenis_lantai'    => $post['jenis_lantai'] ?? '',
+    //             'jenis_dinding'   => $post['jenis_dinding'] ?? '',
+    //             'jenis_atap'      => $post['jenis_atap'] ?? '',
+    //             'bahan_bakar'     => $post['bahan_bakar'] ?? '',
+    //             'sumber_air'      => $post['sumber_air'] ?? '',
+    //             'sumber_listrik'  => $post['sumber_listrik'] ?? '',
+    //             'nomor_pelanggan' => $post['nomor_pelanggan'] ?? '',
+    //             'nomor_meter'     => $post['nomor_meter'] ?? '',
+    //             'daya_listrik'    => $post['daya_listrik'] ?? ''
+    //         ]);
+
+    //         $gabungan['sanitasi'] = array_merge($gabungan['sanitasi'] ?? [], [
+    //             'fasilitas_bab'       => $post['fasilitas_bab'] ?? '',
+    //             'jenis_kloset'        => $post['jenis_kloset'] ?? '',
+    //             'jarak_air_ke_limbah' => $post['jarak_air_ke_limbah'] ?? '',
+    //             'pembuangan_tinja'    => $post['pembuangan_tinja'] ?? ''
+    //         ]);
+
+    //         // Bersihkan properti konflik/redundant
+    //         unset($gabungan['kondisi']['kepemilikan_rumah'], $gabungan['kondisi']['status_kepemilikan'], $gabungan['wilayah']['alamat']);
+
+    //         // Simpan JSON ke database usulan
+    //         $payloadLama['perumahan'] = $gabungan;
+    //         $this->db->table('dtsen_usulan')->where('id', $usulanId)->update([
+    //             'payload'    => json_encode($payloadLama, JSON_UNESCAPED_UNICODE),
+    //             'updated_at' => date('Y-m-d H:i:s'),
+    //             'summary'    => 'Data rumah diperbarui oleh ' . ($user['nama'] ?? 'Sistem')
+    //         ]);
+
+    //         // ==========================================================
+    //         // 4️⃣ SINKRONISASI KE TABEL dtsen_rt (Di dalam saveRumah)
+    //         // ==========================================================
+    //         if ($idRt) {
+    //             // Skenario A: Masih Draft, tapi butuh sinkronisasi wilayah (RT/RW)
+    //             if ($usulanRow['status'] !== 'applied') {
+
+    //                 $rtBaru = trim($post['rt'] ?? '');
+    //                 $rwBaru = trim($post['rw'] ?? '');
+
+    //                 // Cek apakah ada perubahan RT atau RW dari data asli
+    //                 if ($rtBaru !== $rtLama['rt'] || $rwBaru !== $rtLama['rw']) {
+
+    //                     // Hitung apakah ada KK lain di id_rt yang sama
+    //                     $jumlahPenghuni = $this->db->table('dtsen_kk')->where('id_rt', $idRt)->countAllResults();
+
+    //                     if ($jumlahPenghuni > 1) {
+    //                         // 🚨 PECAH ALAMAT DINI: 
+    //                         // Buat "Rumah Kosong" baru di wilayah yang baru agar tidak menyeret KK lain
+    //                         $this->db->table('dtsen_rt')->insert([
+    //                             'rw'         => $rwBaru,
+    //                             'rt'         => $rtBaru,
+    //                             'kode_desa'  => !empty($post['village']) ? $post['village'] : ($rtLama['kode_desa'] ?? null),
+    //                             'created_at' => date('Y-m-d H:i:s'),
+    //                             'created_by' => $user['id'] ?? 'system',
+    //                             'source_name' => 'pecah_alamat_draft_' . $usulanId
+    //                         ]);
+
+    //                         $idRtBaru = $this->db->insertID();
+
+    //                         // Pindahkan HANYA KK ini ke id_rt yang baru
+    //                         $this->db->table('dtsen_kk')->where('id_kk', $usulanRow['dtsen_kk_id'])->update([
+    //                             'id_rt' => $idRtBaru
+    //                         ]);
+    //                     } else {
+    //                         // Cuma sendirian di id_rt ini, langsung update RT/RW-nya
+    //                         $this->db->table('dtsen_rt')->where('id_rt', $idRt)->update([
+    //                             'rw'         => $rwBaru,
+    //                             'rt'         => $rtBaru,
+    //                             'kode_desa'  => !empty($post['village']) ? $post['village'] : ($rtLama['kode_desa'] ?? null),
+    //                             'updated_at' => date('Y-m-d H:i:s'),
+    //                             'updated_by' => $user['nama'] ?? 'system'
+    //                         ]);
+    //                     }
+    //                 }
+    //             }
+
+    //             // Skenario B: Jika status sudah "applied" (Update lengkap)
+    //             if ($usulanRow['status'] === 'applied') {
+
+    //                 $updateRT = []; // Inisialisasi array
+
+    //                 $updateRT['alamat']            = trim($post['alamat']);
+    //                 $updateRT['kepemilikan_rumah'] = (!empty($post['status_kepemilikan'])) ? $post['status_kepemilikan'] : ($rtLama['kepemilikan_rumah'] ?? '');
+
+    //                 // Gunakan !== '' untuk angka agar input 0 tidak ditolak
+    //                 $updateRT['luas_lantai']       = (isset($post['luas_lantai']) && $post['luas_lantai'] !== '') ? (float)$post['luas_lantai'] : ($rtLama['luas_lantai'] ?? 0);
+
+    //                 $updateRT['jenis_lantai']      = (!empty($post['jenis_lantai'])) ? $post['jenis_lantai'] : ($rtLama['jenis_lantai'] ?? '');
+    //                 $updateRT['jenis_dinding']     = (!empty($post['jenis_dinding'])) ? $post['jenis_dinding'] : ($rtLama['kondisi_dinding'] ?? '');
+    //                 $updateRT['bahan_bakar']       = (!empty($post['bahan_bakar'])) ? $post['bahan_bakar'] : ($rtLama['bahan_bakar'] ?? '');
+    //                 $updateRT['sumber_air']        = (!empty($post['sumber_air'])) ? $post['sumber_air'] : ($rtLama['sumber_air'] ?? '');
+    //                 $updateRT['sumber_listrik']    = (!empty($post['sumber_listrik'])) ? $post['sumber_listrik'] : ($rtLama['sumber_listrik'] ?? '');
+
+    //                 // 👇 PINDAHKAN EKSEKUSI UPDATE KE DALAM BLOK INI 👇
+    //                 $this->db->table('dtsen_rt')->where('id_rt', $idRt)->update($updateRT);
+    //             }
+    //         }
+
+    //         // ==========================================================
+    //         // ✅ 5️⃣ HAPUS BENDERA PEMULIHAN (WISUDA DATA)
+    //         // ==========================================================
+    //         // Karena validasi RT/RW di atas sudah lolos (tidak kosong), 
+    //         // kita pastikan keluarga ini dihapus dari daftar Pemulihan.
+    //         $this->db->table('dtsen_kk')
+    //             ->where('id_kk', $usulanRow['dtsen_kk_id'])
+    //             ->update(['is_recovery_needed' => 0]);
+
+    //         $this->db->transCommit();
+
+    //         return $this->response->setJSON([
+    //             'status'  => 'success',
+    //             'message' => 'Data rumah dan sinkronisasi wilayah berhasil disimpan.'
+    //         ]);
+
+    //         $this->db->transCommit();
+
+    //         return $this->response->setJSON([
+    //             'status'  => 'success',
+    //             'message' => 'Data rumah dan sinkronisasi wilayah berhasil disimpan.'
+    //         ]);
+    //     } catch (\Throwable $e) {
+    //         $this->db->transRollback();
+    //         log_message('error', '❌ saveRumah() error: ' . $e->getMessage());
+    //         return $this->response->setJSON([
+    //             'status'  => 'error',
+    //             'message' => 'Gagal menyimpan data rumah: ' . $e->getMessage()
+    //         ]);
+    //     }
+    // }
 
     /**
      * 🧱 Simpan Data Kepemilikan Aset
