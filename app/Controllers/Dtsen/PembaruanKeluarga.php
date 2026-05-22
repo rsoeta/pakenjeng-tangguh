@@ -831,7 +831,7 @@ class PembaruanKeluarga extends BaseController
             ]);
         }
     }
-    
+
     // /**
     //  * 🏠 Simpan data Tab “Keterangan Perumahan”
     //  * - Data disimpan ke dtsen_usulan.payload (JSON)
@@ -1775,6 +1775,413 @@ class PembaruanKeluarga extends BaseController
         }
     }
 
+    // /**
+    //  * ♻️ Simpan Data Seluruh ke Database Utama (dtsen_kk, dtsen_art, dtsen_se)
+    //  * - fitur baru, kirim pesan ke petugas entri (users.nope) sesuai data hasil pekerjaannya
+    //  */
+    // public function apply()
+    // {
+    //     $this->db->transBegin();
+    //     try {
+    //         $usulan_id = $this->request->getPost('usulan_id');
+    //         $userId    = session()->get('id') ?? 'system';
+
+    //         // 🔍 Ambil data usulan utama (simpan status lama untuk pengecekan)
+    //         $usulan = $this->db->table('dtsen_usulan')
+    //             ->where('id', $usulan_id)
+    //             ->get()
+    //             ->getRowArray();
+
+    //         if (!$usulan) {
+    //             throw new \Exception('Data usulan tidak ditemukan.');
+    //         }
+
+    //         $statusSebelumnya = $usulan['status'] ?? null;
+
+    //         $payload = json_decode($usulan['payload'] ?? '{}', true);
+    //         if (json_last_error() !== JSON_ERROR_NONE) {
+    //             throw new \Exception('Payload tidak valid: ' . json_last_error_msg());
+    //         }
+
+    //         $idKk = $usulan['dtsen_kk_id'] ?? null;
+    //         if (!$idKk) {
+    //             throw new \Exception('ID KK tidak ditemukan dalam usulan.');
+    //         }
+
+    //         // =======================================================
+    //         // 🏠 1️⃣ Update Tabel dtsen_rt (Logika Pecah Alamat)
+    //         // =======================================================
+    //         $geo      = $payload['geo'] ?? [];
+    //         $foto     = $payload['foto'] ?? [];
+    //         $rumah    = $payload['perumahan'] ?? [];
+    //         $kondisi  = $rumah['kondisi'] ?? [];
+    //         $sanitasi = $rumah['sanitasi'] ?? [];
+
+    //         // Ambil id_rt yang dipakai KK saat ini
+    //         $idRtSekarang = $this->db->table('dtsen_kk')->select('id_rt')->where('id_kk', $idKk)->get()->getRow('id_rt');
+
+    //         if ($idRtSekarang) {
+    //             // Ambil data asli sebelum ditimpa
+    //             $rtLama = $this->db->table('dtsen_rt')->where('id_rt', $idRtSekarang)->get()->getRowArray();
+
+    //             // Tentukan nilai RT dan RW yang baru
+    //             $rtBaru = (isset($rumah['rt']) && $rumah['rt'] !== '') ? $rumah['rt'] : $rtLama['rt'];
+    //             $rwBaru = (isset($rumah['rw']) && $rumah['rw'] !== '') ? $rumah['rw'] : $rtLama['rw'];
+
+    //             // Deteksi apakah terjadi perpindahan wilayah
+    //             $isPindahWilayah = ($rtBaru !== $rtLama['rt'] || $rwBaru !== $rtLama['rw']);
+
+    //             $rtUpdate = [
+    //                 'rt'                => $rtBaru,
+    //                 'rw'                => $rwBaru,
+    //                 'alamat'            => !empty($rumah['alamat']) ? $rumah['alamat'] : $rtLama['alamat'],
+    //                 'kepemilikan_rumah' => !empty($rumah['status_kepemilikan']) ? $rumah['status_kepemilikan'] : $rtLama['kepemilikan_rumah'],
+    //                 'luas_lantai'       => (isset($kondisi['luas_lantai']) && $kondisi['luas_lantai'] !== '') ? $kondisi['luas_lantai'] : $rtLama['luas_lantai'],
+    //                 'jenis_lantai'      => !empty($kondisi['jenis_lantai']) ? $kondisi['jenis_lantai'] : $rtLama['jenis_lantai'],
+    //                 'jenis_dinding'     => !empty($kondisi['jenis_dinding']) ? $kondisi['jenis_dinding'] : $rtLama['kondisi_dinding'],
+    //                 'bahan_bakar'       => !empty($kondisi['bahan_bakar']) ? $kondisi['bahan_bakar'] : $rtLama['bahan_bakar'],
+    //                 'sumber_air'        => !empty($kondisi['sumber_air']) ? $kondisi['sumber_air'] : $rtLama['sumber_air'],
+    //                 'sumber_listrik'    => !empty($kondisi['sumber_listrik']) ? $kondisi['sumber_listrik'] : $rtLama['sumber_listrik'],
+    //                 'sanitasi'          => !empty($sanitasi['pembuangan_tinja']) ? $sanitasi['pembuangan_tinja'] : $rtLama['sanitasi'],
+    //                 'foto_rumah'        => !empty($foto['depan']) ? $foto['depan'] : $rtLama['foto_rumah'],
+    //                 'foto_rumah_dalam'  => !empty($foto['dalam']) ? $foto['dalam'] : $rtLama['foto_rumah_dalam'],
+    //                 'latitude'          => !empty($geo['lat']) ? $geo['lat'] : $rtLama['latitude'],
+    //                 'longitude'         => !empty($geo['lng']) ? $geo['lng'] : $rtLama['longitude'],
+    //                 'updated_at'        => date('Y-m-d H:i:s'),
+    //                 'updated_by'        => $userId
+    //             ];
+
+    //             if ($isPindahWilayah) {
+    //                 // Hitung berapa KK yang menumpang di id_rt ini
+    //                 $jumlahPenghuni = $this->db->table('dtsen_kk')->where('id_rt', $idRtSekarang)->countAllResults();
+
+    //                 if ($jumlahPenghuni > 1) {
+    //                     // 🚨 PECAH ALAMAT: Buat baris id_rt baru untuk keluarga yang pindah
+    //                     $rtUpdate['kode_desa']   = $rtLama['kode_desa'] ?? null;
+    //                     $rtUpdate['created_at']  = date('Y-m-d H:i:s');
+    //                     $rtUpdate['created_by']  = $userId;
+    //                     $rtUpdate['source_name'] = 'pecah_alamat_usulan_' . $usulan_id;
+
+    //                     $this->db->table('dtsen_rt')->insert($rtUpdate);
+    //                     // Update variabel idRtSekarang dengan ID yang baru saja dibuat
+    //                     $idRtSekarang = $this->db->insertID();
+    //                 } else {
+    //                     // Sendirian di rumah itu, aman untuk update baris lama
+    //                     $this->db->table('dtsen_rt')->where('id_rt', $idRtSekarang)->update($rtUpdate);
+    //                 }
+    //             } else {
+    //                 // Tidak pindah, update normal
+    //                 $this->db->table('dtsen_rt')->where('id_rt', $idRtSekarang)->update($rtUpdate);
+    //             }
+    //         }
+
+    //         // =======================================================
+    //         // 👪 2️⃣ Update Tabel dtsen_kk (DATA KELUARGA)
+    //         // =======================================================
+    //         $kkLama = $this->db->table('dtsen_kk')->where('id_kk', $idKk)->get()->getRowArray();
+
+    //         $kkUpdate = [
+    //             // 👇 PASTIKAN ID_RT BARU MASUK KE SINI JIKA TERJADI PECAH ALAMAT
+    //             'id_rt'                    => $idRtSekarang,
+
+    //             // ✅ MATIKAN BENDERA PEMULIHAN KARENA DATA SUDAH SAH DI-APPLY
+    //             'is_recovery_needed'       => 0,
+
+    //             'no_kk'                    => !empty($rumah['no_kk']) ? $rumah['no_kk'] : $kkLama['no_kk'],
+    //             'kepala_keluarga'          => !empty($rumah['kepala_keluarga']) ? $rumah['kepala_keluarga'] : $kkLama['kepala_keluarga'],
+    //             'alamat'                   => !empty($rumah['alamat']) ? $rumah['alamat'] : $kkLama['alamat'],
+    //             'status_kepemilikan_rumah' => !empty($rumah['status_kepemilikan']) ? $rumah['status_kepemilikan'] : $kkLama['status_kepemilikan_rumah'],
+    //             'kategori_adat'            => !empty($rumah['kategori_adat']) ? $rumah['kategori_adat'] : $kkLama['kategori_adat'],
+    //             'nama_suku'                => !empty($rumah['nama_suku']) ? $rumah['nama_suku'] : $kkLama['nama_suku'],
+    //             'foto_kk'                  => !empty($foto['ktp_kk']) ? $foto['ktp_kk'] : (!empty($foto['ktp']) ? $foto['ktp'] : $kkLama['foto_kk']),
+    //             'foto_rumah'               => !empty($foto['depan']) ? $foto['depan'] : $kkLama['foto_rumah'],
+    //             'foto_rumah_dalam'         => !empty($foto['dalam']) ? $foto['dalam'] : $kkLama['foto_rumah_dalam'],
+    //             'updated_at'               => date('Y-m-d H:i:s'),
+    //             'updated_by'               => $userId
+    //         ];
+    //         $this->db->table('dtsen_kk')->where('id_kk', $idKk)->update($kkUpdate);
+
+    //         // =======================================================
+    //         // 👤 3️⃣ Sinkronisasi dtsen_art
+    //         // =======================================================
+    //         $anggotaUsulan = $this->db->table('dtsen_usulan_art')
+    //             ->where('dtsen_usulan_id', $usulan_id)
+    //             ->get()
+    //             ->getResultArray();
+
+    //         if (!empty($anggotaUsulan)) {
+    //             // hapus dulu anggota lama, lalu insert yang baru
+    //             $this->db->table('dtsen_art')->where('id_kk', $idKk)->delete();
+
+    //             foreach ($anggotaUsulan as $art) {
+    //                 $payloadMember = json_decode($art['payload_member'] ?? '{}', true);
+    //                 $identitas     = $payloadMember['identitas'] ?? [];
+
+    //                 $dataArt = [
+    //                     'id_kk'             => $idKk,
+    //                     'nik'               => $identitas['nik'] ?? $art['nik'] ?? null,
+    //                     'nama'              => $identitas['nama'] ?? $art['nama'] ?? null,
+    //                     'hubungan_keluarga' => $identitas['hubungan'] ?? null,
+    //                     'jenis_kelamin'     => $identitas['jenis_kelamin'] ?? null,
+    //                     'tanggal_lahir'     => $identitas['tanggal_lahir'] ?? null,
+    //                     'tempat_lahir'      => $identitas['tempat_lahir'] ?? null,
+    //                     'pendidikan_terakhir' => $identitas['pendidikan'] ?? null,
+    //                     'pekerjaan'         => $identitas['pekerjaan'] ?? null,
+    //                     'status_kawin'      => $identitas['status_kawin'] ?? null,
+    //                     'foto_identitas'    => $payloadMember['foto'] ?? null,
+    //                     'source_name'       => 'apply_usulan_' . $usulan_id,
+    //                     'created_by'        => $userId,
+    //                     'created_at'        => date('Y-m-d H:i:s')
+    //                 ];
+
+    //                 $this->db->table('dtsen_art')->insert($dataArt);
+    //             }
+    //         }
+
+    //         // =======================================================
+    //         // 💰 4️⃣ Upsert Sosial Ekonomi dtsen_se
+    //         // =======================================================
+    //         $aset  = $payload['aset'] ?? [];
+    //         $geo   = $payload['geo'] ?? [];
+
+    //         $kepemilikan_aset     = json_encode($aset, JSON_UNESCAPED_UNICODE);
+    //         $kepemilikan_bantuan  = json_encode($payload['bantuan'] ?? [], JSON_UNESCAPED_UNICODE);
+
+    //         $existingSE = $this->db->table('dtsen_se')
+    //             ->where('id_kk', $idKk)
+    //             ->get()
+    //             ->getRowArray();
+
+    //         if ($existingSE) {
+    //             $this->db->table('dtsen_se')
+    //                 ->where('id_kk', $idKk)
+    //                 ->update([
+    //                     'kepemilikan_aset'         => $kepemilikan_aset,
+    //                     'kepemilikan_bantuan'      => $kepemilikan_bantuan,
+    //                     'rata_penghasilan_bulanan' => $payload['penghasilan'] ?? null,
+    //                     'rata_pengeluaran_bulanan' => $payload['pengeluaran'] ?? null,
+    //                     'latitude'                 => $geo['lat'] ?? null,
+    //                     'longitude'                => $geo['lng'] ?? null,
+    //                     'updated_at'               => date('Y-m-d H:i:s'),
+    //                     'updated_by'               => $userId
+    //                 ]);
+    //         } else {
+    //             $this->db->table('dtsen_se')->insert([
+    //                 'id_rt'        => $idRtSekarang, // ✅ Sudah diperbaiki
+    //                 'id_kk'        => $idKk,
+    //                 'kepemilikan_aset'       => $kepemilikan_aset,
+    //                 'kepemilikan_bantuan'    => $kepemilikan_bantuan,
+    //                 'rata_penghasilan_bulanan' => $payload['penghasilan'] ?? null,
+    //                 'rata_pengeluaran_bulanan' => $payload['pengeluaran'] ?? null,
+    //                 'latitude'     => $geo['lat'] ?? null,
+    //                 'longitude'    => $geo['lng'] ?? null,
+    //                 'source_name'  => 'apply_usulan_' . $usulan_id,
+    //                 'created_by'   => $userId,
+    //                 'created_at'   => date('Y-m-d H:i:s')
+    //             ]);
+    //         }
+
+    //         // =======================================================
+    //         // 🟦 UPDATE STATUS USULAN
+    //         // =======================================================
+    //         $this->db->table('dtsen_usulan')
+    //             ->where('id', $usulan_id)
+    //             ->update([
+    //                 'status'       => 'diverifikasi',
+    //                 'verified_at'  => date('Y-m-d H:i:s'),
+    //                 'verified_by'  => $userId
+    //             ]);
+
+    //         // =======================================================
+    //         // 🟩 WA INTEGRATION — Generate Reminder Log
+    //         // =======================================================
+    //         $waConfig = $this->db->table('dtsen_wa_config')
+    //             ->where('user_id', $userId)
+    //             ->get()
+    //             ->getRowArray();
+
+    //         $interval = $waConfig['reminder_default_months'] ?? 3;
+    //         $dueDate  = date('Y-m-d H:i:s', strtotime("+$interval months"));
+
+    //         // Insert reminder log
+    //         $this->db->table('dtsen_kk_reminder_log')->insert([
+    //             'kk_id'    => $idKk,
+    //             'admin_id' => $userId,
+    //             'due_date' => $dueDate,
+    //             'status'   => 'pending'
+    //         ]);
+
+    //         // =======================================================
+    //         // Commit transaction dulu — setelah commit, kirim WhatsApp
+    //         // =======================================================
+    //         $this->db->transCommit();
+    //         log_message('info', "✅ Usulan ID {$usulan_id} diterapkan oleh {$userId}. Reminder dibuat.");
+
+    //         // =======================================================
+    //         // 🔔 Kirim WhatsApp ke Petugas Entri (dtks_users.nope)
+    //         // Hanya kirim jika status sebelumnya bukan 'diverifikasi'
+    //         // =======================================================
+    //         try {
+    //             if (($statusSebelumnya ?? '') !== 'diverifikasi') {
+
+    //                 $creatorNik = $usulan['created_by'] ?? null;
+
+    //                 if (!empty($creatorNik)) {
+
+    //                     // 1) Coba cari berdasarkan NIK
+    //                     $petugas = $this->db->table('dtks_users')
+    //                         ->select('id, fullname, nope, nik')
+    //                         ->where('nik', $creatorNik)
+    //                         ->get()
+    //                         ->getRowArray();
+
+    //                     // 2) Jika tidak ketemu → fallback cari berdasarkan user_id
+    //                     if (!$petugas) {
+    //                         $petugas = $this->db->table('dtks_users')
+    //                             ->select('id, fullname, nope, nik')
+    //                             ->where('id', $creatorNik)
+    //                             ->get()
+    //                             ->getRowArray();
+
+    //                         if ($petugas) {
+    //                             log_message('info', "[WA APPLY] Petugas ditemukan via fallback user_id={$creatorNik}");
+    //                         }
+    //                     }
+
+    //                     if (!$petugas) {
+    //                         log_message('warning', "[WA APPLY] Petugas tidak ditemukan. created_by={$creatorNik}");
+    //                     }
+
+    //                     if ($petugas && !empty($petugas['nope'])) {
+
+    //                         // Normalisasi nomor HP → 0812 menjadi 62812 dst
+    //                         $waService = new \App\Libraries\WaService();
+    //                         // $nomorWA  = $waService->normalizeNumber($petugas['nope']);
+    //                         $nomorWA = preg_replace('/[^0-9]/', '', $petugas['nope']); // hapus semua non-digit
+
+    //                         if (str_starts_with($nomorWA, '0')) {
+    //                             $nomorWA = '62' . substr($nomorWA, 1);
+    //                         }
+
+    //                         if (str_starts_with($nomorWA, '620')) {
+    //                             $nomorWA = '62' . substr($nomorWA, 3);
+    //                         }
+
+    //                         // Ambil info KK untuk isi pesan
+    //                         $kkInfo = $this->db->table('dtsen_kk')
+    //                             ->select('no_kk, kepala_keluarga, alamat, id_rt')
+    //                             ->where('id_kk', $idKk)
+    //                             ->get()
+    //                             ->getRowArray();
+
+    //                         // Ambil RT/RW
+    //                         $rtText = '-';
+    //                         $rwText = '-';
+    //                         if (!empty($kkInfo['id_rt'])) {
+    //                             $rtRow = $this->db->table('dtsen_rt')
+    //                                 ->select('rt,rw')
+    //                                 ->where('id_rt', $kkInfo['id_rt'])
+    //                                 ->get()
+    //                                 ->getRowArray();
+
+    //                             if ($rtRow) {
+    //                                 $rtText = $rtRow['rt'] ?? '-';
+    //                                 $rwText = $rtRow['rw'] ?? '-';
+    //                             }
+    //                         }
+
+    //                         // Format tanggal Indonesia lengkap
+    //                         $hari = [
+    //                             'Sunday' => 'Minggu',
+    //                             'Monday' => 'Senin',
+    //                             'Tuesday' => 'Selasa',
+    //                             'Wednesday' => 'Rabu',
+    //                             'Thursday' => 'Kamis',
+    //                             'Friday' => 'Jumat',
+    //                             'Saturday' => 'Sabtu'
+    //                         ];
+
+    //                         $bulan = [
+    //                             1 => 'Januari',
+    //                             2 => 'Februari',
+    //                             3 => 'Maret',
+    //                             4 => 'April',
+    //                             5 => 'Mei',
+    //                             6 => 'Juni',
+    //                             7 => 'Juli',
+    //                             8 => 'Agustus',
+    //                             9 => 'September',
+    //                             10 => 'Oktober',
+    //                             11 => 'November',
+    //                             12 => 'Desember'
+    //                         ];
+
+    //                         $now = date('Y-m-d H:i:s');
+    //                         $hariIndo = $hari[date('l', strtotime($now))];
+    //                         $tgl = date('d', strtotime($now));
+    //                         $bln = $bulan[intval(date('m', strtotime($now)))];
+    //                         $thn = date('Y', strtotime($now));
+    //                         $jam = date('H:i', strtotime($now)) . " WIB";
+
+    //                         $tanggalLengkap = "{$hariIndo}, {$tgl} {$bln} {$thn}, {$jam}";
+
+    //                         // ===============================
+    //                         // 📌 Format Pesan WA (Final)
+    //                         // ===============================
+    //                         $msg  = "*== SINDEN System ==*\n";
+    //                         $msg .= "📌 *Pemberitahuan Validasi Groundcheck*\n";
+    //                         $msg .= "Usulan No. {$usulan_id} telah selesai divalidasi.\n\n";
+    //                         $msg .= "👤 Kepala Keluarga: *" . ($kkInfo['kepala_keluarga'] ?? '-') . "*\n";
+    //                         $msg .= "🏠 No. KK: *" . ($kkInfo['no_kk'] ?? '-') . "*\n";
+    //                         $msg .= "📍 Alamat: " . ($kkInfo['alamat'] ?? '-') . " RT {$rtText} RW {$rwText}\n";
+    //                         $msg .= "🗓 Waktu: {$tanggalLengkap}\n\n";
+    //                         $msg .= "Terima kasih atas kerja baiknya.";
+
+    //                         // ===============================
+    //                         // 📤 Kirim WA via WaService
+    //                         // ===============================
+    //                         try {
+    //                             // $send = $waService->sendText($nomorWA, $msg);
+    //                             $send = $waService->sendText($nomorWA, $msg);
+
+    //                             if (!is_array($send) || empty($send['status']) || $send['status'] != 'success') {
+    //                                 log_message('error', '[WA APPLY] Provider WA error: ' . json_encode($send));
+    //                             }
+
+    //                             log_message('info', '[WA APPLY] Pesan terkirim ke ' . $nomorWA . ' | ' . json_encode($send));
+    //                         } catch (\Throwable $e) {
+    //                             log_message('error', '[WA APPLY] ERROR mengirim WA: ' . $e->getMessage());
+    //                         }
+    //                     } else {
+    //                         log_message('warning', "[WA APPLY] Nomor WA tidak ditemukan di dtks_users untuk NIK: {$creatorNik}");
+    //                     }
+    //                 } else {
+    //                     log_message('warning', "[WA APPLY] created_by kosong, WA tidak dapat dikirim.");
+    //                 }
+    //             } else {
+    //                 log_message('info', "[WA APPLY] Status sebelumnya sudah diverifikasi — WA tidak dikirim ulang.");
+    //             }
+    //         } catch (\Throwable $e) {
+    //             log_message('error', "[WA APPLY OUTER] {$e->getMessage()}");
+    //         }
+
+    //         return $this->response->setJSON([
+    //             'status'   => 'success',
+    //             'message'  => 'Data usulan berhasil diterapkan ke database utama.',
+    //             'redirect' => base_url('dtsen-se')
+    //         ]);
+    //     } catch (\Throwable $e) {
+
+    //         $this->db->transRollback();
+    //         log_message('error', '[apply] ' . $e->getMessage());
+
+    //         return $this->response->setJSON([
+    //             'status'  => 'error',
+    //             'message' => 'Gagal menerapkan data: ' . $e->getMessage()
+    //         ]);
+    //     }
+    // }
+
     /**
      * ♻️ Simpan Data Seluruh ke Database Utama (dtsen_kk, dtsen_art, dtsen_se)
      * - fitur baru, kirim pesan ke petugas entri (users.nope) sesuai data hasil pekerjaannya
@@ -1816,6 +2223,7 @@ class PembaruanKeluarga extends BaseController
             $rumah    = $payload['perumahan'] ?? [];
             $kondisi  = $rumah['kondisi'] ?? [];
             $sanitasi = $rumah['sanitasi'] ?? [];
+            $wilayah  = $rumah['wilayah'] ?? []; // 🚀 Ambil node wilayah
 
             // Ambil id_rt yang dipakai KK saat ini
             $idRtSekarang = $this->db->table('dtsen_kk')->select('id_rt')->where('id_kk', $idKk)->get()->getRow('id_rt');
@@ -1824,14 +2232,16 @@ class PembaruanKeluarga extends BaseController
                 // Ambil data asli sebelum ditimpa
                 $rtLama = $this->db->table('dtsen_rt')->where('id_rt', $idRtSekarang)->get()->getRowArray();
 
-                // Tentukan nilai RT dan RW yang baru
-                $rtBaru = (isset($rumah['rt']) && $rumah['rt'] !== '') ? $rumah['rt'] : $rtLama['rt'];
-                $rwBaru = (isset($rumah['rw']) && $rumah['rw'] !== '') ? $rumah['rw'] : $rtLama['rw'];
+                // Tentukan nilai RT, RW, dan KODE DESA yang baru
+                $rtBaru   = (isset($rumah['rt']) && $rumah['rt'] !== '') ? $rumah['rt'] : $rtLama['rt'];
+                $rwBaru   = (isset($rumah['rw']) && $rumah['rw'] !== '') ? $rumah['rw'] : $rtLama['rw'];
+                $desaBaru = (!empty($wilayah['desa'])) ? $wilayah['desa'] : ($rtLama['kode_desa'] ?? null); // 🚀 BUG FIX KODE DESA
 
                 // Deteksi apakah terjadi perpindahan wilayah
-                $isPindahWilayah = ($rtBaru !== $rtLama['rt'] || $rwBaru !== $rtLama['rw']);
+                $isPindahWilayah = ($rtBaru !== $rtLama['rt'] || $rwBaru !== $rtLama['rw'] || ($desaBaru !== '' && $desaBaru !== $rtLama['kode_desa']));
 
                 $rtUpdate = [
+                    'kode_desa'         => $desaBaru, // 🚀 Pastikan desa terupdate!
                     'rt'                => $rtBaru,
                     'rw'                => $rwBaru,
                     'alamat'            => !empty($rumah['alamat']) ? $rumah['alamat'] : $rtLama['alamat'],
@@ -1852,25 +2262,22 @@ class PembaruanKeluarga extends BaseController
                 ];
 
                 if ($isPindahWilayah) {
-                    // Hitung berapa KK yang menumpang di id_rt ini
                     $jumlahPenghuni = $this->db->table('dtsen_kk')->where('id_rt', $idRtSekarang)->countAllResults();
 
                     if ($jumlahPenghuni > 1) {
-                        // 🚨 PECAH ALAMAT: Buat baris id_rt baru untuk keluarga yang pindah
-                        $rtUpdate['kode_desa']   = $rtLama['kode_desa'] ?? null;
+                        // 🚨 PECAH ALAMAT: Buat baris id_rt baru
                         $rtUpdate['created_at']  = date('Y-m-d H:i:s');
                         $rtUpdate['created_by']  = $userId;
                         $rtUpdate['source_name'] = 'pecah_alamat_usulan_' . $usulan_id;
 
                         $this->db->table('dtsen_rt')->insert($rtUpdate);
-                        // Update variabel idRtSekarang dengan ID yang baru saja dibuat
                         $idRtSekarang = $this->db->insertID();
                     } else {
-                        // Sendirian di rumah itu, aman untuk update baris lama
+                        // Update baris lama
                         $this->db->table('dtsen_rt')->where('id_rt', $idRtSekarang)->update($rtUpdate);
                     }
                 } else {
-                    // Tidak pindah, update normal
+                    // Update normal
                     $this->db->table('dtsen_rt')->where('id_rt', $idRtSekarang)->update($rtUpdate);
                 }
             }
@@ -1881,12 +2288,8 @@ class PembaruanKeluarga extends BaseController
             $kkLama = $this->db->table('dtsen_kk')->where('id_kk', $idKk)->get()->getRowArray();
 
             $kkUpdate = [
-                // 👇 PASTIKAN ID_RT BARU MASUK KE SINI JIKA TERJADI PECAH ALAMAT
                 'id_rt'                    => $idRtSekarang,
-
-                // ✅ MATIKAN BENDERA PEMULIHAN KARENA DATA SUDAH SAH DI-APPLY
                 'is_recovery_needed'       => 0,
-
                 'no_kk'                    => !empty($rumah['no_kk']) ? $rumah['no_kk'] : $kkLama['no_kk'],
                 'kepala_keluarga'          => !empty($rumah['kepala_keluarga']) ? $rumah['kepala_keluarga'] : $kkLama['kepala_keluarga'],
                 'alamat'                   => !empty($rumah['alamat']) ? $rumah['alamat'] : $kkLama['alamat'],
@@ -1902,7 +2305,7 @@ class PembaruanKeluarga extends BaseController
             $this->db->table('dtsen_kk')->where('id_kk', $idKk)->update($kkUpdate);
 
             // =======================================================
-            // 👤 3️⃣ Sinkronisasi dtsen_art
+            // 👤 3️⃣ Sinkronisasi dtsen_art (Memakai SOFT DELETE)
             // =======================================================
             $anggotaUsulan = $this->db->table('dtsen_usulan_art')
                 ->where('dtsen_usulan_id', $usulan_id)
@@ -1910,28 +2313,31 @@ class PembaruanKeluarga extends BaseController
                 ->getResultArray();
 
             if (!empty($anggotaUsulan)) {
-                // hapus dulu anggota lama, lalu insert yang baru
-                $this->db->table('dtsen_art')->where('id_kk', $idKk)->delete();
+                // 🚀 BUG FIX: Gunakan Soft Delete agar riwayat tidak musnah
+                $this->db->table('dtsen_art')->where('id_kk', $idKk)->where('deleted_at', null)->update([
+                    'deleted_at'    => date('Y-m-d H:i:s'),
+                    'delete_reason' => 'Ditimpa oleh usulan pembaruan ID ' . $usulan_id
+                ]);
 
                 foreach ($anggotaUsulan as $art) {
                     $payloadMember = json_decode($art['payload_member'] ?? '{}', true);
                     $identitas     = $payloadMember['identitas'] ?? [];
 
                     $dataArt = [
-                        'id_kk'             => $idKk,
-                        'nik'               => $identitas['nik'] ?? $art['nik'] ?? null,
-                        'nama'              => $identitas['nama'] ?? $art['nama'] ?? null,
-                        'hubungan_keluarga' => $identitas['hubungan'] ?? null,
-                        'jenis_kelamin'     => $identitas['jenis_kelamin'] ?? null,
-                        'tanggal_lahir'     => $identitas['tanggal_lahir'] ?? null,
-                        'tempat_lahir'      => $identitas['tempat_lahir'] ?? null,
+                        'id_kk'               => $idKk,
+                        'nik'                 => $identitas['nik'] ?? $art['nik'] ?? null,
+                        'nama'                => $identitas['nama'] ?? $art['nama'] ?? null,
+                        'hubungan_keluarga'   => $identitas['hubungan'] ?? null,
+                        'jenis_kelamin'       => $identitas['jenis_kelamin'] ?? null,
+                        'tanggal_lahir'       => $identitas['tanggal_lahir'] ?? null,
+                        'tempat_lahir'        => $identitas['tempat_lahir'] ?? null,
                         'pendidikan_terakhir' => $identitas['pendidikan'] ?? null,
-                        'pekerjaan'         => $identitas['pekerjaan'] ?? null,
-                        'status_kawin'      => $identitas['status_kawin'] ?? null,
-                        'foto_identitas'    => $payloadMember['foto'] ?? null,
-                        'source_name'       => 'apply_usulan_' . $usulan_id,
-                        'created_by'        => $userId,
-                        'created_at'        => date('Y-m-d H:i:s')
+                        'pekerjaan'           => $identitas['pekerjaan'] ?? null,
+                        'status_kawin'        => $identitas['status_kawin'] ?? null,
+                        'foto_identitas'      => $payloadMember['foto'] ?? null,
+                        'source_name'         => 'apply_usulan_' . $usulan_id,
+                        'created_by'          => $userId,
+                        'created_at'          => date('Y-m-d H:i:s')
                     ];
 
                     $this->db->table('dtsen_art')->insert($dataArt);
@@ -1967,17 +2373,17 @@ class PembaruanKeluarga extends BaseController
                     ]);
             } else {
                 $this->db->table('dtsen_se')->insert([
-                    'id_rt'        => $idRtSekarang, // ✅ Sudah diperbaiki
-                    'id_kk'        => $idKk,
-                    'kepemilikan_aset'       => $kepemilikan_aset,
-                    'kepemilikan_bantuan'    => $kepemilikan_bantuan,
+                    'id_rt'                    => $idRtSekarang,
+                    'id_kk'                    => $idKk,
+                    'kepemilikan_aset'         => $kepemilikan_aset,
+                    'kepemilikan_bantuan'      => $kepemilikan_bantuan,
                     'rata_penghasilan_bulanan' => $payload['penghasilan'] ?? null,
                     'rata_pengeluaran_bulanan' => $payload['pengeluaran'] ?? null,
-                    'latitude'     => $geo['lat'] ?? null,
-                    'longitude'    => $geo['lng'] ?? null,
-                    'source_name'  => 'apply_usulan_' . $usulan_id,
-                    'created_by'   => $userId,
-                    'created_at'   => date('Y-m-d H:i:s')
+                    'latitude'                 => $geo['lat'] ?? null,
+                    'longitude'                => $geo['lng'] ?? null,
+                    'source_name'              => 'apply_usulan_' . $usulan_id,
+                    'created_by'               => $userId,
+                    'created_at'               => date('Y-m-d H:i:s')
                 ]);
             }
 
@@ -2019,7 +2425,6 @@ class PembaruanKeluarga extends BaseController
 
             // =======================================================
             // 🔔 Kirim WhatsApp ke Petugas Entri (dtks_users.nope)
-            // Hanya kirim jika status sebelumnya bukan 'diverifikasi'
             // =======================================================
             try {
                 if (($statusSebelumnya ?? '') !== 'diverifikasi') {
@@ -2028,36 +2433,23 @@ class PembaruanKeluarga extends BaseController
 
                     if (!empty($creatorNik)) {
 
-                        // 1) Coba cari berdasarkan NIK
                         $petugas = $this->db->table('dtks_users')
                             ->select('id, fullname, nope, nik')
                             ->where('nik', $creatorNik)
                             ->get()
                             ->getRowArray();
 
-                        // 2) Jika tidak ketemu → fallback cari berdasarkan user_id
                         if (!$petugas) {
                             $petugas = $this->db->table('dtks_users')
                                 ->select('id, fullname, nope, nik')
                                 ->where('id', $creatorNik)
                                 ->get()
                                 ->getRowArray();
-
-                            if ($petugas) {
-                                log_message('info', "[WA APPLY] Petugas ditemukan via fallback user_id={$creatorNik}");
-                            }
-                        }
-
-                        if (!$petugas) {
-                            log_message('warning', "[WA APPLY] Petugas tidak ditemukan. created_by={$creatorNik}");
                         }
 
                         if ($petugas && !empty($petugas['nope'])) {
 
-                            // Normalisasi nomor HP → 0812 menjadi 62812 dst
-                            $waService = new \App\Libraries\WaService();
-                            // $nomorWA  = $waService->normalizeNumber($petugas['nope']);
-                            $nomorWA = preg_replace('/[^0-9]/', '', $petugas['nope']); // hapus semua non-digit
+                            $nomorWA = preg_replace('/[^0-9]/', '', $petugas['nope']);
 
                             if (str_starts_with($nomorWA, '0')) {
                                 $nomorWA = '62' . substr($nomorWA, 1);
@@ -2067,14 +2459,12 @@ class PembaruanKeluarga extends BaseController
                                 $nomorWA = '62' . substr($nomorWA, 3);
                             }
 
-                            // Ambil info KK untuk isi pesan
                             $kkInfo = $this->db->table('dtsen_kk')
                                 ->select('no_kk, kepala_keluarga, alamat, id_rt')
                                 ->where('id_kk', $idKk)
                                 ->get()
                                 ->getRowArray();
 
-                            // Ambil RT/RW
                             $rtText = '-';
                             $rwText = '-';
                             if (!empty($kkInfo['id_rt'])) {
@@ -2090,31 +2480,8 @@ class PembaruanKeluarga extends BaseController
                                 }
                             }
 
-                            // Format tanggal Indonesia lengkap
-                            $hari = [
-                                'Sunday' => 'Minggu',
-                                'Monday' => 'Senin',
-                                'Tuesday' => 'Selasa',
-                                'Wednesday' => 'Rabu',
-                                'Thursday' => 'Kamis',
-                                'Friday' => 'Jumat',
-                                'Saturday' => 'Sabtu'
-                            ];
-
-                            $bulan = [
-                                1 => 'Januari',
-                                2 => 'Februari',
-                                3 => 'Maret',
-                                4 => 'April',
-                                5 => 'Mei',
-                                6 => 'Juni',
-                                7 => 'Juli',
-                                8 => 'Agustus',
-                                9 => 'September',
-                                10 => 'Oktober',
-                                11 => 'November',
-                                12 => 'Desember'
-                            ];
+                            $hari = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+                            $bulan = [1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'];
 
                             $now = date('Y-m-d H:i:s');
                             $hariIndo = $hari[date('l', strtotime($now))];
@@ -2125,9 +2492,6 @@ class PembaruanKeluarga extends BaseController
 
                             $tanggalLengkap = "{$hariIndo}, {$tgl} {$bln} {$thn}, {$jam}";
 
-                            // ===============================
-                            // 📌 Format Pesan WA (Final)
-                            // ===============================
                             $msg  = "*== SINDEN System ==*\n";
                             $msg .= "📌 *Pemberitahuan Validasi Groundcheck*\n";
                             $msg .= "Usulan No. {$usulan_id} telah selesai divalidasi.\n\n";
@@ -2137,29 +2501,14 @@ class PembaruanKeluarga extends BaseController
                             $msg .= "🗓 Waktu: {$tanggalLengkap}\n\n";
                             $msg .= "Terima kasih atas kerja baiknya.";
 
-                            // ===============================
-                            // 📤 Kirim WA via WaService
-                            // ===============================
-                            try {
-                                // $send = $waService->sendText($nomorWA, $msg);
-                                $send = $waService->sendText($nomorWA, $msg);
+                            $waService = new \App\Libraries\WaService();
+                            $send = $waService->sendText($nomorWA, $msg);
 
-                                if (!is_array($send) || empty($send['status']) || $send['status'] != 'success') {
-                                    log_message('error', '[WA APPLY] Provider WA error: ' . json_encode($send));
-                                }
-
-                                log_message('info', '[WA APPLY] Pesan terkirim ke ' . $nomorWA . ' | ' . json_encode($send));
-                            } catch (\Throwable $e) {
-                                log_message('error', '[WA APPLY] ERROR mengirim WA: ' . $e->getMessage());
+                            if (!is_array($send) || empty($send['status']) || $send['status'] != 'success') {
+                                log_message('error', '[WA APPLY] Provider WA error: ' . json_encode($send));
                             }
-                        } else {
-                            log_message('warning', "[WA APPLY] Nomor WA tidak ditemukan di dtks_users untuk NIK: {$creatorNik}");
                         }
-                    } else {
-                        log_message('warning', "[WA APPLY] created_by kosong, WA tidak dapat dikirim.");
                     }
-                } else {
-                    log_message('info', "[WA APPLY] Status sebelumnya sudah diverifikasi — WA tidak dikirim ulang.");
                 }
             } catch (\Throwable $e) {
                 log_message('error', "[WA APPLY OUTER] {$e->getMessage()}");
@@ -2171,7 +2520,6 @@ class PembaruanKeluarga extends BaseController
                 'redirect' => base_url('dtsen-se')
             ]);
         } catch (\Throwable $e) {
-
             $this->db->transRollback();
             log_message('error', '[apply] ' . $e->getMessage());
 
