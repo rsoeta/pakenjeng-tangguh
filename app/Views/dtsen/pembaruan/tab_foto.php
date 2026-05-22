@@ -113,9 +113,22 @@ $geo  = $payload['geo'] ?? [];
 <script>
     $('#formFoto').on('submit', function(e) {
         e.preventDefault();
+
+        // 🚀 PANGGIL SATPAM KELENGKAPAN ANGGOTA DI SINI
+        if (typeof window.cekKelengkapanAnggota === 'function') {
+            if (!window.cekKelengkapanAnggota()) {
+                // Jika belum lengkap, otomatis pindah view ke Tab Anggota
+                const tabTrigger = document.querySelector('[href="#tab-anggota"], [data-bs-target="#tab-anggota"]');
+                if (tabTrigger) {
+                    new bootstrap.Tab(tabTrigger).show();
+                }
+                return; // 🛑 Hentikan proses upload foto!
+            }
+        }
+
         const formData = new FormData(this);
 
-        // 🚀 Tambahan opsional: Tampilkan loading spinner agar terlihat lebih profesional saat upload foto
+        // 🚀 Tampilkan loading spinner agar terlihat lebih profesional saat upload foto
         Swal.fire({
             title: 'Menyimpan Foto...',
             text: 'Mohon tunggu sebentar.',
@@ -140,14 +153,7 @@ $geo  = $payload['geo'] ?? [];
                         timer: 1500, // Dipercepat sedikit agar user tidak menunggu lama
                         showConfirmButton: false
                     }).then(() => {
-                        // 🚀 KUNCI SAKTINYA DI SINI MBAH!
-                        // Setelah pesan sukses tertutup, reload halaman secara otomatis.
-                        // Controller detail() akan mengecek ulang kelengkapan data,
-                        // dan menyulap badge "Draft" menjadi "Submitted" jika sudah lengkap.
-                        // 1. Bersihkan URL di address bar dari embel-embel #tab... tanpa me-refresh
                         window.history.replaceState(null, null, window.location.pathname);
-
-                        // 2. Baru reload halamannya dengan URL yang sudah suci dan bersih
                         window.location.reload();
                     });
                 } else {

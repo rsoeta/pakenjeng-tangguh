@@ -10,6 +10,38 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         text-align: left !important;
         vertical-align: top;
     }
+
+    #tableAnggota td,
+    #tableAnggota th {
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 0.2em 0.6em;
+    }
+
+    table.dataTable.dtr-inline.collapsed>tbody>tr>td.dtr-control:before {
+        background-color: #198754 !important;
+    }
+
+    table.dataTable.dtr-inline.collapsed>tbody>tr.parent>td.dtr-control:before {
+        background-color: #dc3545 !important;
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+        }
+
+        70% {
+            box-shadow: 0 0 0 6px rgba(220, 53, 69, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+        }
+    }
 </style>
 <!-- <div class="p-1"> -->
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -26,17 +58,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         </div>
     <?php endif; ?>
 </div>
-<!-- <thead class="table-light text-start">
-        <tr>
-            <th></th>
-            <th>No</th>
-            <th>Nama</th>
-            <th>NIK</th>
-            <th>Tanggal Lahir</th>
-            <th>Hubungan Keluarga</th>
-            <th>Aksi</th>
-        </tr>
-    </thead> -->
 <table class="table table-bordered table-sm table-striped w-100" id="tableAnggota">
     <thead class="table-light text-start">
         <tr>
@@ -664,8 +685,25 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     // 🔹 Nama
                     {
                         data: 'nama',
-                        className: 'text-nowrap text-start',
-                        defaultContent: '-'
+                        className: 'text-nowrap text-start fw-bold',
+                        render: function(data, type, row) {
+                            let nama = data || '-';
+
+                            // 🔍 LOGIKA PENGECEKAN KELENGKAPAN:
+                            let isLengkap = (
+                                row.nik && row.nik !== '-' &&
+                                row.tanggal_lahir && row.tanggal_lahir !== '-' &&
+                                (row.pekerjaan_label || row.pekerjaan) && (row.pekerjaan_label !== '-' && row.pekerjaan !== '-') &&
+                                (row.hubungan_keluarga_label || row.jenis_shdk || row.hubungan_keluarga)
+                            );
+
+                            if (!isLengkap && type === 'display') {
+                                // 🚀 DIPERKECIL: width 14px, height 14px, icon 8px
+                                return `${nama} <span class="badge bg-danger rounded-circle indicator-belum-lengkap ms-2 shadow-sm" title="Data belum lengkap, wajib di-Edit!" style="width: 14px; height: 14px; padding: 0; display: inline-flex; align-items: center; justify-content: center; animation: pulse 2s infinite; vertical-align: middle;"><i class="fas fa-exclamation" style="font-size: 8px;"></i></span>`;
+                            }
+
+                            return nama;
+                        }
                     },
 
                     // 🔹 NIK
@@ -902,25 +940,29 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             });
         });
 
+        // ========================================================
+        // 🛡️ FUNGSI GLOBAL: CEK KELENGKAPAN ANGGOTA SEBELUM APPLY
+        // ========================================================
+        window.cekKelengkapanAnggota = function() {
+            // Cek apakah ada elemen dengan class 'indicator-belum-lengkap' di dalam tabel
+            const adaYangBelumLengkap = $('#tableAnggota .indicator-belum-lengkap').length > 0;
+
+            if (adaYangBelumLengkap) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Data Belum Lengkap!',
+                    html: 'Masih ada anggota keluarga dengan tanda <span class="badge bg-danger rounded-circle p-1 mx-1"><i class="fas fa-exclamation" style="font-size: 10px;"></i></span><br><br>Silakan klik tombol <b><i class="fas fa-edit text-primary"></i> Edit</b> pada anggota tersebut dan lengkapi isiannya.',
+                    confirmButtonText: 'Mengerti',
+                    width: '320px', // Mobile friendly
+                    customClass: {
+                        title: 'fs-5',
+                        content: 'fs-6'
+                    }
+                });
+                return false; // Gagalkan proses
+            }
+            return true; // Lolos, boleh lanjut simpan
+        };
+
     });
 </script>
-
-<style>
-    #tableAnggota td,
-    #tableAnggota th {
-        vertical-align: middle;
-        font-size: 0.9rem;
-    }
-
-    .dataTables_wrapper .dataTables_paginate .paginate_button {
-        padding: 0.2em 0.6em;
-    }
-
-    table.dataTable.dtr-inline.collapsed>tbody>tr>td.dtr-control:before {
-        background-color: #198754 !important;
-    }
-
-    table.dataTable.dtr-inline.collapsed>tbody>tr.parent>td.dtr-control:before {
-        background-color: #dc3545 !important;
-    }
-</style>

@@ -19,7 +19,6 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
 ?>
 
 <style>
-    /* CSS ini sudah sangat baik untuk membuat select readonly secara visual */
     select[readonly],
     select[data-auto="true"] {
         pointer-events: none;
@@ -40,6 +39,7 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
         <input type="hidden" name="sumber" value="<?= esc($sumber ?? 'master') ?>">
 
         <div class="row g-3">
+            <!-- ================= ASET BERGERAK ================= -->
             <div class="col-12 col-lg-6">
                 <div class="card border shadow-sm">
                     <div class="card-header bg-light fw-bold">
@@ -78,6 +78,7 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                 </div>
             </div>
 
+            <!-- ================= TERNAK ================= -->
             <div class="col-12 col-lg-6">
                 <div class="card border shadow-sm">
                     <div class="card-header bg-light fw-bold">
@@ -106,6 +107,7 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                 </div>
             </div>
 
+            <!-- ================= ASET TIDAK BERGERAK ================= -->
             <div class="col-12">
                 <div class="card border shadow-sm">
                     <div class="card-header bg-light fw-bold">
@@ -119,11 +121,11 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                                     class="form-select form-select-sm <?= $disabled ? '' : 'required-field' ?>"
                                     <?= $disabled ?> <?= $disabled ? '' : 'required' ?>>
                                     <option value="">Pilih</option>
-                                    <option value="TIDAK MEMILIKI" <?= ($aset['luas_sawah'] ?? '') === 'TIDAK MEMILIKI' ? 'selected' : '' ?>>TIDAK MEMILIKI</option>
-                                    <option value="KURANG DARI 1000 M2" <?= ($aset['luas_sawah'] ?? '') === 'KURANG DARI 1000 M2' ? 'selected' : '' ?>>KURANG DARI 1000 M2</option>
-                                    <option value="1000-5000 M2" <?= ($aset['luas_sawah'] ?? '') === '1000-5000 M2' ? 'selected' : '' ?>>1000-5000 M2</option>
-                                    <option value="5000-10000 M2" <?= ($aset['luas_sawah'] ?? '') === '5000-10000 M2' ? 'selected' : '' ?>>5000-10000 M2</option>
-                                    <option value="LEBIH DARI 10000 M2" <?= ($aset['luas_sawah'] ?? '') === 'LEBIH DARI 10000 M2' ? 'selected' : '' ?>>LEBIH DARI 10000 M2</option>
+                                    <option <?= ($aset['luas_sawah'] ?? '') === 'TIDAK MEMILIKI' ? 'selected' : '' ?>>TIDAK MEMILIKI</option>
+                                    <option <?= ($aset['luas_sawah'] ?? '') === 'KURANG DARI 1000 M2' ? 'selected' : '' ?>>KURANG DARI 1000 M2</option>
+                                    <option <?= ($aset['luas_sawah'] ?? '') === '1000-5000 M2' ? 'selected' : '' ?>>1000-5000 M2</option>
+                                    <option <?= ($aset['luas_sawah'] ?? '') === '5000-10000 M2' ? 'selected' : '' ?>>5000-10000 M2</option>
+                                    <option <?= ($aset['luas_sawah'] ?? '') === 'LEBIH DARI 10000 M2' ? 'selected' : '' ?>>LEBIH DARI 10000 M2</option>
                                 </select>
                                 <?php if (!$disabled): ?>
                                     <div class="invalid-feedback">
@@ -131,21 +133,18 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                                     </div>
                                 <?php endif; ?>
                             </div>
-                            
                             <div class="col-md-4">
                                 <label class="form-label">Memiliki Lahan (selain yang ditempati)</label>
                                 <select name="memiliki_lahan"
                                     id="memiliki_lahan"
                                     class="form-select form-select-sm bg-light"
                                     readonly
-                                    tabindex="-1"
                                     data-auto="true">
                                     <option value="">Pilih</option>
                                     <option value="YA" <?= ($aset['memiliki_lahan'] ?? '') === 'YA' ? 'selected' : '' ?>>YA</option>
                                     <option value="TIDAK" <?= ($aset['memiliki_lahan'] ?? '') === 'TIDAK' ? 'selected' : '' ?>>TIDAK</option>
                                 </select>
                             </div>
-
                             <div class="col-md-4">
                                 <label class="form-label">Rumah / Bangunan Ditempati Lain <span class="text-danger">*</span></label>
                                 <select name="rumah_lain"
@@ -171,7 +170,7 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
 
     <?php if ($editable): ?>
         <div class="text-end mt-4">
-            <button type="button" id="btnSimpanAset" class="btn btn-success">
+            <button id="btnSimpanAset" class="btn btn-success">
                 <i class="fas fa-save"></i> Simpan Perubahan
             </button>
         </div>
@@ -182,54 +181,19 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
     <?php endif; ?>
 </div>
 
+<!-- ================ SCRIPT ================= -->
 <script>
     $(function() {
-        $('#btnSimpanAset').on('click', function(e) {
-            e.preventDefault(); // Mencegah form reload
-
-            const form = $('#formAset')[0];
-            
-            // 🚀 BUG FIX: Validasi kelengkapan form sebelum mengirim data ke server
-            if (!form.checkValidity()) {
-                form.classList.add('was-validated');
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Isian Belum Lengkap',
-                    text: 'Silakan periksa kembali field yang bertanda bintang (*).',
-                    width: '320px', // Perkecil untuk kenyamanan mobile
-                    customClass: { title: 'fs-5', content: 'fs-6' }
-                });
-                return;
-            }
-
+        $('#btnSimpanAset').on('click', function() {
             const formData = $('#formAset').serialize();
-            
             $.post('<?= base_url('pembaruan-keluarga/save-aset') ?>', formData, function(res) {
                 if (res.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: 'Data aset berhasil disimpan.',
-                        width: '320px', // Perkecil untuk kenyamanan mobile
-                        customClass: { title: 'fs-5', content: 'fs-6' }
-                    });
+                    Swal.fire('Berhasil!', 'Data aset berhasil disimpan.', 'success');
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal!',
-                        text: res.message || 'Terjadi kesalahan.',
-                        width: '320px', // Perkecil untuk kenyamanan mobile
-                        customClass: { title: 'fs-5', content: 'fs-6' }
-                    });
+                    Swal.fire('Gagal!', res.message || 'Terjadi kesalahan.', 'error');
                 }
             }, 'json').fail(() => {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal!',
-                    text: 'Tidak dapat terhubung ke server.',
-                    width: '320px', // Perkecil untuk kenyamanan mobile
-                    customClass: { title: 'fs-5', content: 'fs-6' }
-                });
+                Swal.fire('Gagal!', 'Tidak dapat terhubung ke server.', 'error');
             });
         });
     });
