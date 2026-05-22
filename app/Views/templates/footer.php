@@ -10,46 +10,48 @@
 <!-- /.control-sidebar -->
 </div>
 
-<div class="modal fade" id="modalDokumentasi" data-backdrop="static" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalDokumentasi" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
+
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title"><i class="fas fa-camera retro mr-2"></i> Laporan Dokumentasi Kegiatan</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <h5 class="modal-title"><i class="fas fa-camera retro me-2"></i> Laporan Dokumentasi</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
             <form id="formUploadDokumentasi" enctype="multipart/form-data">
                 <div class="modal-body">
                     <div class="alert alert-info small">
                         <i class="fas fa-info-circle"></i> Sistem akan otomatis menambahkan Watermark (Nama, Waktu, & Lokasi) pada foto Anda.
                     </div>
 
-                    <div class="form-group">
-                        <label>Jenis Kegiatan <span class="text-danger">*</span></label>
-                        <select name="jenis_kegiatan" id="selectKegiatan" class="form-control" required>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Jenis Kegiatan <span class="text-danger">*</span></label>
+                        <select name="jenis_kegiatan" id="selectKegiatan" class="form-select" required>
                             <option value="">-- Memuat Data... --</option>
                         </select>
                     </div>
 
-                    <div id="previewContainer" class="text-center mt-3" style="display: none;">
+                    <div id="previewContainer" class="text-center mt-3 mb-3" style="display: none;">
                         <img id="previewFoto" src="" class="img-fluid rounded shadow-sm" style="max-height: 250px; border: 2px solid #ddd;" alt="Preview Foto">
                     </div>
 
-                    <div class="form-group">
-                        <label>Foto Dokumentasi <span class="text-danger">*</span></label>
-                        <input type="file" name="foto" id="inputFotoDoc" class="form-control-file" accept="image/*" capture="environment" required>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Foto Dokumentasi <span class="text-danger">*</span></label>
+                        <input type="file" name="foto" id="inputFotoDoc" class="form-control" accept="image/*" capture="environment" required>
                     </div>
 
                     <input type="hidden" name="latitude" id="doc_lat">
                     <input type="hidden" name="longitude" id="doc_lng">
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Nanti Saja</button>
-                    <button type="submit" class="btn btn-primary btn-sm" id="btnSaveDoc">
-                        <i class="fas fa-upload mr-1"></i> Upload & Simpan
+
+                <div class="modal-footer bg-light d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nanti Saja</button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveDoc">
+                        <i class="fas fa-upload me-1"></i> Upload & Simpan
                     </button>
                 </div>
+
             </form>
         </div>
     </div>

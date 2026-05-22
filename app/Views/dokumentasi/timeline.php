@@ -2,10 +2,11 @@
 
 <?= $this->section('content'); ?>
 
+<!-- /* ======================================================== -->
+<!-- ✨ EXPERT SNAKE ROADMAP TIMELINE (INFOGRAPHIC) ✨ -->
+<!-- ======================================================== */ -->
+
 <style>
-    /* ========================================================
-       ✨ EXPERT SNAKE ROADMAP TIMELINE (INFOGRAPHIC) ✨
-       ======================================================== */
     .infographic-container {
         max-width: 850px;
         /* Dipersempit agar roadmap tampak padat dan rapi */
@@ -220,6 +221,62 @@
         color: #fff;
     }
 
+    .btn-floating-camera {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1050;
+        width: 55px;
+        /* 🤏 Diperkecil agar lebih proporsional */
+        height: 55px;
+        /* 🤏 Diperkecil agar lebih proporsional */
+        border-radius: 50%;
+        font-size: 22px;
+        /* 🤏 Ikon disesuaikan */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+
+        /* ✨ Sentuhan Estetika: Warna gradien biru ke cyan */
+        background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+        border: none;
+        box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4), inset 0 -2px 5px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+
+        /* 💓 Animasi denyut halus menarik perhatian tanpa norak */
+        animation: pulse-glow 2.5s infinite;
+    }
+
+    /* ✨ Efek saat kursor di atas tombol (untuk pengguna laptop/desktop) */
+    .btn-floating-camera:hover {
+        background: linear-gradient(135deg, #0b5ed7 0%, #0bacce 100%);
+        transform: translateX(-50%) translateY(-3px);
+        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.6);
+        color: #ffffff;
+    }
+
+    /* ✨ Efek membal saat tombol ditekan (Mobile/Touch) */
+    .btn-floating-camera:active {
+        transform: translateX(-50%) scale(0.92);
+    }
+
+    /* ✨ Keyframes untuk animasi denyut bayangan */
+    @keyframes pulse-glow {
+        0% {
+            box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.5);
+        }
+
+        70% {
+            box-shadow: 0 0 0 12px rgba(13, 110, 253, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+        }
+    }
+
     /* 📱 RESPONSIVE: Luruskan jadi vertikal biasa jika di HP */
     @media screen and (max-width: 768px) {
         .snake-group {
@@ -256,8 +313,18 @@
     <div class="infographic-container shadow-sm">
 
         <div class="title-header">
-            <h4>Laporan Historis</h4>
-            <h2><?= $title; ?></h2>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-0">📸 Timeline Dokumentasi Petugas</h4>
+                    <small class="text-muted">Jejak historis kegiatan lapangan</small>
+                </div>
+
+                <div>
+                    <button type="button" class="btn-floating-camera" data-bs-toggle="modal" data-bs-target="#modalDokumentasi" title="Tambah Dokumentasi">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <?php if (empty($timelineData)): ?>
