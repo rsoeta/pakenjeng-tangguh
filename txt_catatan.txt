@@ -1531,13 +1531,13 @@ VALUES ('Timeline Dokumentasi', '', 'dokumentasi/timeline', 'fas fa-fw fa-histor
 ================================================================================================================================================================
 🟩 Menu PDTT (Pemeriksaan Dengan Tujuan Tertentu) - Tahun 2025
 =================================================================================================================================================================
-alur, ubah menu PDTT sebelumnya menjadi 2022.
+alur, ubah menu PDTT menjadi submenu.
 
 INSERT INTO `tb_menu` (`tm_nama`, `tm_class`, `tm_url`, `tm_icon`, `tm_parent_id`, `tm_status`, `tm_grup_akses`, `tm_urutan`)  
-VALUES ('PDTT', '', '', 'fas fa-shield-alt', 11, 1, 5, 0);
+VALUES ('2022', '', 'geotagging', 'fas fa-map-marked-alt', 13, 1, 3, 0);
 
 INSERT INTO `tb_menu` (`tm_nama`, `tm_class`, `tm_url`, `tm_icon`, `tm_parent_id`, `tm_status`, `tm_grup_akses`, `tm_urutan`)  
-VALUES ('2025', '', 'pdtt/2025', 'fas fa-shield-alt', 11, 1, 5, 0);
+VALUES ('2025', '', 'pdtt/2025', 'fas fa-shield-alt', 13, 1, 3, 0);
 
 ubah tb_roles.nm_role dengan id_role 5 menjadi Client dan
 INSERT INTO `tb_roles` (`id_role`, `nm_role`)  

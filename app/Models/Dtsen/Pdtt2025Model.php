@@ -127,6 +127,7 @@ class Pdtt2025Model extends Model
         if (!empty($filters['status_verifikasi'])) {
             $builder->where('p.status_verifikasi', $filters['status_verifikasi']);
         }
+        // ... (Kode filter dinamis Search Frontend) ...
         if (!empty($filters['search'])) {
             $builder->groupStart()
                 ->like('p.nama_pengurus', $filters['search'])
@@ -134,6 +135,55 @@ class Pdtt2025Model extends Model
                 ->orLike('p.no_kk', $filters['search'])
                 ->groupEnd();
         }
+
+        // =======================================================
+        // 🔄 LOGIKA SORTING TINGKAT TINGGI (ORDER BY) DATATABLES
+        // =======================================================
+        $columnOrder = [
+            null,                  // 0: No
+            'p.nama_pengurus',     // 1: Nama Pengurus
+            'p.nik',               // 2: NIK
+            'p.no_kk',             // 3: No KK
+            'p.alamat',            // 4: Alamat
+            'p.keterangan',        // 5: Temuan
+
+            // 6: Foto KKS (Sort by Ada(1) vs Kosong(0))
+            "IF(COALESCE(kks.foto_kepemilikan, kks.foto_kks) != '' AND COALESCE(kks.foto_kepemilikan, kks.foto_kks) NOT LIKE '%noimage%', 1, 0)",
+
+            'r.kepemilikan_rumah', // 7: Kepemilikan Rumah
+            'kondisi_rumah',       // 8: Kondisi Rumah (Alias Group_Concat)
+
+            // 9: Foto Rumah (Sort by Ada(1) vs Kosong(0))
+            "IF(r.foto_rumah != '' AND r.foto_rumah NOT LIKE '%noimage%', 1, 0)",
+
+            // 10: Mobil (Sort by Angka Terendah-Tertinggi dari Ekstraksi JSON)
+            "CAST(COALESCE(JSON_UNQUOTE(JSON_EXTRACT(se.kepemilikan_aset, '$.mobil')), '0') AS UNSIGNED)",
+
+            // 11: Motor (Sort by Angka Terendah-Tertinggi dari Ekstraksi JSON)
+            "CAST(COALESCE(JSON_UNQUOTE(JSON_EXTRACT(se.kepemilikan_aset, '$.sepeda_motor')), '0') AS UNSIGNED)",
+
+            'disabilitas_keluarga', // 12: Disabilitas
+            'p.status_verifikasi',  // 13: Status
+            null                    // 14: Aksi
+        ];
+
+        if (isset($filters['order'])) {
+            $orderIdx = $filters['order'][0]['column'];
+            $orderDir = $filters['order'][0]['dir'];
+
+            if (isset($columnOrder[$orderIdx]) && $columnOrder[$orderIdx] !== null) {
+                // Gunakan escape false agar klausa IF dan JSON_EXTRACT MySQL tidak rusak
+                $builder->orderBy($columnOrder[$orderIdx], $orderDir, false);
+            }
+        } else {
+            // Default Sorting: Pending di atas, disusul nama abjad
+            $builder->orderBy('p.status_verifikasi', 'ASC');
+            $builder->orderBy('p.nama_pengurus', 'ASC');
+        }
+
+        // 🚀 BUG FIX TAMPIL DOUBLE: Pastikan data selalu memiliki urutan mutlak (ID)
+        // Agar MySQL Limit Pagination tidak melompat-lompat / duplikat baris
+        $builder->orderBy('p.id', 'DESC');
 
         return $builder;
     }

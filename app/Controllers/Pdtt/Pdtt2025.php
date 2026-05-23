@@ -98,13 +98,19 @@ class Pdtt2025 extends BaseController
             'role_id'           => $session->get('role_id'),
             'wilayah_tugas'     => $session->get('wilayah_tugas'),
             'kode_desa'         => $session->get('kode_desa'),
+            'order'             => $request->getPost('order') // 🚀 Tangkap Order dari DataTables
         ];
 
         $builder = $this->pdttModel->getDatatablesQuery($filters);
 
         $start  = $request->getPost('start');
         $length = $request->getPost('length');
+
+        // 🚀 BUG FIX DOUBLE: Penghitungan Total Records
         $totalRecords = $builder->countAllResults(false);
+
+        // 🛡️ RE-APPLY GROUP BY: Pasang kembali Group By karena CI4 meresetnya saat countAllResults
+        $builder->groupBy('p.id');
 
         if ($length != -1) {
             $builder->limit($length, $start);

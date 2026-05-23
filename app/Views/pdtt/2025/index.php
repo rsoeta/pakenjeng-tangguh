@@ -215,18 +215,22 @@
                     d.filter_status = $('#filterStatus').val();
                 }
             },
-            columnDefs: [{
+            columnDefs: [
+                // Bebaskan perataan teks, biarkan rata kiri/default bawaan Bootstrap
+                {
                     targets: '_all',
                     className: 'align-middle'
                 },
+                // Pastikan nama pengurus rapi
                 {
                     targets: 1,
                     className: 'text-nowrap fw-bold'
-                }, // 🚀 Nama Pengurus: text-nowrap
-                // {
-                //     targets: [0, 6, 9, 10, 11, 13, 14],
-                //     className: 'text-center'
-                // }
+                },
+                // Hanya matikan fungsi sorting pada kolom Nomor(0) dan Aksi(14)
+                {
+                    targets: [0, 14],
+                    orderable: false
+                }
             ]
         });
 
