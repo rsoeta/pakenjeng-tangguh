@@ -11,7 +11,7 @@
                 </a>
             <?php endif; ?>
 
-            <?php if ($editable): ?>
+            <?php if ($roleId <= 3): ?>
                 <button class="btn btn-success btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#modalImport">
                     <i class="fas fa-upload"></i> Import Data
                 </button>

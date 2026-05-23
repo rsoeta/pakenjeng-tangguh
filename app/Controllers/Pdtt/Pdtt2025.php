@@ -30,11 +30,15 @@ class Pdtt2025 extends BaseController
         return view('pdtt/2025/index', $data);
     }
 
-    // 📥 Fitur Import Excel (Hanya untuk Admin / Role <= 4)
+    // 📥 Fitur Import Excel (Hanya untuk Admin / Role <= 3)
     public function importExcel()
     {
         $roleId = session()->get('role_id');
-        if ($roleId > 4) return $this->response->setJSON(['status' => 'error', 'message' => 'Akses ditolak.']);
+
+        // 🚀 BUG FIX: Kunci rapat-rapat! Hanya Role <= 3 yang boleh eksekusi import
+        if ($roleId > 3) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Akses Ditolak: Hanya Admin yang diizinkan untuk melakukan import data!']);
+        }
 
         $file = $this->request->getFile('file_excel');
         if (!$file || !$file->isValid()) return $this->response->setJSON(['status' => 'error', 'message' => 'File tidak valid.']);
@@ -260,9 +264,22 @@ class Pdtt2025 extends BaseController
             $aset = json_decode($row['kepemilikan_aset'] ?? '{}', true);
             $fotoKksVal = !empty($row['foto_kepemilikan']) ? $row['foto_kepemilikan'] : ($row['foto_kks'] ?? '');
 
-            // Data string diset eksplisit agar 0 di depan tidak hilang
-            $sheet->setCellValueExplicit('A' . $rowNum, trim($row['nik']), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $sheet->setCellValueExplicit('B' . $rowNum, trim($row['no_kk']), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            // 🚀 ALGORITMA MASKING NIK & NO. KK PUSAT
+            $nikAsli = trim($row['nik'] ?? '');
+            $nikMasked = (strlen($nikAsli) === 16)
+                ? substr($nikAsli, 0, 6) . '******' . substr($nikAsli, 12, 4)
+                : $nikAsli; // Jika tidak 16 digit, biarkan apa adanya
+
+            $kkAsli = trim($row['no_kk'] ?? '');
+            $kkMasked = (strlen($kkAsli) === 16)
+                ? substr($kkAsli, 0, 10) . '******'
+                : $kkAsli;
+
+            // 🚀 Set hasil masking ke dalam sel Excel
+            $sheet->setCellValueExplicit('A' . $rowNum, $nikMasked, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('B' . $rowNum, $kkMasked, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+
+            // Kolom sisanya...
             $sheet->setCellValueExplicit('C' . $rowNum, trim($row['no_rekening']), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet->setCellValue('D' . $rowNum, trim($row['nama_pengurus']));
             $sheet->setCellValue('E' . $rowNum, trim($row['lembaga_penyalur']));
