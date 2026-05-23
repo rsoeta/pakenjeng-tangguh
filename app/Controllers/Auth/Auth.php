@@ -298,7 +298,7 @@ class Auth extends BaseController
                     'status' => 0,
                     'level' => $this->request->getVar('no_rw'),
                     'nope' => $this->request->getVar('nope'),
-                    'role_id' => 5,
+                    'role_id' => 99, // Role default untuk pendaftar biasa
                     'password' => $this->request->getVar('password'),
                     'created_at' => date('Y-m-d H:i:s'),
                 ];

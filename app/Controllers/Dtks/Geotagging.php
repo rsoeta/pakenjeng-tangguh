@@ -17,7 +17,9 @@ class Geotagging extends BaseController
     // add this in the class
     protected $_rels;
     protected $_types;
+
     public function __construct()
+
     {
         $this->WilayahModel = new WilayahModel();
         $this->AuthModel = new AuthModel();
@@ -271,7 +273,33 @@ class Geotagging extends BaseController
                 } else {
 
                     $simpandata = [
-                        'vg_no_data' => $vg_no_data, 'vg_nik' => $vg_nik, 'vg_nik_ktp' => $vg_nik_ktp, 'vg_nama_lengkap' => $vg_nama_lengkap, 'vg_nama_ktp' => $vg_nama_ktp, 'vg_nkk' => $vg_nkk, 'vg_alamat' => $vg_alamat, 'vg_rt' => $vg_rt, 'vg_rw' => $vg_rw, 'vg_desa' => $vg_desa, 'vg_kec' => $vg_kec, 'vg_kab' => $vg_kab, 'vg_prov' => $vg_prov, 'vg_dbj_id1' => $vg_dbj_id1, 'vg_dbj_id2' => $vg_dbj_id2, 'vg_norek' => $vg_norek, 'vg_source' => $vg_source, 'vg_fp' => $vg_fp, 'vg_fr' => $vg_fr, 'vg_fktp' => $vg_fktp, 'vg_fkk' => $vg_fkk, 'vg_lat' => $vg_lat, 'vg_lang' => $vg_lang, 'vg_ds_id' => $vg_ds_id, 'vg_sta_id' => $vg_sta_id, 'vg_created_by' => $vg_created_by, 'vg_created_at' => $vg_created_at
+                        'vg_no_data' => $vg_no_data,
+                        'vg_nik' => $vg_nik,
+                        'vg_nik_ktp' => $vg_nik_ktp,
+                        'vg_nama_lengkap' => $vg_nama_lengkap,
+                        'vg_nama_ktp' => $vg_nama_ktp,
+                        'vg_nkk' => $vg_nkk,
+                        'vg_alamat' => $vg_alamat,
+                        'vg_rt' => $vg_rt,
+                        'vg_rw' => $vg_rw,
+                        'vg_desa' => $vg_desa,
+                        'vg_kec' => $vg_kec,
+                        'vg_kab' => $vg_kab,
+                        'vg_prov' => $vg_prov,
+                        'vg_dbj_id1' => $vg_dbj_id1,
+                        'vg_dbj_id2' => $vg_dbj_id2,
+                        'vg_norek' => $vg_norek,
+                        'vg_source' => $vg_source,
+                        'vg_fp' => $vg_fp,
+                        'vg_fr' => $vg_fr,
+                        'vg_fktp' => $vg_fktp,
+                        'vg_fkk' => $vg_fkk,
+                        'vg_lat' => $vg_lat,
+                        'vg_lang' => $vg_lang,
+                        'vg_ds_id' => $vg_ds_id,
+                        'vg_sta_id' => $vg_sta_id,
+                        'vg_created_by' => $vg_created_by,
+                        'vg_created_at' => $vg_created_at
                     ];
 
                     $db->table('dtks_verivali_geo')->insert($simpandata);

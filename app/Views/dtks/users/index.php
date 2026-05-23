@@ -103,43 +103,6 @@
                 <div class="card-body">
                     <br>
                     <div class="tengah">
-                        <!-- <div class="row mb-3">
-
-                            <div class="col-md-3">
-                                <label>Level User</label>
-                                <select id="filterRole" class="form-control form-control-sm">
-                                    <option value="">Semua</option>
-                                    <?php foreach ($roles as $r) : ?>
-                                        <option value="<?= $r['nm_role']; ?>"><?= $r['nm_role']; ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-
-                            <div class="col-md-3">
-                                <label>Status</label>
-                                <select id="filterStatus" class="form-control form-control-sm">
-                                    <option value="">Semua</option>
-                                    <option value="Active">Active</option>
-                                    <option value="Inactive">Inactive</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-3">
-                                <label>No. RW</label>
-                                <select id="filterRW" class="form-control form-control-sm">
-                                    <option value="">Semua</option>
-                                    <?php
-                                    $rwList = array_unique(array_column($users, 'level'));
-                                    sort($rwList);
-                                    foreach ($rwList as $rw) {
-                                        echo "<option value='$rw'>$rw</option>";
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-
-                        </div> -->
-
                         <!-- <div id="customFilter"></div> -->
                         <div class="dt-toolbar">
 

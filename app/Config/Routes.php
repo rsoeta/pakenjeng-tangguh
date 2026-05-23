@@ -20,9 +20,9 @@ $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultController('Landing');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
-// $routes->set404Override(function () {
-// 	return view('maintenance2');
-// });
+$routes->set404Override(function () {
+	return view('maintenance2');
+});
 $routes->setAutoRoute(true);
 $routes->setAutoRoute(false);
 
@@ -152,7 +152,7 @@ $routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview
 });
 
 // USULAN BANSOS
-$routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
+$routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
 	$routes->get('/', 'Dtsen\UsulanBansos::index');
 	$routes->get('data', 'Dtsen\UsulanBansos::getDataBulanIni');
 	$routes->post('verifikasi/(:num)', 'Dtsen\UsulanBansos::verifikasi/$1');
@@ -174,7 +174,7 @@ $routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview']], 
 });
 
 // MASTER KKS
-$routes->group('master-kks', ['filter' => 'authfilterdtks'], function ($routes) {
+$routes->group('master-kks', ['filter' => 'authfilterdtks', 'menufilterdtks'], function ($routes) {
 	$routes->get('/', 'Dtsen\MasterKKS::index');
 	$routes->post('datatable', 'Dtsen\MasterKKS::datatable');
 	$routes->get('get-rw', 'Dtsen\MasterKKS::get_rw_ajax');
@@ -187,7 +187,7 @@ $routes->group('master-kks', ['filter' => 'authfilterdtks'], function ($routes) 
 });
 
 // DOKUMENTASI BANSOS KKS
-$routes->group('bansos-kks', ['filter' => 'authfilterdtks'], function ($routes) {
+$routes->group('bansos-kks', ['filter' => 'authfilterdtks', 'menufilterdtks'], function ($routes) {
 	$routes->get('/', 'Dtsen\BansosKKS::index');
 	$routes->post('datatable', 'Dtsen\BansosKKS::datatable');
 	$routes->post('cari-nik', 'Dtsen\BansosKKS::cari_nik_ajax');
@@ -226,10 +226,7 @@ $routes->cli('cron/wa-reminder', 'Cron\WaReminder::index');
 $routes->get('cron/reminder', 'Cron\Reminder::index');
 
 // DTSEN - Pemeriksaan Data Sosial Ekonomi
-$routes->group('dtsen', [
-	'namespace' => 'App\Controllers\Dtsen',
-	'filter' => ['authfilterdtks', 'menufilterdtks']
-], function ($routes) {
+$routes->group('dtsen', ['namespace' => 'App\Controllers\Dtsen', 'filter' => ['authfilterdtks', 'menufilterdtks']], function ($routes) {
 
 	// Reminder Monitoring (UI + API)
 	$routes->get('laporan', 'ReminderMonitor::index');
@@ -264,9 +261,7 @@ $routes->group('dtsen', [
 });
 
 // PENENTUAN KEMISKINAN
-$routes->group('dtsen/kemiskinan', [
-	'filter' => ['authfilterdtks', 'menufilterdtks']
-], function ($routes) {
+$routes->group('dtsen/kemiskinan', ['filter' => ['authfilterdtks', 'menufilterdtks']], function ($routes) {
 
 	$routes->get('penentuan', 'Dtsen\PenentuanKemiskinan::penentuan');
 	$routes->get('datatable', 'Dtsen\PenentuanKemiskinan::datatable');
@@ -300,8 +295,8 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => ['a
 $routes->group('admin', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
 
 	// Migration Tool (Admin Only)
-	$routes->get('migrate', 'Admin\MigrationTool::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-	$routes->get('download-db', 'Admin\MigrationTool::downloadDb', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+	$routes->get('migrate', 'Admin\MigrationTool::index');
+	$routes->get('download-db', 'Admin\MigrationTool::downloadDb');
 
 	// Article Management
 	$routes->get('articles', 'Admin\ArticleController::index');
@@ -315,7 +310,7 @@ $routes->group('admin', ['filter' => ['authfilterdtks', 'globalview', 'menufilte
 });
 
 // Frontend article view
-$routes->get('artikel', 'ArticleFront::index');
+$routes->get('artikel', 'ArticleFront::index', ['filter' => ['globalview', 'menufilterdtks', 'authfilterdtks']]);
 $routes->get('artikel/(:segment)', 'ArticleFront::show/$1');
 
 
@@ -360,7 +355,7 @@ $routes->post('addpbi', 'Dtks\VervalPbi::save', ['filter' => 'authfilterdtks', '
 $routes->post('importPbi', 'Dtks\VervalPbi::importExcel', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 // PBI INACTIVE
-$routes->get('pbi_nonaktif', 'Dtks\Pbi\Inactive::pbi_nonaktif', ['filter' => 'authfilterdtks']);
+$routes->get('pbi_nonaktif', 'Dtks\Pbi\Inactive::pbi_nonaktif', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
 $routes->post('tb_pbi_nonaktif', 'Dtks\Pbi\Inactive::tb_pbi_nonaktif', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->get('tmbNA', 'Dtks\Pbi\Inactive::formTmbNA', ['filter' => 'authfilterdtks']);
 $routes->post('get_data_pbi', 'Dtks\Pbi\Inactive::get_data_pbi', ['filter' => 'authfilterdtks']);
@@ -371,7 +366,7 @@ $routes->post('updateInactive', 'Dtks\Pbi\Inactive::updateInactive', ['filter' =
 $routes->post('dltInactive', 'Dtks\Pbi\Inactive::hapus', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 // REAKTIVASI PBI
-$routes->group('pbi', ['filter' => ['authfilterdtks', 'globalview']], function ($routes) {
+$routes->group('pbi', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
 
 	$routes->group('reaktivasi', function ($routes) {
 

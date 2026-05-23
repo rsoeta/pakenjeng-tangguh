@@ -85,6 +85,7 @@ class Pages extends BaseController
         $rwUser       = $session->get('level');
         $filterRW     = $this->request->getPost('filterRW') ?? null;
         $wilayahTugas = $session->get('wilayah_tugas');
+
         // Di dalam Dashboard Controller
         $db = \Config\Database::connect();
 
@@ -120,10 +121,9 @@ class Pages extends BaseController
 
         if ($menuPemulihan) {
             // 2. Hitung jumlah KK yang RT/RW nya NULL, Kosong, atau < 3 digit
-            // Kita join dtsen_kk dengan dtsen_rt
             $query = $db->table('dtsen_kk k')
                 ->join('dtsen_rt r', 'k.id_rt = r.id_rt', 'left')
-                ->where('k.deleted_at IS NULL') // 👈 TAMBAHKAN BARIS INI
+                ->where('k.deleted_at IS NULL')
                 ->groupStart()
                 ->where('r.rt', null)
                 ->orWhere('r.rt', '')
@@ -154,34 +154,130 @@ class Pages extends BaseController
             'dataDesil'      => $dataDesil,
             'dd_waktu_start' => $dd_waktu_start ?? null,
             'dd_waktu_end'   => $dd_waktu_end ?? null,
-            'user_login'     => $this->AuthModel->getUserId(), // ✅ ditambahkan kembali
+            'user_login'     => $this->AuthModel->getUserId(),
             'menu_pemulihan' => $menuPemulihan,
             'total_masalah'  => $jumlahBermasalah
         ];
-
-        // dd($data);
 
         // ✅ Set Flashdata untuk notifikasi login
         if (!session()->getFlashdata('login_success')) {
             session()->setFlashdata('login_success', true);
         }
 
-        // 🔹 Tampilkan view dashboard futuristik
-        if (session()->get('status') == 1 && $roleId <= 4) {
+        // 🚀 BUG FIX: Hapus limitasi lama, izinkan Role <= 5 (termasuk tim Auditor PDTT) mengakses Dashboard Utama
+        if (session()->get('status') == 1 && $roleId <= 5) {
             return view('dashboard', $data);
-        } elseif (session()->get('status') == 1 && $roleId == 5) {
-            // 🔸 Mode operator sekolah (contoh tetap)
-            $data = [
-                'title' => 'Data Kartu Indonesia Pintar',
-                'statusRole' => $this->GenModel->getStatusRole(),
-                'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
-                'nama_sekolah' => $this->AuthModel->getSchool()->getResultArray(),
-                'jenjang_sekolah' => $this->GenModel->getSekolahJenjang()->getResultArray(),
-                'kelas_sekolah' => $this->GenModel->getKelas()->getResultArray(),
-            ];
-            return view('dtks/data/kip/home', $data);
         }
+
+        // 🛡️ Fallback pengaman jika sesi aneh atau role > 5 mencoba akses
+        return redirect()->to(base_url('home'))->with('error', 'Akses ditolak atau sesi tidak valid.');
     }
+
+    // public function index()
+    // {
+    //     $session = session();
+    //     $kodeDesa     = $session->get('kode_desa');
+    //     $roleId       = $session->get('role_id');
+    //     $rwUser       = $session->get('level');
+    //     $filterRW     = $this->request->getPost('filterRW') ?? null;
+    //     $wilayahTugas = $session->get('wilayah_tugas');
+    //     // Di dalam Dashboard Controller
+    //     $db = \Config\Database::connect();
+
+    //     $filter = [
+    //         'kode_desa'     => $kodeDesa,
+    //         'rw'            => ($roleId >= 4 ? $rwUser : null),
+    //         'wilayah_tugas' => $wilayahTugas,
+    //     ];
+
+    //     // 🔹 total keluarga (BNBA)
+    //     $totalKK = $this->DtsenKkModel->countVerifiedByUser($roleId, $filter);
+
+    //     // 🔹 total draft (status = 'draft')
+    //     $totalDraft = $this->DtsenDraftModel->countDraftByUser($roleId, $filter);
+
+    //     // 🔹 total submitted (menggunakan query submitted builder)
+    //     $totalSubmitted = $this->DtsenDraftModel->countSubmittedByUser($roleId, $filter);
+
+    //     // 🔹 data desil (kategori kesejahteraan)
+    //     $dataDesil = $this->DtsenSeModel->getDesilByRole($roleId, $filter);
+
+    //     // 🔹 Total Usulan Bansos Bulan Ini
+    //     $totalUsulan = $this->DtsenUsulanBansosModel->countUsulanBansosBulanIni($roleId, $filter);
+
+    //     // 1. Cek apakah fitur pemulihan aktif di tb_menu
+    //     $menuPemulihan = $db->table('tb_menu')
+    //         ->where('tm_url', 'pembaruan-keluarga/pemulihan')
+    //         ->where('tm_status', 1)
+    //         ->get()
+    //         ->getRowArray();
+
+    //     $jumlahBermasalah = 0;
+
+    //     if ($menuPemulihan) {
+    //         // 2. Hitung jumlah KK yang RT/RW nya NULL, Kosong, atau < 3 digit
+    //         // Kita join dtsen_kk dengan dtsen_rt
+    //         $query = $db->table('dtsen_kk k')
+    //             ->join('dtsen_rt r', 'k.id_rt = r.id_rt', 'left')
+    //             ->where('k.deleted_at IS NULL') // 👈 TAMBAHKAN BARIS INI
+    //             ->groupStart()
+    //             ->where('r.rt', null)
+    //             ->orWhere('r.rt', '')
+    //             ->orWhere('r.rw', null)
+    //             ->orWhere('r.rw', '')
+    //             ->orWhere('LENGTH(r.rt) <', 3)
+    //             ->orWhere('LENGTH(r.rw) <', 3)
+    //             ->groupEnd()
+    //             ->countAllResults();
+
+    //         $jumlahBermasalah = $query;
+    //     }
+
+    //     // 🔹 Deadline (optional)
+    //     $deadline = $this->GenModel->getDeadline();
+    //     foreach ($deadline as $d) {
+    //         $dd_waktu_start = date_create($d['dd_waktu_start']);
+    //         $dd_waktu_end = date_create($d['dd_waktu_end']);
+    //     }
+
+    //     // 🔹 Siapkan Data ke View
+    //     $data = [
+    //         'title'          => 'Dashboard',
+    //         'totalKK'        => $totalKK,
+    //         'totalUsulan'    => $totalUsulan,
+    //         'totalDraft'     => $totalDraft,
+    //         'totalSubmitted' => $totalSubmitted,
+    //         'dataDesil'      => $dataDesil,
+    //         'dd_waktu_start' => $dd_waktu_start ?? null,
+    //         'dd_waktu_end'   => $dd_waktu_end ?? null,
+    //         'user_login'     => $this->AuthModel->getUserId(), // ✅ ditambahkan kembali
+    //         'menu_pemulihan' => $menuPemulihan,
+    //         'total_masalah'  => $jumlahBermasalah
+    //     ];
+
+    //     // dd($data);
+
+    //     // ✅ Set Flashdata untuk notifikasi login
+    //     if (!session()->getFlashdata('login_success')) {
+    //         session()->setFlashdata('login_success', true);
+    //     }
+
+    //     // 🔹 Tampilkan view dashboard futuristik
+    //     if (session()->get('status') == 1 && $roleId <= 4) {
+    //         return view('dashboard', $data);
+    //     } elseif (session()->get('status') == 1 && $roleId == 5) {
+    //         // 🔸 Mode operator sekolah (contoh tetap)
+    //         $data = [
+    //             'title' => 'Data Kartu Indonesia Pintar',
+    //             'statusRole' => $this->GenModel->getStatusRole(),
+    //             'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
+    //             'nama_sekolah' => $this->AuthModel->getSchool()->getResultArray(),
+    //             'jenjang_sekolah' => $this->GenModel->getSekolahJenjang()->getResultArray(),
+    //             'kelas_sekolah' => $this->GenModel->getKelas()->getResultArray(),
+    //         ];
+    //         return view('dtks/data/kip/home', $data);
+    //     }
+    // }
 
     public function getNilaiJumlah()
     {

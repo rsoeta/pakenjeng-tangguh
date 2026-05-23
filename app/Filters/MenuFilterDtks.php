@@ -16,40 +16,51 @@ class MenuFilterDtks implements FilterInterface
         }
 
         $MenuModel = new \App\Models\Dtks\MenuModel();
+        $roleId = session()->get('role_id');
 
-        // Ambil segmen modul utama
-        $seg1 = $request->getUri()->getSegment(1); // dtsen
-        $seg2 = $request->getUri()->getSegment(2); // reminder-monitor
-        $module = ($seg1 === 'dtsen') ? $seg2 : $seg1;
+        // Ambil segmen URI
+        $uri = $request->getUri();
+        $seg1 = $uri->getSegment(1);
+        $seg2 = $uri->getTotalSegments() > 1 ? $uri->getSegment(2) : '';
 
-        // Ambil hanya modul utama dari tb_menu
-        $menu = $MenuModel->where('tm_url', $module)->first();
+        // 1️⃣ Coba cari Exact Match (contoh: pembaruan-keluarga/pemulihan)
+        $fullPath = trim($seg1 . '/' . $seg2, '/');
+        $menu = $MenuModel->where('tm_url', $fullPath)->first();
 
-        /**
-         * 🔥 RULE PENTING:
-         * Jika modul TIDAK ada di tb_menu → jangan blokir.
-         * Karena itu biasanya AJAX endpoint dan bukan menu.
-         */
+        // 2️⃣ Jika tidak ada exact match, cari berdasarkan Segmen 1 (atau Segmen 2 jika dtsen)
         if (!$menu) {
-            return; // biarkan lewat
+            $module = ($seg1 === 'dtsen') ? $seg2 : $seg1;
+            $menu = $MenuModel->where('tm_url', $module)->first();
         }
 
-        // Jika menu dimatikan
+        // 3️⃣ Jika MASIH TIDAK ADA di tb_menu (Sapu Jagat / Wildcard Security)
+        if (!$menu) {
+            // 🚨 Daftar prefix URL operasional yang HARAM diakses oleh Role > 4 (Auditor)
+            // Walaupun sub-URL nya tidak terdaftar di tb_menu (seperti /draft, /detail, /tambah)
+            $restrictedPrefixes = [
+                'pembaruan-keluarga',
+                'master-kks',
+                'bansos-kks',
+                'usulan-bansos',
+                'dokumentasi',
+                'dtsen-se'
+            ];
+
+            if (in_array($seg1, $restrictedPrefixes) && $roleId > 4) {
+                return redirect()->to(base_url('lockscreen')); // 🛑 Tendang ke halaman Lockscreen
+            }
+
+            // Jika bukan area terlarang, biarkan lewat (mungkin murni fungsi AJAX endpoint public)
+            return;
+        }
+
+        // Jika menu dimatikan dari database
         if ($menu['tm_status'] == 0) {
             return redirect()->to(base_url('lockscreen'));
         }
 
-        /**
-         * 🔥 Hak akses role:
-         * role_id 1 (Superadmin Kabupaten) → BOLEH
-         * role_id 2 (Admin Kecamatan) → BOLEH
-         * role_id 3 (Admin Desa/Operator) → BOLEH
-         * role_id 4 (Petugas RW/RT) → TIDAK BOLEH
-         *
-         * Artinya:
-         * role_id 4 harus ditolak jika tm_grup_akses < 4
-         */
-        if (session()->get('role_id') > $menu['tm_grup_akses']) {
+        // 4️⃣ Pengecekan hak akses reguler dari tb_menu
+        if ($roleId > $menu['tm_grup_akses']) {
             return redirect()->to(base_url('lockscreen'));
         }
     }

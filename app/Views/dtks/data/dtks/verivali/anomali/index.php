@@ -309,7 +309,7 @@
 <div class="viewmodal" style="display: none;"></div>
 <script>
     $(document).ready(function() {
-        $('body').addClass('sidebar-collapse');
+        // $('body').addClass('sidebar-collapse');
 
         $('.tombolTambah').click(function(e) {
             e.preventDefault();
