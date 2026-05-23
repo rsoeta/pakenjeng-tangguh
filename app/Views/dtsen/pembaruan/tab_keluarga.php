@@ -64,7 +64,7 @@ $disabled = $editable ? '' : 'disabled';
                 <?php if ($editable): ?>
                     <div class="text-end mt-4">
                         <button type="submit" class="btn btn-success rounded-pill px-4">
-                            <i class="fas fa-save me-1"></i> Simpan Perubahan
+                            <i class="fas fa-save me-1"></i> Mulai Pembaruan
                         </button>
                     </div>
                 <?php else: ?>

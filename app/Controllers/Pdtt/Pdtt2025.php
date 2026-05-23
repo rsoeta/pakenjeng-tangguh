@@ -84,7 +84,6 @@ class Pdtt2025 extends BaseController
         }
     }
 
-    // 📊 Fetch DataTables
     public function datatable()
     {
         $request = \Config\Services::request();
@@ -101,31 +100,28 @@ class Pdtt2025 extends BaseController
             'order'             => $request->getPost('order')
         ];
 
-        // 1. Panggil Builder dari Model (Ini sudah berisi Select, Join, Group By, dan Order By)
+        // 1. Ambil Builder dari Model
         $builder = $this->pdttModel->getDatatablesQuery($filters);
 
+        // 2. Clone untuk menghitung total tanpa limit/offset
+        $countBuilder = clone $builder;
+
+        // Menggunakan count() langsung pada hasil query yang di-grouping
+        // Ini cara paling aman di CI4 untuk query kompleks
+        $totalRecords = count($countBuilder->get()->getResultArray());
+
+        // 3. Terapkan limit/offset untuk pagination di builder utama
         $start  = $request->getPost('start');
         $length = $request->getPost('length');
 
-        // =========================================================================
-        // 🚀 BULLETPROOF BUG FIX: Hitung Total Tanpa Merusak Builder Utama CI4
-        // =========================================================================
-        $db = \Config\Database::connect();
-        $countBuilder = clone $builder; // Gandakan builder agar yang asli tidak tersentuh
-
-        // Ambil query SQL mentahnya lalu hitung menggunakan Subquery (Aman dari bug CI4)
-        $sqlCount = $countBuilder->getCompiledSelect(false);
-        $totalRecords = $db->query("SELECT COUNT(*) as total FROM ($sqlCount) a")->getRow()->total;
-
-        // =========================================================================
-        // 2. Eksekusi Builder Utama (Order By dan Group By dipastikan 100% utuh!)
-        // =========================================================================
         if ($length != -1) {
             $builder->limit($length, $start);
         }
 
+        // 4. Eksekusi Query utama
         $query = $builder->get()->getResultArray();
 
+        // ... (sisanya isi $data[] tetap sama)
         $data = [];
         $no = $start + 1;
 
@@ -170,16 +166,22 @@ class Pdtt2025 extends BaseController
 
             $isLengkap = $hasFotoKks && $hasFotoRumah && $hasKepemilikan && $hasKondisi;
 
+            // 🚀 TOMBOL DOWNLOAD HANYA MUNCUL JIKA KEDUA FOTO 'ADA'
+            $downloadBtn = '';
+            if ($hasFotoKks && $hasFotoRumah) {
+                $downloadBtn = '<a href="' . base_url('pdtt/2025/download-images/' . $row['id']) . '" class="btn btn-sm btn-warning text-dark me-1" title="Download Foto"><i class="fas fa-download"></i></a>';
+            }
+
             // 🚀 LOGIKA TOMBOL AKSI BERDASARKAN ROLE & KELENGKAPAN
             if ($session->get('role_id') == 5) {
-                $btnAction = '<span class="badge bg-secondary"><i class="fas fa-eye"></i> Pantau</span>';
+                $btnAction = $downloadBtn . '<span class="badge bg-secondary"><i class="fas fa-eye"></i> Pantau</span>';
             } else {
                 if ($row['status_verifikasi'] === 'Selesai') {
-                    $btnAction = '<button class="btn btn-sm btn-success btn-verifikasi text-nowrap" data-id="' . $row['id'] . '"><i class="fas fa-edit"></i> Edit Verivali</button>';
+                    $btnAction = $downloadBtn . '<button class="btn btn-sm btn-success btn-verifikasi text-nowrap" data-id="' . $row['id'] . '"><i class="fas fa-edit"></i> Edit Verivali</button>';
                 } else if (!$isLengkap) {
                     $btnAction = '<button type="button" class="btn btn-sm btn-secondary btn-locked text-nowrap" title="Groundcheck Belum Lengkap!"><i class="fas fa-lock"></i> Terkunci</button>';
                 } else {
-                    $btnAction = '<button class="btn btn-sm btn-primary btn-verifikasi text-nowrap" data-id="' . $row['id'] . '"><i class="fas fa-search"></i> Verifikasi</button>';
+                    $btnAction = $downloadBtn . '<button class="btn btn-sm btn-primary btn-verifikasi text-nowrap" data-id="' . $row['id'] . '"><i class="fas fa-search"></i> Verifikasi</button>';
                 }
             }
 
@@ -209,125 +211,6 @@ class Pdtt2025 extends BaseController
             'data'            => $data
         ]);
     }
-
-    // // 📊 Fetch DataTables
-    // public function datatable()
-    // {
-    //     $request = \Config\Services::request();
-    //     $session = session();
-
-    //     $filters = [
-    //         'rw'                => $request->getPost('filter_rw'),
-    //         'rt'                => $request->getPost('filter_rt'),
-    //         'status_verifikasi' => $request->getPost('filter_status'),
-    //         'search'            => $request->getPost('search')['value'] ?? '',
-    //         'role_id'           => $session->get('role_id'),
-    //         'wilayah_tugas'     => $session->get('wilayah_tugas'),
-    //         'kode_desa'         => $session->get('kode_desa'),
-    //         'order'             => $request->getPost('order') // 🚀 Tangkap Order dari DataTables
-    //     ];
-
-    //     $builder = $this->pdttModel->getDatatablesQuery($filters);
-
-    //     $start  = $request->getPost('start');
-    //     $length = $request->getPost('length');
-
-    //     // 🚀 BUG FIX DOUBLE: Penghitungan Total Records
-    //     $totalRecords = $builder->countAllResults(false);
-
-    //     // 🛡️ RE-APPLY GROUP BY: Pasang kembali Group By karena CI4 meresetnya saat countAllResults
-    //     $builder->groupBy('p.id');
-
-    //     if ($length != -1) {
-    //         $builder->limit($length, $start);
-    //     }
-    //     $query = $builder->get()->getResultArray();
-
-    //     $data = [];
-    //     $no = $start + 1;
-
-    //     // 🛡️ Fungsi Sensor Masking
-    //     $maskNumber = function ($number, $type) {
-    //         $number = trim($number ?? '');
-    //         if (empty($number) || $number === '-') return esc($number);
-    //         $full = esc($number);
-    //         $len = strlen($full);
-    //         $btnClass = ($type === 'nik') ? 'btnCopyNik' : 'btnCopyNoKK';
-    //         $btnTitle = ($type === 'nik') ? 'Salin NIK' : 'Salin No KK';
-    //         $masked = ($len <= 8) ? $full : substr($full, 0, 8) . str_repeat('*', $len - 8);
-    //         $hoverAttr = ' onmouseenter="this.innerText=\'' . $full . '\'" onmouseleave="this.innerText=\'' . $masked . '\'" ';
-
-    //         return '
-    //         <div class="d-flex justify-content-between align-items-center gap-2">
-    //             <span style="display: none;">' . $full . '</span>
-    //             <span class="text-primary fw-bold text-nowrap" style="cursor:pointer;"' . $hoverAttr . '>' . $masked . '</span>
-    //             <button type="button" class="btn btn-outline-secondary btn-xs ' . $btnClass . ' py-0 px-1" data-value="' . $full . '" title="' . $btnTitle . '">
-    //                 <i class="fas fa-copy"></i>
-    //             </button>
-    //         </div>';
-    //     };
-
-    //     foreach ($query as $row) {
-    //         $aset = json_decode($row['kepemilikan_aset'] ?? '{}', true);
-
-    //         $badgeStatus = ($row['status_verifikasi'] === 'Selesai')
-    //             ? '<span class="badge bg-success">Selesai</span>' : '<span class="badge bg-warning text-dark">Pending</span>';
-
-    //         // 🚀 CEK KELENGKAPAN GROUNDCHECK (4 Pilar)
-    //         $fotoKksVal = !empty($row['foto_kepemilikan']) ? $row['foto_kepemilikan'] : ($row['foto_kks'] ?? '');
-    //         $hasFotoKks = (!empty($fotoKksVal) && $fotoKksVal !== '-' && strpos($fotoKksVal, 'noimage') === false);
-    //         $fotoKks = $hasFotoKks ? '<span class="badge bg-success"><i class="fas fa-check"></i> Ada</span>' : '<span class="badge bg-danger">Kosong</span>';
-
-    //         $fotoRumahVal = $row['foto_rumah'] ?? '';
-    //         $hasFotoRumah = (!empty($fotoRumahVal) && $fotoRumahVal !== '-' && strpos($fotoRumahVal, 'noimage') === false);
-    //         $fotoRumah = $hasFotoRumah ? '<span class="badge bg-success"><i class="fas fa-check"></i> Ada</span>' : '<span class="badge bg-danger">Kosong</span>';
-
-    //         $hasKepemilikan = (!empty($row['kepemilikan_rumah']) && $row['kepemilikan_rumah'] !== '-');
-    //         $hasKondisi = (!empty($row['kondisi_rumah']) && $row['kondisi_rumah'] !== '-');
-
-    //         $isLengkap = $hasFotoKks && $hasFotoRumah && $hasKepemilikan && $hasKondisi;
-
-    //         // 🚀 LOGIKA TOMBOL AKSI BERDASARKAN ROLE & KELENGKAPAN
-    //         if ($session->get('role_id') == 5) {
-    //             // Role 5 (Auditor) hanya melihat
-    //             $btnAction = '<span class="badge bg-secondary"><i class="fas fa-eye"></i> Pantau</span>';
-    //         } else {
-    //             if ($row['status_verifikasi'] === 'Selesai') {
-    //                 $btnAction = '<button class="btn btn-sm btn-success btn-verifikasi text-nowrap" data-id="' . $row['id'] . '"><i class="fas fa-edit"></i> Edit Verivali</button>';
-    //             } else if (!$isLengkap) {
-    //                 // Kunci tombol jika Groundcheck belum lengkap
-    //                 $btnAction = '<button type="button" class="btn btn-sm btn-secondary btn-locked text-nowrap" title="Groundcheck Belum Lengkap!"><i class="fas fa-lock"></i> Terkunci</button>';
-    //             } else {
-    //                 $btnAction = '<button class="btn btn-sm btn-primary btn-verifikasi text-nowrap" data-id="' . $row['id'] . '"><i class="fas fa-search"></i> Verifikasi</button>';
-    //             }
-    //         }
-
-    //         $data[] = [
-    //             $no++,
-    //             esc($row['nama_pengurus']),
-    //             $maskNumber($row['nik'], 'nik'),
-    //             $maskNumber($row['no_kk'], 'nokk'),
-    //             esc($row['alamat']) . ' RT ' . esc($row['rt']) . ' RW ' . esc($row['rw']),
-    //             esc($row['keterangan']),
-    //             $fotoKks,
-    //             esc($row['kepemilikan_rumah'] ?? '-'),
-    //             esc($row['kondisi_rumah'] ?? '-'),
-    //             $fotoRumah,
-    //             esc($aset['mobil'] ?? 0),
-    //             esc($aset['sepeda_motor'] ?? 0),
-    //             esc($row['disabilitas_keluarga'] ?? '-'),
-    //             $badgeStatus,
-    //             $btnAction
-    //         ];
-    //     }
-
-    //     return $this->response->setJSON([
-    //         'draw'            => $request->getPost('draw'),
-    //         'recordsTotal'    => $totalRecords,
-    //         'recordsFiltered' => $totalRecords,
-    //         'data'            => $data
-    //     ]);
-    // }
 
     // 🚀 EKSPOR EXCEL (Tugas Role 5)
     public function exportExcel()
@@ -617,6 +500,155 @@ class Pdtt2025 extends BaseController
         } catch (\Throwable $e) {
             log_message('error', '[PDTT Save] ' . $e->getMessage());
             return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menyimpan: ' . $e->getMessage()]);
+        }
+    }
+
+    public function exportImages()
+    {
+        $roleId = session()->get('role_id');
+        if ($roleId > 5) return redirect()->back()->with('error', 'Akses ditolak.');
+
+        $dataPdtt = $this->pdttModel->getDatatablesQuery([
+            'role_id' => $roleId,
+            'wilayah_tugas' => session()->get('wilayah_tugas')
+        ])->get()->getResultArray();
+
+        // 🚀 BUG FIX: Pastikan folder writable/temp ada
+        $tempDir = WRITEPATH . 'temp';
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0777, true);
+        }
+
+        $zip = new \ZipArchive();
+        $zipName = 'Foto_PDTT_' . date('Ymd_His') . '.zip';
+        $zipPath = $tempDir . DIRECTORY_SEPARATOR . $zipName;
+
+        // 🚀 BUG FIX: Tambahkan flag OVERWRITE agar tidak error jika file sudah ada
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== TRUE) {
+            log_message('error', 'Gagal membuka/membuat file ZIP di: ' . $zipPath);
+            return "Gagal membuat ZIP. Pastikan folder writable/temp ada dan bisa ditulis (writable).";
+        }
+
+        foreach ($dataPdtt as $row) {
+            // Bersihkan nama untuk nama file agar tidak error di Windows
+            $nama = preg_replace('/[^a-zA-Z0-9]/', '_', $row['nama_pengurus']);
+            $nik  = trim($row['nik']);
+
+            // 1. Foto KKS
+            $pathKks = !empty($row['foto_kepemilikan']) ? $row['foto_kepemilikan'] : ($row['foto_kks'] ?? '');
+            $fullPathKks = ROOTPATH . 'public/' . ltrim($pathKks, '/'); // ltrim agar path tidak double slash
+
+            if (!empty($pathKks) && file_exists($fullPathKks)) {
+                $zip->addFile($fullPathKks, "KKS/{$nik}_{$nama}_KKS.jpg");
+            }
+
+            // 2. Foto Rumah
+            $pathRumah = $row['foto_rumah'] ?? '';
+            $fullPathRumah = ROOTPATH . 'public/' . ltrim($pathRumah, '/');
+
+            if (!empty($pathRumah) && file_exists($fullPathRumah)) {
+                $zip->addFile($fullPathRumah, "RUMAH/{$nik}_{$nama}_RUMAH.jpg");
+            }
+        }
+        $zip->close();
+
+        // 🚀 Cek file ada sebelum download
+        if (file_exists($zipPath)) {
+            return $this->response->download($zipPath, null)->setFileName($zipName);
+        } else {
+            return "Gagal membuat ZIP: Tidak ada data/foto yang ditemukan.";
+        }
+    }
+
+    public function downloadImagesPerKpm($id)
+    {
+        $session = session();
+
+        // 🚀 BUG FIX: Gunakan getDatatablesQuery agar join (foto_rumah, foto_kks) ikut terbawa!
+        $filters = [
+            'role_id'       => $session->get('role_id'),
+            'wilayah_tugas' => $session->get('wilayah_tugas'),
+            'kode_desa'     => $session->get('kode_desa')
+        ];
+
+        // Ambil data menggunakan Builder yang sudah ada Join-nya
+        $row = $this->pdttModel->getDatatablesQuery($filters)->where('p.id', $id)->get()->getRowArray();
+
+        if (!$row) return "Data tidak ditemukan atau Anda tidak memiliki akses ke data ini.";
+
+        $nama = preg_replace('/[^a-zA-Z0-9]/', '_', $row['nama_pengurus']);
+        $nik  = trim($row['nik']);
+
+        $tempDir = WRITEPATH . 'temp' . DIRECTORY_SEPARATOR;
+        if (!is_dir($tempDir)) mkdir($tempDir, 0777, true);
+
+        $zipName = "Foto_{$nik}_{$nama}.zip";
+        $zipPath = $tempDir . $zipName;
+
+        $zip = new \ZipArchive();
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== TRUE) {
+            return "Gagal membuat antrian ZIP.";
+        }
+
+        $fileTersimpan = 0;
+
+        // 1. Ambil Foto KKS (Lokal atau Eksternal/Google Drive)
+        $kksPath = !empty($row['foto_kepemilikan']) ? $row['foto_kepemilikan'] : ($row['foto_kks'] ?? '');
+
+        if (!empty($kksPath) && $kksPath !== '-' && strpos($kksPath, 'noimage') === false) {
+            if (filter_var($kksPath, FILTER_VALIDATE_URL)) {
+
+                // 🚀 Trik Cerdas: Convert Link G-Drive Viewer menjadi Link Direct Download
+                if (strpos($kksPath, 'drive.google.com') !== false) {
+                    preg_match('/\/d\/([a-zA-Z0-9_-]+)/', $kksPath, $matches);
+                    if (!empty($matches[1])) {
+                        $kksPath = 'https://drive.google.com/uc?id=' . $matches[1] . '&export=download';
+                    }
+                }
+
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $kksPath);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                $imgData = curl_exec($ch);
+                curl_close($ch);
+
+                if ($imgData) {
+                    $zip->addFromString("KKS_{$nik}.jpg", $imgData);
+                    $fileTersimpan++;
+                }
+            } else {
+                // 🚀 FCPATH lebih aman untuk mendeteksi folder public di CI4
+                $fullPathKks = FCPATH . ltrim($kksPath, '/');
+                if (!file_exists($fullPathKks)) $fullPathKks = ROOTPATH . 'public/' . ltrim($kksPath, '/');
+
+                if (file_exists($fullPathKks)) {
+                    $zip->addFile($fullPathKks, "KKS_{$nik}.jpg");
+                    $fileTersimpan++;
+                }
+            }
+        }
+
+        // 2. Ambil Foto Rumah (Lokal)
+        $rumahPath = $row['foto_rumah'] ?? '';
+        if (!empty($rumahPath) && $rumahPath !== '-' && strpos($rumahPath, 'noimage') === false) {
+            $fullPathRumah = FCPATH . ltrim($rumahPath, '/');
+            if (!file_exists($fullPathRumah)) $fullPathRumah = ROOTPATH . 'public/' . ltrim($rumahPath, '/');
+
+            if (file_exists($fullPathRumah)) {
+                $zip->addFile($fullPathRumah, "RUMAH_{$nik}.jpg");
+                $fileTersimpan++;
+            }
+        }
+
+        $zip->close();
+
+        // 🚀 Proteksi: Pastikan ZIP terbuat
+        if ($fileTersimpan > 0 && file_exists($zipPath)) {
+            return $this->response->download($zipPath, null)->setFileName($zipName);
+        } else {
+            return "Gagal mengunduh: File foto fisik tidak ditemukan di Server maupun Google Drive.";
         }
     }
 }

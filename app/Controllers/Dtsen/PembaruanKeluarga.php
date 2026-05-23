@@ -2418,6 +2418,18 @@ class PembaruanKeluarga extends BaseController
             ]);
 
             // =======================================================
+            // 🚀 SINKRONISASI PDTT 2025 (Set Selesai saat Apply)
+            // =======================================================
+            // Kita update berdasarkan No KK yang sedang di-apply
+            // $this->db->table('dtsen_pdtt_2025')
+            // ->where('no_kk', $kkUpdate['no_kk'])
+            // ->update([
+            //     'status_verifikasi' => 'Selesai',
+            //     'verified_at'       => date('Y-m-d H:i:s'),
+            //     'verified_by'       => $userId
+            // ]);
+
+            // =======================================================
             // Commit transaction dulu — setelah commit, kirim WhatsApp
             // =======================================================
             $this->db->transCommit();

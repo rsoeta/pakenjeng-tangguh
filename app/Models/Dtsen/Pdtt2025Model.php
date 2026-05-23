@@ -46,14 +46,14 @@ class Pdtt2025Model extends Model
                 p.*, 
                 kks.foto_kks,
                 kks.foto_kepemilikan,
+                k.foto_rumah,
                 r.kepemilikan_rumah,
-                r.foto_rumah,
                 se.kepemilikan_aset,
                 GROUP_CONCAT(DISTINCT kam.label SEPARATOR ', ') as kondisi_rumah,
                 GROUP_CONCAT(DISTINCT a.disabilitas SEPARATOR ', ') as disabilitas_keluarga
             ")
-            // ... (sisanya tetap sama)
             ->join('dtsen_kk k', 'k.no_kk = p.no_kk AND k.deleted_at IS NULL', 'left')
+            // ... (lanjutkan join seperti biasa)
             ->join('dtsen_art a', 'a.id_kk = k.id_kk AND a.deleted_at IS NULL', 'left')
             ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
             ->join('dtsen_se se', 'se.id_kk = k.id_kk', 'left')

@@ -20,9 +20,9 @@ $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultController('Landing');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
-$routes->set404Override(function () {
-	return view('maintenance2');
-});
+// $routes->set404Override(function () {
+// 	return view('maintenance2');
+// });
 $routes->setAutoRoute(true);
 $routes->setAutoRoute(false);
 
@@ -288,6 +288,8 @@ $routes->group('pdtt', ['filter' => ['authfilterdtks', 'globalview', 'menufilter
 	$routes->post('2025/datatable', 'Pdtt\Pdtt2025::datatable');
 	$routes->post('2025/import-excel', 'Pdtt\Pdtt2025::importExcel');
 	$routes->get('2025/export-excel', 'Pdtt\Pdtt2025::exportExcel');
+	$routes->get('2025/export-images', 'Pdtt\Pdtt2025::exportImages');
+	$routes->get('2025/download-images/(:num)', 'Pdtt\Pdtt2025::downloadImagesPerKpm/$1');
 
 	// API untuk Form Verifikasi
 	$routes->get('2025/get-detail/(:num)', 'Pdtt\Pdtt2025::getDetail/$1');
