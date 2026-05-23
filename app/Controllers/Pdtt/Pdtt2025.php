@@ -110,30 +110,67 @@ class Pdtt2025 extends BaseController
         $data = [];
         $no = $start + 1;
 
+        // 🛡️ Fungsi Sensor Masking
+        $maskNumber = function ($number, $type) {
+            $number = trim($number ?? '');
+            if (empty($number) || $number === '-') return esc($number);
+            $full = esc($number);
+            $len = strlen($full);
+            $btnClass = ($type === 'nik') ? 'btnCopyNik' : 'btnCopyNoKK';
+            $btnTitle = ($type === 'nik') ? 'Salin NIK' : 'Salin No KK';
+            $masked = ($len <= 8) ? $full : substr($full, 0, 8) . str_repeat('*', $len - 8);
+            $hoverAttr = ' onmouseenter="this.innerText=\'' . $full . '\'" onmouseleave="this.innerText=\'' . $masked . '\'" ';
+
+            return '
+            <div class="d-flex justify-content-between align-items-center gap-2">
+                <span style="display: none;">' . $full . '</span>
+                <span class="text-primary fw-bold text-nowrap" style="cursor:pointer;"' . $hoverAttr . '>' . $masked . '</span>
+                <button type="button" class="btn btn-outline-secondary btn-xs ' . $btnClass . ' py-0 px-1" data-value="' . $full . '" title="' . $btnTitle . '">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>';
+        };
+
         foreach ($query as $row) {
             $aset = json_decode($row['kepemilikan_aset'] ?? '{}', true);
 
             $badgeStatus = ($row['status_verifikasi'] === 'Selesai')
                 ? '<span class="badge bg-success">Selesai</span>' : '<span class="badge bg-warning text-dark">Pending</span>';
 
-            $btnAction = '<button class="btn btn-sm btn-primary btn-verifikasi text-nowrap" data-id="' . $row['id'] . '"><i class="fas fa-search"></i> Verifikasi</button>';
-
-            // 🚀 BUG FIX FOTO KKS: Cek foto_kepemilikan sebagai prioritas utama
+            // 🚀 CEK KELENGKAPAN GROUNDCHECK (4 Pilar)
             $fotoKksVal = !empty($row['foto_kepemilikan']) ? $row['foto_kepemilikan'] : ($row['foto_kks'] ?? '');
-
-            $fotoKks = (!empty($fotoKksVal) && $fotoKksVal !== '-' && strpos($fotoKksVal, 'noimage') === false)
-                ? '<span class="badge bg-success"><i class="fas fa-check"></i> Ada</span>'
-                : '<span class="badge bg-danger">Kosong</span>';
+            $hasFotoKks = (!empty($fotoKksVal) && $fotoKksVal !== '-' && strpos($fotoKksVal, 'noimage') === false);
+            $fotoKks = $hasFotoKks ? '<span class="badge bg-success"><i class="fas fa-check"></i> Ada</span>' : '<span class="badge bg-danger">Kosong</span>';
 
             $fotoRumahVal = $row['foto_rumah'] ?? '';
-            $fotoRumah = (!empty($fotoRumahVal) && $fotoRumahVal !== '-' && strpos($fotoRumahVal, 'noimage') === false)
-                ? '<span class="badge bg-success"><i class="fas fa-check"></i> Ada</span>' : '<span class="badge bg-danger">Kosong</span>';
+            $hasFotoRumah = (!empty($fotoRumahVal) && $fotoRumahVal !== '-' && strpos($fotoRumahVal, 'noimage') === false);
+            $fotoRumah = $hasFotoRumah ? '<span class="badge bg-success"><i class="fas fa-check"></i> Ada</span>' : '<span class="badge bg-danger">Kosong</span>';
+
+            $hasKepemilikan = (!empty($row['kepemilikan_rumah']) && $row['kepemilikan_rumah'] !== '-');
+            $hasKondisi = (!empty($row['kondisi_rumah']) && $row['kondisi_rumah'] !== '-');
+
+            $isLengkap = $hasFotoKks && $hasFotoRumah && $hasKepemilikan && $hasKondisi;
+
+            // 🚀 LOGIKA TOMBOL AKSI BERDASARKAN ROLE & KELENGKAPAN
+            if ($session->get('role_id') == 5) {
+                // Role 5 (Auditor) hanya melihat
+                $btnAction = '<span class="badge bg-secondary"><i class="fas fa-eye"></i> Pantau</span>';
+            } else {
+                if ($row['status_verifikasi'] === 'Selesai') {
+                    $btnAction = '<button class="btn btn-sm btn-success btn-verifikasi text-nowrap" data-id="' . $row['id'] . '"><i class="fas fa-edit"></i> Edit Verivali</button>';
+                } else if (!$isLengkap) {
+                    // Kunci tombol jika Groundcheck belum lengkap
+                    $btnAction = '<button type="button" class="btn btn-sm btn-secondary btn-locked text-nowrap" title="Groundcheck Belum Lengkap!"><i class="fas fa-lock"></i> Terkunci</button>';
+                } else {
+                    $btnAction = '<button class="btn btn-sm btn-primary btn-verifikasi text-nowrap" data-id="' . $row['id'] . '"><i class="fas fa-search"></i> Verifikasi</button>';
+                }
+            }
 
             $data[] = [
                 $no++,
                 esc($row['nama_pengurus']),
-                esc($row['nik']),
-                esc($row['no_kk']),
+                $maskNumber($row['nik'], 'nik'),
+                $maskNumber($row['no_kk'], 'nokk'),
                 esc($row['alamat']) . ' RT ' . esc($row['rt']) . ' RW ' . esc($row['rw']),
                 esc($row['keterangan']),
                 $fotoKks,
@@ -154,6 +191,116 @@ class Pdtt2025 extends BaseController
             'recordsFiltered' => $totalRecords,
             'data'            => $data
         ]);
+    }
+
+    // 🚀 EKSPOR EXCEL (Tugas Role 5)
+    public function exportExcel()
+    {
+        $session = session();
+        $roleId = $session->get('role_id');
+
+        // Hanya Admin (1,2,3) dan Auditor (5) yang boleh ekspor
+        if ($roleId == 4) {
+            return redirect()->back()->with('error', 'Petugas Entri tidak diizinkan mengekspor data.');
+        }
+
+        // Ambil data sesuai wilayah tugas / kode desa
+        $filters = [
+            'role_id'       => $roleId,
+            'wilayah_tugas' => $session->get('wilayah_tugas'),
+            'kode_desa'     => $session->get('kode_desa'),
+        ];
+
+        // Tarik semua data tanpa limit DataTables
+        $builder = $this->pdttModel->getDatatablesQuery($filters);
+        $dataPdtt = $builder->get()->getResultArray();
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Header sesuai format pusat
+        $headers = [
+            'A' => 'NIK_MASK',
+            'B' => 'NOKK_MASK',
+            'C' => 'NOREKENING_MASK',
+            'D' => 'Nama_Pengurus',
+            'E' => 'Lembaga_Penyalur',
+            'F' => 'KODE_WILAYAH',
+            'G' => 'PROV',
+            'H' => 'KAB',
+            'I' => 'KEC',
+            'J' => 'KEL',
+            'K' => 'ALAMAT',
+            'L' => 'RT',
+            'M' => 'RW',
+            'N' => 'KETERANGAN',
+            'O' => 'Kesesuaian',
+            'P' => 'Penjelasan',
+            'Q' => 'Foto Listrik',
+            'R' => 'Foto KKS',
+            'S' => 'Kepemilikan Rumah',
+            'T' => 'Kondisi Rumah',
+            'U' => 'Foto Rumah',
+            'V' => 'Pekerjaan',
+            'W' => 'Jenis Usaha',
+            'X' => 'Jumlah Penghasilan',
+            'Y' => 'Foto Slip Gaji',
+            'Z' => 'Jumlah Mobil',
+            'AA' => 'Jumlah Motor',
+            'AB' => 'Jenis Disabilitas'
+        ];
+
+        foreach ($headers as $col => $title) {
+            $sheet->setCellValue($col . '1', $title);
+            $sheet->getStyle($col . '1')->getFont()->setBold(true);
+        }
+
+        $rowNum = 2;
+        foreach ($dataPdtt as $row) {
+            $aset = json_decode($row['kepemilikan_aset'] ?? '{}', true);
+            $fotoKksVal = !empty($row['foto_kepemilikan']) ? $row['foto_kepemilikan'] : ($row['foto_kks'] ?? '');
+
+            // Data string diset eksplisit agar 0 di depan tidak hilang
+            $sheet->setCellValueExplicit('A' . $rowNum, trim($row['nik']), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('B' . $rowNum, trim($row['no_kk']), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('C' . $rowNum, trim($row['no_rekening']), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('D' . $rowNum, trim($row['nama_pengurus']));
+            $sheet->setCellValue('E' . $rowNum, trim($row['lembaga_penyalur']));
+            $sheet->setCellValueExplicit('F' . $rowNum, trim($row['kode_wilayah']), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('G' . $rowNum, trim($row['prov']));
+            $sheet->setCellValue('H' . $rowNum, trim($row['kab']));
+            $sheet->setCellValue('I' . $rowNum, trim($row['kec']));
+            $sheet->setCellValue('J' . $rowNum, trim($row['kel']));
+            $sheet->setCellValue('K' . $rowNum, trim($row['alamat']));
+            $sheet->setCellValueExplicit('L' . $rowNum, trim($row['rt']), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit('M' . $rowNum, trim($row['rw']), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('N' . $rowNum, trim($row['keterangan']));
+            $sheet->setCellValue('O' . $rowNum, trim($row['kesesuaian']));
+            $sheet->setCellValue('P' . $rowNum, trim($row['penjelasan']));
+            $sheet->setCellValue('Q' . $rowNum, !empty($row['foto_listrik']) ? 'Ada' : 'Kosong');
+            $sheet->setCellValue('R' . $rowNum, (!empty($fotoKksVal) && strpos($fotoKksVal, 'noimage') === false) ? 'Ada' : 'Kosong');
+            $sheet->setCellValue('S' . $rowNum, trim($row['kepemilikan_rumah'] ?? '-'));
+            $sheet->setCellValue('T' . $rowNum, trim($row['kondisi_rumah'] ?? '-'));
+            $sheet->setCellValue('U' . $rowNum, (!empty($row['foto_rumah']) && strpos($row['foto_rumah'], 'noimage') === false) ? 'Ada' : 'Kosong');
+            $sheet->setCellValue('V' . $rowNum, trim($row['pekerjaan'] ?? '-'));
+            $sheet->setCellValue('W' . $rowNum, trim($row['jenis_usaha'] ?? '-'));
+            $sheet->setCellValue('X' . $rowNum, $row['jumlah_penghasilan'] > 0 ? $row['jumlah_penghasilan'] : '-');
+            $sheet->setCellValue('Y' . $rowNum, !empty($row['foto_slip_gaji']) ? 'Ada' : 'Kosong');
+            $sheet->setCellValue('Z' . $rowNum, $aset['mobil'] ?? 0);
+            $sheet->setCellValue('AA' . $rowNum, $aset['sepeda_motor'] ?? 0);
+            $sheet->setCellValue('AB' . $rowNum, trim($row['disabilitas_keluarga'] ?? '-'));
+
+            $rowNum++;
+        }
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $filename = 'Hasil_Verivali_PDTT_2025_' . date('Ymd_His') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
+        exit;
     }
 
     // 🚀 API Ambil Filter RW Bertingkat & Parsing Wilayah Tugas

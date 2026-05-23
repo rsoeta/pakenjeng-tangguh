@@ -287,6 +287,7 @@ $routes->group('pdtt', ['filter' => ['authfilterdtks', 'globalview', 'menufilter
 	$routes->get('2025', 'Pdtt\Pdtt2025::index');
 	$routes->post('2025/datatable', 'Pdtt\Pdtt2025::datatable');
 	$routes->post('2025/import-excel', 'Pdtt\Pdtt2025::importExcel');
+	$routes->get('2025/export-excel', 'Pdtt\Pdtt2025::exportExcel');
 
 	// API untuk Form Verifikasi
 	$routes->get('2025/get-detail/(:num)', 'Pdtt\Pdtt2025::getDetail/$1');

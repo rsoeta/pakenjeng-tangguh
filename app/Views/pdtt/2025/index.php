@@ -4,11 +4,19 @@
 <div class="content-wrapper mt-3">
     <div class="d-flex justify-content-between align-items-center mb-3 px-3">
         <h4 class="fw-bold mb-0"><i class="fas fa-shield-alt text-primary"></i> Verivali PDTT 2025</h4>
-        <?php if ($editable): ?>
-            <button class="btn btn-success btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#modalImport">
-                <i class="fas fa-file-excel"></i> Import Data
-            </button>
-        <?php endif; ?>
+        <div>
+            <?php if ($roleId == 5 || $roleId <= 3): ?>
+                <a href="<?= base_url('pdtt/2025/export-excel') ?>" class="btn btn-primary btn-sm shadow-sm me-1">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </a>
+            <?php endif; ?>
+
+            <?php if ($editable): ?>
+                <button class="btn btn-success btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#modalImport">
+                    <i class="fas fa-upload"></i> Import Data
+                </button>
+            <?php endif; ?>
+        </div>
     </div>
 
     <section class="content px-3">
@@ -220,6 +228,20 @@
                 //     className: 'text-center'
                 // }
             ]
+        });
+
+        // 🚀 EVENT: Klik Tombol Terkunci (Groundcheck Belum Lengkap)
+        $(document).on('click', '.btn-locked', function() {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Terkunci! 🔒',
+                text: 'Selesaikan Groundcheck di menu Pembaruan Keluarga terlebih dahulu. Pastikan Foto KKS, Foto Rumah, Kepemilikan, dan Kondisi Rumah telah terisi!',
+                width: '320px', // Perkecil untuk kenyamanan mobile user
+                customClass: {
+                    title: 'fs-5',
+                    content: 'fs-6'
+                }
+            });
         });
 
         // 📌 Filter Ulang
