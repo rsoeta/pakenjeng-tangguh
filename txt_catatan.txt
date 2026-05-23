@@ -1522,14 +1522,14 @@ INSERT INTO `dtsen_jenis_kegiatan` (`nama_kegiatan`) VALUES
 ('Verifikasi Kemiskinan'),
 ('Dokumentasi Bansos');
 
-// =======================================================
-// 🟩 Menu Timeline Dokumentasi
-// =======================================================
+=======================================================
+🟩 Menu Timeline Dokumentasi
+=======================================================
 INSERT INTO `tb_menu` (`tm_nama`, `tm_class`, `tm_url`, `tm_icon`, `tm_parent_id`, `tm_status`, `tm_grup_akses`, `tm_urutan`)  
 VALUES ('Timeline Dokumentasi', '', 'dokumentasi/timeline', 'fas fa-fw fa-history', 0, 1, 4, 97);
 
 ================================================================================================================================================================
-Menu PDTT (Pemeriksaan Dengan Tujuan Tertentu) - Tahun 2025
+🟩 Menu PDTT (Pemeriksaan Dengan Tujuan Tertentu) - Tahun 2025
 =================================================================================================================================================================
 alur, ubah menu PDTT sebelumnya menjadi 2022.
 
@@ -1542,3 +1542,43 @@ VALUES ('2025', '', 'pdtt/2025', 'fas fa-shield-alt', 11, 1, 5, 0);
 ubah tb_roles.nm_role dengan id_role 5 menjadi Client dan
 INSERT INTO `tb_roles` (`id_role`, `nm_role`)  
 VALUES (99,'Guest');
+
+CREATE TABLE `dtsen_pdtt_2025` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  
+  -- DATA DARI EXCEL PUSAT --
+  `nik` varchar(16) DEFAULT NULL,
+  `no_kk` varchar(16) DEFAULT NULL,
+  `no_rekening` varchar(50) DEFAULT NULL,
+  `nama_pengurus` varchar(150) DEFAULT NULL,
+  `lembaga_penyalur` varchar(50) DEFAULT NULL,
+  `kode_wilayah` varchar(20) DEFAULT NULL,
+  `prov` varchar(50) DEFAULT NULL,
+  `kab` varchar(50) DEFAULT NULL,
+  `kec` varchar(50) DEFAULT NULL,
+  `kel` varchar(50) DEFAULT NULL,
+  `alamat` text DEFAULT NULL,
+  `rt` varchar(5) DEFAULT NULL,
+  `rw` varchar(5) DEFAULT NULL,
+  `keterangan` varchar(100) DEFAULT NULL COMMENT 'Temuan: UMK, PLN, ASN, dll',
+  
+  -- HASIL VERIFIKASI (INPUT PETUGAS) --
+  `kesesuaian` enum('Sesuai','Tidak Sesuai') DEFAULT NULL,
+  `penjelasan` text DEFAULT NULL,
+  `foto_listrik` varchar(255) DEFAULT NULL,
+  `pekerjaan` varchar(100) DEFAULT NULL,
+  `jenis_usaha` varchar(150) DEFAULT NULL,
+  `jumlah_penghasilan` decimal(15,2) DEFAULT NULL,
+  `foto_slip_gaji` varchar(255) DEFAULT NULL,
+  
+  -- STATUS PROGRESS --
+  `status_verifikasi` enum('Pending','Selesai') DEFAULT 'Pending',
+  `verified_by` bigint(20) DEFAULT NULL,
+  `verified_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_nik` (`nik`),
+  KEY `idx_no_kk` (`no_kk`),
+  KEY `idx_status` (`status_verifikasi`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

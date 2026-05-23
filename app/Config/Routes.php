@@ -282,6 +282,21 @@ $routes->group('dtsen/kemiskinan', ['filter' => ['authfilterdtks', 'menufilterdt
 	$routes->post('rollback', 'Dtsen\PenentuanKemiskinan::rollback');
 });
 
+// === PDTT 2025 ===
+$routes->group('pdtt', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
+	$routes->get('2025', 'Pdtt\Pdtt2025::index');
+	$routes->post('2025/datatable', 'Pdtt\Pdtt2025::datatable');
+	$routes->post('2025/import-excel', 'Pdtt\Pdtt2025::importExcel');
+
+	// API untuk Form Verifikasi
+	$routes->get('2025/get-detail/(:num)', 'Pdtt\Pdtt2025::getDetail/$1');
+	$routes->post('2025/save-verifikasi', 'Pdtt\Pdtt2025::saveVerifikasi');
+
+	// 🚀 API Filter Bertingkat (Desa -> RW -> RT)
+	$routes->get('2025/get-rw', 'Pdtt\Pdtt2025::getFilterRw');
+	$routes->get('2025/get-rt/(:any)', 'Pdtt\Pdtt2025::getFilterRt/$1');
+});
+
 // public CMS / admin
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => ['authfilterdtks', 'menufilterdtks']], function ($routes) {
 	$routes->get('articles/data', 'ArticleController::data');
