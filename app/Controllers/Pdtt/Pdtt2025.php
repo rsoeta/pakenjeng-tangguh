@@ -98,23 +98,32 @@ class Pdtt2025 extends BaseController
             'role_id'           => $session->get('role_id'),
             'wilayah_tugas'     => $session->get('wilayah_tugas'),
             'kode_desa'         => $session->get('kode_desa'),
-            'order'             => $request->getPost('order') // 🚀 Tangkap Order dari DataTables
+            'order'             => $request->getPost('order')
         ];
 
+        // 1. Panggil Builder dari Model (Ini sudah berisi Select, Join, Group By, dan Order By)
         $builder = $this->pdttModel->getDatatablesQuery($filters);
 
         $start  = $request->getPost('start');
         $length = $request->getPost('length');
 
-        // 🚀 BUG FIX DOUBLE: Penghitungan Total Records
-        $totalRecords = $builder->countAllResults(false);
+        // =========================================================================
+        // 🚀 BULLETPROOF BUG FIX: Hitung Total Tanpa Merusak Builder Utama CI4
+        // =========================================================================
+        $db = \Config\Database::connect();
+        $countBuilder = clone $builder; // Gandakan builder agar yang asli tidak tersentuh
 
-        // 🛡️ RE-APPLY GROUP BY: Pasang kembali Group By karena CI4 meresetnya saat countAllResults
-        $builder->groupBy('p.id');
+        // Ambil query SQL mentahnya lalu hitung menggunakan Subquery (Aman dari bug CI4)
+        $sqlCount = $countBuilder->getCompiledSelect(false);
+        $totalRecords = $db->query("SELECT COUNT(*) as total FROM ($sqlCount) a")->getRow()->total;
 
+        // =========================================================================
+        // 2. Eksekusi Builder Utama (Order By dan Group By dipastikan 100% utuh!)
+        // =========================================================================
         if ($length != -1) {
             $builder->limit($length, $start);
         }
+
         $query = $builder->get()->getResultArray();
 
         $data = [];
@@ -163,13 +172,11 @@ class Pdtt2025 extends BaseController
 
             // 🚀 LOGIKA TOMBOL AKSI BERDASARKAN ROLE & KELENGKAPAN
             if ($session->get('role_id') == 5) {
-                // Role 5 (Auditor) hanya melihat
                 $btnAction = '<span class="badge bg-secondary"><i class="fas fa-eye"></i> Pantau</span>';
             } else {
                 if ($row['status_verifikasi'] === 'Selesai') {
                     $btnAction = '<button class="btn btn-sm btn-success btn-verifikasi text-nowrap" data-id="' . $row['id'] . '"><i class="fas fa-edit"></i> Edit Verivali</button>';
                 } else if (!$isLengkap) {
-                    // Kunci tombol jika Groundcheck belum lengkap
                     $btnAction = '<button type="button" class="btn btn-sm btn-secondary btn-locked text-nowrap" title="Groundcheck Belum Lengkap!"><i class="fas fa-lock"></i> Terkunci</button>';
                 } else {
                     $btnAction = '<button class="btn btn-sm btn-primary btn-verifikasi text-nowrap" data-id="' . $row['id'] . '"><i class="fas fa-search"></i> Verifikasi</button>';
@@ -202,6 +209,125 @@ class Pdtt2025 extends BaseController
             'data'            => $data
         ]);
     }
+
+    // // 📊 Fetch DataTables
+    // public function datatable()
+    // {
+    //     $request = \Config\Services::request();
+    //     $session = session();
+
+    //     $filters = [
+    //         'rw'                => $request->getPost('filter_rw'),
+    //         'rt'                => $request->getPost('filter_rt'),
+    //         'status_verifikasi' => $request->getPost('filter_status'),
+    //         'search'            => $request->getPost('search')['value'] ?? '',
+    //         'role_id'           => $session->get('role_id'),
+    //         'wilayah_tugas'     => $session->get('wilayah_tugas'),
+    //         'kode_desa'         => $session->get('kode_desa'),
+    //         'order'             => $request->getPost('order') // 🚀 Tangkap Order dari DataTables
+    //     ];
+
+    //     $builder = $this->pdttModel->getDatatablesQuery($filters);
+
+    //     $start  = $request->getPost('start');
+    //     $length = $request->getPost('length');
+
+    //     // 🚀 BUG FIX DOUBLE: Penghitungan Total Records
+    //     $totalRecords = $builder->countAllResults(false);
+
+    //     // 🛡️ RE-APPLY GROUP BY: Pasang kembali Group By karena CI4 meresetnya saat countAllResults
+    //     $builder->groupBy('p.id');
+
+    //     if ($length != -1) {
+    //         $builder->limit($length, $start);
+    //     }
+    //     $query = $builder->get()->getResultArray();
+
+    //     $data = [];
+    //     $no = $start + 1;
+
+    //     // 🛡️ Fungsi Sensor Masking
+    //     $maskNumber = function ($number, $type) {
+    //         $number = trim($number ?? '');
+    //         if (empty($number) || $number === '-') return esc($number);
+    //         $full = esc($number);
+    //         $len = strlen($full);
+    //         $btnClass = ($type === 'nik') ? 'btnCopyNik' : 'btnCopyNoKK';
+    //         $btnTitle = ($type === 'nik') ? 'Salin NIK' : 'Salin No KK';
+    //         $masked = ($len <= 8) ? $full : substr($full, 0, 8) . str_repeat('*', $len - 8);
+    //         $hoverAttr = ' onmouseenter="this.innerText=\'' . $full . '\'" onmouseleave="this.innerText=\'' . $masked . '\'" ';
+
+    //         return '
+    //         <div class="d-flex justify-content-between align-items-center gap-2">
+    //             <span style="display: none;">' . $full . '</span>
+    //             <span class="text-primary fw-bold text-nowrap" style="cursor:pointer;"' . $hoverAttr . '>' . $masked . '</span>
+    //             <button type="button" class="btn btn-outline-secondary btn-xs ' . $btnClass . ' py-0 px-1" data-value="' . $full . '" title="' . $btnTitle . '">
+    //                 <i class="fas fa-copy"></i>
+    //             </button>
+    //         </div>';
+    //     };
+
+    //     foreach ($query as $row) {
+    //         $aset = json_decode($row['kepemilikan_aset'] ?? '{}', true);
+
+    //         $badgeStatus = ($row['status_verifikasi'] === 'Selesai')
+    //             ? '<span class="badge bg-success">Selesai</span>' : '<span class="badge bg-warning text-dark">Pending</span>';
+
+    //         // 🚀 CEK KELENGKAPAN GROUNDCHECK (4 Pilar)
+    //         $fotoKksVal = !empty($row['foto_kepemilikan']) ? $row['foto_kepemilikan'] : ($row['foto_kks'] ?? '');
+    //         $hasFotoKks = (!empty($fotoKksVal) && $fotoKksVal !== '-' && strpos($fotoKksVal, 'noimage') === false);
+    //         $fotoKks = $hasFotoKks ? '<span class="badge bg-success"><i class="fas fa-check"></i> Ada</span>' : '<span class="badge bg-danger">Kosong</span>';
+
+    //         $fotoRumahVal = $row['foto_rumah'] ?? '';
+    //         $hasFotoRumah = (!empty($fotoRumahVal) && $fotoRumahVal !== '-' && strpos($fotoRumahVal, 'noimage') === false);
+    //         $fotoRumah = $hasFotoRumah ? '<span class="badge bg-success"><i class="fas fa-check"></i> Ada</span>' : '<span class="badge bg-danger">Kosong</span>';
+
+    //         $hasKepemilikan = (!empty($row['kepemilikan_rumah']) && $row['kepemilikan_rumah'] !== '-');
+    //         $hasKondisi = (!empty($row['kondisi_rumah']) && $row['kondisi_rumah'] !== '-');
+
+    //         $isLengkap = $hasFotoKks && $hasFotoRumah && $hasKepemilikan && $hasKondisi;
+
+    //         // 🚀 LOGIKA TOMBOL AKSI BERDASARKAN ROLE & KELENGKAPAN
+    //         if ($session->get('role_id') == 5) {
+    //             // Role 5 (Auditor) hanya melihat
+    //             $btnAction = '<span class="badge bg-secondary"><i class="fas fa-eye"></i> Pantau</span>';
+    //         } else {
+    //             if ($row['status_verifikasi'] === 'Selesai') {
+    //                 $btnAction = '<button class="btn btn-sm btn-success btn-verifikasi text-nowrap" data-id="' . $row['id'] . '"><i class="fas fa-edit"></i> Edit Verivali</button>';
+    //             } else if (!$isLengkap) {
+    //                 // Kunci tombol jika Groundcheck belum lengkap
+    //                 $btnAction = '<button type="button" class="btn btn-sm btn-secondary btn-locked text-nowrap" title="Groundcheck Belum Lengkap!"><i class="fas fa-lock"></i> Terkunci</button>';
+    //             } else {
+    //                 $btnAction = '<button class="btn btn-sm btn-primary btn-verifikasi text-nowrap" data-id="' . $row['id'] . '"><i class="fas fa-search"></i> Verifikasi</button>';
+    //             }
+    //         }
+
+    //         $data[] = [
+    //             $no++,
+    //             esc($row['nama_pengurus']),
+    //             $maskNumber($row['nik'], 'nik'),
+    //             $maskNumber($row['no_kk'], 'nokk'),
+    //             esc($row['alamat']) . ' RT ' . esc($row['rt']) . ' RW ' . esc($row['rw']),
+    //             esc($row['keterangan']),
+    //             $fotoKks,
+    //             esc($row['kepemilikan_rumah'] ?? '-'),
+    //             esc($row['kondisi_rumah'] ?? '-'),
+    //             $fotoRumah,
+    //             esc($aset['mobil'] ?? 0),
+    //             esc($aset['sepeda_motor'] ?? 0),
+    //             esc($row['disabilitas_keluarga'] ?? '-'),
+    //             $badgeStatus,
+    //             $btnAction
+    //         ];
+    //     }
+
+    //     return $this->response->setJSON([
+    //         'draw'            => $request->getPost('draw'),
+    //         'recordsTotal'    => $totalRecords,
+    //         'recordsFiltered' => $totalRecords,
+    //         'data'            => $data
+    //     ]);
+    // }
 
     // 🚀 EKSPOR EXCEL (Tugas Role 5)
     public function exportExcel()

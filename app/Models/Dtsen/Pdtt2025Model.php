@@ -60,8 +60,9 @@ class Pdtt2025Model extends Model
             ->join('dtsen_master_kks kks', 'kks.nik = p.nik', 'left')
             ->join('dtsen_penentuan_kemiskinan pk', 'pk.dtsen_kk_id = k.id_kk', 'left')
             ->join('dtsen_penentuan_kemiskinan_alasan pka', 'pka.penentuan_id = pk.id', 'left')
+            // ... (Join tetap sama)
             ->join('dtsen_kemiskinan_alasan_master kam', 'kam.id = pka.alasan_id AND kam.kategori = \'Rumah\'', 'left')
-            ->groupBy('p.id');
+            ->groupBy('p.nik'); // 🚀 Ganti p.id dengan p.nik untuk kestabilan Grouping
 
         // =======================================================
         // 🔐 SOP SINDEN: FILTER KODE DESA & WILAYAH TUGAS
@@ -137,53 +138,40 @@ class Pdtt2025Model extends Model
         }
 
         // =======================================================
-        // 🔄 LOGIKA SORTING TINGKAT TINGGI (ORDER BY) DATATABLES
+        // 🔄 LOGIKA SORTING TINGKAT TINGGI
         // =======================================================
         $columnOrder = [
-            null,                  // 0: No
-            'p.nama_pengurus',     // 1: Nama Pengurus
-            'p.nik',               // 2: NIK
-            'p.no_kk',             // 3: No KK
-            'p.alamat',            // 4: Alamat
-            'p.keterangan',        // 5: Temuan
-
-            // 6: Foto KKS (Sort by Ada(1) vs Kosong(0))
+            null,
+            'p.nama_pengurus',
+            'p.nik',
+            'p.no_kk',
+            'p.alamat',
+            'p.keterangan',
             "IF(COALESCE(kks.foto_kepemilikan, kks.foto_kks) != '' AND COALESCE(kks.foto_kepemilikan, kks.foto_kks) NOT LIKE '%noimage%', 1, 0)",
-
-            'r.kepemilikan_rumah', // 7: Kepemilikan Rumah
-            'kondisi_rumah',       // 8: Kondisi Rumah (Alias Group_Concat)
-
-            // 9: Foto Rumah (Sort by Ada(1) vs Kosong(0))
+            'r.kepemilikan_rumah',
+            'kondisi_rumah',
             "IF(r.foto_rumah != '' AND r.foto_rumah NOT LIKE '%noimage%', 1, 0)",
-
-            // 10: Mobil (Sort by Angka Terendah-Tertinggi dari Ekstraksi JSON)
             "CAST(COALESCE(JSON_UNQUOTE(JSON_EXTRACT(se.kepemilikan_aset, '$.mobil')), '0') AS UNSIGNED)",
-
-            // 11: Motor (Sort by Angka Terendah-Tertinggi dari Ekstraksi JSON)
             "CAST(COALESCE(JSON_UNQUOTE(JSON_EXTRACT(se.kepemilikan_aset, '$.sepeda_motor')), '0') AS UNSIGNED)",
-
-            'disabilitas_keluarga', // 12: Disabilitas
-            'p.status_verifikasi',  // 13: Status
-            null                    // 14: Aksi
+            'disabilitas_keluarga',
+            'p.status_verifikasi',
+            null
         ];
+
+        // Reset Order By sebelum menerapkan sort baru agar tidak numpuk
+        $builder->orderBy('');
 
         if (isset($filters['order'])) {
             $orderIdx = $filters['order'][0]['column'];
             $orderDir = $filters['order'][0]['dir'];
-
             if (isset($columnOrder[$orderIdx]) && $columnOrder[$orderIdx] !== null) {
-                // Gunakan escape false agar klausa IF dan JSON_EXTRACT MySQL tidak rusak
                 $builder->orderBy($columnOrder[$orderIdx], $orderDir, false);
             }
         } else {
-            // Default Sorting: Pending di atas, disusul nama abjad
+            // Default Sorting: Pending di atas, lalu Nama
             $builder->orderBy('p.status_verifikasi', 'ASC');
             $builder->orderBy('p.nama_pengurus', 'ASC');
         }
-
-        // 🚀 BUG FIX TAMPIL DOUBLE: Pastikan data selalu memiliki urutan mutlak (ID)
-        // Agar MySQL Limit Pagination tidak melompat-lompat / duplikat baris
-        $builder->orderBy('p.id', 'DESC');
 
         return $builder;
     }
