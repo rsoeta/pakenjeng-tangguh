@@ -564,16 +564,13 @@ class Pdtt2025 extends BaseController
     {
         $session = session();
 
-        // 🚀 BUG FIX: Gunakan getDatatablesQuery agar join (foto_rumah, foto_kks) ikut terbawa!
         $filters = [
             'role_id'       => $session->get('role_id'),
             'wilayah_tugas' => $session->get('wilayah_tugas'),
             'kode_desa'     => $session->get('kode_desa')
         ];
 
-        // Ambil data menggunakan Builder yang sudah ada Join-nya
         $row = $this->pdttModel->getDatatablesQuery($filters)->where('p.id', $id)->get()->getRowArray();
-
         if (!$row) return "Data tidak ditemukan atau Anda tidak memiliki akses ke data ini.";
 
         $nama = preg_replace('/[^a-zA-Z0-9]/', '_', $row['nama_pengurus']);
@@ -592,54 +589,100 @@ class Pdtt2025 extends BaseController
 
         $fileTersimpan = 0;
 
-        // 1. Ambil Foto KKS (Lokal atau Eksternal/Google Drive)
-        $kksPath = !empty($row['foto_kepemilikan']) ? $row['foto_kepemilikan'] : ($row['foto_kks'] ?? '');
+        // =========================================================================
+        // 🚀 FUNGSI HELPER SUPER TANGGUH UNTUK MENARIK GAMBAR DARI MANAPUN
+        // =========================================================================
+        $fetchImage = function ($path) {
+            if (empty($path) || $path === '-' || strpos($path, 'noimage') !== false) return false;
 
-        if (!empty($kksPath) && $kksPath !== '-' && strpos($kksPath, 'noimage') === false) {
-            if (filter_var($kksPath, FILTER_VALIDATE_URL)) {
+            $path = str_replace(base_url(), '', $path);
 
-                // 🚀 Trik Cerdas: Convert Link G-Drive Viewer menjadi Link Direct Download
-                if (strpos($kksPath, 'drive.google.com') !== false) {
-                    preg_match('/\/d\/([a-zA-Z0-9_-]+)/', $kksPath, $matches);
-                    if (!empty($matches[1])) {
-                        $kksPath = 'https://drive.google.com/uc?id=' . $matches[1] . '&export=download';
+            // 1. Jika URL Eksternal (Google Drive / Lainnya)
+            if (filter_var($path, FILTER_VALIDATE_URL)) {
+
+                // 🚀 HACK GOOGLE DRIVE: Gunakan API Thumbnail agar tidak diblokir halaman HTML
+                if (strpos($path, 'drive.google.com') !== false) {
+                    $fileId = '';
+                    // Deteksi ID dari format /d/ID/view
+                    if (preg_match('/\/d\/([a-zA-Z0-9_-]+)/', $path, $matches)) {
+                        $fileId = $matches[1];
+                    }
+                    // Deteksi ID dari format ?id=ID
+                    elseif (preg_match('/id=([a-zA-Z0-9_-]+)/', $path, $matches)) {
+                        $fileId = $matches[1];
+                    }
+
+                    if (!empty($fileId)) {
+                        // sz=w1200 memaksa resolusi tinggi tanpa batas HTML
+                        $path = 'https://drive.google.com/thumbnail?id=' . $fileId . '&sz=w1200';
                     }
                 }
 
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $kksPath);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                $imgData = curl_exec($ch);
-                curl_close($ch);
-
-                if ($imgData) {
-                    $zip->addFromString("KKS_{$nik}.jpg", $imgData);
-                    $fileTersimpan++;
-                }
-            } else {
-                // 🚀 FCPATH lebih aman untuk mendeteksi folder public di CI4
-                $fullPathKks = FCPATH . ltrim($kksPath, '/');
-                if (!file_exists($fullPathKks)) $fullPathKks = ROOTPATH . 'public/' . ltrim($kksPath, '/');
-
-                if (file_exists($fullPathKks)) {
-                    $zip->addFile($fullPathKks, "KKS_{$nik}.jpg");
-                    $fileTersimpan++;
-                }
+                // 3. JURUS PAMUNGKAS: Paksa Tarik via HTTP Localhost (Matikan Sementara)
+                /*
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, base_url($cleanPath));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $data = curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            
+            if ($code == 200 && $data && @getimagesizefromstring($data)) {
+                return ['type' => 'string', 'data' => $data];
             }
+            */
+                return false;
+            }
+
+            // 2. Coba Path Lokal (Fisik Server Laragon)
+            $cleanPath = ltrim($path, '/');
+            $possiblePaths = [
+                FCPATH . $cleanPath,
+                ROOTPATH . 'public' . DIRECTORY_SEPARATOR . $cleanPath,
+                ROOTPATH . $cleanPath
+            ];
+
+            foreach ($possiblePaths as $p) {
+                if (file_exists($p)) return ['type' => 'file', 'data' => $p];
+            }
+
+            // 3. JURUS PAMUNGKAS: Paksa Tarik via HTTP Localhost
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, base_url($cleanPath));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $data = curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            // 🚀 VALIDASI KETAT LOKAL: Pastikan yang diunduh benar-benar gambar
+            if ($code == 200 && $data && @getimagesizefromstring($data)) {
+                return ['type' => 'string', 'data' => $data];
+            }
+            return false;
+        };
+
+        // =========================================================================
+        // EKSEKUSI PENARIKAN GAMBAR
+        // =========================================================================
+
+        // 1. Ambil Foto KKS
+        $kksPath = !empty($row['foto_kepemilikan']) ? $row['foto_kepemilikan'] : ($row['foto_kks'] ?? '');
+        $resKks = $fetchImage($kksPath);
+        if ($resKks) {
+            if ($resKks['type'] == 'string') $zip->addFromString("KKS_{$nik}.jpg", $resKks['data']);
+            else $zip->addFile($resKks['data'], "KKS_{$nik}.jpg");
+            $fileTersimpan++;
         }
 
-        // 2. Ambil Foto Rumah (Lokal)
+        // 2. Ambil Foto Rumah
         $rumahPath = $row['foto_rumah'] ?? '';
-        if (!empty($rumahPath) && $rumahPath !== '-' && strpos($rumahPath, 'noimage') === false) {
-            $fullPathRumah = FCPATH . ltrim($rumahPath, '/');
-            if (!file_exists($fullPathRumah)) $fullPathRumah = ROOTPATH . 'public/' . ltrim($rumahPath, '/');
-
-            if (file_exists($fullPathRumah)) {
-                $zip->addFile($fullPathRumah, "RUMAH_{$nik}.jpg");
-                $fileTersimpan++;
-            }
+        $resRumah = $fetchImage($rumahPath);
+        if ($resRumah) {
+            if ($resRumah['type'] == 'string') $zip->addFromString("RUMAH_{$nik}.jpg", $resRumah['data']);
+            else $zip->addFile($resRumah['data'], "RUMAH_{$nik}.jpg");
+            $fileTersimpan++;
         }
 
         $zip->close();
