@@ -1,72 +1,87 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lockscreen</title>
+  <title>Autentikasi | <?= nameApp(); ?></title>
 
-  <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <!-- Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= base_url('assets'); ?>/plugins/fontawesome-free/css/all.min.css">
-  <!-- Theme style -->
   <link rel="stylesheet" href="<?= base_url('assets'); ?>/dist/css/adminlte.min.css">
-  <link rel="shortcut icon" type="image/x-icon/png" href="<?= base_url('icon-dtks.png'); ?>">
 
+  <style>
+    body {
+      background: #f4f6f9 !important;
+      font-family: 'Ubuntu', sans-serif !important;
+    }
+
+    /* Memastikan wrapper tidak mentok ke kiri-kanan pada mobile */
+    .lockscreen-wrapper {
+      width: 90%;
+      max-width: 400px;
+      margin: 0 auto;
+      padding-top: 10%;
+    }
+
+    .glass-card {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem;
+      /* padding responsive */
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      border-top: 5px solid #007bff;
+    }
+
+    .lock-icon {
+      font-size: 3rem;
+      color: #007bff;
+      margin-bottom: 1rem;
+    }
+
+    /* Penyesuaian padding untuk desktop agar tetap proporsional */
+    @media (min-width: 576px) {
+      .glass-card {
+        padding: 2.5rem;
+      }
+    }
+  </style>
 </head>
 
 <body class="hold-transition lockscreen">
-  <!-- Automatic element centering -->
   <div class="lockscreen-wrapper">
     <div class="lockscreen-logo">
-      <a href="<?= base_url(); ?>">Opr <b>NewDTKS</b></a>
+      <a href="<?= base_url(); ?>"><b><?= nameApp(); ?></b></a>
     </div>
-    <!-- User name -->
-    <div class="lockscreen-name">Lockscreen</div>
 
-    <!-- START LOCK SCREEN ITEM -->
-    <div class="lockscreen-item">
-      <!-- lockscreen image -->
-      <div class="lockscreen-image">
-        <img src="<?= base_url('assets'); ?>/dist/img/access-denied.png" alt="User Image">
+    <div class="glass-card text-center">
+      <div class="lock-icon">
+        <i class="fas fa-user-lock"></i>
       </div>
-      <!-- /.lockscreen-image -->
 
-      <!-- lockscreen credentials (contains the form) -->
-      <form class="lockscreen-credentials">
-        <div class="input-group">
-          <label class="form-control">Please Login before!
+      <h5 class="font-weight-bold">Sesi Keamanan</h5>
+      <p class="text-muted small">Sesi Anda telah berakhir demi keamanan data. Silakan masuk kembali untuk melanjutkan pekerjaan.</p>
 
-            <a href="<?= base_url('logout'); ?>" type="button" class="btn">
-              <i class="fas fa-arrow-right text-muted"></i>
-            </a>
-            <div class="input-group-append">
-            </div>
-        </div>
-      </form>
-      <!-- /.lockscreen credentials -->
-
+      <div class="mt-4">
+        <a href="<?= base_url('logout'); ?>" class="btn btn-primary btn-block shadow-sm">
+          <i class="fas fa-sign-in-alt mr-2"></i> Login Kembali
+        </a>
+        <a href="javascript:window.history.go(-1);" class="btn btn-link btn-sm text-secondary mt-2">
+          <i class="fas fa-arrow-left mr-1"></i> Kembali
+        </a>
+      </div>
     </div>
-    <!-- /.lockscreen-item -->
 
-    <div class="text-center">
-      <a href="<?= base_url('logout'); ?>">sign in as a different user</a>
-      |
-      <a href="javascript:window.history.go(-1);">back to previous page</a>
-    </div>
-    <div class=" lockscreen-footer text-center">
-      Copyright &copy; 2021 - <?php echo date('Y') ?> <b><a href="<?= base_url(); ?>" class="text-black">Opr NewDTKS</a> - <a href="/dashboard">Dashboard</a></b><br>
-      All rights reserved
+    <div class="lockscreen-footer text-center mt-5">
+      <small class="text-muted">
+        Copyright &copy; 2021 - <?= date('Y') ?> | <b><?= nameApp(); ?></b><br>
+        <?= titleApp(); ?>
+      </small>
     </div>
   </div>
-  <!-- /.center -->
 
-  <!-- jQuery -->
   <script src="<?= base_url('assets'); ?>/plugins/jquery/jquery.min.js"></script>
-  <!-- Bootstrap 4 -->
   <script src="<?= base_url('assets'); ?>/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-
 </body>
 
 </html>

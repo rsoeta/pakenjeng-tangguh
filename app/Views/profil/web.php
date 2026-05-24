@@ -274,22 +274,21 @@
                                         <table class="table table-sm table-hover table-striped mb-0 align-middle" id="tableManagementMenu" style="width:100%;">
                                             <thead>
                                                 <tr class="bg-dark text-white text-center" style="font-size: 0.9rem;">
-                                                    <th style="width: 50px;">No</th>
-                                                    <th style="width: 60px;">ID</th>
+                                                    <th style="width: 40px;">No</th>
+                                                    <th style="width: 50px;">ID</th>
                                                     <th class="text-left">Nama Menu / Submenu</th>
-                                                    <th>Class Code</th>
+                                                    <th>Class</th>
                                                     <th>Route URL</th>
-                                                    <th>Icon Icon</th>
-                                                    <th style="width: 70px;">Parent</th>
-                                                    <th style="width: 70px;">Akses</th>
-                                                    <th>Dashboard</th>
-                                                    <th style="width: 80px;">Urutan</th>
-                                                    <th>Status</th>
+                                                    <th>Icon</th>
+                                                    <th style="width: 60px;">Parent</th>
+                                                    <th style="width: 60px;">Akses</th>
+                                                    <th style="width: 100px;">Dashboard</th>
+                                                    <th style="width: 60px;">Urutan</th>
+                                                    <th style="width: 80px;">Status</th>
                                                     <th style="width: 60px;">Aksi</th>
                                                 </tr>
                                             </thead>
-                                            <tbody style="font-size: 0.875rem;">
-                                            </tbody>
+                                            <tbody style="font-size: 0.875rem;"></tbody>
                                         </table>
                                     </div>
                                 </div>
@@ -466,54 +465,68 @@
                 url: "load_data_menu",
                 dataType: "json",
                 success: function(response) {
+                    // 1. Kelompokkan Menu Utama
+                    var menuUtama = response.filter(m => m.tm_parent_id == '0');
+
                     var html = '';
+                    var index = 1;
 
-                    $.each(response, function(i, item) {
-                        html += '<tr class="text-center">';
-                        html += '<td class="align-middle text-secondary font-weight-bold">' + (i + 1) + '</td>';
-                        html += '<td class="table_data_menu align-middle text-muted fw-bold small" data-column-name="tm_id" id="' + item.tm_id + '">' + item.tm_id + '</td>';
+                    // 2. Looping Menu Utama dan Submenunya
+                    menuUtama.forEach(function(parent) {
+                        // Render Parent
+                        html += renderRow(parent, index++, 0);
 
-                        // 🚀 UX UPGRADE: Tampilkan nama menu berjejer dengan icon aslinya (Live Preview)
-                        var iconPreview = item.tm_icon ? '<i class="' + item.tm_icon + ' text-primary mr-2" style="width:20px; display:inline-block; text-align:center;"></i>' : '<i class="fas fa-dot-circle text-muted mr-2"></i>';
-                        html += '<td class="table_data_menu align-middle text-left" data-column-name="tm_nama" id="' + item.tm_id + '" contenteditable style="font-weight:600; color:#2c3e50;">' + iconPreview + item.tm_nama + '</td>';
-
-                        // Kolom Class Code
-                        var classVal = item.tm_class ? item.tm_class : '-';
-                        html += '<td class="table_data_menu align-middle text-muted" data-column-name="tm_class" id="' + item.tm_id + '" contenteditable>' + classVal + '</td>';
-
-                        // 🚀 UX UPGRADE: Badgify URL Link
-                        html += '<td class="table_data_menu align-middle text-left" data-column-name="tm_url" id="' + item.tm_id + '" contenteditable><code class="text-danger bg-light px-2 py-1 rounded" style="font-size:0.8rem; border:1px solid #f1f1f1;">' + item.tm_url + '</code></td>';
-
-                        // Kolom Icon Code
-                        html += '<td class="table_data_menu align-middle text-left text-monospace font-weight-light" data-column-name="tm_icon" id="' + item.tm_id + '" contenteditable style="font-size:0.8rem; color:#7f8c8d;">' + (item.tm_icon ? item.tm_icon : '') + '</td>';
-                        html += '<td class="table_data_menu align-middle font-weight-bold text-dark" data-column-name="tm_parent_id" id="' + item.tm_id + '" contenteditable>' + item.tm_parent_id + '</td>';
-                        html += '<td class="table_data_menu align-middle font-weight-bold text-dark" data-column-name="tm_grup_akses" id="' + item.tm_id + '" contenteditable>' + item.tm_grup_akses + '</td>';
-
-                        // Column Dashboard Switch
-                        var chkDash = (item.tm_is_dashboard == '1') ? 'checked' : '';
-                        html += '<td class="align-middle" data-column-name="tm_is_dashboard" id="' + item.tm_id + '"><input type="checkbox" class="toggle_checkbox_auto" data-toggle="toggle" data-on="<i class=\'fas fa-bolt\'></i> Tampil" data-off="Sembunyi" data-onstyle="info" data-offstyle="secondary" data-size="sm" ' + chkDash + ' value="1"></td>';
-
-                        // Column Urutan
-                        html += '<td class="table_data_menu align-middle font-weight-bold text-primary" data-column-name="tm_urutan" id="' + item.tm_id + '" contenteditable style="font-size:1rem;">' + item.tm_urutan + '</td>';
-
-                        // Column Status Switch
-                        var chkStat = (item.tm_status == '1') ? 'checked' : '';
-                        html += '<td class="align-middle" data-column-name="tm_status" id="' + item.tm_id + '"><input type="checkbox" class="toggle_checkbox_auto" data-toggle="toggle" data-on="Aktif" data-off="Mati" data-onstyle="success" data-offstyle="danger" data-size="sm" ' + chkStat + ' value="1"></td>';
-
-                        // Column Action Delete
-                        html += '<td class="align-middle"><button type="button" name="btn_delete" class="btn btn-xs btn-outline-danger btn_delete py-1 px-2" style="border-radius:4px;"><i class="fa fa-trash-alt"></i></button></td>';
-                        html += '</tr>';
+                        // Cari Submenu untuk parent ini
+                        var submenus = response.filter(m => m.tm_parent_id == parent.tm_id);
+                        submenus.forEach(function(child) {
+                            html += renderRow(child, index++, 20); // 20px indent
+                        });
                     });
 
                     $('#tableManagementMenu tbody').html(html);
-
-                    // Render ulang komponen toggle bootstrap
-                    if ($.fn.bootstrapToggle) {
-                        $('#tableManagementMenu .toggle_checkbox_auto').bootstrapToggle();
-                    }
+                    if ($.fn.bootstrapToggle) $('.toggle_checkbox_auto').bootstrapToggle();
                 }
             });
         }
+
+        function renderRow(item, no, paddingLeft) {
+            var isParent = (paddingLeft === 0);
+            var style = isParent ? 'font-weight:bold; background-color:#f8f9fa;' : '';
+            var row = '<tr class="text-center" style="' + style + '">';
+
+            row += '<td class="align-middle text-muted small">' + no + '</td>';
+            row += '<td class="table_data_menu align-middle small" data-column-name="tm_id" id="' + item.tm_id + '">' + item.tm_id + '</td>';
+
+            // Nama Menu (Padding menyesuaikan hierarki)
+            var icon = item.tm_icon ? '<i class="' + item.tm_icon + ' text-primary mr-2"></i>' : '<i class="fas fa-dot-circle text-muted mr-2"></i>';
+            row += '<td class="table_data_menu align-middle text-left" data-column-name="tm_nama" id="' + item.tm_id + '" contenteditable style="padding-left: ' + (paddingLeft + 15) + 'px !important;">' + icon + item.tm_nama + '</td>';
+
+            // Kolom lainnya (Pastikan tidak ada colspan agar sejajar)
+            row += '<td class="table_data_menu align-middle" data-column-name="tm_class" id="' + item.tm_id + '" contenteditable>' + (item.tm_class || '-') + '</td>';
+            row += '<td class="table_data_menu align-middle text-left" data-column-name="tm_url" id="' + item.tm_id + '" contenteditable><code class="text-danger">' + item.tm_url + '</code></td>';
+            row += '<td class="table_data_menu align-middle text-left small" data-column-name="tm_icon" id="' + item.tm_id + '" contenteditable>' + (item.tm_icon || '') + '</td>';
+
+            // Parent (Hapus colspan="2")
+            row += '<td class="table_data_menu align-middle font-weight-bold" data-column-name="tm_parent_id" id="' + item.tm_id + '" contenteditable>' + item.tm_parent_id + '</td>';
+
+            row += '<td class="table_data_menu align-middle" data-column-name="tm_grup_akses" id="' + item.tm_id + '" contenteditable>' + item.tm_grup_akses + '</td>';
+
+            // Toggle Dashboard
+            var chkDash = (item.tm_is_dashboard == '1') ? 'checked' : '';
+            row += '<td class="align-middle" data-column-name="tm_is_dashboard" id="' + item.tm_id + '"><input type="checkbox" class="toggle_checkbox_auto" data-toggle="toggle" data-on="<i class=\'fas fa-bolt\'></i>" data-off="-" data-onstyle="info" data-offstyle="secondary" data-size="sm" ' + chkDash + ' value="1"></td>';
+
+            // Urutan
+            row += '<td class="table_data_menu align-middle font-weight-bold text-primary" data-column-name="tm_urutan" id="' + item.tm_id + '" contenteditable>' + item.tm_urutan + '</td>';
+
+            // Status
+            var chkStat = (item.tm_status == '1') ? 'checked' : '';
+            row += '<td class="align-middle" data-column-name="tm_status" id="' + item.tm_id + '"><input type="checkbox" class="toggle_checkbox_auto" data-toggle="toggle" data-on="Y" data-off="N" data-onstyle="success" data-offstyle="danger" data-size="sm" ' + chkStat + ' value="1"></td>';
+
+            row += '<td class="align-middle"><button type="button" class="btn btn-xs btn-outline-danger btn_delete"><i class="fa fa-trash-alt"></i></button></td>';
+            row += '</tr>';
+            return row;
+        }
+
         load_data_menu();
 
         // =========================================================================

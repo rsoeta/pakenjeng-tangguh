@@ -21,7 +21,7 @@ $routes->setDefaultController('Landing');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
 $routes->set404Override(function () {
-	return view('maintenance2');
+	return view('lockscreen');
 });
 $routes->setAutoRoute(true);
 $routes->setAutoRoute(false);
