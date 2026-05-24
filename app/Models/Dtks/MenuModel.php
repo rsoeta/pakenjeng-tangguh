@@ -19,6 +19,8 @@ class MenuModel extends Model
         'tm_parent_id',
         'tm_status',
         'tm_grup_akses',
+        'tm_urutan',        // Tambahkan ini
+        'tm_is_dashboard'   // Tambahkan ini juga
     ];
 
     /**

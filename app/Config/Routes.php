@@ -214,7 +214,6 @@ $routes->group('pengaturan_wa', ['filter' => ['authfilterdtks', 'menufilterdtks'
 	$routes->post('save_api', 'Profil\WaSettings::saveApi');
 	$routes->post('save_template', 'Profil\WaSettings::saveTemplate');
 	$routes->post('preview', 'Profil\WaSettings::preview');
-	$routes->post('test', 'Profil\WaSettings::testApi');
 
 	// Fonnte Settings
 	$routes->post('save_fonnte', 'Profil\WaSettings::saveFonnte');

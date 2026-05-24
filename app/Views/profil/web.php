@@ -262,25 +262,111 @@
                                         </form>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade" id="custom-tabs-three-menu" role="tabpanel" aria-labelledby="cuxtom-tab-three-menu-tab">
-                                    <div class="col-12 table">
-                                        <table class="table table-sm table-striped compact" cellspacing="0" width="100%">
+                                <div class="tab-pane fade" id="custom-tabs-three-menu" role="tabpanel" aria-labelledby="custom-tabs-three-menu-tab">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="fw-bold text-secondary mb-0"><i class="fas fa-list-alt text-primary"></i> Struktur Navigasi SINDEN</h5>
+                                        <button type="button" class="btn btn-primary btn-sm shadow-sm" data-toggle="modal" data-target="#modalTambahMenu">
+                                            <i class="fas fa-plus-circle"></i> Tambah Menu Baru
+                                        </button>
+                                    </div>
+
+                                    <div class="col-12 table-responsive p-0" style="border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                                        <table class="table table-sm table-hover table-striped mb-0 align-middle" id="tableManagementMenu" style="width:100%;">
                                             <thead>
-                                                <tr class="table-dark">
-                                                    <td>No</td>
-                                                    <td>ID</td>
-                                                    <td>Nama Menu/Submenu</td>
-                                                    <td>Class</td>
-                                                    <td>Link</td>
-                                                    <td>Icon</td>
-                                                    <td colspan="2">Parent</td>
-                                                    <td>Akses</td>
-                                                    <td>Status</td>
-                                                    <td>Action</td>
+                                                <tr class="bg-dark text-white text-center" style="font-size: 0.9rem;">
+                                                    <th style="width: 50px;">No</th>
+                                                    <th style="width: 60px;">ID</th>
+                                                    <th class="text-left">Nama Menu / Submenu</th>
+                                                    <th>Class Code</th>
+                                                    <th>Route URL</th>
+                                                    <th>Icon Icon</th>
+                                                    <th style="width: 70px;">Parent</th>
+                                                    <th style="width: 70px;">Akses</th>
+                                                    <th>Dashboard</th>
+                                                    <th style="width: 80px;">Urutan</th>
+                                                    <th>Status</th>
+                                                    <th style="width: 60px;">Aksi</th>
                                                 </tr>
                                             </thead>
-                                            <tbody></tbody>
+                                            <tbody style="font-size: 0.875rem;">
+                                            </tbody>
                                         </table>
+                                    </div>
+                                </div>
+
+                                <div class="modal fade" id="modalTambahMenu" role="dialog" aria-labelledby="modalTambahMenuLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+                                            <div class="modal-header bg-primary text-white" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                                                <h5 class="modal-title fw-bold" id="modalTambahMenuLabel"><i class="fas fa-sliders-h"></i> Form Menu Baru</h5>
+                                                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <form id="form_tambah_menu" method="POST">
+                                                <div class="modal-body p-4">
+                                                    <div class="row">
+                                                        <div class="col-12 col-md-6 form-group mb-3">
+                                                            <label class="fw-bold small text-secondary">Nama Menu <span class="text-danger">*</span></label>
+                                                            <input type="text" name="tm_nama" id="new_tm_nama" class="form-control form-control-sm" placeholder="Contoh: PDTT 2025" required spellcheck="false">
+                                                        </div>
+                                                        <div class="col-12 col-md-6 form-group mb-3">
+                                                            <label class="fw-bold small text-secondary">Route URL Link <span class="text-danger">*</span></label>
+                                                            <input type="text" name="tm_url" id="new_tm_url" class="form-control form-control-sm" placeholder="Contoh: pdtt/2025" required spellcheck="false">
+                                                        </div>
+                                                        <div class="col-12 col-md-6 form-group mb-3">
+                                                            <label class="fw-bold small text-secondary">Icon Class (FontAwesome)</label>
+                                                            <input type="text" name="tm_icon" id="new_tm_icon" class="form-control form-control-sm" placeholder="Contoh: fas fa-shield-alt" spellcheck="false">
+                                                        </div>
+                                                        <div class="col-12 col-md-6 form-group mb-3">
+                                                            <label class="fw-bold small text-secondary">CSS Class Code</label>
+                                                            <input type="text" name="tm_class" id="new_tm_class" class="form-control form-control-sm" placeholder="Kosongkan jika tidak ada" spellcheck="false">
+                                                        </div>
+                                                        <div class="col-12 col-md-6 form-group mb-3">
+                                                            <label class="fw-bold small text-secondary">Induk Parent Menu</label>
+                                                            <select name="tm_parent_id" id="new_tm_parent_id" class="form-control form-control-sm">
+                                                                <option value="0">--- Menu Utama (No Parent) ---</option>
+                                                                <?php foreach ($menu as $m): ?>
+                                                                    <?php if ($m['tm_parent_id'] == 0): ?>
+                                                                        <option value="<?= $m['tm_id'] ?>"><?= esc($m['tm_nama']) ?> [ID: <?= $m['tm_id'] ?>]</option>
+                                                                    <?php endif; ?>
+                                                                <?php endforeach; ?>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-12 col-md-6 form-group mb-3">
+                                                            <label class="fw-bold small text-secondary">Batas Grup Akses</label>
+                                                            <select name="tm_grup_akses" id="new_tm_grup_akses" class="form-control form-control-sm">
+                                                                <?php foreach ($statusRole as $role): ?>
+                                                                    <option value="<?= $role['id_role'] ?>" <?= $role['id_role'] == 4 ? 'selected' : '' ?>><?= esc($role['nm_role']) ?></option>
+                                                                <?php endforeach; ?>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-12 col-md-4 form-group mb-3">
+                                                            <label class="fw-bold small text-secondary">Nomor Urutan</label>
+                                                            <input type="number" name="tm_urutan" id="new_tm_urutan" class="form-control form-control-sm text-center" value="0" min="0">
+                                                        </div>
+                                                        <div class="col-12 col-md-4 form-group mb-3">
+                                                            <label class="fw-bold small text-secondary">Dashboard Shortcut</label>
+                                                            <select name="tm_is_dashboard" id="new_tm_is_dashboard" class="form-control form-control-sm">
+                                                                <option value="0">Sembunyi</option>
+                                                                <option value="1">Tampilkan</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-12 col-md-4 form-group mb-3">
+                                                            <label class="fw-bold small text-secondary">Status Sistem</label>
+                                                            <select name="tm_status" id="new_tm_status" class="form-control form-control-sm">
+                                                                <option value="1">Aktif</option>
+                                                                <option value="0">Non-Aktif</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer bg-light" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                                                    <button type="button" class="btn btn-secondary btn-sm shadow-sm" data-dismiss="modal">Batal</button>
+                                                    <button type="submit" id="btnSubmitMenu" class="btn btn-success btn-sm shadow-sm px-3"><i class="fas fa-save"></i> Simpan Menu</button>
+                                                </div>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -371,131 +457,131 @@
 <script type="text/javascript">
     $(document).ready(function() {
 
+        // =========================================================================
+        // 🚀 LOAD DATA MENU (UI/UX UPGRADE VERSION)
+        // =========================================================================
         function load_data_menu() {
             $.ajax({
                 type: "post",
                 url: "load_data_menu",
                 dataType: "json",
                 success: function(response) {
-                    // make column editable
-                    var html = '<tr>';
-                    html += '<td id="" placeholder="No urut akan terisi otomatis"></td>';
-                    html += '<td id="tm_id" placeholder="ID akan terisi otomatis"></td>';
-                    html += '<td id="tm_nama" contenteditable placeholder="Isikan Nama menu/submenu"></td>';
-                    html += '<td id="tm_class" contenteditable placeholder="Isikan class code"></td>';
-                    html += '<td id="tm_url" contenteditable placeholder="Isikan link"></td>';
-                    html += '<td id="tm_icon" contenteditable placeholder="Isikan kode icon code"></td>';
-                    html += '<td colspan="2" id="tm_parent_id" contenteditable placeholder="Isikan ID parent"></td>';
-                    html += '<td id="tm_grup_akses" contenteditable placeholder="Isikan akses"></td>';
-                    html += '<td id="tm_status" contenteditable placeholder="Isikan status"></td>';
-                    html += '<td><button type="button" name="btn_add" id="btn_add" class="btn btn-sm btn-outline-success btn-block"><i class="fa fa-check"></i></button></td>';
-                    html += '</tr>';
-                    // loop data
+                    var html = '';
+
                     $.each(response, function(i, item) {
-                        html += '<tr>';
-                        html += '<td>' + (i + 1) + '</td>';
-                        //  get id  
-                        html += '<td class="table_data_menu" data-column-name="tm_id" id="' + item.tm_id + '" contenteditable>' + item.tm_id + '</td>';
-                        html += '<td class="table_data_menu" data-column-name="tm_nama" id="' + item.tm_id + '" contenteditable>' + item.tm_nama + '</td>';
-                        html += '<td class="table_data_menu" data-column-name="tm_class" id="' + item.tm_id + '" contenteditable>' + item.tm_class + '</td>';
-                        html += '<td class="table_data_menu" data-column-name="tm_url" id="' + item.tm_id + '" contenteditable>' + item.tm_url + '</td>';
-                        html += '<td class="table_data_menu" data-column-name="tm_icon" id="' + item.tm_id + '" contenteditable>' + item.tm_icon + '</td>';
-                        html += '<td colspan="2" class="table_data_menu" data-column-name="tm_parent_id" id="' + item.tm_id + '" contenteditable>' + item.tm_parent_id + '</td>';
+                        html += '<tr class="text-center">';
+                        html += '<td class="align-middle text-secondary font-weight-bold">' + (i + 1) + '</td>';
+                        html += '<td class="table_data_menu align-middle text-muted fw-bold small" data-column-name="tm_id" id="' + item.tm_id + '">' + item.tm_id + '</td>';
 
-                        // show get_nama_menu to table
-                        // html += get_nama_menu(item.tm_parent_id);
+                        // 🚀 UX UPGRADE: Tampilkan nama menu berjejer dengan icon aslinya (Live Preview)
+                        var iconPreview = item.tm_icon ? '<i class="' + item.tm_icon + ' text-primary mr-2" style="width:20px; display:inline-block; text-align:center;"></i>' : '<i class="fas fa-dot-circle text-muted mr-2"></i>';
+                        html += '<td class="table_data_menu align-middle text-left" data-column-name="tm_nama" id="' + item.tm_id + '" contenteditable style="font-weight:600; color:#2c3e50;">' + iconPreview + item.tm_nama + '</td>';
 
+                        // Kolom Class Code
+                        var classVal = item.tm_class ? item.tm_class : '-';
+                        html += '<td class="table_data_menu align-middle text-muted" data-column-name="tm_class" id="' + item.tm_id + '" contenteditable>' + classVal + '</td>';
 
-                        // html += namaParent.responseText;
-                        html += '<td class="table_data_menu" data-column-name="tm_grup_akses" id="' + item.tm_id + '" contenteditable>' + item.tm_grup_akses + '</td>';
-                        // get status with checkbox class data-toggle="toggle"
-                        if (item.tm_status == '1') {
-                            html += '<td class="table_data_menu" data-column-name="tm_status" id="' + item.tm_id + '" contenteditable><input type="checkbox" class="toggle_checkbox" data-toggle="toggle" data-on="Aktif" data-off="Tidak Aktif" data-onstyle="success" data-offstyle="danger" checked value="1"></td>';
-                        } else {
-                            html += '<td class="table_data_menu" data-column-name="tm_status" id="' + item.tm_id + '" contenteditable><input type="checkbox" class="toggle_checkbox" data-toggle="toggle" data-on="Aktif" data-off="Tidak Aktif" data-onstyle="success" data-offstyle="danger" value="0"></td>';
-                        }
-                        // html += '<td class="table_data_menu" data-column-name="tm_status" id="' + item.tm_id + '" contenteditable>' + item.tm_status + '</td>';
-                        html += '<td><button type="button" name="btn_delete" class="btn btn-sm btn-outline-danger btn-block btn_delete"><i class="fa fa-trash-alt"></i></button></td>';
+                        // 🚀 UX UPGRADE: Badgify URL Link
+                        html += '<td class="table_data_menu align-middle text-left" data-column-name="tm_url" id="' + item.tm_id + '" contenteditable><code class="text-danger bg-light px-2 py-1 rounded" style="font-size:0.8rem; border:1px solid #f1f1f1;">' + item.tm_url + '</code></td>';
+
+                        // Kolom Icon Code
+                        html += '<td class="table_data_menu align-middle text-left text-monospace font-weight-light" data-column-name="tm_icon" id="' + item.tm_id + '" contenteditable style="font-size:0.8rem; color:#7f8c8d;">' + (item.tm_icon ? item.tm_icon : '') + '</td>';
+                        html += '<td class="table_data_menu align-middle font-weight-bold text-dark" data-column-name="tm_parent_id" id="' + item.tm_id + '" contenteditable>' + item.tm_parent_id + '</td>';
+                        html += '<td class="table_data_menu align-middle font-weight-bold text-dark" data-column-name="tm_grup_akses" id="' + item.tm_id + '" contenteditable>' + item.tm_grup_akses + '</td>';
+
+                        // Column Dashboard Switch
+                        var chkDash = (item.tm_is_dashboard == '1') ? 'checked' : '';
+                        html += '<td class="align-middle" data-column-name="tm_is_dashboard" id="' + item.tm_id + '"><input type="checkbox" class="toggle_checkbox_auto" data-toggle="toggle" data-on="<i class=\'fas fa-bolt\'></i> Tampil" data-off="Sembunyi" data-onstyle="info" data-offstyle="secondary" data-size="sm" ' + chkDash + ' value="1"></td>';
+
+                        // Column Urutan
+                        html += '<td class="table_data_menu align-middle font-weight-bold text-primary" data-column-name="tm_urutan" id="' + item.tm_id + '" contenteditable style="font-size:1rem;">' + item.tm_urutan + '</td>';
+
+                        // Column Status Switch
+                        var chkStat = (item.tm_status == '1') ? 'checked' : '';
+                        html += '<td class="align-middle" data-column-name="tm_status" id="' + item.tm_id + '"><input type="checkbox" class="toggle_checkbox_auto" data-toggle="toggle" data-on="Aktif" data-off="Mati" data-onstyle="success" data-offstyle="danger" data-size="sm" ' + chkStat + ' value="1"></td>';
+
+                        // Column Action Delete
+                        html += '<td class="align-middle"><button type="button" name="btn_delete" class="btn btn-xs btn-outline-danger btn_delete py-1 px-2" style="border-radius:4px;"><i class="fa fa-trash-alt"></i></button></td>';
                         html += '</tr>';
                     });
-                    // append to table
-                    $('tbody').html(html);
-                }
-            });
-        }
-        load_data_menu(); // panggil fungsi load data menu
 
-        // get item.tm_nama from item.tm_parent_id
-        function get_nama_menu(id) {
-            $.ajax({
-                type: "post",
-                url: "get_nama_menu",
-                data: {
-                    id: item.tm_parent_id
-                },
-                dataType: "json",
-                success: function(response) {
-                    // $('#tm_parent_id').val(response.tm_nama);
-                    html += '<td class="table_data_menu" data-column-name="tm_parent_nama" id="' + item.tm_id + '" contenteditable>' + response.data + '</td>';
-                }
-            });
-        }
-        // get item.tm_nama from item.tm_parent_id
+                    $('#tableManagementMenu tbody').html(html);
 
-        // insert data menu
-        $(document).on('click', '#btn_add', function() {
-            var tm_nama = $('#tm_nama').text();
-            var tm_class = $('#tm_class').text();
-            var tm_url = $('#tm_url').text();
-            var tm_icon = $('#tm_icon').text();
-            var tm_parent_id = $('#tm_parent_id').text();
-            var tm_grup_akses = $('#tm_grup_akses').text();
-            var tm_status = $('#tm_status').text();
-
-            // cek if fields is empty
-            if (tm_nama == '' || tm_url == '' || tm_icon == '' || tm_parent_id == '' || tm_grup_akses == '' || tm_status == '') {
-                alert('Isikan data dengan lengkap');
-            } else {
-                $.ajax({
-                    type: "post",
-                    url: "insert_data_menu",
-                    data: {
-                        tm_nama: tm_nama,
-                        tm_class: tm_class,
-                        tm_url: tm_url,
-                        tm_icon: tm_icon,
-                        tm_parent_id: tm_parent_id,
-                        tm_grup_akses: tm_grup_akses,
-                        tm_status: tm_status
-                    },
-                    success: function(data) {
-                        // alert('Data berhasil ditambahkan');
-                        load_data_menu();
+                    // Render ulang komponen toggle bootstrap
+                    if ($.fn.bootstrapToggle) {
+                        $('#tableManagementMenu .toggle_checkbox_auto').bootstrapToggle();
                     }
-                });
-            }
+                }
+            });
+        }
+        load_data_menu();
+
+        // =========================================================================
+        // 🚀 ACTION SUBMIT: TAMBAH DATA MENU VIA MODAL (BUG-FREE & ASYNC)
+        // =========================================================================
+        $('#form_tambah_menu').on('submit', function(e) {
+            e.preventDefault();
+
+            var form_data = $(this).serialize();
+
+            // Ubah status tombol loading
+            var btn = $('#btnSubmitMenu');
+            var originalText = btn.html();
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Memproses...');
+
+            $.ajax({
+                type: "POST",
+                url: "insert_data_menu",
+                data: form_data,
+                dataType: "json",
+                success: function(res) {
+                    btn.prop('disabled', false).html(originalText);
+
+                    if (res.status === 'success') {
+                        // Tutup modal
+                        $('#modalTambahMenu').modal('hide');
+                        // Reset isi form inputan
+                        $('#form_tambah_menu')[0].reset();
+
+                        // Memicu Notifikasi Sukses SweetAlert2 Mobile-Friendly (320px)
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sukses! 🎉',
+                            text: res.message,
+                            width: '320px',
+                            timer: 2000,
+                            showConfirmButton: false,
+                            customClass: {
+                                title: 'fs-5',
+                                content: 'fs-6'
+                            }
+                        });
+
+                        // Muat ulang tabel navigasi secara realtime
+                        load_data_menu();
+                    } else {
+                        alert(res.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    btn.prop('disabled', false).html(originalText);
+                    console.error(xhr.responseText);
+                    alert("Terjadi kesalahan sistem saat menyimpan menu!");
+                }
+            });
         });
 
-        // update data menu
-        $(document).on('blur', '.table_data_menu', function() {
+        // UPDATE DATA MENU (Untuk In-Place Text Editing / ContentEditable)
+        $(document).on('blur', '.table_data_menu[contenteditable]', function() {
             var id = $(this).attr('id');
             var table_column = $(this).attr('data-column-name');
-            // if value from input is empty, then set value from checkbox
-            if ($(this).text() == '') {
-                // get value from checkbox
-                var valu = $(this).find('input[type="checkbox"]').prop('checked');
-                // if checkbox is checked, then set value 1, else set value 0
-                if (valu) {
-                    var value = 1;
-                } else {
-                    var value = 0;
-                }
-            } else {
-                var value = $(this).text();
+            var value = $(this).text().trim();
+
+            // Pengaman khusus untuk kolom link URL apabila dibungkus tag <code> oleh browser
+            if (table_column === 'tm_url') {
+                value = $(this).find('code').text().trim() || value;
             }
-            // var value = $(this).text();
-            // var value = $(this).text();
-            // alert(id + ', ' + table_column + ', ' + value);
+
             $.ajax({
                 type: "post",
                 url: "update_data_menu",
@@ -505,48 +591,102 @@
                     value: value
                 },
                 success: function(data) {
-                    // alert('Data berhasil diupdate');
-                    load_data_menu();
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Perubahan disimpan!'
+                    });
+                }
+            });
+        });
+
+        // UPDATE DATA SWITCH TOGGLE (Dashboard & Status)
+        $(document).on('change', '.toggle_checkbox_auto', function() {
+            var td = $(this).closest('td');
+            var id = td.attr('id');
+            var table_column = td.attr('data-column-name');
+            var value = $(this).prop('checked') ? 1 : 0;
+
+            $.ajax({
+                type: "post",
+                url: "update_data_menu",
+                data: {
+                    id: id,
+                    table_column: table_column,
+                    value: value
+                },
+                success: function(data) {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Perubahan disimpan!'
+                    });
                 }
             });
         });
 
         // delete data menu
         $(document).on('click', '.btn_delete', function() {
-            // alert confitm delete
-            var conf = confirm('Yakin ingin menghapus data ini?');
-            if (conf) {
-                var id = $(this).parents("tr").find("td:eq(1)").text();
+            var tr = $(this).parents("tr");
+            var id = tr.find("td:eq(1)").text(); // Ambil ID dari kolom ke-2
 
-                $.ajax({
-                    type: "post",
-                    url: "delete_data_menu",
-                    data: {
-                        id: id
-                    },
-                    success: function(data) {
-                        //  sweet alert
-                        const Toast = Swal.mixin({
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 2000,
-                            timerProgressBar: true,
-                            didOpen: (toast) => {
-                                toast.addEventListener('mouseenter', Swal.stopTimer)
-                                toast.addEventListener('mouseleave', Swal.resumeTimer)
-                            }
-                        })
+            // 🚀 Ganti confirm() standar dengan SweetAlert2 (Versi Mungil)
+            Swal.fire({
+                title: 'Hapus Data?',
+                text: "Menu ini akan dihapus permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                width: '320px', // Perkecil ukuran untuk kenyamanan layar mobile
+                customClass: {
+                    title: 'fs-5',
+                    content: 'fs-6'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "post",
+                        url: "delete_data_menu",
+                        data: {
+                            id: id
+                        },
+                        success: function(data) {
+                            // Toast Notifikasi Sukses
+                            const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 2000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                }
+                            });
 
-                        Toast.fire({
-                            icon: 'success',
-                            title: 'data berhasil dihapus',
-                        });
-                        // alert('Data berhasil dihapus');
-                        load_data_menu();
-                    }
-                });
-            }
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Data berhasil dihapus'
+                            });
+
+                            load_data_menu();
+                        }
+                    });
+                }
+            });
         });
 
         $('#personalSubmit').submit(function(event) {

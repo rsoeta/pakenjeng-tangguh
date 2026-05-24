@@ -33,6 +33,7 @@ class Profil_Web extends BaseController
         $this->WilayahModel = new WilayahModel();
         $this->MenuModel = new MenuModel();
     }
+
     public function index()
     {
         $user_id = session()->get('id');
@@ -72,9 +73,6 @@ class Profil_Web extends BaseController
             'deadline_general' => $this->GenModel->getDeadlinePpks(),
 
         ];
-        // dd($data);
-        // dd($data['statusRole']);
-        // dd(session()->get('id'));
         return view('profil/web', $data);
     }
 
@@ -204,18 +202,30 @@ class Profil_Web extends BaseController
         echo json_encode($data);
     }
 
-    function insert_data_menu()
+    public function insert_data_menu()
     {
-        $data = [
-            'tm_nama' => $this->request->getPost('tm_nama'),
-            'tm_class' => $this->request->getPost('tm_class'),
-            'tm_url' => $this->request->getPost('tm_url'),
-            'tm_icon' => $this->request->getPost('tm_icon'),
-            'tm_parent_id' => $this->request->getPost('tm_parent_id'),
-            'tm_grup_akses' => $this->request->getPost('tm_grup_akses'),
-            'tm_status' => $this->request->getPost('tm_status'),
-        ];
-        $this->MenuModel->insert_data_menu($data);
+        if ($this->request->isAJAX()) {
+            $data = [
+                'tm_nama'         => trim((string) $this->request->getPost('tm_nama')),
+                'tm_class'        => trim((string) $this->request->getPost('tm_class')) ?: null,
+                'tm_url'          => trim((string) $this->request->getPost('tm_url')),
+                'tm_icon'         => trim((string) $this->request->getPost('tm_icon')) ?: null,
+                'tm_parent_id'    => (int) $this->request->getPost('tm_parent_id'),
+                'tm_status'       => (int) $this->request->getPost('tm_status'),
+                'tm_grup_akses'   => (int) $this->request->getPost('tm_grup_akses'),
+                'tm_urutan'       => (int) $this->request->getPost('tm_urutan'),
+                'tm_is_dashboard' => (int) $this->request->getPost('tm_is_dashboard'),
+            ];
+
+            // Gunakan Query Builder native agar aman dari pergeseran urutan array
+            $insert = $this->MenuModel->db->table('tb_menu')->insert($data);
+
+            if ($insert) {
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Menu baru berhasil ditambahkan!']);
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menyimpan data ke database.']);
+            }
+        }
     }
 
     function update_data_menu()
@@ -265,28 +275,6 @@ class Profil_Web extends BaseController
         }
     }
 
-    // function update_general()
-    // {
-    //     if ($this->request->isAJAX()) {
-
-    //         $dataArr = $this->request->getPost();
-    //         // var_dump($dataArr);
-    //         // die;
-
-    //         $id = $this->request->getPost('dd_id');
-    //         // dd($id);
-
-    //         $data = [
-    //             'dd_id' => $id,
-    //             'dd_waktu_start' => $this->request->getPost('dd_waktu_start'),
-    //             'dd_waktu_end' => $this->request->getPost('dd_waktu_end'),
-    //             'dd_role' => $this->request->getPost('dd_role'),
-    //             'dd_deskripsi' => $this->request->getPost('dd_deskripsi'),
-    //         ];
-    //         $data = $this->GenModel->update_general($id, $data);
-    //         echo json_encode($data);
-    //     }
-    // }
     public function update_general()
     {
         $dataArr = $this->request->getPost();
