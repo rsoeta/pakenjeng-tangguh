@@ -144,18 +144,6 @@ class Pages extends BaseController
             $dd_waktu_end = date_create($d['dd_waktu_end']);
         }
 
-        // =======================================================
-        // 🚀 AMBIL MENU PRIORITAS UNTUK DASHBOARD (DENGAN PARENT)
-        // =======================================================
-        $menuPrioritas = $db->table('tb_menu m')
-            ->select('m.*, p.tm_nama as parent_nama') // 🚀 Tarik nama parent-nya
-            ->join('tb_menu p', 'm.tm_parent_id = p.tm_id', 'left') // 🚀 Self Join ke tabel yang sama
-            ->where('m.tm_status', 1)
-            ->where('m.tm_is_dashboard', 1)
-            ->orderBy('m.tm_urutan', 'ASC')
-            ->get()
-            ->getResultArray();
-
         // 🔹 Siapkan Data ke View
         $data = [
             'title'          => 'Dashboard',
@@ -168,8 +156,7 @@ class Pages extends BaseController
             'dd_waktu_end'   => $dd_waktu_end ?? null,
             'user_login'     => $this->AuthModel->getUserId(),
             'menu_pemulihan' => $menuPemulihan,
-            'total_masalah'  => $jumlahBermasalah,
-            'menu_prioritas' => $menuPrioritas // 🚀 Kirim Menu Prioritas ke View
+            'total_masalah'  => $jumlahBermasalah
         ];
 
         // ✅ Set Flashdata untuk notifikasi login

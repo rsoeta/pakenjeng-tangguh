@@ -56,16 +56,6 @@
         margin-bottom: .5rem;
     }
 
-    /* 🚀 Gaya khusus untuk Card Menu Prioritas Dinamis */
-    .priority-card {
-        border-top: 4px solid #4facfe;
-        background: linear-gradient(to bottom, #ffffff, #f8fbff);
-    }
-
-    .priority-card:hover {
-        border-top: 4px solid #00f2fe;
-    }
-
     .chart-box {
         background: white;
         border-radius: 15px;
@@ -87,6 +77,7 @@
 </style>
 
 <div class="content-wrapper p-4">
+    <!-- Hero -->
     <div class="hero-banner">
         <h2>👋 Assalamualaikum, Selamat <?= Salam(); ?>,</h2>
         <h2><?= ucwords(strtolower(session()->get('fullname'))); ?></h2>
@@ -115,25 +106,7 @@
         </div>
     <?php endif; ?>
 
-    <?php if (!empty($menu_prioritas)): ?>
-        <h5 class="mt-4 mb-2 fw-bold text-secondary"><i class="fas fa-bolt text-warning"></i> Menu Prioritas & Akses Cepat</h5>
-        <div class="stats-grid mt-0">
-            <?php foreach ($menu_prioritas as $mp): ?>
-                <?php
-                // 🚀 LOGIKA PENGGABUNGAN NAMA: "Parent Child"
-                $judulMenu = !empty($mp['parent_nama'])
-                    ? $mp['parent_nama'] . ' ' . $mp['tm_nama']
-                    : $mp['tm_nama'];
-                ?>
-                <div class="stat-card priority-card shadow-sm" onclick="window.location='<?= base_url($mp['tm_url']) ?>'">
-                    <div class="stat-icon text-info"><i class="<?= esc($mp['tm_icon']) ?>"></i></div>
-                    <h6 class="fw-bold mt-2 text-dark"><?= esc(strtoupper($judulMenu)) ?></h6>
-                    <small class="text-muted d-block mt-1">Buka Modul</small>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
-
+    <!-- Kartu Statistik -->
     <div class="stats-grid">
         <div class="stat-card" onclick="window.location='/dtsen-se'">
             <div class="stat-icon text-primary"><i class="fas fa-users"></i></div>
@@ -147,19 +120,23 @@
             <h3><?= number_format($totalUsulan ?? 0, 0, ',', '.'); ?></h3>
         </div>
 
+        <!-- Card Draft Pembaruan -->
         <div class="stat-card" onclick="window.location='/pembaruan-keluarga/draft'">
             <div class="stat-icon text-warning"><i class="fas fa-clipboard-list"></i></div>
             <h6>Draft Pembaruan</h6>
             <h3><?= number_format($totalDraft ?? 0, 0, ',', '.'); ?></h3>
         </div>
 
+        <!-- Card Submitted Pembaruan -->
         <div class="stat-card" onclick="window.location='/pembaruan-keluarga/submitted'">
             <div class="stat-icon text-success"><i class="fas fa-file-upload"></i></div>
             <h6>Submitted Pembaruan</h6>
             <h3><?= number_format($totalSubmitted ?? 0, 0, ',', '.'); ?></h3>
         </div>
+
     </div>
 
+    <!-- Diagram -->
     <div class="chart-box">
         <h5 class="mb-3"><i class="fas fa-chart-bar text-info"></i> Jumlah Keluarga Berdasarkan Kategori Desil</h5>
         <canvas id="chartDesil" height="100"></canvas>
@@ -181,10 +158,10 @@
 
         // Ambil data chart dari PHP
         const desilLabels = [
-            <?php foreach ($dataDesil ?? [] as $d): ?> '<?= $d->kategori_desil; ?>', <?php endforeach; ?>
+            <?php foreach ($dataDesil as $d): ?> '<?= $d->kategori_desil; ?>', <?php endforeach; ?>
         ];
         const desilData = [
-            <?php foreach ($dataDesil ?? [] as $d): ?> <?= $d->jumlah; ?>, <?php endforeach; ?>
+            <?php foreach ($dataDesil as $d): ?> <?= $d->jumlah; ?>, <?php endforeach; ?>
         ];
 
         new Chart(document.getElementById('chartDesil'), {

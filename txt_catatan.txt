@@ -1582,3 +1582,12 @@ CREATE TABLE `dtsen_pdtt_2025` (
   KEY `idx_no_kk` (`no_kk`),
   KEY `idx_status` (`status_verifikasi`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+===================================================================================================================================================================
+🟩 Fitur: Tambah "Dynamic Shortcut" di Dashboard untuk Akses Cepat ke Menu Utama
+===================================================================================================================================================================
+-- Tambah kolom penanda dashboard
+ALTER TABLE `tb_menu` ADD COLUMN `tm_is_dashboard` TINYINT(1) NOT NULL DEFAULT 0 AFTER `tm_urutan`;
+
+-- Jadikan menu PDTT 2025 (URL: pdtt/2025) tampil di dashboard
+UPDATE `tb_menu` SET `tm_is_dashboard` = 1 WHERE `tm_url` = 'pdtt/2025';
