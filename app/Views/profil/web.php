@@ -465,60 +465,61 @@
                 url: "load_data_menu",
                 dataType: "json",
                 success: function(response) {
-                    // 1. Kelompokkan Menu Utama
-                    var menuUtama = response.filter(m => m.tm_parent_id == '0');
+                    // 🚀 FUNGSI REKURSIF UNTUK MEMBANGUN TREE (N-LEVEL)
+                    function buildTree(data, parentId = 0, level = 0) {
+                        let html = '';
+                        // Cari item yang parent_id-nya sesuai
+                        let items = data.filter(m => parseInt(m.tm_parent_id) === parentId);
 
-                    var html = '';
-                    var index = 1;
+                        items.forEach((item, index) => {
+                            // Render baris saat ini
+                            html += renderRow(item, level);
 
-                    // 2. Looping Menu Utama dan Submenunya
-                    menuUtama.forEach(function(parent) {
-                        // Render Parent
-                        html += renderRow(parent, index++, 0);
-
-                        // Cari Submenu untuk parent ini
-                        var submenus = response.filter(m => m.tm_parent_id == parent.tm_id);
-                        submenus.forEach(function(child) {
-                            html += renderRow(child, index++, 20); // 20px indent
+                            // Panggil diri sendiri (Rekursif) untuk mencari anak dari item ini
+                            html += buildTree(data, parseInt(item.tm_id), level + 1);
                         });
-                    });
+                        return html;
+                    }
 
-                    $('#tableManagementMenu tbody').html(html);
-                    if ($.fn.bootstrapToggle) $('.toggle_checkbox_auto').bootstrapToggle();
+                    // Panggil fungsi buildTree dengan parent 0 (Menu Utama)
+                    let tableBody = buildTree(response, 0, 0);
+                    $('#tableManagementMenu tbody').html(tableBody);
+
+                    // Re-init bootstrap toggle
+                    if ($.fn.bootstrapToggle) {
+                        $('.toggle_checkbox_auto').bootstrapToggle();
+                    }
                 }
             });
         }
 
-        function renderRow(item, no, paddingLeft) {
-            var isParent = (paddingLeft === 0);
-            var style = isParent ? 'font-weight:bold; background-color:#f8f9fa;' : '';
-            var row = '<tr class="text-center" style="' + style + '">';
+        // 🚀 FUNGSI HELPER RENDER ROW YANG DINAMIS
+        function renderRow(item, level) {
+            let paddingLeft = level * 30; // Indentasi 30px per level
+            let isSubmenu = level > 0;
+            let style = isSubmenu ? 'background-color:#ffffff;' : 'font-weight:bold; background-color:#f8f9fa;';
 
-            row += '<td class="align-middle text-muted small">' + no + '</td>';
+            var row = '<tr class="text-center" style="' + style + '">';
+            row += '<td class="align-middle text-muted small">#</td>';
             row += '<td class="table_data_menu align-middle small" data-column-name="tm_id" id="' + item.tm_id + '">' + item.tm_id + '</td>';
 
-            // Nama Menu (Padding menyesuaikan hierarki)
-            var icon = item.tm_icon ? '<i class="' + item.tm_icon + ' text-primary mr-2"></i>' : '<i class="fas fa-dot-circle text-muted mr-2"></i>';
+            // Kolom Nama dengan Indentasi dinamis
+            var icon = item.tm_icon ? '<i class="' + item.tm_icon + ' text-primary mr-2"></i>' : '<i class="fas fa-circle text-muted mr-2" style="font-size:0.5rem;"></i>';
             row += '<td class="table_data_menu align-middle text-left" data-column-name="tm_nama" id="' + item.tm_id + '" contenteditable style="padding-left: ' + (paddingLeft + 15) + 'px !important;">' + icon + item.tm_nama + '</td>';
 
-            // Kolom lainnya (Pastikan tidak ada colspan agar sejajar)
+            // Kolom lainnya
             row += '<td class="table_data_menu align-middle" data-column-name="tm_class" id="' + item.tm_id + '" contenteditable>' + (item.tm_class || '-') + '</td>';
             row += '<td class="table_data_menu align-middle text-left" data-column-name="tm_url" id="' + item.tm_id + '" contenteditable><code class="text-danger">' + item.tm_url + '</code></td>';
             row += '<td class="table_data_menu align-middle text-left small" data-column-name="tm_icon" id="' + item.tm_id + '" contenteditable>' + (item.tm_icon || '') + '</td>';
-
-            // Parent (Hapus colspan="2")
-            row += '<td class="table_data_menu align-middle font-weight-bold" data-column-name="tm_parent_id" id="' + item.tm_id + '" contenteditable>' + item.tm_parent_id + '</td>';
-
+            row += '<td colspan="2" class="table_data_menu align-middle font-weight-bold" data-column-name="tm_parent_id" id="' + item.tm_id + '" contenteditable>' + item.tm_parent_id + '</td>';
             row += '<td class="table_data_menu align-middle" data-column-name="tm_grup_akses" id="' + item.tm_id + '" contenteditable>' + item.tm_grup_akses + '</td>';
 
-            // Toggle Dashboard
+            // Dashboard Toggle
             var chkDash = (item.tm_is_dashboard == '1') ? 'checked' : '';
             row += '<td class="align-middle" data-column-name="tm_is_dashboard" id="' + item.tm_id + '"><input type="checkbox" class="toggle_checkbox_auto" data-toggle="toggle" data-on="<i class=\'fas fa-bolt\'></i>" data-off="-" data-onstyle="info" data-offstyle="secondary" data-size="sm" ' + chkDash + ' value="1"></td>';
 
-            // Urutan
+            // Urutan & Status
             row += '<td class="table_data_menu align-middle font-weight-bold text-primary" data-column-name="tm_urutan" id="' + item.tm_id + '" contenteditable>' + item.tm_urutan + '</td>';
-
-            // Status
             var chkStat = (item.tm_status == '1') ? 'checked' : '';
             row += '<td class="align-middle" data-column-name="tm_status" id="' + item.tm_id + '"><input type="checkbox" class="toggle_checkbox_auto" data-toggle="toggle" data-on="Y" data-off="N" data-onstyle="success" data-offstyle="danger" data-size="sm" ' + chkStat + ' value="1"></td>';
 
