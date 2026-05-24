@@ -590,77 +590,71 @@ class Pdtt2025 extends BaseController
         $fileTersimpan = 0;
 
         // =========================================================================
-        // 🚀 FUNGSI HELPER SUPER TANGGUH UNTUK MENARIK GAMBAR DARI MANAPUN
+        // 🚀 FUNGSI HELPER: RADAR FISIK ANTI-DEADLOCK (TANPA HTTP LOCALHOST)
         // =========================================================================
         $fetchImage = function ($path) {
             if (empty($path) || $path === '-' || strpos($path, 'noimage') !== false) return false;
 
-            $path = str_replace(base_url(), '', $path);
+            // 🚀 PROTEKSI DEADLOCK: Jika URL mengandung localhost/IP lokal, paksa jadikan path lokal
+            $isLocalUrl = (strpos($path, 'localhost') !== false || strpos($path, '127.0.0.1') !== false || strpos($path, '192.168.') !== false || strpos($path, base_url()) !== false);
 
-            // 1. Jika URL Eksternal (Google Drive / Lainnya)
-            if (filter_var($path, FILTER_VALIDATE_URL)) {
-
-                // 🚀 HACK GOOGLE DRIVE: Gunakan API Thumbnail agar tidak diblokir halaman HTML
+            // 1. Jika URL EKSTERNAL MURNI (Google Drive) -> Aman pakai cURL
+            if (filter_var($path, FILTER_VALIDATE_URL) && !$isLocalUrl) {
                 if (strpos($path, 'drive.google.com') !== false) {
                     $fileId = '';
-                    // Deteksi ID dari format /d/ID/view
-                    if (preg_match('/\/d\/([a-zA-Z0-9_-]+)/', $path, $matches)) {
-                        $fileId = $matches[1];
-                    }
-                    // Deteksi ID dari format ?id=ID
-                    elseif (preg_match('/id=([a-zA-Z0-9_-]+)/', $path, $matches)) {
-                        $fileId = $matches[1];
-                    }
+                    if (preg_match('/\/d\/([a-zA-Z0-9_-]+)/', $path, $matches)) $fileId = $matches[1];
+                    elseif (preg_match('/id=([a-zA-Z0-9_-]+)/', $path, $matches)) $fileId = $matches[1];
 
-                    if (!empty($fileId)) {
-                        // sz=w1200 memaksa resolusi tinggi tanpa batas HTML
-                        $path = 'https://drive.google.com/thumbnail?id=' . $fileId . '&sz=w1200';
-                    }
+                    if (!empty($fileId)) $path = 'https://drive.google.com/thumbnail?id=' . $fileId . '&sz=w1200';
                 }
 
-                // 3. JURUS PAMUNGKAS: Paksa Tarik via HTTP Localhost (Matikan Sementara)
-                /*
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, base_url($cleanPath));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            $data = curl_exec($ch);
-            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-            
-            if ($code == 200 && $data && @getimagesizefromstring($data)) {
-                return ['type' => 'string', 'data' => $data];
-            }
-            */
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $path);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+                $data = curl_exec($ch);
+                $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+
+                if ($code == 200 && $data && @getimagesizefromstring($data)) {
+                    return ['type' => 'string', 'data' => $data];
+                }
                 return false;
             }
 
-            // 2. Coba Path Lokal (Fisik Server Laragon)
-            $cleanPath = ltrim($path, '/');
+            // 2. RADAR FISIK LOKAL (Pencari File Tanpa HTTP)
+            // Bersihkan domain atau base_url agar hanya tersisa path belakangnya saja
+            $cleanPath = str_replace(base_url(), '', $path);
+            $cleanPath = preg_replace('#^https?://[^/]+(/sinden)?(/public)?/#i', '', $cleanPath);
+            $cleanPath = ltrim($cleanPath, '/');
+
+            // Hapus kata 'public/' di awal (CodeIgniter sering mendobelnya)
+            if (strpos($cleanPath, 'public/') === 0) {
+                $cleanPath = substr($cleanPath, 7);
+            }
+
+            // Daftar tempat persembunyian file di CodeIgniter 4
             $possiblePaths = [
-                FCPATH . $cleanPath,
-                ROOTPATH . 'public' . DIRECTORY_SEPARATOR . $cleanPath,
-                ROOTPATH . $cleanPath
+                FCPATH . $cleanPath,                                     // C:\...\sinden\public\foto.jpg
+                ROOTPATH . $cleanPath,                                   // C:\...\sinden\foto.jpg
+                ROOTPATH . 'public' . DIRECTORY_SEPARATOR . $cleanPath,  // C:\...\sinden\public\foto.jpg
+                WRITEPATH . 'uploads' . DIRECTORY_SEPARATOR . $cleanPath, // Default folder upload CI4
+                FCPATH . 'data' . DIRECTORY_SEPARATOR . $cleanPath,      // public/data/
+                FCPATH . 'uploads' . DIRECTORY_SEPARATOR . $cleanPath    // public/uploads/
             ];
 
             foreach ($possiblePaths as $p) {
-                if (file_exists($p)) return ['type' => 'file', 'data' => $p];
+                // Normalisasi garis miring (/) menjadi (\) khusus untuk Windows
+                $p = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $p);
+
+                if (file_exists($p) && is_file($p)) {
+                    return ['type' => 'file', 'data' => $p];
+                }
             }
 
-            // 3. JURUS PAMUNGKAS: Paksa Tarik via HTTP Localhost
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, base_url($cleanPath));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            $data = curl_exec($ch);
-            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-
-            // 🚀 VALIDASI KETAT LOKAL: Pastikan yang diunduh benar-benar gambar
-            if ($code == 200 && $data && @getimagesizefromstring($data)) {
-                return ['type' => 'string', 'data' => $data];
-            }
-            return false;
+            return false; // File benar-benar tidak ditemukan di harddisk
         };
 
         // =========================================================================
