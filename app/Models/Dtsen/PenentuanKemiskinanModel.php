@@ -29,382 +29,130 @@ class PenentuanKemiskinanModel extends Model
     public function getPenentuanKemiskinan(array $filter)
     {
         $db = $this->db;
-
-        /**
-         * ======================================================
-         * 1️⃣ QUERY DASAR KK
-         * ======================================================
-         */
+        $userRole = session()->role_id ?? 99;
 
         $builder = $db->table('dtsen_kk kk')
             ->select('
-            kk.id_kk,
-            kk.no_kk,
-            kk.kepala_keluarga,
-            kk.alamat,
-            rt.rw,
-            rt.rt,
-            art.nik,
-            se.kategori_desil
-        ')
-            ->join(
-                'dtsen_art art',
-                'art.id_kk = kk.id_kk AND art.hubungan_keluarga = 1',
-                'left'
-            )
+                kk.id_kk, kk.no_kk, kk.kepala_keluarga, kk.alamat,
+                rt.rw, rt.rt, art.nik, se.kategori_desil
+            ')
+            ->join('dtsen_art art', 'art.id_kk = kk.id_kk AND art.hubungan_keluarga = 1 AND art.deleted_at IS NULL', 'left')
             ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
             ->join('dtsen_se se', 'se.id_kk = kk.id_kk', 'left')
-            ->where('kk.deleted_at', null);
+            ->where('kk.deleted_at', null); // 🛡️ Cegah data sampah
 
-
-        /**
-         * ======================================================
-         * 🔐 FILTER WILAYAH TUGAS
-         * ======================================================
-         */
-        $userRole = session()->role_id ?? 99;
-
+        // 🔐 Panggil Filter Trait
         $this->applyWilayahFilter($builder, $filter, $userRole);
 
-        /**
-         * ======================================================
-         * 2️⃣ HANYA KK VERIFIED
-         * ======================================================
-         */
-
+        // Hanya yang sudah verified dari usulan
         $builder->whereIn('kk.id_kk', function ($sub) {
-
             $sub->select('dtsen_kk_id')
                 ->from('dtsen_usulan')
                 ->whereIn('status', ['verified', 'diverifikasi']);
         });
 
-        /**
-         * ======================================================
-         * 3️⃣ HILANGKAN YANG MASIH AKTIF (pending & approved)
-         * ======================================================
-         */
-
+        // 🔄 LOGIKA SIKLUS: Hilangkan yang masih aktif (pending/approved). 
+        // Jika statusnya 'rollback', otomatis akan muncul kembali di sini!
         $builder->whereNotIn('kk.id_kk', function ($sub) {
-
             $sub->select('dtsen_kk_id')
                 ->from('dtsen_penentuan_kemiskinan')
                 ->whereIn('status_verifikasi', ['pending', 'approved']);
         });
 
-        /**
-         * ======================================================
-         * 4️⃣ FILTER RW / RT / DESIL
-         * ======================================================
-         */
-
+        // Filter Tambahan
         if (!empty($filter['rw']) && $filter['rw'] !== 'all') {
             $builder->where('rt.rw', $filter['rw']);
         }
-
         if (!empty($filter['rt']) && $filter['rt'] !== 'all') {
             $builder->where('rt.rt', $filter['rt']);
         }
-
         if (!empty($filter['desil']) && $filter['desil'] !== 'all') {
-
-            if ($filter['desil'] === 'none') {
-                $builder->where('se.kategori_desil', null);
-            } else {
-                $builder->where('se.kategori_desil', $filter['desil']);
-            }
+            $builder->where('se.kategori_desil', $filter['desil'] === 'none' ? null : $filter['desil']);
         }
 
-        return $builder
-            ->get()
-            ->getResultArray();
+        return $builder->get()->getResultArray();
     }
-
-    /*
-    ====================================
-    DATA VERIFIKASI OPERATOR
-    ====================================
-    */
 
     public function getVerifikasiKemiskinan(array $filter)
     {
         $db = $this->db;
+        $userRole = session()->role_id ?? 99;
 
         $builder = $db->table('dtsen_penentuan_kemiskinan pk')
             ->select('
-            pk.id,
-            pk.status_kemiskinan,
-            pk.created_by,
-            u.fullname as petugas_entri,
-            pk.catatan,
-            kk.no_kk,
-            kk.kepala_keluarga,
-            art.nik,
-            rt.rw,
-            rt.rt,
-            se.kategori_desil
-        ')
+                pk.id, pk.status_kemiskinan, pk.created_by, u.fullname as petugas_entri, pk.catatan,
+                kk.no_kk, kk.kepala_keluarga, art.nik, rt.rw, rt.rt, se.kategori_desil
+            ')
             ->join('dtsen_kk kk', 'kk.id_kk = pk.dtsen_kk_id')
-            ->join(
-                'dtsen_art art',
-                'art.id_kk = kk.id_kk AND art.hubungan_keluarga = 1',
-                'left'
-            )
+            ->join('dtsen_art art', 'art.id_kk = kk.id_kk AND art.hubungan_keluarga = 1 AND art.deleted_at IS NULL', 'left')
             ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
             ->join('dtsen_se se', 'se.id_kk = kk.id_kk', 'left')
             ->join('dtks_users u', 'u.id = pk.created_by', 'left')
-            ->where('pk.status_verifikasi', 'pending');
+            ->where('pk.status_verifikasi', 'pending')
+            ->where('kk.deleted_at', null); // 🛡️ Cegah data sampah
 
-        /**
-         * ======================================================
-         * 🔐 FILTER DESA
-         * ======================================================
-         */
+        // 🔐 Panggil Filter Trait (Menggantikan puluhan baris logika override)
+        $this->applyWilayahFilter($builder, $filter, $userRole);
 
         if (!empty($filter['kode_desa'])) {
             $builder->where('rt.kode_desa', $filter['kode_desa']);
         }
-
-        /**
-         * ======================================================
-         * 🔐 FILTER WILAYAH TUGAS (SMART OVERRIDE)
-         * ======================================================
-         */
-
-        if (empty($filter['rw']) && empty($filter['rt'])) {
-
-            if (!empty($filter['wilayah_tugas'])) {
-
-                $wilayahTugas = str_replace('RW:', '', trim($filter['wilayah_tugas']));
-                $blokRW = preg_split('/[|;]/', $wilayahTugas);
-
-                $builder->groupStart();
-
-                foreach ($blokRW as $blok) {
-
-                    $blok = trim($blok);
-                    if (!$blok) continue;
-
-                    [$rw, $rtStr] = array_pad(explode(':', $blok), 2, null);
-                    $rtList = $rtStr ? explode(',', $rtStr) : [];
-
-                    $builder->orGroupStart()
-                        ->groupStart()
-                        ->where('rt.rw', $rw)
-                        ->orWhere('rt.rw', str_pad($rw, 2, '0', STR_PAD_LEFT))
-                        ->groupEnd();
-
-                    if (!empty($rtList)) {
-
-                        $rtVariants = [];
-
-                        foreach ($rtList as $rt) {
-                            $rtVariants[] = $rt;
-                            $rtVariants[] = str_pad($rt, 2, '0', STR_PAD_LEFT);
-                        }
-
-                        $builder->whereIn('rt.rt', $rtVariants);
-                    }
-
-                    $builder->groupEnd();
-                }
-
-                $builder->groupEnd();
-            }
-        }
-
-        /**
-         * ======================================================
-         * 🔎 FILTER RW / RT (PRIORITAS USER)
-         * ======================================================
-         */
-
-        // FILTER RW
-        if (!empty($filter['rw'])) {
-
-            $rwVariants = [
-                $filter['rw'],
-                str_pad($filter['rw'], 2, '0', STR_PAD_LEFT)
-            ];
-
-            $builder->whereIn('rt.rw', $rwVariants);
-        }
-
-        // FILTER RT
-        if (!empty($filter['rt'])) {
-
-            $rtVariants = [
-                $filter['rt'],
-                str_pad($filter['rt'], 2, '0', STR_PAD_LEFT)
-            ];
-
-            $builder->whereIn('rt.rt', $rtVariants);
-        }
-
-        /**
-         * ======================================================
-         * 🔎 DESIL
-         * ======================================================
-         */
         if (!empty($filter['desil'])) {
-
-            if ($filter['desil'] === 'none') {
-                $builder->where('se.kategori_desil', null);
-            } else {
-                $builder->where('se.kategori_desil', $filter['desil']);
-            }
+            $builder->where('se.kategori_desil', $filter['desil'] === 'none' ? null : $filter['desil']);
         }
-
-        // FILTER STATUS
         if (!empty($filter['status'])) {
             $builder->where('pk.status_kemiskinan', $filter['status']);
         }
-
-        // FILTER PETUGAS
         if (!empty($filter['petugas'])) {
             $builder->like('u.fullname', $filter['petugas']);
         }
 
-        return $builder
-            ->orderBy('pk.updated_at', 'ASC')
-            ->get()
-            ->getResultArray() ?? [];
+        return $builder->orderBy('pk.updated_at', 'ASC')->get()->getResultArray() ?? [];
     }
-
-    /*
-    ====================================
-    DATA KEMISKINAN FINAL
-    ====================================
-    */
 
     public function getDataKemiskinanFinal(array $filter)
     {
         $db = $this->db;
+        $userRole = session()->role_id ?? 99;
 
         $builder = $db->table('dtsen_penentuan_kemiskinan pk')
             ->select('
-            pk.id,
-            pk.status_kemiskinan,
-            pk.verified_at,
-            kk.no_kk,
-            kk.kepala_keluarga,
-            art.nik,
-            rt.rw,
-            rt.rt
-        ')
+                pk.id, pk.status_kemiskinan, pk.verified_at,
+                kk.no_kk, kk.kepala_keluarga, art.nik, rt.rw, rt.rt
+            ')
             ->join('dtsen_kk kk', 'kk.id_kk = pk.dtsen_kk_id')
-            ->join(
-                'dtsen_art art',
-                'art.id_kk = kk.id_kk AND art.hubungan_keluarga = 1',
-                'left'
-            )
+            ->join('dtsen_art art', 'art.id_kk = kk.id_kk AND art.hubungan_keluarga = 1 AND art.deleted_at IS NULL', 'left')
             ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
-            ->where('pk.status_verifikasi', 'approved');
+            ->where('pk.status_verifikasi', 'approved')
+            ->where('kk.deleted_at', null); // 🛡️ Cegah data sampah
 
-        /**
-         * ======================================================
-         * 🔐 FILTER DESA
-         * ======================================================
-         */
+        // 🔐 Panggil Filter Trait
+        $this->applyWilayahFilter($builder, $filter, $userRole);
 
         if (!empty($filter['kode_desa'])) {
             $builder->where('rt.kode_desa', $filter['kode_desa']);
         }
-
-        /**
-         * ======================================================
-         * 🔐 FILTER WILAYAH TUGAS
-         * ======================================================
-         */
-
-        if (!empty($filter['wilayah_tugas'])) {
-
-            $wilayahTugas = str_replace('RW:', '', trim($filter['wilayah_tugas']));
-            $blokRW = preg_split('/[|;]/', $wilayahTugas);
-
-            $builder->groupStart();
-
-            foreach ($blokRW as $blok) {
-
-                $blok = trim($blok);
-                if (!$blok) continue;
-
-                [$rw, $rtStr] = array_pad(explode(':', $blok), 2, null);
-                $rtList = $rtStr ? explode(',', $rtStr) : [];
-
-                $builder->orGroupStart()
-                    ->groupStart()
-                    ->where('rt.rw', $rw)
-                    ->orWhere('rt.rw', str_pad($rw, 2, '0', STR_PAD_LEFT))
-                    ->groupEnd();
-
-                if (!empty($rtList)) {
-
-                    $rtVariants = [];
-
-                    foreach ($rtList as $rt) {
-                        $rtVariants[] = $rt;
-                        $rtVariants[] = str_pad($rt, 2, '0', STR_PAD_LEFT);
-                    }
-
-                    $builder->whereIn('rt.rt', $rtVariants);
-                }
-
-                $builder->groupEnd();
-            }
-
-            $builder->groupEnd();
-        }
-
-        /**
-         * ======================================================
-         * 🔎 FILTER RW / RT (PRIORITAS USER)
-         * ======================================================
-         */
-
-        if (!empty($filter['rw'])) {
-            $builder->whereIn('rt.rw', [
-                $filter['rw'],
-                str_pad($filter['rw'], 2, '0', STR_PAD_LEFT)
-            ]);
-        }
-
-        if (!empty($filter['rt'])) {
-            $builder->whereIn('rt.rt', [
-                $filter['rt'],
-                str_pad($filter['rt'], 2, '0', STR_PAD_LEFT)
-            ]);
-        }
-
-        /**
-         * ======================================================
-         * 🔎 FILTER STATUS
-         * ======================================================
-         */
-
         if (!empty($filter['status'])) {
             $builder->where('pk.status_kemiskinan', $filter['status']);
         }
 
-        return $builder
-            ->orderBy('pk.verified_at', 'DESC')
-            ->get()
-            ->getResultArray();
+        return $builder->orderBy('pk.verified_at', 'DESC')->get()->getResultArray();
     }
 
-
-    /*
-    ====================================
-    JUMLAH DATA MENUNGGU VERIFIKASI
-    ====================================
-    */
-
-    public function countPending()
+    public function countPending(array $filter = [])
     {
-        return $this->db->table('dtsen_penentuan_kemiskinan')
+        $db = $this->db;
+        $userRole = session()->role_id ?? 99;
 
-            ->where('status_verifikasi', 'pending')
+        $builder = $db->table('dtsen_penentuan_kemiskinan pk')
+            ->join('dtsen_kk kk', 'kk.id_kk = pk.dtsen_kk_id')
+            ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
+            ->where('pk.status_verifikasi', 'pending')
+            ->where('kk.deleted_at', null);
 
-            ->countAllResults();
+        // Filter jumlah pending berdasarkan wilayah petugas
+        $this->applyWilayahFilter($builder, $filter, $userRole);
+
+        return $builder->countAllResults();
     }
 }
