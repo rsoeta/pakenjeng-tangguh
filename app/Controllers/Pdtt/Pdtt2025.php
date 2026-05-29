@@ -21,7 +21,7 @@ class Pdtt2025 extends BaseController
         $roleId = session()->get('role_id') ?? 99;
 
         $data = [
-            'title'    => 'Verivali PDTT 2025',
+            'title'    => 'VERVAL PDTT 2025',
             'roleId'   => $roleId,
             'editable' => ($roleId <= 4)
         ];
@@ -687,5 +687,17 @@ class Pdtt2025 extends BaseController
         } else {
             return "Gagal mengunduh: File foto fisik tidak ditemukan di Server maupun Google Drive.";
         }
+    }
+
+    public function statistik()
+    {
+        $model = new \App\Models\Dtsen\Pdtt2025Model(); // Sesuaikan namespace model Kang Rian
+
+        $data = [
+            'title'     => 'Statistik Capaian Verivali PDTT 2025',
+            'statistik' => json_encode($model->getStatistikPerPetugas())
+        ];
+
+        return view('pdtt/2025/statistik', $data);
     }
 }

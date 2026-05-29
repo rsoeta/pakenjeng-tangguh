@@ -175,4 +175,92 @@ class Pdtt2025Model extends Model
 
         return $builder;
     }
+
+    /**
+     * Mengambil rekap statistik Selesai & Pending per Petugas berdasarkan wilayah tugas
+     */
+    public function getStatistikPerPetugas()
+    {
+        $db = \Config\Database::connect();
+
+        // 1. Ambil semua user/petugas yang memiliki wilayah_tugas (Role 4/5 atau sesuaikan)
+        $users = $db->table('dtks_users')
+            ->select('id, fullname, wilayah_tugas')
+            ->where('wilayah_tugas !=', '')
+            ->where('wilayah_tugas IS NOT NULL')
+            ->get()->getResultArray();
+
+        // 2. Ambil rekap total data PDTT berdasarkan RW, RT, dan Status
+        // Sesuaikan nama tabel 'dtsen_pdtt_2025' dengan yang Kang Rian gunakan
+        $rekapData = $db->table('dtsen_pdtt_2025')
+            ->select('rw, rt, status_verifikasi, COUNT(id) as total')
+            ->groupBy('rw, rt, status_verifikasi')
+            ->get()->getResultArray();
+
+        $statistik = [];
+
+        // 3. Mapping data rekap ke masing-masing petugas
+        foreach ($users as $user) {
+            $selesai = 0;
+            $pending = 0;
+
+            foreach ($rekapData as $row) {
+                // Cek apakah RW & RT dari data ini masuk dalam wilayah tugas petugas
+                if ($this->isWilayahMatch($row['rw'], $row['rt'], $user['wilayah_tugas'])) {
+                    if (strtolower($row['status_verifikasi']) === 'selesai' || strtolower($row['status_verifikasi']) === 'verified') {
+                        $selesai += $row['total'];
+                    } else {
+                        $pending += $row['total'];
+                    }
+                }
+            }
+
+            // Hanya tampilkan petugas yang memiliki beban tugas (ada data)
+            if ($selesai > 0 || $pending > 0) {
+                $statistik[] = [
+                    'nama'    => $user['fullname'],
+                    'selesai' => $selesai,
+                    'pending' => $pending
+                ];
+            }
+        }
+
+        return $statistik;
+    }
+
+    /**
+     * Helper PHP untuk mencocokkan string wilayah_tugas (mirip logika Trait Kang Rian)
+     */
+    private function isWilayahMatch($rwData, $rtData, $wilayahTugasPetugas)
+    {
+        if (empty($wilayahTugasPetugas)) return false;
+
+        $wilayahTugas = str_replace('RW:', '', trim($wilayahTugasPetugas));
+        $blokRW = preg_split('/[|;]/', $wilayahTugas);
+
+        $rwDataPad = str_pad($rwData, 2, '0', STR_PAD_LEFT);
+        $rtDataPad = str_pad($rtData, 2, '0', STR_PAD_LEFT);
+
+        foreach ($blokRW as $blok) {
+            $blok = trim($blok);
+            if (!$blok) continue;
+
+            [$rwTugas, $rtStr] = array_pad(explode(':', $blok), 2, null);
+            $rtList = $rtStr ? explode(',', $rtStr) : [];
+            $rwTugasPad = str_pad($rwTugas, 2, '0', STR_PAD_LEFT);
+
+            if ($rwDataPad === $rwTugasPad) {
+                if (empty($rtList)) {
+                    return true; // Punya akses full ke 1 RW
+                } else {
+                    foreach ($rtList as $rt) {
+                        if ($rtDataPad === str_pad($rt, 2, '0', STR_PAD_LEFT)) {
+                            return true; // Punya akses ke RT spesifik
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }

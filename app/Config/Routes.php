@@ -20,9 +20,9 @@ $routes->setDefaultNamespace('App\Controllers');
 $routes->setDefaultController('Landing');
 $routes->setDefaultMethod('index');
 $routes->setTranslateURIDashes(false);
-$routes->set404Override(function () {
-	return view('lockscreen');
-});
+// $routes->set404Override(function () {
+// 	return view('lockscreen');
+// });
 $routes->setAutoRoute(true);
 $routes->setAutoRoute(false);
 
@@ -289,6 +289,7 @@ $routes->group('pdtt', ['filter' => ['authfilterdtks', 'globalview', 'menufilter
 	$routes->get('2025/export-excel', 'Pdtt\Pdtt2025::exportExcel');
 	$routes->get('2025/export-images', 'Pdtt\Pdtt2025::exportImages');
 	$routes->get('2025/download-images/(:num)', 'Pdtt\Pdtt2025::downloadImagesPerKpm/$1');
+	$routes->get('2025/statistik', 'Pdtt\Pdtt2025::statistik'); // Sesuaikan nama controllernya
 
 	// API untuk Form Verifikasi
 	$routes->get('2025/get-detail/(:num)', 'Pdtt\Pdtt2025::getDetail/$1');
@@ -590,6 +591,29 @@ $routes->match(['GET', 'POST'], 'profil_user', 'Profil\Profil_User::index', ['fi
 $routes->post('update_user', 'Profil\Profil_User::update_user', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('submit_lembaga', 'Profil\Profil_User::submit_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('update_lembaga', 'Profil\Profil_User::update_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+
+/**
+ * =========================================================================
+ * ⚙️ SETTINGS & APLIKASI
+ * =========================================================================
+ */
+// 🛡️ Filter grup hanya mewajibkan LOGIN (authfilterdtks)
+$routes->group('settings', [
+	'namespace' => 'App\Controllers\Settings',
+	'filter'    => 'authfilterdtks'
+], function ($routes) {
+
+	// 🛡️ Halaman Utama: Ekstra perlindungan HAK AKSES MENU (menufilterdtks)
+	$routes->get('menu', 'MenuApp::index', ['filter' => 'menufilterdtks']);
+
+	// 🔓 Ubah ke GET agar bebas dari blokir CSRF saat memuat data
+	$routes->get('load_data_menu', 'MenuApp::load_data_menu');
+
+	$routes->post('insert_data_menu', 'MenuApp::insert_data_menu');
+	$routes->post('update_data_menu', 'MenuApp::update_data_menu');
+	$routes->post('delete_data_menu', 'MenuApp::delete_data_menu');
+	$routes->post('get_nama_menu', 'MenuApp::get_nama_menu');
+});
 
 // DOKUMENTASI KEGIATAN PETUGAS ENTRI
 $routes->get('dokumentasi/kegiatan', 'Dokumentasi::get_kegiatan', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);

@@ -3,17 +3,22 @@
 
 <div class="content-wrapper mt-3">
     <div class="d-flex justify-content-between align-items-center mb-3 px-3">
-        <h4 class="fw-bold mb-0"><i class="fas fa-shield-alt text-primary"></i> Verivali PDTT 2025</h4>
+        <h4 class="fw-bold mb-0"><i class="fas fa-shield-alt text-primary"></i> VERVAL PDTT 2025</h4>
         <div>
+            <!-- Tombol Baru: Statistik Capaian -->
+            <a href="<?= base_url('pdtt/2025/statistik') ?>" class="btn btn-info btn-sm shadow-sm me-1">
+                <i class="fas fa-chart-bar"></i> Statistik Capaian
+            </a>
+
             <?php if ($roleId == 5 || $roleId <= 3): ?>
                 <a href="<?= base_url('pdtt/2025/export-excel') ?>" class="btn btn-primary btn-sm shadow-sm me-1">
-                    <i class="fas fa-file-excel"></i> Export Excel
+                    <i class="fas fa-file-excel"></i>
                 </a>
             <?php endif; ?>
 
             <?php if ($roleId <= 3): ?>
                 <button class="btn btn-success btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#modalImport">
-                    <i class="fas fa-upload"></i> Import Data
+                    <i class="fas fa-upload"></i>
                 </button>
             <?php endif; ?>
         </div>
