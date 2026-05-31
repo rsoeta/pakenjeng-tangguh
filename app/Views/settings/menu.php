@@ -25,11 +25,14 @@
         <div class="container-fluid">
 
             <div class="card card-primary card-outline shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold text-secondary mb-0">Struktur Navigasi SINDEN</h5>
-                    <button type="button" class="btn btn-primary btn-sm shadow-sm" data-toggle="modal" data-target="#modalTambahMenu">
-                        <i class="fas fa-plus-circle"></i> Tambah Menu Baru
-                    </button>
+                <div class="card-header bg-white">
+                    <h5 class="card-title fw-bold text-secondary mb-0 mt-1">Struktur Navigasi SINDEN</h5>
+
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-primary btn-sm shadow-sm" data-toggle="modal" data-target="#modalTambahMenu">
+                            <i class="fas fa-plus-circle"></i> Tambah Menu Baru
+                        </button>
+                    </div>
                 </div>
 
                 <div class="card-body p-0">
