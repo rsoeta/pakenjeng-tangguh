@@ -281,6 +281,12 @@ $routes->group('dtsen/kemiskinan', ['filter' => ['authfilterdtks', 'menufilterdt
 	$routes->post('rollback', 'Dtsen\PenentuanKemiskinan::rollback');
 });
 
+/**
+ * =========================================================================
+ * 🛡️ MODUL VERVAL (Verifikasi & Validasi) DTSEN
+ * =========================================================================
+ */
+
 // === PDTT 2025 ===
 $routes->group('pdtt', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
 	$routes->get('2025', 'Pdtt\Pdtt2025::index');
@@ -298,6 +304,42 @@ $routes->group('pdtt', ['filter' => ['authfilterdtks', 'globalview', 'menufilter
 	// 🚀 API Filter Bertingkat (Desa -> RW -> RT)
 	$routes->get('2025/get-rw', 'Pdtt\Pdtt2025::getFilterRw');
 	$routes->get('2025/get-rt/(:any)', 'Pdtt\Pdtt2025::getFilterRt/$1');
+});
+
+
+// Filter grup dasar: Wajib LOGIN (authfilterdtks)
+$routes->group('verval', [
+	'namespace' => 'App\Controllers\Dtsen\Verval',
+	'filter'    => ['authfilterdtks', 'menufilterdtks'] // Pastikan menufilterdtks juga aktif untuk akses menu,
+], function ($routes) {
+
+	// ---------------------------------------------------------------------
+	// 📌 SUBMENU: ANOMALI SIKS-NG
+	// ---------------------------------------------------------------------
+	// Halaman Utama: Ekstra perlindungan HAK AKSES MENU (menufilterdtks)
+	$routes->get('anomali', 'Anomali::index', ['filter' => 'menufilterdtks']);
+
+	// 🔓 AJAX Endpoint: Cukup login saja, bebas dari blokir hak akses menu
+	$routes->post('anomali/search_nik_ajax', 'Anomali::search_nik_ajax');
+	$routes->post('anomali/simpan', 'Anomali::simpan');
+	// Tambahkan di bawah rute anomali/simpan
+	$routes->get('anomali/get_data_ajax', 'Anomali::get_data_ajax');
+
+	// 🔓 AJAX Endpoint untuk mengambil detail 1 baris anomali
+	$routes->get('anomali/get_detail_ajax/(:num)', 'Anomali::get_detail_ajax/$1');
+
+	// 🔓 AJAX Endpoint untuk menyimpan perbaikan KK dari Petugas
+	$routes->post('anomali/update_petugas', 'Anomali::update_petugas');
+
+	// 🔓 AJAX Endpoint untuk Dropdown Bertingkat Wilayah (Prov, Kab, Kec, Desa)
+	$routes->get('anomali/get_wilayah/(:any)', 'Anomali::get_wilayah/$1');
+	$routes->get('anomali/get_wilayah/(:any)/(:any)', 'Anomali::get_wilayah/$1/$2');
+
+	// 🔓 AJAX Endpoint untuk Dropdown SHDK, Kawin, Pekerjaan
+	$routes->get('anomali/get_referensi/(:any)', 'Anomali::get_referensi/$1');
+
+	// 🔓 AJAX Endpoint untuk Proses Verifikasi Operator (Setuju / Tolak)
+	$routes->post('anomali/proses_verifikasi', 'Anomali::proses_verifikasi');
 });
 
 // public CMS / admin

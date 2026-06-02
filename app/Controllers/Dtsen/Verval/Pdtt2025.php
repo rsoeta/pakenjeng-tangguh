@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Controllers\Pdtt;
+// namespace App\Controllers\Pdtt;
+namespace App\Controllers\Dtsen\Verval; // 🚀 Direvisi menjadi Dtsen
 
 use App\Controllers\BaseController;
 use App\Models\Dtsen\Pdtt2025Model;
@@ -27,7 +28,7 @@ class Pdtt2025 extends BaseController
         ];
 
         // Pastikan Kang Rian membuat file views/pdtt/2025/index.php setelah ini
-        return view('pdtt/2025/index', $data);
+        return view('dtsen/verval/pdtt2025/index', $data);
     }
 
     // 📥 Fitur Import Excel (Hanya untuk Admin / Role <= 3)
@@ -698,6 +699,6 @@ class Pdtt2025 extends BaseController
             'statistik' => json_encode($model->getStatistikPerPetugas())
         ];
 
-        return view('pdtt/2025/statistik', $data);
+        return view('dtsen/verval/pdtt2025/statistik', $data);
     }
 }

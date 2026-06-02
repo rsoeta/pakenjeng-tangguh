@@ -1,0 +1,210 @@
+Kita lanjut membuat submenu Anomali dibawah Menu VERVAL.
+Workflow-nya  adalah Operator Desa menemukan data yang tidak padan capil di SIKS-NG kemudian saat itu juga Operator Desa me-screenshoot bukti ketidakpadanan capil tersebut, lalu Operator desa masuk ke Menu VERVAL > Anomali, pada menu tersebut disediakan tombol untuk menampilkan modal dimana modal tersebut berfungsi untuk mencari data berdasarkan NIK pada tabel dtsen_art yang di join dengan tabel-tabel lainnya, bila ditemukan maka hasilnya disimpan kedalam field-field yang ada dalam modal tersebut (NIK, No. KK, Nama Lengkap, Nama Ibu Kandung, Tempat Lahir, Tanggal Lahir, Provinsi, Kabupaten/Kota, Kecamatan, Desa, Alamat, RT, RW, SHDK, Jenis Kelamin, Status Kawin, Pekerjaan, dan Input file image untuk screenshoot bukti ketidakpadanan capil diatas).
+Keterangan join tabel: 
+•	Untuk mendapatkan No. KK: dtsen.art.id_kk = dtsen_kk.id_kk
+•	Untuk mendapatkan Provinsi, Kabupaten/Kota, Kecamatan, Desa: dtsen_kk.id_rt = dtsen_rt.kode_desa (contoh tampilan isi kode_desa 32.05.33.2006), kode desa tersebut join lagi mungkin dengan tb_provinces, tb_regencies, tb_districts, dan tb_villages
+•	Untuk mendapatkan SHDK (Status Hubungan dalam Keluarga): dtsen_art. hubungan_keluarga = tb_shdk.id
+•	Untuk mendapatkan Status Kawin: dtsen_art.status_kawin =tb_status_kawin.idStatus
+•	Untuk mendapatkan Pekerjaan: dtsen_art.pekerjaan= tb_penduduk_pekerjaan.pk_id
+
+mysql> describe dtsen_art;
++---------------------+--------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| Field               | Type                                             | Null | Key | Default           | Extra                                         |
++---------------------+--------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| id_art              | int unsigned                                     | NO   | PRI | NULL              | auto_increment                                |
+| id_kk               | int unsigned                                     | NO   | MUL | NULL              |                                               |
+| nik                 | varchar(20)                                      | YES  |     | NULL              |                                               |
+| shdk                | int                                              | YES  |     | NULL              |                                               |
+| nama                | varchar(100)                                     | NO   |     | NULL              |                                               |
+| hubungan_keluarga   | varchar(50)                                      | YES  |     | NULL              |                                               |
+| jenis_kelamin       | enum('L','P')                                    | YES  |     | NULL              |                                               |
+| tempat_lahir        | varchar(50)                                      | YES  |     | NULL              |                                               |
+| tanggal_lahir       | date                                             | YES  |     | NULL              |                                               |
+| status_kawin        | varchar(50)                                      | YES  |     | NULL              |                                               |
+| pendidikan_terakhir | varchar(50)                                      | YES  |     | NULL              |                                               |
+| pekerjaan           | varchar(100)                                     | YES  |     | NULL              |                                               |
+| disabilitas         | varchar(50)                                      | YES  |     | NULL              |                                               |
+| status_hamil        | enum('Tidak','Ya')                               | NO   |     | Tidak             |                                               |
+| tgl_hamil           | date                                             | YES  |     | NULL              |                                               |
+| foto_identitas      | varchar(255)                                     | YES  |     | NULL              |                                               |
+| ibu_kandung         | varchar(100)                                     | YES  |     | NULL              |                                               |
+| program_bansos      | varchar(100)                                     | YES  |     | NULL              |                                               |
+| is_usulan_bansos    | tinyint(1)                                       | NO   |     | 0                 |                                               |
+| usulan_status       | enum('draft','dikirim','diverifikasi','ditolak') | YES  |     | draft             |                                               |
+| source_name         | varchar(100)                                     | YES  |     | NULL              |                                               |
+| created_at          | datetime                                         | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| updated_at          | datetime                                         | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
+| created_by          | varchar(50)                                      | YES  |     | NULL              |                                               |
+| updated_by          | varchar(50)                                      | YES  |     | NULL              |                                               |
+| deleted_at          | datetime                                         | YES  |     | NULL              |                                               |
+| delete_reason       | text                                             | YES  |     | NULL              |                                               |
++---------------------+--------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+27 rows in set (2.03 sec)
+
+mysql> describe dtsen_kk;
++--------------------------+--------------------+------+-----+-------------------+-----------------------------------------------+
+| Field                    | Type               | Null | Key | Default           | Extra                                         |
++--------------------------+--------------------+------+-----+-------------------+-----------------------------------------------+
+| id_kk                    | int unsigned       | NO   | PRI | NULL              | auto_increment                                |
+| id_rt                    | int unsigned       | NO   | MUL | NULL              |                                               |
+| no_kk                    | varchar(20)        | NO   |     | NULL              |                                               |
+| kepala_keluarga          | varchar(100)       | NO   |     | NULL              |                                               |
+| alamat                   | varchar(50)        | YES  |     | NULL              |                                               |
+| status_kepemilikan_rumah | varchar(50)        | YES  |     | NULL              |                                               |
+| jumlah_anggota           | int                | YES  |     | NULL              |                                               |
+| program_bansos           | varchar(100)       | YES  |     | NULL              |                                               |
+| kategori_adat            | enum('Tidak','Ya') | NO   |     | Tidak             |                                               |
+| nama_suku                | varchar(100)       | YES  |     | NULL              |                                               |
+| foto_kk                  | varchar(255)       | YES  |     | NULL              |                                               |
+| foto_rumah               | varchar(255)       | YES  |     | NULL              |                                               |
+| foto_rumah_dalam         | varchar(255)       | YES  |     | NULL              |                                               |
+| source_name              | varchar(100)       | YES  |     | NULL              |                                               |
+| created_at               | datetime           | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| updated_at               | datetime           | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
+| deleted_at               | datetime           | YES  |     | NULL              |                                               |
+| delete_reason            | text               | YES  |     | NULL              |                                               |
+| created_by               | varchar(50)        | YES  |     | NULL              |                                               |
+| updated_by               | varchar(50)        | YES  |     | NULL              |                                               |
+| is_recovery_needed       | tinyint(1)         | YES  |     | 0                 |                                               |
++--------------------------+--------------------+------+-----+-------------------+-----------------------------------------------+
+21 rows in set (0.01 sec)
+
+mysql> describe dtsen_rt;
++-------------------+-------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| Field             | Type                                                  | Null | Key | Default           | Extra                                         |
++-------------------+-------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| id_rt             | int unsigned                                          | NO   | PRI | NULL              | auto_increment                                |
+| kode_desa         | varchar(20)                                           | YES  |     | NULL              |                                               |
+| alamat            | varchar(255)                                          | YES  |     | NULL              |                                               |
+| rt                | varchar(5)                                            | YES  |     | NULL              |                                               |
+| rw                | varchar(5)                                            | YES  |     | NULL              |                                               |
+| kelurahan         | varchar(100)                                          | YES  |     | NULL              |                                               |
+| latitude          | varchar(50)                                           | YES  |     | NULL              |                                               |
+| longitude         | varchar(50)                                           | YES  |     | NULL              |                                               |
+| accuracy          | varchar(20)                                           | YES  |     | NULL              |                                               |
+| kepemilikan_rumah | enum('Milik Sendiri','Kontrak','Menumpang','Lainnya') | NO   |     | Milik Sendiri     |                                               |
+| kondisi_atap      | varchar(50)                                           | YES  |     | NULL              |                                               |
+| kondisi_dinding   | varchar(50)                                           | YES  |     | NULL              |                                               |
+| kondisi_lantai    | varchar(50)                                           | YES  |     | NULL              |                                               |
+| luas_lantai       | decimal(8,2)                                          | YES  |     | NULL              |                                               |
+| bahan_bakar       | varchar(100)                                          | YES  |     | NULL              |                                               |
+| sumber_air        | varchar(50)                                           | YES  |     | NULL              |                                               |
+| sanitasi          | varchar(50)                                           | YES  |     | NULL              |                                               |
+| sumber_listrik    | varchar(50)                                           | YES  |     | NULL              |                                               |
+| foto_rumah        | varchar(255)                                          | YES  |     | NULL              |                                               |
+| foto_rumah_dalam  | varchar(255)                                          | YES  |     | NULL              |                                               |
+| source_name       | varchar(100)                                          | YES  |     | NULL              |                                               |
+| created_at        | datetime                                              | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| updated_at        | datetime                                              | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
+| created_by        | varchar(50)                                           | YES  |     | NULL              |                                               |
+| updated_by        | varchar(50)                                           | YES  |     | NULL              |                                               |
++-------------------+-------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+25 rows in set (0.00 sec)
+
+mysql> describe tb_provinces;
++-------+----------------+------+-----+---------+-------+
+| Field | Type           | Null | Key | Default | Extra |
++-------+----------------+------+-----+---------+-------+
+| id    | varchar(25)    | NO   | PRI | NULL    |       |
+| name  | varbinary(100) | YES  |     | NULL    |       |
++-------+----------------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+
+mysql> describe tb_regencies;
++-------------+--------------+------+-----+---------+-------+
+| Field       | Type         | Null | Key | Default | Extra |
++-------------+--------------+------+-----+---------+-------+
+| id          | varchar(100) | NO   | PRI | NULL    |       |
+| province_id | varchar(100) | YES  |     | NULL    |       |
+| name        | varchar(255) | YES  |     | NULL    |       |
++-------------+--------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+mysql> describe tb_districts;
++------------+--------------+------+-----+---------+-------+
+| Field      | Type         | Null | Key | Default | Extra |
++------------+--------------+------+-----+---------+-------+
+| id         | varchar(100) | NO   | PRI | NULL    |       |
+| regency_id | varchar(100) | YES  |     | NULL    |       |
+| name       | varchar(255) | YES  |     | NULL    |       |
++------------+--------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+mysql> describe tb_villages;
++-------------+--------------+------+-----+---------+-------+
+| Field       | Type         | Null | Key | Default | Extra |
++-------------+--------------+------+-----+---------+-------+
+| id          | varchar(100) | NO   | PRI | NULL    |       |
+| name        | varchar(255) | YES  |     | NULL    |       |
+| province_id | varchar(100) | YES  | MUL | NULL    |       |
+| regency_id  | varchar(100) | YES  | MUL | NULL    |       |
+| district_id | varchar(100) | YES  | MUL | NULL    |       |
++-------------+--------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+mysql> describe tb_shdk;
++------------+--------------+------+-----+---------+-------+
+| Field      | Type         | Null | Key | Default | Extra |
++------------+--------------+------+-----+---------+-------+
+| id         | int          | NO   | PRI | NULL    |       |
+| jenis_shdk | varchar(100) | NO   |     | NULL    |       |
+| tsf_id     | int          | YES  |     | NULL    |       |
++------------+--------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+mysql> describe tb_status_kawin;
++-------------+-------------+------+-----+---------+----------------+
+| Field       | Type        | Null | Key | Default | Extra          |
++-------------+-------------+------+-----+---------+----------------+
+| idStatus    | int         | NO   | PRI | NULL    | auto_increment |
+| StatusKawin | varchar(50) | NO   |     | NULL    |                |
++-------------+-------------+------+-----+---------+----------------+
+2 rows in set (0.00 sec)
+
+mysql> describe tb_penduduk_pekerjaan;
++---------+--------------+------+-----+---------+-------+
+| Field   | Type         | Null | Key | Default | Extra |
++---------+--------------+------+-----+---------+-------+
+| pk_id   | int unsigned | NO   | PRI | NULL    |       |
+| pk_nama | varchar(100) | YES  |     | NULL    |       |
+| fpp_id  | int          | YES  |     | NULL    |       |
++---------+--------------+------+-----+---------+-------+
+3 rows in set (0.00 sec)
+
+setelah berhasil terinclude ke field masing-masing, Operator Desa dapat menyimpan data tersebut dengan menekan tombol simpan, maka data tersebut akan tersimpan ke dalam tabel dtsen_anomali dengan field-field yang sama dengan field-field yang ada di modal tersebut. jangan lupa tambahkan field tambahan untuk menyimpan informasi tentang siapa yang menyimpan data tersebut (created_by), kapan data tersebut disimpan (created_at), dan siapa petugas entri yang harus memperbaikinya (berdasarkan wilayah_tugas alamat awal KPM). untuk apa mengetahui siapa petugas entri yang harus memperbaikinya? karena sebelum data tersebut tersimpan ke tabel dtsen_anomali ini nantinya akan digunakan untuk mengirim pesan whatsapp ke petugas entri yang bersangkutan, agar segera melakukan perbaikan data di submenu Anomali ini, dan tampilkan pula hanya ke dashboard (app\Views\dashboard.php) petugas entri tersebut.
+tugas dari petugas entri: adalah memperbaiki data yang salah tadi dengan data terbaru KPM termasuk wajib melampirkan foto KK terbaru KPM (data anomali) tersebut. setelah berhasil diperbaiki oleh petugas entri, maka data tersebut akan berpindah status menjadi "draft".
+tugas Operator Desa setelah data tersebut diperbaiki oleh petugas entri adalah melakukan verifikasi data yang sudah diperbaiki tersebut, bila data tersebut sudah benar maka Operator Desa dapat menekan tombol "verifikasi" untuk memindahkan status data tersebut menjadi "verified". namun bila data tersebut masih belum benar maka Operator Desa dapat menekan tombol "tolak" untuk mengembalikan data tersebut ke petugas entri untuk diperbaiki kembali, dan status data tersebut akan berubah menjadi "rejected".
+
+=================================================================================================================================================================================
+CREATE TABLE `dtsen_anomali` (
+  `id_anomali` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nik` varchar(20) NOT NULL,
+  `no_kk` varchar(20) DEFAULT NULL,
+  `nama_lengkap` varchar(100) NOT NULL,
+  `ibu_kandung` varchar(100) DEFAULT NULL,
+  `tempat_lahir` varchar(50) DEFAULT NULL,
+  `tanggal_lahir` date DEFAULT NULL,
+  `provinsi` varchar(100) DEFAULT NULL,
+  `kabupaten` varchar(100) DEFAULT NULL,
+  `kecamatan` varchar(100) DEFAULT NULL,
+  `desa` varchar(100) DEFAULT NULL,
+  `alamat` varchar(255) DEFAULT NULL,
+  `rt` varchar(5) DEFAULT NULL,
+  `rw` varchar(5) DEFAULT NULL,
+  `shdk` varchar(100) DEFAULT NULL,
+  `jenis_kelamin` enum('L','P') DEFAULT NULL,
+  `status_kawin` varchar(50) DEFAULT NULL,
+  `pekerjaan` varchar(100) DEFAULT NULL,
+  `bukti_siksng` varchar(255) NOT NULL COMMENT 'Screenshot dari Operator Desa',
+  `foto_kk_baru` varchar(255) DEFAULT NULL COMMENT 'Upload KK dari Petugas Entri',
+  `petugas_entri_id` int(11) UNSIGNED DEFAULT NULL COMMENT 'ID User Petugas yang ditugaskan',
+  `status_anomali` enum('open','draft','verified','rejected') DEFAULT 'open' COMMENT 'open=baru, draft=sudah diperbaiki petugas, verified=selesai, rejected=ditolak operator',
+  `catatan_penolakan` text DEFAULT NULL,
+  `created_by` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_by` varchar(50) DEFAULT NULL,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_anomali`),
+  KEY `idx_nik` (`nik`),
+  KEY `idx_petugas` (`petugas_entri_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

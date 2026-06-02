@@ -254,7 +254,7 @@
                 // 🔹 Wilayah
                 {
                     data: null,
-                    className: 'text-center',
+                    className: 'text-start',
                     render: r => `
                 <span class="badge bg-light text-dark border">RW ${r.rw}</span>
                 <span class="mx-1">/</span>
@@ -265,7 +265,7 @@
                 // 🔹 Status
                 {
                     data: 'usulan_status',
-                    className: 'text-center',
+                    className: 'text-start',
                     render: function(status, type, row) {
 
                         if (!status) {
@@ -294,7 +294,7 @@
                 // 🔹 Desil
                 {
                     data: 'kategori_desil',
-                    className: 'text-center',
+                    className: 'text-start',
                     render: d => {
                         // 🚀 PERBAIKAN: Pastikan 0 tidak terdeteksi sebagai "Belum"
                         if (d === null || d === '' || d === undefined) {

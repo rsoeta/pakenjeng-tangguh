@@ -93,6 +93,30 @@
         <small>Terima kasih telah berkontribusi dalam memperbarui data kesejahteraan masyarakat desa.</small>
     </div>
 
+    <!-- 🚀 ALERT INFO: TUGAS PERBAIKAN ANOMALI (Khusus Petugas Entri) -->
+    <?php if (isset($total_anomali_tugas) && $total_anomali_tugas > 0): ?>
+        <div class="alert alert-warning shadow-sm my-2 border-0" style="border-radius: 12px;">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning-dark"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h5 class="fw-bold mb-1 text-dark">Tugas Baru: Perbaikan Data Anomali</h5>
+                    <p class="mb-0 text-dark">
+                        Terdapat <strong><?= $total_anomali_tugas ?> KPM</strong> di wilayah Anda yang mengalami ketidakpadanan data Dukcapil.
+                        Silakan lakukan koordinasi, lengkapi data, dan unggah Foto KK terbaru.
+                    </p>
+                </div>
+                <div class="ms-3">
+                    <!-- Arahkan langsung ke halaman Verval Anomali -->
+                    <a href="<?= base_url('verval/anomali') ?>" class="btn btn-warning fw-bold px-4 shadow-sm text-dark" style="border-radius: 8px;">
+                        <i class="fas fa-edit"></i> Tindak Lanjuti
+                    </a>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <?php if (!empty($menu_pemulihan) && $total_masalah > 0): ?>
         <div class="alert alert-danger shadow-sm my-2 border-0">
             <div class="d-flex align-items-center">
