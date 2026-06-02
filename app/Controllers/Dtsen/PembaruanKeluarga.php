@@ -3013,143 +3013,6 @@ class PembaruanKeluarga extends BaseController
         }
     }
 
-    /**
-     * 👨‍👩‍👧 Ambil daftar anggota keluarga (gabungan usulan_art + tabel utama)
-     * - Jika ada usulan draft → tampilkan gabungan unik berdasarkan NIK
-     * - Jika tidak ada draft → tampilkan dari tabel utama saja
-     */
-    // public function getAnggotaList($id_kk = null)
-    // {
-    //     try {
-    //         $db = \Config\Database::connect();
-
-    //         if (empty($id_kk) || !is_numeric($id_kk)) {
-    //             return $this->response->setJSON([
-    //                 'status'  => 'error',
-    //                 'message' => 'ID KK tidak valid.'
-    //             ]);
-    //         }
-
-    //         // 🔍 Cek apakah KK ini punya usulan aktif
-    //         $usulan = $db->table('dtsen_usulan')
-    //             ->select('id, status')
-    //             ->where('dtsen_kk_id', $id_kk)
-    //             ->whereIn('status', ['draft', 'submitted', 'verified', 'diverifikasi'])
-    //             ->orderBy('id', 'DESC')
-    //             ->get()
-    //             ->getRowArray();
-
-    //         // 📦 Data hasil akhir
-    //         $anggotaFinal = [];
-
-    //         // =====================================================
-    //         // 1️⃣ Ambil dari USULAN_ART (jika ada)
-    //         // =====================================================
-    //         $anggotaUsulan = [];
-    //         if ($usulan) {
-    //             $anggotaUsulan = $db->table('dtsen_usulan_art ua')
-    //                 ->select('ua.*, s.jenis_shdk, ua.nik')
-    //                 ->join('tb_shdk s', 's.id = ua.hubungan', 'left')
-    //                 ->where('ua.dtsen_usulan_id', $usulan['id'])
-    //                 ->where('ua.deleted_at', null)
-    //                 // orderBy berdasarkan hubungan keluarga
-    //                 ->orderBy('s.id', 'ASC')
-    //                 ->get()
-    //                 ->getResultArray();
-    //         }
-
-    //         // Simpan semua NIK dari usulan untuk mencegah duplikat
-    //         $nikUsulan = array_filter(array_column($anggotaUsulan, 'nik'));
-
-    //         // =====================================================
-    //         // 2️⃣ Ambil dari tabel UTAMA (dtsen_art)
-    //         // =====================================================
-    //         $anggotaUtama = $db->table('dtsen_art a')
-    //             ->select('a.*, s.jenis_shdk, a.nik')
-    //             ->join('tb_shdk s', 's.id = a.shdk', 'left')
-    //             ->select('a.*, kk.no_kk, s.jenis_shdk')
-    //             ->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'left')
-    //             ->where('a.id_kk', $id_kk)
-    //             ->where('a.deleted_at', null)
-    //             ->orderBy('s.id', 'ASC')
-    //             ->get()
-    //             ->getResultArray();
-
-    //         // =====================================================
-    //         // 3️⃣ Gabungkan data unik berdasarkan NIK
-    //         // =====================================================
-    //         // Gunakan NIK sebagai kunci unik
-    //         $gabungan = [];
-
-    //         foreach ($anggotaUtama as $row) {
-    //             if (!empty($row['nik'])) {
-    //                 $gabungan[$row['nik']] = $row;
-    //             }
-    //         }
-
-    //         /**
-    //          * STRUKTUR PAYLOAD ART (USULAN):
-    //          * payload_member.identitas.individu_no_kk  → No. KK
-    //          * payload_member.identitas.tanggal_lahir   → Tanggal lahir
-    //          * JANGAN ambil dari dtsen_usulan.no_kk_target
-    //          */
-    //         foreach ($anggotaUsulan as $row) {
-    //             if (empty($row['nik'])) {
-    //                 continue;
-    //             }
-
-    //             // Decode payload_member
-    //             $payload = [];
-    //             if (!empty($row['payload_member'])) {
-    //                 $payload = json_decode($row['payload_member'], true) ?? [];
-    //             }
-
-    //             // Ambil identitas dengan aman
-    //             $identitas = $payload['identitas'] ?? [];
-
-    //             // ✅ No. KK dari payload.identitas.individu_no_kk
-    //             $row['no_kk'] = $identitas['individu_no_kk'] ?? null;
-
-    //             // ✅ Tanggal lahir dari payload.identitas.tanggal_lahir
-    //             $row['tanggal_lahir'] = $identitas['tanggal_lahir'] ?? null;
-
-    //             // ✅ Hubungan keluarga → NAMA, bukan kode
-    //             $row['hubungan_keluarga_label'] =
-    //                 $row['jenis_shdk']
-    //                 ?? $row['hubungan']
-    //                 ?? '-';
-
-    //             // Timpa data utama bila NIK sama
-    //             $gabungan[$row['nik']] = $row;
-    //         }
-
-    //         // Konversi ke array numerik biasa
-    //         $anggotaFinal = array_values($gabungan);
-
-    //         // =====================================================
-    //         // 4️⃣ Kembalikan respons JSON
-    //         // =====================================================
-    //         if (empty($anggotaFinal)) {
-    //             return $this->response->setJSON([
-    //                 'status'  => 'success',
-    //                 'message' => 'Belum ada anggota keluarga.',
-    //                 'data'    => [],
-    //             ]);
-    //         }
-
-    //         return $this->response->setJSON([
-    //             'status'  => 'success',
-    //             'message' => 'Data anggota berhasil digabungkan.',
-    //             'data'    => $anggotaFinal
-    //         ]);
-    //     } catch (\Throwable $e) {
-    //         log_message('error', '[getAnggotaList] ' . $e->getMessage());
-    //         return $this->response->setJSON([
-    //             'status'  => 'error',
-    //             'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-    //         ]);
-    //     }
-    // }
     public function getAnggotaList($id_kk = null)
     {
         try {
@@ -3231,6 +3094,7 @@ class PembaruanKeluarga extends BaseController
                     continue;
                 }
 
+                // ... (kode ekstraksi awal)
                 $payload = [];
                 if (!empty($row['payload_member'])) {
                     $payload = json_decode($row['payload_member'], true) ?? [];
@@ -3242,9 +3106,15 @@ class PembaruanKeluarga extends BaseController
                 $row['tanggal_lahir'] = $identitas['tanggal_lahir'] ?? null;
                 $row['hubungan_keluarga_label'] = $row['jenis_shdk'] ?? $row['hubungan'] ?? '-';
 
-                // 🚀 AMBIL DATA PEKERJAAN DARI PAYLOAD USULAN SECARA AMAN
+                // 🚀 AMBIL DATA PEKERJAAN
                 $pkInput = $payload['pekerjaan'] ?? $identitas['pekerjaan'] ?? null;
                 $row['pekerjaan_label'] = $pekerjaanMap[$pkInput] ?? $payload['pekerjaan_nama'] ?? $pkInput ?? '-';
+
+                // 🚀 AMBIL DATA WILAYAH CAPIL (Dari payload -> identitas)
+                $row['provinsi']  = $identitas['provinsi'] ?? null;
+                $row['kabupaten'] = $identitas['kabupaten'] ?? null;
+                $row['kecamatan'] = $identitas['kecamatan'] ?? null;
+                $row['desa']      = $identitas['desa'] ?? null;
 
                 // Timpa data utama bila NIK sama (jalur usulan draft terbaru)
                 $gabungan[$row['nik']] = $row;

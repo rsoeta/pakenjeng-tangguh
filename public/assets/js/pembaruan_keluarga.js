@@ -687,11 +687,6 @@ $(document).ready(function () {
 
         let noKK           = $('#keluarga_no_kk').val().trim();
         const kepala       = $('#kepala_keluarga').val().trim();
-        // const alamat       = $('#alamat').val().trim();
-        // const rw           = $('#rw').val().trim();
-        // const rt           = $('#rt').val().trim();
-        // const kategoriAdat = $('#kategori_adat').val().trim();
-        // const namaSuku     = $('#nama_suku').val().trim();
 
         // ===========================================
         // 🔒 1) Bersihkan input: hanya angka
@@ -733,78 +728,82 @@ $(document).ready(function () {
             return;
         }
 
-        // ===========================================
-        // 🔒 4) VALIDASI SUKU TAMBAHAN
-        // ===========================================
-        // if (kategoriAdat === 'Ya' && !namaSuku) {
-        //     Swal.fire({
-        //         icon: 'error',
-        //         title: 'Gagal',
-        //         text: 'Nama Suku wajib diisi karena Keluarga Adat = Ya.'
-        //     });
-        //     return;
-        // }
-
         // =============================
-        // 🟢 5) SIMPAN LANGSUNG (tanpa konfirmasi)
+        // 🟢 4) KONFIRMASI SEBELUM SIMPAN
         // =============================
         const sumber = $('#sumber').val();
 
         Swal.fire({
-            title: 'Menyimpan data...',
-            text: 'Mohon tunggu',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading()
-        });
-
-        $.ajax({
-            url: baseUrl + '/pembaruan-keluarga/save-keluarga',
-            method: 'POST',
-            data: $('#formDataKeluarga').serialize(),
-            dataType: 'json',
-            success: res => {
-                if (res.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: res.message,
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-
-                    if (res.id_kk) {
-                        $('#id_kk').val(res.id_kk);
-                    }
-
-                    if (sumber === 'baru' && res.id_kk) {
-                        setTimeout(() => {
-                            window.location.href =
-                                `${baseUrl}/pembaruan-keluarga/detail/${res.id_kk}`;
-                        }, 1200);
-                        return;
-                    }
-
-                    $('#sumber').val('utama');
-                    setTimeout(() => location.reload(), 1000);
-
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: res.message || 'Tidak dapat menyimpan data.'
-                    });
-                }
-            },
-            error: () => {
+            title: 'Apakah Anda Yakin?',
+            html: 'Dengan menekan tombol <b>Ya</b>, data yang telah terinput sebelumnya akan ditimpa/hilang.<br><br><small class="text-danger"><i>*Perhatian khusus bagi data yang telah berstatus Verified.</i></small>',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: '<i class="fas fa-save"></i> Ya, Simpan Data!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true // Memindah tombol Ya ke kanan agar lebih natural
+        }).then((result) => {
+            if (result.isConfirmed) {
+                
+                // 🚀 Tampilkan Loading saat proses berjalan
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Terjadi kesalahan saat menyimpan data.'
+                    title: 'Menyimpan data...',
+                    text: 'Mohon tunggu',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                // 🚀 Eksekusi AJAX Simpan Data
+                $.ajax({
+                    url: baseUrl + '/pembaruan-keluarga/save-keluarga',
+                    method: 'POST',
+                    data: $('#formDataKeluarga').serialize(),
+                    dataType: 'json',
+                    success: res => {
+                        if (res.status === 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: res.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+
+                            if (res.id_kk) {
+                                $('#id_kk').val(res.id_kk);
+                            }
+
+                            if (sumber === 'baru' && res.id_kk) {
+                                setTimeout(() => {
+                                    window.location.href =
+                                        `${baseUrl}/pembaruan-keluarga/detail/${res.id_kk}`;
+                                }, 1200);
+                                return;
+                            }
+
+                            $('#sumber').val('utama');
+                            setTimeout(() => location.reload(), 1000);
+
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: res.message || 'Tidak dapat menyimpan data.'
+                            });
+                        }
+                    },
+                    error: () => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Terjadi kesalahan saat menyimpan data.'
+                        });
+                    }
                 });
             }
         });
     });
-
 
     // 🔹 Simpan Data Rumah
     $('#formRumah').on('submit', function (e) {

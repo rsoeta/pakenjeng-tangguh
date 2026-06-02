@@ -689,17 +689,17 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         render: function(data, type, row) {
                             let nama = data || '-';
 
-                            // 🔍 LOGIKA PENGECEKAN KELENGKAPAN:
+                            // 🔍 LOGIKA: Pengecekan Syarat Kelengkapan Utama
                             let isLengkap = (
-                                row.nik && row.nik !== '-' &&
-                                row.tanggal_lahir && row.tanggal_lahir !== '-' &&
-                                (row.pekerjaan_label || row.pekerjaan) && (row.pekerjaan_label !== '-' && row.pekerjaan !== '-') &&
-                                (row.hubungan_keluarga_label || row.jenis_shdk || row.hubungan_keluarga)
+                                row.provinsi && String(row.provinsi).trim() !== '' &&
+                                row.kabupaten && String(row.kabupaten).trim() !== '' &&
+                                row.kecamatan && String(row.kecamatan).trim() !== '' &&
+                                row.desa && String(row.desa).trim() !== ''
                             );
 
                             if (!isLengkap && type === 'display') {
-                                // 🚀 DIPERKECIL: width 14px, height 14px, icon 8px
-                                return `${nama} <span class="badge bg-danger rounded-circle indicator-belum-lengkap ms-2 shadow-sm" title="Data belum lengkap, wajib di-Edit!" style="width: 14px; height: 14px; padding: 0; display: inline-flex; align-items: center; justify-content: center; animation: pulse 2s infinite; vertical-align: middle;"><i class="fas fa-exclamation" style="font-size: 8px;"></i></span>`;
+                                // 🚀 UBAH TEKS TITLE DI SINI
+                                return `${nama} <span class="badge bg-danger rounded-circle indicator-belum-lengkap ms-2 shadow-sm" title="Terdapat data yang belum lengkap, wajib di-Edit!" style="width: 14px; height: 14px; padding: 0; display: inline-flex; align-items: center; justify-content: center; animation: pulse 2s infinite; vertical-align: middle;"><i class="fas fa-exclamation" style="font-size: 8px;"></i></span>`;
                             }
 
                             return nama;
@@ -944,24 +944,42 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         // 🛡️ FUNGSI GLOBAL: CEK KELENGKAPAN ANGGOTA SEBELUM APPLY
         // ========================================================
         window.cekKelengkapanAnggota = function() {
-            // Cek apakah ada elemen dengan class 'indicator-belum-lengkap' di dalam tabel
-            const adaYangBelumLengkap = $('#tableAnggota .indicator-belum-lengkap').length > 0;
+            let adaYangBelumLengkap = false;
+
+            let table = $('#tableAnggota').DataTable();
+
+            table.rows().every(function() {
+                let data = this.data();
+
+                let isLengkap = (
+                    data.provinsi && String(data.provinsi).trim() !== '' &&
+                    data.kabupaten && String(data.kabupaten).trim() !== '' &&
+                    data.kecamatan && String(data.kecamatan).trim() !== '' &&
+                    data.desa && String(data.desa).trim() !== ''
+                );
+
+                if (!isLengkap) {
+                    adaYangBelumLengkap = true;
+                }
+            });
 
             if (adaYangBelumLengkap) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Data Belum Lengkap!',
-                    html: 'Masih ada anggota keluarga dengan tanda <span class="badge bg-danger rounded-circle p-1 mx-1"><i class="fas fa-exclamation" style="font-size: 10px;"></i></span><br><br>Silakan klik tombol <b><i class="fas fa-edit text-primary"></i> Edit</b> pada anggota tersebut dan lengkapi isiannya.',
+                    // 🚀 UBAH JUDUL DAN ISI PESAN DI SINI
+                    title: 'Data Anggota Belum Lengkap!',
+                    html: 'Masih ada anggota keluarga dengan tanda <span class="badge bg-danger rounded-circle p-1 mx-1"><i class="fas fa-exclamation" style="font-size: 10px;"></i></span><br><br>Silakan klik tombol <b><i class="fas fa-edit text-primary"></i> Edit</b> pada anggota tersebut dan pastikan seluruh isian datanya (termasuk Wilayah Capil) telah dilengkapi.',
                     confirmButtonText: 'Mengerti',
-                    width: '320px', // Mobile friendly
+                    width: '350px',
                     customClass: {
                         title: 'fs-5',
                         content: 'fs-6'
                     }
                 });
-                return false; // Gagalkan proses
+                return false;
             }
-            return true; // Lolos, boleh lanjut simpan
+
+            return true;
         };
 
     });
