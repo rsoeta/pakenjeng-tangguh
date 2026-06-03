@@ -134,22 +134,31 @@ class DtsenKkModel extends Model
 
         /**
          * ======================================================
-         * 1️⃣ AMBIL DATA KK DASAR (AMAN & STABIL)
+         * 1️⃣ AMBIL DATA KK DASAR (AMAN & STABIL + SUBQUERY)
          * ======================================================
          */
         $builder = $db->table('dtsen_kk kk')
+            // 🚀 PENTING: Tambahkan 'false' di akhir select agar subquery tidak dirusak CI4
             ->select('
-            kk.id_kk,
-            kk.no_kk,
-            kk.kepala_keluarga,
-            kk.alamat,
-            rt.rw,
-            rt.rt,
-            se.kategori_desil
-        ')
+                kk.id_kk,
+                kk.no_kk,
+                kk.kepala_keluarga,
+                kk.alamat,
+                rt.rw,
+                rt.rt,
+                se.kategori_desil,
+                (SELECT GROUP_CONCAT(CONCAT_WS(" ", nik, nama) SEPARATOR " | ") 
+                 FROM dtsen_art 
+                 WHERE id_kk = kk.id_kk AND deleted_at IS NULL) as anggota_search
+            ', false)
             ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
             ->join('dtsen_se se', 'se.id_kk = kk.id_kk', 'left')
-            ->where('kk.deleted_at', null);
+            // 🚀 PENTING: Penulisan baku CI4 untuk ngecek NULL (tanpa string IS NULL)
+            ->groupStart()
+            ->where('kk.deleted_at', null)
+            // Tangani juga jaga-jaga kalau sistem lama menyimpan null sebagai 0000
+            ->orWhere('kk.deleted_at', '0000-00-00 00:00:00')
+            ->groupEnd();
 
         // 🔐 Filter desa
         if (!empty($filter['kode_desa'])) {
@@ -203,6 +212,7 @@ class DtsenKkModel extends Model
             ->select('id, dtsen_kk_id, status, payload')
             ->whereIn('dtsen_kk_id', $ids)
             ->whereIn('status', ['draft', 'submitted', 'verified', 'diverifikasi'])
+            // ->where('deleted_at IS NULL') // 🚀 FILTER DRAFT/USULAN HANTU
             ->orderBy('id', 'DESC')
             ->get()
             ->getResultArray();

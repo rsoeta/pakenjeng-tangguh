@@ -40,6 +40,11 @@ class PembaruanKeluarga extends BaseController
             // 1) Ambil data KK utama (pastikan array)
             $kkData = $db->table('dtsen_kk')
                 ->where('id_kk', $id_kk)
+                // 🚀 PENTING: Penulisan baku CI4
+                ->groupStart()
+                ->where('deleted_at', null)
+                ->orWhere('deleted_at', '0000-00-00 00:00:00')
+                ->groupEnd()
                 ->get()
                 ->getRowArray() ?? [];
 
@@ -70,6 +75,7 @@ class PembaruanKeluarga extends BaseController
             $usulan = $db->table('dtsen_usulan')
                 ->where('dtsen_kk_id', $id_kk)
                 ->whereIn('status', ['draft', 'submitted', 'verified', 'diverifikasi'])
+                // ->where('deleted_at IS NULL') // 🚀 FILTER DRAFT/USULAN HANTU DI DETAIL
                 ->orderBy('id', 'DESC')
                 ->get()
                 ->getRowArray();

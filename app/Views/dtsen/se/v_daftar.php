@@ -349,105 +349,84 @@
                             </button>
                         `;
                     }
+                },
+                // 🔹 Kolom Pencarian Tersembunyi (Anggota Keluarga)
+                {
+                    data: 'anggota_search',
+                    visible: false, // 🚀 Sembunyikan dari tampilan tabel
+                    searchable: true, // 🚀 Tapi tetap dilacak oleh fitur Search
+                    defaultContent: ''
                 }
             ]
         });
 
-        // ========================= 🎛 FILTER HANDLER =========================
+        // ========================= 🎛 FILTER HANDLER (OPTIMIZED) =========================
+
+        // 1. Fungsi khusus me-reload tabel
         function reloadTableKeluarga() {
-            tableKeluarga.ajax.reload();
+            tableKeluarga.ajax.reload(null, false);
         }
 
-        // Wilayah / Akses
-        $('#filterWilayah').on('change', function() {
-            filterKeluarga.wilayah = $(this).val() || null;
+        // 2. Event Listener Gabungan (Tanpa RW)
+        $('#filterRT, #filterStatus, #filterDesil').on('change', function() {
+            // Update state object
+            filterKeluarga.rt = $('#filterRT').val() || '';
+            filterKeluarga.status = $('#filterStatus').val() || '';
+            filterKeluarga.desil = $('#filterDesil').val() || '';
+
             reloadTableKeluarga();
         });
 
-        // RW
-        const $filterRW = $('#filterRW');
-        const $filterRT = $('#filterRT');
-
-        /**
-         * ===============================
-         * 🔁 FETCH RT BY RW
-         * ===============================
-         */
-        $(document).on('change', '#filterRW', function() {
+        // 3. Logic khusus: Saat RW berubah (Tangani RT dulu, baru reload)
+        $('#filterRW').on('change', function() {
             const rw = $(this).val();
+            const $rt = $('#filterRT');
 
+            // Set state RW
             filterKeluarga.rw = rw || '';
+
+            // Kosongkan UI RT & Set state RT jadi kosong
+            $rt.prop('disabled', !rw).empty().append('<option value="">Semua RT</option>');
             filterKeluarga.rt = '';
 
-            const $rt = $('#filterRT');
-            $rt.prop('disabled', !rw)
-                .empty()
-                .append('<option value="">Semua RT</option>');
+            // Reload tabel dengan kondisi RT yang sudah pasti bersih
+            reloadTableKeluarga();
 
-            if (!rw) {
-                $('#tableKeluarga').DataTable().ajax.reload();
-                return;
-            }
-
-            $.getJSON(`/dtsen-se/list-rt/${rw}`, function(res) {
-                res.data.forEach(rt => {
-                    $rt.append(`<option value="${rt}">RT ${rt}</option>`);
+            // Fetch data RT baru via AJAX
+            if (rw) {
+                $.getJSON(`/dtsen-se/list-rt/${rw}`, function(res) {
+                    res.data.forEach(rt => {
+                        $rt.append(`<option value="${rt}">RT ${rt}</option>`);
+                    });
                 });
-            });
-
-            $('#tableKeluarga').DataTable().ajax.reload();
+            }
         });
 
-        $(document).on('change', '#filterRT', function() {
-            filterKeluarga.rt = $(this).val() || '';
-            $('#tableKeluarga').DataTable().ajax.reload();
-        });
-
-        // RT
-        $('#filterRT').on('change', function() {
-            filterKeluarga.rt = $(this).val() || null;
-            reloadTableKeluarga();
-        });
-
-        // Status
-        $('#filterStatus').on('change', function() {
-            filterKeluarga.status = $(this).val() || null;
-            reloadTableKeluarga();
-        });
-
-        // Desil
-        $('#filterDesil').on('change', function() {
-            filterKeluarga.desil = $(this).val() || null;
-            reloadTableKeluarga();
-        });
-
-        $('.filter-keluarga').on('change', function() {
-            const key = $(this).data('filter');
-            filterKeluarga[key] = $(this).val();
-
-            console.log('🧠 FILTER UPDATE:', filterKeluarga);
-
-            $('#tableKeluarga').DataTable().ajax.reload();
-        });
-
-
-        // Reset
+        // 4. Tombol Reset
         $('#btnResetFilter').on('click', function() {
+            $('#filterRW, #filterRT, #filterStatus, #filterDesil').val('');
+            $('#filterRT').prop('disabled', true).empty().append('<option value="">Semua RT</option>');
 
+            // Reset state
             filterKeluarga.rw = '';
             filterKeluarga.rt = '';
             filterKeluarga.status = '';
             filterKeluarga.desil = '';
 
-            // reset UI
-            $('.filter-keluarga').val('');
-
-            $('#tableKeluarga').DataTable().ajax.reload();
+            reloadTableKeluarga();
         });
 
-        function reloadTableKeluarga() {
-            $('#tableKeluarga').DataTable().ajax.reload(null, false);
-        }
+        // 5. Tombol Aksi Tambah & Muat Ulang
+        $('#btnTambahKeluarga').on('click', () => window.location.href = '/pembaruan-keluarga/tambah');
+
+        $('#btnReloadKeluarga').on('click', function() {
+            reloadTableKeluarga();
+            const btn = $(this);
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Memuat...');
+            setTimeout(() => {
+                btn.prop('disabled', false).html('<i class="fas fa-sync-alt"></i> Muat Ulang');
+            }, 800);
+        });
 
         /* ======================================================
          * 🔎 FILTER HANDLER — TABLE KELUARGA
