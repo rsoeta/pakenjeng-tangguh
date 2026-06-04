@@ -172,6 +172,83 @@
             });
         });
 
+        // ========================= 🔥 HAPUS DRAFT USULAN =========================
+        $(document).on('click', '.btnDeleteUsulan', function() {
+            let idUsulan = $(this).data('id');
+
+            Swal.fire({
+                title: 'Hapus Draft?',
+                html: 'Tindakan ini akan menghapus data secara <b>permanen</b> dan tidak dapat dibatalkan.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-trash-alt"></i> Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true, // Tombol Ya di kanan
+                width: '320px', // 📱 Mobile friendly: perkecil ukuran pop-up
+                customClass: {
+                    title: 'fs-5',
+                    htmlContainer: 'fs-6 text-muted'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    // 🚀 Munculkan loading agar tidak diklik berkali-kali
+                    Swal.fire({
+                        title: 'Menghapus...',
+                        text: 'Mohon tunggu sebentar',
+                        allowOutsideClick: false,
+                        width: '300px',
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    // 🚀 Kirim request POST standar (bukan JSON murni)
+                    $.ajax({
+                        // 💡 PERBAIKAN: Hapus "baseUrl +" karena tidak terdefinisi di view ini
+                        url: '/pembaruan-keluarga/delete-keluarga',
+                        type: 'POST',
+                        data: {
+                            id: idUsulan
+                        },
+                        dataType: 'json',
+                        success: function(res) {
+                            if (res.status) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Terhapus!',
+                                    text: res.message,
+                                    timer: 1500,
+                                    showConfirmButton: false,
+                                    width: '300px'
+                                });
+                                // 💡 Sesuaikan dengan nama variabel tabel di file masing-masing:
+                                // Gunakan tableDraft.ajax.reload(null, false); untuk v_draft.php
+                                // Gunakan tableSubmitted.ajax.reload(null, false); untuk v_submitted.php
+                                if (typeof tableDraft !== 'undefined') tableDraft.ajax.reload(null, false);
+                                if (typeof tableSubmitted !== 'undefined') tableSubmitted.ajax.reload(null, false);
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal',
+                                    text: res.message,
+                                    width: '320px'
+                                });
+                            }
+                        },
+                        error: function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error Server',
+                                text: 'Terjadi kesalahan saat menghubungi server.',
+                                width: '320px'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+
     });
 </script>
 

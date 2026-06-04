@@ -88,42 +88,39 @@
 
     <section class="content">
         <div class="container-fluid">
-            <div class="card filter-box mb-4 shadow-none">
+            <div class="card filter-box mb-4 shadow-none border">
                 <div class="card-body p-3">
-                    <div class="row align-items-end">
-                        <div class="col-6 col-md-3 mb-2 mb-md-0">
-                            <label class="filter-label">Wilayah RW</label>
-                            <select id="filter_rw" class="form-control form-control-sm border-0 bg-light rounded-pill px-3">
+                    <div class="row align-items-end g-2">
+                        <!-- Filter RW -->
+                        <div class="col-6 col-md">
+                            <label class="filter-label small fw-bold text-muted mb-1">Wilayah RW</label>
+                            <select id="filter_rw" class="form-control form-control-sm border bg-light rounded-pill px-3">
                                 <option value="">Semua RW</option>
                             </select>
                         </div>
-                        <div class="col-6 col-md-3 mb-2 mb-md-0">
-                            <label class="filter-label">Wilayah RT</label>
-                            <select id="filter_rt" class="form-control form-control-sm border-0 bg-light rounded-pill px-3">
+
+                        <!-- Filter RT -->
+                        <div class="col-6 col-md">
+                            <label class="filter-label small fw-bold text-muted mb-1">Wilayah RT</label>
+                            <select id="filter_rt" class="form-control form-control-sm border bg-light rounded-pill px-3">
                                 <option value="">Semua RT</option>
                             </select>
                         </div>
-                        <div class="col-6 col-md-3 mb-2 mb-md-0">
-                            <label class="filter-label">Tahap Salur</label>
-                            <select id="filter_tahap" class="form-control form-control-sm border-0 bg-light rounded-pill px-3">
+
+                        <!-- Filter Tahap Salur -->
+                        <div class="col-12 col-md-4">
+                            <label class="filter-label small fw-bold text-muted mb-1">Tahap Salur</label>
+                            <select id="filter_tahap" class="form-control form-control-sm border bg-light rounded-pill px-3">
                                 <option value="">Semua Tahap</option>
                                 <?php
-                                // Menghitung tahap berjalan secara otomatis (Kuartal 1-4)
                                 $currentYear = date('Y');
                                 $currentTahapNum = ceil(date('n') / 3);
                                 $defaultTahap = "Tahap {$currentTahapNum} Tahun {$currentYear}";
 
-                                // Loop tahun dari yang terbaru ke yang terlama (DESC)
                                 foreach ([$currentYear, $currentYear - 1] as $y) {
-
-                                    // Jika yang sedang di-loop adalah tahun ini, batas atasnya adalah tahap saat ini.
-                                    // Jika tahun sebelumnya, batas atasnya full (4 tahap).
                                     $maxTahap = ($y == $currentYear) ? $currentTahapNum : 4;
-
-                                    // Looping tahap secara menurun/mundur (DESC)
                                     for ($t = $maxTahap; $t >= 1; $t--) {
                                         $val = "Tahap $t Tahun $y";
-                                        // Tandai 'selected' jika cocok dengan tahap berjalan saat ini
                                         $isSelected = ($val === $defaultTahap) ? 'selected' : '';
                                         echo "<option value=\"$val\" $isSelected>$val</option>";
                                     }
@@ -131,8 +128,22 @@
                                 ?>
                             </select>
                         </div>
-                        <div class="col-6 col-md-3">
-                            <button id="btn_filter" class="btn btn-sm btn-dark w-100 rounded-pill"><i class="fas fa-filter mr-1"></i> Terapkan</button>
+
+                        <!-- 🚀 Filter Status Kunci (Gembok) -->
+                        <div class="col-8 col-md">
+                            <label class="filter-label small fw-bold text-muted mb-1">Status Kunci</label>
+                            <select id="filter_locked" class="form-control form-control-sm border bg-light rounded-pill px-3">
+                                <option value="">Semua Status</option>
+                                <option value="1">🔒 Terkunci (Valid)</option>
+                                <option value="0">🔓 Terbuka (Belum Valid)</option>
+                            </select>
+                        </div>
+
+                        <!-- Tombol Terapkan -->
+                        <div class="col-4 col-md-auto">
+                            <button id="btn_filter" class="btn btn-sm btn-dark w-100 rounded-pill px-4 shadow-sm">
+                                <i class="fas fa-filter mr-1"></i> Filter
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -324,6 +335,7 @@
                     d.filter_rw = $('#filter_rw').val();
                     d.filter_rt = $('#filter_rt').val();
                     d.filter_tahap = $('#filter_tahap').val();
+                    d.filter_locked = $('#filter_locked').val();
                 }
             },
             "columnDefs": [{
@@ -640,6 +652,77 @@
             $('#nik_search').val(null).trigger('change');
             $('#prev_kpm, #prev_bukti').attr('src', "<?= base_url('assets/images/image_not_available.jpg'); ?>");
             $('.btn-group-toggle .btn').removeClass('active');
+        });
+
+        // ==========================================
+        // 🔒 LOGIKA KLIK TOMBOL KUNCI/GEMBOK (TOGGLE LOCK)
+        // ==========================================
+        $('#tableDokumentasi').on('click', '.btn-toggle-lock', function() {
+            var id = $(this).data('id');
+            var currentStatus = $(this).data('status'); // 1 = saat ini terkunci, 0 = saat ini terbuka
+
+            // 🚀 PERBAIKAN LOGIKA: Jika sekarang 0 (terbuka), maka kita akan menguncinya (isLocking = true)
+            var isLocking = (currentStatus == 0);
+            var targetStatus = isLocking ? 1 : 0; // Status yang akan dikirim ke database
+
+            var titleText = isLocking ? 'Kunci Data?' : 'Buka Kunci Data?';
+            var htmlText = isLocking ?
+                'Data ini akan ditandai sebagai <b>Valid</b> dan tidak dapat diedit/dihapus oleh Operator/Pentri.' :
+                'Kunci data akan dibuka, Operator/Pentri akan bisa mengedit data ini kembali.';
+            var iconType = isLocking ? 'question' : 'warning';
+            var btnText = isLocking ? '<i class="fas fa-lock"></i> Ya, Kunci!' : '<i class="fas fa-unlock"></i> Ya, Buka!';
+            var btnColor = isLocking ? '#d33' : '#3085d6';
+
+            Swal.fire({
+                title: titleText,
+                html: htmlText,
+                icon: iconType,
+                showCancelButton: true,
+                confirmButtonColor: btnColor,
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: btnText,
+                cancelButtonText: '<i class="fas fa-times"></i> Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    Swal.fire({
+                        title: 'Memproses...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    $.ajax({
+                        url: "<?= base_url('bansos-kks/toggle-lock') ?>",
+                        type: "POST",
+                        data: {
+                            id: id,
+                            status: targetStatus, // 🚀 Kirim TARGET statusnya ke backend
+                            '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                        },
+                        dataType: "JSON",
+                        success: function(res) {
+                            if (res.status === 'success') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: res.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+                                $('#tableDokumentasi').DataTable().ajax.reload(null, false);
+                            } else {
+                                Swal.fire('Gagal!', res.message, 'error');
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.fire('Error Sistem', 'Terjadi kesalahan jaringan atau server.', 'error');
+                        }
+                    });
+                }
+            });
         });
 
         // ==========================================

@@ -1,0 +1,1 @@
+ALTER TABLE dtsen_bansos_kks ADD COLUMN is_locked TINYINT(1) DEFAULT 0;

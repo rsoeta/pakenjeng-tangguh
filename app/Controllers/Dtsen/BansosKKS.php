@@ -42,6 +42,7 @@ class BansosKKS extends BaseController
         $filterRw = $this->request->getPost('filter_rw');
         $filterRt = $this->request->getPost('filter_rt');
         $filterTahap = $this->request->getPost('filter_tahap');
+        $filterLocked = $this->request->getPost('filter_locked');
 
         $builder = $this->db->table('dtsen_bansos_kks b')
             ->select('b.*, m.alamat, r.rt, r.rw')
@@ -72,6 +73,10 @@ class BansosKKS extends BaseController
         }
         if (!empty($filterTahap)) {
             $builder->where('b.tahap_salur', $filterTahap);
+        }
+        // 🚀 TERAPKAN FILTER KUNCI JIKA DIPILIH
+        if ($filterLocked !== '' && $filterLocked !== null) {
+            $builder->where('b.is_locked', (int)$filterLocked);
         }
 
         // Kunci Data Unik agar tidak duplikat dan Urutkan yang terbaru paling atas
@@ -118,7 +123,14 @@ class BansosKKS extends BaseController
             $nikMasked = $maskNumber($row['nik_kpm'], 'nik');
             $kksMasked = $maskNumber($row['nomor_kks'], 'nokk');
 
-            // 🚀 REVISI DI SINI: Selipkan NIK dan KKS asli di dalam span display:none
+            // ... (kode atasnya tetap sama: $nikMasked, $kksMasked, $nominal) ...
+
+            // 🚀 CEK STATUS KUNCI
+            $isLocked = (int)($row['is_locked'] ?? 0);
+
+            // 🚀 INDIKATOR GEMBOK VISUAL (Biar di layar kelihatan keren)
+            $badgeLock = $isLocked ? '<span class="badge bg-danger p-2 ml-1" title="Data Telah Diverifikasi & Dikunci"><i class="fas fa-lock"></i></span>' : '';
+
             $colDetail = '
             <div class="row align-items-center">
                 <span style="display: none;">' . esc($row['nik_kpm']) . ' ' . esc($row['nomor_kks']) . '</span>
@@ -131,7 +143,7 @@ class BansosKKS extends BaseController
                     <div class="mb-1">
                         <span class="badge bg-primary p-2 mr-1">' . esc($row['jenis_bansos']) . '</span>
                         <span class="badge bg-success p-2">' . $nominal . '</span>
-                    </div>
+                        ' . $badgeLock . ' </div>
                     <div class="small text-muted mt-1 d-flex align-items-center justify-content-md-end">
                          <i class="fas fa-credit-card mr-2"></i> ' . $kksMasked . '
                     </div>
@@ -141,10 +153,39 @@ class BansosKKS extends BaseController
                 </div>
             </div>';
 
+            // ==========================================
+            // 🚀 LOGIKA TOMBOL AKSI BERDASARKAN ROLE & KUNCI
+            // ==========================================
+            $btnEdit   = '';
+            $btnDelete = '';
+            $btnLock   = '';
+
+            // 1. TOMBOL KUNCI (Eksklusif Role <= 3)
+            if ($roleId <= 3) {
+                if ($isLocked) {
+                    $btnLock = '<button class="btn btn-sm btn-danger btn-toggle-lock shadow-sm" data-id="' . $row['id'] . '" data-status="1" title="Buka Kunci"><i class="fas fa-lock"></i></button>';
+                } else {
+                    $btnLock = '<button class="btn btn-sm btn-outline-secondary btn-toggle-lock" data-id="' . $row['id'] . '" data-status="0" title="Kunci Data"><i class="fas fa-unlock"></i></button>';
+                }
+            }
+
+            // 2. TOMBOL EDIT (Hanya bisa diklik jika belum dikunci, ATAU yang login adalah Role <= 3)
+            if (!$isLocked || $roleId <= 3) {
+                $btnEdit = '<button class="btn btn-sm btn-outline-warning btn-edit" data-id="' . $row['id'] . '" title="Edit Data"><i class="fas fa-edit"></i></button>';
+            } else {
+                // Untuk Role Pentri jika data sudah dikunci
+                $btnEdit = '<button class="btn btn-sm btn-secondary disabled" title="Data Terkunci"><i class="fas fa-lock"></i></button>';
+            }
+
+            // 3. TOMBOL DELETE (Eksklusif Role <= 3)
+            if ($roleId <= 3) {
+                $btnDelete = '<button class="btn btn-sm btn-outline-danger btn-delete" data-id="' . $row['id'] . '" title="Hapus"><i class="fas fa-trash-alt"></i></button>';
+            }
+
+            // Gabungkan semua tombol
             $btnAction = '
             <div class="d-flex flex-row justify-content-center align-items-center" style="gap: 5px;">
-                <button class="btn btn-sm btn-outline-warning btn-edit" data-id="' . $row['id'] . '" title="Edit Data"><i class="fas fa-edit"></i></button>
-                ' . ($roleId <= 3 ? '<button class="btn btn-sm btn-outline-danger btn-delete" data-id="' . $row['id'] . '" title="Hapus"><i class="fas fa-trash"></i></button>' : '') . '
+                ' . $btnLock . $btnEdit . $btnDelete . '
             </div>';
 
             $data[] = [$no++, $colFoto, $colDetail, $btnAction];
@@ -646,6 +687,42 @@ class BansosKKS extends BaseController
             }
         } catch (\Throwable $e) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
+        }
+    }
+
+    // ==========================================
+    // 🔒 FUNGSI KUNCI/BUKA KUNCI DATA BANSOS
+    // ==========================================
+    public function toggleLock()
+    {
+        $id = $this->request->getPost('id');
+        $status = $this->request->getPost('status'); // Berisi 1 atau 0
+        $roleId = session()->get('role_id');
+
+        // Proteksi Lapis Ganda: Hanya Role Desa (3) ke atas (Kecamatan/Admin) yang boleh eksekusi
+        if ($roleId > 3) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Akses ditolak! Anda tidak memiliki wewenang untuk mengunci/membuka data.'
+            ]);
+        }
+
+        try {
+            $this->db->table('dtsen_bansos_kks')
+                ->where('id', $id)
+                ->update(['is_locked' => $status]);
+
+            $pesan = ($status == 1) ? 'Data berhasil dikunci dan diamankan!' : 'Kunci data berhasil dibuka!';
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => $pesan
+            ]);
+        } catch (\Throwable $e) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan pada database: ' . $e->getMessage()
+            ]);
         }
     }
 }

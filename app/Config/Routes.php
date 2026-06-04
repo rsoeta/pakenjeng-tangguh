@@ -196,6 +196,7 @@ $routes->group('bansos-kks', ['filter' => 'authfilterdtks', 'menufilterdtks'], f
 	$routes->get('get-rw', 'Dtsen\BansosKKS::get_rw_ajax');
 	$routes->get('get-rt', 'Dtsen\BansosKKS::get_rt_ajax');
 	$routes->post('hapus', 'Dtsen\BansosKKS::hapus');
+	$routes->post('toggle-lock', 'Dtsen\BansosKKS::toggleLock');
 });
 
 // 🌍 API Wilayah Lokal (Dropdown berantai untuk DTSEN)
