@@ -135,7 +135,7 @@
 <div class="content-wrapper mt-1">
     <section class="content-header">
         <div class="container-fluid d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="fas fa-hand-holding-heart"></i> <?= esc($title); ?></h5>
+            <h1 class="mb-0"><i class="fas fa-hand-holding-heart"></i> <?= esc($title); ?></h1>
             <ol class="breadcrumb float-right mb-0">
                 <li class="breadcrumb-item"><a href="<?= base_url('/pages'); ?>">Home</a></li>
                 <li class="breadcrumb-item active"><?= esc($title); ?></li>

@@ -20,12 +20,12 @@
             $segment = $uri->getSegment(3);
             ?>
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center">
 
                 <!-- TITLE -->
-                <h5 class="m-0">
+                <h4 class="m-0">
                     <?= $title ?>
-                </h5>
+                </h4>
 
                 <!-- NAV FLOW BUTTON -->
                 <div class="btn-group" role="group">

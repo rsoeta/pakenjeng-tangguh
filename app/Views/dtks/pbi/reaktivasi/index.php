@@ -18,142 +18,150 @@
 </style>
 
 <div class="content-wrapper mt-1">
-    <section class="content pt-2">
+    <div class="content-header">
         <div class="container-fluid">
-            <div class="card card-outline card-primary">
-                <div class="card-header">
-                    <h3 class="card-title mb-0">Reaktivasi PBI</h3>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-3" id="summaryCards">
-                        <div class="col-md col-4 mb-2">
-                            <div class="card border-secondary shadow-sm summary-card" data-status="draft">
-                                <div class="card-body text-center">
-                                    <h6 class="text-muted">Draft</h6>
-                                    <h4 class="counter" id="sumDraft">0</h4>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md col-4 mb-2">
-                            <div class="card border-warning shadow-sm summary-card" data-status="diajukan">
-                                <div class="card-body text-center">
-                                    <h6 class="text-muted">Diajukan</h6>
-                                    <h4 class="counter" id="sumDiajukan">0</h4>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md col-4 mb-2">
-                            <div class="card border-info shadow-sm summary-card" data-status="diverifikasi">
-                                <div class="card-body text-center">
-                                    <h6 class="text-muted">Diverifikasi</h6>
-                                    <h4 class="counter" id="sumVerifikasi">0</h4>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md col-4 mb-2">
-                            <div class="card border-success shadow-sm summary-card" data-status="disetujui">
-                                <div class="card-body text-center">
-                                    <h6 class="text-muted">Disetujui</h6>
-                                    <h4 class="counter" id="sumSetujui">0</h4>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md col-4 mb-2">
-                            <div class="card border-danger shadow-sm summary-card" data-status="ditolak">
-                                <div class="card-body text-center">
-                                    <h6 class="text-muted">Ditolak</h6>
-                                    <h4 class="counter" id="sumTolak">0</h4>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md col-4 mb-2">
-                            <div class="card border-primary shadow-sm summary-card" data-status="diajukan_siks">
-                                <div class="card-body text-center">
-                                    <h6 class="text-muted">Diajukan SIKS</h6>
-                                    <h4 class="counter" id="sumSiks">0</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="table-responsive">
-                        <div class="row g-2 align-items-end mb-3">
-
-                            <div class="col-md-2">
-                                <label class="form-label small mb-1">Status</label>
-                                <select id="filterStatus" class="form-control form-control-sm">
-                                    <option value="">Semua Status</option>
-                                    <option value="0">Draft</option>
-                                    <option value="1">Diajukan</option>
-                                    <option value="2">Diverifikasi</option>
-                                    <option value="3">Disetujui</option>
-                                    <option value="4">Ditolak</option>
-                                    <option value="5">Diajukan SIKS</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label small mb-1">RW</label>
-                                <select id="filterRw" class="form-control form-control-sm"></select>
-                            </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label small mb-1">RT</label>
-                                <select id="filterRt" class="form-control form-control-sm"></select>
-                            </div>
-
-                            <div class="col-md-2">
-                                <button id="btnResetFilter" class="btn btn-sm btn-outline-secondary w-100">
-                                    Reset Filter
-                                </button>
-                            </div>
-
-                            <!-- Upload Excel -->
-                            <?php if (session('role_id') < 4) : ?>
-                                <div class="col-md-4 col-12">
-                                    <label class="form-label small mb-1">Upload Data Verivali</label>
-                                    <form id="formUploadExcel" enctype="multipart/form-data" class="d-flex gap-2">
-                                        <input type="file"
-                                            name="file_excel"
-                                            accept=".xls,.xlsx"
-                                            class="form-control form-control-sm"
-                                            required>
-
-                                        <button type="submit"
-                                            class="btn btn-primary btn-sm">
-                                            Upload
-                                        </button>
-                                    </form>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                        <table id="tabelReaktivasi" class="table table-sm table-hover table-striped w-100">
-                            <thead>
-                                <tr>
-                                    <th>Nama</th>
-                                    <th>NIK</th>
-                                    <th>No KK</th>
-                                    <th>Desil</th>
-                                    <th>Status</th>
-                                    <th>RW</th>
-                                    <th>RT</th>
-                                    <th>ALAMAT</th>
-                                    <th>Reaktivasi</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Reaktivasi PBI</h1>
                 </div>
             </div>
         </div>
-    </section>
+
+        <section class="content pt-2">
+            <div class="container-fluid">
+                <div class="card card-outline card-primary">
+                    <div class="card-body">
+                        <div class="row mb-3" id="summaryCards">
+                            <div class="col-md col-4 mb-2">
+                                <div class="card border-secondary shadow-sm summary-card" data-status="draft">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Draft</h6>
+                                        <h4 class="counter" id="sumDraft">0</h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md col-4 mb-2">
+                                <div class="card border-warning shadow-sm summary-card" data-status="diajukan">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Diajukan</h6>
+                                        <h4 class="counter" id="sumDiajukan">0</h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md col-4 mb-2">
+                                <div class="card border-info shadow-sm summary-card" data-status="diverifikasi">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Diverifikasi</h6>
+                                        <h4 class="counter" id="sumVerifikasi">0</h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md col-4 mb-2">
+                                <div class="card border-success shadow-sm summary-card" data-status="disetujui">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Disetujui</h6>
+                                        <h4 class="counter" id="sumSetujui">0</h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md col-4 mb-2">
+                                <div class="card border-danger shadow-sm summary-card" data-status="ditolak">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Ditolak</h6>
+                                        <h4 class="counter" id="sumTolak">0</h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md col-4 mb-2">
+                                <div class="card border-primary shadow-sm summary-card" data-status="diajukan_siks">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Diajukan SIKS</h6>
+                                        <h4 class="counter" id="sumSiks">0</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <div class="row g-2 align-items-end mb-3">
+
+                                <div class="col-md-2">
+                                    <label class="form-label small mb-1">Status</label>
+                                    <select id="filterStatus" class="form-control form-control-sm">
+                                        <option value="">Semua Status</option>
+                                        <option value="0">Draft</option>
+                                        <option value="1">Diajukan</option>
+                                        <option value="2">Diverifikasi</option>
+                                        <option value="3">Disetujui</option>
+                                        <option value="4">Ditolak</option>
+                                        <option value="5">Diajukan SIKS</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label small mb-1">RW</label>
+                                    <select id="filterRw" class="form-control form-control-sm"></select>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label small mb-1">RT</label>
+                                    <select id="filterRt" class="form-control form-control-sm"></select>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <button id="btnResetFilter" class="btn btn-sm btn-outline-secondary w-100">
+                                        Reset Filter
+                                    </button>
+                                </div>
+
+                                <!-- Upload Excel -->
+                                <?php if (session('role_id') < 4) : ?>
+                                    <div class="col-md-4 col-12">
+                                        <label class="form-label small mb-1">Upload Data Verivali</label>
+                                        <form id="formUploadExcel" enctype="multipart/form-data" class="d-flex gap-2">
+                                            <input type="file"
+                                                name="file_excel"
+                                                accept=".xls,.xlsx"
+                                                class="form-control form-control-sm"
+                                                required>
+
+                                            <button type="submit"
+                                                class="btn btn-primary btn-sm">
+                                                Upload
+                                            </button>
+                                        </form>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <table id="tabelReaktivasi" class="table table-sm table-hover table-striped w-100">
+                                <thead>
+                                    <tr>
+                                        <th>Nama</th>
+                                        <th>NIK</th>
+                                        <th>No KK</th>
+                                        <th>Desil</th>
+                                        <th>Status</th>
+                                        <th>RW</th>
+                                        <th>RT</th>
+                                        <th>ALAMAT</th>
+                                        <th>Reaktivasi</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
 </div>
+
 <div class="modal fade" id="modalAjukan">
     <div class="modal-dialog">
         <div class="modal-content">

@@ -68,7 +68,7 @@
     }
 </style>
 
-<div class="content-wrapper">
+<div class="content-wrapper mt-1">
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
