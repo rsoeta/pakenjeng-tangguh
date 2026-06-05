@@ -80,7 +80,7 @@ class BansosKKS extends BaseController
         }
 
         // Kunci Data Unik agar tidak duplikat dan Urutkan yang terbaru paling atas
-        $builder->groupBy('b.id')->orderBy('b.created_at', 'DESC');
+        $builder->groupBy('b.id')->orderBy('b.updated_at', 'ASC');
 
         $query = $builder->get()->getResultArray();
         $data = [];
