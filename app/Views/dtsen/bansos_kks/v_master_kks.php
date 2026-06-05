@@ -238,13 +238,13 @@
                         <div class="col-4">
                             <div class="form-group">
                                 <label style="font-size: 0.85rem;">Nomor KKS</label>
-                                <input type="text" class="form-control form-control-sm" name="no_kks" id="no_kks" placeholder="Kosongkan jika tdk ada">
+                                <input type="text" class="form-control form-control-sm" name="no_kks" id="no_kks" placeholder="6032xxxx" maxlength="16" required>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="form-group">
                                 <label style="font-size: 0.85rem;">No. WhatsApp</label>
-                                <input type="number" class="form-control form-control-sm" name="no_wa" id="no_wa" placeholder="08xxxx">
+                                <input type="number" class="form-control form-control-sm" name="no_wa" id="no_wa" placeholder="08xxxx" required>
                             </div>
                         </div>
                         <div class="col-4">
@@ -332,37 +332,6 @@
             }
         });
 
-        // 3. Modifikasi inisialisasi DataTables (Tambahkan parameter d)
-        // var tableKKS = $('#tableMasterKKS').DataTable({
-        //     processing: true,
-        //     serverSide: true,
-        //     responsive: true,
-        //     // ... (setting processing, serverSide seperti instruksi sebelumnya)
-        //     ajax: {
-        //         url: "<?= base_url('master-kks/datatable') ?>",
-        //         type: "POST",
-        //         data: function(d) {
-        //             d.filter_rw = $('#filter_rw').val();
-        //             d.filter_rt = $('#filter_rt').val();
-        //             d.filter_status = $('#filter_status').val();
-        //             d['<?= csrf_token() ?>'] = '<?= csrf_hash() ?>';
-        //         }
-        //     },
-        //     columnDefs: [{
-        //             targets: [0, 6],
-        //             orderable: false,
-        //             className: 'text-center'
-        //         },
-        //         {
-        //             targets: [4, 5],
-        //             className: 'text-center'
-        //         }
-        //     ],
-        //     language: {
-        //         // Tambahkan https: secara eksplisit
-        //         url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
-        //     }
-        // });
         var tableKKS = $('#tableMasterKKS').DataTable({
             processing: true,
             serverSide: true,
@@ -447,44 +416,7 @@
             $('#modalKKS').modal('show');
         });
 
-        // 2. Klik Tombol Edit
-        $('#tableMasterKKS tbody').on('click', '.btn-edit', function() {
-            var id = $(this).data('id');
-
-            $.ajax({
-                url: "<?= base_url('master-kks/get-kpm') ?>",
-                type: "POST",
-                data: {
-                    id: id,
-                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
-                },
-                dataType: "JSON",
-                success: function(data) {
-                    $('#formKKS')[0].reset();
-                    $('#kpm_id').val(data.id);
-
-                    // Set data Select2 secara manual untuk mode Edit
-                    var option = new Option(data.nik + ' - ' + data.nama_penerima, data.nik, true, true);
-                    $('#nik').append(option).trigger('change');
-
-                    // (Di dalam bagian ajax success Edit Data)
-                    $('#nama_penerima').val(data.nama_penerima);
-                    $('#no_kks').val(data.no_kks === '-' ? '' : data.no_kks);
-                    $('#no_wa').val(data.no_wa);
-                    $('#alamat').val(data.alamat);
-
-                    // GANTI INI: Format jadi 3 digit saat Edit diklik!
-                    $('#rw').val(String(data.rw || 0).padStart(3, '0'));
-                    $('#rt').val(String(data.rt || 0).padStart(3, '0'));
-                    $('#status_kks').val(data.status_kks);
-
-                    $('#modalTitle').text('Edit Data KPM');
-                    $('#modalKKS').modal('show');
-                }
-            });
-        });
-
-        // 3. Submit Form (Pake FormData karena ada upload file!)
+        // 2. Submit Form (Pake FormData karena ada upload file!)
         $('#formKKS').submit(function(e) {
             e.preventDefault();
             $('#btnSimpanKPM').text('Menyimpan...').prop('disabled', true);
@@ -514,6 +446,94 @@
                     Swal.fire('Error!', 'Terjadi kesalahan pada server.', 'error');
                 }
             });
+        });
+
+        // ==========================================
+        // 👀 3. KLIK TOMBOL VIEW (Khusus Role > 3)
+        // ==========================================
+        $('#tableMasterKKS tbody').on('click', '.btn-view', function() {
+            var id = $(this).data('id');
+
+            $.ajax({
+                url: "<?= base_url('master-kks/get-kpm') ?>",
+                type: "POST",
+                data: {
+                    id: id,
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                },
+                dataType: "JSON",
+                success: function(data) {
+                    $('#formKKS')[0].reset();
+                    resetPreviewFoto();
+
+                    $('#kpm_id').val(data.id);
+                    var option = new Option(data.nik + ' - ' + data.nama_penerima, data.nik, true, true);
+                    $('#nik').append(option).trigger('change');
+
+                    $('#nama_penerima').val(data.nama_penerima);
+                    $('#no_kks').val(data.no_kks === '-' ? '' : data.no_kks);
+                    $('#no_wa').val(data.no_wa);
+                    $('#alamat').val(data.alamat);
+                    $('#rw').val(parseInt(data.rw));
+                    $('#rt').val(parseInt(data.rt));
+
+                    if (data.status_kks.toLowerCase() === 'aktif') {
+                        $('#status_aktif').prop('checked', true);
+                        $('#lbl_status_aktif').addClass('active');
+                        $('#lbl_status_nonaktif').removeClass('active');
+                    } else {
+                        $('#status_nonaktif').prop('checked', true);
+                        $('#lbl_status_nonaktif').addClass('active');
+                        $('#lbl_status_aktif').removeClass('active');
+                    }
+
+                    // Tampilkan Foto (Logika Sama dengan Edit)
+                    if (data.foto_kks && data.foto_kks !== '') {
+                        $('#preview_foto').attr('src', '<?= base_url() ?>/' + data.foto_kks).show();
+                        $('#preview_iframe').hide();
+                        $('#placeholder_foto').hide();
+                    } else if (data.foto_kepemilikan && data.foto_kepemilikan !== '') {
+                        var driveUrl = data.foto_kepemilikan;
+                        var match = driveUrl.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]{25,})/);
+                        if (match && match[1]) {
+                            var iframeUrl = 'https://drive.google.com/file/d/' + match[1] + '/preview';
+                            $('#preview_iframe').attr('src', iframeUrl).show();
+                            $('#preview_foto').hide();
+                            $('#placeholder_foto').hide();
+                        } else {
+                            $('#placeholder_foto').show().html('<span class="text-danger text-sm">URL tidak valid</span>');
+                        }
+                    } else {
+                        resetPreviewFoto();
+                    }
+
+                    // 🚀 KUNCI SAKTINYA UNTUK MODE READ-ONLY:
+                    $('#modalTitle').text('Detail Data KPM');
+
+                    // Disable semua input
+                    $('#formKKS input, #formKKS textarea, #formKKS select, #formKKS button.btn-outline-success, #formKKS button.btn-outline-danger').prop('disabled', true);
+
+                    // Matikan Select2 agar tidak bisa diganti
+                    $('#nik').prop('disabled', true);
+
+                    // Sembunyikan input file upload foto
+                    $('#foto_kks').closest('.custom-file').hide();
+
+                    // Sembunyikan tombol simpan
+                    $('#btnSimpanKPM').hide();
+
+                    $('#modalKKS').modal('show');
+                }
+            });
+        });
+
+        // 🚀 RESET KONDISI FORM SAAT MODAL DITUTUP
+        // Agar saat user klik "Tambah Baru" setelah klik "View", inputannya tidak terkunci
+        $('#modalKKS').on('hidden.bs.modal', function() {
+            $('#formKKS input, #formKKS textarea, #formKKS select, #formKKS button.btn-outline-success, #formKKS button.btn-outline-danger').prop('disabled', false);
+            $('#nik').prop('disabled', false);
+            $('#foto_kks').closest('.custom-file').show();
+            $('#btnSimpanKPM').show();
         });
 
         // ==========================================
@@ -562,12 +582,14 @@
             $('#modalKKS').modal('show');
         });
 
-        // Klik Tombol Edit
+        // ==========================================
+        // ✏️ KLIK TOMBOL EDIT (Khusus Role <= 3)
+        // ==========================================
         $('#tableMasterKKS tbody').on('click', '.btn-edit', function() {
             var id = $(this).data('id');
 
             $.ajax({
-                url: "<?= base_url('master-kks/get-kpm') ?>", // Pastikan URL sesuai route baru Anda!
+                url: "<?= base_url('master-kks/get-kpm') ?>",
                 type: "POST",
                 data: {
                     id: id,
@@ -586,8 +608,8 @@
                     $('#no_kks').val(data.no_kks === '-' ? '' : data.no_kks); // Hilangkan strip di form edit
                     $('#no_wa').val(data.no_wa);
                     $('#alamat').val(data.alamat);
-                    $('#rw').val(parseInt(data.rw));
-                    $('#rt').val(parseInt(data.rt));
+                    $('#rw').val(String(data.rw || 0).padStart(3, '0'));
+                    $('#rt').val(String(data.rt || 0).padStart(3, '0'));
 
                     // Logic Radio Button Status
                     if (data.status_kks.toLowerCase() === 'aktif') {
@@ -601,67 +623,29 @@
                     }
 
                     // ==========================================
-                    // 📸 FITUR PREVIEW FOTO (IMG & IFRAME)
+                    // 📸 LOGIKA TAMPILKAN FOTO (LOKAL & G-DRIVE)
                     // ==========================================
-                    function resetPreviewFoto() {
-                        $('#preview_foto').hide().attr('src', '');
-                        $('#preview_iframe').hide().attr('src', ''); // Matikan juga iframe
-                        $('#placeholder_foto').show();
-                        $('#foto_kks').val('');
-                        $('.custom-file-label').html('Pilih file foto...');
-                    }
-
-                    // Saat milih file dari HP/Laptop (Pakai IMG)
-                    $('#foto_kks').change(function() {
-                        var file = this.files[0];
-                        if (file) {
-                            var reader = new FileReader();
-                            reader.onload = function(e) {
-                                $('#preview_foto').attr('src', e.target.result).show();
-                                $('#preview_iframe').hide(); // Sembunyikan iframe G-Drive
-                                $('#placeholder_foto').hide();
-                            }
-                            reader.readAsDataURL(file);
-                            $(this).next('.custom-file-label').html(file.name);
-                        } else {
-                            resetPreviewFoto();
-                        }
-                    });
-
-                    // ... (di dalam fungsi .btn-edit AJAX Success) ...
-
-                    // ==========================================
-                    // 📸 LOGIKA TAMPILKAN FOTO (ANTI BADAI G-DRIVE)
-                    // ==========================================
-                    // 1. Prioritas: Cek foto lokal (hasil upload SINDEN)
                     if (data.foto_kks && data.foto_kks !== '') {
                         $('#preview_foto').attr('src', '<?= base_url() ?>/' + data.foto_kks).show();
                         $('#preview_iframe').hide();
                         $('#placeholder_foto').hide();
-                    }
-                    // 2. Alternatif: Cek data warisan Google Drive
-                    else if (data.foto_kepemilikan && data.foto_kepemilikan !== '') {
+                    } else if (data.foto_kepemilikan && data.foto_kepemilikan !== '') {
                         var driveUrl = data.foto_kepemilikan;
                         var match = driveUrl.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]{25,})/);
 
                         if (match && match[1]) {
                             var fileId = match[1];
-                            // 🚀 KUNCI: Gunakan endpoint /preview resmi Google
                             var iframeUrl = 'https://drive.google.com/file/d/' + fileId + '/preview';
 
                             $('#preview_iframe').attr('src', iframeUrl).show();
                             $('#preview_foto').hide();
                             $('#placeholder_foto').hide();
                         } else {
-                            // Jika URL sama sekali tidak dikenali
                             $('#placeholder_foto').show().html('<span class="text-danger text-sm">URL tidak valid</span>');
                         }
                     } else {
-                        resetPreviewFoto(); // Jika keduanya kosong
+                        resetPreviewFoto();
                     }
-
-                    $('#modalTitle').text('Edit Data KPM');
-                    $('#modalKKS').modal('show');
 
                     $('#modalTitle').text('Edit Data KPM');
                     $('#modalKKS').modal('show');
