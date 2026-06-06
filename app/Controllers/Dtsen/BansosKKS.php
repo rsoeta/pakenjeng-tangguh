@@ -344,6 +344,7 @@ class BansosKKS extends BaseController
                 // PROSES INSERT
                 $dataSave['created_by'] = session()->get('id') ?? 0;
                 $dataSave['created_at'] = date('Y-m-d H:i:s');
+                $dataSave['updated_at'] = date('Y-m-d H:i:s');
                 $this->db->table('dtsen_bansos_kks')->insert($dataSave);
                 $msg = 'Dokumentasi berhasil disimpan!';
             }
