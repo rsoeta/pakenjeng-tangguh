@@ -241,11 +241,23 @@
                                         </select>
                                     </div>
                                     <div class="col-7 pl-1">
+                                        <?php
+                                        // 🚀 Menghitung tahap berdasarkan bulan berjalan (Kuartal 1-4)
+                                        $tahapSekarang = ceil(date('n') / 3);
+                                        ?>
                                         <div class="btn-group btn-group-toggle d-flex" data-toggle="buttons">
-                                            <label class="btn btn-xs flex-fill py-1"><input type="radio" name="tahap_salur" value="Tahap 1"> T.1</label>
-                                            <label class="btn btn-xs flex-fill py-1"><input type="radio" name="tahap_salur" value="Tahap 2"> T.2</label>
-                                            <label class="btn btn-xs flex-fill py-1"><input type="radio" name="tahap_salur" value="Tahap 3"> T.3</label>
-                                            <label class="btn btn-xs flex-fill py-1"><input type="radio" name="tahap_salur" value="Tahap 4"> T.4</label>
+                                            <label class="btn btn-xs flex-fill py-1 <?= ($tahapSekarang == 1) ? 'active' : '' ?>">
+                                                <input type="radio" name="tahap_salur" value="Tahap 1" <?= ($tahapSekarang == 1) ? 'checked' : '' ?> required> T.1
+                                            </label>
+                                            <label class="btn btn-xs flex-fill py-1 <?= ($tahapSekarang == 2) ? 'active' : '' ?>">
+                                                <input type="radio" name="tahap_salur" value="Tahap 2" <?= ($tahapSekarang == 2) ? 'checked' : '' ?> required> T.2
+                                            </label>
+                                            <label class="btn btn-xs flex-fill py-1 <?= ($tahapSekarang == 3) ? 'active' : '' ?>">
+                                                <input type="radio" name="tahap_salur" value="Tahap 3" <?= ($tahapSekarang == 3) ? 'checked' : '' ?> required> T.3
+                                            </label>
+                                            <label class="btn btn-xs flex-fill py-1 <?= ($tahapSekarang == 4) ? 'active' : '' ?>">
+                                                <input type="radio" name="tahap_salur" value="Tahap 4" <?= ($tahapSekarang == 4) ? 'checked' : '' ?> required> T.4
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
@@ -651,7 +663,18 @@
             $('.offcanvas-title').html('<i class="fas fa-plus-circle mr-2"></i> Tambah Dokumentasi Baru');
             $('#nik_search').val(null).trigger('change');
             $('#prev_kpm, #prev_bukti').attr('src', "<?= base_url('assets/images/image_not_available.jpg'); ?>");
-            $('.btn-group-toggle .btn').removeClass('active');
+
+            // 🚀 Reset Jenis Bansos (kosongkan)
+            $('.btn-group-bansos .btn').removeClass('active');
+
+            // 🚀 Reset Tahap Salur ke bulan berjalan saat ini secara dinamis
+            $('.btn-group-toggle input[name="tahap_salur"]').parent().removeClass('active');
+            var currentMonth = new Date().getMonth() + 1; // getMonth() mulai dari 0, jadi ditambah 1
+            var currentTahap = Math.ceil(currentMonth / 3);
+            $("input[name='tahap_salur'][value='Tahap " + currentTahap + "']").prop('checked', true).parent().addClass('active');
+
+            // 🚀 Pastikan Dropdown Tahun juga kembali ke tahun ini
+            $("select[name='tahun_salur']").val(new Date().getFullYear());
         });
 
         // ==========================================
