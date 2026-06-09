@@ -1,0 +1,25 @@
+Migrasi Aplikasi BPJSTK ke Menu SINDEN
+
+CREATE TABLE `dtsen_bpjstk` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `no_urut` varchar(10) DEFAULT NULL,
+  `kpj` varchar(50) DEFAULT NULL,
+  `nama` varchar(150) DEFAULT NULL,
+  `nik` varchar(20) DEFAULT NULL,
+  `alamat` text DEFAULT NULL,
+  `rt` varchar(3) DEFAULT NULL,
+  `rw` varchar(3) DEFAULT NULL,
+  `nama_ibu` varchar(150) DEFAULT NULL,
+  `no_hp` varchar(20) DEFAULT NULL,
+  `ttd_penerima` varchar(255) DEFAULT NULL,
+  `foto_bukti` varchar(255) DEFAULT NULL,
+  `status_serah_terima` tinyint(1) DEFAULT 0 COMMENT '0: Belum Diserahkan, 1: Sudah Diserahkan',
+  `waktu_serah_terima` datetime DEFAULT NULL,
+  `petugas_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_wilayah` (`rw`,`rt`),
+  KEY `idx_status` (`status_serah_terima`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

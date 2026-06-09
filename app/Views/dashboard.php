@@ -140,8 +140,23 @@
     <?php endif; ?>
 
     <?php if (!empty($menu_prioritas)): ?>
+        <?php
+        // 🚀 HITUNG JUMLAH MENU
+        $jmlMenu = count($menu_prioritas);
+
+        // 🚀 LOGIKA KELAS DINAMIS (TANPA WHITESPACE DI DESKTOP)
+        if ($jmlMenu == 1) {
+            $colClass = 'col-12'; // 1 Menu: Full layar HP & Desktop
+        } elseif ($jmlMenu == 2) {
+            $colClass = 'col-6';  // 2 Menu: Dibagi 2 rata di HP & Desktop (50:50)
+        } else {
+            $colClass = 'col-6 col-md-4'; // >= 3 Menu: Di HP bagi 2, di Desktop maksimal 3 sejajar
+        }
+        ?>
+
         <h5 class="mt-4 mb-2 fw-bold text-secondary"><i class="fas fa-bolt text-warning"></i> Menu Prioritas & Akses Cepat</h5>
-        <div class="stats-grid mt-0">
+
+        <div class="row mt-0">
             <?php foreach ($menu_prioritas as $mp): ?>
                 <?php
                 // 🚀 LOGIKA PENGGABUNGAN NAMA: "Parent Child"
@@ -149,10 +164,12 @@
                     ? $mp['parent_nama'] . ' ' . $mp['tm_nama']
                     : $mp['tm_nama'];
                 ?>
-                <div class="stat-card priority-card shadow-sm" onclick="window.location='<?= base_url($mp['tm_url']) ?>'">
-                    <div class="stat-icon text-info"><i class="<?= esc($mp['tm_icon']) ?>"></i></div>
-                    <h6 class="fw-bold mt-2 text-dark"><?= esc(strtoupper($judulMenu)) ?></h6>
-                    <small class="text-muted d-block mt-1">Buka Modul</small>
+                <div class="<?= $colClass ?> mb-3">
+                    <div class="stat-card priority-card shadow-sm h-100" onclick="window.location='<?= base_url($mp['tm_url']) ?>'">
+                        <div class="stat-icon text-info"><i class="<?= esc($mp['tm_icon']) ?>"></i></div>
+                        <h6 class="fw-bold mt-2 text-dark"><?= esc(strtoupper($judulMenu)) ?></h6>
+                        <small class="text-muted d-block mt-1">Buka Modul</small>
+                    </div>
                 </div>
             <?php endforeach; ?>
         </div>

@@ -199,6 +199,18 @@ $routes->group('bansos-kks', ['filter' => 'authfilterdtks', 'menufilterdtks'], f
 	$routes->post('toggle-lock', 'Dtsen\BansosKKS::toggleLock');
 });
 
+// ==========================================
+// 🪪 MODUL ARSIP BPJSTK
+// ==========================================
+$routes->group('bpjstk', ['filter' => 'authfilterdtks', 'menufilterdtks'], function ($routes) {
+	$routes->get('/', 'Dtsen\Bpjstk::index');
+	$routes->post('datatable', 'Dtsen\Bpjstk::datatable');
+	$routes->post('import', 'Dtsen\Bpjstk::importExcel');
+	$routes->get('get-data/(:num)', 'Dtsen\Bpjstk::getData/$1'); // Untuk menarik data ke modal
+	$routes->post('simpan-serah-terima', 'Dtsen\Bpjstk::simpanSerahTerima'); // Untuk save foto & TTD
+	$routes->post('rollback', 'Dtsen\Bpjstk::rollback'); // 🚀 Tambahkan rute rollback ini
+});
+
 // 🌍 API Wilayah Lokal (Dropdown berantai untuk DTSEN)
 $routes->group('api/villages', ['namespace' => 'App\Controllers\Api'], function ($routes) {
 	$routes->get('provinces', 'Villages::provinces');
