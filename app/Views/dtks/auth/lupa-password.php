@@ -1,6 +1,8 @@
 <?= $this->extend('dtks/auth/templates/index'); ?>
 <?= $this->section('content'); ?>
 
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
 <!-- render fonts poppins -->
 <link href="<?= base_url('assets/font/Poppins/poppins.css'); ?>" rel="stylesheet">
 
@@ -130,6 +132,8 @@
                 <div class="form-group text-left">
                     <input type="email" class="form-control" name="email" placeholder="Masukan Email" value="<?= set_value('email'); ?>">
                 </div>
+
+                <div class="cf-turnstile" data-sitekey="0x4AAAAAADhc27Fwr9L8O_Sb" data-theme="light"></div>
 
                 <button type="submit" class="btn btn-danger btn-block">Reset Password</button>
 

@@ -1,5 +1,6 @@
 <?= $this->extend('dtks/auth/templates/index'); ?>
 <?= $this->section('content'); ?>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
 <div class="min-vh-100 d-flex align-items-center justify-content-center">
     <div class="card shadow-lg border-0 rounded-3" id="theme-card" style="max-width: 400px; width: 100%; background-color: var(--card-bg, #fff);">
@@ -87,6 +88,8 @@
                     <input type="checkbox" id="checkbox">
                     <label for="checkbox" class="small">Tampilkan kata sandi</label>
                 </div>
+
+                <div class="cf-turnstile" data-sitekey="0x4AAAAAADhc27Fwr9L8O_Sb" data-theme="light"></div>
 
                 <button type="submit" class="btn btn-primary w-100 mb-3" style="background-color: #2EC4B6; border:none;">Daftar</button>
             </form>

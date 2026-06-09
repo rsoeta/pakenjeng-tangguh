@@ -4,7 +4,8 @@
 <!-- captha -->
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://www.google.com/recaptcha/api.js"></script>
+<!-- <script src="https://www.google.com/recaptcha/api.js"></script> -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
 <!-- render fonts poppins -->
 <style>
@@ -149,7 +150,9 @@
             <i class="fas fa-eye" id="togglePassword" style="position:absolute; right:16px; top:14px; cursor:pointer; color:#aaa"></i>
         </div>
 
-        <div class="g-recaptcha" data-sitekey="6LctvBomAAAAAGjg0x7rNMuW9c5BOZfP-ev4E6b5"></div>
+        <!-- <div class="g-recaptcha" data-sitekey="6LctvBomAAAAAGjg0x7rNMuW9c5BOZfP-ev4E6b5"></div> -->
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAADhc27Fwr9L8O_Sb" data-theme="light"></div>
+
         <div class="mb-3"></div>
 
         <button type="submit" class="btn btn-primary w-100">Masuk</button>
