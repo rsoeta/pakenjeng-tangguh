@@ -40,7 +40,7 @@
                         <?php
                         $imageUrl = $article['image']
                             ? base_url('uploads/articles/' . $article['image'])
-                            : base_url('assets/img/no-image.png');
+                            : base_url('assets/img/no-image.svg');
                         ?>
 
                         <img src="<?= $imageUrl ?>" id="editPreview"

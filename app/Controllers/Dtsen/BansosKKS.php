@@ -116,20 +116,45 @@ class BansosKKS extends BaseController
         };
 
         foreach ($query as $row) {
-            $fotoPath = !empty($row['foto_kpm_kks']) ? base_url('uploads/bansos/' . $row['foto_kpm_kks']) : base_url('assets/img/no-image.png');
+            // 🚀 1. DETEKSI STATUS KUNCI & KELENGKAPAN
+            $isLocked = (int)($row['is_locked'] ?? 0);
+            $statusKelengkapan = (int)($row['status_kelengkapan'] ?? 0);
+
+            // 🚀 PERBAIKAN LOGIKA: Lindungi data lama. 
+            // Jika di database statusnya 0 tapi ternyata sudah ada status salur/fotonya, paksa anggap lengkap (1)
+            if (!empty($row['status_salur']) || !empty($row['foto_kpm_kks'])) {
+                $statusKelengkapan = 1;
+            }
+
+            // 🚀 2. LOGIKA TAMPILAN DATA BERDASARKAN KELENGKAPAN
+            if ($statusKelengkapan == 0) {
+                // JIKA MASIH DRAFT (PR DARI ADMIN BENERAN KOSONG)
+                $fotoPath = base_url('assets/img/no-image.svg');
+
+                // 🚀 PERBAIKAN: Tampilkan nominal jika Admin sudah mengisinya (lebih dari 0)
+                $nominal = ($row['nominal_cair'] > 0)
+                    ? 'Rp ' . number_format($row['nominal_cair'], 0, ',', '.')
+                    : '<span class="text-muted"><i class="fas fa-minus"></i></span>';
+
+                $badgeStatus = '<span class="badge bg-warning text-dark p-2 mr-1 shadow-sm"><i class="fas fa-clock"></i> Draft/Menunggu Foto</span>';
+            } else {
+                // JIKA SUDAH LENGKAP (DIDOKUMENTASIKAN PENTRI ATAU DATA LAMA)
+                $fotoPath = !empty($row['foto_kpm_kks']) ? base_url('uploads/bansos/' . $row['foto_kpm_kks']) : base_url('assets/img/no-image.svg');
+                $nominal = 'Rp ' . number_format($row['nominal_cair'], 0, ',', '.');
+
+                $status_cek = strtolower(trim($row['status_salur']));
+                $badgeStatus = ($status_cek == 'sukses salur')
+                    ? '<span class="badge bg-success p-2 mr-1 shadow-sm"><i class="fas fa-check-circle"></i> Sukses Salur</span>'
+                    : '<span class="badge bg-danger p-2 mr-1 shadow-sm"><i class="fas fa-times-circle"></i> ' . esc($row['status_salur']) . '</span>';
+            }
+
             $colFoto = '<a href="' . $fotoPath . '" data-lightbox="gallery-kpm" data-title="Foto KPM: ' . esc($row['nama_kpm']) . '"><img src="' . $fotoPath . '" class="rounded shadow-sm" style="width: 70px; height: 90px; object-fit: cover; border: 2px solid #fff; cursor: pointer;" title="Klik untuk memperbesar"></a>';
-            $nominal = 'Rp ' . number_format($row['nominal_cair'], 0, ',', '.');
 
             $nikMasked = $maskNumber($row['nik_kpm'], 'nik');
             $kksMasked = $maskNumber($row['nomor_kks'], 'nokk');
 
-            // ... (kode atasnya tetap sama: $nikMasked, $kksMasked, $nominal) ...
-
-            // 🚀 CEK STATUS KUNCI
-            $isLocked = (int)($row['is_locked'] ?? 0);
-
-            // 🚀 INDIKATOR GEMBOK VISUAL (Biar di layar kelihatan keren)
-            $badgeLock = $isLocked ? '<span class="badge bg-danger p-2 ml-1" title="Data Telah Diverifikasi & Dikunci"><i class="fas fa-lock"></i></span>' : '';
+            // 🚀 3. INDIKATOR GEMBOK VISUAL
+            $badgeLock = $isLocked ? '<span class="badge bg-danger p-2 ml-1 shadow-sm" title="Data Telah Diverifikasi & Dikunci"><i class="fas fa-lock"></i></span>' : '';
 
             $colDetail = '
             <div class="row align-items-center">
@@ -141,9 +166,11 @@ class BansosKKS extends BaseController
                 </div>
                 <div class="col-md-6 d-none d-md-block text-md-right border-left">
                     <div class="mb-1">
-                        <span class="badge bg-primary p-2 mr-1">' . esc($row['jenis_bansos']) . '</span>
-                        <span class="badge bg-success p-2">' . $nominal . '</span>
-                        ' . $badgeLock . ' </div>
+                        <span class="badge bg-primary p-2 mr-1 shadow-sm">' . esc($row['jenis_bansos']) . '</span>
+                        ' . $badgeStatus . '
+                        <span class="badge bg-success p-2 shadow-sm">' . $nominal . '</span>
+                        ' . $badgeLock . ' 
+                    </div>
                     <div class="small text-muted mt-1 d-flex align-items-center justify-content-md-end">
                          <i class="fas fa-credit-card mr-2"></i> ' . $kksMasked . '
                     </div>
@@ -154,39 +181,34 @@ class BansosKKS extends BaseController
             </div>';
 
             // ==========================================
-            // 🚀 LOGIKA TOMBOL AKSI BERDASARKAN ROLE & KUNCI
+            // 🚀 4. LOGIKA TOMBOL AKSI BERDASARKAN ROLE & KELENGKAPAN
             // ==========================================
-            $btnEdit   = '';
-            $btnDelete = '';
-            $btnLock   = '';
+            $btnActionHTML = '';
 
-            // 1. TOMBOL KUNCI (Eksklusif Role <= 3)
             if ($roleId <= 3) {
-                if ($isLocked) {
-                    $btnLock = '<button class="btn btn-sm btn-danger btn-toggle-lock shadow-sm" data-id="' . $row['id'] . '" data-status="1" title="Buka Kunci"><i class="fas fa-lock"></i></button>';
+                // === EKSKLUSIF ADMIN (ROLE <= 3) ===
+                $btnLock = $isLocked
+                    ? '<button class="btn btn-sm btn-danger btn-toggle-lock shadow-sm" data-id="' . $row['id'] . '" data-status="1" title="Buka Kunci"><i class="fas fa-lock"></i></button>'
+                    : '<button class="btn btn-sm btn-outline-secondary btn-toggle-lock" data-id="' . $row['id'] . '" data-status="0" title="Kunci Data"><i class="fas fa-unlock"></i></button>';
+
+                // Admin bisa edit apa saja (tambahkan atribut data-kelengkapan agar JS tahu ini mode apa)
+                $btnEdit = '<button class="btn btn-sm btn-outline-warning btn-edit shadow-sm" data-id="' . $row['id'] . '" data-kelengkapan="' . $statusKelengkapan . '" title="Edit Data"><i class="fas fa-edit"></i></button>';
+                $btnDelete = '<button class="btn btn-sm btn-outline-danger btn-delete shadow-sm" data-id="' . $row['id'] . '" title="Hapus"><i class="fas fa-trash-alt"></i></button>';
+
+                $btnActionHTML = $btnLock . $btnEdit . $btnDelete;
+            } else {
+                // === EKSKLUSIF PENTRI (ROLE >= 4) ===
+                if ($statusKelengkapan == 0) {
+                    // Jika data masih Draft -> Tombol LENGKAPI (Kamera)
+                    $btnActionHTML = '<button class="btn btn-sm btn-primary btn-edit shadow-sm px-3" data-id="' . $row['id'] . '" data-kelengkapan="0" title="Lengkapi Dokumentasi Lapangan"><i class="fas fa-camera mr-1"></i> Lengkapi</button>';
                 } else {
-                    $btnLock = '<button class="btn btn-sm btn-outline-secondary btn-toggle-lock" data-id="' . $row['id'] . '" data-status="0" title="Kunci Data"><i class="fas fa-unlock"></i></button>';
+                    // Jika sudah lengkap -> Tombol READ-ONLY (Mata)
+                    $btnActionHTML = '<button class="btn btn-sm btn-info btn-edit shadow-sm px-3" data-id="' . $row['id'] . '" data-kelengkapan="1" title="Lihat Detail (Read-Only)"><i class="fas fa-eye mr-1"></i> Lihat</button>';
                 }
             }
 
-            // 2. TOMBOL EDIT (Hanya bisa diklik jika belum dikunci, ATAU yang login adalah Role <= 3)
-            if (!$isLocked || $roleId <= 3) {
-                $btnEdit = '<button class="btn btn-sm btn-outline-warning btn-edit" data-id="' . $row['id'] . '" title="Edit Data"><i class="fas fa-edit"></i></button>';
-            } else {
-                // Untuk Role Pentri jika data sudah dikunci
-                $btnEdit = '<button class="btn btn-sm btn-secondary disabled" title="Data Terkunci"><i class="fas fa-lock"></i></button>';
-            }
-
-            // 3. TOMBOL DELETE (Eksklusif Role <= 3)
-            if ($roleId <= 3) {
-                $btnDelete = '<button class="btn btn-sm btn-outline-danger btn-delete" data-id="' . $row['id'] . '" title="Hapus"><i class="fas fa-trash-alt"></i></button>';
-            }
-
-            // Gabungkan semua tombol
-            $btnAction = '
-            <div class="d-flex flex-row justify-content-center align-items-center" style="gap: 5px;">
-                ' . $btnLock . $btnEdit . $btnDelete . '
-            </div>';
+            // Gabungkan semua tombol ke dalam wrapper flex
+            $btnAction = '<div class="d-flex flex-row justify-content-center align-items-center" style="gap: 5px;">' . $btnActionHTML . '</div>';
 
             $data[] = [$no++, $colFoto, $colDetail, $btnAction];
         }
@@ -267,7 +289,7 @@ class BansosKKS extends BaseController
     }
 
     // ========================================================
-    // 💾 SIMPAN DATA (Insert & Update dalam 1 Fungsi, dengan Logika File yang Cerdas)
+    // 💾 SIMPAN DATA (Insert & Update, Logika Draft, & Validasi Double)
     // ========================================================
     public function simpan()
     {
@@ -279,11 +301,45 @@ class BansosKKS extends BaseController
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Data KPM tidak valid!']);
             }
 
-            // Gabungkan Tahun dan Tahap
-            $tahap_salur_final = $post['tahap_salur'] . ' Tahun ' . $post['tahun_salur'];
+            $roleId = session()->get('role_id');
 
-            $fotoKpm   = $this->request->getFile('foto_kpm_kks');
-            $fotoBukti = $this->request->getFile('foto_bukti_transaksi');
+            // 🚀 LOGIKA CERDAS: Deteksi Mode Draft
+            // Jika yang login Admin (Role <= 3) dan status salur dikosongkan, berarti ini pembuatan PR/Draft
+            $isDraft = ($roleId <= 3 && empty($post['status_salur']));
+
+            // Gabungkan Tahun dan Tahap
+            $tahun = $post['tahun_salur'] ?? date('Y');
+            $tahap_salur_final = $post['tahap_salur'] . ' Tahun ' . $tahun;
+
+            $jenisBansos = $post['jenis_bansos'];
+            $nik = $post['nik_kpm'];
+
+            // ==========================================
+            // 🛡️ VALIDASI DOUBLE DATA (NIK + TAHAP + JENIS)
+            // ==========================================
+            $builderCek = $this->db->table('dtsen_bansos_kks')
+                ->where('nik_kpm', $nik)
+                ->where('tahap_salur', $tahap_salur_final)
+                ->where('jenis_bansos', $jenisBansos);
+
+            // Jika sedang proses UPDATE, kecualikan ID yang sedang diedit agar tidak terdeteksi sebagai duplikat
+            if ($id) {
+                $builderCek->where('id !=', $id);
+            }
+
+            if ($builderCek->countAllResults() > 0) {
+                // Return JSON Error yang akan ditangkap oleh SweetAlert2 di frontend
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Gagal! NIK ini sudah terdaftar untuk ' . $jenisBansos . ' pada ' . $tahap_salur_final . '.'
+                ]);
+            }
+            // ==========================================
+
+            $kks = (!empty($post['no_kks']) && $post['no_kks'] !== '-') ? $post['no_kks'] : 'NOKKS';
+            $lat = $post['latitude'] ?: '0';
+            $lng = $post['longitude'] ?: '0';
+            $timestamp = time();
 
             // 1. Ambil data lama jika ini proses UPDATE
             $oldData = null;
@@ -291,32 +347,43 @@ class BansosKKS extends BaseController
                 $oldData = $this->db->table('dtsen_bansos_kks')->where('id', $id)->get()->getRowArray();
             }
 
-            $nik = $post['nik_kpm'];
-            $kks = ($post['no_kks'] !== '-' && !empty($post['no_kks'])) ? $post['no_kks'] : 'NOKKS';
-            $lat = $post['latitude'] ?: '0';
-            $lng = $post['longitude'] ?: '0';
-            $timestamp = time();
+            $namaFotoKpm = ($id && $oldData) ? $oldData['foto_kpm_kks'] : '';
+            $namaFotoBukti = ($id && $oldData) ? $oldData['foto_bukti_transaksi'] : '';
 
-            // 2. LOGIKA FILE FOTO (Update vs Insert)
-            $uploadPath = FCPATH . 'uploads/bansos/';
-            if (!is_dir($uploadPath)) mkdir($uploadPath, 0777, true);
+            // 2. LOGIKA FILE FOTO & NOMINAL (Draft vs Selesai)
+            if (!$isDraft) {
+                // === MODE LENGKAPI / FULL SUBMIT (Wajib Foto) ===
+                $fotoKpm   = $this->request->getFile('foto_kpm_kks');
+                $fotoBukti = $this->request->getFile('foto_bukti_transaksi');
+                $uploadPath = FCPATH . 'uploads/bansos/';
+                if (!is_dir($uploadPath)) mkdir($uploadPath, 0777, true);
 
-            // -- Foto KPM --
-            if ($fotoKpm && $fotoKpm->isValid()) {
-                $namaFotoKpm = "KPM_{$nik}_{$kks}_{$timestamp}.jpg";
-                $this->_applyWatermark($fotoKpm, $uploadPath . $namaFotoKpm, $post);
-                // Jika update, hapus foto lama jika perlu (opsional)
+                // -- Proses Foto KPM --
+                if ($fotoKpm && $fotoKpm->isValid()) {
+                    $namaFotoKpm = "KPM_{$nik}_{$kks}_{$timestamp}.jpg";
+                    $this->_applyWatermark($fotoKpm, $uploadPath . $namaFotoKpm, $post);
+                } elseif (!$id && empty($oldData['foto_kpm_kks'])) {
+                    // Wajib jika insert data baru yang bukan draft
+                    return $this->response->setJSON(['status' => 'error', 'message' => 'Foto KPM & KKS wajib diunggah!']);
+                }
+
+                // -- Proses Foto Bukti --
+                if ($fotoBukti && $fotoBukti->isValid()) {
+                    $namaFotoBukti = "STRUK_{$nik}_{$kks}_{$timestamp}.jpg";
+                    $this->_applyWatermark($fotoBukti, $uploadPath . $namaFotoBukti, $post);
+                } elseif (!$id && empty($oldData['foto_bukti_transaksi'])) {
+                    return $this->response->setJSON(['status' => 'error', 'message' => 'Foto Struk/Uang wajib diunggah!']);
+                }
+
+                $nominalCair = (int) str_replace('.', '', $post['nominal_cair'] ?? 0);
+                $statusSalur = $post['status_salur'];
+                $statusKelengkapan = 1; // Selesai
             } else {
-                // Jika update dan tidak upload baru, pakai nama foto lama
-                $namaFotoKpm = ($id && $oldData) ? $oldData['foto_kpm_kks'] : '';
-            }
-
-            // -- Foto Bukti --
-            if ($fotoBukti && $fotoBukti->isValid()) {
-                $namaFotoBukti = "STRUK_{$nik}_{$kks}_{$timestamp}.jpg";
-                $this->_applyWatermark($fotoBukti, $uploadPath . $namaFotoBukti, $post);
-            } else {
-                $namaFotoBukti = ($id && $oldData) ? $oldData['foto_bukti_transaksi'] : '';
+                // === MODE DRAFT / TUGAS ADMIN (Bypass Foto) ===
+                // 🚀 PERBAIKAN: Ambil nominal dari inputan Admin, jangan di-nol-kan!
+                $nominalCair = (int) str_replace('.', '', $post['nominal_cair'] ?? 0);
+                $statusSalur = null;
+                $statusKelengkapan = 0; // Masih PR/Draft
             }
 
             // 3. PREPARASI DATA
@@ -324,29 +391,30 @@ class BansosKKS extends BaseController
                 'nik_kpm'              => $nik,
                 'nama_kpm'             => $post['nama_kpm'],
                 'nomor_kks'            => $kks,
-                'jenis_bansos'         => $post['jenis_bansos'],
+                'jenis_bansos'         => $jenisBansos,
                 'tahap_salur'          => $tahap_salur_final,
-                'nominal_cair'         => (int) str_replace('.', '', $post['nominal_cair'] ?? 0),
-                'status_salur'         => $post['status_salur'],
+                'nominal_cair'         => $nominalCair,
+                'status_salur'         => $statusSalur,
                 'foto_kpm_kks'         => $namaFotoKpm,
                 'foto_bukti_transaksi' => $namaFotoBukti,
                 'latitude'             => $lat,
                 'longitude'            => $lng,
+                'status_kelengkapan'   => $statusKelengkapan // Kolom penanda baru
             ];
 
             // 4. EKSEKUSI (INSERT vs UPDATE)
             if ($id) {
-                // PROSES UPDATE
+                // PROSES UPDATE / MELENGKAPI
                 $dataSave['updated_at'] = date('Y-m-d H:i:s');
                 $this->db->table('dtsen_bansos_kks')->where('id', $id)->update($dataSave);
-                $msg = 'Dokumentasi berhasil diperbarui!';
+                $msg = ($statusKelengkapan == 1) ? 'Dokumentasi berhasil dilengkapi!' : 'Draft Tugas diperbarui!';
             } else {
                 // PROSES INSERT
-                $dataSave['created_by'] = session()->get('id') ?? 0;
+                $dataSave['created_by'] = session()->get('user_id') ?? 0;
                 $dataSave['created_at'] = date('Y-m-d H:i:s');
                 $dataSave['updated_at'] = date('Y-m-d H:i:s');
                 $this->db->table('dtsen_bansos_kks')->insert($dataSave);
-                $msg = 'Dokumentasi berhasil disimpan!';
+                $msg = ($statusKelengkapan == 1) ? 'Dokumentasi berhasil disimpan!' : 'Draft Tugas berhasil dibuat!';
             }
 
             return $this->response->setJSON(['status' => 'success', 'message' => $msg]);
@@ -354,6 +422,95 @@ class BansosKKS extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
+
+    // // ========================================================
+    // // 💾 SIMPAN DATA (Insert & Update dalam 1 Fungsi, dengan Logika File yang Cerdas)
+    // // ========================================================
+    // public function simpan()
+    // {
+    //     try {
+    //         $post = $this->request->getPost();
+    //         $id = $post['id'] ?? null; // Ambil ID jika ada (untuk Update)
+
+    //         if (empty($post['nik_kpm'])) {
+    //             return $this->response->setJSON(['status' => 'error', 'message' => 'Data KPM tidak valid!']);
+    //         }
+
+    //         // Gabungkan Tahun dan Tahap
+    //         $tahap_salur_final = $post['tahap_salur'] . ' Tahun ' . $post['tahun_salur'];
+
+    //         $fotoKpm   = $this->request->getFile('foto_kpm_kks');
+    //         $fotoBukti = $this->request->getFile('foto_bukti_transaksi');
+
+    //         // 1. Ambil data lama jika ini proses UPDATE
+    //         $oldData = null;
+    //         if ($id) {
+    //             $oldData = $this->db->table('dtsen_bansos_kks')->where('id', $id)->get()->getRowArray();
+    //         }
+
+    //         $nik = $post['nik_kpm'];
+    //         $kks = ($post['no_kks'] !== '-' && !empty($post['no_kks'])) ? $post['no_kks'] : 'NOKKS';
+    //         $lat = $post['latitude'] ?: '0';
+    //         $lng = $post['longitude'] ?: '0';
+    //         $timestamp = time();
+
+    //         // 2. LOGIKA FILE FOTO (Update vs Insert)
+    //         $uploadPath = FCPATH . 'uploads/bansos/';
+    //         if (!is_dir($uploadPath)) mkdir($uploadPath, 0777, true);
+
+    //         // -- Foto KPM --
+    //         if ($fotoKpm && $fotoKpm->isValid()) {
+    //             $namaFotoKpm = "KPM_{$nik}_{$kks}_{$timestamp}.jpg";
+    //             $this->_applyWatermark($fotoKpm, $uploadPath . $namaFotoKpm, $post);
+    //             // Jika update, hapus foto lama jika perlu (opsional)
+    //         } else {
+    //             // Jika update dan tidak upload baru, pakai nama foto lama
+    //             $namaFotoKpm = ($id && $oldData) ? $oldData['foto_kpm_kks'] : '';
+    //         }
+
+    //         // -- Foto Bukti --
+    //         if ($fotoBukti && $fotoBukti->isValid()) {
+    //             $namaFotoBukti = "STRUK_{$nik}_{$kks}_{$timestamp}.jpg";
+    //             $this->_applyWatermark($fotoBukti, $uploadPath . $namaFotoBukti, $post);
+    //         } else {
+    //             $namaFotoBukti = ($id && $oldData) ? $oldData['foto_bukti_transaksi'] : '';
+    //         }
+
+    //         // 3. PREPARASI DATA
+    //         $dataSave = [
+    //             'nik_kpm'              => $nik,
+    //             'nama_kpm'             => $post['nama_kpm'],
+    //             'nomor_kks'            => $kks,
+    //             'jenis_bansos'         => $post['jenis_bansos'],
+    //             'tahap_salur'          => $tahap_salur_final,
+    //             'nominal_cair'         => (int) str_replace('.', '', $post['nominal_cair'] ?? 0),
+    //             'status_salur'         => $post['status_salur'],
+    //             'foto_kpm_kks'         => $namaFotoKpm,
+    //             'foto_bukti_transaksi' => $namaFotoBukti,
+    //             'latitude'             => $lat,
+    //             'longitude'            => $lng,
+    //         ];
+
+    //         // 4. EKSEKUSI (INSERT vs UPDATE)
+    //         if ($id) {
+    //             // PROSES UPDATE
+    //             $dataSave['updated_at'] = date('Y-m-d H:i:s');
+    //             $this->db->table('dtsen_bansos_kks')->where('id', $id)->update($dataSave);
+    //             $msg = 'Dokumentasi berhasil diperbarui!';
+    //         } else {
+    //             // PROSES INSERT
+    //             $dataSave['created_by'] = session()->get('id') ?? 0;
+    //             $dataSave['created_at'] = date('Y-m-d H:i:s');
+    //             $dataSave['updated_at'] = date('Y-m-d H:i:s');
+    //             $this->db->table('dtsen_bansos_kks')->insert($dataSave);
+    //             $msg = 'Dokumentasi berhasil disimpan!';
+    //         }
+
+    //         return $this->response->setJSON(['status' => 'success', 'message' => $msg]);
+    //     } catch (\Throwable $e) {
+    //         return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+    //     }
+    // }
 
     // ========================================================
     // 🖼️ FUNGSI WATERMARK: NATIVE GD PREMIUM (SINDEN STYLE)
@@ -724,6 +881,55 @@ class BansosKKS extends BaseController
                 'status' => 'error',
                 'message' => 'Terjadi kesalahan pada database: ' . $e->getMessage()
             ]);
+        }
+    }
+
+    // ========================================================
+    // 📥 IMPORT EXCEL TUGAS DARI SIKS-NG (KHUSUS ADMIN)
+    // ========================================================
+    public function importTugasExcel()
+    {
+        if (session()->get('role_id') > 3) {
+            return redirect()->back()->with('error', 'Akses ditolak!');
+        }
+
+        $file = $this->request->getFile('file_excel');
+        if (!$file || !$file->isValid()) {
+            return redirect()->back()->with('error', 'Pilih file Excel yang valid!');
+        }
+
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getTempName());
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray();
+
+            $insertData = [];
+            foreach ($rows as $index => $row) {
+                if ($index == 0) continue; // Skip header
+
+                $nik = trim($row[0] ?? '');
+                if (empty($nik)) continue;
+
+                $insertData[] = [
+                    'nik_kpm'            => $nik,
+                    'nama_kpm'           => trim($row[1] ?? ''),
+                    'nomor_kks'          => trim($row[2] ?? ''),
+                    'jenis_bansos'       => trim($row[3] ?? 'SEMBAKO'), // Sesuai format ENUM
+                    'tahap_salur'        => trim($row[4] ?? 'Tahap 1'),
+                    'status_kelengkapan' => 0, // 🚀 Langsung set sebagai PR/Draft
+                    'status_salur'       => null,
+                    'created_by'         => session()->get('user_id'),
+                    'created_at'         => date('Y-m-d H:i:s')
+                ];
+            }
+
+            if (!empty($insertData)) {
+                $this->db->table('dtsen_bansos_kks')->insertBatch($insertData);
+            }
+
+            return redirect()->back()->with('success', count($insertData) . ' Data Tugas Dokumentasi berhasil diimpor!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memproses file: ' . $e->getMessage());
         }
     }
 }

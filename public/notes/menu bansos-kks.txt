@@ -1,1 +1,11 @@
 ALTER TABLE dtsen_bansos_kks ADD COLUMN is_locked TINYINT(1) DEFAULT 0;
+
+-- 1. Modifikasi tabel untuk mengizinkan status NULL dan menambah kolom kelengkapan
+ALTER TABLE `dtsen_bansos_kks` 
+MODIFY `status_salur` enum('Sukses Salur','Saldo Kosong','KKS Rusak/Hilang','KPM Meninggal','Pindah/Tidak Ditemukan') DEFAULT NULL,
+ADD `status_kelengkapan` tinyint(1) DEFAULT 0 COMMENT '0: Draft/PR dari Admin, 1: Lengkap/Selesai' AFTER `updated_at`;
+
+-- 2. Update data lama agar otomatis dikenali sebagai data yang sudah lengkap
+UPDATE `dtsen_bansos_kks` 
+SET `status_kelengkapan` = 1 
+WHERE `status_salur` IS NOT NULL;
