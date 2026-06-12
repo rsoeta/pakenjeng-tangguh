@@ -423,95 +423,6 @@ class BansosKKS extends BaseController
         }
     }
 
-    // // ========================================================
-    // // 💾 SIMPAN DATA (Insert & Update dalam 1 Fungsi, dengan Logika File yang Cerdas)
-    // // ========================================================
-    // public function simpan()
-    // {
-    //     try {
-    //         $post = $this->request->getPost();
-    //         $id = $post['id'] ?? null; // Ambil ID jika ada (untuk Update)
-
-    //         if (empty($post['nik_kpm'])) {
-    //             return $this->response->setJSON(['status' => 'error', 'message' => 'Data KPM tidak valid!']);
-    //         }
-
-    //         // Gabungkan Tahun dan Tahap
-    //         $tahap_salur_final = $post['tahap_salur'] . ' Tahun ' . $post['tahun_salur'];
-
-    //         $fotoKpm   = $this->request->getFile('foto_kpm_kks');
-    //         $fotoBukti = $this->request->getFile('foto_bukti_transaksi');
-
-    //         // 1. Ambil data lama jika ini proses UPDATE
-    //         $oldData = null;
-    //         if ($id) {
-    //             $oldData = $this->db->table('dtsen_bansos_kks')->where('id', $id)->get()->getRowArray();
-    //         }
-
-    //         $nik = $post['nik_kpm'];
-    //         $kks = ($post['no_kks'] !== '-' && !empty($post['no_kks'])) ? $post['no_kks'] : 'NOKKS';
-    //         $lat = $post['latitude'] ?: '0';
-    //         $lng = $post['longitude'] ?: '0';
-    //         $timestamp = time();
-
-    //         // 2. LOGIKA FILE FOTO (Update vs Insert)
-    //         $uploadPath = FCPATH . 'uploads/bansos/';
-    //         if (!is_dir($uploadPath)) mkdir($uploadPath, 0777, true);
-
-    //         // -- Foto KPM --
-    //         if ($fotoKpm && $fotoKpm->isValid()) {
-    //             $namaFotoKpm = "KPM_{$nik}_{$kks}_{$timestamp}.jpg";
-    //             $this->_applyWatermark($fotoKpm, $uploadPath . $namaFotoKpm, $post);
-    //             // Jika update, hapus foto lama jika perlu (opsional)
-    //         } else {
-    //             // Jika update dan tidak upload baru, pakai nama foto lama
-    //             $namaFotoKpm = ($id && $oldData) ? $oldData['foto_kpm_kks'] : '';
-    //         }
-
-    //         // -- Foto Bukti --
-    //         if ($fotoBukti && $fotoBukti->isValid()) {
-    //             $namaFotoBukti = "STRUK_{$nik}_{$kks}_{$timestamp}.jpg";
-    //             $this->_applyWatermark($fotoBukti, $uploadPath . $namaFotoBukti, $post);
-    //         } else {
-    //             $namaFotoBukti = ($id && $oldData) ? $oldData['foto_bukti_transaksi'] : '';
-    //         }
-
-    //         // 3. PREPARASI DATA
-    //         $dataSave = [
-    //             'nik_kpm'              => $nik,
-    //             'nama_kpm'             => $post['nama_kpm'],
-    //             'nomor_kks'            => $kks,
-    //             'jenis_bansos'         => $post['jenis_bansos'],
-    //             'tahap_salur'          => $tahap_salur_final,
-    //             'nominal_cair'         => (int) str_replace('.', '', $post['nominal_cair'] ?? 0),
-    //             'status_salur'         => $post['status_salur'],
-    //             'foto_kpm_kks'         => $namaFotoKpm,
-    //             'foto_bukti_transaksi' => $namaFotoBukti,
-    //             'latitude'             => $lat,
-    //             'longitude'            => $lng,
-    //         ];
-
-    //         // 4. EKSEKUSI (INSERT vs UPDATE)
-    //         if ($id) {
-    //             // PROSES UPDATE
-    //             $dataSave['updated_at'] = date('Y-m-d H:i:s');
-    //             $this->db->table('dtsen_bansos_kks')->where('id', $id)->update($dataSave);
-    //             $msg = 'Dokumentasi berhasil diperbarui!';
-    //         } else {
-    //             // PROSES INSERT
-    //             $dataSave['created_by'] = session()->get('id') ?? 0;
-    //             $dataSave['created_at'] = date('Y-m-d H:i:s');
-    //             $dataSave['updated_at'] = date('Y-m-d H:i:s');
-    //             $this->db->table('dtsen_bansos_kks')->insert($dataSave);
-    //             $msg = 'Dokumentasi berhasil disimpan!';
-    //         }
-
-    //         return $this->response->setJSON(['status' => 'success', 'message' => $msg]);
-    //     } catch (\Throwable $e) {
-    //         return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
-    //     }
-    // }
-
     // ========================================================
     // 🖼️ FUNGSI WATERMARK: NATIVE GD PREMIUM (SINDEN STYLE)
     // ========================================================
@@ -890,12 +801,12 @@ class BansosKKS extends BaseController
     public function importTugasExcel()
     {
         if (session()->get('role_id') > 3) {
-            return redirect()->back()->with('error', 'Akses ditolak!');
+            return redirect()->to('/bansos-kks')->with('error', 'Akses ditolak!');
         }
 
         $file = $this->request->getFile('file_excel');
         if (!$file || !$file->isValid()) {
-            return redirect()->back()->with('error', 'Pilih file Excel yang valid!');
+            return redirect()->to('/bansos-kks')->with('error', 'Pilih file Excel yang valid!');
         }
 
         try {
@@ -904,22 +815,45 @@ class BansosKKS extends BaseController
             $rows = $sheet->toArray();
 
             $insertData = [];
+            $jumlahDouble = 0; // Menghitung berapa data yang di-skip karena duplikat
+
             foreach ($rows as $index => $row) {
-                if ($index == 0) continue; // Skip header
+                if ($index == 0) continue; // Skip header di Baris 1
 
                 $nik = trim($row[0] ?? '');
                 if (empty($nik)) continue;
+
+                $jenisBansos = trim($row[3] ?? 'SEMBAKO');
+                $tahapSalur  = trim($row[4] ?? 'Tahap 2 Tahun ' . date('Y'));
+
+                // 🛡️ RADAR ANTI-DOUBLE: Cek apakah NIK + Bansos + Tahap ini sudah ada di database?
+                $cekDouble = $this->db->table('dtsen_bansos_kks')
+                    ->where('nik_kpm', $nik)
+                    ->where('jenis_bansos', $jenisBansos)
+                    ->where('tahap_salur', $tahapSalur)
+                    ->countAllResults();
+
+                if ($cekDouble > 0) {
+                    $jumlahDouble++;
+                    continue; // 🚀 SKIP baris ini, jangan dimasukkan ke array insert
+                }
+
+                // Bersihkan format titik, koma, atau "Rp" dari Excel
+                $rawNominal = trim($row[5] ?? '0');
+                $nominalCair = (int) preg_replace('/\D/', '', $rawNominal);
 
                 $insertData[] = [
                     'nik_kpm'            => $nik,
                     'nama_kpm'           => trim($row[1] ?? ''),
                     'nomor_kks'          => trim($row[2] ?? ''),
-                    'jenis_bansos'       => trim($row[3] ?? 'SEMBAKO'), // Sesuai format ENUM
-                    'tahap_salur'        => trim($row[4] ?? 'Tahap 1'),
-                    'status_kelengkapan' => 0, // 🚀 Langsung set sebagai PR/Draft
+                    'jenis_bansos'       => $jenisBansos,
+                    'tahap_salur'        => $tahapSalur,
+                    'nominal_cair'       => $nominalCair,
+                    'status_kelengkapan' => 0,
                     'status_salur'       => null,
-                    'created_by'         => session()->get('user_id'),
-                    'created_at'         => date('Y-m-d H:i:s')
+                    'created_by'         => session()->get('id'),
+                    'created_at'         => date('Y-m-d H:i:s'),
+                    'updated_at'         => date('Y-m-d H:i:s')
                 ];
             }
 
@@ -927,9 +861,15 @@ class BansosKKS extends BaseController
                 $this->db->table('dtsen_bansos_kks')->insertBatch($insertData);
             }
 
-            return redirect()->back()->with('success', count($insertData) . ' Data Tugas Dokumentasi berhasil diimpor!');
+            // Pesan sukses yang informatif
+            $pesanSukses = count($insertData) . ' Data Tugas Dokumentasi berhasil diimpor!';
+            if ($jumlahDouble > 0) {
+                $pesanSukses .= ' (Mengabaikan ' . $jumlahDouble . ' data duplikat/sudah ada).';
+            }
+
+            return redirect()->to('/bansos-kks')->with('success', $pesanSukses);
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memproses file: ' . $e->getMessage());
+            return redirect()->to('/bansos-kks')->with('error', 'Gagal memproses file: ' . $e->getMessage());
         }
     }
 }

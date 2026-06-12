@@ -346,13 +346,13 @@
                 <h5 class="modal-title"><i class="fas fa-file-excel mr-2"></i> Impor PR / Tugas SIKS-NG</h5>
                 <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close"><span>&times;</span></button>
             </div>
-            <form action="<?= base_url('bansoskks/importTugasExcel'); ?>" method="post" enctype="multipart/form-data">
+            <form action="<?= base_url('bansos-kks/importTugasExcel'); ?>" method="post" enctype="multipart/form-data">
                 <?= csrf_field(); ?>
                 <div class="modal-body bg-light">
                     <div class="alert alert-warning small py-2 border-warning shadow-sm">
                         <i class="fas fa-info-circle"></i> <b>Format Kolom Excel (Mulai Baris 2):</b><br>
-                        1. NIK KPM &nbsp; 2. NAMA KPM &nbsp; 3. NOMOR KKS<br>
-                        4. JENIS BANSOS &nbsp; 5. TAHAP SALUR
+                        A. NIK KPM &nbsp; | &nbsp; B. NAMA KPM &nbsp; | &nbsp; C. NOMOR KKS<br>
+                        D. JENIS BANSOS &nbsp; | &nbsp; E. TAHAP SALUR &nbsp; | &nbsp; F. NOMINAL CAIR
                     </div>
                     <div class="form-group mb-0">
                         <label class="fw-bold small">Pilih File Excel (.xls / .xlsx)</label>
