@@ -89,6 +89,9 @@ class Banpang extends BaseController
 
         $filteredRecords = $builder->countAllResults(false);
 
+        // 🚀 KUNCI ANTI GANDA: Pastikan 1 riwayat scan hanya tampil 1 baris
+        $builder->groupBy('b.id');
+
         // Urutkan yang terbaru discan berada di paling atas
         $builder->orderBy('b.waktu_scan', 'DESC');
 
@@ -171,6 +174,9 @@ class Banpang extends BaseController
         if (!empty($filter_rt)) {
             $builder->where('rt.rt', str_pad($filter_rt, 3, '0', STR_PAD_LEFT));
         }
+
+        // 🚀 KUNCI ANTI GANDA
+        $builder->groupBy('b.id');
 
         $builder->orderBy('rt.rw', 'ASC')->orderBy('rt.rt', 'ASC')->orderBy('b.nama_kpm', 'ASC');
         $query = $builder->get()->getResultArray();
@@ -264,6 +270,9 @@ class Banpang extends BaseController
         if (!empty($filter_rt)) {
             $builder->where('rt.rt', str_pad($filter_rt, 3, '0', STR_PAD_LEFT));
         }
+
+        // 🚀 KUNCI ANTI GANDA
+        $builder->groupBy('b.id');
 
         $builder->orderBy('rt.rw', 'ASC')->orderBy('rt.rt', 'ASC')->orderBy('b.nama_kpm', 'ASC');
         $query = $builder->get()->getResultArray();

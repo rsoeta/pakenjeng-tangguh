@@ -392,16 +392,22 @@ $routes->group('admin', ['filter' => ['authfilterdtks', 'globalview', 'menufilte
 
 
 // ========================================================
-// 📷 ROUTE SCANNER BANTUAN PANGAN (BANPANG)
+// 📦 MODUL BANTUAN PANGAN (BANPANG)
 // ========================================================
-$routes->get('banpang', 'Dtsen\Banpang::index');
-$routes->post('banpang/datatable', 'Dtsen\Banpang::datatable');
-$routes->get('banpang/scanner', 'Dtsen\Banpang::scanner');
-$routes->post('banpang/simpanScan', 'Dtsen\Banpang::simpanScan');
-$routes->get('banpang/getLatestScans', 'Dtsen\Banpang::getLatestScans');
-// 🖨️ ROUTE EKSPOR DATA BANPANG (EXCEL & PDF REPORT)
-$routes->get('banpang/exportExcel', 'Dtsen\Banpang::exportExcel');
-$routes->get('banpang/exportPdf', 'Dtsen\Banpang::exportPdf');
+$routes->group('banpang', ['filter' => ['authfilterdtks', 'menufilterdtks']], static function ($routes) {
+	// 📊 Halaman Rekap & Datatable
+	$routes->get('/', 'Dtsen\Banpang::index');
+	$routes->post('datatable', 'Dtsen\Banpang::datatable');
+
+	// 📷 Fitur Scanner & AJAX
+	$routes->get('scanner', 'Dtsen\Banpang::scanner');
+	$routes->post('simpanScan', 'Dtsen\Banpang::simpanScan');
+	$routes->get('getLatestScans', 'Dtsen\Banpang::getLatestScans');
+
+	// 🖨️ Ekspor Laporan
+	$routes->get('exportExcel', 'Dtsen\Banpang::exportExcel');
+	$routes->get('exportPdf', 'Dtsen\Banpang::exportPdf');
+});
 
 // Frontend article view
 $routes->get('artikel', 'ArticleFront::index', ['filter' => ['globalview', 'menufilterdtks', 'authfilterdtks']]);
