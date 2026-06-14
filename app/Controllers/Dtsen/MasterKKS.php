@@ -51,9 +51,10 @@ class MasterKKS extends BaseController
         $roleId = session()->get('role_id') ?? $user['role_id'] ?? 4;
 
         // 🚀 OPTIMASI 1: HAPUS JOIN & GROUP BY, GANTI DENGAN SUBQUERY
-        // Ini akan mencegah MySQL membuat Temporary Table yang bikin loading sangat lama!
+        // Termasuk penambahan Subquery untuk mengambil kategori_desil dari dtsen_se
         $builder = $this->db->table('dtsen_master_kks rt')
-            ->select('rt.*, (
+            ->select('rt.*, 
+            (
                 SELECT kk.no_kk 
                 FROM dtsen_art art 
                 JOIN dtsen_kk kk ON kk.id_kk = art.id_kk 
@@ -61,8 +62,15 @@ class MasterKKS extends BaseController
                   AND art.deleted_at IS NULL 
                   AND kk.deleted_at IS NULL 
                 LIMIT 1
-            ) as no_kk', false);
-        // ❌ HAPUS: groupBy('rt.id') sudah tidak diperlukan dan bikin lemot!
+            ) as no_kk,
+            (
+                SELECT se.kategori_desil 
+                FROM dtsen_art art 
+                JOIN dtsen_se se ON se.id_kk = art.id_kk 
+                WHERE art.nik = rt.nik 
+                  AND art.deleted_at IS NULL 
+                LIMIT 1
+            ) as kategori_desil', false);
 
         // =======================================================
         // 🔐 TERAPKAN TRAIT WILAYAH FILTER
@@ -94,7 +102,6 @@ class MasterKKS extends BaseController
                 ->like('rt.nik', $search)
                 ->orLike('rt.nama_penerima', $search)
                 ->orLike('rt.no_kks', $search)
-                // 🚀 OPTIMASI 2: Jangan men-search 'kk.no_kk' karena itu menyebabkan Full-Table Scan di tabel lain.
                 ->groupEnd();
         }
 
@@ -143,12 +150,28 @@ class MasterKKS extends BaseController
         };
 
         foreach ($query as $row) {
+            // -- LOGIKA BADGE STATUS --
             $status_cek = strtolower(trim($row['status_kks']));
             $badge = ($status_cek == 'aktif')
                 ? '<span class="badge badge-success">Aktif</span>'
                 : (($status_cek == 'non aktif' || $status_cek == 'non-aktif')
                     ? '<span class="badge badge-danger">Non Aktif</span>'
                     : '<span class="badge badge-secondary">' . esc($row['status_kks']) . '</span>');
+
+            // -- 🚀 LOGIKA BADGE KATEGORI DESIL --
+            $desilVal = $row['kategori_desil'] ?? null;
+            $badgeDesil = '<span class="text-muted"><i class="fas fa-minus"></i></span>';
+            if ($desilVal) {
+                // Beri warna dinamis berdasarkan tingkat kemiskinan (Asumsi Desil 1 paling rentan)
+                $warnaDesil = 'badge-secondary';
+                if ($desilVal == 1) $warnaDesil = 'badge-info';
+                elseif ($desilVal < 5) $warnaDesil = 'badge-info';
+                elseif ($desilVal >= 5) $warnaDesil = 'badge-warning';
+
+                $badgeDesil = '<div class="text-center"><span class="badge ' . $warnaDesil . ' shadow-sm p-1">Desil ' . esc($desilVal) . '</span></div>';
+            } else {
+                $badgeDesil = '<div class="text-center"><span class="text-muted"><i class="fas fa-minus"></i></span></div>';
+            }
 
             // ==========================================
             // 🚀 LOGIKA TOMBOL AKSI BERDASARKAN ROLE
@@ -171,6 +194,7 @@ class MasterKKS extends BaseController
             $kksMasked = $maskNumber($row['no_kks'], 'nokk');
             $noKkMasked = $maskNumber($row['no_kk'] ?? '-', 'nokk');
 
+            // 🚀 UPDATE ARRAY DATA UNTUK MENAMPILKAN DESIL
             $data[] = [
                 $no++,
                 esc($row['nama_penerima']),
@@ -178,6 +202,7 @@ class MasterKKS extends BaseController
                 $nikMasked,
                 $noKkMasked,
                 esc($row['alamat']) . ' RT ' . esc($row['rt']) . ' RW ' . esc($row['rw']),
+                $badgeDesil, // <-- KOLOM DESIL BERADA DI SINI
                 $badge,
                 $btnAction
             ];
@@ -192,7 +217,7 @@ class MasterKKS extends BaseController
     }
 
     // // ========================================================
-    // // 📊 DATA TABLES: READ DATA & INTEGRASI TRAIT WILAYAH
+    // // 📊 DATA TABLES: READ DATA & INTEGRASI TRAIT WILAYAH (OPTIMIZED)
     // // ========================================================
     // public function datatable()
     // {
@@ -207,27 +232,33 @@ class MasterKKS extends BaseController
     //     $filter_rt     = $request->getPost('filter_rt');
     //     $filter_status = $request->getPost('filter_status');
 
-    //     // 🚀 SUNTIKAN JOIN UNTUK MENGAMBIL NO_KK (BUG FIX: DOUBLE DATA)
+    //     $user   = $this->authModel->getUserId();
+    //     $roleId = session()->get('role_id') ?? $user['role_id'] ?? 4;
+
+    //     // 🚀 OPTIMASI 1: HAPUS JOIN & GROUP BY, GANTI DENGAN SUBQUERY
+    //     // Ini akan mencegah MySQL membuat Temporary Table yang bikin loading sangat lama!
     //     $builder = $this->db->table('dtsen_master_kks rt')
-    //         ->select('rt.*, kk.no_kk')
-    //         // 1️⃣ Tambahkan filter deleted_at langsung di dalam kondisi JOIN
-    //         ->join('dtsen_art art', 'art.nik = rt.nik AND art.deleted_at IS NULL', 'left')
-    //         ->join('dtsen_kk kk', 'kk.id_kk = art.id_kk AND kk.deleted_at IS NULL', 'left')
-    //         // 2️⃣ Sabuk pengaman: Kunci agar 1 ID Master KKS HANYA tampil 1 kali
-    //         ->groupBy('rt.id');
+    //         ->select('rt.*, (
+    //             SELECT kk.no_kk 
+    //             FROM dtsen_art art 
+    //             JOIN dtsen_kk kk ON kk.id_kk = art.id_kk 
+    //             WHERE art.nik = rt.nik 
+    //               AND art.deleted_at IS NULL 
+    //               AND kk.deleted_at IS NULL 
+    //             LIMIT 1
+    //         ) as no_kk', false);
+    //     // ❌ HAPUS: groupBy('rt.id') sudah tidak diperlukan dan bikin lemot!
 
     //     // =======================================================
     //     // 🔐 TERAPKAN TRAIT WILAYAH FILTER
     //     // =======================================================
-    //     $user   = $this->authModel->getUserId();
-    //     $roleId = session()->get('role_id') ?? $user['role_id'] ?? 4;
-
     //     $filterData = [
     //         'wilayah_tugas' => trim($user['wilayah_tugas'] ?? '')
     //     ];
 
     //     $this->applyWilayahFilter($builder, $filterData, $roleId);
 
+    //     // Hitung total rekaman dasar
     //     $totalRecords = $builder->countAllResults(false);
 
     //     // =======================================================
@@ -248,7 +279,7 @@ class MasterKKS extends BaseController
     //             ->like('rt.nik', $search)
     //             ->orLike('rt.nama_penerima', $search)
     //             ->orLike('rt.no_kks', $search)
-    //             ->orLike('kk.no_kk', $search)
+    //             // 🚀 OPTIMASI 2: Jangan men-search 'kk.no_kk' karena itu menyebabkan Full-Table Scan di tabel lain.
     //             ->groupEnd();
     //     }
 
@@ -310,27 +341,21 @@ class MasterKKS extends BaseController
     //         $btnAction = '<div class="d-flex justify-content-center" style="gap: 5px;">';
 
     //         if ($roleId <= 3) {
-    //             // Role Desa/Kecamatan/Admin: Bisa Edit & Hapus
     //             $btnAction .= '
     //                 <button class="btn btn-xs btn-warning btn-edit" data-id="' . $row['id'] . '" title="Edit KPM"><i class="fas fa-edit"></i></button>
     //                 <button class="btn btn-xs btn-danger btn-delete" data-id="' . $row['id'] . '" data-nama="' . esc($row['nama_penerima']) . '" title="Hapus KPM"><i class="fas fa-trash-alt"></i></button>
     //             ';
     //         } else {
-    //             // Role Pentri (>3): Hanya Read/View
     //             $btnAction .= '
     //                 <button class="btn btn-xs btn-info btn-view" data-id="' . $row['id'] . '" title="Lihat Detail KPM"><i class="fas fa-eye"></i></button>
     //             ';
     //         }
     //         $btnAction .= '</div>';
 
-    //         // 🚀 Menerapkan sensor
     //         $nikMasked = $maskNumber($row['nik'], 'nik');
     //         $kksMasked = $maskNumber($row['no_kks'], 'nokk');
-
-    //         // 🚀 Ambil no_kk dari hasil join, beri nilai default jika KPM tidak ada di dtsen_art
     //         $noKkMasked = $maskNumber($row['no_kk'] ?? '-', 'nokk');
 
-    //         // 🚀 SUSUNAN BARU: No | Nama KPM | No. KKS | NIK | No. KK | Alamat Lengkap | Status | Aksi
     //         $data[] = [
     //             $no++,
     //             esc($row['nama_penerima']),

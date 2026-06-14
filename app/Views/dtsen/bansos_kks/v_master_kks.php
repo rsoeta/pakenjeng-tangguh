@@ -147,6 +147,7 @@
                                                 <th>NIK</th>
                                                 <th>No. KK</th>
                                                 <th class="text-center">Alamat Lengkap</th>
+                                                <th class="text-center">Kategori Desil</th>
                                                 <th class="text-center">Status</th>
                                                 <th class="text-center"><i class="fas fa-cog"></i></th>
                                             </tr>
