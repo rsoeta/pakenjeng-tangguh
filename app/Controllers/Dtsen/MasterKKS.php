@@ -61,14 +61,18 @@ class MasterKKS extends BaseController
                 WHERE art.nik = rt.nik 
                   AND art.deleted_at IS NULL 
                   AND kk.deleted_at IS NULL 
+                ORDER BY kk.id_kk DESC -- 🚀 PENGAMAN: Ambil data KK yang paling baru dimasukkan
                 LIMIT 1
             ) as no_kk,
             (
                 SELECT se.kategori_desil 
                 FROM dtsen_art art 
-                JOIN dtsen_se se ON se.id_kk = art.id_kk 
+                JOIN dtsen_kk kk ON kk.id_kk = art.id_kk -- 🚀 PERBAIKAN: Join ke KK untuk baca deleted_at
+                JOIN dtsen_se se ON se.id_kk = kk.id_kk 
                 WHERE art.nik = rt.nik 
                   AND art.deleted_at IS NULL 
+                  AND kk.deleted_at IS NULL -- 🚀 PERBAIKAN: Abaikan KK yang sudah di-soft-delete
+                ORDER BY kk.id_kk DESC -- 🚀 PENGAMAN: Sesuaikan urutan dengan no_kk
                 LIMIT 1
             ) as kategori_desil', false);
 
@@ -162,7 +166,7 @@ class MasterKKS extends BaseController
             $desilVal = $row['kategori_desil'] ?? null;
             $badgeDesil = '<span class="text-muted"><i class="fas fa-minus"></i></span>';
             if ($desilVal) {
-                // Beri warna dinamis berdasarkan tingkat kemiskinan (Asumsi Desil 1 paling rentan)
+                // Beri warna dinamis berdasarkan tingkat kemiskinan
                 $warnaDesil = 'badge-secondary';
                 if ($desilVal == 1) $warnaDesil = 'badge-info';
                 elseif ($desilVal < 5) $warnaDesil = 'badge-info';
@@ -202,7 +206,7 @@ class MasterKKS extends BaseController
                 $nikMasked,
                 $noKkMasked,
                 esc($row['alamat']) . ' RT ' . esc($row['rt']) . ' RW ' . esc($row['rw']),
-                $badgeDesil, // <-- KOLOM DESIL BERADA DI SINI
+                $badgeDesil,
                 $badge,
                 $btnAction
             ];
