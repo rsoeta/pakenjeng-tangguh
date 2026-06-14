@@ -10,6 +10,15 @@
                     <h5 class="card-title m-0 font-weight-bold mt-1"><i class="fas fa-qrcode mr-2"></i> Scanner</h5>
 
                     <div class="card-tools">
+                        <button id="btnSwitchCamera" class="btn btn-sm btn-warning shadow-sm py-0 px-2 mr-1 d-none" title="Ganti Lensa Kamera">
+                            <i class="fas fa-camera-retro"></i> Ganti Lensa
+                        </button>
+
+                        <a href="<?= base_url('banpang') ?>" class="btn btn-sm btn-light text-primary shadow-sm py-0 px-2" title="Kembali ke Rekap">
+                            <i class="fas fa-arrow-left mr-1"></i> Kembali
+                        </a>
+                    </div>
+                    <div class="card-tools">
                         <a href="<?= base_url('banpang') ?>" class="btn btn-sm btn-light text-primary shadow-sm py-0 px-2" title="Kembali ke Rekap">
                             <i class="fas fa-arrow-left mr-1"></i> Kembali
                         </a>
@@ -117,21 +126,83 @@
         };
 
         // ==========================================
-        // 🚀 FUNGSI KONTROL KAMERA
+        // 🚀 FITUR BARU: Deteksi Semua Lensa HP (Multi-Camera)
         // ==========================================
-        function startKamera() {
-            // Argumen pertama dikembalikan murni 1 kunci agar library tidak error
-            html5QrCode.start({
-                    facingMode: "environment"
-                }, config,
+        let daftarKamera = [];
+        let indeksKameraAktif = 0;
+
+        // Ambil daftar semua kamera fisik di HP
+        Html5Qrcode.getCameras().then(devices => {
+            if (devices && devices.length > 1) {
+                daftarKamera = devices;
+                $('#btnSwitchCamera').removeClass('d-none'); // Munculkan tombol jika lensa > 1
+
+                // Opsional: Langsung gunakan lensa terakhir di daftar (biasanya lensa utama 1.0x ada di akhir)
+                indeksKameraAktif = devices.length - 1;
+                startKamera(daftarKamera[indeksKameraAktif].id);
+            } else {
+                startKamera(); // Jika cuma 1 kamera, jalankan normal
+            }
+        }).catch(err => {
+            console.error("Gagal mendeteksi multi-kamera:", err);
+            startKamera(); // Fallback jika gagal deteksi
+        });
+
+        // ==========================================
+        // 🚀 FUNGSI KONTROL KAMERA (Support Device ID)
+        // ==========================================
+        function startKamera(cameraId = null) {
+            // Jika ada ID lensa spesifik, gunakan itu. Jika tidak, pasrah ke "environment"
+            let opsiKamera = cameraId ? {
+                deviceId: {
+                    exact: cameraId
+                }
+            } : {
+                facingMode: "environment"
+            };
+
+            html5QrCode.start(opsiKamera, config,
                 function(decodedText, decodedResult) {
-                    html5QrCode.pause(); // Jeda kamera
+                    html5QrCode.pause();
                     prosesDataQR(decodedText, 'kamera');
                 }
             ).catch((err) => {
                 console.log("Kamera standby / tidak tersedia.", err);
             });
         }
+
+        // ==========================================
+        // 🚀 EVENT TRIGGER: TOMBOL GANTI LENSA
+        // ==========================================
+        $('#btnSwitchCamera').click(function() {
+            if (daftarKamera.length > 1) {
+                // Pindah ke indeks lensa berikutnya (Berputar jika sudah di ujung)
+                indeksKameraAktif = (indeksKameraAktif + 1) % daftarKamera.length;
+                let cameraIdBaru = daftarKamera[indeksKameraAktif].id;
+
+                Toast.fire({
+                    icon: 'info',
+                    title: 'Mengganti lensa kamera...',
+                    timer: 1000
+                });
+
+                // Matikan kamera yang sedang menyala, lalu hidupkan dengan lensa yang baru
+                let state = html5QrCode.getState();
+                if (state === Html5QrcodeScannerState.SCANNING || state === Html5QrcodeScannerState.PAUSED) {
+                    html5QrCode.stop().then(() => {
+                        html5QrCode.clear();
+                        startKamera(cameraIdBaru);
+                    }).catch(err => {
+                        startKamera(cameraIdBaru);
+                    });
+                } else {
+                    startKamera(cameraIdBaru);
+                }
+            }
+        });
+
+        // ⚠️ PENTING: Jangan tulis startKamera(); lagi di sini, 
+        // karena sudah otomatis dipanggil di dalam fungsi Html5Qrcode.getCameras() di atas.
 
         function prosesDataQR(decodedText, mode) {
             try {
