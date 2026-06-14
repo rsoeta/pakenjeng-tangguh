@@ -31,7 +31,7 @@ class Banpang extends BaseController
     }
 
     // ========================================================
-    // 🚀 DATATABLES REKAP BANPANG (WITH TRAIT & OPTIMIZED JOIN)
+    // 🚀 DATATABLES REKAP BANPANG (ANTI-GANDA SUBQUERY)
     // ========================================================
     public function datatable()
     {
@@ -53,10 +53,12 @@ class Banpang extends BaseController
         $roleId = session()->get('role_id') ?? $user['role_id'] ?? 4;
         $kodeDesa = session()->get('kode_desa') ?? ($user['kode_desa'] ?? '');
 
-        // 🚀 IMPLEMENTASI JOIN SUPER AMAN & PRESISI (TAMBAH k.alamat)
+        // 🚀 KUNCI ANTI GANDA: Subquery untuk mengambil 1 riwayat KK terbaru per NIK
+        $subqueryART = '(SELECT nik, MAX(id_kk) as id_kk FROM dtsen_art WHERE deleted_at IS NULL GROUP BY nik)';
+
         $builder = $this->db->table('dtsen_banpang b')
             ->select('b.*, rt.rt, rt.rw, k.alamat')
-            ->join('dtsen_art a', 'a.nik = b.nik_kpm AND a.deleted_at IS NULL', 'left')
+            ->join($subqueryART . ' a', 'a.nik = b.nik_kpm', 'left') // <- JOIN dari Subquery
             ->join('dtsen_kk k', 'k.id_kk = a.id_kk AND k.deleted_at IS NULL', 'left')
             ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left');
 
@@ -69,7 +71,7 @@ class Banpang extends BaseController
             $this->applyWilayahFilter($builder, $filterData, $roleId);
         }
 
-        // Hitung Total Data (Sebelum filter manual)
+        // Hitung Total Data (Sudah akurat karena tidak ada groupBy)
         $totalRecords = $builder->countAllResults(false);
 
         // 🔍 FILTER DINAMIS DARI FRONTEND
@@ -89,9 +91,6 @@ class Banpang extends BaseController
 
         $filteredRecords = $builder->countAllResults(false);
 
-        // 🚀 KUNCI ANTI GANDA: Pastikan 1 riwayat scan hanya tampil 1 baris
-        $builder->groupBy('b.id');
-
         // Urutkan yang terbaru discan berada di paling atas
         $builder->orderBy('b.waktu_scan', 'DESC');
 
@@ -105,11 +104,9 @@ class Banpang extends BaseController
         $no = $start + 1;
 
         foreach ($query as $row) {
-            // Masking NIK untuk keamanan tampilan
             $nikLengkap = esc($row['nik_kpm']);
             $nikMasked = strlen($nikLengkap) >= 16 ? substr($nikLengkap, 0, 8) . '********' : $nikLengkap;
 
-            // 🚀 FORMAT ALAMAT: Tampilkan Jalan/Dusun beserta RT/RW
             $teksAlamat = !empty($row['alamat']) ? esc($row['alamat']) . '<br>' : '';
             $alamat = (!empty($row['rt']) && !empty($row['rw']))
                 ? $teksAlamat . '<span class="badge badge-light border mt-1">RT ' . esc($row['rt']) . ' / RW ' . esc($row['rw']) . '</span>'
@@ -128,7 +125,7 @@ class Banpang extends BaseController
                 $alamat,
                 $waktuScan,
                 $status,
-                '<button class="btn btn-xs btn-outline-primary" title="Detail"><i class="fas fa-search"></i></button>' // Placeholder untuk aksi
+                '<button class="btn btn-xs btn-outline-primary" title="Detail"><i class="fas fa-search"></i></button>'
             ];
         }
 
