@@ -4,22 +4,15 @@
 
 <div class="content-wrapper mt-1">
     <div class="content-header">
-
         <div class="container-fluid">
             <div class="row align-items-center mb-2">
                 <div class="col-sm-6">
                     <h1 class="m-0 font-weight-bold text-primary"><i class="fas fa-clipboard-list mr-2"></i> Rekap Scan Banpang</h1>
-                    <div class="mt-2 mt-md-0">
-                        <a href="<?= base_url('banpang/scanner') ?>" class="btn btn-sm btn-success shadow-sm mr-1"><i class="fas fa-qrcode mr-1"></i> Buka Scanner</a>
-                        <button type="button" class="btn btn-sm btn-outline-success shadow-sm mr-1" id="btnExportExcel"><i class="fas fa-file-excel mr-1"></i> Ekspor Excel</button>
-                        <button type="button" class="btn btn-sm btn-danger shadow-sm" id="btnCetakPdf"><i class="fas fa-file-pdf mr-1"></i> Cetak PDF</button>
-                    </div>
                 </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="<?= base_url() ?>">Home</a></li>
-                        <li class="breadcrumb-item active">Rekap Banpang</li>
-                    </ol>
+                <div class="col-sm-6 text-sm-right mt-3 mt-sm-0">
+                    <a href="<?= base_url('banpang/scanner') ?>" class="btn btn-sm btn-success shadow-sm mr-1"><i class="fas fa-qrcode mr-1"></i> Buka Scanner</a>
+                    <button type="button" class="btn btn-sm btn-outline-success shadow-sm mr-1" id="btnExportExcel"><i class="fas fa-file-excel mr-1"></i> Ekspor Excel</button>
+                    <button type="button" class="btn btn-sm btn-danger shadow-sm" id="btnCetakPdf"><i class="fas fa-file-pdf mr-1"></i> Cetak PDF</button>
                 </div>
             </div>
         </div>

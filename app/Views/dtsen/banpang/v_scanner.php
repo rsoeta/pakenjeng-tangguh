@@ -1,12 +1,19 @@
 <?= $this->extend('templates/index') ?>
 
 <?= $this->section('content') ?>
+
 <div class="container-fluid pt-3">
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-4">
             <div class="card card-primary card-outline shadow">
-                <div class="card-header text-center bg-primary text-white p-2">
-                    <h5 class="card-title m-0 font-weight-bold"><i class="fas fa-qrcode mr-2"></i> Scanner Banpang</h5>
+                <div class="card-header bg-primary text-white p-2">
+                    <h5 class="card-title m-0 font-weight-bold mt-1"><i class="fas fa-qrcode mr-2"></i> Scanner</h5>
+
+                    <div class="card-tools">
+                        <a href="<?= base_url('banpang') ?>" class="btn btn-sm btn-light text-primary shadow-sm py-0 px-2" title="Kembali ke Rekap">
+                            <i class="fas fa-arrow-left mr-1"></i> Kembali
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body p-3 text-center">
 
@@ -99,16 +106,25 @@
             }
         };
 
+        // ==========================================
+        // 🚀 FUNGSI KONTROL KAMERA (FIX ZOOM 1.0x)
+        // ==========================================
         function startKamera() {
-            html5QrCode.start({
-                    facingMode: "environment"
-                }, config,
+            // Suntikan steroid WebRTC agar lensa tidak pakai mode Ultrawide (0.5x)
+            const cameraConstraints = {
+                facingMode: "environment",
+                advanced: [{
+                    zoom: 1.0
+                }] // Paksa ke Lensa Utama (Normal)
+            };
+
+            html5QrCode.start(cameraConstraints, config,
                 function(decodedText, decodedResult) {
-                    html5QrCode.pause();
+                    html5QrCode.pause(); // Jeda kamera
                     prosesDataQR(decodedText, 'kamera');
                 }
             ).catch((err) => {
-                console.log("Kamera standby / tidak tersedia.");
+                console.log("Kamera standby / tidak tersedia.", err);
             });
         }
 
