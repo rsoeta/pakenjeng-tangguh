@@ -399,6 +399,9 @@ $routes->post('banpang/datatable', 'Dtsen\Banpang::datatable');
 $routes->get('banpang/scanner', 'Dtsen\Banpang::scanner');
 $routes->post('banpang/simpanScan', 'Dtsen\Banpang::simpanScan');
 $routes->get('banpang/getLatestScans', 'Dtsen\Banpang::getLatestScans');
+// 🖨️ ROUTE EKSPOR DATA BANPANG (EXCEL & PDF REPORT)
+$routes->get('banpang/exportExcel', 'Dtsen\Banpang::exportExcel');
+$routes->get('banpang/exportPdf', 'Dtsen\Banpang::exportPdf');
 
 // Frontend article view
 $routes->get('artikel', 'ArticleFront::index', ['filter' => ['globalview', 'menufilterdtks', 'authfilterdtks']]);

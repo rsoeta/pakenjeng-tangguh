@@ -11,6 +11,7 @@
                     <h1 class="m-0 font-weight-bold text-primary"><i class="fas fa-clipboard-list mr-2"></i> Rekap Scan Banpang</h1>
                     <div class="mt-2 mt-md-0">
                         <a href="<?= base_url('banpang/scanner') ?>" class="btn btn-sm btn-success shadow-sm mr-1"><i class="fas fa-qrcode mr-1"></i> Buka Scanner</a>
+                        <button type="button" class="btn btn-sm btn-outline-success shadow-sm mr-1" id="btnExportExcel"><i class="fas fa-file-excel mr-1"></i> Ekspor Excel</button>
                         <button type="button" class="btn btn-sm btn-danger shadow-sm" id="btnCetakPdf"><i class="fas fa-file-pdf mr-1"></i> Cetak PDF</button>
                     </div>
                 </div>
@@ -65,7 +66,7 @@
                                         <th class="text-center" width="5%">No</th>
                                         <th>No PBP</th>
                                         <th>Nama KPM / NIK</th>
-                                        <th class="text-center">RT/RW</th>
+                                        <th class="text-center">Alamat Lengkap</th>
                                         <th>Waktu Scan</th>
                                         <th class="text-center">Status</th>
                                         <th class="text-center"><i class="fas fa-cog"></i></th>
@@ -120,19 +121,20 @@
             tableBanpang.ajax.reload();
         });
 
-        // Trigger Tombol PDF (Tahap 4 Nanti)
+        // 🚀 EVENT TRIGGER: EKSPOR EXCEL NATIVE
+        $('#btnExportExcel').click(function() {
+            let rw = $('#filter_rw').val();
+            let rt = $('#filter_rt').val();
+            // Buka tab baru menembak rute Excel dengan query string filter aktif
+            window.open("<?= base_url('banpang/exportExcel') ?>?filter_rw=" + rw + "&filter_rt=" + rt, '_blank');
+        });
+
+        // 🚀 EVENT TRIGGER: CETAK PDF LAPORAN DESA
         $('#btnCetakPdf').click(function() {
-            // Mbah berikan SweetAlert2 compact sesuai selera Kang Rian
-            Swal.fire({
-                title: 'Segera Hadir!',
-                text: 'Modul Cetak PDF sedang diracik oleh Mbah.',
-                icon: 'info',
-                confirmButtonText: 'Tutup',
-                customClass: {
-                    confirmButton: 'btn btn-sm btn-primary px-4'
-                },
-                buttonsStyling: false
-            });
+            let rw = $('#filter_rw').val();
+            let rt = $('#filter_rt').val();
+            // Buka tab baru menembak rute PDF dengan query string filter aktif
+            window.open("<?= base_url('banpang/exportPdf') ?>?filter_rw=" + rw + "&filter_rt=" + rt, '_blank');
         });
 
     });
