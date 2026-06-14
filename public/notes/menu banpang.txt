@@ -1,0 +1,15 @@
+CREATE TABLE `dtsen_banpang` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `no_pbp` varchar(50) NOT NULL,
+  `no_bast` varchar(50) NOT NULL,
+  `nik_kpm` varchar(16) NOT NULL,
+  `nama_kpm` varchar(150) NOT NULL,
+  `waktu_scan` datetime DEFAULT current_timestamp(),
+  `foto_bukti` varchar(255) DEFAULT NULL,
+  `status_kelengkapan` tinyint(1) DEFAULT 0 COMMENT '0: Scan Saja, 1: Selesai/Difoto',
+  `id_petugas` int(11) NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_pbp` (`no_pbp`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

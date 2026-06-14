@@ -390,6 +390,16 @@ $routes->group('admin', ['filter' => ['authfilterdtks', 'globalview', 'menufilte
 	$routes->post('articles/upload-image', 'Admin\ArticleController::uploadImage');
 });
 
+
+// ========================================================
+// 📷 ROUTE SCANNER BANTUAN PANGAN (BANPANG)
+// ========================================================
+$routes->get('banpang', 'Dtsen\Banpang::index');
+$routes->post('banpang/datatable', 'Dtsen\Banpang::datatable');
+$routes->get('banpang/scanner', 'Dtsen\Banpang::scanner');
+$routes->post('banpang/simpanScan', 'Dtsen\Banpang::simpanScan');
+$routes->get('banpang/getLatestScans', 'Dtsen\Banpang::getLatestScans');
+
 // Frontend article view
 $routes->get('artikel', 'ArticleFront::index', ['filter' => ['globalview', 'menufilterdtks', 'authfilterdtks']]);
 $routes->get('artikel/(:segment)', 'ArticleFront::show/$1');

@@ -66,6 +66,74 @@
 
     <link rel="shortcut icon" type="image/x-icon/png" href="<?= logoApp(); ?>" />
 
+    <style>
+        /* 🚀 STYLING UI PREMIUM SINDEN */
+        .content-wrapper {
+            min-height: 100vh !important;
+            background-color: #f4f6f9;
+        }
+
+        /* Tombol Melayang (Floating Action Button) */
+        .btn-floating {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1050;
+            transition: all 0.3s ease;
+        }
+
+        .btn-floating:hover {
+            transform: scale(1.1);
+        }
+
+        /* Styling Radio Button Group (Style Mbah) */
+        .btn-group-toggle .btn {
+            border: 1px solid #ced4da;
+            background-color: #fff;
+            color: #495057;
+            font-size: 0.85rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .btn-group-toggle .btn:hover {
+            background-color: #f8f9fa;
+        }
+
+        .btn-group-toggle .btn.active {
+            background-color: #007bff !important;
+            border-color: #007bff !important;
+            color: #fff !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-group-bansos .btn.active {
+            background-color: #28a745 !important;
+            border-color: #28a745 !important;
+        }
+
+        /* Table & Filter Styling */
+        .card-bansos {
+            border-radius: 12px;
+            border: none;
+        }
+
+        .filter-box {
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .filter-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #6c757d;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            display: block;
+        }
+    </style>
+
+
 
     <!-- ===================== -->
     <!-- JAVASCRIPT — URUTAN BENAR -->
