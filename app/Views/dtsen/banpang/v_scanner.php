@@ -92,6 +92,9 @@
 
         // Konfigurasi Kamera (Dengan Steroid)
         const html5QrCode = new Html5Qrcode("reader");
+        // ==========================================
+        // 🚀 UPGRADE: Konfigurasi "Steroid" Pemindai & Fix Lensa Normal (1.0x)
+        // ==========================================
         const config = {
             fps: 15,
             qrbox: function(vw, vh) {
@@ -103,22 +106,24 @@
             formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
             experimentalFeatures: {
                 useBarCodeDetectorIfSupported: true
+            },
+            // 🚀 SUNTIKAN WEBRTC DISINI: Memaksa lensa utama (bukan ultrawide)
+            videoConstraints: {
+                facingMode: "environment",
+                advanced: [{
+                    zoom: 1.0
+                }]
             }
         };
 
         // ==========================================
-        // 🚀 FUNGSI KONTROL KAMERA (FIX ZOOM 1.0x)
+        // 🚀 FUNGSI KONTROL KAMERA
         // ==========================================
         function startKamera() {
-            // Suntikan steroid WebRTC agar lensa tidak pakai mode Ultrawide (0.5x)
-            const cameraConstraints = {
-                facingMode: "environment",
-                advanced: [{
-                    zoom: 1.0
-                }] // Paksa ke Lensa Utama (Normal)
-            };
-
-            html5QrCode.start(cameraConstraints, config,
+            // Argumen pertama dikembalikan murni 1 kunci agar library tidak error
+            html5QrCode.start({
+                    facingMode: "environment"
+                }, config,
                 function(decodedText, decodedResult) {
                     html5QrCode.pause(); // Jeda kamera
                     prosesDataQR(decodedText, 'kamera');
