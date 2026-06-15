@@ -18,11 +18,6 @@
                             <i class="fas fa-arrow-left mr-1"></i> Kembali
                         </a>
                     </div>
-                    <div class="card-tools">
-                        <a href="<?= base_url('banpang') ?>" class="btn btn-sm btn-light text-primary shadow-sm py-0 px-2" title="Kembali ke Rekap">
-                            <i class="fas fa-arrow-left mr-1"></i> Kembali
-                        </a>
-                    </div>
                 </div>
                 <div class="card-body p-3 text-center">
 
