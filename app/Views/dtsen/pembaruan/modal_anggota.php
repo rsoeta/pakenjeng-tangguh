@@ -1,4 +1,8 @@
-<!-- app/Views/dtsen/pembaruan/modal_anggota.php -->
+<?php
+// Tangkap informasi sesi role di dalam modal
+$roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
+$editable = ($roleId <= 4);
+?>
 <div class="modal fade" id="modalAnggota" tabindex="-1" aria-labelledby="modalAnggotaLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-sm-down">
         <div class="modal-content">
@@ -7,50 +11,47 @@
 
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title fw-bold" id="modalAnggotaLabel">🧍‍♂️ Pembaruan Data Individu</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <a href="javascript:void(0)" class="btn-close btn-close-white" data-bs-dismiss="modal" style="display:block !important; text-decoration:none;"></a>
                 </div>
 
                 <div class="modal-body" style="max-height: calc(100vh - 200px); overflow-y:auto;">
-                    <!-- Nav Tabs -->
                     <ul class="nav nav-tabs" id="tabAnggotaTabs" role="tablist">
                         <li class="nav-item">
-                            <button class="nav-link active" id="tab-identitas-tab" data-bs-toggle="tab"
-                                data-bs-target="#tab-identitas" type="button" role="tab" aria-controls="tab-identitas"
-                                aria-selected="true">
+                            <a href="javascript:void(0)" class="nav-link active" id="tab-identitas-tab" data-bs-toggle="tab"
+                                data-bs-target="#tab-identitas" role="tab" aria-controls="tab-identitas"
+                                aria-selected="true" style="display:block !important; text-decoration:none;">
                                 📋 Data Pokok Individu <span class="badge bg-secondary ms-1" id="badgeIdentitas">⚠️</span>
-                            </button>
+                            </a>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="tab-pendidikan-tab" data-bs-toggle="tab"
-                                data-bs-target="#tab-pendidikan" type="button" role="tab">
+                            <a href="javascript:void(0)" class="nav-link" id="tab-pendidikan-tab" data-bs-toggle="tab"
+                                data-bs-target="#tab-pendidikan" role="tab" style="display:block !important; text-decoration:none;">
                                 🎓 Pendidikan <span class="badge bg-secondary ms-1" id="badgePendidikan">⚠️</span>
-                            </button>
+                            </a>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="tab-kerja-tab" data-bs-toggle="tab"
-                                data-bs-target="#tab-kerja" type="button" role="tab">
+                            <a href="javascript:void(0)" class="nav-link" id="tab-kerja-tab" data-bs-toggle="tab"
+                                data-bs-target="#tab-kerja" role="tab" style="display:block !important; text-decoration:none;">
                                 💼 Tenaga Kerja <span class="badge bg-secondary ms-1" id="badgeKerja">⚠️</span>
-                            </button>
+                            </a>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="tab-usaha-tab" data-bs-toggle="tab"
-                                data-bs-target="#tab-usaha" type="button" role="tab">
+                            <a href="javascript:void(0)" class="nav-link" id="tab-usaha-tab" data-bs-toggle="tab"
+                                data-bs-target="#tab-usaha" role="tab" style="display:block !important; text-decoration:none;">
                                 🏢 Kepemilikan Usaha <span class="badge bg-secondary ms-1" id="badgeUsaha">⚠️</span>
-                            </button>
+                            </a>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="tab-kesehatan-tab" data-bs-toggle="tab"
-                                data-bs-target="#tab-kesehatan" type="button" role="tab">
+                            <a href="javascript:void(0)" class="nav-link" id="tab-kesehatan-tab" data-bs-toggle="tab"
+                                data-bs-target="#tab-kesehatan" role="tab" style="display:block !important; text-decoration:none;">
                                 ❤️ Kesehatan <span class="badge bg-secondary ms-1" id="badgeKesehatan">⚠️</span>
-                            </button>
+                            </a>
                         </li>
                     </ul>
 
                     <div class="tab-content pt-3">
-                        <!-- TAB 1: IDENTITAS -->
                         <div class="tab-pane fade show active" id="tab-identitas" role="tabpanel">
                             <div class="row g-4">
-                                <!-- ===================== ROW ATAS ===================== -->
                                 <div class="row align-items-center border-bottom pb-1 mt-3 mb-1">
                                     <label class="col-md-5 col-12 col-form-label fw-bold">
                                         Status Keberadaan
@@ -68,32 +69,25 @@
                                         </select>
                                     </div>
                                 </div>
-                                <!-- <hr> -->
-
-                                <!-- ===================== KIRI ===================== -->
                                 <div class="col-lg-6">
 
                                     <div class="row g-3">
 
-                                        <!-- Nama Lengkap -->
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Nama Lengkap</label>
                                             <input type="text" class="form-control required upper" name="nama" id="nama">
                                         </div>
 
-                                        <!-- NIK -->
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">NIK</label>
                                             <input type="text" class="form-control required onlynum16" name="nik" id="nik" maxlength="16">
                                         </div>
 
-                                        <!-- NKK -->
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Nomor KK</label>
                                             <input type="text" class="form-control required onlynum16" name="individu_no_kk" id="individu_no_kk" maxlength="16">
                                         </div>
 
-                                        <!-- TTL -->
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Tanggal Lahir</label>
                                             <input type="date" class="form-control required" name="tanggal_lahir" id="tanggal_lahir">
@@ -104,19 +98,16 @@
                                             <input type="text" class="form-control required upper" name="tempat_lahir" id="tempat_lahir">
                                         </div>
 
-                                        <!-- Hubungan -->
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Hubungan dengan Kepala Keluarga</label>
                                             <select class="form-select required" name="hubungan" id="hubungan"></select>
                                         </div>
 
-                                        <!-- Status Kawin -->
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Status Kawin</label>
                                             <select class="form-select required" name="status_kawin" id="status_kawin"></select>
                                         </div>
 
-                                        <!-- Ibu Kandung -->
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Nama Ibu Kandung</label>
                                             <input type="text" class="form-control required upper" name="ibu_kandung" id="ibu_kandung">
@@ -126,24 +117,20 @@
 
                                 </div>
 
-                                <!-- ===================== KANAN ===================== -->
                                 <div class="col-lg-6">
 
                                     <div class="row g-3">
 
-                                        <!-- Pendidikan -->
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Pendidikan Terakhir</label>
                                             <select class="form-select required" name="pendidikan_terakhir" id="pendidikan_terakhir"></select>
                                         </div>
 
-                                        <!-- Pekerjaan -->
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Pekerjaan</label>
                                             <select class="form-select required" name="pekerjaan" id="pekerjaan"></select>
                                         </div>
 
-                                        <!-- Jenis Kelamin -->
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Jenis Kelamin</label>
                                             <div class="d-flex gap-3">
@@ -158,7 +145,6 @@
                                             </div>
                                         </div>
 
-                                        <!-- Wilayah Capil -->
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold border-bottom pb-1">Wilayah Capil (Sesuai Data Kependudukan)</label>
 
@@ -185,9 +171,9 @@
                                                 <label class="form-label fw-semibold">Alamat Domisili</label>
                                                 <div class="bg-light border rounded-3 p-3 small">
                                                     <div>
-                                                        <strong>RW:</strong> <?= esc($perumahan['rw'] ?? '-') ?> |
-                                                        <strong>RT:</strong> <?= esc($perumahan['rt'] ?? '-') ?> |
-                                                        <?= esc($perumahan['alamat'] ?? '-') ?>
+                                                        <strong>RW:</strong> <?= esc($payload['perumahan']['rw'] ?? '-') ?> |
+                                                        <strong>RT:</strong> <?= esc($payload['perumahan']['rt'] ?? '-') ?> |
+                                                        <?= esc($payload['perumahan']['alamat'] ?? '-') ?>
                                                     </div>
                                                 </div>
                                             </div>
@@ -202,11 +188,9 @@
                             </div>
                         </div>
 
-                        <!-- TAB 2: Pendidikan -->
                         <div class="tab-pane fade" id="tab-pendidikan" role="tabpanel" aria-labelledby="tab-pendidikan-tab">
                             <div class="row g-3">
 
-                                <!-- Partisipasi Sekolah -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Partisipasi Sekolah</label>
                                     <select class="form-select required" name="partisipasi_sekolah" id="partisipasi_sekolah">
@@ -217,7 +201,6 @@
                                     </select>
                                 </div>
 
-                                <!-- Jenjang & Jenis Pendidikan -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Jenjang & Jenis Pendidikan</label>
                                     <select class="form-select" name="jenjang_pendidikan" id="jenjang_pendidikan">
@@ -249,7 +232,6 @@
                                     </select>
                                 </div>
 
-                                <!-- Kelas Tertinggi -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Kelas Tertinggi yang Pernah Ditamatkan</label>
                                     <select class="form-select" name="kelas_tertinggi" id="kelas_tertinggi">
@@ -266,7 +248,6 @@
                                     </select>
                                 </div>
 
-                                <!-- Ijazah/STTB -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Ijazah/STTB Tertinggi</label>
                                     <select class="form-select" name="ijazah_tertinggi" id="ijazah_tertinggi">
@@ -299,11 +280,9 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- TAB 3: Tenaga Kerja -->
                         <div class="tab-pane fade" id="tab-kerja" role="tabpanel" aria-labelledby="tab-kerja-tab">
                             <div class="row g-3">
 
-                                <!-- Bekerja seminggu terakhir -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Apakah bekerja/membantu bekerja selama seminggu terakhir?</label>
                                     <select class="form-select required" name="bekerja_seminggu" id="bekerja_seminggu">
@@ -313,7 +292,6 @@
                                     </select>
                                 </div>
 
-                                <!-- Lapangan Usaha -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Jenis Lapangan Usaha Pekerjaan Utama</label>
                                     <select class="form-select" name="lapangan_usaha" id="lapangan_usaha">
@@ -347,7 +325,6 @@
                                     </select>
                                 </div>
 
-                                <!-- Status Pekerjaan -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Status dalam Pekerjaan Utama</label>
                                     <select class="form-select" name="status_pekerjaan" id="status_pekerjaan">
@@ -363,7 +340,6 @@
                                     </select>
                                 </div>
 
-                                <!-- Pendapatan -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Pendapatan Sebulan Terakhir</label>
                                     <select class="form-select" name="pendapatan" id="pendapatan">
@@ -377,7 +353,6 @@
                                     </select>
                                 </div>
 
-                                <!-- Keterampilan -->
                                 <div class="col-md-12">
                                     <label class="form-label fw-bold">Keterampilan Khusus / Sertifikat Keahlian yang Dimiliki</label>
                                     <div class="border rounded p-2" style="max-height: 250px; overflow-y:auto;">
@@ -433,11 +408,9 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- TAB 4: Kepemilikan Usaha -->
                         <div class="tab-pane fade" id="tab-usaha" role="tabpanel" aria-labelledby="tab-usaha-tab">
                             <div class="row g-3">
 
-                                <!-- Pertanyaan utama -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Apakah memiliki usaha sendiri atau bersama keluarga?</label>
                                     <select class="form-select required" name="memiliki_usaha" id="memiliki_usaha">
@@ -447,13 +420,9 @@
                                     </select>
                                 </div>
 
-                                <!-- Form tambahan (hanya muncul bila 'Ya') -->
                                 <div id="form_usaha_detail" class="mt-3" style="display: none;">
                                     <div class="row g-3">
 
-                                        <!-- =======================
-                                            KOLOM KIRI (JUMLAH & PEKERJA)
-                                        ======================== -->
                                         <div class="col-12 col-md-6">
                                             <div class="row g-3">
 
@@ -493,9 +462,6 @@
                                             </div>
                                         </div>
 
-                                        <!-- =======================
-                                            KOLOM KANAN (OMZET)
-                                        ======================== -->
                                         <div class="col-12 col-md-6">
                                             <label class="form-label fw-bold">
                                                 Omzet per Bulan
@@ -520,11 +486,9 @@
 
                             </div>
                         </div>
-                        <!-- TAB 5: Kesehatan -->
                         <div class="tab-pane fade" id="tab-kesehatan" role="tabpanel" aria-labelledby="tab-kesehatan-tab">
                             <div class="row g-3">
 
-                                <!-- Status Hamil -->
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Status Hamil <span class="text-muted small">(hanya untuk perempuan)</span></label>
                                     <select class="form-select required" name="status_hamil" id="status_hamil">
@@ -534,7 +498,6 @@
                                     </select>
                                 </div>
 
-                                <!-- Disabilitas -->
                                 <div class="col-md-12">
                                     <label class="form-label fw-bold">Penyandang Disabilitas</label>
                                     <div class="border rounded p-3" style="max-height: 200px; overflow-y:auto;">
@@ -559,7 +522,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Keluhan Kesehatan Kronis / Menahun -->
                                 <div class="col-md-12 mt-3">
                                     <label class="form-label fw-bold">Keluhan Kesehatan Kronis / Menahun</label>
                                     <select class="form-select required" name="penyakit_kronis" id="penyakit_kronis">
@@ -592,7 +554,13 @@
                 </div>
 
                 <div class="modal-footer sticky-bottom bg-light">
-                    <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Simpan</button>
+                    <?php if ($editable): ?>
+                        <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Simpan</button>
+                    <?php else: ?>
+                        <a href="javascript:void(0)" class="btn btn-secondary px-4 shadow-sm" data-bs-dismiss="modal" style="display:inline-block !important; text-decoration:none;">
+                            <i class="fas fa-times me-1"></i> Tutup
+                        </a>
+                    <?php endif; ?>
                 </div>
             </form>
         </div>

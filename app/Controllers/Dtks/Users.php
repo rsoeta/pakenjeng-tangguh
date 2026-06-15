@@ -317,4 +317,74 @@ class Users extends BaseController
         return redirect()->to('/dtks/users');
         // }
     }
+
+    public function saveRole()
+    {
+        $db = \Config\Database::connect();
+
+        $old_id_role = $this->request->getPost('old_id_role');
+        $id_role     = $this->request->getPost('id_role');
+        $nm_role     = trim($this->request->getPost('nm_role'));
+
+        if (empty($old_id_role)) {
+            // ==========================================
+            // 🆕 MODE: TAMBAH ROLE BARU
+            // ==========================================
+            $dataInsert = ['nm_role' => $nm_role];
+
+            // Jika Kang Rian mengetikkan ID manual (misal ketik angka 6)
+            if (!empty($id_role)) {
+                $cek = $db->table('tb_roles')->where('id_role', $id_role)->countAllResults();
+                if ($cek > 0) {
+                    return $this->response->setJSON(['status' => 'error', 'message' => "Gagal! ID Role {$id_role} sudah digunakan."]);
+                }
+                $dataInsert['id_role'] = $id_role;
+            }
+
+            $db->table('tb_roles')->insert($dataInsert);
+            $msg = "Role baru berhasil ditambahkan.";
+        } else {
+            // ==========================================
+            // ✏️ MODE: UPDATE ROLE LAMA
+            // ==========================================
+            $dataUpdate = ['nm_role' => $nm_role];
+
+            // Jika Kang Rian mengubah angka ID-nya (misal dari 100 diganti ke 6)
+            if (!empty($id_role) && $id_role != $old_id_role) {
+                // Cek apakah ID baru target sudah dipakai role lain
+                $cek = $db->table('tb_roles')->where('id_role', $id_role)->countAllResults();
+                if ($cek > 0) {
+                    return $this->response->setJSON(['status' => 'error', 'message' => "Gagal ubah ID! ID {$id_role} sudah dipakai role lain."]);
+                }
+                $dataUpdate['id_role'] = $id_role;
+
+                // 🔐 PENGAMBAT KEBOCORAN: Amankan relasi data user agar tidak broken/kehilangan akses role
+                $db->table('dtks_users')->where('role_id', $old_id_role)->update(['role_id' => $id_role]);
+            }
+
+            $db->table('tb_roles')->where('id_role', $old_id_role)->update($dataUpdate);
+            $msg = "Nama & ID Role berhasil diperbarui.";
+        }
+
+        return $this->response->setJSON(['status' => 'success', 'message' => $msg]);
+    }
+
+    public function deleteRole()
+    {
+        $db = \Config\Database::connect();
+
+        $id_role = $this->request->getPost('id_role');
+
+        // 🚀 PERBAIKAN: Menggunakan nama tabel dtks_users
+        $cekUser = $db->table('dtks_users')->where('role_id', $id_role)->countAllResults();
+        if ($cekUser > 0) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Role ini tidak bisa dihapus karena masih digunakan oleh ' . $cekUser . ' user.'
+            ]);
+        }
+
+        $db->table('tb_roles')->where('id_role', $id_role)->delete();
+        return $this->response->setJSON(['status' => 'success', 'message' => 'Role berhasil dihapus.']);
+    }
 }

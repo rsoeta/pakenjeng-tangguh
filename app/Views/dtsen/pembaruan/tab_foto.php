@@ -26,7 +26,7 @@ $geo  = $payload['geo'] ?? [];
             <div class="col-md-4 mb-3 text-center">
                 <label class="fw-semibold d-block">Foto KTP / KK</label>
                 <img src="<?= base_url($foto['ktp_kk'] ?? 'data/usulan/foto_identitas/noimage.png') ?>"
-                    class="img-fluid rounded border mb-2 img-download" id="previewKtp" style="max-height: 200px;">
+                    class="img-fluid rounded border mb-2 img-download" id="previewKtp" style="max-height: 200px;" onerror="this.src='<?= base_url('data/usulan/foto_identitas/noimage.png') ?>'">
                 <?php if ($editable): ?>
                     <input type="file" name="foto_ktp" id="fotoKtp" class="form-control form-control-sm" accept="image/*" capture="environment">
                 <?php endif; ?>
@@ -36,7 +36,7 @@ $geo  = $payload['geo'] ?? [];
             <div class="col-md-4 mb-3 text-center">
                 <label class="fw-semibold d-block">Foto Rumah (Tampak Depan)</label>
                 <img src="<?= base_url($foto['depan'] ?? 'data/usulan/foto_rumah/noimage.png') ?>"
-                    class="img-fluid rounded border mb-2 img-download" id="previewDepan" style="max-height: 200px;">
+                    class="img-fluid rounded border mb-2 img-download" id="previewDepan" style="max-height: 200px;" onerror="this.src='<?= base_url('data/usulan/foto_rumah/noimage.png') ?>'">
                 <?php if ($editable): ?>
                     <input type="file" name="foto_depan" id="fotoDepan" class="form-control form-control-sm" accept="image/*" capture="environment">
                 <?php endif; ?>
@@ -46,7 +46,7 @@ $geo  = $payload['geo'] ?? [];
             <div class="col-md-4 mb-3 text-center">
                 <label class="fw-semibold d-block">Foto Rumah (Bagian Dalam)</label>
                 <img src="<?= base_url($foto['dalam'] ?? 'data/usulan/foto_rumah_dalam/noimage.png') ?>"
-                    class="img-fluid rounded border mb-2 img-download" id="previewDalam" style="max-height: 200px;">
+                    class="img-fluid rounded border mb-2 img-download" id="previewDalam" style="max-height: 200px;" onerror="this.src='<?= base_url('data/usulan/foto_rumah_dalam/noimage.png') ?>'">
                 <?php if ($editable): ?>
                     <input type="file" name="foto_dalam" id="fotoDalam" class="form-control form-control-sm" accept="image/*" capture="environment">
                 <?php endif; ?>
@@ -83,9 +83,11 @@ $geo  = $payload['geo'] ?? [];
         </div>
 
         <div class="mt-3 mb-3 d-flex gap-2">
-            <button type="button" class="btn btn-sm btn-primary" id="btnGetLocation">
-                <i class="fas fa-map-marker-alt"></i> Ambil Lokasi Saat Ini
-            </button>
+            <?php if ($editable): ?>
+                <button type="button" class="btn btn-sm btn-primary" id="btnGetLocation">
+                    <i class="fas fa-map-marker-alt"></i> Ambil Lokasi Saat Ini
+                </button>
+            <?php endif; ?>
 
             <button type="button" class="btn btn-sm btn-info" id="btnCopyFull" title="Salin Latitude & Longitude">
                 <i class="fas fa-copy"></i> Salin Koordinat
@@ -242,69 +244,74 @@ $geo  = $payload['geo'] ?? [];
         }
 
         // =============================
-        // 📍 GET KOORDINAT MANUAL
+        // 📍 GET KOORDINAT MANUAL (DIJINAKKAN)
         // =============================
-        document.getElementById('btnGetLocation').addEventListener('click', function() {
-            if (!navigator.geolocation) {
-                return Swal.fire("Error", "Browser tidak mendukung GPS.", "error");
-            }
+        const btnGetLocation = document.getElementById('btnGetLocation');
 
-            Swal.fire({
-                icon: "info",
-                title: "Mencari lokasi...",
-                text: "Mohon tunggu sebentar",
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    Swal.close();
-
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-
-                    // isi input
-                    latInput.value = userLat.toFixed(6);
-                    lngInput.value = userLng.toFixed(6);
-
-                    // buat marker kalau belum ada
-                    if (!marker) {
-                        marker = L.marker([userLat, userLng], {
-                            draggable: true
-                        }).addTo(map);
-
-                        marker.on('dragend', function(e) {
-                            const pos = e.target.getLatLng();
-                            latInput.value = pos.lat.toFixed(6);
-                            lngInput.value = pos.lng.toFixed(6);
-                        });
-                    } else {
-                        marker.setLatLng([userLat, userLng]);
-                    }
-
-                    map.setView([userLat, userLng], 17);
-
-                    Swal.fire({
-                        toast: true,
-                        position: 'bottom-end',
-                        icon: 'success',
-                        title: 'Lokasi berhasil diambil!',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                },
-                function(error) {
-                    Swal.close();
-                    Swal.fire("Gagal", "Tidak dapat mengambil lokasi. Aktifkan GPS Anda.", "warning");
-                }, {
-                    enableHighAccuracy: true,
-                    timeout: 8000,
-                    maximumAge: 0
+        // Cek dulu apakah tombolnya ada di layar (bukan Role 6)
+        if (btnGetLocation) {
+            btnGetLocation.addEventListener('click', function() {
+                if (!navigator.geolocation) {
+                    return Swal.fire("Error", "Browser tidak mendukung GPS.", "error");
                 }
-            );
-        });
+
+                Swal.fire({
+                    icon: "info",
+                    title: "Mencari lokasi...",
+                    text: "Mohon tunggu sebentar",
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        Swal.close();
+
+                        const userLat = position.coords.latitude;
+                        const userLng = position.coords.longitude;
+
+                        // isi input
+                        latInput.value = userLat.toFixed(6);
+                        lngInput.value = userLng.toFixed(6);
+
+                        // buat marker kalau belum ada
+                        if (!marker) {
+                            marker = L.marker([userLat, userLng], {
+                                draggable: true
+                            }).addTo(map);
+
+                            marker.on('dragend', function(e) {
+                                const pos = e.target.getLatLng();
+                                latInput.value = pos.lat.toFixed(6);
+                                lngInput.value = pos.lng.toFixed(6);
+                            });
+                        } else {
+                            marker.setLatLng([userLat, userLng]);
+                        }
+
+                        map.setView([userLat, userLng], 17);
+
+                        Swal.fire({
+                            toast: true,
+                            position: 'bottom-end',
+                            icon: 'success',
+                            title: 'Lokasi berhasil diambil!',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    },
+                    function(error) {
+                        Swal.close();
+                        Swal.fire("Gagal", "Tidak dapat mengambil lokasi. Aktifkan GPS Anda.", "warning");
+                    }, {
+                        enableHighAccuracy: true,
+                        timeout: 8000,
+                        maximumAge: 0
+                    }
+                );
+            });
+        }
     });
 
     // =============================

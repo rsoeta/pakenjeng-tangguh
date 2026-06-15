@@ -195,12 +195,12 @@ class Pages extends BaseController
             session()->setFlashdata('login_success', true);
         }
 
-        // 🚀 BUG FIX: Hapus limitasi lama, izinkan Role <= 5 mengakses Dashboard Utama
-        if (session()->get('status') == 1 && $roleId <= 5) {
+        // 🚀 BUG FIX: Hapus limitasi lama, izinkan Role <= 7 mengakses Dashboard Utama
+        if (session()->get('status') == 1 && $roleId <= 7) {
             return view('dashboard', $data);
         }
 
-        // 🛡️ Fallback pengaman jika sesi aneh atau role > 5 mencoba akses
+        // 🛡️ Fallback pengaman jika sesi aneh atau role > 7 mencoba akses
         return redirect()->to(base_url('home'))->with('error', 'Akses ditolak atau sesi tidak valid.');
     }
 

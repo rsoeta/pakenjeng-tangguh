@@ -4,7 +4,7 @@
 // =============================================
 
 // Hak akses
-$roleId   = $user['role_id'] ?? 99;
+$roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
 $editable = ($roleId <= 4);
 $disabled = $editable ? '' : 'disabled';
 
@@ -131,7 +131,7 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                                     </div>
                                 <?php endif; ?>
                             </div>
-                            
+
                             <div class="col-md-4">
                                 <label class="form-label">Memiliki Lahan (selain yang ditempati)</label>
                                 <select name="memiliki_lahan"
@@ -188,7 +188,7 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
             e.preventDefault(); // Mencegah form reload
 
             const form = $('#formAset')[0];
-            
+
             // 🚀 BUG FIX: Validasi kelengkapan form sebelum mengirim data ke server
             if (!form.checkValidity()) {
                 form.classList.add('was-validated');
@@ -197,13 +197,16 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                     title: 'Isian Belum Lengkap',
                     text: 'Silakan periksa kembali field yang bertanda bintang (*).',
                     width: '320px', // Perkecil untuk kenyamanan mobile
-                    customClass: { title: 'fs-5', content: 'fs-6' }
+                    customClass: {
+                        title: 'fs-5',
+                        content: 'fs-6'
+                    }
                 });
                 return;
             }
 
             const formData = $('#formAset').serialize();
-            
+
             $.post('<?= base_url('pembaruan-keluarga/save-aset') ?>', formData, function(res) {
                 if (res.status === 'success') {
                     Swal.fire({
@@ -211,7 +214,10 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                         title: 'Berhasil!',
                         text: 'Data aset berhasil disimpan.',
                         width: '320px', // Perkecil untuk kenyamanan mobile
-                        customClass: { title: 'fs-5', content: 'fs-6' }
+                        customClass: {
+                            title: 'fs-5',
+                            content: 'fs-6'
+                        }
                     });
                 } else {
                     Swal.fire({
@@ -219,7 +225,10 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                         title: 'Gagal!',
                         text: res.message || 'Terjadi kesalahan.',
                         width: '320px', // Perkecil untuk kenyamanan mobile
-                        customClass: { title: 'fs-5', content: 'fs-6' }
+                        customClass: {
+                            title: 'fs-5',
+                            content: 'fs-6'
+                        }
                     });
                 }
             }, 'json').fail(() => {
@@ -228,7 +237,10 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                     title: 'Gagal!',
                     text: 'Tidak dapat terhubung ke server.',
                     width: '320px', // Perkecil untuk kenyamanan mobile
-                    customClass: { title: 'fs-5', content: 'fs-6' }
+                    customClass: {
+                        title: 'fs-5',
+                        content: 'fs-6'
+                    }
                 });
             });
         });

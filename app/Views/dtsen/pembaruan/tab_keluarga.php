@@ -1,5 +1,5 @@
 <?php
-$roleId = $user['role_id'] ?? 99;
+$roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
 $editable = ($roleId <= 4);
 $disabled = $editable ? '' : 'disabled';
 ?>
@@ -292,7 +292,8 @@ $disabled = $editable ? '' : 'disabled';
 
         const idKK = <?= (int)$id_kk ?>;
 
-        fetch("<?= base_url('pembaruan-keluarga/desil-history') ?>/" + idKK)
+        // 🚀 UBAH BARIS INI (URL Dinamis):
+        fetch("<?= base_url($roleId == 6 ? 'sensus-ekonomi/desil-history' : 'pembaruan-keluarga/desil-history') ?>/" + idKK)
             .then(res => res.json())
             .then(res => {
 

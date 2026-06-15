@@ -92,8 +92,12 @@
                         <div class="col">
                             <!-- Button trigger modal -->
                             <h4 class="text-center"><?= $title; ?></h4>
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-primary btn-tool float-right" data-toggle="modal" data-target="#modalAdd">
+                            <div class="card-tools d-flex gap-2 justify-content-end">
+                                <button class="btn btn-info btn-sm shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRole" aria-controls="offcanvasRole">
+                                    <i class="fas fa-user-tag"></i> Kelola Role
+                                </button>
+
+                                <button type="button" class="btn btn-primary btn-sm shadow-sm" data-toggle="modal" data-target="#modalAdd">
                                     <i class="fa fa-plus fa-sm"></i> Tambah User
                                 </button>
                             </div>
@@ -238,9 +242,146 @@
         </div>
     </section>
 </div>
-<!-- End of Main Content -->
 
 <div class="viewmodal" style="display: none;"></div>
+
+<div class="offcanvas offcanvas-end shadow" tabindex="-1" id="offcanvasRole" aria-labelledby="offcanvasRoleLabel" style="width: 400px;">
+    <div class="offcanvas-header bg-dark text-white">
+        <h5 class="offcanvas-title fw-bold" id="offcanvasRoleLabel"><i class="fas fa-user-tag me-2"></i> Kelola Role Pengguna</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body bg-light">
+
+        <div class="card shadow-sm mb-4 border-0">
+            <div class="card-body bg-white rounded">
+                <form id="formRole">
+                    <input type="hidden" id="old_id_role" name="old_id_role">
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-4">
+                            <label class="form-label fw-bold text-primary small">ID Role</label>
+                            <input type="number" class="form-control" id="id_role" name="id_role" placeholder="Auto">
+                        </div>
+                        <div class="col-8">
+                            <label class="form-label fw-bold text-primary small">Nama Role / Level</label>
+                            <input type="text" class="form-control" id="nm_role" name="nm_role" placeholder="Contoh: Petugas SE 2026" required autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-2">
+                        <button type="button" class="btn btn-sm btn-secondary d-none" id="btnBatalRole"><i class="fas fa-times"></i> Batal</button>
+                        <button type="submit" class="btn btn-sm btn-success shadow-sm" id="btnSimpanRole"><i class="fas fa-save"></i> Simpan Role</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <h6 class="fw-bold text-secondary mb-3"><i class="fas fa-list me-1"></i> Daftar Role Saat Ini</h6>
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <table class="table table-sm table-striped table-hover mb-0" id="tabelRoleOffcanvas">
+                    <thead class="bg-primary text-white">
+                        <tr>
+                            <th width="15%" class="text-center">ID</th>
+                            <th>Nama Role</th>
+                            <th width="25%" class="text-center"><i class="fas fa-cog"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($roles as $r): ?>
+                            <tr>
+                                <td class="text-center fw-bold align-middle"><?= $r['id_role'] ?></td>
+                                <td class="align-middle"><?= esc($r['nm_role']) ?></td>
+                                <td class="text-center align-middle">
+                                    <button class="btn btn-xs btn-outline-primary btnEditRole" data-id="<?= $r['id_role'] ?>" data-nama="<?= esc($r['nm_role']) ?>"><i class="fas fa-edit"></i></button>
+                                    <?php if (!in_array($r['id_role'], [1, 2, 99])): // Lindungi role inti agar tidak terhapus 
+                                    ?>
+                                        <button class="btn btn-xs btn-outline-danger btnHapusRole" data-id="<?= $r['id_role'] ?>"><i class="fas fa-trash"></i></button>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // 1. Reset Form Role
+        $('#btnBatalRole').click(function() {
+            $('#formRole')[0].reset();
+            $('#id_role').val('');
+            $('#old_id_role').val('');
+            $('#btnBatalRole').addClass('d-none');
+            $('#btnSimpanRole').removeClass('btn-warning').addClass('btn-success').html('<i class="fas fa-save"></i> Simpan Role');
+        });
+
+        // 2. Lempar Data ke Form Edit
+        $(document).on('click', '.btnEditRole', function() {
+            let id = $(this).data('id');
+            let nama = $(this).data('nama');
+
+            // Isikan ke kedua field ID
+            $('#id_role').val(id);
+            $('#old_id_role').val(id);
+
+            $('#nm_role').val(nama);
+            $('#btnBatalRole').removeClass('d-none');
+            $('#btnSimpanRole').removeClass('btn-success').addClass('btn-warning').html('<i class="fas fa-check-circle"></i> Update Role');
+            $('#nm_role').focus();
+        });
+
+        // 3. Proses Simpan / Update Role (AJAX)
+        $('#formRole').submit(function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Menyimpan...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            $.post('<?= base_url('users/saveRole') ?>', $(this).serialize(), function(res) {
+                if (res.status === 'success') {
+                    Swal.fire('Berhasil!', res.message, 'success').then(() => location.reload());
+                } else {
+                    Swal.fire('Gagal!', res.message || 'Terjadi kesalahan.', 'error');
+                }
+            }, 'json');
+        });
+
+        // 4. Proses Hapus Role (AJAX)
+        $(document).on('click', '.btnHapusRole', function() {
+            let id = $(this).data('id');
+            Swal.fire({
+                title: 'Hapus Role Ini?',
+                text: "Pastikan tidak ada User yang sedang menggunakan Role ini!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('<?= base_url('users/deleteRole') ?>', {
+                        id_role: id
+                    }, function(res) {
+                        if (res.status === 'success') {
+                            Swal.fire('Terhapus!', res.message, 'success').then(() => location.reload());
+                        } else {
+                            Swal.fire('Gagal!', res.message, 'error');
+                        }
+                    }, 'json');
+                }
+            });
+        });
+    });
+</script>
+<!-- End of Main Content -->
+
 <script>
     $(document).ready(function() {
         // Setelah DataTable dibuat

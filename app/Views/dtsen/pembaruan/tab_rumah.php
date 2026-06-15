@@ -1,5 +1,5 @@
 <?php
-$roleId = $user['role_id'] ?? 99;
+$roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
 $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 $perumahan = $payload['perumahan'] ?? [];
 $wil = $perumahan['wilayah'] ?? [];

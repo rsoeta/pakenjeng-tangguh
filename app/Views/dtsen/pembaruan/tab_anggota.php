@@ -1,6 +1,6 @@
-<!-- app/Views/dtsen/pembaruan/tab_anggota.php -->
 <?php
-$roleId = $user['role_id'] ?? 99;
+// 🚀 PERBAIKAN: Tangkap langsung dari session agar lebih akurat
+$roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
 $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 ?>
 
@@ -43,11 +43,10 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         }
     }
 </style>
-<!-- <div class="p-1"> -->
+
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h5 class="fw-bold mb-0">👨‍👩‍👧 Daftar Anggota Keluarga</h5>
     <?php if ($editable): ?>
-        <!-- gabungkan tombol -->
         <div class="btn-group">
             <button id="btnTambahAnggota" class="btn btn-success btn-sm">
                 <i class="fas fa-user-plus"></i> Tambah Anggota
@@ -58,6 +57,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         </div>
     <?php endif; ?>
 </div>
+
 <table class="table table-bordered table-sm table-striped w-100" id="tableAnggota">
     <thead class="table-light text-start">
         <tr>
@@ -72,30 +72,25 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         </tr>
     </thead>
 </table>
-<!-- </div> -->
 
-<!-- Modal Anggota -->
 <?= $this->include('dtsen/pembaruan/modal_anggota') ?>
-<!-- ============================== -->
-<!-- ✅ DataTables & Dependencies -->
-<!-- ============================== -->
+
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
-
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 <script src="<?= base_url('assets/js/datatables.config.js'); ?>"></script>
-
-<!-- Dependencies: Select2 (cascading dropdown), SweetAlert2 -->
-<!-- (Pastikan Select2 dan SweetAlert sudah muncul di global layout AdminLTE; jika belum, URL di bawah bisa dipakai) -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     window.baseUrl = "<?= rtrim(base_url(), '/') ?>";
+
+    // 🚀 PERBAIKAN: Lempar status editable ke JS agar DataTables tahu
+    const isEditable = <?= $editable ? 'true' : 'false' ?>;
 
     $(document).ready(function() {
 
@@ -105,9 +100,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         const selectUsaha = document.getElementById('memiliki_usaha');
         const formDetail = document.getElementById('form_usaha_detail');
 
-        // ============================================================
-        // 🧩 Tampilkan / sembunyikan form detail usaha
-        // ============================================================
         function toggleUsahaDetail() {
             const val = $('#memiliki_usaha').val(); // ambil langsung dari form, bukan dari `d`
             if (val === 'Ya') {
@@ -116,17 +108,12 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             } else {
                 $('#form_usaha_detail').slideUp();
                 $('.required-if-ya').removeAttr('required').removeClass('is-invalid');
-                // kosongkan field tambahan kalau "Tidak"
                 $('#jumlah_usaha, #pekerja_dibayar, #pekerja_tidak_dibayar, #omzet_bulanan').val('');
             }
-            // perbarui badge validasi tab usaha
             $('#badgeUsaha').text(val ? '🟢' : '⚠️');
         }
 
-
-        // Event listener
         $('#memiliki_usaha').on('change', toggleUsahaDetail);
-
 
         if (selectUsaha) {
             selectUsaha.addEventListener('change', toggleUsahaDetail);
@@ -238,7 +225,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             });
         }
 
-        // 🌐 Event cascading antar wilayah
         $('#ind_provinsi').on('change', function() {
             loadRegencies(this.value);
             $('#ind_kecamatan, #ind_desa').html('<option value="">Pilih Kecamatan/Desa</option>');
@@ -270,7 +256,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         console.log("Usaha:", $('#memiliki_usaha').val());
 
         /* ============================================================
-         * ✏️ EVENT: Tombol Edit Anggota
+         * ✏️ EVENT: Tombol Edit / Lihat Anggota
          * ============================================================ */
         $(document).on('click', '.btnEditAnggota', function() {
 
@@ -286,7 +272,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 didOpen: () => Swal.showLoading()
             });
 
-            $.getJSON(`${window.baseUrl}/pembaruan-keluarga/get-anggota-detail/${id}`, function(res) {
+            $.getJSON(`${window.baseUrl}/<?= ($roleId == 6) ? 'sensus-ekonomi' : 'pembaruan-keluarga' ?>/get-anggota-detail/${id}`, function(res) {
                 Swal.close();
                 if (res.status !== 'success') return Swal.fire("Gagal", res.message, "error");
 
@@ -298,7 +284,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 $('#nama').val(d.nama ?? '');
                 $('#tempat_lahir').val(d.tempat_lahir ?? '');
                 $('#tanggal_lahir').val(d.tanggal_lahir ?? '');
-                // $('#jenis_kelamin').val(d.jenis_kelamin ?? '');
+
                 // Prefill Jenis Kelamin (radio button)
                 $('input[name="jenis_kelamin"]').prop('checked', false); // reset dulu
                 if (d.jenis_kelamin === 'L' || d.jenis_kelamin === 'P') {
@@ -338,13 +324,12 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 $('#pekerja_dibayar').val(d.pekerja_dibayar || '');
                 $('#pekerja_tidak_dibayar').val(d.pekerja_tidak_dibayar || '');
                 $('#omzet_bulanan').val(d.omzet_bulanan || '');
-                toggleUsahaDetail(); // pastikan tampil sesuai nilai prefill
+                toggleUsahaDetail();
 
                 // Prefill Tab Kesehatan
                 $('#status_hamil').val(d.status_hamil ?? '');
                 $('#penyakit_kronis').val(d.penyakit_kronis ?? '');
 
-                // Multi-check Disabilitas dan Keterampilan
                 // ♿ Disabilitas
                 if (Array.isArray(d.disabilitas)) {
                     $('.disab-check').prop('checked', false);
@@ -352,7 +337,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         $(`.disab-check[value="${val}"]`).prop('checked', true);
                     });
                 } else if (typeof d.disabilitas === 'string' && d.disabilitas.trim() !== '') {
-                    // Jika string tapi berisi JSON misalnya '["Fisik"]'
                     try {
                         const parsed = JSON.parse(d.disabilitas);
                         if (Array.isArray(parsed)) {
@@ -381,7 +365,9 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     }
                 }
 
-                $('#modalAnggotaLabel').text('Edit Anggota');
+                // 🚀 PERUBAHAN: Bedakan judul Modal antara Edit dan Read-Only
+                $('#modalAnggotaLabel').text(isEditable ? 'Edit Anggota' : 'Detail Anggota');
+
                 const idKk = $('#id_kk').val() || $('[name="id_kk"]').val();
                 $('#formAnggota #id_kk').val(idKk);
                 $('#modalAnggota').modal('show');
@@ -406,44 +392,34 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 didOpen: () => Swal.showLoading()
             });
 
-            // 🔗 Ambil dropdown master dari backend
-            $.getJSON(`${window.baseUrl}/pembaruan-keluarga/get-anggota-detail`, function(res) {
+            $.getJSON(`${window.baseUrl}/<?= ($roleId == 6) ? 'sensus-ekonomi' : 'pembaruan-keluarga' ?>/get-anggota-detail`, function(res) {
                 Swal.close();
 
-                // 🧹 Reset seluruh form modal
                 $('#formAnggota')[0].reset();
                 $('#id_anggota').val('');
 
-                // Ambil id_kk dari halaman utama
                 const idKk = $('#id_kk').val() || $('[name="id_kk"]').val();
 
-                // Pastikan diset ke form di modal
                 $('#formAnggota #id_kk').val(idKk);
 
                 $('#modalAnggotaLabel').text('Tambah Anggota Baru');
 
-                // Kosongkan semua dropdown wilayah
                 $('#ind_provinsi, #ind_kabupaten, #ind_kecamatan, #ind_desa').html('<option value="">Pilih...</option>').val('').trigger('change');
 
-                // Kosongkan checklist & select lainnya
                 $('.skill-check, .disab-check').prop('checked', false);
 
-                // Prefill dropdown master
                 const drop = res.data?.dropdowns ?? {};
                 updateSelectOptions('#status_kawin', drop.status_kawin);
                 updateSelectOptions('#hubungan', drop.hubungan);
                 updateSelectOptions('#pekerjaan', drop.pekerjaan);
                 updateSelectOptions('#pendidikan_terakhir', drop.pendidikan);
 
-                // Pastikan tab pertama aktif
-                $('#tabAnggotaTabs button:first').tab('show');
+                $('#tabAnggotaTabs a:first').tab('show');
 
-                // 🌏 Muat daftar provinsi awal
                 loadProvinces('', function() {
                     console.log('✅ Daftar provinsi dimuat.');
                 });
 
-                // Buka modal
                 $('#modalAnggota').modal('show');
             }).fail(() => {
                 Swal.close();
@@ -515,9 +491,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             const form = $(this);
             let valid = true;
 
-            /* ======================================================
-               1️⃣ VALIDASI REQUIRED
-            ====================================================== */
             form.find('.required').each(function() {
                 if (!$(this).val().trim()) {
                     $(this).addClass('is-invalid');
@@ -527,9 +500,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 }
             });
 
-            /* ======================================================
-               2️⃣ VALIDASI 16 DIGIT (NIK / No KK)
-            ====================================================== */
             ['#nik', '#keluarga_no_kk', '#individu_no_kk'].forEach(selector => {
                 const el = form.find(selector);
                 if (el.length) {
@@ -554,9 +524,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 return;
             }
 
-            /* ======================================================
-               3️⃣ SIMPAN LANGSUNG (TANPA KONFIRMASI)
-            ====================================================== */
             Swal.fire({
                 title: 'Menyimpan...',
                 allowOutsideClick: false,
@@ -604,30 +571,21 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         // ==========================================
         function maskNumberJS(number) {
             if (!number || number === '-' || number === 'NOKKS') return number || '-';
-
             let numStr = number.toString().trim();
             if (numStr.length <= 8) return numStr;
-
             let masked = numStr.substring(0, 8) + '*'.repeat(numStr.length - 8);
-
             return `<span class="fw-bold text-primary" style="cursor:pointer;" 
                       onmouseenter="this.innerText='${numStr}'" 
                       onmouseleave="this.innerText='${masked}'" 
-                      ontouchstart="this.innerText='${numStr}'" 
-                      ontouchend="this.innerText='${masked}'" 
                       title="Tahan/Arahkan kursor untuk melihat utuh">${masked}</span>`;
         }
 
-        /* ============================================================
-         * 📋 LOAD TABLE ANGGOTA (FINAL – LEFT ALIGNED & RESPONSIVE)
-         * ============================================================ */
         let tableAnggota;
 
         function initTableAnggota() {
             const idKk = $('#id_kk').val();
             if (!idKk) return;
 
-            // Jika sudah ada → reload saja
             if ($.fn.DataTable.isDataTable('#tableAnggota')) {
                 tableAnggota.ajax.reload(null, false);
                 return;
@@ -644,9 +602,8 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 },
                 autoWidth: false,
                 pageLength: 10,
-
                 ajax: {
-                    url: `${window.baseUrl}/pembaruan-keluarga/get-anggota-list/${idKk}`,
+                    url: `${window.baseUrl}/<?= ($roleId == 6) ? 'sensus-ekonomi' : 'pembaruan-keluarga' ?>/get-anggota-list/${idKk}`,
                     type: 'GET',
                     dataSrc: function(json) {
                         if (!json || json.status !== 'success') {
@@ -656,142 +613,92 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         return json.data;
                     }
                 },
-
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
                 },
-
-                /* ===============================
-                 * DEFINISI KOLOM
-                 * =============================== */
-                columns: [
-                    // 🔹 Control (+)
-                    {
+                columns: [{
                         data: null,
                         defaultContent: '',
                         className: 'dtr-control text-start',
                         orderable: false,
                         width: '20px'
                     },
-
-                    // 🔹 No
                     {
                         data: null,
                         className: 'text-start',
                         width: '40px',
                         render: (d, t, r, m) => m.row + 1
                     },
-
-                    // 🔹 Nama
                     {
                         data: 'nama',
                         className: 'text-nowrap text-start fw-bold',
                         render: function(data, type, row) {
                             let nama = data || '-';
-
-                            // 🔍 LOGIKA: Pengecekan Syarat Kelengkapan Utama
-                            let isLengkap = (
-                                row.provinsi && String(row.provinsi).trim() !== '' &&
-                                row.kabupaten && String(row.kabupaten).trim() !== '' &&
-                                row.kecamatan && String(row.kecamatan).trim() !== '' &&
-                                row.desa && String(row.desa).trim() !== ''
-                            );
-
+                            let isLengkap = (row.provinsi && row.kabupaten && row.kecamatan && row.desa);
                             if (!isLengkap && type === 'display') {
-                                // 🚀 UBAH TEKS TITLE DI SINI
-                                return `${nama} <span class="badge bg-danger rounded-circle indicator-belum-lengkap ms-2 shadow-sm" title="Terdapat data yang belum lengkap, wajib di-Edit!" style="width: 14px; height: 14px; padding: 0; display: inline-flex; align-items: center; justify-content: center; animation: pulse 2s infinite; vertical-align: middle;"><i class="fas fa-exclamation" style="font-size: 8px;"></i></span>`;
+                                return `${nama} <span class="badge bg-danger rounded-circle ms-2 shadow-sm" title="Data belum lengkap!" style="width: 14px; height: 14px; padding: 0; display: inline-flex; align-items: center; justify-content: center; animation: pulse 2s infinite; vertical-align: middle;"><i class="fas fa-exclamation" style="font-size: 8px;"></i></span>`;
                             }
-
                             return nama;
                         }
                     },
-
-                    // 🔹 NIK
                     {
                         data: 'nik',
                         className: 'text-nowrap text-start',
                         render: function(data, type, row) {
                             if (!data) return '-';
-                            if (type === 'filter' || type === 'sort') {
-                                return data;
-                            }
+                            if (type === 'filter' || type === 'sort') return data;
                             let maskedData = maskNumberJS(data);
-                            return `
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="fw-semibold">${maskedData}</span>
-                                    <button 
-                                        type="button"
-                                        class="btn btn-outline-secondary btn-xs btnCopyNik"
-                                        data-value="${data}" 
-                                        title="Salin NIK">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
-                                </div>
-                            `;
+                            return `<div class="d-flex align-items-center gap-2"><span class="fw-semibold">${maskedData}</span><button type="button" class="btn btn-outline-secondary btn-xs btnCopyNik" data-value="${data}" title="Salin NIK"><i class="fas fa-copy"></i></button></div>`;
                         }
                     },
-
-                    // 🔹 Tanggal Lahir
                     {
                         data: 'tanggal_lahir',
                         className: 'text-nowrap text-start',
-                        render: d =>
-                            d ?
-                            new Date(d).toLocaleDateString('id-ID', {
-                                day: '2-digit',
-                                month: 'short',
-                                year: 'numeric'
-                            }) : '-'
+                        render: d => d ? new Date(d).toLocaleDateString('id-ID', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric'
+                        }) : '-'
                     },
-
-                    // 🔹 Hubungan
                     {
                         data: null,
                         className: 'text-nowrap text-start',
-                        render: row =>
-                            row.hubungan_keluarga_label ??
-                            row.jenis_shdk ??
-                            row.hubungan_keluarga ??
-                            '-'
+                        render: row => row.hubungan_keluarga_label ?? row.jenis_shdk ?? row.hubungan_keluarga ?? '-'
                     },
-
-                    // 🔹 Pekerjaan (🆕 Kolom Baru)
                     {
                         data: 'pekerjaan_label',
                         className: 'text-nowrap text-start',
                         defaultContent: '-'
                     },
-
-                    // 🔹 Aksi
                     {
                         data: null,
                         orderable: false,
                         searchable: false,
                         className: 'text-start',
                         width: '140px',
-                        render: r => `
-                            <div class="btn-group btn-group-sm">
-                                <button class="btn btn-primary btnEditAnggota"
-                                    data-id="${r.id_art ?? r.id}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-danger btnHapusAnggota"
-                                    data-id="${r.id_art ?? r.id}">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </div>
-                        `
+                        render: function(r) {
+                            if (!isEditable) {
+                                // 🚀 KITA GUNAKAN TAG <a> KEMBALI
+                                // Karena fieldset pembeku sudah dihapus, tag <a> sekarang bebas diklik!
+                                return `
+                                    <a href="javascript:void(0)" class="btn btn-info btn-sm btnEditAnggota shadow-sm" data-id="${r.id_art ?? r.id}" title="Lihat Detail Data">
+                                        <i class="fas fa-eye me-1"></i> Lihat
+                                    </a>
+                                `;
+                            }
+                            return `
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-primary btnEditAnggota" data-id="${r.id_art ?? r.id}"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btnHapusAnggota" data-id="${r.id_art ?? r.id}"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            `;
+                        }
                     }
                 ],
-
-                /* ===============================
-                 * COLUMN DEFS (INI KUNCI UTAMA)
-                 * =============================== */
                 columnDefs: [{
                     targets: '_all',
                     className: 'text-start align-middle'
                 }],
-
                 order: [
                     [1, 'asc']
                 ]
@@ -799,20 +706,11 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         }
 
         $(document).ready(function() {
-            if ($.fn.DataTable.isDataTable('#tableAnggota')) {
-                $('#tableAnggota').DataTable().clear().destroy();
-            }
-
             initTableAnggota();
         });
-
-        // reload setelah tambah / edit anggota
         $(document).on('anggota:saved', function() {
             if (tableAnggota) tableAnggota.ajax.reload(null, false);
         });
-
-        // loadTableAnggota();
-        initTableAnggota();
 
         /* ======================================================
            🔁 TOMBOL RELOAD DAFTAR ANGGOTA (FIXED)
@@ -839,9 +737,8 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         showConfirmButton: false
                     });
 
-                }, false); // false = tetap di halaman saat ini
+                }, false);
             } else {
-                // fallback (jika table belum init)
                 initTableAnggota();
                 Swal.close();
             }
@@ -878,7 +775,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 }, function(res) {
                     if (res.status) {
                         Swal.fire('Berhasil!', res.message, 'success');
-                        // loadTableAnggota();
                         initTableAnggota();
                     } else {
                         Swal.fire('Gagal', res.message, 'error');
@@ -891,7 +787,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         // 📋 FUNGSI SALIN KE CLIPBOARD (NIK & NO KK)
         // ========================================================
 
-        // Konfigurasi SweetAlert untuk Toast (Notifikasi Pojok Kanan Atas)
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -904,9 +799,8 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             }
         });
 
-        // 🎯 Salin No. KK
         $(document).on('click', '.btnCopyNoKK', function() {
-            const value = $(this).attr('data-value'); // Ambil nilai asli dari data-value
+            const value = $(this).attr('data-value');
 
             navigator.clipboard.writeText(value).then(() => {
                 Toast.fire({
@@ -922,9 +816,8 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             });
         });
 
-        // 🎯 Salin NIK
         $(document).on('click', '.btnCopyNik', function() {
-            const value = $(this).attr('data-value'); // Ambil nilai asli dari data-value
+            const value = $(this).attr('data-value');
 
             navigator.clipboard.writeText(value).then(() => {
                 Toast.fire({
@@ -966,7 +859,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             if (adaYangBelumLengkap) {
                 Swal.fire({
                     icon: 'warning',
-                    // 🚀 UBAH JUDUL DAN ISI PESAN DI SINI
                     title: 'Data Anggota Belum Lengkap!',
                     html: 'Masih ada anggota keluarga dengan tanda <span class="badge bg-danger rounded-circle p-1 mx-1"><i class="fas fa-exclamation" style="font-size: 10px;"></i></span><br><br>Silakan klik tombol <b><i class="fas fa-edit text-primary"></i> Edit</b> pada anggota tersebut dan pastikan seluruh isian datanya (termasuk Wilayah Capil) telah dilengkapi.',
                     confirmButtonText: 'Mengerti',

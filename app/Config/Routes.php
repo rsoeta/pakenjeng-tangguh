@@ -42,11 +42,16 @@ $routes->setAutoRoute(false);
 // route since we don't have to scan directories.
 // $routes->get('/', 'Pages::home');
 
+// ========================================================
+// 🚀 WEBHOOK AUTO-DEPLOY GITHUB TO CPANEL
+// ========================================================
+$routes->match(['get', 'post'], 'deploy-sinden-rahasia', 'Webhook::deploy');
+
 // AUTH
 // $routes->match(['GET', 'POST'], 'lockscreen', 'Lockscreen::index', ['filter' => 'authfilterdtks']);
 $routes->match(['GET', 'POST'], 'login', 'Auth\Auth::login', ['filter' => 'noauthfilterdtks']);
-// $routes->match(['GET', 'POST'], 'register', 'Auth\Auth::register', ['filter' => 'noauthfilterdtks']);
-$routes->match(['GET', 'POST'], 'register', 'Auth\Auth::regOpSek', ['filter' => 'noauthfilterdtks']);
+$routes->match(['GET', 'POST'], 'register', 'Auth\Auth::register', ['filter' => 'noauthfilterdtks']);
+// $routes->match(['GET', 'POST'], 'register', 'Auth\Auth::regOpSek', ['filter' => 'noauthfilterdtks']);
 $routes->match(['GET', 'POST'], 'lupa-password', 'Auth\Auth::lupaPassword', ['filter' => 'noauthfilterdtks']);
 $routes->match(['GET', 'POST'], 'requestReset', 'Auth\Auth::requestReset', ['filter' => 'noauthfilterdtks']);
 $routes->get('reset-password', 'Auth\Auth::resetPassword', ['filter' => 'noauthfilterdtks']);
@@ -217,6 +222,22 @@ $routes->group('bpjstk', ['filter' => 'authfilterdtks', 'menufilterdtks'], funct
 	$routes->get('get-data/(:num)', 'Dtsen\Bpjstk::getData/$1'); // Untuk menarik data ke modal
 	$routes->post('simpan-serah-terima', 'Dtsen\Bpjstk::simpanSerahTerima'); // Untuk save foto & TTD
 	$routes->post('rollback', 'Dtsen\Bpjstk::rollback'); // 🚀 Tambahkan rute rollback ini
+});
+
+// ========================================================
+// 📊 SENSUS EKONOMI 2026 (PENCARIAN KELUARGA STRICT)
+// ========================================================
+$routes->group('sensus-ekonomi', ['filter' => ['authfilterdtks', 'menufilterdtks']], static function ($routes) {
+	$routes->get('/', 'Dtsen\SensusEkonomi::index');
+	$routes->post('cariKk', 'Dtsen\SensusEkonomi::cariKk');
+
+	// 🚀 BYPASS ROUTE: Menembak fungsi detail tanpa harus masuk menu pembaruan-keluarga
+	$routes->get('detail/(:num)', 'Dtsen\PembaruanKeluarga::detail/$1');
+	// 🚀 BYPASS AJAX: Mengizinkan Role 6 (Petugas SE) mengambil data tanpa terblokir Menu Filter
+	$routes->get('get-anggota-list/(:num)', 'Dtsen\PembaruanKeluarga::getAnggotaList/$1');
+	$routes->get('get-anggota-detail/(:num)', 'Dtsen\PembaruanKeluarga::getAnggotaDetail/$1');
+	$routes->get('get-anggota-detail', 'Dtsen\PembaruanKeluarga::getAnggotaDetail');
+	$routes->get('desil-history/(:num)', 'Dtsen\PembaruanKeluarga::desilHistory/$1');
 });
 
 // 🌍 API Wilayah Lokal (Dropdown berantai untuk DTSEN)
@@ -652,6 +673,8 @@ $routes->match(['GET', 'POST'], 'update_status/(:num)/(:num)', 'Dtks\Users::upda
 $routes->post('hapus', 'Dtks\Users::hapus', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('formview', 'Dtks\Users::formview', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('updateDataUser', 'Dtks\Users::updatedata', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('users/saveRole', 'Dtks\Users::saveRole', ['filter' => 'authfilterdtks']);
+$routes->post('users/deleteRole', 'Dtks\Users::deleteRole', ['filter' => 'authfilterdtks']);
 
 // setting web hak akses Super Admin
 $routes->match(['GET', 'POST'], 'settings', 'Profil\Profil_Web::index', ['filter' => 'authfilterdtks']);
