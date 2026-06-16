@@ -68,6 +68,13 @@
                                     <td class="align-top">:</td>
                                     <td id="res_alamat" class="align-top text-sm"></td>
                                 </tr>
+                                <tr>
+                                    <td class="text-muted align-middle">Kategori Desil</td>
+                                    <td class="align-middle">:</td>
+                                    <td class="align-middle">
+                                        <span id="res_desil" class="badge"></span>
+                                    </td>
+                                </tr>
                             </table>
                             <hr class="mt-2 mb-3">
                             <a href="#" id="btnLihatDetail" class="btn btn-block btn-success shadow-sm font-weight-bold">
@@ -120,15 +127,42 @@
                     btn.prop('disabled', false).html('<i class="fas fa-search"></i>');
 
                     if (response.status === 'success') {
-                        // Populate data ke dalam Card
-                        $('#res_no_kk').text(response.data.no_kk);
-                        $('#res_kepala').text(response.data.kepala_keluarga);
-                        $('#res_alamat').text(response.data.alamat);
-                        $('#btnLihatDetail').attr('href', response.data.link_detail);
+                        // 🚀 PERBAIKAN: Deklarasikan variabel 'd' dengan mengambil dari response.data
+                        let d = response.data;
 
-                        // Munculkan Card dengan efek halus
-                        $('#cardHasil').removeClass('d-none').hide().fadeIn();
+                        // Populate data ke dalam Card
+                        $('#res_no_kk').text(d.no_kk);
+                        $('#res_kepala').text(d.kepala_keluarga);
+                        $('#res_alamat').text(d.alamat);
+                        $('#btnLihatDetail').attr('href', d.link_detail);
+
+                        // 🚀 LOGIKA PEWARNAAN BADGE DESIL
+                        let desilText = d.kategori_desil || 'Belum Ditentukan';
+                        let badgeClass = 'badge bg-secondary'; // Warna default abu-abu
+
+                        // Ekstrak angka dari teks (misal "Desil 3" akan diambil angka 3-nya saja)
+                        let angkaDesil = parseInt(desilText.replace(/\D/g, ''));
+
+                        if (!isNaN(angkaDesil)) {
+                            if (angkaDesil >= 1 && angkaDesil <= 4) {
+                                badgeClass = 'badge bg-success'; // 1-4: Hijau
+                            } else if (angkaDesil === 5) {
+                                badgeClass = 'badge bg-warning text-dark'; // 5: Kuning
+                            } else if (angkaDesil >= 6 && angkaDesil <= 10) {
+                                badgeClass = 'badge bg-danger'; // 6-10: Merah
+                            }
+                        }
+
+                        // Terapkan class warna dan teksnya ke dalam span
+                        $('#res_desil').attr('class', badgeClass + ' px-2 py-1').text(desilText);
+
+                        // Tampilkan Card Hasil dengan animasi transisi
+                        $('#cardHasil').removeClass('d-none').hide().fadeIn('fast');
+
                     } else {
+                        // Sembunyikan card jika sebelumnya terbuka, lalu tampilkan alert
+                        $('#cardHasil').addClass('d-none');
+
                         // Alert jika KK tidak ada / di luar wilayah
                         Swal.fire({
                             icon: 'error',

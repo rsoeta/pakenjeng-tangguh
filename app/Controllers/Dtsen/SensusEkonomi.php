@@ -49,14 +49,17 @@ class SensusEkonomi extends BaseController
         $roleId   = session()->get('role_id') ?? $user['role_id'] ?? 6;
         $kodeDesa = session()->get('kode_desa') ?? ($user['kode_desa'] ?? '');
 
-        // 🚀 RACIKAN KEAMANAN: Query hanya KK yang aktif
+        // 🚀 RACIKAN KEAMANAN: Query hanya KK yang aktif dengan tambahan JOIN ke dtsen_se
         $builder = $this->db->table('dtsen_kk k')
-            ->select('k.id_kk, k.no_kk, k.kepala_keluarga, k.alamat, rt.rt, rt.rw')
+            // 🚀 PERBAIKAN: Masukkan se.kategori_desil ke dalam select
+            ->select('k.id_kk, k.no_kk, k.kepala_keluarga, k.alamat, rt.rt, rt.rw, se.kategori_desil')
             ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left')
+            // 🚀 PERBAIKAN: Hubungkan relasi ke tabel dtsen_se berdasarkan id_kk
+            ->join('dtsen_se se', 'se.id_kk = k.id_kk', 'left')
             ->where('k.no_kk', $no_kk)
             ->where('k.deleted_at IS NULL');
 
-        // 🔐 KARANTINA WILAYAH: Jika beda RW/RT dari wilayah tugas, data tidak akan bocor!
+        // 🔐 KARANTINA WILAYAH: Jika beda RW/RT dari wilayah kerja, data tidak akan bocor!
         $filterData = [
             'kode_desa'     => $kodeDesa,
             'wilayah_tugas' => trim($user['wilayah_tugas'] ?? '')
@@ -66,6 +69,9 @@ class SensusEkonomi extends BaseController
         $keluarga = $builder->get()->getRowArray();
 
         if ($keluarga) {
+            // 🚀 PERBAIKAN: Format angka INT dari database menjadi format teks "Desil X"
+            $teksDesil = !empty($keluarga['kategori_desil']) ? 'Desil ' . $keluarga['kategori_desil'] : 'Belum Ditentukan';
+
             return $this->response->setJSON([
                 'status' => 'success',
                 'data'   => [
@@ -74,7 +80,9 @@ class SensusEkonomi extends BaseController
                     'kepala_keluarga' => esc($keluarga['kepala_keluarga']),
                     'alamat'          => esc($keluarga['alamat']) . ' - RT ' . esc($keluarga['rt']) . ' / RW ' . esc($keluarga['rw']),
 
-                    // 🚀 PERBAIKAN: Gunakan rute sensus-ekonomi agar tidak kena lockscreen!
+                    // 🚀 Gunakan hasil format teks desil yang sudah aman
+                    'kategori_desil'  => $teksDesil,
+
                     'link_detail'     => base_url('sensus-ekonomi/detail/' . $keluarga['id_kk'])
                 ]
             ]);
@@ -82,7 +90,7 @@ class SensusEkonomi extends BaseController
             // Pesan dibuat ambigu agar peretas tidak tahu apakah KK-nya yang salah atau Wilayahnya yang dikunci
             return $this->response->setJSON([
                 'status'  => 'error',
-                'message' => 'Data Keluarga tidak ditemukan atau Nomor KK berada di luar wilayah tugas Anda!'
+                'message' => 'Data Keluarga tidak ditemukan atau Nomor KK berada di luar wilayah kerja Anda!'
             ]);
         }
     }

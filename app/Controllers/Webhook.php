@@ -24,7 +24,7 @@ class Webhook extends Controller
         $rootPath = ROOTPATH;
 
         // Jalankan perintah pindah ke folder Sinden, lalu eksekusi git pull
-        $output = shell_exec("cd {$rootPath} && git pull origin main 2>&1");
+        $output = shell_exec("cd {$rootPath} && git reset --hard HEAD && git clean -fd && git pull origin main 2>&1");
 
         // 🖨️ 3. Tampilkan hasil log-nya
         $html = "<pre>🚀 Menjalankan Git Pull di Sinden...\n\n";
