@@ -331,21 +331,21 @@ $routes->group('dtsen/kemiskinan', ['filter' => ['authfilterdtks', 'menufilterdt
 
 // === PDTT 2025 ===
 $routes->group('pdtt', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
-	$routes->get('2025', 'Pdtt\Pdtt2025::index');
-	$routes->post('2025/datatable', 'Pdtt\Pdtt2025::datatable');
-	$routes->post('2025/import-excel', 'Pdtt\Pdtt2025::importExcel');
-	$routes->get('2025/export-excel', 'Pdtt\Pdtt2025::exportExcel');
-	$routes->get('2025/export-images', 'Pdtt\Pdtt2025::exportImages');
-	$routes->get('2025/download-images/(:num)', 'Pdtt\Pdtt2025::downloadImagesPerKpm/$1');
-	$routes->get('2025/statistik', 'Pdtt\Pdtt2025::statistik'); // Sesuaikan nama controllernya
+	$routes->get('2025', 'Dtsen\Verval\Pdtt2025::index');
+	$routes->post('2025/datatable', 'Dtsen\Verval\Pdtt2025::datatable');
+	$routes->post('2025/import-excel', 'Dtsen\Verval\Pdtt2025::importExcel');
+	$routes->get('2025/export-excel', 'Dtsen\Verval\Pdtt2025::exportExcel');
+	$routes->get('2025/export-images', 'Dtsen\Verval\Pdtt2025::exportImages');
+	$routes->get('2025/download-images/(:num)', 'Dtsen\Verval\Pdtt2025::downloadImagesPerKpm/$1');
+	$routes->get('2025/statistik', 'Dtsen\Verval\Pdtt2025::statistik'); // Sesuaikan nama controllernya
 
 	// API untuk Form Verifikasi
-	$routes->get('2025/get-detail/(:num)', 'Pdtt\Pdtt2025::getDetail/$1');
-	$routes->post('2025/save-verifikasi', 'Pdtt\Pdtt2025::saveVerifikasi');
+	$routes->get('2025/get-detail/(:num)', 'Dtsen\Verval\Pdtt2025::getDetail/$1');
+	$routes->post('2025/save-verifikasi', 'Dtsen\Verval\Pdtt2025::saveVerifikasi');
 
 	// 🚀 API Filter Bertingkat (Desa -> RW -> RT)
-	$routes->get('2025/get-rw', 'Pdtt\Pdtt2025::getFilterRw');
-	$routes->get('2025/get-rt/(:any)', 'Pdtt\Pdtt2025::getFilterRt/$1');
+	$routes->get('2025/get-rw', 'Dtsen\Verval\Pdtt2025::getFilterRw');
+	$routes->get('2025/get-rt/(:any)', 'Dtsen\Verval\Pdtt2025::getFilterRt/$1');
 });
 
 
