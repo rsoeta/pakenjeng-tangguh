@@ -23,8 +23,15 @@ class Webhook extends Controller
         // ROOTPATH akan otomatis menunjuk ke folder utama Sinden (di atas folder public)
         $rootPath = ROOTPATH;
 
-        // Jalankan perintah pindah ke folder Sinden, lalu eksekusi git pull
-        $output = shell_exec("cd {$rootPath} && git reset --hard HEAD && git clean -fd && git pull origin main 2>&1");
+        // 🚀 PERBAIKAN: Tambahkan -e writable/ dan -e public/ agar Tukang Sapu Git melewatkan folder tersebut
+        $output = shell_exec("cd {$rootPath} && git reset --hard HEAD && git clean -fd -e writable/ -e public/ && git pull origin main 2>&1");
+        // 🛡️ SCRIPT PENYEMBUH OTOMATIS
+        // Pastikan folder cache ada dan aksesnya terbuka (777) setelah Git Pull
+        $cachePath = WRITEPATH . 'cache';
+        if (!is_dir($cachePath)) {
+            mkdir($cachePath, 0777, true);
+        }
+        chmod($cachePath, 0777);
 
         // 🖨️ 3. Tampilkan hasil log-nya
         $html = "<pre>🚀 Menjalankan Git Pull di Sinden...\n\n";
