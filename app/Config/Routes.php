@@ -428,6 +428,29 @@ $routes->group('banpang', ['filter' => ['authfilterdtks', 'menufilterdtks']], st
 	// 🖨️ Ekspor Laporan
 	$routes->get('exportExcel', 'Dtsen\Banpang::exportExcel');
 	$routes->get('exportPdf', 'Dtsen\Banpang::exportPdf');
+
+	// ========================================================
+	// 📥 FITUR BARU: PERBAIKAN DATA BANPANG (REJECT BULOG)
+	// ========================================================
+
+	// Halaman Utama Admin (Daftar Data Reject)
+	$routes->get('reject', 'Dtsen\Banpang::indexReject');
+	$routes->post('reject/datatable', 'Dtsen\Banpang::datatableReject');
+
+	// Upload Data Awal (Excel & Manual)
+	$routes->post('reject/importExcel', 'Dtsen\Banpang::importExcelReject');
+	$routes->post('reject/tambahManual', 'Dtsen\Banpang::tambahManualReject');
+
+	// Antarmuka Kamera PENTRI & Proses Simpan + Trigger WA
+	$routes->get('reject/kamera/(:segment)', 'Dtsen\Banpang::kameraReject/$1');
+	$routes->post('reject/simpanDokumentasi', 'Dtsen\Banpang::simpanDokumentasiReject');
+
+	// Antarmuka Kamera PENTRI & Proses Simpan + Trigger WA
+	$routes->get('reject/kamera/(:segment)', 'Dtsen\Banpang::kameraReject/$1');
+	$routes->post('reject/simpanDokumentasi', 'Dtsen\Banpang::simpanDokumentasiReject');
+
+	// 🚀 PERBAIKAN 2: Rute Eksekusi Verifikasi Admin
+	$routes->post('reject/aksiVerifikasi', 'Dtsen\Banpang::aksiVerifikasiReject');
 });
 
 // Frontend article view

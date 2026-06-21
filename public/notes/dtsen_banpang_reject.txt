@@ -1,0 +1,53 @@
+CREATE TABLE `dtsen_banpang_reject` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  
+  -- ==========================================
+  -- 📦 KOLOM DATA BAWAAN BULOG (26 Kolom)
+  -- ==========================================
+  `nik` varchar(16) NOT NULL,
+  `no_kk` varchar(16) DEFAULT NULL,
+  `nama` varchar(150) NOT NULL,
+  `foto_ktp` varchar(255) DEFAULT NULL,
+  `foto_pbp` varchar(255) DEFAULT NULL,
+  `transporter_name` varchar(100) DEFAULT NULL,
+  `no_pbp` varchar(50) NOT NULL,
+  `alamat_pbp` text,
+  `lat_penyaluran` varchar(50) DEFAULT NULL,
+  `long_penyaluran` varchar(50) DEFAULT NULL,
+  `status_pbp` varchar(50) DEFAULT NULL,
+  `nik_pengganti` varchar(16) DEFAULT NULL,
+  `no_kk_pengganti` varchar(16) DEFAULT NULL,
+  `nama_pengganti` varchar(150) DEFAULT NULL,
+  `notes` text COMMENT 'Alasan penolakan / revisi dari BULOG',
+  `alamat_pengganti` text,
+  `verification_status` varchar(50) DEFAULT NULL,
+  `status_serah` varchar(50) DEFAULT NULL,
+  `no_bast` varchar(50) DEFAULT NULL,
+  `alokasi_bulan` varchar(20) DEFAULT NULL,
+  `alokasi_tahun` varchar(4) DEFAULT NULL,
+  `entitas` varchar(100) DEFAULT NULL,
+  `provinsi` varchar(100) DEFAULT NULL,
+  `kabupaten` varchar(100) DEFAULT NULL,
+  `kecamatan` varchar(100) DEFAULT NULL,
+  `kelurahan` varchar(100) DEFAULT NULL,
+
+  -- ==========================================
+  -- 📸 KOLOM TAMBAHAN OPERASIONAL SINDEN
+  -- ==========================================
+  `foto_ktp_sinden` varchar(255) DEFAULT NULL COMMENT 'Path file foto KTP jernih hasil PENTRI',
+  `foto_pbp_sinden` varchar(255) DEFAULT NULL COMMENT 'Path file Swafoto KPM+Beras hasil PENTRI',
+  `is_redocumented` tinyint(1) DEFAULT '0' COMMENT '0: Belum Difoto Ulang, 1: Sudah Difoto, 2: Verified',
+  
+  -- Sudah diubah ke INT untuk menampung session()->get('id')
+  `updated_by_pentri` int DEFAULT NULL COMMENT 'ID Petugas yang mendokumentasikan',
+  
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  
+  PRIMARY KEY (`id`),
+  
+  -- 🚀 INDEX UNTUK KECEPATAN PENCARIAN
+  KEY `idx_no_pbp` (`no_pbp`),
+  KEY `idx_nik` (`nik`),
+  KEY `idx_is_redocumented` (`is_redocumented`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
