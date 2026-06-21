@@ -101,4 +101,13 @@ class Filters extends BaseConfig
 			]
 		],
 	];
+
+	/**
+	 * List of filter aliases that should run on any
+	 * before or after URI patterns.
+	 *
+	 * Example:
+	 * 'post' => ['foo', 'bar']
+	 */
+	public array $methods = [];
 }

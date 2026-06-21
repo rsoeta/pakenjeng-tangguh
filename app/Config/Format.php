@@ -76,4 +76,15 @@ class Format extends BaseConfig
 	{
 		return Services::format()->getFormatter($mime);
 	}
+
+	/**
+	 * --------------------------------------------------------------------------
+	 * JSON Encode Options & Depth
+	 * --------------------------------------------------------------------------
+	 * Options to pass to json_encode()
+	 */
+	public int $jsonEncodeOptions = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+
+	// INI DIA YANG DICARI OLEH SISTEM:
+	public int $jsonEncodeDepth = 512;
 }

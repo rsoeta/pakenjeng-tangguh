@@ -4,13 +4,13 @@
 # ======================================================================
 
 # --- Force PHP 8.1 ---
-<IfModule mime_module>
-  RemoveHandler .php
-  RemoveHandler .php7
-  RemoveHandler .phtml
-  AddHandler application/x-httpd-alt-php81 .php .php7 .phtml
-  AddType application/x-httpd-alt-php81 .php
-</IfModule>
+# <IfModule mime_module>
+#   RemoveHandler .php
+#   RemoveHandler .php7
+#   RemoveHandler .phtml
+#   AddHandler application/x-httpd-alt-php81 .php .php7 .phtml
+#   AddType application/x-httpd-alt-php81 .php
+# </IfModule>
 
 # --- Disable directory listing ---
 Options -Indexes

@@ -501,4 +501,14 @@ class App extends BaseConfig
 	 * @var list<string>
 	 */
 	public array $allowedHostnames = [];
+
+	/**
+	 * --------------------------------------------------------------------------
+	 * Permitted URI Chars
+	 * --------------------------------------------------------------------------
+	 *
+	 * Typically this is a regular expression character class.
+	 * Examples: 'a-z 0-9~%.:_-'
+	 */
+	public string $permittedURIChars = 'a-z 0-9~%.:_\-';
 }
