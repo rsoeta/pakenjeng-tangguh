@@ -811,7 +811,7 @@ class Banpang extends BaseController
         $no     = $start + 1;
 
         foreach ($data as $row) {
-            // 🚀 PERBAIKAN 1: Logika Badge Status untuk 3 Kondisi (0, 1, dan 2)
+            // Logika Badge Status untuk 3 Kondisi (0, 1, dan 2)
             if ($row['is_redocumented'] == 2) {
                 $statusBadge = '<span class="badge bg-success px-2 py-1"><i class="fas fa-check-double mr-1"></i> Valid / Selesai</span>';
             } elseif ($row['is_redocumented'] == 1) {
@@ -826,8 +826,7 @@ class Banpang extends BaseController
                 ? "{$alamatPbp}<br><small class='text-muted font-weight-bold'><i class='fas fa-map-marker-alt mr-1'></i>RT {$row['rt']} / RW {$row['rw']}</small>"
                 : $alamatPbp;
 
-            // 🚀 PERBAIKAN 2: Jika status 1 (menunggu) ATAU 2 (terverifikasi), kunci ke tombol 'Lihat'
-            // Tambahkan juga parameter $row['is_redocumented'] di akhir fungsi onclick
+            // Jika status 1 (menunggu) ATAU 2 (terverifikasi), kunci ke tombol 'Lihat'
             if ($row['is_redocumented'] == 1 || $row['is_redocumented'] == 2) {
                 $btnAksi = '<button class="btn btn-sm btn-outline-success font-weight-bold" onclick="lihatFoto(' . $row['id'] . ', \'' . $row['foto_ktp_sinden'] . '\', \'' . $row['foto_pbp_sinden'] . '\', ' . $row['is_redocumented'] . ')" title="Lihat Hasil"><i class="fas fa-image mr-1"></i> Lihat</button>';
             } else {
@@ -836,10 +835,27 @@ class Banpang extends BaseController
                 $btnAksi   = '<a href="' . $urlKamera . '" class="btn btn-sm btn-primary shadow-sm font-weight-bold" title="Ambil Foto"><i class="fas fa-camera mr-1"></i> Foto</a>';
             }
 
+            // 🚀 PERBAIKAN: Masking + Fitur Hover + Tombol Salin
+            $nikAsli = trim($row['nik']);
+            $maskedNik = $nikAsli;
+            if (strlen($nikAsli) > 8) {
+                $sensorNik = substr($nikAsli, 0, 8) . str_repeat('*', strlen($nikAsli) - 8);
+                $maskedNik = '<span title="' . esc($nikAsli) . '" style="cursor: help; border-bottom: 1px dotted #888;">' . $sensorNik . '</span>' .
+                    ' <button class="btn btn-xs btn-light border-0 p-0 ml-1" onclick="copyToClipboard(\'' . $nikAsli . '\')" title="Salin NIK"><i class="fas fa-copy text-secondary"></i></button>';
+            }
+
+            $pbpAsli = trim($row['no_pbp']);
+            $maskedPbp = $pbpAsli;
+            if (strlen($pbpAsli) > 8) {
+                $sensorPbp = substr($pbpAsli, 0, 8) . str_repeat('*', strlen($pbpAsli) - 8);
+                $maskedPbp = '<span title="' . esc($pbpAsli) . '" style="cursor: help; border-bottom: 1px dotted #888;">' . $sensorPbp . '</span>' .
+                    ' <button class="btn btn-xs btn-light border-0 p-0 ml-1" onclick="copyToClipboard(\'' . $pbpAsli . '\')" title="Salin No. PBP"><i class="fas fa-copy text-secondary"></i></button>';
+            }
+
             $result[] = [
                 'no'           => $no++,
-                'no_pbp'       => $row['no_pbp'],
-                'nik'          => $row['nik'],
+                'no_pbp'       => $maskedPbp,
+                'nik'          => $maskedNik,
                 'nama'         => $row['nama'],
                 'wilayah'      => $wilayahText,
                 'status_badge' => $statusBadge,

@@ -224,6 +224,26 @@
         }, 'json');
     }
 
+    // 📋 FUNGSI COPY TO CLIPBOARD
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Gunakan Toast SweetAlert2 agar tidak menutupi layar
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
+            Toast.fire({
+                icon: 'success',
+                title: 'Berhasil disalin ke clipboard'
+            });
+        }, function(err) {
+            console.error('Gagal menyalin: ', err);
+        });
+    }
+
     // ========================================================
     // ⚙️ INISIALISASI DATATABLES DLL
     // ========================================================
