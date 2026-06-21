@@ -25,13 +25,24 @@ class Webhook extends Controller
 
         // 🚀 PERBAIKAN: Tambahkan -e writable/ dan -e public/ agar Tukang Sapu Git melewatkan folder tersebut
         $output = shell_exec("cd {$rootPath} && git reset --hard HEAD && git clean -fd -e writable/ -e public/ && git pull origin main 2>&1");
-        // 🛡️ SCRIPT PENYEMBUH OTOMATIS
-        // Pastikan folder cache ada dan aksesnya terbuka (777) setelah Git Pull
-        $cachePath = WRITEPATH . 'cache';
-        if (!is_dir($cachePath)) {
-            mkdir($cachePath, 0777, true);
+
+        // 🛡️ SCRIPT PENYEMBUH OTOMATIS SUPER
+        // WRITEPATH di CI4 sudah include trailing slash, pastikan semua folder vital aman!
+        $foldersToRescue = [
+            WRITEPATH . 'cache',
+            WRITEPATH . 'logs',
+            WRITEPATH . 'session',
+            WRITEPATH . 'uploads'
+        ];
+
+        foreach ($foldersToRescue as $folder) {
+            if (!is_dir($folder)) {
+                // Buat foldernya kembali jika gaib/terhapus
+                mkdir($folder, 0777, true);
+            }
+            // Paksa reset permission agar aplikasi bisa menulis data (mencegah error 500)
+            @chmod($folder, 0777);
         }
-        chmod($cachePath, 0777);
 
         // 🖨️ 3. Tampilkan hasil log-nya
         $html = "<pre>🚀 Menjalankan Git Pull di Sinden...\n\n";
