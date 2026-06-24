@@ -855,21 +855,31 @@ class Banpang extends BaseController
                 $btnAksi   = '<a href="' . $urlKamera . '" class="btn btn-sm btn-primary shadow-sm font-weight-bold" title="Ambil Foto"><i class="fas fa-camera mr-1"></i> Foto</a>';
             }
 
-            // 🚀 PERBAIKAN: Masking + Fitur Hover + Tombol Salin
+            // 🚀 PERBAIKAN: Masking Inline (Membuka Teks Saat Di-hover atau Diklik)
             $nikAsli = trim($row['nik']);
             $maskedNik = $nikAsli;
             if (strlen($nikAsli) > 8) {
                 $sensorNik = substr($nikAsli, 0, 8) . str_repeat('*', strlen($nikAsli) - 8);
-                $maskedNik = '<span title="' . esc($nikAsli) . '" style="cursor: help; border-bottom: 1px dotted #888;">' . $sensorNik . '</span>' .
-                    ' <button class="btn btn-xs btn-light border-0 p-0 ml-1" onclick="copyToClipboard(\'' . $nikAsli . '\')" title="Salin NIK"><i class="fas fa-copy text-secondary"></i></button>';
+                $maskedNik = '<span class="text-primary font-weight-bold" style="cursor: pointer; border-bottom: 1px dashed #007bff;" ' .
+                    'data-masked="' . $sensorNik . '" data-full="' . esc($nikAsli) . '" ' .
+                    'onmouseenter="this.innerText=this.getAttribute(\'data-full\')" ' .
+                    'onmouseleave="this.innerText=this.getAttribute(\'data-masked\')" ' .
+                    'onclick="this.innerText=this.getAttribute(\'data-full\')">' .
+                    $sensorNik . '</span>' .
+                    ' <button class="btn btn-xs btn-light border-0 p-0 ml-1" onclick="copyToClipboard(\'' . esc($nikAsli) . '\')" title="Salin NIK"><i class="fas fa-copy text-secondary"></i></button>';
             }
 
             $pbpAsli = trim($row['no_pbp']);
             $maskedPbp = $pbpAsli;
             if (strlen($pbpAsli) > 8) {
                 $sensorPbp = substr($pbpAsli, 0, 8) . str_repeat('*', strlen($pbpAsli) - 8);
-                $maskedPbp = '<span title="' . esc($pbpAsli) . '" style="cursor: help; border-bottom: 1px dotted #888;">' . $sensorPbp . '</span>' .
-                    ' <button class="btn btn-xs btn-light border-0 p-0 ml-1" onclick="copyToClipboard(\'' . $pbpAsli . '\')" title="Salin No. PBP"><i class="fas fa-copy text-secondary"></i></button>';
+                $maskedPbp = '<span class="text-primary font-weight-bold" style="cursor: pointer; border-bottom: 1px dashed #007bff;" ' .
+                    'data-masked="' . $sensorPbp . '" data-full="' . esc($pbpAsli) . '" ' .
+                    'onmouseenter="this.innerText=this.getAttribute(\'data-full\')" ' .
+                    'onmouseleave="this.innerText=this.getAttribute(\'data-masked\')" ' .
+                    'onclick="this.innerText=this.getAttribute(\'data-full\')">' .
+                    $sensorPbp . '</span>' .
+                    ' <button class="btn btn-xs btn-light border-0 p-0 ml-1" onclick="copyToClipboard(\'' . esc($pbpAsli) . '\')" title="Salin No. PBP"><i class="fas fa-copy text-secondary"></i></button>';
             }
 
             $result[] = [

@@ -350,6 +350,27 @@
         });
     }
 
+    // Fungsi salin ke clipboard dengan notifikasi SweetAlert2
+    function copyToClipboard(text) {
+        var tempInput = document.createElement("input");
+        tempInput.value = text;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Tersalin!',
+            text: text + ' telah disalin ke clipboard.',
+            timer: 1500,
+            showConfirmButton: false,
+            customClass: {
+                popup: 'swal2-sm' // Ukuran mini untuk toast/notifikasi
+            }
+        });
+    }
+
     // ========================================================
     // ⚙️ INISIALISASI DATATABLES DLL
     // ========================================================
