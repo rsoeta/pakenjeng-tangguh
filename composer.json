@@ -15,7 +15,8 @@
     },
      "audit": {
         "block-insecure": false
-    }
+    },
+    "platform-check": false
   },
   "scripts": {
     "post-update-cmd": [
