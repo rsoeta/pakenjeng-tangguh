@@ -582,24 +582,28 @@ class Auth extends BaseController
     {
         // $previousPage = previous_url();
         $data = [
-            'id' => $user['id'],
-            'nik' => $user['nik'],
-            'fullname' => $user['fullname'],
-            'email' => $user['email'],
-            'level' => $user['level'],
-            'nope' => $user['nope'],
-            'role_id' => $user['role_id'],
-            'status' => $user['status'],
-            'kode_desa' => $user['kode_desa'],
-            'kode_kec' => $user['kode_kec'],
-            'kode_kab' => $user['kode_kab'],
-            'kode_prov' => $user['kode_prov'],
-            'jabatan' => $user['level'],
-            'opr_sch' => $user['opr_sch'],
-            'user_image' => $user['user_image'],
+            'id'              => $user['id'],
+            'nik'             => $user['nik'],
+            'fullname'        => $user['fullname'],
+            'email'           => $user['email'],
+            'level'           => $user['level'],
+            'nope'            => $user['nope'],
+            'role_id'         => $user['role_id'],
+            'status'          => $user['status'],
+            'kode_desa'       => $user['kode_desa'] ?? '32.05.33.2003', // Opsional: Beri default jika null
+            'kode_kec'        => $user['kode_kec'] ?? '32.05.33',       // Opsional: Beri default jika null
+            'kode_kab'        => $user['kode_kab'] ?? '32.05',
+
+            // 🚀 INI BARIS YANG DIPERBAIKI:
+            // Jika kode_prov tidak ada di DB, otomatis gunakan '32' (Jawa Barat)
+            'kode_prov'       => $user['kode_prov'] ?? '32',
+
+            'jabatan'         => $user['level'],
+            'opr_sch'         => $user['opr_sch'],
+            'user_image'      => $user['user_image'],
             'user_lembaga_id' => $user['user_lembaga_id'],
-            'wilayah_tugas' => $user['wilayah_tugas'],
-            'logDtks' => true,
+            'wilayah_tugas'   => $user['wilayah_tugas'],
+            'logDtks'         => true,
             // 'previousPage' => $previousPage,
         ];
 
