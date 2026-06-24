@@ -185,7 +185,7 @@
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer bg-light">
+                <div class="modal-footer bg-light justify-content-between">
                     <button type="button" class="btn btn-secondary rounded-pill px-3" data-dismiss="modal">Batal</button>
                     <button type="button" class="btn btn-primary rounded-pill px-4" id="btnSimpanReject">
                         <i class="fas fa-save mr-1"></i> Simpan ke Daftar Reject
