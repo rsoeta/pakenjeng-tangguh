@@ -590,7 +590,7 @@ class Auth extends BaseController
             'nope'            => $user['nope'],
             'role_id'         => $user['role_id'],
             'status'          => $user['status'],
-            'kode_desa'       => $user['kode_desa'] ?? '32.05.33.2003', // Opsional: Beri default jika null
+            'kode_desa'       => $user['kode_desa'] ?? '32.05.33.2006', // Opsional: Beri default jika null
             'kode_kec'        => $user['kode_kec'] ?? '32.05.33',       // Opsional: Beri default jika null
             'kode_kab'        => $user['kode_kab'] ?? '32.05',
 
