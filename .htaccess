@@ -3,14 +3,11 @@
 # IdCloudHost / LiteSpeed / cPanel environment
 # ======================================================================
 
-# --- Force PHP 8.1 ---
-# <IfModule mime_module>
-#   RemoveHandler .php
-#   RemoveHandler .php7
-#   RemoveHandler .phtml
-#   AddHandler application/x-httpd-alt-php81 .php .php7 .phtml
-#   AddType application/x-httpd-alt-php81 .php
-# </IfModule>
+# php -- BEGIN cPanel-generated handler, do not edit
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php82 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit
 
 # --- Disable directory listing ---
 Options -Indexes
