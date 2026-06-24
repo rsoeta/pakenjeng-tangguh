@@ -1,15 +1,43 @@
+# ======================================================================
+
+# 🚀 CodeIgniter 4 - SINDEN Optimized (PHP 8.2 + LiteSpeed cPanel)
+
+# ======================================================================
+
+# --- 1. KUNCI MUTLAK PHP 8.2 UNTUK CPANEL ---
+
+# php -- BEGIN cPanel-generated handler, do not edit
+
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php82 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit
+
+# --- 2. KEAMANAN DASAR ---
+
+# Mencegah orang melihat isi folder jika tidak ada file index
+
+Options -Indexes
+
+# --- 3. REWRITE ENGINE (CODEIGNITER 4) ---
+
 <IfModule mod_rewrite.c>
+    Options +FollowSymlinks
     RewriteEngine On
-    # Ensure index.php is hidden (CI4 front controller)
+
+    # Sembunyikan index.php dan arahkan semua request ke CI4 Front Controller
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ index.php/$1 [L,NC,QSA]
+
+    # Pastikan Header Authorization terbaca (Sangat penting untuk API/Webhook)
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
 </IfModule>
 
-# Force PHP 8.1 handler (if host supports alt php handlers)
-<IfModule mime_module>
-    AddHandler application/x-httpd-alt-php81 .php .php7 .phtml
-</IfModule>
+# --- 4. OPTIMASI SERVER LITESPEED (IdCloudHost) ---
 
-# Security: disable directory listing
-Options -Indexes
+<IfModule litespeed>
+    RewriteRule .* - [E=noconntimeout:1]
+</IfModule>
