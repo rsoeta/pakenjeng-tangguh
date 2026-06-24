@@ -1051,8 +1051,11 @@ class Banpang extends BaseController
         // 🚀 Tambahkan a.no_bast di bagian select
         $builder = $db->table('dtsen_banpang a')
             ->select('a.id, a.no_pbp, a.no_bast, a.nik_kpm, a.nama_kpm, c.no_kk')
-            ->join('dtsen_art b', 'b.nik = a.nik_kpm', 'left')
-            ->join('dtsen_kk c', 'c.id_kk = b.id_kk', 'left');
+            // 🚀 PERBAIKAN: Abaikan ART dan KK yang sudah di-soft-delete
+            ->join('dtsen_art b', 'b.nik = a.nik_kpm AND b.deleted_at IS NULL', 'left')
+            ->join('dtsen_kk c', 'c.id_kk = b.id_kk AND c.deleted_at IS NULL', 'left')
+            // 🚀 KUNCI ANTI-GANDA: Pastikan hasil pencarian unik per KPM
+            ->groupBy('a.id');
 
         if (!empty($search)) {
             $builder->groupStart()
