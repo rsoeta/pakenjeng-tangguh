@@ -451,6 +451,10 @@ $routes->group('banpang', ['filter' => ['authfilterdtks', 'menufilterdtks']], st
 
 	// 🚀 PERBAIKAN 2: Rute Eksekusi Verifikasi Admin
 	$routes->post('reject/aksiVerifikasi', 'Dtsen\Banpang::aksiVerifikasiReject');
+
+	// 🚀 Tambahan rute baru:
+	$routes->get('searchKpmAjax', 'Dtsen\Banpang::searchKpmAjax');
+	$routes->post('simpanRejectManual', 'Dtsen\Banpang::simpanRejectManual');
 });
 
 // Frontend article view

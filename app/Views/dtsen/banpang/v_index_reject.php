@@ -15,7 +15,7 @@
                         <button class="btn btn-sm btn-success shadow-sm rounded-pill font-weight-bold" data-toggle="modal" data-target="#modalImport">
                             <i class="fas fa-file-excel mr-1"></i> Import Excel
                         </button>
-                        <button type="button" class="btn btn-primary btn-sm shadow-sm rounded-pill px-3" id="btnTambahKPM">
+                        <button type="button" class="btn btn-primary btn-sm shadow-sm rounded-pill px-3" id="btnTambahReject">
                             <i class="fas fa-plus-circle mr-1"></i> Tambah KPM
                         </button>
                     <?php endif; ?>
@@ -85,6 +85,112 @@
                         <button type="submit" class="btn btn-sm btn-success"><i class="fas fa-cloud-upload-alt mr-1"></i> Mulai Import</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalTambahReject" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-plus-circle mr-1"></i> Tambah KPM Reject (Manual)</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formTambahReject">
+                        <div class="form-group border-bottom pb-3">
+                            <label class="font-weight-bold">Cari KPM (dari data Scan SINDEN)</label>
+                            <select class="form-control" id="selectCariKpm" style="width: 100%;"></select>
+                            <small class="text-muted">Ketik No. PBP, NIK, atau Nama KPM untuk mencari otomatis.</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label>No. PBP</label>
+                                <input type="text" class="form-control" id="add_no_pbp" name="no_pbp" readonly required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Nama KPM</label>
+                                <input type="text" class="form-control" id="add_nama" name="nama" readonly required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label>No. KK</label>
+                                <input type="text" class="form-control" id="add_no_kk" name="no_kk" readonly required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>NIK</label>
+                                <input type="text" class="form-control" id="add_nik" name="nik" readonly required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="row mt-2">
+                                <!-- Form No. BAST (Otomatis dari DB) -->
+                                <div class="col-md-4 form-group">
+                                    <label>No. BAST</label>
+                                    <input type="text" class="form-control" id="add_no_bast" name="no_bast" readonly required>
+                                </div>
+
+                                <!-- Form Alokasi Bulan (Manual) -->
+                                <div class="col-md-12 form-group">
+                                    <label class="d-block font-weight-bold mb-2">Alokasi Bulan <span class="text-danger">*</span></label>
+                                    <div class="d-flex flex-wrap">
+                                        <?php
+                                        $bulan_list = [
+                                            1 => 'Januari',
+                                            2 => 'Februari',
+                                            3 => 'Maret',
+                                            4 => 'April',
+                                            5 => 'Mei',
+                                            6 => 'Juni',
+                                            7 => 'Juli',
+                                            8 => 'Agustus',
+                                            9 => 'September',
+                                            10 => 'Oktober',
+                                            11 => 'November',
+                                            12 => 'Desember'
+                                        ];
+                                        foreach ($bulan_list as $val => $nama) :
+                                        ?>
+                                            <div class="custom-control custom-radio custom-control-inline mb-2 mr-3">
+                                                <input type="radio" id="bulan<?= $val ?>" name="alokasi_bulan" class="custom-control-input" value="<?= $val ?>" required>
+                                                <label class="custom-control-label cursor-pointer" style="cursor: pointer;" for="bulan<?= $val ?>">
+                                                    <?= $nama ?>
+                                                </label>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+
+                                <!-- Form Alokasi Tahun (Manual) -->
+                                <div class="col-md-4 form-group">
+                                    <label>Alokasi Tahun <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="add_alokasi_tahun" name="alokasi_tahun" value="<?= date('Y') ?>" required>
+                                </div>
+                            </div>
+                            <div class="col-md-8 form-group">
+                                <label>Alamat (Opsional)</label>
+                                <input type="text" class="form-control" id="add_alamat" name="alamat_pbp" placeholder="Nama Jalan / Kp.">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="font-weight-bold text-danger">Catatan Reject / Alasan <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="add_catatan" name="catatan" rows="3" placeholder="Contoh: Foto kurang jelas, KTP tidak terbaca..." required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary rounded-pill px-3" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4" id="btnSimpanReject">
+                        <i class="fas fa-save mr-1"></i> Simpan ke Daftar Reject
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -385,6 +491,106 @@
                 }
             });
         });
+
+        // 1. Tampilkan Modal Saat Tombol Diklik
+        $('#btnTambahReject').click(function() {
+            $('#formTambahReject')[0].reset();
+            $('#selectCariKpm').empty().trigger('change'); // Kosongkan pilihan
+            $('#modalTambahReject').modal('show');
+        });
+
+        // 2. Inisialisasi Select2 untuk Pencarian AJAX
+        if ($.fn.select2) {
+            $('#selectCariKpm').select2({
+                theme: 'bootstrap4',
+                dropdownParent: $('#modalTambahReject'),
+                placeholder: 'Pilih / Ketik KPM...',
+                ajax: {
+                    url: '<?= base_url('banpang/searchKpmAjax') ?>',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            q: params.term
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+            // Otomatis isi kolom saat KPM dipilih
+            $('#selectCariKpm').on('select2:select', function(e) {
+                var data = e.params.data;
+                $('#add_no_pbp').val(data.no_pbp);
+                $('#add_no_bast').val(data.no_bast); // 🚀 Otomatis lempar data No. BAST
+                $('#add_no_kk').val(data.no_kk);
+                $('#add_nik').val(data.nik);
+                $('#add_nama').val(data.nama);
+            });
+        }
+
+        // 3. Aksi Simpan menggunakan AJAX + SweetAlert2
+        $('#btnSimpanReject').click(function() {
+            let no_pbp = $('#add_no_pbp').val();
+            let catatan = $('#add_catatan').val();
+
+            if (!no_pbp || !catatan) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Form Belum Lengkap!',
+                    text: 'Pastikan KPM sudah dipilih dan Catatan Reject wajib diisi.',
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
+
+            // Ubah tombol jadi loading
+            let btn = $(this);
+            let originalText = btn.html();
+            btn.html('<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...').prop('disabled', true);
+
+            $.ajax({
+                url: '<?= base_url('banpang/simpanRejectManual') ?>',
+                type: 'POST',
+                data: $('#formTambahReject').serialize(),
+                dataType: 'json',
+                success: function(res) {
+                    btn.html(originalText).prop('disabled', false);
+                    if (res.status === 'success') {
+                        $('#modalTambahReject').modal('hide');
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: res.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        // Reload DataTables (sesuaikan dengan nama variabel datatable Kang Rian)
+                        $('#tableReject').DataTable().ajax.reload(null, false);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: res.message
+                        });
+                    }
+                },
+                error: function() {
+                    btn.html(originalText).prop('disabled', false);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Server Error',
+                        text: 'Gagal menghubungi server.'
+                    });
+                }
+            });
+        });
+
     });
 </script>
 <?= $this->endSection() ?>

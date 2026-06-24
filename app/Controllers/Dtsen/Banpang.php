@@ -1011,4 +1011,91 @@ class Banpang extends BaseController
             log_message('error', "[WA Pentri Banpang] Gagal kirim ke {$nomorWA}: " . $e->getMessage());
         }
     }
+
+    // Fungsi 1: Pencarian AJAX
+    public function searchKpmAjax()
+    {
+        $search = $this->request->getGet('q');
+        $db = \Config\Database::connect();
+
+        // 🚀 Tambahkan a.no_bast di bagian select
+        $builder = $db->table('dtsen_banpang a')
+            ->select('a.id, a.no_pbp, a.no_bast, a.nik_kpm, a.nama_kpm, c.no_kk')
+            ->join('dtsen_art b', 'b.nik = a.nik_kpm', 'left')
+            ->join('dtsen_kk c', 'c.id_kk = b.id_kk', 'left');
+
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('a.no_pbp', $search)
+                ->orLike('a.nik_kpm', $search)
+                ->orLike('a.nama_kpm', $search)
+                ->groupEnd();
+        }
+
+        $query = $builder->limit(10)->get()->getResultArray();
+        $data = [];
+
+        foreach ($query as $row) {
+            $no_kk_aman = !empty($row['no_kk']) ? $row['no_kk'] : '-';
+
+            $data[] = [
+                'id'      => $row['id'],
+                'text'    => $row['no_pbp'] . ' - ' . $row['nama_kpm'],
+                'no_pbp'  => $row['no_pbp'],
+                'no_bast' => $row['no_bast'], // 🚀 Kirim no_bast ke form
+                'nik'     => $row['nik_kpm'],
+                'nama'    => $row['nama_kpm'],
+                'no_kk'   => $no_kk_aman
+            ];
+        }
+
+        return $this->response->setJSON(['results' => $data]);
+    }
+
+    // Fungsi 2: Menyimpan data manual ke tabel Reject
+    public function simpanRejectManual()
+    {
+        $rejectModel = new \App\Models\Dtsen\BanpangRejectModel();
+
+        // Tangkap data dari form
+        $no_pbp        = $this->request->getPost('no_pbp');
+        $no_bast       = $this->request->getPost('no_bast');
+        $no_kk         = $this->request->getPost('no_kk');
+        $nik           = $this->request->getPost('nik');
+        $nama          = $this->request->getPost('nama');
+        $catatan       = $this->request->getPost('catatan');
+        $alokasi_bulan = $this->request->getPost('alokasi_bulan');
+        $alokasi_tahun = $this->request->getPost('alokasi_tahun');
+
+        $cekData = $rejectModel->where('no_pbp', $no_pbp)->first();
+        if ($cekData) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'No. PBP ini sudah ada di dalam daftar Reject.'
+            ]);
+        }
+
+        $rejectModel->insert([
+            'no_pbp'          => $no_pbp,
+            'no_bast'         => $no_bast, // 🚀 Masukkan No. BAST
+            'no_kk'           => $no_kk,
+            'nik'             => $nik,
+            'nama'            => $nama,
+            'alamat_pbp'      => $this->request->getPost('alamat_pbp') ?: '-',
+            'alokasi_bulan'   => $alokasi_bulan, // 🚀 Masukkan Bulan
+            'alokasi_tahun'   => $alokasi_tahun, // 🚀 Masukkan Tahun
+            // 🚀 Ambil wilayah otomatis dari Session Admin
+            'provinsi'        => session()->get('kode_prov'),
+            'kabupaten'       => session()->get('kode_kab'),
+            'kecamatan'       => session()->get('kode_kec'),
+            'kelurahan'       => session()->get('kode_desa'),
+            'catatan'         => $catatan,
+            'is_redocumented' => 0
+        ]);
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Data KPM berhasil dimasukkan ke daftar Reject.'
+        ]);
+    }
 }
