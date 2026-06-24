@@ -41,3 +41,17 @@ Options -Indexes
 <IfModule litespeed>
     RewriteRule .* - [E=noconntimeout:1]
 </IfModule>
+
+# --- 5. PAKSA LIMIT UPLOAD PHP UNTUK FOTO HP (50MB) ---
+
+<IfModule lsapi_module>
+   php_value max_execution_time 300
+   php_value memory_limit 512M
+   php_value upload_max_filesize 50M
+   php_value post_max_size 50M
+</IfModule>
+
+<IfModule mime_module>
+   php_value upload_max_filesize 50M
+   php_value post_max_size 50M
+</IfModule>

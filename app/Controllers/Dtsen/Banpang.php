@@ -513,6 +513,24 @@ class Banpang extends BaseController
             ]);
         }
 
+        // --- 🚀 RADAR PELACAK ERROR UPLOAD ---
+        $fileKtpCheck = $this->request->getFile('foto_ktp_sinden');
+        $filePbpCheck = $this->request->getFile('foto_pbp_sinden');
+
+        if ($fileKtpCheck && !$fileKtpCheck->isValid()) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Upload KTP Ditolak Server: ' . $fileKtpCheck->getErrorString()
+            ]);
+        }
+        if ($filePbpCheck && !$filePbpCheck->isValid()) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Upload Swafoto Ditolak Server: ' . $filePbpCheck->getErrorString()
+            ]);
+        }
+        // --- AKHIR RADAR ---
+
         // 2. Validasi Berkas Unggahan (Foto KTP & Foto PBP Swafoto)
         $validationRule = [
             'foto_ktp_sinden' => [
