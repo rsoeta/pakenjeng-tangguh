@@ -517,11 +517,13 @@ class Banpang extends BaseController
         $validationRule = [
             'foto_ktp_sinden' => [
                 'label' => 'Foto KTP',
-                'rules' => 'uploaded[foto_ktp_sinden]|is_image[foto_ktp_sinden]|mime_in[foto_ktp_sinden,image/jpg,image/jpeg,image/png]'
+                // 🚀 PERBAIKAN: Hapus is_image, tambahkan webp & heic, naikkan limit jadi 15MB
+                'rules' => 'uploaded[foto_ktp_sinden]|ext_in[foto_ktp_sinden,jpg,jpeg,png,webp,heic]|mime_in[foto_ktp_sinden,image/jpg,image/jpeg,image/png,image/webp,image/heic,application/octet-stream]|max_size[foto_ktp_sinden,15360]'
             ],
             'foto_pbp_sinden' => [
                 'label' => 'Foto Swafoto KPM',
-                'rules' => 'uploaded[foto_pbp_sinden]|is_image[foto_pbp_sinden]|mime_in[foto_pbp_sinden,image/jpg,image/jpeg,image/png]'
+                // 🚀 PERBAIKAN: Hapus is_image, tambahkan webp & heic, naikkan limit jadi 15MB
+                'rules' => 'uploaded[foto_pbp_sinden]|ext_in[foto_pbp_sinden,jpg,jpeg,png,webp,heic]|mime_in[foto_pbp_sinden,image/jpg,image/jpeg,image/png,image/webp,image/heic,application/octet-stream]|max_size[foto_pbp_sinden,15360]'
             ]
         ];
 
