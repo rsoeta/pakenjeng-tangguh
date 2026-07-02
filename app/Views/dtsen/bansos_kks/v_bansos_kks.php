@@ -95,11 +95,11 @@
                                 <i class="fas fa-filter mr-1"></i> Filter
                             </button>
 
-                            <button id="btn_export_excel" class="btn btn-sm btn-success rounded-pill px-4 shadow-sm">
-                                <i class="fas fa-file-excel mr-1"></i> Export
-                            </button>
-
                             <?php if (session()->get('role_id') < 4): ?>
+                                <button id="btn_export_excel" class="btn btn-sm btn-success rounded-pill px-4 shadow-sm">
+                                    <i class="fas fa-file-excel mr-1"></i> Export
+                                </button>
+
                                 <button type="button" class="btn btn-primary btn-sm shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalImportTugas">
                                     <i class="fas fa-upload mr-1"></i> Impor (SIKS-NG)
                                 </button>
