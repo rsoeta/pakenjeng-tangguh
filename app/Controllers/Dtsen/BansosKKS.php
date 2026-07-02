@@ -43,6 +43,7 @@ class BansosKKS extends BaseController
         $filterRt = $this->request->getPost('filter_rt');
         $filterTahap = $this->request->getPost('filter_tahap');
         $filterLocked = $this->request->getPost('filter_locked');
+        $filterJenis = $this->request->getPost('filter_jenis');
 
         // =======================================================
         // 🚀 PERBAIKAN QUERY: Kembalikan JOIN demi Keamanan Trait Wilayah
@@ -84,6 +85,16 @@ class BansosKKS extends BaseController
         // 🚀 TERAPKAN FILTER KUNCI JIKA DIPILIH
         if ($filterLocked !== '' && $filterLocked !== null) {
             $builder->where('b.is_locked', (int)$filterLocked);
+        }
+        // 🚀 Terapkan Filter Jenis Bansos (Logika Inklusi MIX)
+        if (!empty($filterJenis)) {
+            if ($filterJenis === 'PKH') {
+                $builder->whereIn('b.jenis_bansos', ['PKH', 'PKH + SEMBAKO']);
+            } elseif ($filterJenis === 'SEMBAKO') {
+                $builder->whereIn('b.jenis_bansos', ['SEMBAKO', 'PKH + SEMBAKO']);
+            } else {
+                $builder->where('b.jenis_bansos', $filterJenis);
+            }
         }
 
         // Kunci Data Unik agar tidak duplikat dan Urutkan yang terbaru paling atas
@@ -222,190 +233,6 @@ class BansosKKS extends BaseController
 
         return $this->response->setJSON(['data' => $data]);
     }
-
-    // public function datatable()
-    // {
-    //     $user = $this->authModel->getUserId();
-    //     $roleId = session()->get('role_id') ?? 4;
-    //     $kodeDesa = session()->get('kode_desa') ?? ($user['kode_desa'] ?? '');
-
-    //     // 🚀 TANGKAP REQUEST FILTER DARI VIEW
-    //     $filterRw = $this->request->getPost('filter_rw');
-    //     $filterRt = $this->request->getPost('filter_rt');
-    //     $filterTahap = $this->request->getPost('filter_tahap');
-    //     $filterLocked = $this->request->getPost('filter_locked');
-
-    //     $builder = $this->db->table('dtsen_bansos_kks b')
-    //         ->select('b.*, m.alamat, m.rt, m.rw')
-    //         ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
-    //         ->join('dtsen_art a', 'a.nik = b.nik_kpm', 'left')
-    //         ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left')
-    //         ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left');
-
-    //     // =======================================================
-    //     // 🔐 TERAPKAN TRAIT WILAYAH FILTER
-    //     // =======================================================
-    //     $filterData = [
-    //         'kode_desa'     => $kodeDesa,
-    //         'wilayah_tugas' => trim($user['wilayah_tugas'] ?? '')
-    //     ];
-
-    //     // 💥 Boom! Gunakan mesin Trait untuk memproses pola wilayah_tugas yang rumit
-    //     $this->applyWilayahFilter($builder, $filterData, $roleId);
-
-    //     // ==========================================
-    //     // 🔍 FILTER DINAMIS DARI FRONTEND (Manual)
-    //     // ==========================================
-    //     if (!empty($filterRw)) {
-    //         $builder->where('r.rw', str_pad($filterRw, 3, '0', STR_PAD_LEFT));
-    //     }
-    //     if (!empty($filterRt)) {
-    //         $builder->where('r.rt', str_pad($filterRt, 3, '0', STR_PAD_LEFT));
-    //     }
-    //     if (!empty($filterTahap)) {
-    //         $builder->where('b.tahap_salur', $filterTahap);
-    //     }
-    //     // 🚀 TERAPKAN FILTER KUNCI JIKA DIPILIH
-    //     if ($filterLocked !== '' && $filterLocked !== null) {
-    //         $builder->where('b.is_locked', (int)$filterLocked);
-    //     }
-
-    //     // Kunci Data Unik agar tidak duplikat dan Urutkan yang terbaru paling atas
-    //     $builder->groupBy('b.id')->orderBy('b.updated_at', 'ASC');
-
-    //     $query = $builder->get()->getResultArray();
-    //     $data = [];
-    //     $no = 1;
-
-    //     // --- 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF + TOMBOL SALIN ---
-    //     $maskNumber = function ($number, $type) {
-    //         $number = trim($number ?? '');
-    //         if (empty($number) || $number === '-' || $number === 'NOKKS') return esc($number);
-
-    //         $full = esc($number);
-    //         $len = strlen($full);
-
-    //         // Tentukan Class dan Title Tombol berdasarkan jenis data
-    //         $btnClass = ($type === 'nik') ? 'btnCopyNik' : 'btnCopyNoKK';
-    //         $btnTitle = ($type === 'nik') ? 'Salin NIK' : 'Salin No KK';
-
-    //         if ($len <= 8) {
-    //             $masked = $full;
-    //             $hoverEffect = '';
-    //         } else {
-    //             $masked = substr($full, 0, 8) . str_repeat('*', $len - 8);
-    //             $hoverEffect = ' onmouseenter="this.innerText=\'' . $full . '\'" onmouseleave="this.innerText=\'' . $masked . '\'" ontouchstart="this.innerText=\'' . $full . '\'" ontouchend="this.innerText=\'' . $masked . '\'" title="Tahan/Arahkan kursor untuk melihat utuh" ';
-    //         }
-
-    //         return '
-    //         <div class="d-inline-flex align-items-center" style="gap: 5px;">
-    //             <span class="fw-bold text-primary" style="cursor:pointer;"' . $hoverEffect . '>' . $masked . '</span>
-    //             <button type="button" class="btn btn-outline-secondary btn-xs ' . $btnClass . ' py-0 px-1" data-value="' . $full . '" title="' . $btnTitle . '">
-    //                 <i class="fas fa-copy"></i>
-    //             </button>
-    //         </div>';
-    //     };
-
-    //     foreach ($query as $row) {
-    //         // 🚀 1. DETEKSI STATUS KUNCI & KELENGKAPAN
-    //         $isLocked = (int)($row['is_locked'] ?? 0);
-    //         $statusKelengkapan = (int)($row['status_kelengkapan'] ?? 0);
-
-    //         // 🚀 PERBAIKAN LOGIKA: Lindungi data lama. 
-    //         // Jika di database statusnya 0 tapi ternyata sudah ada status salur/fotonya, paksa anggap lengkap (1)
-    //         if (!empty($row['status_salur']) || !empty($row['foto_kpm_kks'])) {
-    //             $statusKelengkapan = 1;
-    //         }
-
-    //         // 🚀 2. LOGIKA TAMPILAN DATA BERDASARKAN KELENGKAPAN
-    //         if ($statusKelengkapan == 0) {
-    //             // JIKA MASIH DRAFT (PR DARI ADMIN BENERAN KOSONG)
-    //             $fotoPath = base_url('assets/img/no-image.svg');
-
-    //             // 🚀 PERBAIKAN: Tampilkan nominal jika Admin sudah mengisinya (lebih dari 0)
-    //             $nominal = ($row['nominal_cair'] > 0)
-    //                 ? 'Rp ' . number_format($row['nominal_cair'], 0, ',', '.')
-    //                 : '<span class="text-muted"><i class="fas fa-minus"></i></span>';
-
-    //             $badgeStatus = '<span class="badge bg-warning text-dark p-2 mr-1 shadow-sm"><i class="fas fa-clock"></i> Draft/Menunggu Foto</span>';
-    //         } else {
-    //             // JIKA SUDAH LENGKAP (DIDOKUMENTASIKAN PENTRI ATAU DATA LAMA)
-    //             $fotoPath = !empty($row['foto_kpm_kks']) ? base_url('uploads/bansos/' . $row['foto_kpm_kks']) : base_url('assets/img/no-image.svg');
-    //             $nominal = 'Rp ' . number_format($row['nominal_cair'], 0, ',', '.');
-
-    //             $status_cek = strtolower(trim($row['status_salur']));
-    //             $badgeStatus = ($status_cek == 'sukses salur')
-    //                 ? '<span class="badge bg-success p-2 mr-1 shadow-sm"><i class="fas fa-check-circle"></i> Sukses Salur</span>'
-    //                 : '<span class="badge bg-danger p-2 mr-1 shadow-sm"><i class="fas fa-times-circle"></i> ' . esc($row['status_salur']) . '</span>';
-    //         }
-
-    //         $colFoto = '<a href="' . $fotoPath . '" data-lightbox="gallery-kpm" data-title="Foto KPM: ' . esc($row['nama_kpm']) . '"><img src="' . $fotoPath . '" class="rounded shadow-sm" style="width: 70px; height: 90px; object-fit: cover; border: 2px solid #fff; cursor: pointer;" title="Klik untuk memperbesar"></a>';
-
-    //         $nikMasked = $maskNumber($row['nik_kpm'], 'nik');
-    //         $kksMasked = $maskNumber($row['nomor_kks'], 'nokk');
-
-    //         // 🚀 3. INDIKATOR GEMBOK VISUAL
-    //         $badgeLock = $isLocked ? '<span class="badge bg-danger p-2 ml-1 shadow-sm" title="Data Telah Diverifikasi & Dikunci"><i class="fas fa-lock"></i></span>' : '';
-
-    //         $colDetail = '
-    //         <div class="row align-items-center">
-    //             <span style="display: none;">' . esc($row['nik_kpm']) . ' ' . esc($row['nomor_kks']) . '</span>
-
-    //             <div class="col-md-6 mb-2 mb-md-0">
-    //                 <span class="fw-bold text-dark d-block" style="font-size:1.1rem;">' . esc($row['nama_kpm']) . '</span>
-    //                 <div class="text-muted small mt-1 d-flex align-items-center"><i class="fas fa-id-card mr-2"></i> ' . $nikMasked . '</div>
-    //             </div>
-    //             <div class="col-md-6 d-none d-md-block text-md-right border-left">
-    //                 <div class="mb-1">
-    //                     <span class="badge bg-primary p-2 mr-1 shadow-sm">' . esc($row['jenis_bansos']) . '</span>
-    //                     ' . $badgeStatus . '
-    //                     <span class="badge bg-success p-2 shadow-sm">' . $nominal . '</span>
-    //                     ' . $badgeLock . ' 
-    //                 </div>
-    //                 <div class="small text-muted mt-1 d-flex align-items-center justify-content-md-end">
-    //                      <i class="fas fa-credit-card mr-2"></i> ' . $kksMasked . '
-    //                 </div>
-    //             </div>
-    //             <div class="col-12 mt-1">
-    //                 <small class="text-muted"><i class="fas fa-map-marker-alt text-danger mr-1"></i> ' . esc($row['alamat'] ?? '-') . ' RT' . ($row['rt'] ?? '00') . '/RW' . ($row['rw'] ?? '00') . '</small>
-    //             </div>
-    //         </div>';
-
-    //         // ==========================================
-    //         // 🚀 4. LOGIKA TOMBOL AKSI BERDASARKAN ROLE & KELENGKAPAN
-    //         // ==========================================
-    //         $btnActionHTML = '';
-
-    //         if ($roleId <= 3) {
-    //             // === EKSKLUSIF ADMIN (ROLE <= 3) ===
-    //             $btnLock = $isLocked
-    //                 ? '<button class="btn btn-sm btn-danger btn-toggle-lock shadow-sm" data-id="' . $row['id'] . '" data-status="1" title="Buka Kunci"><i class="fas fa-lock"></i></button>'
-    //                 : '<button class="btn btn-sm btn-outline-secondary btn-toggle-lock" data-id="' . $row['id'] . '" data-status="0" title="Kunci Data"><i class="fas fa-unlock"></i></button>';
-
-    //             // Admin bisa edit apa saja (tambahkan atribut data-kelengkapan agar JS tahu ini mode apa)
-    //             $btnEdit = '<button class="btn btn-sm btn-outline-warning btn-edit shadow-sm" data-id="' . $row['id'] . '" data-kelengkapan="' . $statusKelengkapan . '" title="Edit Data"><i class="fas fa-edit"></i></button>';
-    //             $btnDelete = '<button class="btn btn-sm btn-outline-danger btn-delete shadow-sm" data-id="' . $row['id'] . '" title="Hapus"><i class="fas fa-trash-alt"></i></button>';
-
-    //             $btnActionHTML = $btnLock . $btnEdit . $btnDelete;
-    //         } else {
-    //             // === EKSKLUSIF PENTRI (ROLE >= 4) ===
-    //             if ($statusKelengkapan == 0) {
-    //                 // Jika data masih Draft -> Tombol LENGKAPI (Kamera)
-    //                 $btnActionHTML = '<button class="btn btn-sm btn-primary btn-edit shadow-sm px-3" data-id="' . $row['id'] . '" data-kelengkapan="0" title="Lengkapi Dokumentasi Lapangan"><i class="fas fa-camera mr-1"></i> Lengkapi</button>';
-    //             } else {
-    //                 // Jika sudah lengkap -> Tombol READ-ONLY (Mata)
-    //                 $btnActionHTML = '<button class="btn btn-sm btn-info btn-edit shadow-sm px-3" data-id="' . $row['id'] . '" data-kelengkapan="1" title="Lihat Detail (Read-Only)"><i class="fas fa-eye mr-1"></i> Lihat</button>';
-    //             }
-    //         }
-
-    //         // Gabungkan semua tombol ke dalam wrapper flex
-    //         $btnAction = '<div class="d-flex flex-row justify-content-center align-items-center" style="gap: 5px;">' . $btnActionHTML . '</div>';
-
-    //         $data[] = [$no++, $colFoto, $colDetail, $btnAction];
-    //     }
-
-    //     return $this->response->setJSON(['data' => $data]);
-    // }
 
     // ========================================================
     // 🔍 PENCARIAN AJAX (Validasi Silang & Filter Wilayah Tugas)
@@ -1062,5 +889,168 @@ class BansosKKS extends BaseController
         } catch (\Exception $e) {
             return redirect()->to('/bansos-kks')->with('error', 'Gagal memproses file: ' . $e->getMessage());
         }
+    }
+
+    // ========================================================
+    // 🟢 EXPORT EXCEL MENGIKUTI FILTER (FORMAT PREMIUM BANSOS)
+    // ========================================================
+    public function exportExcel()
+    {
+        // 1. Tangkap Request GET dari URL
+        $filterRw = $this->request->getGet('rw');
+        $filterRt = $this->request->getGet('rt');
+        $filterTahap = $this->request->getGet('tahap');
+        $filterLocked = $this->request->getGet('locked');
+        $filterJenis = $this->request->getGet('jenis');
+
+        $user = $this->authModel->getUserId();
+        $roleId = session()->get('role_id') ?? 4;
+        $kodeDesa = session()->get('kode_desa') ?? ($user['kode_desa'] ?? '');
+
+        // 2. Build Query (Persis seperti Datatable agar akurat)
+        $builder = $this->db->table('dtsen_bansos_kks b')
+            ->select('b.*, m.alamat, m.rt, m.rw, k.no_kk, k.kepala_keluarga, a.tempat_lahir, a.tanggal_lahir, a.jenis_kelamin')
+            ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
+            ->join('dtsen_art a', 'a.nik = b.nik_kpm AND a.deleted_at IS NULL', 'left')
+            ->join('dtsen_kk k', 'k.id_kk = a.id_kk AND k.deleted_at IS NULL', 'left')
+            ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left'); // Alias 'rt' untuk Trait
+
+        // 3. 🔐 Filter Wilayah (Trait)
+        $filterData = [
+            'kode_desa'     => $kodeDesa,
+            'wilayah_tugas' => trim($user['wilayah_tugas'] ?? '')
+        ];
+        $this->applyWilayahFilter($builder, $filterData, $roleId);
+
+        // 4. Terapkan Dinamis Filter
+        if (!empty($filterRw)) $builder->where('m.rw', str_pad($filterRw, 3, '0', STR_PAD_LEFT));
+        if (!empty($filterRt)) $builder->where('m.rt', str_pad($filterRt, 3, '0', STR_PAD_LEFT));
+        if (!empty($filterTahap)) $builder->where('b.tahap_salur', $filterTahap);
+        if ($filterLocked !== '' && $filterLocked !== null) $builder->where('b.is_locked', (int)$filterLocked);
+        // 🚀 Terapkan Filter Jenis Bansos (Logika Inklusi MIX)
+        if (!empty($filterJenis)) {
+            if ($filterJenis === 'PKH') {
+                $builder->whereIn('b.jenis_bansos', ['PKH', 'PKH + SEMBAKO']);
+            } elseif ($filterJenis === 'SEMBAKO') {
+                $builder->whereIn('b.jenis_bansos', ['SEMBAKO', 'PKH + SEMBAKO']);
+            } else {
+                $builder->where('b.jenis_bansos', $filterJenis);
+            }
+        }
+
+        // Eksekusi Query
+        $builder->groupBy('b.id')->orderBy('m.rw', 'ASC')->orderBy('m.rt', 'ASC')->orderBy('b.nama_kpm', 'ASC');
+        $query = $builder->get()->getResultArray();
+
+        // ==========================================
+        // 🛠️ MULAI PROSES SPREADSHEET
+        // ==========================================
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // 🚀 FITUR BARU: NAMA SHEET MENGIKUTI FILTER JENIS BANSOS
+        $namaSheet = !empty($filterJenis) ? $filterJenis : 'Semua Bansos';
+
+        // Amankan nama sheet dari karakter ilegal Excel dan batasi maksimal 31 karakter
+        $namaSheetAman = substr(str_replace(['*', ':', '/', '\\', '?', '[', ']'], '', $namaSheet), 0, 31);
+        $sheet->setTitle($namaSheetAman);
+
+        // --- MERGE & SETUP HEADER SEPERTI GAMBAR ---
+        $sheet->setCellValue('A1', 'NO');
+        // ... (lanjutan kode merge dan setCellValue di bawahnya tetap sama)
+        $sheet->mergeCells('A1:A2');
+
+        $sheet->setCellValue('B1', 'NO KK');
+        $sheet->mergeCells('B1:B2');
+
+        $sheet->setCellValue('C1', 'KEPALA KELUARGA');
+        $sheet->mergeCells('C1:C2');
+
+        $sheet->setCellValue('D1', 'IDENTITAS DI KARTU PESERTA');
+        $sheet->mergeCells('D1:I1'); // Membentang dari D ke I
+
+        // Baris ke-2 di bawah "IDENTITAS DI KARTU PESERTA"
+        $sheet->setCellValue('D2', 'NIK');
+        $sheet->setCellValue('E2', 'NAMA');
+        $sheet->setCellValue('F2', 'TEMPAT LAHIR');
+        $sheet->setCellValue('G2', 'TANGGAL LAHIR');
+        $sheet->setCellValue('H2', 'JENIS KELAMIN');
+        $sheet->setCellValue('I2', 'ALAMAT');
+
+        // --- STYLING HEADER ---
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['argb' => 'F2F2F2'], // Warna abu-abu muda elegan
+            ],
+        ];
+        $sheet->getStyle('A1:I2')->applyFromArray($headerStyle);
+
+        // --- MENGISI DATA ---
+        $rowNum = 3;
+        $no = 1;
+        foreach ($query as $row) {
+            // Merakit alamat lengkap
+            $alamat = $row['alamat'] ?? '-';
+            if (!empty($row['rt']) && !empty($row['rw'])) {
+                $alamat .= ' RT. ' . ltrim($row['rt'], '0') . ' / RW. ' . ltrim($row['rw'], '0');
+            }
+
+            // Merakit Tanggal Lahir
+            $tglLahir = !empty($row['tanggal_lahir']) ? date('d-m-Y', strtotime($row['tanggal_lahir'])) : '-';
+
+            $sheet->setCellValue('A' . $rowNum, $no++);
+            $sheet->setCellValueExplicit('B' . $rowNum, $row['no_kk'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('C' . $rowNum, $row['kepala_keluarga']);
+            $sheet->setCellValueExplicit('D' . $rowNum, $row['nik_kpm'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('E' . $rowNum, $row['nama_kpm']);
+            $sheet->setCellValue('F' . $rowNum, $row['tempat_lahir']);
+            $sheet->setCellValueExplicit('G' . $rowNum, $tglLahir, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('H' . $rowNum, $row['jenis_kelamin']);
+            $sheet->setCellValue('I' . $rowNum, $alamat);
+
+            $rowNum++;
+        }
+
+        // --- STYLING BORDER DATA ---
+        $dataStyle = [
+            'borders' => [
+                'allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],
+            ],
+            'alignment' => [
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ]
+        ];
+        // Hanya beri border jika ada data
+        if ($rowNum > 3) {
+            $sheet->getStyle('A3:I' . ($rowNum - 1))->applyFromArray($dataStyle);
+
+            // Tengah-tengahkan kolom tertentu (Nomor, Tanggal Lahir, Jenis Kelamin)
+            $sheet->getStyle('A3:A' . ($rowNum - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('G3:H' . ($rowNum - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        }
+
+        // --- AUTO-SIZE COLUMN ---
+        foreach (range('A', 'I') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // --- HEADER OUTPUT BROWSER (DOWNLOAD) ---
+        $filename = 'Laporan_Bansos_KKS_' . date('Ymd_His') . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
     }
 }

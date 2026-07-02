@@ -210,6 +210,7 @@ $routes->group('bansos-kks', ['filter' => 'authfilterdtks', 'menufilterdtks'], f
 	$routes->post('toggle-lock', 'Dtsen\BansosKKS::toggleLock');
 	// 🚀 ROUTE IMPORT TUGAS DOKUMENTASI KKS DARI SIKS-NG
 	$routes->post('importTugasExcel', 'Dtsen\BansosKKS::importTugasExcel');
+	$routes->get('exportExcel', 'Dtsen\BansosKKS::exportExcel');
 });
 
 // ==========================================

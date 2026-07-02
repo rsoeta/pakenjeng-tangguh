@@ -25,9 +25,11 @@
         <div class="container-fluid">
             <div class="card filter-box mb-4 shadow-none border">
                 <div class="card-body p-3">
+
+                    <!-- BARIS 1: AREA FILTER DROPDOWN -->
                     <div class="row align-items-end g-2">
                         <!-- Filter RW -->
-                        <div class="col-6 col-md">
+                        <div class="col-6 col-md-2">
                             <label class="filter-label small fw-bold text-muted mb-1">Wilayah RW</label>
                             <select id="filter_rw" class="form-control form-control-sm border bg-light rounded-pill px-3">
                                 <option value="">Semua RW</option>
@@ -35,7 +37,7 @@
                         </div>
 
                         <!-- Filter RT -->
-                        <div class="col-6 col-md">
+                        <div class="col-6 col-md-2">
                             <label class="filter-label small fw-bold text-muted mb-1">Wilayah RT</label>
                             <select id="filter_rt" class="form-control form-control-sm border bg-light rounded-pill px-3">
                                 <option value="">Semua RT</option>
@@ -43,7 +45,7 @@
                         </div>
 
                         <!-- Filter Tahap Salur -->
-                        <div class="col-12 col-md-4">
+                        <div class="col-6 col-md-3">
                             <label class="filter-label small fw-bold text-muted mb-1">Tahap Salur</label>
                             <select id="filter_tahap" class="form-control form-control-sm border bg-light rounded-pill px-3">
                                 <option value="">Semua Tahap</option>
@@ -64,45 +66,64 @@
                             </select>
                         </div>
 
-                        <!-- 🚀 Filter Status Kunci (Gembok) -->
-                        <div class="col-8 col-md">
-                            <label class="filter-label small fw-bold text-muted mb-1">Status Kunci</label>
-                            <select id="filter_locked" class="form-control form-control-sm border bg-light rounded-pill px-3">
-                                <option value="">Semua Status</option>
-                                <option value="1">🔒 Terkunci (Valid)</option>
-                                <option value="0">🔓 Terbuka (Belum Valid)</option>
+                        <!-- Filter Jenis Bansos -->
+                        <div class="col-6 col-md-3">
+                            <label class="filter-label small fw-bold text-muted mb-1">Jenis Bansos</label>
+                            <select id="filter_jenis" class="form-control form-control-sm border bg-light rounded-pill px-3">
+                                <option value="">Semua Bansos</option>
+                                <option value="PKH">PKH</option>
+                                <option value="SEMBAKO">SEMBAKO</option>
+                                <option value="PKH + SEMBAKO">MIX (PKH + SEMBAKO)</option>
                             </select>
                         </div>
 
-                        <!-- Tombol Terapkan -->
-                        <div class="col-4 col-md-auto">
-                            <?php if (session()->get('role_id') < 4): ?>
-                                <button type="button" class="btn btn-success w-100 btn-sm shadow-sm rounded-pill px-4 mb-2" data-bs-toggle="modal" data-bs-target="#modalImportTugas">
-                                    <i class="fas fa-file-excel mr-1"></i> Impor (SIKS-NG)
-                                </button>
-                            <?php endif; ?>
-                            <button id="btn_filter" class="btn btn-sm btn-dark w-100 rounded-pill px-4 shadow-sm">
-                                <i class="fas fa-filter mr-1"></i> Filter
-                            </button>
+                        <!-- Filter Status Kunci -->
+                        <div class="col-12 col-md-2">
+                            <label class="filter-label small fw-bold text-muted mb-1">Status Kunci</label>
+                            <select id="filter_locked" class="form-control form-control-sm border bg-light rounded-pill px-3">
+                                <option value="">Semua Status</option>
+                                <option value="1">🔒 Terkunci</option>
+                                <option value="0">🔓 Terbuka</option>
+                            </select>
                         </div>
                     </div>
+
+                    <!-- BARIS 2: AREA TOMBOL AKSI (RATA KANAN) -->
+                    <div class="row mt-3">
+                        <div class="col-12 d-flex justify-content-end align-items-center" style="gap: 8px;">
+                            <button id="btn_filter" class="btn btn-sm btn-dark rounded-pill px-4 shadow-sm">
+                                <i class="fas fa-filter mr-1"></i> Filter
+                            </button>
+
+                            <button id="btn_export_excel" class="btn btn-sm btn-success rounded-pill px-4 shadow-sm">
+                                <i class="fas fa-file-excel mr-1"></i> Export
+                            </button>
+
+                            <?php if (session()->get('role_id') < 4): ?>
+                                <button type="button" class="btn btn-primary btn-sm shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalImportTugas">
+                                    <i class="fas fa-upload mr-1"></i> Impor (SIKS-NG)
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
                 </div>
             </div>
+        </div>
 
-            <div class="card card-bansos shadow-sm">
-                <div class="card-body p-3">
-                    <table class="table table-hover align-middle w-100" id="tableDokumentasi">
-                        <thead>
-                            <tr>
-                                <th class="text-center">No</th>
-                                <th class="text-center">Foto KPM</th>
-                                <th>Detail KPM & Bantuan</th>
-                                <th class="text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+        <div class="card card-bansos shadow-sm">
+            <div class="card-body p-3">
+                <table class="table table-hover align-middle w-100" id="tableDokumentasi">
+                    <thead>
+                        <tr>
+                            <th class="text-center">No</th>
+                            <th class="text-center">Foto KPM</th>
+                            <th>Detail KPM & Bantuan</th>
+                            <th class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </section>
@@ -319,6 +340,7 @@
                     d.filter_rt = $('#filter_rt').val();
                     d.filter_tahap = $('#filter_tahap').val();
                     d.filter_locked = $('#filter_locked').val();
+                    d.filter_jenis = $('#filter_jenis').val();
                 }
             },
             "columnDefs": [{
@@ -335,6 +357,19 @@
         // 🚀 Aktifkan Tombol Filter
         $('#btn_filter').click(function() {
             tableDokumentasi.ajax.reload();
+        });
+
+        // 🚀 FUNGSI EXPORT EXCEL MENGIKUTI FILTER
+        $('#btn_export_excel').click(function() {
+            var rw = $('#filter_rw').val();
+            var rt = $('#filter_rt').val();
+            var tahap = $('#filter_tahap').val();
+            var locked = $('#filter_locked').val();
+            var jenis = $('#filter_jenis').val();
+
+            // Redirect ke function Controller dengan query parameter
+            var exportUrl = "<?= base_url('bansos-kks/exportExcel') ?>?rw=" + rw + "&rt=" + rt + "&tahap=" + tahap + "&locked=" + locked + "&jenis=" + jenis;
+            window.open(exportUrl, '_blank');
         });
 
         // ==========================================
