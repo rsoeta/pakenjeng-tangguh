@@ -110,6 +110,7 @@ class UsulanBansos extends Controller
     /**
      * 🔍 Cari individu berdasarkan NIK/Nama
      * 🔐 Dibatasi wilayah_tugas user login (multi RW–RT)
+     * 🛡️ Anti Data Ganda & Bypass Soft Delete
      */
     public function searchArt()
     {
@@ -126,13 +127,19 @@ class UsulanBansos extends Controller
             dtsen_rt.rw,
             dtsen_rt.rt
         ")
-            ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk', 'left')
+            // 🚀 PERBAIKAN 1: Pastikan KK yang ditarik adalah KK yang masih aktif
+            ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk AND dtsen_kk.deleted_at IS NULL', 'left')
             ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
-            ->where('dtsen_art.deleted_at', null)
+
+            // 🚀 PERBAIKAN 2: Gunakan sintaks string statis agar Query Builder mutlak membaca IS NULL
+            ->where('dtsen_art.deleted_at IS NULL')
             ->groupStart()
             ->like('dtsen_art.nik', $term)
             ->orLike('dtsen_art.nama', $term)
             ->groupEnd()
+
+            // 🚀 PERBAIKAN 3: Kunci mutlak NIK agar tidak ada nama yang sama muncul dua kali
+            ->groupBy('dtsen_art.nik')
             ->limit(10);
 
         /* =====================================================
@@ -323,14 +330,6 @@ class UsulanBansos extends Controller
                 ]);
             }
         }
-
-        // // DESIL 5 → hanya BPNT/SEMBAKO + PBI
-        // if ($desil === 5 && !in_array($program, [2, 5])) {
-        //     return $this->response->setJSON([
-        //         'success' => false,
-        //         'message' => 'Kategori desil 5 hanya dapat mengajukan BPNT/SEMBAKO atau PBI.'
-        //     ]);
-        // }
 
         /* =====================================================
        4️⃣ Cek Duplikasi Bulan Berjalan

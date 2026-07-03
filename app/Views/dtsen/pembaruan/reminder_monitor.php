@@ -5,11 +5,6 @@
     <section class="content-header">
         <div class="container-fluid">
             <h1>Monitoring Reminder WA</h1>
-            <!-- tampilkan session id -->
-            <?php
-            $adminId = session()->get('id');
-            echo "<p class='text-muted'>Admin ID: $adminId</p>";
-            ?>
         </div>
     </section>
 
