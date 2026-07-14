@@ -1,0 +1,12 @@
+CREATE TABLE dtsen_ppks_pas (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nik_kpm VARCHAR(20) NOT NULL,
+    kategori_id INT NOT NULL COMMENT 'Relasi ke ppks_kategori',
+    jenis_ppks_gform VARCHAR(100) NOT NULL COMMENT 'Teks mutlak sesuai GForm Pemkab',
+    status_gform TINYINT(1) DEFAULT 0 COMMENT '0=Belum, 1=Sudah Eksekusi Operator',
+    created_by INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX (nik_kpm),
+    INDEX (status_gform)
+);

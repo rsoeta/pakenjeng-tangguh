@@ -69,7 +69,7 @@ class Ppks extends BaseController
                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', '32.05.33')->findAll(),
                 'datarw' => $this->RwModel->noRw(),
                 'bansos' => $this->BansosModel->findAll(),
-                'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
+                // 'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
                 'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
                 'shdk' => $this->ShdkModel->findAll(),
                 'percentages' => $this->VervalPbiModel->jml_persentase(),
@@ -93,7 +93,7 @@ class Ppks extends BaseController
                 'datarw' => $this->RwModel->noRw(),
                 'datart' => $this->RtModel->noRt(),
                 'bansos' => $this->BansosModel->findAll(),
-                'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
+                // 'pekerjaan' => $this->PekerjaanModel->orderBy('JenisPekerjaan', 'asc')->findAll(),
                 'statusKawin' => $this->StatusKawinModel->orderBy('StatusKawin', 'asc')->findAll(),
                 'shdk' => $this->ShdkModel->findAll(),
                 'percentages' => $this->VervalPbiModel->jml_persentase(),
@@ -258,6 +258,7 @@ class Ppks extends BaseController
                 //     text: "Something went wrong!",
                 //     footer: "<a href="">Why do I have this issue?</a>"
                 // })
+
                 $msg = [
                     'data' =>
                     '<script>

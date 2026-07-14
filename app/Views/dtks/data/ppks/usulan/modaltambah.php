@@ -72,8 +72,6 @@ $desa_id = session()->get('kode_desa');
                     <div id="smartwizard">
                         <ul>
                             <li><a href="#step-1">Pendataan<br /><small>Data Individu</small></a></li>
-                            <!-- <li><a href="#step-2">Step 2<br /><small>Personal Info</small></a></li> -->
-                            <!-- <li><a href="#step-4">Step 3<br /><small>Pengusulan Bansos</small></a></li> -->
                         </ul>
                         <div>
                             <div id="step-1">
@@ -229,9 +227,6 @@ $desa_id = session()->get('kode_desa');
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <!-- <div class="col-sm-12 col-12 mt-2"> -->
-                                    <!-- <label class="label-center mt-2">Dokumen</label> -->
-                                    <!-- <div class="form-group row nopadding"> -->
                                     <div class="col-6 col-sm-6 mb-2">
                                         <img class="img-preview-rmh" src="<?= ppks_foto(null, ''); ?>" style="width: 30px; height: 40px; border-radius: 2px;">
                                         <br>
@@ -245,7 +240,6 @@ $desa_id = session()->get('kode_desa');
                                     </div>
                                     <div class="invalid-feedback errorppks_foto"></div>
                                     <!-- </div> -->
-                                    <!-- <div class="form-group row nopadding"> -->
                                     <div class="col-6 col-sm-6 mb-2">
                                         <img class="img-preview-rmh foto-dokumen" src="https://assets.pikiran-rakyat.com/crop/0x0:0x0/x/photo/2020/10/01/4026253578.jpg" style="height: 40px; border-radius: 2px;">
                                         <!-- <img class="img-preview-rmh" src="<?= ppks_foto(null, ''); ?>" style="width: 30px; height: 40px; border-radius: 2px;"> -->
@@ -285,20 +279,6 @@ $desa_id = session()->get('kode_desa');
                                     <button type="submit" class="btn btn-block btn-primary btnSimpan" id="btnSimpan">Simpan</button>
                                 </div>
                             </div>
-                            <!-- <div id="step-2">
-                            <div class="row">
-                                <div class="col-md-6"> <input type="text" class="form-control" placeholder="Address" required> </div>
-                                <div class="col-md-6"> <input type="text" class="form-control" placeholder="City" required> </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-md-6"> <input type="text" class="form-control" placeholder="State" required> </div>
-                                <div class="col-md-6"> <input type="text" class="form-control" placeholder="Country" required> </div>
-                            </div>
-                            </div> -->
-
-                            <!-- <div id="step-4" class="">
-                                
-                            </div> -->
                         </div>
                     </div>
                 </div>

@@ -562,6 +562,20 @@ $routes->group('pbi', ['filter' => ['authfilterdtks', 'globalview', 'menufilterd
 	});
 });
 
+// PENDATAAN PPKS 5 PAS (GFORM KABUPATEN)
+$routes->group('ppks-pas', ['filter' => ['authfilterdtks', 'menufilterdtks']], function ($routes) {
+	$routes->get('/', 'Dtsen\PpksPas::index');
+	$routes->post('datatable', 'Dtsen\PpksPas::datatable');
+	$routes->get('search-nik', 'Dtsen\PpksPas::searchNik');
+	$routes->post('simpan', 'Dtsen\PpksPas::simpan');
+	$routes->post('tandai-selesai', 'Dtsen\PpksPas::tandaiSelesai');
+	$routes->post('hapus', 'Dtsen\PpksPas::hapus');
+	// 🚀 ROUTE BARU UNTUK EXPORT EXCEL
+	$routes->get('export-excel', 'Dtsen\PpksPas::exportExcel');
+	// 🚀 ROUTE BARU UNTUK CEK DEADLINE
+	$routes->get('check-deadline', 'Dtsen\PpksPas::checkDeadline');
+});
+
 // USULAN
 $routes->get('usulan', 'Dtks\Usulan22::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tmbUsul', 'Dtks\Usulan22::save', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
