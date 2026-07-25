@@ -576,6 +576,14 @@ $routes->group('ppks-pas', ['filter' => ['authfilterdtks', 'menufilterdtks']], f
 	$routes->get('check-deadline', 'Dtsen\PpksPas::checkDeadline');
 });
 
+// ==========================================
+// 🚀 DASHBOARD ANALISIS DESIL
+// ==========================================
+$routes->group('analisis-desil', ['filter' => ['authfilterdtks', 'menufilterdtks']], function ($routes) {
+	$routes->get('/', 'Dtsen\AnalisisDesil::index');
+	$routes->post('datatable', 'Dtsen\AnalisisDesil::datatable');
+});
+
 // USULAN
 $routes->get('usulan', 'Dtks\Usulan22::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tmbUsul', 'Dtks\Usulan22::save', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
