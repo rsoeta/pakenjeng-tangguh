@@ -149,8 +149,11 @@ class AnalisisDesil extends BaseController
 
                 $data[] = [
                     $no++,
-                    '<b>' . esc($row['kepala_keluarga'] ?? 'Tanpa Nama') . '</b><br><small class="text-muted">KK: ' . $row['no_kk'] . '</small>',
+                    '<b>' . esc($row['kepala_keluarga'] ?? 'Tanpa Nama') . '</b><br>' .
+                        '<small class="text-muted">KK: ' . $row['no_kk'] . ' ' .
+                        '<a href="javascript:void(0)" onclick="copyKK(\'' . $row['no_kk'] . '\')" class="text-primary ms-1" title="Salin No. KK"><i class="far fa-copy"></i></a></small>',
                     'RT ' . str_pad($row['rt'] ?? '0', 3, '0', STR_PAD_LEFT) . ' / RW ' . str_pad($row['rw'] ?? '0', 3, '0', STR_PAD_LEFT),
+                    // ... sisa kolom lainnya ...
                     '<span class="badge bg-dark fs-6">' . $strAwal . '</span>',
                     '<span class="badge bg-primary fs-6">' . $strAkhir . '</span>',
                     $statusBadge,

@@ -44,26 +44,26 @@
             <!-- 🎛️ FILTER PANEL DINAMIS -->
             <div class="card shadow-sm border-top-primary mb-4">
                 <div class="card-body p-3">
-                    <div class="row row-cols-1 row-cols-md-4 g-3">
-                        <div class="col">
+                    <div class="row g-2">
+                        <div class="col-6 col-md-3">
                             <label class="small fw-bold">RW</label>
                             <select id="filter_rw" class="form-control select2">
-                                <option value="">-- Semua RW --</option>
+                                <option value="">-- Semua --</option>
                                 <?php for ($i = 1; $i <= 15; $i++): ?>
                                     <option value="<?= $i ?>"><?= str_pad($i, 3, '0', STR_PAD_LEFT) ?></option>
                                 <?php endfor; ?>
                             </select>
                         </div>
-                        <div class="col">
+                        <div class="col-6 col-md-3">
                             <label class="small fw-bold">RT</label>
                             <select id="filter_rt" class="form-control select2">
-                                <option value="">-- Semua RT --</option>
+                                <option value="">-- Semua --</option>
                                 <?php for ($i = 1; $i <= 10; $i++): ?>
                                     <option value="<?= $i ?>"><?= str_pad($i, 3, '0', STR_PAD_LEFT) ?></option>
                                 <?php endfor; ?>
                             </select>
                         </div>
-                        <div class="col">
+                        <div class="col-6 col-md-3">
                             <label class="small fw-bold">Bandingkan Dari <span class="text-danger">*</span></label>
                             <select id="periode_awal" class="form-control select2">
                                 <?php foreach ($periodes as $p): ?>
@@ -71,7 +71,7 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="col">
+                        <div class="col-6 col-md-3">
                             <label class="small fw-bold">Bandingkan Ke <span class="text-danger">*</span></label>
                             <select id="periode_akhir" class="form-control select2">
                                 <?php foreach ($periodes as $p): ?>
@@ -174,6 +174,7 @@
         var table = $('#tableDesil').DataTable({
             "processing": true,
             "serverSide": false,
+            "responsive": true,
             // Menambahkan 'l' ke dalam kolom agar bersanding dengan tombol Export dan Search
             "dom": '<"row align-items-center"<"col-md-4"l><"col-md-4 text-center"B><"col-md-4"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
             "buttons": [{
@@ -249,6 +250,25 @@
             table.ajax.reload();
         });
     });
+
+    // 🚀 Fungsi Salin No. KK
+    window.copyKK = function(nokk) {
+        navigator.clipboard.writeText(nokk).then(function() {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'KK ' + nokk + ' disalin!',
+                showConfirmButton: false,
+                timer: 1500,
+                customClass: {
+                    popup: 'swal-sm'
+                }
+            });
+        }).catch(function(err) {
+            console.error('Gagal menyalin text: ', err);
+        });
+    };
 </script>
 
 <?= $this->endSection(); ?>
