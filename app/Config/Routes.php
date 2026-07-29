@@ -477,6 +477,7 @@ $routes->get('bnba', 'Dtks\Bnba::index', ['filter' => 'authfilterdtks', 'filter'
 $routes->post('tabel_bnba', 'Dtks\Bnba::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('detailBnba', 'Dtks\Bnba::formview', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->match(['GET', 'POST'], 'editBnba', 'Dtks\Bnba::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+
 // VERIVALI BNBA
 $routes->get('verivalibnba', 'Dtks\VervalBnba::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tabVerivaliBnba', 'Dtks\VervalBnba::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
@@ -489,78 +490,94 @@ $routes->post('updatebnba1', 'Dtks\VervalBnba::ajax_update1', ['filter' => 'auth
 $routes->post('lockBnba', 'Dtks\VervalBnba::lockBnba', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('unlockBnba', 'Dtks\VervalBnba::unlockBnba', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
-// VERVAL PBI
-$routes->get('verval', 'Dtks\VeriVali09::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->get('verivalipbi', 'Dtks\VervalPbi::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('tabel_pbi', 'Dtks\VervalPbi::tabel_data', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->get('exportExcel', 'Dtks\VervalPbi::excelpage', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->get('tmbData', 'Dtks\VervalPbi::formtambah', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('tabexport', 'Dtks\VervalPbi::tabexport', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('tabel_pbi_verivali', 'Dtks\VervalPbi::tabel_pbi_verivali', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('dltPbi', 'Dtks\VervalPbi::hapus', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('editpbi', 'Dtks\VervalPbi::formedit', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('updatepbi', 'Dtks\VervalPbi::ajax_update', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('addpbi', 'Dtks\VervalPbi::save', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('importPbi', 'Dtks\VervalPbi::importExcel', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-
-// PBI INACTIVE
-$routes->get('pbi_nonaktif', 'Dtks\Pbi\Inactive::pbi_nonaktif', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
-$routes->post('tb_pbi_nonaktif', 'Dtks\Pbi\Inactive::tb_pbi_nonaktif', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->get('tmbNA', 'Dtks\Pbi\Inactive::formTmbNA', ['filter' => 'authfilterdtks']);
-$routes->post('get_data_pbi', 'Dtks\Pbi\Inactive::get_data_pbi', ['filter' => 'authfilterdtks']);
-$routes->resource('api_pbi', ['controller' => 'Api\Dtks_Pbi', 'filter' => 'menufilterdtks']);
-$routes->post('saveInactive', 'Dtks\Pbi\Inactive::saveInactive', ['filter' => 'authfilterdtks']);
-$routes->post('editInactive', 'Dtks\Pbi\Inactive::formEditInactive', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('updateInactive', 'Dtks\Pbi\Inactive::updateInactive', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-$routes->post('dltInactive', 'Dtks\Pbi\Inactive::hapus', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
-
-// REAKTIVASI PBI
+/*
+|--------------------------------------------------------------------------
+| 🏥 MODUL PBI-JKN (MASTER DATA, VERIVALI, NON-AKTIF, REAKTIVASI)
+|--------------------------------------------------------------------------
+| Semua route PBI dibungkus dalam prefix '/pbi' agar URL terlihat rapi.
+| Filter diterapkan secara global untuk seluruh grup.
+*/
 $routes->group('pbi', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
 
+	// 🗄️ 1. MASTER DATA PBI (Aktif)
+	$routes->group('data', function ($routes) {
+		$routes->get('/', 'Dtks\Pbi\Data::index');
+		$routes->post('datatable', 'Dtks\Pbi\Data::datatable');
+		$routes->post('proses_nonaktif', 'Dtks\Pbi\Data::proses_nonaktif'); // <-- Endpoint AJAX Non-Aktif
+		$routes->post('import_excel', 'Dtks\Pbi\Data::import_excel');
+		$routes->post('cek_nik', 'Dtks\Pbi\Data::cek_nik');
+		$routes->post('simpan_manual', 'Dtks\Pbi\Data::simpan_manual');
+	});
+
+	// 📝 2. VERIVALI PBI (Legacy: VervalPbi)
+	$routes->group('verivali', function ($routes) {
+		$routes->get('/', 'Dtks\VervalPbi::index');
+		$routes->post('tabel', 'Dtks\VervalPbi::tabel_data');
+		$routes->post('tabel-verivali', 'Dtks\VervalPbi::tabel_pbi_verivali');
+
+		$routes->get('form-tambah', 'Dtks\VervalPbi::formtambah');
+		$routes->post('save', 'Dtks\VervalPbi::save');
+
+		$routes->post('form-edit', 'Dtks\VervalPbi::formedit');
+		$routes->post('update', 'Dtks\VervalPbi::ajax_update');
+		$routes->post('delete', 'Dtks\VervalPbi::hapus');
+
+		$routes->get('export-excel', 'Dtks\VervalPbi::excelpage');
+		$routes->post('tabexport', 'Dtks\VervalPbi::tabexport');
+		$routes->post('import-excel', 'Dtks\VervalPbi::importExcel');
+	});
+
+	// 🚷 3. NON-AKTIF PBI (Legacy: Inactive)
+	$routes->group('nonaktif', function ($routes) {
+		$routes->get('/', 'Dtks\Pbi\Inactive::pbi_nonaktif');
+		$routes->post('tabel', 'Dtks\Pbi\Inactive::tb_pbi_nonaktif');
+		$routes->post('restore', 'Dtks\Pbi\Inactive::restore_aktif');
+		$routes->post('get-data', 'Dtks\Pbi\Inactive::get_data_pbi');
+
+		$routes->get('form-tambah', 'Dtks\Pbi\Inactive::formTmbNA');
+		$routes->post('save', 'Dtks\Pbi\Inactive::saveInactive');
+
+		$routes->post('form-edit', 'Dtks\Pbi\Inactive::formEditInactive');
+		$routes->post('update', 'Dtks\Pbi\Inactive::updateInactive');
+		$routes->post('delete', 'Dtks\Pbi\Inactive::hapus');
+	});
+
+	// 🔄 4. REAKTIVASI PBI
 	$routes->group('reaktivasi', function ($routes) {
-
-		// Halaman utama (Daftar Pengajuan)
-		$routes->GET('/', 'Dtks\Pbi\Reaktivasi::index');
-
-		// 🔥 TAMBAHKAN INI
+		$routes->get('/', 'Dtks\Pbi\Reaktivasi::index');
 		$routes->match(['GET', 'POST'], 'tabel', 'Dtks\Pbi\Reaktivasi::tabel_data');
 
-		// Form Ajukan
-		$routes->POST('ajukan', 'Dtks\Pbi\Reaktivasi::ajukan');
-
-		// Simpan draft
-		$routes->post('store', 'Dtks\Pbi\Reaktivasi::store');
-
-		// DataTables
-		$routes->post('tabel', 'Dtks\Pbi\Reaktivasi::tabel_data');
-
-		// Summary cards
-		$routes->GET('summary', 'Dtks\Pbi\Reaktivasi::summary');
-
-		// Lifecycle actions
-		$routes->post('submit/(:num)', 'Dtks\Pbi\Reaktivasi::submit/$1');
-		$routes->post('verify/(:num)', 'Dtks\Pbi\Reaktivasi::verify/$1');
-		$routes->post('approve/(:num)', 'Dtks\Pbi\Reaktivasi::approve/$1');
-		$routes->post('reject/(:num)', 'Dtks\Pbi\Reaktivasi::reject/$1');
-		$routes->post('kirim-siks/(:num)', 'Dtks\Pbi\Reaktivasi::kirimSiks/$1');
-
-		// Riwayat
-		$routes->GET('riwayat', 'Dtks\Pbi\Reaktivasi::riwayat');
-
-		// Upload Excel Verivali
-		$routes->post('upload-excel', 'Dtks\Pbi\Reaktivasi::uploadExcel');
-
-		// Detail view
+		$routes->get('summary', 'Dtks\Pbi\Reaktivasi::summary');
+		$routes->get('riwayat', 'Dtks\Pbi\Reaktivasi::riwayat');
 		$routes->get('detail/(:num)', 'Dtks\Pbi\Reaktivasi::detail/$1');
-
-		// Dropdown untuk filter status di DataTables
 		$routes->get('dropdown-status', 'Dtks\Pbi\Reaktivasi::dropdownStatus');
 
-		$routes->post('verifikasi/(:num)', 'Dtks\Pbi\Reaktivasi::verifikasi/$1');
-		$routes->post('setujui/(:num)', 'Dtks\Pbi\Reaktivasi::setujui/$1');
-		$routes->post('tolak/(:num)', 'Dtks\Pbi\Reaktivasi::tolak/$1');
+		$routes->post('ajukan', 'Dtks\Pbi\Reaktivasi::ajukan');
+		$routes->post('store', 'Dtks\Pbi\Reaktivasi::store');
+		$routes->post('upload-excel', 'Dtks\Pbi\Reaktivasi::uploadExcel');
+
+		// Lifecycle Workflow
+		$routes->post('submit/(:num)', 'Dtks\Pbi\Reaktivasi::submit/$1');
+		$routes->post('verifikasi/(:num)', 'Dtks\Pbi\Reaktivasi::verifikasi/$1'); // Alias verify
+		$routes->post('verify/(:num)', 'Dtks\Pbi\Reaktivasi::verify/$1');
+		$routes->post('setujui/(:num)', 'Dtks\Pbi\Reaktivasi::setujui/$1'); // Alias approve
+		$routes->post('approve/(:num)', 'Dtks\Pbi\Reaktivasi::approve/$1');
+		$routes->post('tolak/(:num)', 'Dtks\Pbi\Reaktivasi::tolak/$1'); // Alias reject
+		$routes->post('reject/(:num)', 'Dtks\Pbi\Reaktivasi::reject/$1');
+		$routes->post('kirim-siks/(:num)', 'Dtks\Pbi\Reaktivasi::kirimSiks/$1');
+	});
+
+	// 📊 5. STATISTIK & LAPORAN PBI
+	$routes->group('statistik', function ($routes) {
+		$routes->get('/', 'Dtks\Pbi\Statistik::index');
+		$routes->post('get_data', 'Dtks\Pbi\Statistik::get_data'); // Endpoint AJAX untuk Chart
 	});
 });
+
+// 📌 API & ROUTE GLOBAL LAINNYA
+// Tetap di luar grup pbi agar tidak merusak sistem / aplikasi eksternal yang sudah konek
+$routes->get('verval', 'Dtks\VeriVali09::index', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->resource('api_pbi', ['controller' => 'Api\Dtks_Pbi', 'filter' => 'menufilterdtks']);
 
 // PENDATAAN PPKS 5 PAS (GFORM KABUPATEN)
 $routes->group('ppks-pas', ['filter' => ['authfilterdtks', 'menufilterdtks']], function ($routes) {

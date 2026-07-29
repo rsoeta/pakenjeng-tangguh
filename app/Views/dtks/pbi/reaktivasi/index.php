@@ -22,7 +22,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Reaktivasi PBI</h1>
+                    <h1 class="m-0"><?= $title; ?></h1>
                 </div>
             </div>
         </div>

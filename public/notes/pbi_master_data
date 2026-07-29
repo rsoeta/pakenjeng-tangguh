@@ -1,0 +1,35 @@
+CREATE TABLE `pbi_master_data` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  
+  -- 🔗 KUNCI RELASI
+  `nik` varchar(20) NOT NULL,
+  `id_art` int unsigned DEFAULT NULL COMMENT 'Relasi langsung ke dtsen_art (Bisa NULL jika NIK dari Pusat belum terdata di desa)',
+  
+  `no_kk` varchar(20) DEFAULT NULL,
+  `nama` varchar(150) NOT NULL,
+  `no_kis` varchar(30) DEFAULT NULL COMMENT 'Nomor Kartu Indonesia Sehat',
+  `faskes_tk1` varchar(150) DEFAULT NULL COMMENT 'Nama Klinik/Puskesmas Faskes Tingkat 1',
+  `kampung` varchar(100) DEFAULT NULL COMMENT 'Nama Kampung/Dusun/Jalan',
+  `rt` varchar(5) NOT NULL,
+  `rw` varchar(5) NOT NULL,
+  `kode_desa` varchar(20) NOT NULL,
+  `status_kepesertaan` enum('Aktif','Non-Aktif') NOT NULL DEFAULT 'Aktif',
+  
+  -- 🚷 Field khusus Non-Aktif
+  `alasan_nonaktif` text DEFAULT NULL,
+  `tanggal_nonaktif` date DEFAULT NULL,
+  `dinonaktifkan_oleh` int unsigned DEFAULT NULL,
+  
+  `periode_sinkron_terakhir` varchar(20) DEFAULT NULL,
+  
+  `created_by` int unsigned DEFAULT NULL,
+  `updated_by` int unsigned DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nik_unik` (`nik`),
+  KEY `idx_status` (`status_kepesertaan`),
+  KEY `idx_wilayah` (`kode_desa`,`rw`,`rt`),
+  KEY `idx_art` (`id_art`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
