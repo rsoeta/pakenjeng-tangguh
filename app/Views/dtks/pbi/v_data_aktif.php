@@ -184,7 +184,7 @@
                        <option value="MENINGGAL DUNIA">MENINGGAL DUNIA</option>
                        <option value="PINDAH DOMISILI">PINDAH DOMISILI</option>
                        <option value="DINONAKTIFKAN PUSAT/MAMPU">DINONAKTIFKAN PUSAT / MAMPU</option>
-                       <option value="LAINNYA">LAINNYA...</option>
+                       <option value="Lainnya">LAINNYA...</option>
                    </select>
                    <textarea id="alasan_lainnya" class="form-control form-control-sm d-none mt-2" rows="3" placeholder="Tuliskan alasan spesifik di sini..."></textarea>`,
             icon: 'warning',
