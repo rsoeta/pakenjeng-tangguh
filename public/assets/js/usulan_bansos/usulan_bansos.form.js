@@ -48,23 +48,23 @@ $(document).ready(function () {
        RULE 2 — DESIL FILTER
        Desil 5 → hanya SEMBAKO & PBI
     --------------------------------------------- */
-    function filterByDesil(desil) {
-        if (desil === 5) {
-            console.log("🔒 DESIL 5 → hanya SEMBAKO+PBI");
-            $('#program_bansos option').each(function () {
-                const text = $(this).text().toUpperCase();
-                if (
-                    !text.includes('BPNT') &&
-                    !text.includes('SEMBAKO') &&   //<-- tambahan penting
-                    !text.includes('PBI') &&
-                    $(this).val() !== ''
-                )
-    {
-                    $(this).hide();
-                }
-            });
-        }
-    }
+    // function filterByDesil(desil) {
+    //     if (desil === 5) {
+    //         console.log("🔒 DESIL 5 → hanya SEMBAKO+PBI");
+    //         $('#program_bansos option').each(function () {
+    //             const text = $(this).text().toUpperCase();
+    //             if (
+    //                 !text.includes('BPNT') &&
+    //                 !text.includes('SEMBAKO') &&   //<-- tambahan penting
+    //                 !text.includes('PBI') &&
+    //                 $(this).val() !== ''
+    //             )
+    // {
+    //                 $(this).hide();
+    //             }
+    //         });
+    //     }
+    // }
 
     /* ---------------------------------------------
        RULE GABUNGAN (SHDK + DESIL + VALIDASI)
@@ -76,33 +76,51 @@ $(document).ready(function () {
         const select = $('#program_bansos');
         const options = select.find('option');
 
-        // 🔴 DESIL tidak valid → tidak layak
-        if (desil === null || desil === 0 || isNaN(desil) || desil > 4) {
+        // 🔴 DESIL tidak valid atau > 5 (Batas toleransi kemensos)
+        if (desil === null || desil === 0 || isNaN(desil) || desil > 5) {
             Swal.fire(
                 'Tidak Layak',
-                'Kategori desil tidak valid atau di atas 4.',
+                'Kategori desil ' + (desil || 'Tidak Valid') + ' tidak memenuhi syarat (Maksimal Desil 5).',
                 'warning'
             );
             options.not('[value=""]').hide();
             return;
         }
 
-        // 🔵 DESIL 5
-        // if (desil === 5) {
-        //     options.each(function () {
-        //         const text = $(this).text().toUpperCase();
-        //         if (
-        //             !text.includes('PBI') &&
-        //             !text.includes('BPNT') &&
-        //             !text.includes('SEMBAKO') &&
-        //             $(this).val() !== ''
-        //         ) {
-        //             $(this).hide();
-        //         }
-        //     });
-        // }
+        // 🔵 KEMENSOS RULE: DESIL 5 -> HANYA PBI-JK
+        if (desil === 5) {
+            options.each(function () {
+                const text = $(this).text().toUpperCase();
+                // Sembunyikan semuanya kecuali PBI
+                if (!text.includes('PBI') && $(this).val() !== '') {
+                    $(this).hide();
+                }
+            });
+            
+            // Pilih otomatis (jika opsinya ada)
+            const pbi = options.filter((i, o) => $(o).text().toUpperCase().includes('PBI')).first();
+            if (pbi.length) select.val(pbi.val()).trigger('change');
 
-        // 🔵 SHDK LAIN / NULL / 0 → hanya PBI
+            // Beri tahu petugas kenapa opsi lain hilang
+            Swal.fire({
+                title: 'Layak Bersyarat',
+                text: 'Desil 5 HANYA diperbolehkan untuk usulan PBI-JK.',
+                icon: 'info',
+                customClass: { popup: 'swal-sm' }
+            });
+        } 
+        // 🟢 KEMENSOS RULE: DESIL 1-4 -> BISA PKH, SEMBAKO, PBI
+        else {
+            Swal.fire({
+                title: 'Layak Diusulkan',
+                text: `Kategori Desil ${desil} memenuhi syarat untuk usulan PKH, Sembako/BPNT, dan PBI.`,
+                icon: 'success',
+                customClass: { popup: 'swal-sm' }
+            });
+        }
+
+        // 🔵 SHDK RULE: Bukan Kepala Keluarga & Bukan Istri → PAKSA HANYA PBI
+        // Ini akan mengeksekusi ulang filter jika shdk bukan 1 atau 3, meskipun dia Desil 1-4
         if (shdk !== 1 && shdk !== 3) {
             options.each(function () {
                 const text = $(this).text().toUpperCase();
@@ -110,6 +128,11 @@ $(document).ready(function () {
                     $(this).hide();
                 }
             });
+            
+            const pbi = options.filter((i, o) => $(o).text().toUpperCase().includes('PBI')).first();
+            if (pbi.length) select.val(pbi.val()).trigger('change');
+            
+            console.log("🔒 SHDK bukan KK/Istri → Dropdown dikunci hanya untuk PBI");
         }
     }
 
@@ -217,24 +240,30 @@ $(document).ready(function () {
             .done(res => {
 
                 if (!res.success) {
-                    Swal.fire('Gagal Memeriksa Desil', res.message, 'error');
+                    Swal.fire({
+                        title: 'Gagal Memeriksa Desil', 
+                        text: res.message, 
+                        icon: 'error',
+                        customClass: { popup: 'swal-sm' } // Tampilan ringkas untuk mobile
+                    });
                     return;
                 }
 
                 const desil = parseInt(res.kategori_desil);
                 $('#kategori_desil').val(desil);
 
-                // Apply rule gabungan
+                // 🚀 Apply rule gabungan
+                // Pesan kelayakan (SweetAlert) kini sepenuhnya di-handle oleh fungsi ini
+                // Hapus blok if(desil <= 4) yang lama di bawah ini
                 applyProgramFilters(shdk, desil);
 
-                if (desil <= 4) {
-                    Swal.fire('Layak Diusulkan', `Kategori desil ${desil} memenuhi syarat.`, 'success');
-                } else {
-                    Swal.fire('Tidak Layak', `Kategori desil ${desil} di atas batas kelayakan.`, 'warning');
-                }
-
             })
-            .fail(() => Swal.fire('Kesalahan', 'Tidak dapat memeriksa desil.', 'error'));
+            .fail(() => Swal.fire({
+                title: 'Kesalahan', 
+                text: 'Tidak dapat memeriksa desil.', 
+                icon: 'error',
+                customClass: { popup: 'swal-sm' }
+            }));
     });
 
 

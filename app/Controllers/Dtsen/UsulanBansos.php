@@ -204,6 +204,7 @@ class UsulanBansos extends Controller
 
     /**
      * 🔎 Cek kategori desil berdasarkan NIK → id_kk
+     * 🔐 Terproteksi dari pengambilan KK yang sudah dihapus (Soft Delete)
      * Log detail setiap langkah agar mudah dilacak di writable/logs/
      */
     public function checkDesil()
@@ -222,19 +223,29 @@ class UsulanBansos extends Controller
         }
 
         try {
-            // 1️⃣ Ambil id_kk dari dtsen_art
-            $art = $this->artModel->select('id_kk')->where('nik', $nik)->first();
-            log_message('info', '[checkDesil] Hasil query ART: ' . json_encode($art));
+            // 1️⃣ Ambil id_kk dari dtsen_art dan pastikan KK-nya berstatus AKTIF
+            $art = $this->artModel
+                ->select('dtsen_art.id_kk')
+                // 🚀 PERBAIKAN: Join ke dtsen_kk untuk mengecek status hapusnya
+                ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk', 'left')
+                ->where('dtsen_art.nik', $nik)
+                // 🚀 KUNCI UTAMA: Pastikan baik Individu maupun KK-nya tidak berstatus terhapus
+                ->where('dtsen_art.deleted_at IS NULL')
+                ->where('dtsen_kk.deleted_at IS NULL')
+                ->orderBy('dtsen_art.id_art', 'DESC') // Opsional: Ambil data paling baru jika ada ganda
+                ->first();
+
+            log_message('info', '[checkDesil] Hasil query ART (Hanya KK Aktif): ' . json_encode($art));
 
             if (!$art || empty($art['id_kk'])) {
-                log_message('warning', "[checkDesil] Tidak ditemukan ART untuk NIK {$nik}");
+                log_message('warning', "[checkDesil] Tidak ditemukan ART aktif untuk NIK {$nik}");
                 return $this->response->setJSON([
                     'success' => false,
-                    'message' => 'Data individu tidak ditemukan di tabel ART.'
+                    'message' => 'Data individu tidak ditemukan atau KK sudah tidak aktif.'
                 ]);
             }
 
-            // 2️⃣ Ambil kategori_desil dari dtsen_se berdasarkan id_kk
+            // 2️⃣ Ambil kategori_desil dari dtsen_se berdasarkan id_kk yang valid/aktif
             $se = $this->seModel
                 ->select('kategori_desil')
                 ->where('id_kk', $art['id_kk'])
@@ -300,7 +311,7 @@ class UsulanBansos extends Controller
         }
 
         /* =====================================================
-       2️⃣ Validasi DESIL
+       2️⃣ Validasi DESIL & PROGRAM BANSOS (Aturan Kemensos)
        ===================================================== */
         $se = $db->table('dtsen_se')
             ->where('id_kk', $art['id_kk'])
@@ -309,10 +320,20 @@ class UsulanBansos extends Controller
 
         $desil = (int) ($se['kategori_desil'] ?? 0);
 
-        if ($desil <= 0 || $desil > 4) {
+        // 🔴 Tolak jika Desil 0 atau lebih dari 5 (misal: 6, 7, dst)
+        if ($desil <= 0 || $desil > 5) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Kategori desil tidak memenuhi syarat.'
+                'message' => "Kategori Desil {$desil} tidak memenuhi syarat kelayakan usulan bansos."
+            ]);
+        }
+
+        // 🔵 Aturan Khusus Desil 5: HANYA BOLEH PBI-JK
+        // Asumsi nilai opsi/value untuk PBI di database dbj_id adalah 5
+        if ($desil === 5 && $program !== 5) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Desil 5 HANYA diperbolehkan untuk program PBI-JK.'
             ]);
         }
 
@@ -520,94 +541,6 @@ class UsulanBansos extends Controller
             return $this->response->setJSON(['data' => [], 'error' => $e->getMessage()]);
         }
     }
-    
-    // public function getDataBulanIni()
-    // {
-    //     $session = session();
-    //     $roleId = (int) $session->get('role_id');
-    //     $nik = $session->get('nik');
-
-    //     $bulan  = $this->request->getVar('bulan');
-    //     $tahun  = $this->request->getVar('tahun');
-
-    //     $status     = $this->request->getVar('status');
-    //     $program    = $this->request->getVar('program');
-    //     $createdBy  = $this->request->getVar('created_by');
-    //     $rw         = $this->request->getVar('rw');
-    //     $rt         = $this->request->getVar('rt');
-
-    //     // 🔧 INIT BUILDER DULU (WAJIB DI ATAS)
-    //     $builder = $this->DtsenUsulanBansosModel
-    //         ->select("
-    //         dtsen_usulan_bansos.*,
-    //         dtsen_art.nama,
-    //         dbj.dbj_nama_bansos,
-    //         u1.fullname AS created_by_name,
-    //         u1.nope    AS created_by_nope,
-    //         u2.fullname AS updated_by_name
-    //     ")
-    //         ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_usulan_bansos.id_kk', 'left')
-    //         ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
-    //         ->join('dtsen_art', 'dtsen_art.nik = dtsen_usulan_bansos.nik', 'left')
-    //         ->join('dtks_bansos_jenis dbj', 'dbj.dbj_id = dtsen_usulan_bansos.program_bansos', 'left')
-    //         ->join('dtks_users u1', 'u1.nik = dtsen_usulan_bansos.created_by', 'left')
-    //         ->join('dtks_users u2', 'u2.nik = dtsen_usulan_bansos.updated_by', 'left');
-
-    //     // 👉 DEFAULT hanya jika dua-duanya kosong
-    //     if (empty($bulan) && empty($tahun)) {
-    //         $bulan = date('m');
-    //         $tahun = date('Y');
-    //     }
-
-    //     // 👉 FILTER DINAMIS
-    //     if (!empty($bulan)) {
-    //         $builder->where('MONTH(dtsen_usulan_bansos.created_at)', $bulan);
-    //     }
-
-    //     if (!empty($tahun)) {
-    //         $builder->where('YEAR(dtsen_usulan_bansos.created_at)', $tahun);
-    //     }
-
-    //     // 👉 FILTER TAMBAHAN
-    //     if (!empty($status)) {
-    //         $builder->where('dtsen_usulan_bansos.status', $status);
-    //     }
-
-    //     if (!empty($program)) {
-    //         $builder->where('dtsen_usulan_bansos.program_bansos', $program);
-    //     }
-
-    //     if (!empty($createdBy)) {
-    //         $builder->where('dtsen_usulan_bansos.created_by', $createdBy);
-    //     }
-
-    //     if (!empty($rw)) {
-    //         $builder->where('dtsen_rt.rw', $rw);
-    //     }
-
-    //     if (!empty($rt)) {
-    //         $builder->where('dtsen_rt.rt', $rt);
-    //     }
-
-    //     // 👉 ROLE FILTER
-    //     if ($roleId > 4) {
-    //         log_message('info', "[getDataBulanIni] role_id={$roleId} tidak diizinkan melihat data.");
-    //         return $this->response->setJSON(['data' => []]);
-    //     } elseif ($roleId === 4) {
-    //         $builder->where('dtsen_usulan_bansos.created_by', $nik);
-    //     }
-
-    //     $builder->orderBy('dtsen_usulan_bansos.created_at', 'ASC');
-
-    //     try {
-    //         $data = $builder->findAll();
-    //         log_message('info', "✅ getDataBulanIni() memuat " . count($data) . " data untuk role={$roleId}, status={$status}, bulan={$bulan}, tahun={$tahun}");
-    //         return $this->response->setJSON(['data' => $data]);
-    //     } catch (\Throwable $e) {
-    //         log_message('error', "❌ getDataBulanIni() error: " . $e->getMessage());
-    //         return $this->response->setJSON(['data' => [], 'error' => $e->getMessage()]);
-    //     }
-    // }
 
     /**
      * API: check-deadline
