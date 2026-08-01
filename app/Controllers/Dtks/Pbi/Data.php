@@ -4,60 +4,81 @@ namespace App\Controllers\Dtks\Pbi;
 
 use App\Controllers\BaseController;
 use App\Models\PbiMasterDataModel;
+use App\Models\Dtks\AuthModel; // 🚀 Gunakan pola UsulanBansos
 
 class Data extends BaseController
 {
     protected $pbiModel;
+    protected $AuthModel;
 
     public function __construct()
     {
         $this->pbiModel = new PbiMasterDataModel();
+        $this->AuthModel = new AuthModel(); // 🚀 Inisialisasi AuthModel
     }
 
     public function index()
     {
         $data = [
             'title' => 'Master Data PBI-JKN (Aktif)',
-            // Silakan sesuaikan dengan layout SINDEN Kang Rian
         ];
-
         return view('dtks/pbi/v_data_aktif', $data);
     }
 
-    // 🚀 Server-side DataTables Full Features
     public function datatable()
     {
-        if (!$this->request->isAJAX()) {
-            return exit('Tidak diizinkan');
-        }
+        if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
 
         $post = $this->request->getPost();
-        $kodeDesa = session()->get('kode_desa'); // Gembok wilayah desa
 
-        // 1️⃣ Tangkap Parameter Bawaan DataTables
+        // 🚀 Ambil data user dari model Auth seperti di UsulanBansos
+        $userInfo = $this->AuthModel->getUserId();
+        $kodeDesa = $userInfo['kode_desa'] ?? session()->get('kode_desa');
+        $wilayahTugas = trim($userInfo['wilayah_tugas'] ?? '');
+
         $draw   = (int) ($post['draw'] ?? 1);
         $start  = (int) ($post['start'] ?? 0);
         $length = (int) ($post['length'] ?? 10);
         $search = $post['search']['value'] ?? '';
 
-        $builder = $this->pbiModel->builder()
-            ->select('id, nik, no_kk, nama, no_kis, faskes_tk1, kampung, rt, rw, periode_sinkron_terakhir')
-            ->where('status_kepesertaan', 'Aktif');
+        $builder = $this->pbiModel->builder()->where('status_kepesertaan', 'Aktif');
 
-        // 🎛️ Filter Gembok Desa
         if (!empty($kodeDesa)) {
             $builder->where('kode_desa', $kodeDesa);
         }
 
-        // 🎛️ Filter RW & RT dari UI
-        if (!empty($post['rw'])) {
-            $builder->where('rw', str_pad($post['rw'], 3, '0', STR_PAD_LEFT));
-        }
-        if (!empty($post['rt'])) {
-            $builder->where('rt', str_pad($post['rt'], 3, '0', STR_PAD_LEFT));
+        // 🔐 PARSE wilayah_tugas → pasangan RW–RT (POLA USULAN BANSOS)
+        if (!empty($wilayahTugas)) {
+            $blocks = explode('|', $wilayahTugas);
+            $builder->groupStart();
+
+            foreach ($blocks as $block) {
+                [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
+                $rw = trim($rw);
+
+                if ($rw !== '') {
+                    $builder->orGroupStart()
+                        ->where('rw', str_pad($rw, 3, '0', STR_PAD_LEFT)); // Format PBI 3 digit
+
+                    $rts = array_filter(array_map('trim', explode(',', $rtList)));
+                    if (!empty($rts)) {
+                        $rtVariants = [];
+                        foreach ($rts as $rt) {
+                            $rtVariants[] = str_pad($rt, 3, '0', STR_PAD_LEFT);
+                        }
+                        $builder->whereIn('rt', $rtVariants);
+                    }
+                    $builder->groupEnd();
+                }
+            }
+            $builder->groupEnd();
         }
 
-        // 🔍 Fitur Pencarian Global (Search Box DataTables)
+        // 🎛️ Filter UI (RW / RT)
+        if (!empty($post['rw'])) $builder->where('rw', str_pad($post['rw'], 3, '0', STR_PAD_LEFT));
+        if (!empty($post['rt'])) $builder->where('rt', str_pad($post['rt'], 3, '0', STR_PAD_LEFT));
+
+        // 🔍 Pencarian
         if (!empty($search)) {
             $builder->groupStart()
                 ->like('nama', $search)
@@ -66,35 +87,59 @@ class Data extends BaseController
                 ->groupEnd();
         }
 
-        // 2️⃣ Hitung Total Data Setelah Difilter (Sebelum dipotong Limit)
         $recordsFiltered = $builder->countAllResults(false);
 
-        // 3️⃣ Eksekusi Limit & Offset untuk Pagination
-        if ($length != -1) {
-            $builder->limit($length, $start);
-        }
+        if ($length != -1) $builder->limit($length, $start);
 
         $results = $builder->orderBy('rw', 'ASC')->orderBy('rt', 'ASC')->get()->getResultArray();
 
-        // 4️⃣ Hitung Total Data Murni (Tanpa Filter Pencarian)
+        // 4️⃣ Hitung Total Data Murni (Beserta Gembok Wilayah Tugas)
         $totalBuilder = $this->pbiModel->builder()->where('status_kepesertaan', 'Aktif');
-        if (!empty($kodeDesa)) {
-            $totalBuilder->where('kode_desa', $kodeDesa);
+        if (!empty($kodeDesa)) $totalBuilder->where('kode_desa', $kodeDesa);
+
+        // 🔐 Gembok Total Records dengan pola yang sama
+        if (!empty($wilayahTugas)) {
+            $blocks = explode('|', $wilayahTugas);
+            $totalBuilder->groupStart();
+            foreach ($blocks as $block) {
+                [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
+                $rw = trim($rw);
+                if ($rw !== '') {
+                    $totalBuilder->orGroupStart()->where('rw', str_pad($rw, 3, '0', STR_PAD_LEFT));
+                    $rts = array_filter(array_map('trim', explode(',', $rtList)));
+                    if (!empty($rts)) {
+                        $rtVariants = [];
+                        foreach ($rts as $rt) $rtVariants[] = str_pad($rt, 3, '0', STR_PAD_LEFT);
+                        $totalBuilder->whereIn('rt', $rtVariants);
+                    }
+                    $totalBuilder->groupEnd();
+                }
+            }
+            $totalBuilder->groupEnd();
         }
         $recordsTotal = $totalBuilder->countAllResults();
 
-        // 5️⃣ Susun Data ke Array
+        // 🚀 Tangkap role_id user yang sedang login
+        $roleId = (int) ($userInfo['role_id'] ?? session()->get('role_id') ?? 99);
+
         $data = [];
-        $no = $start + 1; // Nomor urut menyesuaikan halaman
+        $no = $start + 1;
 
         foreach ($results as $row) {
-            $btnAksi = '
-                <button type="button" class="btn btn-sm btn-outline-danger shadow-sm" onclick="nonAktifkan(\'' . $row['id'] . '\', \'' . esc($row['nama']) . '\')" title="Non-Aktifkan Data">
-                    <i class="fas fa-user-times"></i> Non-Aktif
-                </button>
-            ';
+            $btnAksi = '-'; // Default kosong untuk role >= 4
+
+            // 🔐 Hanya role 1, 2, 3 (Kades, Sekdes, dsb) yang boleh melihat tombol Non-Aktif
+            if ($roleId < 4) {
+                $btnAksi = '
+                    <button type="button" class="btn btn-sm btn-outline-danger shadow-sm" onclick="nonAktifkan(\'' . $row['id'] . '\', \'' . esc($row['nama']) . '\')" title="Non-Aktifkan Data">
+                        <i class="fas fa-user-times"></i> Non-Aktif
+                    </button>
+                ';
+            }
 
             $alamat = ($row['kampung'] ?? '-') . '<br><small class="text-muted">RT ' . str_pad($row['rt'] ?? '0', 3, '0', STR_PAD_LEFT) . ' / RW ' . str_pad($row['rw'] ?? '0', 3, '0', STR_PAD_LEFT) . '</small>';
+
+            // ... (lanjutan array $data[] biarkan sama seperti sebelumnya) ...
 
             $data[] = [
                 $no++,
@@ -107,16 +152,15 @@ class Data extends BaseController
             ];
         }
 
-        // 6️⃣ Kembalikan JSON sesuai Standar DataTables Server-Side
         return $this->response->setJSON([
-            'draw'            => $draw,
-            'recordsTotal'    => $recordsTotal,
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
             'recordsFiltered' => $recordsFiltered,
-            'data'            => $data
+            'data' => $data
         ]);
     }
 
-    // 🚀 Jangan lupa tambahkan use PhpOffice\PhpSpreadsheet\IOFactory; di bagian atas controller
+    // ... (Fungsi import_excel, cek_nik, simpan_manual, proses_nonaktif biarkan utuh seperti sebelumnya) ...
 
     public function import_excel()
     {
@@ -131,10 +175,9 @@ class Data extends BaseController
             $sheet = $spreadsheet->getActiveSheet()->toArray();
 
             $sukses = 0;
-            $kodeDesa = session('kode_desa') ?? '3205332004'; // Sesuaikan default kode desa Pasirlangu
-            $periode = date('F Y'); // Contoh: July 2026
+            $kodeDesa = session()->get('kode_desa') ?? '3205332004';
+            $periode = date('F Y');
 
-            // Mulai dari index 1 untuk melewati baris Header
             for ($i = 1; $i < count($sheet); $i++) {
                 $row = $sheet[$i];
 
@@ -145,7 +188,7 @@ class Data extends BaseController
                 $noKis = trim($row[7] ?? '');
                 $statusRaw = trim($row[8] ?? '');
 
-                if (empty($nik) || empty($nama)) continue; // Lewati jika NIK kosong
+                if (empty($nik) || empty($nama)) continue;
 
                 // 🧠 LOGIKA 1: PENENTUAN STATUS
                 $statusUpper = strtoupper($statusRaw);
@@ -154,8 +197,8 @@ class Data extends BaseController
                 $statusKepesertaan = $isAktif ? 'Aktif' : 'Non-Aktif';
                 $alasanNonAktif = $isAktif ? null : $statusRaw;
 
-                // 🧠 LOGIKA 2: MENCARI id_art, RT, dan RW dari database kependudukan
-                $db = \Config\Database::connect(); // 🚀 Deklarasi koneksi DB CI4
+                // 🧠 LOGIKA 2: MENCARI id_art
+                $db = \Config\Database::connect();
 
                 $artData = $db->table('dtsen_art a')
                     ->select('a.id_art, rt.rt, rt.rw')
@@ -166,10 +209,9 @@ class Data extends BaseController
                     ->get()->getRowArray();
 
                 $idArt = $artData ? $artData['id_art'] : null;
-                $rt = $artData ? $artData['rt'] : '000'; // Default jika NIK tidak terdaftar di desa
+                $rt = $artData ? $artData['rt'] : '000';
                 $rw = $artData ? $artData['rw'] : '000';
 
-                // Siapkan data untuk di-insert / update
                 $dataPbi = [
                     'nik' => $nik,
                     'id_art' => $idArt,
@@ -183,15 +225,14 @@ class Data extends BaseController
                     'status_kepesertaan' => $statusKepesertaan,
                     'alasan_nonaktif' => $alasanNonAktif,
                     'periode_sinkron_terakhir' => $periode,
-                    'updated_by' => session()->get('id') // 🚀 Sudah menggunakan standar baku baru
+                    'updated_by' => session()->get('id')
                 ];
 
-                // Cek apakah NIK sudah ada
                 $cekExists = $this->pbiModel->where('nik', $nik)->first();
                 if ($cekExists) {
                     $this->pbiModel->update($cekExists['id'], $dataPbi);
                 } else {
-                    $dataPbi['created_by'] = session()->get('id'); // 🚀 Sudah menggunakan standar baku baru
+                    $dataPbi['created_by'] = session()->get('id');
                     $this->pbiModel->insert($dataPbi);
                 }
 
@@ -210,18 +251,12 @@ class Data extends BaseController
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | 🚀 FUNGSI CEK NIK (INTEGRASI KE KEPENDUDUKAN)
-    |--------------------------------------------------------------------------
-    */
     public function cek_nik()
     {
         if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
 
         $nik = trim($this->request->getPost('nik'));
 
-        // 1. Cek apakah sudah ada di PBI Master Data dan masih Aktif
         $cekPbi = $this->pbiModel->where('nik', $nik)->first();
         if ($cekPbi && $cekPbi['status_kepesertaan'] == 'Aktif') {
             return $this->response->setJSON([
@@ -230,10 +265,8 @@ class Data extends BaseController
             ]);
         }
 
-        // 2. Deklarasikan koneksi DB secara manual untuk memanggil tabel dtsen_art
         $db = \Config\Database::connect();
 
-        // 3. Cari di database kependudukan desa
         $artData = $db->table('dtsen_art a')
             ->select('a.id_art, a.nik, a.nama, k.no_kk, k.alamat as kampung, rt.rt, rt.rw')
             ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left')
@@ -249,7 +282,7 @@ class Data extends BaseController
                     'id_art'  => $artData['id_art'],
                     'nik'     => $artData['nik'],
                     'nama'    => $artData['nama'],
-                    'no_kk'   => $artData['no_kk'], // Tanda petik sudah diperbaiki!
+                    'no_kk'   => $artData['no_kk'],
                     'kampung' => $artData['kampung'] ?? '-',
                     'rt'      => $artData['rt'] ?? '000',
                     'rw'      => $artData['rw'] ?? '000',
@@ -264,17 +297,12 @@ class Data extends BaseController
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | 🚀 FUNGSI SIMPAN PBI MANUAL
-    |--------------------------------------------------------------------------
-    */
     public function simpan_manual()
     {
         if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
 
         $post = $this->request->getPost();
-        $kodeDesa = session('kode_desa') ?? '3205332004'; // Kode Desa Pasirlangu
+        $kodeDesa = session()->get('kode_desa') ?? '3205332004';
 
         $dataPbi = [
             'nik'                => $post['nik'],
@@ -288,12 +316,11 @@ class Data extends BaseController
             'rw'                 => str_pad($post['rw'], 3, '0', STR_PAD_LEFT),
             'kode_desa'          => $kodeDesa,
             'status_kepesertaan' => 'Aktif',
-            'alasan_nonaktif'    => null, // Reset jika sebelumnya non-aktif
+            'alasan_nonaktif'    => null,
             'periode_sinkron_terakhir' => date('F Y'),
             'updated_by'         => session()->get('id')
         ];
 
-        // Jika sebelumnya sempat Non-Aktif, kita Update. Jika warga baru, kita Insert.
         if (!empty($post['pbi_id'])) {
             $this->pbiModel->update($post['pbi_id'], $dataPbi);
         } else {
@@ -304,11 +331,6 @@ class Data extends BaseController
         return $this->response->setJSON(['status' => true, 'message' => 'Data PBI berhasil ditambahkan!']);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | 🚀 FUNGSI PROSES NON-AKTIF
-    |--------------------------------------------------------------------------
-    */
     public function proses_nonaktif()
     {
         if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
@@ -320,11 +342,10 @@ class Data extends BaseController
             return $this->response->setJSON(['status' => false, 'message' => 'Data tidak lengkap.']);
         }
 
-        // Siapkan data untuk update status
         $dataUpdate = [
             'status_kepesertaan' => 'Non-Aktif',
             'alasan_nonaktif'    => $alasan,
-            'tanggal_nonaktif'   => date('Y-m-d'), // Otomatis tanggal hari ini
+            'tanggal_nonaktif'   => date('Y-m-d'),
             'dinonaktifkan_oleh' => session()->get('id')
         ];
 
