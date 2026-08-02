@@ -295,18 +295,22 @@ class UsulanBansos extends Controller
         $db = db_connect();
 
         /* =====================================================
-       1️⃣ Validasi ART
+       1️⃣ Validasi ART (Terproteksi dari KK yang terhapus)
        ===================================================== */
         $art = $db->table('dtsen_art')
-            ->where('nik', $nik)
-            ->where('deleted_at', null)
+            ->select('dtsen_art.*') // Ambil semua data ART
+            ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk', 'left') // 🚀 Gabungkan dengan tabel KK
+            ->where('dtsen_art.nik', $nik)
+            ->where('dtsen_art.deleted_at IS NULL')
+            ->where('dtsen_kk.deleted_at IS NULL') // 🚀 KUNCI: Pastikan KK masih aktif
+            ->orderBy('dtsen_art.id_art', 'DESC') // Ambil data ter-update
             ->get()
             ->getRowArray();
 
         if (!$art) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Data individu tidak ditemukan.'
+                'message' => 'Data individu tidak ditemukan atau KK sudah tidak aktif.'
             ]);
         }
 
