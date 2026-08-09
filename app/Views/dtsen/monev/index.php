@@ -27,8 +27,30 @@
 
             <div class="card-body">
                 <!-- 🚀 Tabel ini sementara kosong, nanti kita isi dengan Server-Side DataTables -->
-                <div class="alert alert-info border-0 shadow-sm">
+                <!-- <div class="alert alert-info border-0 shadow-sm">
                     <i class="fas fa-info-circle me-2"></i> Silakan import data Excel dari Pendamping PKH terlebih dahulu.
+                </div> -->
+                <!-- 🔍 Area Filter Data -->
+                <div class="row mb-3 align-items-center">
+                    <div class="col-md-3 col-6 mb-2">
+                        <select id="filterKelengkapan" class="form-select form-select-sm shadow-sm">
+                            <option value="">-- Semua Kelengkapan --</option>
+                            <option value="1">Lengkap (4 Foto)</option>
+                            <option value="0">Belum Lengkap</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-6 mb-2">
+                        <select id="filterStatus" class="form-select form-select-sm shadow-sm">
+                            <option value="">-- Semua Status --</option>
+                            <option value="Menunggu">Menunggu</option>
+                            <option value="Selesai">Selesai</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-12 mb-2">
+                        <button type="button" id="btnResetFilter" class="btn btn-sm btn-danger shadow-sm w-100">
+                            <i class="fas fa-sync-alt me-1"></i> Reset
+                        </button>
+                    </div>
                 </div>
 
                 <div class="table-responsive mt-3">
@@ -222,6 +244,9 @@
                 data: function(d) {
                     // Sisipkan CSRF Token agar aman
                     d.<?= csrf_token() ?> = '<?= csrf_hash() ?>';
+                    // Kirim nilai filter ke controller
+                    d.filter_kelengkapan = $('#filterKelengkapan').val();
+                    d.filter_status = $('#filterStatus').val();
                 }
             },
             columns: [{
@@ -247,6 +272,37 @@
                 } // 5: Aksi
             ]
         });
+
+        // 🔄 Trigger reload DataTables saat dropdown berubah
+        $('#filterKelengkapan, #filterStatus').on('change', function() {
+            tableMonev.ajax.reload();
+        });
+
+        // 📋 Fungsi Salin NIK dengan SweetAlert2 Mini (Toast) untuk Mobile
+        window.salinNIK = function(nikReal) {
+            navigator.clipboard.writeText(nikReal).then(() => {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'NIK berhasil disalin!',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    customClass: {
+                        popup: 'swal2-small' // Perkecil ukuran untuk kenyamanan mobile
+                    }
+                });
+            }).catch(err => {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Gagal menyalin NIK',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            });
+        };
 
         // 🚀 BIND KE EVENT CLICK TOMBOL, BUKAN FORM SUBMIT
         $('#btnProsesImport').on('click', function() {
@@ -494,6 +550,19 @@
             if (typeof tableMonev !== 'undefined') {
                 tableMonev.columns.adjust().responsive.recalc();
             }
+        });
+
+        // 🧹 Tombol Reset Filter
+        $('#btnResetFilter').on('click', function() {
+            // Kembalikan dropdown ke nilai default (kosong)
+            $('#filterKelengkapan').val('');
+            $('#filterStatus').val('');
+
+            // Hapus juga teks pencarian global bawaan DataTables jika ada
+            tableMonev.search('');
+
+            // Reload tabel
+            tableMonev.ajax.reload();
         });
 
     });

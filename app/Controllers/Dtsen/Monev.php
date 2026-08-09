@@ -46,6 +46,8 @@ class Monev extends BaseController
         $start  = (int) ($post['start'] ?? 0);
         $length = (int) ($post['length'] ?? 10);
         $search = $post['search']['value'] ?? '';
+        $filterKelengkapan = $post['filter_kelengkapan'] ?? '';
+        $filterStatus = $post['filter_status'] ?? '';
 
         $nikPetugas = session()->get('nik');
         $roleId     = session()->get('role_id');
@@ -119,6 +121,25 @@ class Monev extends BaseController
                     }
                 }
                 $builder->groupEnd();
+            }
+        }
+
+        // 🔍 FITUR FILTER DROPDOWN
+        if ($filterStatus !== '') {
+            $builder->where('m.status_monev', $filterStatus);
+        }
+
+        if ($filterKelengkapan !== '') {
+            // Rumus kelengkapan murni di level database SQL
+            $kondisiLengkap = "(bk.foto_kpm_kks IS NOT NULL AND bk.foto_kpm_kks != '') AND 
+                               ((mk.foto_kks IS NOT NULL AND mk.foto_kks != '') OR (mk.foto_kepemilikan IS NOT NULL AND mk.foto_kepemilikan != '')) AND 
+                               (COALESCE(k.foto_rumah, rt.foto_rumah) IS NOT NULL AND COALESCE(k.foto_rumah, rt.foto_rumah) != '') AND 
+                               (COALESCE(k.foto_rumah_dalam, rt.foto_rumah_dalam) IS NOT NULL AND COALESCE(k.foto_rumah_dalam, rt.foto_rumah_dalam) != '')";
+
+            if ($filterKelengkapan === '1') {
+                $builder->where($kondisiLengkap, null, false);
+            } else if ($filterKelengkapan === '0') {
+                $builder->where("NOT ($kondisiLengkap)", null, false);
             }
         }
 
@@ -202,6 +223,21 @@ class Monev extends BaseController
 
             $alamatStr = $alamatFinal . '<br><small class="text-muted">RT ' . $rtFinal . ' / RW ' . $rwFinal . '</small>';
 
+            // 🛡️ MASKING NIK (Tampilkan 6 digit awal dan 4 akhir)
+            $realNik = esc($row['nik']);
+            $maskedNik = substr($realNik, 0, 6) . '******' . substr($realNik, -4);
+
+            // HTML Nama Target, Masked NIK, dan Tombol Copy
+            $namaDanNik = '
+                <b>' . esc($row['nama_target']) . '</b><br>
+                <div class="d-flex align-items-center mt-1">
+                    <small class="text-muted mb-0 me-2">NIK: ' . $maskedNik . '</small>
+                    <button class="btn btn-sm btn-light border py-0 px-1 shadow-sm" onclick="salinNIK(\'' . $realNik . '\')" title="Salin NIK Asli">
+                        <i class="fas fa-copy text-primary" style="font-size: 0.85rem;"></i>
+                    </button>
+                </div>
+            ';
+
             // 🧠 Logika Kelengkapan
             $isLengkap = (!empty($row['foto_kpm_kks']) && !empty($row['foto_kks_final']) &&
                 !empty($row['foto_rumah']) && !empty($row['foto_rumah_dalam']));
@@ -221,7 +257,7 @@ class Monev extends BaseController
             // 📊 4. Susunan Kolom DataTables (Pastikan pas 6 kolom sesuai header HTML)
             $data[] = [
                 $no++,
-                '<b>' . esc($row['nama_target']) . '</b><br><small class="text-muted">NIK: ' . esc($row['nik']) . '</small>',
+                $namaDanNik,
                 $alamatStr,
                 $badgeKelengkapan,
                 $badgeStatus,
