@@ -53,6 +53,7 @@ class Monev extends BaseController
         // 🚀 THE MAGIC: Gunakan db_connect() agar 100% aman dari Fatal Error CI4
         $db = \Config\Database::connect();
 
+        // 1. Susun Base Builder (Join & Group By)
         $builder = $db->table('dtsen_monev m')
             ->select("
                 m.id_monev, 
@@ -74,22 +75,19 @@ class Monev extends BaseController
                     ELSE mk.foto_kepemilikan 
                 END as foto_kks_final
             ")
-            // Hubungkan NIK Excel ke ART
             ->join('dtsen_art a', 'a.nik = m.nik AND a.deleted_at IS NULL', 'left')
-            // Hubungkan ART ke KK
             ->join('dtsen_kk k', 'k.id_kk = a.id_kk AND k.deleted_at IS NULL', 'left')
-            // Hubungkan KK ke RT/RW
             ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left')
-            // Ambil Foto KPM (Bansos KKS)
             ->join('dtsen_bansos_kks bk', 'bk.nik_kpm = m.nik', 'left')
-            // Ambil Foto Fisik KKS (Master KKS) - Mendukung NIK langsung
-            ->join('dtsen_master_kks mk', 'mk.nik = m.nik', 'left');
+            ->join('dtsen_master_kks mk', 'mk.nik = m.nik', 'left')
+            ->groupBy('m.id_monev'); // Kunci agar tidak double
 
-        $userInfo = $this->authModel->getUserId(); // Pastikan AuthModel sudah di-load
-        $kodeDesa = $userInfo['kode_desa'] ?? session()->get('kode_desa');
-        $wilayahTugas = trim($userInfo['wilayah_tugas'] ?? '');
+        // 2. Proteksi Role 5 (Pendamping)
+        if ($roleId == 5) {
+            $builder->where('m.created_by', $nikPetugas);
+        }
 
-        // 🛡️ FILTER WILAYAH (Jika role di bawah 5)
+        // 3. Gembok Wilayah Tugas (Role < 5)
         if ($roleId < 5) {
             if (!empty($kodeDesa)) {
                 $builder->where("m.nik IN (
@@ -103,70 +101,69 @@ class Monev extends BaseController
             if (!empty($wilayahTugas)) {
                 $blocks = explode('|', $wilayahTugas);
                 $builder->groupStart();
-
                 foreach ($blocks as $block) {
                     [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
-
-                    // Bersihkan angka RW (buang nol di depan agar murni angka)
                     $rwInt = (int) trim($rw);
-
                     if ($rwInt > 0) {
                         $rts = array_filter(array_map('trim', explode(',', $rtList)));
-
-                        // Jika ada spesifikasi RT (misal 003:005,002)
                         if (!empty($rts)) {
                             foreach ($rts as $rt) {
                                 $rtInt = (int) trim($rt);
                                 if ($rtInt > 0) {
-                                    // 🚀 Trik Sakti: Konversi nilai kolom DB dan inputan menjadi INTEGER
-                                    // Ini membuat '003', '03', dan '3' bernilai SAMA (3) bagi MySQL!
                                     $builder->orWhere("(CAST(m.rw AS UNSIGNED) = {$rwInt} AND CAST(m.rt AS UNSIGNED) = {$rtInt})");
                                 }
                             }
                         } else {
-                            // Jika hanya RW saja (misal 003)
                             $builder->orWhere("CAST(m.rw AS UNSIGNED) = {$rwInt}");
                         }
                     }
                 }
-
                 $builder->groupEnd();
             }
         }
 
-        // 🚀 FITUR PENGURUTAN (SORTING)
-        // Indeks array ini memetakan kolom DataTables (0-4) ke nama kolom di Database
+        // 4. 🔍 FITUR PENCARIAN GLOBAL (Ditaruh SEBELUM clone & counting)
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('m.nama_target', $search)
+                ->orLike('m.nik', $search)
+                ->groupEnd();
+        }
+
+        // 🚀 5. CLONE BUILDER UNTUK MENGHITUNG DATA TERFILTER (Wajib setelah pencarian & filter wilayah)
+        $builderClone = clone $builder;
+        $recordsFiltered = $builderClone->countAllResults();
+
+        // 6. FITUR PENGURUTAN (SORTING)
         $columnOrder = [
             null,               // 0: No
             'm.nama_target',    // 1: Nama Target
-            'm.alamat',         // 2: Alamat Lengkap
-            'm.status_monev',   // 3: Status Monev
-            null                // 4: Aksi
+            'm.alamat',         // 2: Alamat
+            null,               // 3: Kelengkapan
+            'm.status_monev',   // 4: Status
+            null                // 5: Aksi
         ];
 
         if (isset($post['order'])) {
             $colIndex = (int) $post['order'][0]['column'];
-            $dir      = $post['order'][0]['dir'] === 'asc' ? 'ASC' : 'DESC'; // Validasi arah panah
-
-            // Jika kolom tersebut diizinkan untuk di-sort (bukan null)
+            $dir      = $post['order'][0]['dir'] === 'asc' ? 'ASC' : 'DESC';
             if (isset($columnOrder[$colIndex]) && $columnOrder[$colIndex] !== null) {
                 $builder->orderBy($columnOrder[$colIndex], $dir);
             } else {
-                $builder->orderBy('m.id_monev', 'ASC'); // Fallback
+                $builder->orderBy('m.id_monev', 'ASC');
             }
         } else {
-            $builder->orderBy('m.id_monev', 'ASC'); // Default load pertama kali
+            $builder->orderBy('m.id_monev', 'ASC');
         }
 
-        // HAPUS ATAU KOMENTARI BARIS INI (Karena sudah digantikan oleh logika di atas):
-        // $results = $builder->orderBy('m.id_monev', 'ASC')->get()->getResultArray(); 
+        // 7. LIMIT & OFFSET UNTUK PAGINATION
+        if ($length != -1) {
+            $builder->limit($length, $start);
+        }
 
-        // GANTI MENJADI SEPERTI INI:
-        $recordsFiltered = $builder->countAllResults(false);
-        if ($length != -1) $builder->limit($length, $start);
         $results = $builder->get()->getResultArray();
 
-        // 📊 Hitung Total Data Murni
+        // 8. HITUNG TOTAL MURNI (Tanpa filter pencarian)
         $totalBuilder = $db->table('dtsen_monev m');
         if ($roleId == 5) {
             $totalBuilder->where('m.created_by', $nikPetugas);
