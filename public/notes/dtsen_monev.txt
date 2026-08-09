@@ -1,0 +1,32 @@
+CREATE TABLE `dtsen_monev` (
+  `id_monev` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  
+  -- 📊 DATA ASLI DARI EXCEL
+  `nama_target` varchar(150) DEFAULT NULL,
+  `provinsi` varchar(100) DEFAULT NULL,
+  `kabupaten` varchar(100) DEFAULT NULL,
+  `kecamatan` varchar(100) DEFAULT NULL,
+  `kelurahan` varchar(100) DEFAULT NULL,
+  `alamat` text DEFAULT NULL,
+  `rt` varchar(10) DEFAULT NULL,
+  `rw` varchar(10) DEFAULT NULL,
+  `nama_sdm` varchar(150) DEFAULT NULL,
+  `status_kpm` varchar(100) DEFAULT NULL,
+  `nik` varchar(20) DEFAULT NULL,
+  
+  -- ⚙️ DATA PELACAKAN SISTEM SINDEN
+  `periode` varchar(50) DEFAULT NULL,
+  `status_monev` enum('Menunggu','Selesai') NOT NULL DEFAULT 'Menunggu',
+  `catatan_pendamping` text DEFAULT NULL,
+  
+  -- 🕒 AUDIT TRAIL
+  `created_by` varchar(50) DEFAULT NULL,
+  `updated_by` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  
+  PRIMARY KEY (`id_monev`),
+  KEY `idx_nik` (`nik`),
+  KEY `idx_periode` (`periode`),
+  KEY `idx_status_monev` (`status_monev`)
+) ENGINE=InnoDB;

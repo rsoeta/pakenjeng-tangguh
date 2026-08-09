@@ -241,6 +241,17 @@ $routes->group('sensus-ekonomi', ['filter' => ['authfilterdtks', 'menufilterdtks
 	$routes->get('desil-history/(:num)', 'Dtsen\PembaruanKeluarga::desilHistory/$1');
 });
 
+// 📊 MONEV PKH
+$routes->group('monev', ['namespace' => 'App\Controllers\Dtsen'], function ($routes) {
+	$routes->get('/', 'Monev::index');
+	$routes->post('import_excel', 'Monev::import_excel');
+	$routes->post('datatable', 'Monev::datatable');
+
+	// 🚀 Tambahkan 2 rute ini:
+	$routes->get('get_detail/(:num)', 'Monev::get_detail/$1');
+	$routes->post('tandai_selesai', 'Monev::tandai_selesai');
+});
+
 // 🌍 API Wilayah Lokal (Dropdown berantai untuk DTSEN)
 $routes->group('api/villages', ['namespace' => 'App\Controllers\Api'], function ($routes) {
 	$routes->get('provinces', 'Villages::provinces');
