@@ -62,37 +62,76 @@ class Monev extends BaseController
                 m.rt, 
                 m.rw, 
                 m.status_monev,
-                a.nama as nama_sinden,
-                k.alamat as alamat_sinden,
-                rt.rt as rt_sinden,
-                rt.rw as rw_sinden,
-                rt.foto_rumah,
-                rt.foto_rumah_dalam,
+                COALESCE(a.nama, m.nama_target) as nama_sinden,
+                COALESCE(k.alamat, m.alamat) as alamat_sinden,
+                COALESCE(rt.rt, m.rt) as rt_sinden,
+                COALESCE(rt.rw, m.rw) as rw_sinden,
+                COALESCE(k.foto_rumah, rt.foto_rumah) as foto_rumah,
+                COALESCE(k.foto_rumah_dalam, rt.foto_rumah_dalam) as foto_rumah_dalam,
                 bk.foto_kpm_kks,
-                COALESCE(mk.foto_kks, mk.foto_kepemilikan) as foto_kks_final
+                CASE 
+                    WHEN mk.foto_kks IS NOT NULL AND mk.foto_kks != '' THEN mk.foto_kks 
+                    ELSE mk.foto_kepemilikan 
+                END as foto_kks_final
             ")
             // Hubungkan NIK Excel ke ART
             ->join('dtsen_art a', 'a.nik = m.nik AND a.deleted_at IS NULL', 'left')
-            // Hubungkan ART ke KK (Pastikan aktif)
+            // Hubungkan ART ke KK
             ->join('dtsen_kk k', 'k.id_kk = a.id_kk AND k.deleted_at IS NULL', 'left')
             // Hubungkan KK ke RT/RW
             ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left')
             // Ambil Foto KPM (Bansos KKS)
             ->join('dtsen_bansos_kks bk', 'bk.nik_kpm = m.nik', 'left')
-            // Ambil Foto Fisik KKS (Master KKS)
+            // Ambil Foto Fisik KKS (Master KKS) - Mendukung NIK langsung
             ->join('dtsen_master_kks mk', 'mk.nik = m.nik', 'left');
 
-        // 🔒 Proteksi: Pendamping PKH (role 5) hanya melihat data target unggahannya sendiri
-        if ($roleId == 5) {
-            $builder->where('m.created_by', $nikPetugas);
-        }
+        $userInfo = $this->authModel->getUserId(); // Pastikan AuthModel sudah di-load
+        $kodeDesa = $userInfo['kode_desa'] ?? session()->get('kode_desa');
+        $wilayahTugas = trim($userInfo['wilayah_tugas'] ?? '');
 
-        // 🔍 Fitur Pencarian Global
-        if (!empty($search)) {
-            $builder->groupStart()
-                ->like('m.nama_target', $search)
-                ->orLike('m.nik', $search)
-                ->groupEnd();
+        // 🛡️ FILTER WILAYAH (Jika role di bawah 5)
+        if ($roleId < 5) {
+            if (!empty($kodeDesa)) {
+                $builder->where("m.nik IN (
+                    SELECT a.nik FROM dtsen_art a 
+                    JOIN dtsen_kk k ON k.id_kk = a.id_kk 
+                    JOIN dtsen_rt rt ON rt.id_rt = k.id_rt 
+                    WHERE rt.kode_desa = '" . $db->escapeString($kodeDesa) . "'
+                )", NULL, FALSE);
+            }
+
+            if (!empty($wilayahTugas)) {
+                $blocks = explode('|', $wilayahTugas);
+                $builder->groupStart();
+
+                foreach ($blocks as $block) {
+                    [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
+
+                    // Bersihkan angka RW (buang nol di depan agar murni angka)
+                    $rwInt = (int) trim($rw);
+
+                    if ($rwInt > 0) {
+                        $rts = array_filter(array_map('trim', explode(',', $rtList)));
+
+                        // Jika ada spesifikasi RT (misal 003:005,002)
+                        if (!empty($rts)) {
+                            foreach ($rts as $rt) {
+                                $rtInt = (int) trim($rt);
+                                if ($rtInt > 0) {
+                                    // 🚀 Trik Sakti: Konversi nilai kolom DB dan inputan menjadi INTEGER
+                                    // Ini membuat '003', '03', dan '3' bernilai SAMA (3) bagi MySQL!
+                                    $builder->orWhere("(CAST(m.rw AS UNSIGNED) = {$rwInt} AND CAST(m.rt AS UNSIGNED) = {$rtInt})");
+                                }
+                            }
+                        } else {
+                            // Jika hanya RW saja (misal 003)
+                            $builder->orWhere("CAST(m.rw AS UNSIGNED) = {$rwInt}");
+                        }
+                    }
+                }
+
+                $builder->groupEnd();
+            }
         }
 
         // 🚀 FITUR PENGURUTAN (SORTING)
@@ -138,29 +177,56 @@ class Monev extends BaseController
         $no = $start + 1;
 
         foreach ($results as $row) {
-            // Label Status Pengerjaan
+            // 🔍 DEBUGGING: Cek isi masing-masing foto di log error Laragon (writable/logs)
+            log_message('error', 'CEK FOTO NIK ' . $row['nik'] .
+                ' | KPM: ' . var_export($row['foto_kpm_kks'], true) .
+                ' | KKS: ' . var_export($row['foto_kks_final'], true) .
+                ' | R_Depan: ' . var_export($row['foto_rumah'], true) .
+                ' | R_Dalam: ' . var_export($row['foto_rumah_dalam'], true));
+
+            // 🧠 Logika Kelengkapan yang lebih toleran (membuang spasi kosong)
+            $isLengkap = (!empty(trim($row['foto_kpm_kks'] ?? '')) &&
+                !empty(trim($row['foto_kks_final'] ?? '')) &&
+                !empty(trim($row['foto_rumah'] ?? '')) &&
+                !empty(trim($row['foto_rumah_dalam'] ?? '')));
+
             $badgeStatus = ($row['status_monev'] == 'Selesai')
                 ? '<span class="badge bg-success"><i class="fas fa-check-circle"></i> Selesai</span>'
                 : '<span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> Menunggu</span>';
 
-            // 🧠 Cerdas: Jika data SINDEN ada, pakai alamat SINDEN. Jika tidak ada, pakai alamat mentah Excel.
+            $badgeKelengkapan = $isLengkap
+                ? '<span class="badge bg-primary"><i class="fas fa-check"></i> Lengkap</span>'
+                : '<span class="badge bg-danger"><i class="fas fa-times"></i> Belum Lengkap</span>';
+
+            // 🧠 2. Definisi Alamat (Menggabungkan data SINDEN dan Excel)
             $alamatFinal = !empty($row['alamat_sinden']) ? $row['alamat_sinden'] : $row['alamat'];
             $rtFinal = !empty($row['rt_sinden']) ? str_pad($row['rt_sinden'], 3, '0', STR_PAD_LEFT) : $row['rt'];
             $rwFinal = !empty($row['rw_sinden']) ? str_pad($row['rw_sinden'], 3, '0', STR_PAD_LEFT) : $row['rw'];
 
             $alamatStr = $alamatFinal . '<br><small class="text-muted">RT ' . $rtFinal . ' / RW ' . $rwFinal . '</small>';
 
-            // Tombol Eksekusi
+            // 🧠 Logika Kelengkapan
+            $isLengkap = (!empty($row['foto_kpm_kks']) && !empty($row['foto_kks_final']) &&
+                !empty($row['foto_rumah']) && !empty($row['foto_rumah_dalam']));
+
+            // 🚀 Tombol Eksekusi: Kita tambahkan class 'disabled' jika belum lengkap
+            // Kita gunakan logic CSS pointer-events: none agar tidak bisa diklik
+            $statusBtn = $isLengkap ? '' : 'disabled';
             $btnAksi = '
-                <button class="btn btn-sm btn-primary shadow-sm" onclick="lihatDetailMonev(' . $row['id_monev'] . ')" title="Lakukan Monev">
-                    <i class="fas fa-camera"></i> Eksekusi
+                <button class="btn btn-sm btn-primary shadow-sm" 
+                        onclick="lihatDetailMonev(' . $row['id_monev'] . ')" 
+                        title="' . ($isLengkap ? 'Eksekusi Monev' : 'Data belum lengkap') . '"
+                        ' . $statusBtn . '>
+                    <i class="fas fa-camera"></i> ' . ($isLengkap ? 'Eksekusi' : 'Tunggu') . '
                 </button>
             ';
 
+            // 📊 4. Susunan Kolom DataTables (Pastikan pas 6 kolom sesuai header HTML)
             $data[] = [
                 $no++,
                 '<b>' . esc($row['nama_target']) . '</b><br><small class="text-muted">NIK: ' . esc($row['nik']) . '</small>',
                 $alamatStr,
+                $badgeKelengkapan,
                 $badgeStatus,
                 $btnAksi
             ];
@@ -181,8 +247,14 @@ class Monev extends BaseController
     */
     public function import_excel()
     {
-        if (!$this->request->isAJAX()) {
-            return exit('Tidak diizinkan');
+        if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
+
+        // 🔒 Gembok: Blokir role_id >= 4 melakukan import
+        if (session()->get('role_id') >= 4) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Akses ditolak! Anda tidak memiliki wewenang untuk mengunggah data Excel.'
+            ]);
         }
 
         $file = $this->request->getFile('file_excel');
@@ -315,6 +387,14 @@ class Monev extends BaseController
     public function tandai_selesai()
     {
         if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
+
+        // 🔒 Gembok Keamanan: Cegah role_id = 4 mengubah status
+        if (session()->get('role_id') == 4) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Akses ditolak! Anda tidak memiliki wewenang untuk menandai selesai.'
+            ]);
+        }
 
         $id = $this->request->getPost('id_monev');
         $catatan = $this->request->getPost('catatan_pendamping');

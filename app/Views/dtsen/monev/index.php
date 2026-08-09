@@ -16,9 +16,13 @@
         <div class="card mt-2 shadow-sm border-top-primary">
             <div class="card-header bg-white d-flex justify-content-between align-items-center w-100">
                 <h5 class="mb-0 fw-bold text-primary">Daftar Target Monev</h5>
-                <button type="button" class="btn btn-sm btn-success shadow-sm ms-auto" data-bs-toggle="modal" data-bs-target="#modalImportMonev">
-                    <i class="fas fa-file-excel me-1"></i> Import Data Excel
-                </button>
+
+                <!-- Tombol Import hanya muncul jika role_id < 4 -->
+                <?php if (session()->get('role_id') < 4): ?>
+                    <button type="button" class="btn btn-sm btn-success shadow-sm ms-auto" data-bs-toggle="modal" data-bs-target="#modalImportMonev">
+                        <i class="fas fa-file-excel me-1"></i> Import Data Excel
+                    </button>
+                <?php endif; ?>
             </div>
 
             <div class="card-body">
@@ -34,7 +38,8 @@
                                 <th>No</th>
                                 <th>Nama Target</th>
                                 <th>Alamat</th>
-                                <th>Status Monev</th>
+                                <th>Kelengkapan</th>
+                                <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -192,10 +197,12 @@
                     <i class="fas fa-arrow-left me-1"></i> Tutup
                 </button>
 
-                <!-- Tombol Tandai Selesai di Kanan -->
-                <button type="button" class="btn btn-primary px-4 shadow-sm" id="btnTandaiSelesai">
-                    <i class="fas fa-check me-1"></i> Tandai Selesai
-                </button>
+                <!-- Tombol Tandai Selesai di Kanan (Hanya untuk SELAIN role_id = 4) -->
+                <?php if (session()->get('role_id') != 4): ?>
+                    <button type="button" class="btn btn-primary px-4 shadow-sm" id="btnTandaiSelesai">
+                        <i class="fas fa-check me-1"></i> Tandai Selesai
+                    </button>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -219,15 +226,25 @@
             },
             columns: [{
                     className: "text-center"
-                }, // No
-                null, // Nama Target
-                null, // Alamat
+                }, // 0: No
                 {
-                    className: "text-center"
-                }, // Status
+                    orderable: true
+                }, // 1: Nama Target
                 {
+                    orderable: true
+                }, // 2: Alamat Lengkap
+                {
+                    orderable: true,
                     className: "text-center"
-                } // Aksi
+                }, // 3: Kelengkapan
+                {
+                    orderable: true,
+                    className: "text-center"
+                }, // 4: Status
+                {
+                    orderable: false,
+                    className: "text-center"
+                } // 5: Aksi
             ]
         });
 
