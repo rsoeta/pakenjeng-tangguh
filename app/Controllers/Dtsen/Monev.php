@@ -84,44 +84,34 @@ class Monev extends BaseController
             ->join('dtsen_master_kks mk', 'mk.nik = m.nik', 'left')
             ->groupBy('m.id_monev'); // Kunci agar tidak double
 
-        // 2. Proteksi Role 5 (Pendamping)
-        if ($roleId == 5) {
-            $builder->where('m.created_by', $nikPetugas);
-        }
+        // 🚀 PANGGIL VARIABEL USER INFO & WILAYAH
+        $userInfo     = $this->authModel->getUserId();
+        $wilayahTugas = trim($userInfo['wilayah_tugas'] ?? '');
 
-        // 3. Gembok Wilayah Tugas (Role < 5)
-        if ($roleId < 5) {
-            if (!empty($kodeDesa)) {
-                $builder->where("m.nik IN (
-                    SELECT a.nik FROM dtsen_art a 
-                    JOIN dtsen_kk k ON k.id_kk = a.id_kk 
-                    JOIN dtsen_rt rt ON rt.id_rt = k.id_rt 
-                    WHERE rt.kode_desa = '" . $db->escapeString($kodeDesa) . "'
-                )", NULL, FALSE);
-            }
-
-            if (!empty($wilayahTugas)) {
-                $blocks = explode('|', $wilayahTugas);
-                $builder->groupStart();
-                foreach ($blocks as $block) {
-                    [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
-                    $rwInt = (int) trim($rw);
-                    if ($rwInt > 0) {
-                        $rts = array_filter(array_map('trim', explode(',', $rtList)));
-                        if (!empty($rts)) {
-                            foreach ($rts as $rt) {
-                                $rtInt = (int) trim($rt);
-                                if ($rtInt > 0) {
-                                    $builder->orWhere("(CAST(m.rw AS UNSIGNED) = {$rwInt} AND CAST(m.rt AS UNSIGNED) = {$rtInt})");
-                                }
+        // 🛡️ GEMBOK WILAYAH KERJA 
+        // Hanya eksekusi filter JIKA user memiliki wilayah_tugas spesifik (misal Role 4).
+        // Role 3 & 5 yang wilayah_tugas-nya KOSONG akan ter-bypass dan melihat FULL 799 data!
+        if ($roleId <= 5 && !empty($wilayahTugas)) {
+            $blocks = explode('|', $wilayahTugas);
+            $builder->groupStart();
+            foreach ($blocks as $block) {
+                [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
+                $rwInt = (int) trim($rw);
+                if ($rwInt > 0) {
+                    $rts = array_filter(array_map('trim', explode(',', $rtList)));
+                    if (!empty($rts)) {
+                        foreach ($rts as $rt) {
+                            $rtInt = (int) trim($rt);
+                            if ($rtInt > 0) {
+                                $builder->orWhere("(CAST(m.rw AS UNSIGNED) = {$rwInt} AND CAST(m.rt AS UNSIGNED) = {$rtInt})");
                             }
-                        } else {
-                            $builder->orWhere("CAST(m.rw AS UNSIGNED) = {$rwInt}");
                         }
+                    } else {
+                        $builder->orWhere("CAST(m.rw AS UNSIGNED) = {$rwInt}");
                     }
                 }
-                $builder->groupEnd();
             }
+            $builder->groupEnd();
         }
 
         // 🔍 FITUR FILTER DROPDOWN
@@ -184,11 +174,32 @@ class Monev extends BaseController
 
         $results = $builder->get()->getResultArray();
 
-        // 8. HITUNG TOTAL MURNI (Tanpa filter pencarian)
+        // 8. HITUNG TOTAL MURNI (Sesuai hak akses wilayah tugas)
         $totalBuilder = $db->table('dtsen_monev m');
-        if ($roleId == 5) {
-            $totalBuilder->where('m.created_by', $nikPetugas);
+
+        if ($roleId <= 5 && !empty($wilayahTugas)) {
+            $blocks = explode('|', $wilayahTugas);
+            $totalBuilder->groupStart();
+            foreach ($blocks as $block) {
+                [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
+                $rwInt = (int) trim($rw);
+                if ($rwInt > 0) {
+                    $rts = array_filter(array_map('trim', explode(',', $rtList)));
+                    if (!empty($rts)) {
+                        foreach ($rts as $rt) {
+                            $rtInt = (int) trim($rt);
+                            if ($rtInt > 0) {
+                                $totalBuilder->orWhere("(CAST(m.rw AS UNSIGNED) = {$rwInt} AND CAST(m.rt AS UNSIGNED) = {$rtInt})");
+                            }
+                        }
+                    } else {
+                        $totalBuilder->orWhere("CAST(m.rw AS UNSIGNED) = {$rwInt}");
+                    }
+                }
+            }
+            $totalBuilder->groupEnd();
         }
+
         $recordsTotal = $totalBuilder->countAllResults();
 
         $data = [];
