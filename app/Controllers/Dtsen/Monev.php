@@ -234,27 +234,29 @@ class Monev extends BaseController
 
             $alamatStr = $alamatFinal . '<br><small class="text-muted">RT ' . $rtFinal . ' / RW ' . $rwFinal . '</small>';
 
-            // 🛡️ MASKING NIK (Tampilkan 6 digit awal dan 4 akhir)
+            // 🛡️ MASKING NIK (Interaktif: Tampil asli saat di-hover)
             $realNik = esc($row['nik']);
             $maskedNik = substr($realNik, 0, 6) . '******' . substr($realNik, -4);
 
-            // HTML Nama Target, Masked NIK, dan Tombol Copy
+            // HTML Nama Target, Masked NIK interaktif, dan Tombol Copy
             $namaDanNik = '
                 <b>' . esc($row['nama_target']) . '</b><br>
                 <div class="d-flex align-items-center mt-1">
-                    <small class="text-muted mb-0 me-2">NIK: ' . $maskedNik . '</small>
+                    <small class="text-muted mb-0 me-2" 
+                           style="cursor: pointer; transition: all 0.2s ease-in-out;" 
+                           data-masked="NIK: ' . $maskedNik . '" 
+                           data-real="NIK: ' . $realNik . '"
+                           onmouseover="this.innerText = this.getAttribute(\'data-real\'); this.classList.remove(\'text-muted\'); this.classList.add(\'text-primary\', \'fw-bold\');"
+                           onmouseout="this.innerText = this.getAttribute(\'data-masked\'); this.classList.remove(\'text-primary\', \'fw-bold\'); this.classList.add(\'text-muted\');">
+                        NIK: ' . $maskedNik . '
+                    </small>
                     <button class="btn btn-sm btn-light border py-0 px-1 shadow-sm" onclick="salinNIK(\'' . $realNik . '\')" title="Salin NIK Asli">
                         <i class="fas fa-copy text-primary" style="font-size: 0.85rem;"></i>
                     </button>
                 </div>
             ';
 
-            // 🧠 Logika Kelengkapan
-            $isLengkap = (!empty($row['foto_kpm_kks']) && !empty($row['foto_kks_final']) &&
-                !empty($row['foto_rumah']) && !empty($row['foto_rumah_dalam']));
-
-            // 🚀 Tombol Eksekusi: Kita tambahkan class 'disabled' jika belum lengkap
-            // Kita gunakan logic CSS pointer-events: none agar tidak bisa diklik
+            // 🚀 TOMBOL AKSI UTAMA
             $statusBtn = $isLengkap ? '' : 'disabled';
             $btnAksi = '
                 <button class="btn btn-sm btn-primary shadow-sm" 
@@ -265,14 +267,24 @@ class Monev extends BaseController
                 </button>
             ';
 
-            // 📊 4. Susunan Kolom DataTables (Pastikan pas 6 kolom sesuai header HTML)
+            // 🎯 TOMBOL UBAH NIK (Hanya muncul jika yang login adalah Operator Desa / role_id = 3)
+            if ($roleId == 3) {
+                $btnAksi .= '
+                <button class="btn btn-sm btn-warning shadow-sm ms-1" 
+                        onclick="bukaModalUbahNik(' . $row['id_monev'] . ', \'' . $realNik . '\', \'' . esc($row['nama_target']) . '\')" 
+                        title="Ubah NIK">
+                    <i class="fas fa-edit"></i> Edit
+                </button>';
+            }
+
+            // 📊 Susunan Kolom DataTables
             $data[] = [
                 $no++,
                 $namaDanNik,
                 $alamatStr,
                 $badgeKelengkapan,
                 $badgeStatus,
-                $btnAksi
+                $btnAksi // Pastikan variabel $btnAksi masuk ke kolom terakhir ini
             ];
         }
 
@@ -450,5 +462,140 @@ class Monev extends BaseController
         ]);
 
         return $this->response->setJSON(['status' => true, 'message' => 'Monev berhasil ditandai selesai!']);
+    }
+
+    public function search_nik_art()
+    {
+        if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
+
+        $term = trim($this->request->getGet('q'));
+        $userInfo = $this->authModel->getUserId();
+        $wilayahTugas = trim($userInfo['wilayah_tugas'] ?? '');
+        $db = \Config\Database::connect();
+
+        $builder = $db->table('dtsen_art')
+            ->select("dtsen_art.nik, dtsen_art.nama, dtsen_art.hubungan_keluarga AS shdk, dtsen_rt.rw, dtsen_rt.rt")
+            ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk AND dtsen_kk.deleted_at IS NULL', 'left')
+            ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
+            ->where('dtsen_art.deleted_at IS NULL')
+            ->groupStart()
+            ->like('dtsen_art.nik', $term)
+            ->orLike('dtsen_art.nama', $term)
+            ->groupEnd()
+            ->groupBy('dtsen_art.nik')
+            ->limit(10);
+
+        if (!empty($wilayahTugas)) {
+            $wilayahPairs = [];
+            $blocks = explode('|', $wilayahTugas);
+            foreach ($blocks as $block) {
+                [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
+                $rw = trim($rw);
+                foreach (explode(',', $rtList) as $rt) {
+                    $rt = trim($rt);
+                    if ($rw !== '' && $rt !== '') {
+                        $wilayahPairs[] = ['rw' => $rw, 'rt' => $rt];
+                    }
+                }
+            }
+            if (!empty($wilayahPairs)) {
+                $builder->groupStart();
+                foreach ($wilayahPairs as $pair) {
+                    $builder->orGroupStart()
+                        ->where('dtsen_rt.rw', $pair['rw'])
+                        ->where('dtsen_rt.rt', $pair['rt'])
+                        ->groupEnd();
+                }
+                $builder->groupEnd();
+            }
+        }
+
+        $rows = $builder->get()->getResultArray();
+        $results = array_map(function ($row) {
+            return [
+                'id'    => $row['nik'],
+                'text'  => $row['nik'] . ' - ' . strtoupper($row['nama']),
+                'nama'  => $row['nama']
+            ];
+        }, $rows);
+
+        return $this->response->setJSON(['results' => $results]);
+    }
+
+    public function update_nik()
+    {
+        if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
+
+        // 🔒 Gembok Hak Akses (Hanya Admin Desa)
+        if (session()->get('role_id') != 3) {
+            return $this->response->setJSON(['status' => false, 'message' => 'Akses ditolak!']);
+        }
+
+        $id = $this->request->getPost('id_monev');
+        $nikBaru = $this->request->getPost('nik_baru');
+
+        // 🛡️ VALIDASI ANTI GANDA: Cek apakah NIK baru sudah ada di tabel Monev
+        $cekDataGanda = $this->monevModel->where('nik', $nikBaru)->first();
+
+        if ($cekDataGanda) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Gagal! NIK tersebut sudah terdaftar di daftar Monev saat ini.'
+            ]);
+        }
+
+        // 🚀 Eksekusi Update jika aman
+        $this->monevModel->update($id, ['nik' => $nikBaru]);
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'NIK berhasil diperbarui tanpa bentrok data!'
+        ]);
+    }
+
+    public function tambah_monev()
+    {
+        if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
+
+        // 🔒 Gembok Hak Akses (Hanya untuk Admin/Operator Desa dengan role < 4)
+        if (session()->get('role_id') >= 4) {
+            return $this->response->setJSON(['status' => false, 'message' => 'Akses ditolak!']);
+        }
+
+        $nik = $this->request->getPost('nik');
+        $namaTarget = $this->request->getPost('nama_target');
+        $periode = 'Triwulan 2 ' . date('Y'); // Sesuaikan periode defaultnya
+
+        if (empty($nik)) {
+            return $this->response->setJSON(['status' => false, 'message' => 'Data NIK tidak valid!']);
+        }
+
+        // 🛡️ VALIDASI ANTI GANDA
+        $cekDataGanda = $this->monevModel->where('nik', $nik)->first();
+        if ($cekDataGanda) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Gagal! KPM tersebut sudah terdaftar di Monev saat ini.'
+            ]);
+        }
+
+        // 🚀 Eksekusi Insert Data
+        // Catatan: Karena di fungsi datatable() kita sudah memakai COALESCE(k.alamat, m.alamat), 
+        // kita tidak perlu mengisi kolom alamat/rt/rw di tabel dtsen_monev.
+        // Sistem otomatis akan menarik alamat/RT/RW terbaru dari dtsen_art (master).
+        $dataInsert = [
+            'nik'          => $nik,
+            'nama_target'  => $namaTarget,
+            'periode'      => $periode,
+            'status_monev' => 'Menunggu',
+            'created_by'   => session()->get('nik') ?? 'system'
+        ];
+
+        $this->monevModel->insert($dataInsert);
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'Data target Monev berhasil ditambahkan!'
+        ]);
     }
 }

@@ -17,11 +17,16 @@
             <div class="card-header bg-white d-flex justify-content-between align-items-center w-100">
                 <h5 class="mb-0 fw-bold text-primary">Daftar Target Monev</h5>
 
-                <!-- Tombol Import hanya muncul jika role_id < 4 -->
+                <!-- Tombol Import & Tambah hanya muncul jika role_id < 4 -->
                 <?php if (session()->get('role_id') < 4): ?>
-                    <button type="button" class="btn btn-sm btn-success shadow-sm ms-auto" data-bs-toggle="modal" data-bs-target="#modalImportMonev">
-                        <i class="fas fa-file-excel me-1"></i> Import Data Excel
-                    </button>
+                    <div class="ms-auto d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahMonev">
+                            <i class="fas fa-plus me-1"></i> Tambah
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#modalImportMonev">
+                            <i class="fas fa-file-excel me-1"></i> Import Data Excel
+                        </button>
+                    </div>
                 <?php endif; ?>
             </div>
 
@@ -225,6 +230,68 @@
                         <i class="fas fa-check me-1"></i> Tandai Selesai
                     </button>
                 <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ubah NIK -->
+<div class="modal fade" id="modalUbahNik" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title text-dark"><i class="fas fa-edit me-2"></i>Koreksi NIK KPM</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formUbahNik">
+                    <?= csrf_field() ?>
+                    <input type="hidden" id="id_monev_ubah" name="id_monev">
+
+                    <div class="mb-3">
+                        <label class="form-label">Nama Target</label>
+                        <input type="text" class="form-control bg-light" id="nama_target_ubah" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">NIK Lama</label>
+                        <input type="text" class="form-control bg-light" id="nik_lama_ubah" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-primary fw-bold">Cari NIK Baru <span class="text-danger">*</span></label>
+                        <select class="form-select" id="select_nik_baru" name="nik_baru" style="width: 100%;" required></select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-white d-flex justify-content-between w-100">
+                <button type="button" class="btn btn-secondary shadow-sm" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary shadow-sm" id="btnSimpanNik">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Monev -->
+<div class="modal fade" id="modalTambahMonev" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Tambah Target Monev</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formTambahMonev">
+                    <?= csrf_field() ?>
+                    <div class="mb-3">
+                        <label class="form-label text-primary fw-bold">Cari KPM (NIK / Nama) <span class="text-danger">*</span></label>
+                        <select class="form-select" id="select_nik_tambah" name="nik" style="width: 100%;" required></select>
+                    </div>
+                    <!-- Input hidden untuk menyimpan nama target saat NIK dipilih -->
+                    <input type="hidden" id="nama_tambah" name="nama_target">
+                </form>
+            </div>
+            <div class="modal-footer bg-white d-flex justify-content-between w-100">
+                <button type="button" class="btn btn-secondary shadow-sm" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary shadow-sm" id="btnSimpanTambah">Simpan Data</button>
             </div>
         </div>
     </div>
@@ -563,6 +630,185 @@
 
             // Reload tabel
             tableMonev.ajax.reload();
+        });
+
+        // Inisialisasi Select2 untuk Ubah NIK
+        $('#select_nik_baru').select2({
+            dropdownParent: $('#modalUbahNik'),
+            placeholder: 'Ketik NIK atau Nama...',
+            minimumInputLength: 3,
+            ajax: {
+                url: '<?= site_url('monev/search_nik_art') ?>',
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        q: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            }
+        });
+
+        // Buka Modal Ubah NIK
+        window.bukaModalUbahNik = function(id_monev, nik, nama) {
+            $('#id_monev_ubah').val(id_monev);
+            $('#nik_lama_ubah').val(nik);
+            $('#nama_target_ubah').val(nama);
+            $('#select_nik_baru').val(null).trigger('change');
+            $('#modalUbahNik').modal('show');
+        };
+
+        // Eksekusi Simpan dengan SweetAlert2 Mini
+        $('#btnSimpanNik').on('click', function() {
+            let nikBaru = $('#select_nik_baru').val();
+            if (!nikBaru) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'warning',
+                    title: 'Pilih NIK baru terlebih dahulu!',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    customClass: {
+                        popup: 'swal2-small'
+                    }
+                });
+                return;
+            }
+
+            let formData = $('#formUbahNik').serialize();
+
+            $.ajax({
+                url: '<?= site_url('monev/update_nik') ?>',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response.status) {
+                        $('#modalUbahNik').modal('hide');
+                        tableMonev.ajax.reload(null, false);
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: response.message,
+                            showConfirmButton: false,
+                            timer: 2000,
+                            customClass: {
+                                popup: 'swal2-small'
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: response.message,
+                            showConfirmButton: false,
+                            timer: 2500,
+                            customClass: {
+                                popup: 'swal2-small'
+                            }
+                        });
+                    }
+                }
+            });
+        });
+
+        // Inisialisasi Select2 untuk Modal Tambah
+        $('#select_nik_tambah').select2({
+            dropdownParent: $('#modalTambahMonev'),
+            placeholder: 'Ketik NIK atau Nama...',
+            minimumInputLength: 3,
+            ajax: {
+                url: '<?= site_url('monev/search_nik_art') ?>',
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        q: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            }
+        });
+
+        // Otomatis isi input hidden nama_target ketika Select2 dipilih
+        $('#select_nik_tambah').on('select2:select', function(e) {
+            var data = e.params.data;
+            $('#nama_tambah').val(data.nama);
+        });
+
+        // Bersihkan modal setiap kali ditutup
+        $('#modalTambahMonev').on('hidden.bs.modal', function() {
+            $('#select_nik_tambah').val(null).trigger('change');
+            $('#nama_tambah').val('');
+        });
+
+        // Eksekusi Simpan Tambah Data
+        $('#btnSimpanTambah').on('click', function() {
+            let nik = $('#select_nik_tambah').val();
+            if (!nik) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'warning',
+                    title: 'Pilih KPM terlebih dahulu!',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    customClass: {
+                        popup: 'swal2-small'
+                    }
+                });
+                return;
+            }
+
+            let formData = $('#formTambahMonev').serialize();
+
+            $.ajax({
+                url: '<?= site_url('monev/tambah_monev') ?>',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response.status) {
+                        $('#modalTambahMonev').modal('hide');
+                        tableMonev.ajax.reload(null, false);
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: response.message,
+                            showConfirmButton: false,
+                            timer: 2000,
+                            customClass: {
+                                popup: 'swal2-small'
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'error',
+                            title: response.message,
+                            showConfirmButton: false,
+                            timer: 2500,
+                            customClass: {
+                                popup: 'swal2-small'
+                            }
+                        });
+                    }
+                }
+            });
         });
 
     });

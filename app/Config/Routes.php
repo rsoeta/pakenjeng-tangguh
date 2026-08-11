@@ -250,6 +250,11 @@ $routes->group('monev', ['namespace' => 'App\Controllers\Dtsen'], function ($rou
 	// 🚀 Tambahkan 2 rute ini:
 	$routes->get('get_detail/(:num)', 'Monev::get_detail/$1');
 	$routes->post('tandai_selesai', 'Monev::tandai_selesai');
+
+	$routes->get('search_nik_art', 'Monev::search_nik_art');
+	$routes->post('update_nik', 'Monev::update_nik');
+
+	$routes->post('tambah_monev', 'Monev::tambah_monev');
 });
 
 // 🌍 API Wilayah Lokal (Dropdown berantai untuk DTSEN)
