@@ -214,18 +214,41 @@ class Monev extends BaseController
                 ' | R_Dalam: ' . var_export($row['foto_rumah_dalam'], true));
 
             // 🧠 Logika Kelengkapan yang lebih toleran (membuang spasi kosong)
-            $isLengkap = (!empty(trim($row['foto_kpm_kks'] ?? '')) &&
-                !empty(trim($row['foto_kks_final'] ?? '')) &&
-                !empty(trim($row['foto_rumah'] ?? '')) &&
-                !empty(trim($row['foto_rumah_dalam'] ?? '')));
+            $fotoKpm = trim($row['foto_kpm_kks'] ?? '');
+            $fotoKks = trim($row['foto_kks_final'] ?? '');
+            $fotoRmh = trim($row['foto_rumah'] ?? '');
+            $fotoDlm = trim($row['foto_rumah_dalam'] ?? '');
+
+            $isLengkap = (!empty($fotoKpm) && !empty($fotoKks) && !empty($fotoRmh) && !empty($fotoDlm));
+
+            // 🎯 Render Badge Kelengkapan & Daftar Kekurangan
+            if ($isLengkap) {
+                $badgeKelengkapan = '<span class="badge bg-primary"><i class="fas fa-check"></i> Lengkap</span>';
+            } else {
+                $badgeKelengkapan = '<span class="badge bg-danger"><i class="fas fa-times"></i> Belum Lengkap</span>';
+                $badgeKelengkapan .= '<div class="mt-1 text-start" style="font-size: 0.75rem; line-height: 1.3;">';
+
+                if (empty($fotoKpm)) {
+                    $badgeKelengkapan .= '<span class="text-danger d-block"><i class="fas fa-exclamation-circle me-1"></i>Foto KPM KKS</span>';
+                }
+                if (empty($fotoKks)) {
+                    $badgeKelengkapan .= '<span class="text-danger d-block"><i class="fas fa-exclamation-circle me-1"></i>Fisik KKS</span>';
+                }
+                if (empty($fotoRmh)) {
+                    $badgeKelengkapan .= '<span class="text-danger d-block"><i class="fas fa-exclamation-circle me-1"></i>Rumah Depan</span>';
+                }
+                if (empty($fotoDlm)) {
+                    $badgeKelengkapan .= '<span class="text-danger d-block"><i class="fas fa-exclamation-circle me-1"></i>Rumah Dalam</span>';
+                }
+
+                $badgeKelengkapan .= '</div>';
+            }
 
             $badgeStatus = ($row['status_monev'] == 'Selesai')
                 ? '<span class="badge bg-success"><i class="fas fa-check-circle"></i> Selesai</span>'
                 : '<span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> Menunggu</span>';
 
-            $badgeKelengkapan = $isLengkap
-                ? '<span class="badge bg-primary"><i class="fas fa-check"></i> Lengkap</span>'
-                : '<span class="badge bg-danger"><i class="fas fa-times"></i> Belum Lengkap</span>';
+            // ... (kode Alamat dan Masking NIK tetap di bawahnya)
 
             // 🧠 2. Definisi Alamat (Menggabungkan data SINDEN dan Excel)
             $alamatFinal = !empty($row['alamat_sinden']) ? $row['alamat_sinden'] : $row['alamat'];
