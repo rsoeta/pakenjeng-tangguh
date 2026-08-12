@@ -57,7 +57,7 @@
 
 <?php
 // Ambil data user untuk Watermark
-$namaUser = session()->get('nama') ?? 'PENGGUNA';
+$namaUser = session()->get('fullname') ?? 'PENGGUNA';
 $nikUser  = session()->get('nik') ?? 'N/A';
 $watermarkStr = $namaUser . ' - ' . $nikUser . ' - ' . date('d/m/Y');
 ?>
