@@ -241,20 +241,29 @@ $routes->group('sensus-ekonomi', ['filter' => ['authfilterdtks', 'menufilterdtks
 	$routes->get('desil-history/(:num)', 'Dtsen\PembaruanKeluarga::desilHistory/$1');
 });
 
+// ========================================================
 // 📊 MONEV PKH
-$routes->group('monev', ['namespace' => 'App\Controllers\Dtsen'], function ($routes) {
+// ========================================================
+$routes->group('monev', ['namespace' => 'App\Controllers\Dtsen', 'filter' => ['authfilterdtks', 'menufilterdtks']], static function ($routes) {
 	$routes->get('/', 'Monev::index');
 	$routes->post('import_excel', 'Monev::import_excel');
 	$routes->post('datatable', 'Monev::datatable');
 
-	// 🚀 Tambahkan 2 rute ini:
 	$routes->get('get_detail/(:num)', 'Monev::get_detail/$1');
 	$routes->post('tandai_selesai', 'Monev::tandai_selesai');
 
 	$routes->get('search_nik_art', 'Monev::search_nik_art');
 	$routes->post('update_nik', 'Monev::update_nik');
-
 	$routes->post('tambah_monev', 'Monev::tambah_monev');
+});
+
+// ========================================================
+// 🚫 EXCLUDE (BLACKLIST KPM)
+// ========================================================
+$routes->group('exclude', ['namespace' => 'App\Controllers\Dtsen', 'filter' => ['authfilterdtks', 'menufilterdtks']], static function ($routes) {
+	$routes->get('/', 'Exclude::index');
+	$routes->post('datatable', 'Exclude::datatable');
+	$routes->post('import_excel', 'Exclude::import_excel');
 });
 
 // 🌍 API Wilayah Lokal (Dropdown berantai untuk DTSEN)

@@ -1,0 +1,16 @@
+CREATE TABLE `dtsen_kpm_exclude` (
+  `id_exclude` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nik` varchar(16) NOT NULL,
+  `nama` varchar(150) NOT NULL,
+  `no_kk` varchar(16) DEFAULT NULL,
+  `tgl_nonaktif` date DEFAULT NULL,
+  `keterangan` text DEFAULT NULL,
+  `bank` varchar(50) DEFAULT NULL,
+  `no_rek` varchar(50) DEFAULT NULL,
+  `desil` int(11) DEFAULT NULL,
+  `created_by` varchar(16) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id_exclude`),
+  KEY `idx_nik` (`nik`)
+) ENGINE=InnoDB;

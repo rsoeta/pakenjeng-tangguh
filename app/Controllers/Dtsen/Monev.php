@@ -229,10 +229,10 @@ class Monev extends BaseController
                 $badgeKelengkapan .= '<div class="mt-1 text-start" style="font-size: 0.75rem; line-height: 1.3;">';
 
                 if (empty($fotoKpm)) {
-                    $badgeKelengkapan .= '<span class="text-danger d-block"><i class="fas fa-exclamation-circle me-1"></i>Foto KPM KKS</span>';
+                    $badgeKelengkapan .= '<span class="text-danger d-block"><i class="fas fa-exclamation-circle me-1"></i>Foto KPM</span>';
                 }
                 if (empty($fotoKks)) {
-                    $badgeKelengkapan .= '<span class="text-danger d-block"><i class="fas fa-exclamation-circle me-1"></i>Fisik KKS</span>';
+                    $badgeKelengkapan .= '<span class="text-danger d-block"><i class="fas fa-exclamation-circle me-1"></i>Foto KKS</span>';
                 }
                 if (empty($fotoRmh)) {
                     $badgeKelengkapan .= '<span class="text-danger d-block"><i class="fas fa-exclamation-circle me-1"></i>Rumah Depan</span>';
