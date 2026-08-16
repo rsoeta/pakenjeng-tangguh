@@ -19,11 +19,43 @@ class Exclude extends BaseController
 
     public function index()
     {
+        $db = \Config\Database::connect();
+        $kodeDesa = session()->get('kode_desa'); // 🛡️ Ambil kode desa dari sesi
+
+        // Ambil daftar RW unik untuk dropdown filter (Dibatasi per Desa)
+        $rwList = $db->table('dtsen_rt')
+            ->select('rw')
+            ->where('kode_desa', $kodeDesa)
+            ->distinct()
+            ->orderBy('CAST(rw AS UNSIGNED)', 'ASC')
+            ->get()->getResultArray();
+
         $data = [
-            'title' => 'Daftar KPM Exclude (Blacklist)'
+            'title'  => 'Daftar KPM Exclude',
+            'rwList' => $rwList
         ];
 
         return view('dtsen/exclude/index', $data);
+    }
+
+    public function get_rt_by_rw()
+    {
+        if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
+
+        $rw = $this->request->getPost('rw');
+        $kodeDesa = session()->get('kode_desa'); // 🛡️ Ambil kode desa dari sesi
+
+        $db = \Config\Database::connect();
+
+        // Ambil daftar RT berdasarkan RW (Dibatasi per Desa)
+        $rtList = $db->table('dtsen_rt')
+            ->select('rt')
+            ->where('kode_desa', $kodeDesa)
+            ->where("CAST(rw AS UNSIGNED) = ", (int)$rw)
+            ->orderBy('CAST(rt AS UNSIGNED)', 'ASC')
+            ->get()->getResultArray();
+
+        return $this->response->setJSON($rtList);
     }
 
     /*
@@ -90,6 +122,19 @@ class Exclude extends BaseController
                 }
             }
             $builder->groupEnd();
+        }
+
+        // ==========================================
+        // 🎯 TANGKAP FILTER DROPDOWN RW & RT
+        // ==========================================
+        $filterRw = $this->request->getPost('filter_rw');
+        $filterRt = $this->request->getPost('filter_rt');
+
+        if (!empty($filterRw)) {
+            $builder->where("CAST(rt.rw AS UNSIGNED) = ", (int)$filterRw);
+        }
+        if (!empty($filterRt)) {
+            $builder->where("CAST(rt.rt AS UNSIGNED) = ", (int)$filterRt);
         }
 
         // 3. 🔍 PENCARIAN GLOBAL
@@ -398,5 +443,85 @@ class Exclude extends BaseController
                 'message' => 'Sistem gagal membaca Excel: ' . $e->getMessage()
             ]);
         }
+    }
+
+    // 🔍 FUNGSI PENCARIAN NIK/NAMA UNTUK SELECT2
+    public function search_nik_art()
+    {
+        if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
+
+        $q = $this->request->getGet('q');
+        $kodeDesa = session()->get('kode_desa');
+        $db = \Config\Database::connect();
+
+        // 🚀 Perbaikan: JOIN ke dtsen_rt agar filter kode_desa valid
+        $builder = $db->table('dtsen_art a')
+            ->select('a.nik, a.nama, k.no_kk')
+            ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left')
+            ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left')
+            ->where('rt.kode_desa', $kodeDesa) // Filter menggunakan tabel RT
+            ->where('a.deleted_at', null)
+            ->groupStart()
+            ->like('a.nik', $q)
+            ->orLike('a.nama', $q)
+            ->groupEnd()
+            ->limit(20);
+
+        $results = $builder->get()->getResultArray();
+
+        $data = [];
+        foreach ($results as $row) {
+            $data[] = [
+                'id'    => $row['nik'],
+                'text'  => $row['nik'] . ' - ' . $row['nama'],
+                'nama'  => $row['nama'],
+                'no_kk' => $row['no_kk']
+            ];
+        }
+
+        return $this->response->setJSON(['results' => $data]);
+    }
+
+    // 🚀 FUNGSI INSERT TAMBAH MANUAL
+    public function tambah_exclude()
+    {
+        if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
+
+        if (session()->get('role_id') >= 4) {
+            return $this->response->setJSON(['status' => false, 'message' => 'Akses ditolak!']);
+        }
+
+        $nik = $this->request->getPost('nik');
+        if (empty($nik)) {
+            return $this->response->setJSON(['status' => false, 'message' => 'Data NIK tidak valid!']);
+        }
+
+        // 🛡️ Validasi Anti Ganda
+        $cekData = $this->excludeModel->where('nik', $nik)->first();
+        if ($cekData) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Gagal! KPM tersebut sudah ada di daftar Exclude.'
+            ]);
+        }
+
+        $dataInsert = [
+            'nik'          => $nik,
+            'nama'         => $this->request->getPost('nama'),
+            'no_kk'        => $this->request->getPost('no_kk'),
+            'tgl_nonaktif' => $this->request->getPost('tgl_nonaktif'),
+            'keterangan'   => $this->request->getPost('keterangan'),
+            'bank'         => $this->request->getPost('bank'),
+            'no_rek'       => $this->request->getPost('no_rek'),
+            'desil'        => (int) $this->request->getPost('desil'),
+            'created_by'   => session()->get('nik') ?? 'system'
+        ];
+
+        $this->excludeModel->insert($dataInsert);
+
+        return $this->response->setJSON([
+            'status'  => true,
+            'message' => 'Data target Exclude berhasil ditambahkan secara manual!'
+        ]);
     }
 }

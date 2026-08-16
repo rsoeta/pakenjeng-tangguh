@@ -264,6 +264,13 @@ $routes->group('exclude', ['namespace' => 'App\Controllers\Dtsen', 'filter' => [
 	$routes->get('/', 'Exclude::index');
 	$routes->post('datatable', 'Exclude::datatable');
 	$routes->post('import_excel', 'Exclude::import_excel');
+
+	// 🚀 Tambahkan route ini
+	$routes->post('get_rt_by_rw', 'Exclude::get_rt_by_rw');
+
+	// 🚀 Tambahkan route ini di dalam grup 'exclude'
+	$routes->get('search_nik_art', 'Exclude::search_nik_art');
+	$routes->post('tambah_exclude', 'Exclude::tambah_exclude');
 });
 
 // 🌍 API Wilayah Lokal (Dropdown berantai untuk DTSEN)

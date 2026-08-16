@@ -24,7 +24,7 @@ class Monev extends BaseController
         $userInfo = $this->authModel->getUserId();
 
         $data = [
-            'title'      => 'Monitoring dan Evaluasi (MONEV) PKH',
+            'title'      => 'MONEV PKH',
             'user_login' => $userInfo
         ];
 
