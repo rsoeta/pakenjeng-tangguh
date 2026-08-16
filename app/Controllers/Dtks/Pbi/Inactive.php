@@ -159,10 +159,19 @@ class Inactive extends BaseController
             }
 
             $alamat = ($row['kampung'] ?? '-') . ' RT ' . str_pad($row['rt'] ?? '0', 3, '0', STR_PAD_LEFT) . '/' . str_pad($row['rw'] ?? '0', 3, '0', STR_PAD_LEFT);
-            // ... (lanjutan array $data[] biarkan sama seperti sebelumnya) ...
             $tglNonAktif = $row['tanggal_nonaktif'] ? date('d-m-Y', strtotime($row['tanggal_nonaktif'])) : '-';
 
-            $data[] = [$no++, '<b>' . esc($row['nama']) . '</b><br><small class="text-muted">NIK: ' . $row['nik'] . '</small>', esc($row['alasan_nonaktif'] ?? '-'), '<span class="badge bg-danger"><i class="fas fa-calendar-times"></i> ' . $tglNonAktif . '</span>', $alamat, $btnAksi];
+            // 🚀 MODIFIKASI: Menambahkan tombol salin (copyText) untuk NIK
+            $namaDanNik = '<b>' . esc($row['nama']) . '</b><br><small class="text-muted">NIK: ' . $row['nik'] . ' <a href="javascript:void(0)" onclick="copyText(\'' . $row['nik'] . '\')" class="text-primary ms-1" title="Salin NIK"><i class="far fa-copy"></i></a></small>';
+
+            $data[] = [
+                $no++,
+                $namaDanNik,
+                esc($row['alasan_nonaktif'] ?? '-'),
+                '<span class="badge bg-danger"><i class="fas fa-calendar-times"></i> ' . $tglNonAktif . '</span>',
+                $alamat,
+                $btnAksi
+            ];
         }
 
         return $this->response->setJSON(['draw' => $draw, 'recordsTotal' => $recordsTotal, 'recordsFiltered' => $recordsFiltered, 'data' => $data]);

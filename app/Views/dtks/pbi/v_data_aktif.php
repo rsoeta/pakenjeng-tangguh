@@ -37,24 +37,26 @@
 
                         <!-- 🛠️ TEMPAT KUMPULAN TOMBOL AKSI -->
                         <div class="col-12 col-md-6 d-flex align-items-end justify-content-md-end mt-2 mt-md-0 flex-wrap gap-2">
+                            <?php if (session()->get('role_id') < 4): ?>
 
-                            <!-- Tombol Tambah Manual -->
-                            <button class="btn btn-sm btn-primary shadow-sm" onclick="tambahPbiManual()">
-                                <i class="fas fa-plus me-1"></i> Tambah
-                            </button>
+                                <!-- Tombol Tambah Manual -->
+                                <button class="btn btn-sm btn-primary shadow-sm" onclick="tambahPbiManual()">
+                                    <i class="fas fa-plus me-1"></i> Tambah
+                                </button>
 
-                            <!-- Form Hidden untuk Upload -->
-                            <input type="file" id="fileExcel" class="d-none" accept=".xls,.xlsx" onchange="uploadExcel()">
+                                <!-- Form Hidden untuk Upload -->
+                                <input type="file" id="fileExcel" class="d-none" accept=".xls,.xlsx" onchange="uploadExcel()">
 
-                            <!-- Tombol Import -->
-                            <button class="btn btn-sm btn-info text-white shadow-sm" onclick="document.getElementById('fileExcel').click()">
-                                <i class="fas fa-file-import me-1"></i> Import
-                            </button>
+                                <!-- Tombol Import -->
+                                <button class="btn btn-sm btn-info text-white shadow-sm" onclick="document.getElementById('fileExcel').click()">
+                                    <i class="fas fa-file-import me-1"></i> Import
+                                </button>
 
-                            <!-- Tombol Export (Trigger External) -->
-                            <button class="btn btn-sm btn-success shadow-sm" onclick="exportExcelLuar()">
-                                <i class="fas fa-file-excel me-1"></i> Export
-                            </button>
+                                <!-- Tombol Export (Trigger External) -->
+                                <button class="btn btn-sm btn-success shadow-sm" onclick="exportExcelLuar()">
+                                    <i class="fas fa-file-excel me-1"></i> Export
+                                </button>
+                            <?php endif; ?>
 
                             <!-- Tombol Refresh (Pakai Ikon Saja agar Hemat Tempat) -->
                             <button class="btn btn-sm btn-secondary shadow-sm" onclick="reloadTable()" title="Refresh Data">
@@ -89,6 +91,7 @@
         </div>
     </div>
 </div>
+
 <script>
     var table;
 
@@ -357,7 +360,7 @@
         });
     }
 
-    // 🚀 Fungsi Tambah PBI Manual (Real AJAX)
+    // 🚀 Fungsi Tambah PBI Manual (Real AJAX dengan Jenis Kepesertaan)
     function tambahPbiManual() {
         Swal.fire({
             title: 'Cek Data Penduduk',
@@ -373,15 +376,14 @@
             cancelButtonText: 'Batal',
             showLoaderOnConfirm: true,
             customClass: {
-                popup: 'swal-sm'
-            }, // Tetap mungil untuk HP
+                popup: 'swal-sm' // Ukuran mini untuk mobile
+            },
             preConfirm: (nik) => {
                 if (!nik || nik.length !== 16) {
                     Swal.showValidationMessage('NIK harus lengkap 16 digit!');
                     return false;
                 }
 
-                // Menghubungi Controller cek_nik
                 return $.ajax({
                     url: '<?= site_url('pbi/data/cek_nik') ?>',
                     type: 'POST',
@@ -392,7 +394,7 @@
                     if (!response.status) {
                         throw new Error(response.message);
                     }
-                    return response.data; // Mengembalikan data warga ke result.value
+                    return response.data;
                 }).catch(error => {
                     Swal.showValidationMessage(error.message || 'Gagal menghubungi server');
                 });
@@ -402,15 +404,25 @@
             if (result.isConfirmed) {
                 let w = result.value;
 
-                // Jika NIK ditemukan, buka Form Lanjutan pakai HTML SweetAlert2
+                // 🚀 Buka Form Lanjutan dengan tambahan Jenis Kepesertaan
                 Swal.fire({
-                    title: 'Lengkapi Data PBI',
+                    title: 'Lengkapi Data BPJS',
                     html: `
                         <div class="text-start small mb-3 p-2 bg-light rounded border">
                             <b class="text-primary">${w.nama}</b><br>
                             NIK: ${w.nik} | KK: ${w.no_kk}<br>
                             Alamat: ${w.kampung} RT ${w.rt} / RW ${w.rw}
                         </div>
+                        
+                        <!-- 🎯 DROPDOWN JENIS KEPESERTAAN -->
+                        <label class="small text-muted float-start fw-bold">Jenis Kepesertaan <span class="text-danger">*</span></label>
+                        <select id="jenis_kepesertaan_manual" class="form-select form-select-sm mb-2 shadow-sm border-primary">
+                            <option value="PBI APBN">PBI APBN (Pusat)</option>
+                            <option value="PBI APBD">PBI APBD (Daerah)</option>
+                            <option value="PBPU / MANDIRI">PBPU / MANDIRI</option>
+                            <option value="LAINNYA">LAINNYA</option>
+                        </select>
+
                         <label class="small text-muted float-start fw-bold">Nomor KIS (Opsional)</label>
                         <input type="text" id="kis_manual" class="form-control form-control-sm mb-2" placeholder="000xxxxxx">
                         
@@ -418,8 +430,8 @@
                         <input type="text" id="faskes_manual" class="form-control form-control-sm mb-2" placeholder="Cth: Puskesmas Pakenjeng">
                     `,
                     showCancelButton: true,
-                    confirmButtonText: '<i class="fas fa-save"></i> Simpan',
                     cancelButtonText: 'Batal',
+                    confirmButtonText: '<i class="fas fa-save"></i> Simpan',
                     customClass: {
                         popup: 'swal-sm'
                     },
@@ -433,6 +445,7 @@
                             rt: w.rt,
                             rw: w.rw,
                             pbi_id: w.pbi_id,
+                            jenis_kepesertaan: document.getElementById('jenis_kepesertaan_manual').value, // 👈 Tangkap valuenya
                             no_kis: document.getElementById('kis_manual').value,
                             faskes_tk1: document.getElementById('faskes_manual').value
                         }
@@ -455,7 +468,124 @@
                                             popup: 'swal-sm'
                                         }
                                     });
+                                } else {
+                                    // 🚨 TANGKAP ERROR JIKA GAGAL SIMPAN
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Gagal Menyimpan!',
+                                        text: r.message,
+                                        customClass: {
+                                            popup: 'swal-sm'
+                                        }
+                                    });
                                 }
+                            },
+                            error: function() {
+                                // 🚨 TANGKAP ERROR 500 / JARINGAN
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Koneksi Terputus!',
+                                    text: 'Terjadi kesalahan pada server (Error 500/Network).',
+                                    customClass: {
+                                        popup: 'swal-sm'
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    // 🚀 Fungsi Edit PBI (Memanfaatkan endpoint simpan_manual yang sudah ada)
+    function editPbi(id, nik, id_art, no_kk, nama, kampung, rt, rw, no_kis, jenis_kepesertaan, faskes_tk1) {
+
+        // Cek nilai awal dropdown
+        let isLainnya = (jenis_kepesertaan !== 'PBI APBN' && jenis_kepesertaan !== 'PBI APBD' && jenis_kepesertaan !== 'PBPU / MANDIRI' && jenis_kepesertaan !== '');
+
+        Swal.fire({
+            title: 'Edit Data BPJS',
+            html: `
+                <div class="text-start small mb-3 p-2 bg-light rounded border">
+                    <b class="text-primary">${nama}</b><br>
+                    NIK: ${nik} | KK: ${no_kk || '-'}<br>
+                    Alamat: ${kampung || '-'} RT ${rt} / RW ${rw}
+                    <hr class="my-1 border-secondary">
+                    <span class="text-muted" style="font-size: 0.75rem;"><em>*Identitas pribadi otomatis disinkronkan dari database kependudukan.</em></span>
+                </div>
+                
+                <label class="small text-muted float-start fw-bold">Jenis Kepesertaan <span class="text-danger">*</span></label>
+                <select id="edit_jenis_kepesertaan" class="form-select form-select-sm mb-2 shadow-sm border-primary">
+                    <option value="PBI APBN" ${jenis_kepesertaan === 'PBI APBN' ? 'selected' : ''}>PBI APBN (Pusat)</option>
+                    <option value="PBI APBD" ${jenis_kepesertaan === 'PBI APBD' ? 'selected' : ''}>PBI APBD (Daerah)</option>
+                    <option value="PBPU / MANDIRI" ${jenis_kepesertaan === 'PBPU / MANDIRI' ? 'selected' : ''}>PBPU / MANDIRI</option>
+                    <option value="${isLainnya ? jenis_kepesertaan : 'LAINNYA'}" ${isLainnya ? 'selected' : ''}>${isLainnya ? jenis_kepesertaan : 'LAINNYA'}</option>
+                </select>
+
+                <label class="small text-muted float-start fw-bold">Nomor KIS (Opsional)</label>
+                <input type="text" id="edit_kis" class="form-control form-control-sm mb-2" value="${no_kis}" placeholder="000xxxxxx">
+                
+                <label class="small text-muted float-start fw-bold">Faskes Tk. 1 (Opsional)</label>
+                <input type="text" id="edit_faskes" class="form-control form-control-sm mb-2" value="${faskes_tk1}" placeholder="Cth: Puskesmas Pakenjeng">
+            `,
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-save"></i> Simpan Perubahan',
+            cancelButtonText: 'Batal',
+            customClass: {
+                popup: 'swal-sm'
+            },
+            preConfirm: () => {
+                return {
+                    pbi_id: id, // 👈 Kunci utama agar Controller tahu ini mode UPDATE
+                    nik: nik,
+                    id_art: id_art,
+                    no_kk: no_kk,
+                    nama: nama,
+                    kampung: kampung,
+                    rt: rt,
+                    rw: rw,
+                    jenis_kepesertaan: document.getElementById('edit_jenis_kepesertaan').value,
+                    no_kis: document.getElementById('edit_kis').value,
+                    faskes_tk1: document.getElementById('edit_faskes').value
+                }
+            }
+        }).then((res) => {
+            if (res.isConfirmed) {
+                // Tembak data ke Controller simpan_manual yang sama persis
+                $.ajax({
+                    url: '<?= site_url('pbi/data/simpan_manual') ?>',
+                    type: 'POST',
+                    data: res.value,
+                    success: function(r) {
+                        if (r.status) {
+                            table.ajax.reload(null, false);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: 'Data kepesertaan berhasil diperbarui.',
+                                customClass: {
+                                    popup: 'swal-sm'
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal Menyimpan!',
+                                text: r.message,
+                                customClass: {
+                                    popup: 'swal-sm'
+                                }
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Koneksi Terputus!',
+                            text: 'Terjadi kesalahan pada server (Error 500/Network).',
+                            customClass: {
+                                popup: 'swal-sm'
                             }
                         });
                     }

@@ -20,6 +20,7 @@ class PbiMasterDataModel extends Model
         'no_kk',
         'nama',
         'no_kis',
+        'jenis_kepesertaan', // 👈 Ini yang baru ditambahkan
         'faskes_tk1',
         'kampung',
         'rt',

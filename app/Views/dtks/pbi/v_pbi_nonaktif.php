@@ -223,5 +223,24 @@
             }
         });
     }
+
+    // 📋 Fungsi Salin Teks (NIK / KK) dengan Toast SweetAlert2 yang diperkecil
+    window.copyText = function(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: text + ' disalin!',
+                showConfirmButton: false,
+                timer: 1500,
+                customClass: {
+                    popup: 'swal-sm' // Ukuran mini agar nyaman di HP
+                }
+            });
+        }).catch(function(err) {
+            console.error('Gagal menyalin text: ', err);
+        });
+    };
 </script>
 <?= $this->endSection() ?>

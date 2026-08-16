@@ -33,3 +33,6 @@ CREATE TABLE `pbi_master_data` (
   KEY `idx_wilayah` (`kode_desa`,`rw`,`rt`),
   KEY `idx_art` (`id_art`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `pbi_master_data` 
+ADD COLUMN `jenis_kepesertaan` varchar(100) DEFAULT NULL COMMENT 'Jenis JKN (PBI APBD, PBI APBN, dll)' AFTER `no_kis`;
