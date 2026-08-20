@@ -597,19 +597,26 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
         });
     });
 
-    // 🚀 FUNGSI PROSES SURAT & UPLOAD BUKTI (One-Stop-Process)
+    // 🚀 FUNGSI PROSES SURAT & UPLOAD BUKTI (One-Stop-Process + UI Bersih)
     function cetakSuratJudol(id, nik, nama) {
         Swal.fire({
             title: 'Proses Surat Klarifikasi',
             text: `Pilih jenis dokumen untuk KPM: ${nama}`,
             icon: 'question',
-            showCancelButton: true,
+
+            // 🚀 PERUBAHAN UI: Tombol X dan Klik Luar
+            showCancelButton: false, // Matikan tombol batal di bawah
+            showCloseButton: true, // Nyalakan tombol X di kanan atas
+            allowOutsideClick: true, // Izinkan klik di luar area untuk menutup
+
             showDenyButton: true,
             confirmButtonText: '<i class="fas fa-file-word"></i> BA (Membantah)',
             denyButtonText: '<i class="fas fa-file-signature"></i> Pernyataan (Mengaku)',
-            cancelButtonText: 'Batal',
+            buttonsStyling: false,
             customClass: {
-                popup: 'swal2-small'
+                popup: 'swal2-small',
+                confirmButton: 'btn btn-warning text-dark mx-1 shadow-sm',
+                denyButton: 'btn btn-success mx-1 shadow-sm'
             }
         }).then((result) => {
             if (result.isConfirmed) {
@@ -623,7 +630,7 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                 $.post('<?= site_url('exclude/proses_surat') ?>', {
                     id: id,
                     jenis: 'ba',
-                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>' // 👈 TAMBAHKAN BARIS INI
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
                 }, function(res) {
                     if (res.status) {
                         $('#tableExclude').DataTable().ajax.reload(null, false);
@@ -674,14 +681,17 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                         <input type="file" id="file_bukti" class="form-control form-control-sm shadow-sm" accept=".jpg,.jpeg,.png,.pdf">
                         <small class="float-start text-muted" style="font-size:0.75rem;">Maksimal 5MB (Format: JPG/PNG/PDF)</small>
                     `,
-                    showCancelButton: true,
+
+                    // 🚀 PERUBAHAN UI: Konsisten dengan Popup Pertama
+                    showCancelButton: false,
+                    showCloseButton: true,
+                    allowOutsideClick: () => !Swal.isLoading(), // Bisa klik luar, KECUALI sedang proses loading upload
+
                     confirmButtonText: '<i class="fas fa-save"></i> Simpan ke Server',
-                    cancelButtonText: 'Batal',
                     customClass: {
                         popup: 'swal2-small'
                     },
                     didOpen: () => {
-                        // Inisialisasi Select2
                         $('#select_pelaku').select2({
                             dropdownParent: $('.swal2-popup'),
                             placeholder: 'Ketik NIK atau Nama warga...',
@@ -743,8 +753,7 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                         }).catch(error => {
                             Swal.showValidationMessage(error.message || 'Gagal menghubungi server');
                         });
-                    },
-                    allowOutsideClick: () => !Swal.isLoading()
+                    }
                 }).then((res2) => {
                     if (res2.isConfirmed) {
                         $('#tableExclude').DataTable().ajax.reload(null, false);
