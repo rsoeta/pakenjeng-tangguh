@@ -246,7 +246,7 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                         </div>
                         <div class="col-6 mb-3">
                             <label class="form-label fw-bold">Desil</label>
-                            <input type="number" class="form-control" name="desil" placeholder="1">
+                            <input type="number" class="form-control" name="desil" id="desil_exclude" placeholder="1">
                         </div>
                     </div>
                 </form>
@@ -501,34 +501,38 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
         });
     }
 
-    // 🚀 INISIALISASI SELECT2 UNTUK MODAL TAMBAH
+    // Inisialisasi Select2 di Modal Tambah Data
     $('#select_nik_exclude').select2({
         dropdownParent: $('#modalTambahExclude'),
-        placeholder: 'Ketik NIK atau Nama KPM...',
+        placeholder: 'Ketik NIK atau Nama warga...',
         minimumInputLength: 3,
         ajax: {
-            url: '<?= site_url('exclude/search_nik_art') ?>',
+            url: '<?= site_url("exclude/search_nik_art") ?>',
             dataType: 'json',
-            delay: 250,
+            delay: 500,
             data: function(params) {
                 return {
                     q: params.term
                 };
-            },
-            processResults: function(data) {
-                return {
-                    results: data.results
-                };
-            },
-            cache: true
+            }
+            // (processResults tidak perlu diubah jika sudah jalan)
         }
     });
 
-    // Otomatis isi hidden input ketika KPM dipilih
+    // 🚀 AUTO-FILL NAMA, KK, DAN DESIL SAAT KPM DIPILIH
     $('#select_nik_exclude').on('select2:select', function(e) {
         var data = e.params.data;
+
+        // Isi input hidden nama dan KK
         $('#nama_exclude').val(data.nama);
         $('#kk_exclude').val(data.no_kk);
+
+        // Isi otomatis form Desil (jika desil kosong dari master, biarkan kosong agar bisa diisi manual)
+        if (data.desil) {
+            $('#desil_exclude').val(data.desil);
+        } else {
+            $('#desil_exclude').val(''); // Kosongkan jika tidak ada data desil
+        }
     });
 
     $('#modalTambahExclude').on('hidden.bs.modal', function() {

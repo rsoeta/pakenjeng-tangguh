@@ -143,6 +143,7 @@ class Exclude extends BaseController
             $builder->groupStart()
                 ->like('m.nama', $search)
                 ->orLike('m.nik', $search)
+                ->orLike('m.no_kk', $search) // 👈 TAMBAHKAN BARIS INI
                 ->orLike('m.keterangan', $search)
                 ->groupEnd();
         }
@@ -479,7 +480,7 @@ class Exclude extends BaseController
         }
     }
 
-    // 🔍 FUNGSI PENCARIAN NIK/NAMA UNTUK SELECT2
+    // 🔍 FUNGSI PENCARIAN NIK/NAMA UNTUK SELECT2 (Plus Ambil Data Desil)
     public function search_nik_art()
     {
         if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
@@ -488,12 +489,12 @@ class Exclude extends BaseController
         $kodeDesa = session()->get('kode_desa');
         $db = \Config\Database::connect();
 
-        // 🚀 Perbaikan: JOIN ke dtsen_rt agar filter kode_desa valid
         $builder = $db->table('dtsen_art a')
-            ->select('a.nik, a.nama, k.no_kk')
+            ->select('a.nik, a.nama, k.no_kk, se.kategori_desil') // 👈 Tambahkan se.kategori_desil
             ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left')
             ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left')
-            ->where('rt.kode_desa', $kodeDesa) // Filter menggunakan tabel RT
+            ->join('dtsen_se se', 'se.id_kk = k.id_kk', 'left') // 👈 Join ke Sosial Ekonomi
+            ->where('rt.kode_desa', $kodeDesa)
             ->where('a.deleted_at', null)
             ->groupStart()
             ->like('a.nik', $q)
@@ -509,7 +510,8 @@ class Exclude extends BaseController
                 'id'    => $row['nik'],
                 'text'  => $row['nik'] . ' - ' . $row['nama'],
                 'nama'  => $row['nama'],
-                'no_kk' => $row['no_kk']
+                'no_kk' => $row['no_kk'],
+                'desil' => $row['kategori_desil'] // 👈 Selipkan data desil ke JSON
             ];
         }
 
