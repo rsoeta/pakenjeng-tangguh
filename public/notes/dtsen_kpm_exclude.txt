@@ -14,3 +14,6 @@ CREATE TABLE `dtsen_kpm_exclude` (
   PRIMARY KEY (`id_exclude`),
   KEY `idx_nik` (`nik`)
 ) ENGINE=InnoDB;
+
+ALTER TABLE `dtsen_kpm_exclude` 
+ADD COLUMN `bukti_penutupan` varchar(255) DEFAULT NULL COMMENT 'Path file foto/scan bukti penutupan rekening' AFTER `keterangan`;

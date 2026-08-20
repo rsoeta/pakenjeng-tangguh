@@ -156,6 +156,7 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                                             <th width="25%">Keterangan Blacklist</th>
                                             <th width="15%">Data Bank</th>
                                             <th width="15%">Tanggal Nonaktif</th>
+                                            <th width="15%">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -595,6 +596,171 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
             }
         });
     });
+
+    // 🚀 FUNGSI PROSES SURAT & UPLOAD BUKTI (One-Stop-Process)
+    function cetakSuratJudol(id, nik, nama) {
+        Swal.fire({
+            title: 'Proses Surat Klarifikasi',
+            text: `Pilih jenis dokumen untuk KPM: ${nama}`,
+            icon: 'question',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: '<i class="fas fa-file-word"></i> BA (Membantah)',
+            denyButtonText: '<i class="fas fa-file-signature"></i> Pernyataan (Mengaku)',
+            cancelButtonText: 'Batal',
+            customClass: {
+                popup: 'swal2-small'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // 🛑 OPSI 1: BA (Tanpa Upload File)
+                Swal.fire({
+                    title: 'Memproses BA...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                $.post('<?= site_url('exclude/proses_surat') ?>', {
+                    id: id,
+                    jenis: 'ba',
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>' // 👈 TAMBAHKAN BARIS INI
+                }, function(res) {
+                    if (res.status) {
+                        $('#tableExclude').DataTable().ajax.reload(null, false);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: res.message,
+                            customClass: {
+                                popup: 'swal2-small'
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: res.message,
+                            customClass: {
+                                popup: 'swal2-small'
+                            }
+                        });
+                    }
+                }).fail(function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Server',
+                        text: xhr.responseText.substring(0, 100) + '...',
+                        customClass: {
+                            popup: 'swal2-small'
+                        }
+                    });
+                });
+
+            } else if (result.isDenied) {
+                // 🛑 OPSI 2: PERNYATAAN (Select2 + Upload Bukti)
+                Swal.fire({
+                    title: 'Lengkapi Pernyataan',
+                    html: `
+                        <div class="text-start small text-muted mb-3">Pilih identitas pelaku dan lampirkan foto/scan penutupan rekening.</div>
+                        
+                        <label class="float-start fw-bold small text-primary">Identitas Pelaku (NIK / Nama) <span class="text-danger">*</span></label>
+                        <select id="select_pelaku" class="form-control form-control-sm mb-3" style="width: 100%;">
+                            <option value="${nik}|${nama}" selected>${nik} - ${nama}</option>
+                        </select>
+                        
+                        <br><br>
+                        
+                        <label class="float-start fw-bold small text-primary mt-1">Upload Bukti Penutupan <span class="text-danger">*</span></label>
+                        <input type="file" id="file_bukti" class="form-control form-control-sm shadow-sm" accept=".jpg,.jpeg,.png,.pdf">
+                        <small class="float-start text-muted" style="font-size:0.75rem;">Maksimal 5MB (Format: JPG/PNG/PDF)</small>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fas fa-save"></i> Simpan ke Server',
+                    cancelButtonText: 'Batal',
+                    customClass: {
+                        popup: 'swal2-small'
+                    },
+                    didOpen: () => {
+                        // Inisialisasi Select2
+                        $('#select_pelaku').select2({
+                            dropdownParent: $('.swal2-popup'),
+                            placeholder: 'Ketik NIK atau Nama warga...',
+                            minimumInputLength: 3,
+                            ajax: {
+                                url: '<?= site_url("exclude/search_nik_art") ?>',
+                                dataType: 'json',
+                                delay: 500,
+                                data: function(params) {
+                                    return {
+                                        q: params.term
+                                    };
+                                },
+                                processResults: function(data) {
+                                    return {
+                                        results: data.results.map(function(item) {
+                                            return {
+                                                id: item.id + '|' + item.nama,
+                                                text: item.text
+                                            }
+                                        })
+                                    };
+                                },
+                                cache: true
+                            }
+                        });
+                    },
+                    preConfirm: () => {
+                        let val = document.getElementById('select_pelaku').value;
+                        let file = document.getElementById('file_bukti').files[0];
+
+                        if (!val) {
+                            Swal.showValidationMessage('Identitas Pelaku wajib dipilih!');
+                            return false;
+                        }
+                        if (!file) {
+                            Swal.showValidationMessage('Bukti penutupan wajib diunggah!');
+                            return false;
+                        }
+
+                        let splitData = val.split('|');
+                        let formData = new FormData();
+                        formData.append('id', id);
+                        formData.append('jenis', 'pernyataan');
+                        formData.append('nik_pelaku', splitData[0]);
+                        formData.append('nama_pelaku', splitData[1]);
+                        formData.append('file_bukti', file);
+                        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+                        return $.ajax({
+                            url: '<?= site_url('exclude/proses_surat') ?>',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false
+                        }).then(response => {
+                            if (!response.status) throw new Error(response.message);
+                            return response;
+                        }).catch(error => {
+                            Swal.showValidationMessage(error.message || 'Gagal menghubungi server');
+                        });
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((res2) => {
+                    if (res2.isConfirmed) {
+                        $('#tableExclude').DataTable().ajax.reload(null, false);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Tersimpan!',
+                            text: res2.value.message,
+                            customClass: {
+                                popup: 'swal2-small'
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
 </script>
 
 <?= $this->endSection() ?>

@@ -5,7 +5,8 @@
     "php": ">=8.2",
     "codeigniter4/framework": "^4.6.2",
     "kint-php/kint": "5.0",
-    "phpoffice/phpspreadsheet": "*"
+    "phpoffice/phpspreadsheet": "*",
+    "phpoffice/phpword": "*"
   },
   "config": {
     "optimize-autoloader": true,

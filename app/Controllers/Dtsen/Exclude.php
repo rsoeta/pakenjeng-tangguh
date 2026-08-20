@@ -91,6 +91,7 @@ class Exclude extends BaseController
                 m.keterangan,
                 m.bank,
                 m.no_rek,
+                m.bukti_penutupan,
                 a.nama as nama_master,
                 rt.rt,
                 rt.rw
@@ -158,10 +159,10 @@ class Exclude extends BaseController
             if (isset($columnOrder[$colIndex]) && $columnOrder[$colIndex] !== null) {
                 $builder->orderBy($columnOrder[$colIndex], $dir);
             } else {
-                $builder->orderBy('m.id_exclude', 'DESC');
+                $builder->orderBy('m.id_exclude', 'DESC'); // 👈 Kembalikan ke id_exclude
             }
         } else {
-            $builder->orderBy('m.id_exclude', 'DESC');
+            $builder->orderBy('m.id_exclude', 'DESC'); // 👈 Kembalikan ke id_exclude
         }
 
         // 6. LIMIT (PAGINATION)
@@ -270,13 +271,46 @@ class Exclude extends BaseController
 
             $tgl = !empty($row['tgl_nonaktif']) ? date('d/m/Y', strtotime($row['tgl_nonaktif'])) : '-';
 
+            $btnAksi = '-';
+
+            // 🔐 Buka akses untuk Pentri (4) dan Petugas Entri (5)
+            if ($roleId <= 5) {
+                $btnAksi = '<div class="d-flex gap-1 justify-content-center">';
+
+                // 1. Tombol PROSES (Gambar Gear/Setting)
+                $btnAksi .= '
+                    <button type="button" class="btn btn-sm btn-outline-warning shadow-sm px-2" onclick="cetakSuratJudol(\'' . $row['id_exclude'] . '\', \'' . $row['nik'] . '\', \'' . esc($row['nama']) . '\')" title="Proses Surat & Upload Bukti">
+                        <i class="fas fa-cogs"></i>
+                    </button>
+                ';
+
+                // 2. DETEKSI & TAMPILKAN TOMBOL DOWNLOAD SURAT WORD
+                $filePernyataan = 'uploads/surat_judol/Pernyataan_Judol_' . $row['nik'] . '.docx';
+                $fileBA         = 'uploads/surat_judol/BA_Klarifikasi_' . $row['nik'] . '.docx';
+
+                if (file_exists(FCPATH . $filePernyataan)) {
+                    $btnAksi .= '<a href="' . base_url($filePernyataan) . '" target="_blank" class="btn btn-sm btn-primary shadow-sm px-2" title="Unduh Surat Pernyataan"><i class="fas fa-file-word"></i></a>';
+                } elseif (file_exists(FCPATH . $fileBA)) {
+                    $btnAksi .= '<a href="' . base_url($fileBA) . '" target="_blank" class="btn btn-sm btn-primary shadow-sm px-2" title="Unduh Surat BA"><i class="fas fa-file-word"></i></a>';
+                }
+
+                // 3. TAMPILKAN TOMBOL DOWNLOAD BUKTI ASLI (Jika Ingin Cek Mentahannya)
+                $fileBukti = $row['bukti_penutupan'] ?? null;
+                if (!empty($fileBukti)) {
+                    $btnAksi .= '<a href="' . base_url('uploads/bukti_judol/' . $fileBukti) . '" target="_blank" class="btn btn-sm btn-success shadow-sm px-2" title="Lihat Foto Bukti Asli"><i class="fas fa-file-image"></i></a>';
+                }
+
+                $btnAksi .= '</div>';
+            }
+
             $data[] = [
                 $no++,
                 $namaWilayah,
                 $nikKk,
                 $keterangan,
                 $dataBank,
-                $tgl
+                $tgl,
+                $btnAksi
             ];
         }
 
@@ -523,5 +557,117 @@ class Exclude extends BaseController
             'status'  => true,
             'message' => 'Data target Exclude berhasil ditambahkan secara manual!'
         ]);
+    }
+
+    // 📅 Helper Tanggal Gaya Birokrasi (Contoh: "Senin tanggal 8 bulan Agustus tahun 2026")
+    private function format_tanggal_ba()
+    {
+        $hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        $bulan = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        return $hari[date('w')] . ' tanggal ' . date('j') . ' bulan ' . $bulan[date('n')] . ' tahun ' . date('Y');
+    }
+
+    // 🚀 SUPER FUNGSI: PROSES UPLOAD BUKTI & GENERATE WORD (DI SIMPAN KE SERVER)
+    public function proses_surat()
+    {
+        if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
+
+        $id = $this->request->getPost('id');
+        $jenis = $this->request->getPost('jenis');
+        $db = \Config\Database::connect();
+
+        $kpm = $db->table('dtsen_kpm_exclude e')
+            ->select('e.*, rt.rt, rt.rw, k.alamat as kampung')
+            ->join('dtsen_art a', 'a.nik = e.nik', 'left')
+            ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left')
+            ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left')
+            ->where('e.id_exclude', $id)
+            ->get()->getRowArray();
+
+        if (!$kpm) return $this->response->setJSON(['status' => false, 'message' => 'Data KPM tidak ditemukan.']);
+
+        $alamat = ($kpm['kampung'] ?? '-') . ' RT ' . str_pad($kpm['rt'] ?? '0', 3, '0', STR_PAD_LEFT) . ' / RW ' . str_pad($kpm['rw'] ?? '0', 3, '0', STR_PAD_LEFT);
+
+        $templatePath = WRITEPATH . 'uploads/templates/';
+        $suratDir = FCPATH . 'uploads/surat_judol/';
+        if (!is_dir($suratDir)) mkdir($suratDir, 0777, true); // Folder untuk menyimpan hasil Word
+
+        $namaFile = ($jenis === 'ba') ? 'BA_Klarifikasi_' . $kpm['nik'] . '.docx' : 'Pernyataan_Judol_' . $kpm['nik'] . '.docx';
+        $fileTemplate = ($jenis === 'ba') ? $templatePath . 'ba_klarifikasi.docx' : $templatePath . 'surat_pernyataan.docx';
+
+        if (!file_exists($fileTemplate)) {
+            return $this->response->setJSON(['status' => false, 'message' => 'File Template Word belum diunggah di sistem.']);
+        }
+
+        $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($fileTemplate);
+
+        $templateProcessor->setValue('tgl_birokrasi', $this->format_tanggal_ba());
+        $templateProcessor->setValue('tgl_sekarang', date('d-m-Y'));
+        $templateProcessor->setValue('nama_kpm', $kpm['nama']);
+        $templateProcessor->setValue('nik_kpm', $kpm['nik']);
+        $templateProcessor->setValue('no_kk', $kpm['no_kk'] ?? '-');
+        $templateProcessor->setValue('alamat', $alamat);
+
+        $newName = $kpm['bukti_penutupan'] ?? '';
+
+        if ($jenis === 'pernyataan') {
+            // 📸 1. PROSES UPLOAD FOTO BUKTI
+            $file = $this->request->getFile('file_bukti');
+            if ($file && $file->isValid()) {
+                if ($file->getSizeByUnit('mb') > 5) return $this->response->setJSON(['status' => false, 'message' => 'Ukuran file maks 5MB.']);
+
+                $pathBukti = FCPATH . 'uploads/bukti_judol/';
+                if (!is_dir($pathBukti)) mkdir($pathBukti, 0777, true);
+
+                $newName = $file->getRandomName();
+                $file->move($pathBukti, $newName);
+
+                $db->table('dtsen_kpm_exclude')->where('id_exclude', $id)->update([
+                    'bukti_penutupan' => $newName
+                ]);
+            }
+
+            // 📝 2. INJEKSI VARIABEL PERNYATAAN & TABEL REKENING
+            $templateProcessor->setValue('nama_pelaku', $this->request->getPost('nama_pelaku'));
+            $templateProcessor->setValue('nik_pelaku', $this->request->getPost('nik_pelaku'));
+
+            $arrBank = array_map('trim', array_filter(preg_split('/[,;]+/', $kpm['bank'] ?? '')));
+            $arrRek  = array_map('trim', array_filter(preg_split('/[,;]+/', $kpm['no_rek'] ?? '')));
+            if (empty($arrBank)) {
+                $arrBank = ['-'];
+                $arrRek = ['-'];
+            }
+
+            $jmlData = max(count($arrBank), count($arrRek));
+            $dataRekening = [];
+            for ($i = 0; $i < $jmlData; $i++) {
+                $dataRekening[] = ['nourut' => $i + 1, 'namabank' => $arrBank[$i] ?? '-', 'norek' => $arrRek[$i] ?? '-'];
+            }
+            $templateProcessor->cloneRowAndSetValues('nourut', $dataRekening);
+
+            // 🖼️ 3. TEMPEL GAMBAR BUKTI KE LAMPIRAN (Halaman 3)
+            $pathBuktiFull = FCPATH . 'uploads/bukti_judol/' . $newName;
+            if (!empty($newName) && file_exists($pathBuktiFull)) {
+                $ext = strtolower(pathinfo($pathBuktiFull, PATHINFO_EXTENSION));
+                if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+                    // 🚀 TAMBAHKAN HEIGHT AGAR GAMBAR TIDAK MENGECIL JADI PRANGKO
+                    $templateProcessor->setImageValue('bukti_foto', [
+                        'path'   => $pathBuktiFull,
+                        'width'  => 500,
+                        'height' => 700,
+                        'ratio'  => true
+                    ]);
+                } else {
+                    $templateProcessor->setValue('bukti_foto', '(Bukti yang diunggah berupa file PDF, silakan periksa berkas asli)');
+                }
+            } else {
+                $templateProcessor->setValue('bukti_foto', '(Belum ada bukti yang diunggah)');
+            }
+        }
+
+        // 💾 SIMPAN WORD LANGSUNG KE SERVER (Tidak download otomatis)
+        $templateProcessor->saveAs($suratDir . $namaFile);
+
+        return $this->response->setJSON(['status' => true, 'message' => 'Surat dan Bukti telah berhasil diracik dan disimpan di Server.']);
     }
 }
