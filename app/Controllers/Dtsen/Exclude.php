@@ -301,6 +301,15 @@ class Exclude extends BaseController
                     $btnAksi .= '<a href="' . base_url('uploads/bukti_judol/' . $fileBukti) . '" target="_blank" class="btn btn-sm btn-success shadow-sm px-2" title="Lihat Foto Bukti Asli"><i class="fas fa-file-image"></i></a>';
                 }
 
+                // 4. 🚀 TOMBOL HAPUS (Eksklusif Khusus Role < 4 / Operator ke atas)
+                if ($roleId < 4) {
+                    $btnAksi .= '
+                        <button type="button" class="btn btn-sm btn-danger shadow-sm px-2" onclick="hapusExclude(\'' . $row['id_exclude'] . '\', \'' . esc($row['nama']) . '\')" title="Hapus Data KPM">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    ';
+                }
+
                 $btnAksi .= '</div>';
             }
 
@@ -671,5 +680,40 @@ class Exclude extends BaseController
         $templateProcessor->saveAs($suratDir . $namaFile);
 
         return $this->response->setJSON(['status' => true, 'message' => 'Surat dan Bukti telah berhasil diracik dan disimpan di Server.']);
+    }
+
+    // 🗑️ SUPER FUNGSI HAPUS: Hapus Data + Bersihkan File Server
+    public function delete()
+    {
+        if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
+
+        $id = $this->request->getPost('id');
+        $db = \Config\Database::connect();
+
+        // Cari data yang akan dihapus
+        $kpm = $db->table('dtsen_kpm_exclude')->where('id_exclude', $id)->get()->getRowArray();
+        if (!$kpm) return $this->response->setJSON(['status' => false, 'message' => 'Data tidak ditemukan!']);
+
+        // 🧹 1. HAPUS FILE FOTO BUKTI (Jika Ada)
+        $fileBukti = $kpm['bukti_penutupan'] ?? '';
+        if (!empty($fileBukti) && file_exists(FCPATH . 'uploads/bukti_judol/' . $fileBukti)) {
+            unlink(FCPATH . 'uploads/bukti_judol/' . $fileBukti);
+        }
+
+        // 🧹 2. HAPUS FILE WORD SURAT PERNYATAAN / BA (Jika Ada)
+        $filePernyataan = FCPATH . 'uploads/surat_judol/Pernyataan_Judol_' . $kpm['nik'] . '.docx';
+        $fileBA         = FCPATH . 'uploads/surat_judol/BA_Klarifikasi_' . $kpm['nik'] . '.docx';
+
+        if (file_exists($filePernyataan)) unlink($filePernyataan);
+        if (file_exists($fileBA)) unlink($fileBA);
+
+        // 💥 3. HAPUS DATA DARI DATABASE
+        $hapus = $db->table('dtsen_kpm_exclude')->where('id_exclude', $id)->delete();
+
+        if ($hapus) {
+            return $this->response->setJSON(['status' => true, 'message' => 'Data KPM beserta file lampirannya berhasil dibumihanguskan.']);
+        } else {
+            return $this->response->setJSON(['status' => false, 'message' => 'Gagal menghapus data dari server.']);
+        }
     }
 }

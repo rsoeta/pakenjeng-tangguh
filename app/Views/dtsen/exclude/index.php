@@ -774,6 +774,67 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
             }
         });
     }
+
+    // 🗑️ FUNGSI HAPUS DATA KPM EXCLUDE
+    function hapusExclude(id, nama) {
+        Swal.fire({
+            title: 'Hapus Data?',
+            html: `Apakah Anda yakin ingin menghapus <b>${nama}</b> dari daftar KPM Exclude? <br><br><small class="text-danger">File surat Word dan foto bukti (jika sudah ada) juga akan ikut terhapus dari server.</small>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-trash-alt"></i> Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            buttonsStyling: false,
+            customClass: {
+                popup: 'swal2-small',
+                confirmButton: 'btn btn-danger mx-1 shadow-sm',
+                cancelButton: 'btn btn-secondary mx-1 shadow-sm'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Menghapus Data...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                $.post('<?= site_url('exclude/delete') ?>', {
+                    id: id,
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                }, function(res) {
+                    if (res.status) {
+                        $('#tableExclude').DataTable().ajax.reload(null, false);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Terhapus!',
+                            text: res.message,
+                            customClass: {
+                                popup: 'swal2-small'
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: res.message,
+                            customClass: {
+                                popup: 'swal2-small'
+                            }
+                        });
+                    }
+                }).fail(function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Server',
+                        text: xhr.responseText.substring(0, 100) + '...',
+                        customClass: {
+                            popup: 'swal2-small'
+                        }
+                    });
+                });
+            }
+        });
+    }
 </script>
 
 <?= $this->endSection() ?>

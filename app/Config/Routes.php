@@ -276,6 +276,8 @@ $routes->group('exclude', ['namespace' => 'App\Controllers\Dtsen', 'filter' => [
 
 	$routes->post('upload_bukti', 'Exclude::upload_bukti');
 	$routes->post('proses_surat', 'Exclude::proses_surat');
+
+	$routes->post('delete', 'Exclude::delete');
 });
 
 // 🌍 API Wilayah Lokal (Dropdown berantai untuk DTSEN)
