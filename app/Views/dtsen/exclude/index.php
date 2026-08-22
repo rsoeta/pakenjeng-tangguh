@@ -682,8 +682,9 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                         <br><br>
                         
                         <label class="float-start fw-bold small text-primary mt-1">Upload Bukti Penutupan <span class="text-danger">*</span></label>
-                        <input type="file" id="file_bukti" class="form-control form-control-sm shadow-sm" accept=".jpg,.jpeg,.png,.pdf">
-                        <small class="float-start text-muted" style="font-size:0.75rem;">Maksimal 5MB (Format: JPG/PNG/PDF)</small>
+                        <!-- 🚀 TAMBAHKAN multiple DI SINI -->
+                        <input type="file" id="file_bukti" class="form-control form-control-sm shadow-sm" accept=".jpg,.jpeg,.png,.pdf" multiple>
+                        <small class="float-start text-muted" style="font-size:0.75rem;">Maks 5MB per file (Bisa pilih lebih dari 1 foto sekaligus)</small>
                     `,
 
                     // 🚀 PERUBAHAN UI: Konsisten dengan Popup Pertama
@@ -725,13 +726,13 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                     },
                     preConfirm: () => {
                         let val = document.getElementById('select_pelaku').value;
-                        let file = document.getElementById('file_bukti').files[0];
+                        let files = document.getElementById('file_bukti').files; // 🚀 Ganti jadi .files
 
                         if (!val) {
                             Swal.showValidationMessage('Identitas Pelaku wajib dipilih!');
                             return false;
                         }
-                        if (!file) {
+                        if (files.length === 0) {
                             Swal.showValidationMessage('Bukti penutupan wajib diunggah!');
                             return false;
                         }
@@ -742,10 +743,16 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                         formData.append('jenis', 'pernyataan');
                         formData.append('nik_pelaku', splitData[0]);
                         formData.append('nama_pelaku', splitData[1]);
-                        formData.append('file_bukti', file);
+
+                        // 🚀 LOOPING SEMUA FOTO UNTUK DIKIRIM KE SERVER
+                        for (let i = 0; i < files.length; i++) {
+                            formData.append('file_bukti[]', files[i]);
+                        }
+
                         formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
                         return $.ajax({
+                            // (Sisa kodenya tetap sama seperti sebelumnya)
                             url: '<?= site_url('exclude/proses_surat') ?>',
                             type: 'POST',
                             data: formData,

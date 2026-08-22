@@ -295,10 +295,13 @@ class Exclude extends BaseController
                     $btnAksi .= '<a href="' . base_url($fileBA) . '" target="_blank" class="btn btn-sm btn-primary shadow-sm px-2" title="Unduh Surat BA"><i class="fas fa-file-word"></i></a>';
                 }
 
-                // 3. TAMPILKAN TOMBOL DOWNLOAD BUKTI ASLI (Jika Ingin Cek Mentahannya)
+                // 3. TAMPILKAN TOMBOL DOWNLOAD BUKTI ASLI (Bisa Lebih dari 1)
                 $fileBukti = $row['bukti_penutupan'] ?? null;
                 if (!empty($fileBukti)) {
-                    $btnAksi .= '<a href="' . base_url('uploads/bukti_judol/' . $fileBukti) . '" target="_blank" class="btn btn-sm btn-success shadow-sm px-2" title="Lihat Foto Bukti Asli"><i class="fas fa-file-image"></i></a>';
+                    $arrBukti = explode(',', $fileBukti);
+                    foreach ($arrBukti as $idx => $fb) {
+                        $btnAksi .= '<a href="' . base_url('uploads/bukti_judol/' . trim($fb)) . '" target="_blank" class="btn btn-sm btn-success shadow-sm px-2" title="Lihat Foto Bukti ' . ($idx + 1) . '"><i class="fas fa-file-image"></i></a>';
+                    }
                 }
 
                 // 4. 🚀 TOMBOL HAPUS (Eksklusif Khusus Role < 4 / Operator ke atas)
@@ -622,23 +625,34 @@ class Exclude extends BaseController
         $newName = $kpm['bukti_penutupan'] ?? '';
 
         if ($jenis === 'pernyataan') {
-            // 📸 1. PROSES UPLOAD FOTO BUKTI
-            $file = $this->request->getFile('file_bukti');
-            if ($file && $file->isValid()) {
-                if ($file->getSizeByUnit('mb') > 5) return $this->response->setJSON(['status' => false, 'message' => 'Ukuran file maks 5MB.']);
+            // 📸 1. PROSES UPLOAD FOTO BUKTI (BISA LEBIH DARI 1)
+            $files = $this->request->getFileMultiple('file_bukti');
+            $uploadedFiles = [];
 
+            if ($files) {
                 $pathBukti = FCPATH . 'uploads/bukti_judol/';
                 if (!is_dir($pathBukti)) mkdir($pathBukti, 0777, true);
 
-                $newName = $file->getRandomName();
-                $file->move($pathBukti, $newName);
+                foreach ($files as $file) {
+                    if ($file->isValid() && !$file->hasMoved()) {
+                        if ($file->getSizeByUnit('mb') > 5) return $this->response->setJSON(['status' => false, 'message' => 'Ukuran salah satu file melebih 5MB.']);
 
-                $db->table('dtsen_kpm_exclude')->where('id_exclude', $id)->update([
-                    'bukti_penutupan' => $newName
-                ]);
+                        $namaRandom = $file->getRandomName();
+                        $file->move($pathBukti, $namaRandom);
+                        $uploadedFiles[] = $namaRandom; // Simpan nama file ke array
+                    }
+                }
+
+                // Gabungkan semua nama file dengan koma
+                if (!empty($uploadedFiles)) {
+                    $newName = implode(',', $uploadedFiles);
+                    $db->table('dtsen_kpm_exclude')->where('id_exclude', $id)->update([
+                        'bukti_penutupan' => $newName
+                    ]);
+                }
             }
 
-            // 📝 2. INJEKSI VARIABEL PERNYATAAN & TABEL REKENING
+            // (Kode Injeksi Variabel Pernyataan & Tabel Rekening tetap sama...)
             $templateProcessor->setValue('nama_pelaku', $this->request->getPost('nama_pelaku'));
             $templateProcessor->setValue('nik_pelaku', $this->request->getPost('nik_pelaku'));
 
@@ -656,23 +670,38 @@ class Exclude extends BaseController
             }
             $templateProcessor->cloneRowAndSetValues('nourut', $dataRekening);
 
-            // 🖼️ 3. TEMPEL GAMBAR BUKTI KE LAMPIRAN (Halaman 3)
-            $pathBuktiFull = FCPATH . 'uploads/bukti_judol/' . $newName;
-            if (!empty($newName) && file_exists($pathBuktiFull)) {
-                $ext = strtolower(pathinfo($pathBuktiFull, PATHINFO_EXTENSION));
-                if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
-                    // 🚀 TAMBAHKAN HEIGHT AGAR GAMBAR TIDAK MENGECIL JADI PRANGKO
-                    $templateProcessor->setImageValue('bukti_foto', [
-                        'path'   => $pathBuktiFull,
-                        'width'  => 500,
-                        'height' => 700,
-                        'ratio'  => true
-                    ]);
-                } else {
-                    $templateProcessor->setValue('bukti_foto', '(Bukti yang diunggah berupa file PDF, silakan periksa berkas asli)');
+            // 🖼️ 3. TEMPEL GAMBAR BUKTI KE LAMPIRAN (Halaman 3) - DINAMIS
+            $fileBukti = $newName ?? '';
+            $arrBukti  = array_filter(explode(',', $fileBukti)); // Pecah pakai koma
+
+            if (!empty($arrBukti)) {
+                // Gandakan blok di Word sesuai jumlah foto
+                $templateProcessor->cloneBlock('block_bukti', count($arrBukti), true, true);
+
+                $i = 1;
+                foreach ($arrBukti as $bkt) {
+                    $pathBuktiFull = FCPATH . 'uploads/bukti_judol/' . trim($bkt);
+                    if (file_exists($pathBuktiFull)) {
+                        $ext = strtolower(pathinfo($pathBuktiFull, PATHINFO_EXTENSION));
+                        if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+                            $templateProcessor->setImageValue("bukti_foto#" . $i, [
+                                'path'   => $pathBuktiFull,
+                                'width'  => 500,
+                                'height' => 700,
+                                'ratio'  => true
+                            ]);
+                        } else {
+                            $templateProcessor->setValue("bukti_foto#" . $i, '(Bukti ke-' . $i . ' berupa file PDF, silakan periksa berkas asli)');
+                        }
+                    } else {
+                        $templateProcessor->setValue("bukti_foto#" . $i, '(File bukti tidak ditemukan)');
+                    }
+                    $i++;
                 }
             } else {
-                $templateProcessor->setValue('bukti_foto', '(Belum ada bukti yang diunggah)');
+                // Jika tidak ada bukti sama sekali
+                $templateProcessor->cloneBlock('block_bukti', 1, true, true);
+                $templateProcessor->setValue('bukti_foto#1', '(Belum ada bukti yang diunggah)');
             }
         }
 
@@ -694,10 +723,14 @@ class Exclude extends BaseController
         $kpm = $db->table('dtsen_kpm_exclude')->where('id_exclude', $id)->get()->getRowArray();
         if (!$kpm) return $this->response->setJSON(['status' => false, 'message' => 'Data tidak ditemukan!']);
 
-        // 🧹 1. HAPUS FILE FOTO BUKTI (Jika Ada)
+        // 🧹 1. HAPUS FILE FOTO BUKTI (Semua File Sekaligus)
         $fileBukti = $kpm['bukti_penutupan'] ?? '';
-        if (!empty($fileBukti) && file_exists(FCPATH . 'uploads/bukti_judol/' . $fileBukti)) {
-            unlink(FCPATH . 'uploads/bukti_judol/' . $fileBukti);
+        if (!empty($fileBukti)) {
+            $arrBukti = explode(',', $fileBukti);
+            foreach ($arrBukti as $fb) {
+                $path = FCPATH . 'uploads/bukti_judol/' . trim($fb);
+                if (file_exists($path)) unlink($path);
+            }
         }
 
         // 🧹 2. HAPUS FILE WORD SURAT PERNYATAAN / BA (Jika Ada)
