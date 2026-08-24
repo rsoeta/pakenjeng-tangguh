@@ -180,7 +180,10 @@ $(document).ready(function () {
         const usia = getUsia();
         const jenjang = $('#jenjang_pendidikan').val();
 
-        if (!usia || !jenjang) return;
+        // Reset error state
+        $('#jenjang_pendidikan').removeClass('is-invalid');
+
+        if (usia === null || !jenjang) return;
 
         let minUsia = 0;
 
@@ -193,16 +196,13 @@ $(document).ready(function () {
         if (jenjang === "S3") minUsia = 25;
 
         if (usia < minUsia) {
-            Swal.fire("Validasi Usia", 
-                `Usia ${usia} tahun terlalu muda untuk jenjang ${jenjang}. Minimal usia adalah ${minUsia} tahun.`,
-                "warning"
-            );
-            $('#jenjang_pendidikan').val("");
+            $('#jenjang_pendidikan').addClass('is-invalid');
+            $('#fb_jenjang').html(`<i class="fas fa-exclamation-circle"></i> Usia terlalu muda (Minimal ${minUsia} thn).`);
+            // Value tidak di-reset agar user tahu apa yang salah
         }
     }
 
     $('#tanggal_lahir, #jenjang_pendidikan').on('change', validateUsiaJenjang);
-
 
 
     // ===================================================================
@@ -212,6 +212,9 @@ $(document).ready(function () {
         const ps = $('#partisipasi_sekolah').val();
         const jenjang = $('#jenjang_pendidikan').val();
         const ijazah = $('#ijazah_tertinggi').val();
+
+        // Reset error state
+        $('#ijazah_tertinggi').removeClass('is-invalid');
 
         if (!jenjang || !ijazah) return;
 
@@ -223,31 +226,20 @@ $(document).ready(function () {
 
         // Masih sekolah → ijazah harus lebih rendah
         if (ps === "Masih Sekolah") {
-
-            // ✔ Jika ijazah = placeholder ("Belum Ditentukan") → valid
-            if (ijazah === "Belum Ditentukan") return;
-
             if (levelIjazah >= levelJenjang) {
-                Swal.fire("Validasi Pendidikan",
-                    "Ijazah tidak boleh sama atau lebih tinggi dari jenjang yang sedang ditempuh.",
-                    "warning"
-                );
-                $('#ijazah_tertinggi').val("");
+                $('#ijazah_tertinggi').addClass('is-invalid');
+                $('#fb_ijazah').html('<i class="fas fa-exclamation-circle"></i> Ijazah tidak boleh sama/lebih tinggi dari jenjang yang sedang ditempuh.');
             }
         }
 
         // Tidak sekolah lagi → ijazah ≤ jenjang
         if (ps === "Tidak Bersekolah Lagi" && levelIjazah > levelJenjang) {
-            Swal.fire("Validasi Pendidikan",
-                "Ijazah tidak boleh lebih tinggi dari jenjang pendidikan terakhir.",
-                "warning"
-            );
-            $('#ijazah_tertinggi').val("");
+            $('#ijazah_tertinggi').addClass('is-invalid');
+            $('#fb_ijazah').html('<i class="fas fa-exclamation-circle"></i> Ijazah tidak boleh lebih tinggi dari jenjang pendidikan terakhir.');
         }
     }
 
-    $('#jenjang_pendidikan, #ijazah_tertinggi, #partisipasi_sekolah')
-        .on('change', validateJenjangIjazah);
+    $('#jenjang_pendidikan, #ijazah_tertinggi, #partisipasi_sekolah').on('change', validateJenjangIjazah);
 
 
     // ===================================================================
@@ -256,6 +248,9 @@ $(document).ready(function () {
     function validateKelas() {
         const jenjang = $('#jenjang_pendidikan').val();
         const kelas = parseInt($('#kelas_tertinggi').val());
+
+        // Reset error state
+        $('#kelas_tertinggi').removeClass('is-invalid');
 
         if (!kelas || !jenjang) return;
 
@@ -271,11 +266,8 @@ $(document).ready(function () {
         else if (lv >= 3) allowed = kelasValid.levelPT;
 
         if (!allowed.includes(kelas)) {
-            Swal.fire("Validasi Kelas",
-                `Kelas ${kelas} tidak valid untuk jenjang ${jenjang}.`,
-                "warning"
-            );
-            $('#kelas_tertinggi').val("");
+            $('#kelas_tertinggi').addClass('is-invalid');
+            $('#fb_kelas').html(`<i class="fas fa-exclamation-circle"></i> Kelas ${kelas} tidak sesuai untuk jenjang ini.`);
         }
     }
 
@@ -493,7 +485,33 @@ $(document).ready(function () {
                 $skillChecks.prop('disabled', false);
             }
         }
-    });
+    }); // 👈 PASTIKAN PENUTUP INI ADA DI SINI SEBELUM KODE DI BAWAHNYA
+
+    // ===================================================================
+    // 🚀 LOGIKA DINAMIS: SEMBUNYIKAN STATUS JIKA "TIDAK BEKERJA"
+    // ===================================================================
+    function toggleStatusPekerjaan() {
+        const profesi = $('#lapangan_usaha').val();
+        const $divStatus = $('#div_status_pekerjaan');
+        const $inputStatus = $('#status_pekerjaan');
+
+        if (profesi === 'Tidak Bekerja') {
+            $divStatus.slideUp(200); // Sembunyikan dengan animasi halus
+            $inputStatus.val('').removeClass('is-invalid'); // Kosongkan & hapus error (jika ada)
+        } else {
+            $divStatus.slideDown(200); // Tampilkan kembali
+        }
+    }
+
+    // Panggil saat dropdown profesi berubah (mendukung Select2)
+    $('#lapangan_usaha').on('change', toggleStatusPekerjaan);
+
+    // Sisipkan juga ke dalam fungsi applyRules() bawaan Jenderal agar tereksekusi saat modal pertama dibuka
+    const originalApplyRules = window.applyRules;
+    window.applyRules = function() {
+        originalApplyRules();
+        toggleStatusPekerjaan(); // Panggil paksa setiap kali modal/aturan dirender ulang
+    };
 
     $(document).on('change', '#memiliki_usaha', function () {
         if ($(this).val() === 'Ya') {
@@ -679,57 +697,82 @@ $(document).ready(function () {
     📤 Submit Data Form
     ======================================================= */
 
+    // 🚀 VALIDASI REAL-TIME TAB KELUARGA
+    $('#formDataKeluarga').on('input change', '.required, [required]', function() {
+        if (!$(this).val() || String($(this).val()).trim() === '') {
+            $(this).addClass('is-invalid');
+            // Khusus Select2 Bootstrap 5: Beri border merah pada wadahnya
+            if ($(this).hasClass('select2-hidden-accessible')) {
+                $(this).next('.select2-container').find('.select2-selection').addClass('border-danger');
+            }
+        } else {
+            $(this).removeClass('is-invalid');
+            if ($(this).hasClass('select2-hidden-accessible')) {
+                $(this).next('.select2-container').find('.select2-selection').removeClass('border-danger');
+            }
+        }
+    });
+
     // ============================= 
-    // 🛡️ VALIDASI WAJIB FORM KELUARGA
+    // 🛡️ SUBMIT FORM KELUARGA
     // =============================
     $('#formDataKeluarga').on('submit', function (e) {
         e.preventDefault();
 
-        let noKK           = $('#keluarga_no_kk').val().trim();
-        const kepala       = $('#kepala_keluarga').val().trim();
+        const form = $(this);
+        let isValid = true;
 
-        // ===========================================
-        // 🔒 1) Bersihkan input: hanya angka
-        // ===========================================
-        noKK = noKK.replace(/\D/g, '');
-        $('#keluarga_no_kk').val(noKK);
+        // 1) Sikat bersih huruf/simbol pada field Nomor (Hanya sisakan angka)
+        ['#keluarga_no_kk', '#nik_kepala_keluarga', '#kode_pos'].forEach(selector => {
+            const el = form.find(selector);
+            if (el.length) {
+                el.val(el.val().replace(/\D/g, ''));
+            }
+        });
 
-        // ===========================================
-        // 🔒 2) VALIDASI KHUSUS No KK
-        // ===========================================
-        if (noKK.length !== 16) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Nomor KK Tidak Valid',
-                text: 'Nomor KK harus berisi 16 digit angka.'
-            });
+        // 2) Periksa SEMUA field wajib (.required atau ber-atribut required)
+        form.find('.required, [required]').each(function() {
+            if (!$(this).val() || String($(this).val()).trim() === '') {
+                $(this).addClass('is-invalid');
+                if ($(this).hasClass('select2-hidden-accessible')) {
+                    $(this).next('.select2-container').find('.select2-selection').addClass('border-danger');
+                }
+                isValid = false;
+            } else {
+                $(this).removeClass('is-invalid');
+                if ($(this).hasClass('select2-hidden-accessible')) {
+                    $(this).next('.select2-container').find('.select2-selection').removeClass('border-danger');
+                }
+            }
+        });
+
+        // 3) Validasi khusus Nomor KK
+        const noKK = $('#keluarga_no_kk').val();
+        if (noKK && noKK.length !== 16) {
+            $('#keluarga_no_kk').addClass('is-invalid');
+            Swal.fire({ icon: 'error', title: 'Nomor KK Tidak Valid', text: 'Nomor KK harus berisi 16 digit angka.' });
             return;
         }
 
-        if (noKK.slice(-3) === "000") {
-            Swal.fire({
-                icon: 'error',
-                title: 'Nomor KK Tidak Valid',
-                text: 'Tiga digit terakhir Nomor KK tidak boleh 000.'
-            });
+        if (noKK && noKK.slice(-3) === "000") {
+            $('#keluarga_no_kk').addClass('is-invalid');
+            Swal.fire({ icon: 'error', title: 'Nomor KK Tidak Valid', text: 'Tiga digit terakhir Nomor KK tidak boleh 000.' });
             return;
         }
 
-        // ===========================================
-        // 🔒 3) VALIDASI FIELD WAJIB
-        // ===========================================
-        if (!noKK || !kepala) {
-            //  || !alamat || !rw || !rt || !kategoriAdat
+        // 4) 🚀 GATEKEEPER: Hentikan eksekusi jika ada form yang kosong / merah
+        if (!isValid) {
             Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: 'Semua field wajib diisi sebelum menyimpan.'
+                icon: 'warning',
+                title: 'Isian Belum Lengkap',
+                text: 'Terdapat isian wajib (seperti Wilayah Capil atau Identitas) yang masih kosong. Silakan lengkapi kotak yang bergaris merah.',
+                confirmButtonText: 'Periksa Kembali'
             });
             return;
         }
 
         // =============================
-        // 🟢 4) KONFIRMASI SEBELUM SIMPAN
+        // 🟢 5) KONFIRMASI SEBELUM SIMPAN
         // =============================
         const sumber = $('#sumber').val();
 
@@ -742,11 +785,10 @@ $(document).ready(function () {
             cancelButtonColor: '#d33',
             confirmButtonText: '<i class="fas fa-save"></i> Ya, Simpan Data!',
             cancelButtonText: 'Batal',
-            reverseButtons: true // Memindah tombol Ya ke kanan agar lebih natural
+            reverseButtons: true
         }).then((result) => {
             if (result.isConfirmed) {
                 
-                // 🚀 Tampilkan Loading saat proses berjalan
                 Swal.fire({
                     title: 'Menyimpan data...',
                     text: 'Mohon tunggu',
@@ -754,7 +796,6 @@ $(document).ready(function () {
                     didOpen: () => Swal.showLoading()
                 });
 
-                // 🚀 Eksekusi AJAX Simpan Data
                 $.ajax({
                     url: baseUrl + '/pembaruan-keluarga/save-keluarga',
                     method: 'POST',
@@ -770,14 +811,11 @@ $(document).ready(function () {
                                 showConfirmButton: false
                             });
 
-                            if (res.id_kk) {
-                                $('#id_kk').val(res.id_kk);
-                            }
+                            if (res.id_kk) $('#id_kk').val(res.id_kk);
 
                             if (sumber === 'baru' && res.id_kk) {
                                 setTimeout(() => {
-                                    window.location.href =
-                                        `${baseUrl}/pembaruan-keluarga/detail/${res.id_kk}`;
+                                    window.location.href = `${baseUrl}/pembaruan-keluarga/detail/${res.id_kk}`;
                                 }, 1200);
                                 return;
                             }
@@ -786,19 +824,11 @@ $(document).ready(function () {
                             setTimeout(() => location.reload(), 1000);
 
                         } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Gagal',
-                                text: res.message || 'Tidak dapat menyimpan data.'
-                            });
+                            Swal.fire({ icon: 'error', title: 'Gagal', text: res.message || 'Tidak dapat menyimpan data.' });
                         }
                     },
                     error: () => {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Terjadi kesalahan saat menyimpan data.'
-                        });
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan saat menyimpan data.' });
                     }
                 });
             }

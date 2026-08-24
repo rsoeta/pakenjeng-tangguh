@@ -71,9 +71,27 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             <th>Aksi</th>
         </tr>
     </thead>
+    <!-- ... (tabel DataTable Anggota di atasnya) ... -->
 </table>
 
+<!-- 🚀 KOTAK TOMBOL SELESAI / CEK STATUS -->
+<?php if ($editable): ?>
+    <div class="mt-4 p-4 bg-light border border-primary border-opacity-25 rounded-3 shadow-sm text-end">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+            <div class="text-start mb-3 mb-md-0">
+                <h6 class="fw-bold text-primary mb-1"><i class="fas fa-info-circle me-1"></i> Pengisian Selesai?</h6>
+                <span class="text-muted small">Jika seluruh tab (Keluarga, Rumah, Foto, Aset, Anggota) telah diisi dengan lengkap, klik tombol di samping untuk mengecek status akhir usulan.</span>
+            </div>
+            <!-- 🚀 BUG FIX: Panggil cekKelengkapanAnggota() sebelum reload -->
+            <button type="button" class="btn btn-primary px-4 rounded-pill px-4 shadow-sm" onclick="if(typeof window.cekKelengkapanAnggota === 'function' && window.cekKelengkapanAnggota()) { window.location.reload(); }">
+                <i class="fas fa-clipboard-check me-2"></i> Cek Status Kelengkapan Usulan
+            </button>
+        </div>
+    </div>
+<?php endif; ?>
+
 <?= $this->include('dtsen/pembaruan/modal_anggota') ?>
+<!-- ... (script assets di bawahnya) ... -->
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
@@ -255,6 +273,130 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         $('#memiliki_usaha').on('change', toggleUsahaDetail);
         console.log("Usaha:", $('#memiliki_usaha').val());
 
+        /* ======================================================
+        💾 EVENT SUBMIT FORM ANGGOTA (Tambah / Edit)
+        ====================================================== */
+        $(document).on('submit', '#formAnggota', function(e) {
+            e.preventDefault();
+
+            const form = $(this);
+            let errorMessage = 'Pastikan kolom wajib terisi dan NIK/No KK terdiri dari 16 digit.';
+
+            // 1. Cek semua input yang wajib diisi (Required)
+            form.find('.required').each(function() {
+                if (!$(this).val().trim()) {
+                    // Jika kosong, berikan garis merah
+                    $(this).addClass('is-invalid');
+                } else {
+                    // 🚀 PENTING: Jangan langsung hapus class 'is-invalid' membabi buta!
+                    // Karena bisa jadi elemen ini sedang terkena validasi pintar dari Tab Pendidikan.
+                    // Khusus untuk field biasa (selain 3 dropdown pendidikan ini), jika sudah terisi, hapus merahnya.
+                    if (!['jenjang_pendidikan', 'kelas_tertinggi', 'ijazah_tertinggi'].includes($(this).attr('id'))) {
+                        $(this).removeClass('is-invalid');
+                    }
+                }
+            });
+
+            // 2. Format dan cek presisi digit NIK / No KK
+            ['#nik', '#keluarga_no_kk', '#individu_no_kk'].forEach(selector => {
+                const el = form.find(selector);
+                if (el.length) {
+                    const value = el.val().replace(/\D/g, '');
+                    el.val(value); // Sikat huruf/simbol jadi angka murni
+
+                    if (value.length > 0 && value.length !== 16) {
+                        el.addClass('is-invalid');
+                    } else if (value.length === 16) {
+                        el.removeClass('is-invalid');
+                    }
+                }
+            });
+
+            // 3. 🚀 FINAL GATEKEEPER: Adakah elemen yang masih menyala merah?
+            const invalidElements = form.find('.is-invalid');
+
+            if (invalidElements.length > 0) {
+                // Cek apakah errornya bersumber dari kecerdasan Tab Pendidikan
+                const hasPendidikanError = invalidElements.filter('#jenjang_pendidikan, #kelas_tertinggi, #ijazah_tertinggi').length > 0;
+
+                if (hasPendidikanError) {
+                    errorMessage = 'Terdapat isian pendidikan/usia yang tidak logis (bergaris merah). Silakan periksa kembali Tab Pendidikan!';
+                }
+
+                // Tembakkan SweetAlert yang elegan
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Isian Tidak Valid',
+                    text: errorMessage,
+                    customClass: {
+                        title: 'fs-5',
+                        content: 'fs-6'
+                    },
+                    width: '350px'
+                });
+                return; // Stop pengiriman data ke server!
+            }
+
+            // ==========================================
+            // 🚀 JIKA LOLOS SEMUA GATEKEEPER -> SIMPAN!
+            // ==========================================
+            Swal.fire({
+                title: 'Menyimpan...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            $.ajax({
+                url: `${window.baseUrl}/pembaruan-keluarga/save-anggota`,
+                method: 'POST',
+                data: form.serialize(),
+                dataType: 'json',
+                success: function(res) {
+                    Swal.close();
+
+                    if (res.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Tersimpan',
+                            text: res.message,
+                            timer: 900,
+                            showConfirmButton: false,
+                            willClose: () => {
+                                initTableAnggota();
+                                $(document).trigger('anggota:saved');
+                            }
+                        });
+                    } else {
+                        Swal.fire('Gagal', res.message || 'Gagal menyimpan data.', 'error');
+                    }
+                },
+                error: function(xhr) {
+                    Swal.close();
+
+                    // Ambil teks error dari server (bisa jadi HTML error page dari CodeIgniter)
+                    let errorMsg = xhr.responseText;
+
+                    // Potong teks jika terlalu panjang agar popup tidak terlalu penuh
+                    if (errorMsg.length > 500) {
+                        errorMsg = errorMsg.substring(0, 500) + '...';
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Server (' + xhr.status + ')',
+                        html: '<div class="text-start small text-danger" style="max-height: 200px; overflow-y: auto; text-align: left;">' + errorMsg + '</div>',
+                        confirmButtonText: 'Tutup'
+                    });
+
+                    console.error("DETAIL ERROR AJAX:", xhr.responseText);
+                }
+            });
+        });
+
+        $('#modalAnggota').on('shown.bs.modal', function() {
+            console.log('🧾 Modal Anggota terbuka, event submit aktif');
+        });
+
         /* ============================================================
          * ✏️ EVENT: Tombol Edit / Lihat Anggota
          * ============================================================ */
@@ -291,6 +433,12 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     $(`input[name="jenis_kelamin"][value="${d.jenis_kelamin}"]`).prop('checked', true);
                 }
 
+                // 🚀 TAMBAHAN: Prefill Rekening / Dompet Digital (radio button)
+                $('input[name="rekening_aktif"]').prop('checked', false); // reset dulu
+                if (d.rekening_aktif) {
+                    $(`input[name="rekening_aktif"][value="${d.rekening_aktif}"]`).prop('checked', true);
+                }
+
                 updateSelectOptions('#status_kawin', drop.status_kawin, d.status_kawin ?? d.status_kawin_label);
                 updateSelectOptions('#hubungan', drop.hubungan, d.hubungan ?? d.hubungan_label);
                 updateSelectOptions('#pekerjaan', drop.pekerjaan, d.pekerjaan ?? d.pekerjaan_label);
@@ -317,6 +465,12 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 $('#lapangan_usaha').val(d.lapangan_usaha ?? '');
                 $('#status_pekerjaan').val(d.status_pekerjaan ?? '');
                 $('#pendapatan').val(d.pendapatan ?? '');
+
+                // 🚀 PREFILL: Rekening / Dompet Digital (Radio Button)
+                $('input[name="rekening_aktif"]').prop('checked', false); // Bersihkan dulu
+                if (d.rekening_aktif) {
+                    $(`input[name="rekening_aktif"][value="${d.rekening_aktif}"]`).prop('checked', true);
+                }
 
                 // Prefill Tab Usaha
                 $('#memiliki_usaha').val(d.memiliki_usaha || '');
@@ -482,90 +636,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 
         $('#modalAnggota').on('shown.bs.modal', initSelect2WilayahModal);
 
-        /* ======================================================
-        💾 EVENT SUBMIT FORM ANGGOTA (Tambah / Edit)
-        ====================================================== */
-        $(document).on('submit', '#formAnggota', function(e) {
-            e.preventDefault();
-
-            const form = $(this);
-            let valid = true;
-
-            form.find('.required').each(function() {
-                if (!$(this).val().trim()) {
-                    $(this).addClass('is-invalid');
-                    valid = false;
-                } else {
-                    $(this).removeClass('is-invalid');
-                }
-            });
-
-            ['#nik', '#keluarga_no_kk', '#individu_no_kk'].forEach(selector => {
-                const el = form.find(selector);
-                if (el.length) {
-                    const value = el.val().replace(/\D/g, '');
-                    el.val(value);
-
-                    if (value.length !== 16) {
-                        el.addClass('is-invalid');
-                        valid = false;
-                    } else {
-                        el.removeClass('is-invalid');
-                    }
-                }
-            });
-
-            if (!valid) {
-                Swal.fire(
-                    'Isian Tidak Valid',
-                    'Pastikan kolom wajib terisi dan NIK/No KK terdiri dari 16 digit.',
-                    'warning'
-                );
-                return;
-            }
-
-            Swal.fire({
-                title: 'Menyimpan...',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-
-            $.ajax({
-                url: `${window.baseUrl}/pembaruan-keluarga/save-anggota`,
-                method: 'POST',
-                data: form.serialize(),
-                dataType: 'json',
-                success: function(res) {
-                    Swal.close();
-
-                    if (res.status === 'success') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Tersimpan',
-                            text: res.message,
-                            timer: 900,
-                            showConfirmButton: false,
-                            willClose: () => {
-                                initTableAnggota();
-                                $(document).trigger('anggota:saved');
-                            }
-                        });
-                    } else {
-                        Swal.fire('Gagal', res.message || 'Gagal menyimpan data.', 'error');
-                    }
-                },
-                error: function(xhr) {
-                    Swal.close();
-                    Swal.fire('Error', 'Terjadi kesalahan saat menyimpan data.', 'error');
-                    console.error(xhr.responseText);
-                }
-            });
-        });
-
-        $('#modalAnggota').on('shown.bs.modal', function() {
-            console.log('🧾 Modal Anggota terbuka, event submit aktif');
-        });
-
         // ==========================================
         // 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF (JS)
         // ==========================================
@@ -613,11 +683,20 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         return json.data;
                     }
                 },
+                // ... (kode ajax SINDEN sebelumnya)
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
                 },
+                // 🚀 TAMBAHKAN BLOK INI: Akan dipanggil otomatis tiap kali tabel selesai dimuat / di-refresh
+                drawCallback: function(settings) {
+                    let totalAnggota = this.api().rows().count(); // Hitung jumlah data asli di dalam API DataTables
+                    if (typeof window.updateJumlahAnggotaOtomatis === 'function') {
+                        window.updateJumlahAnggotaOtomatis(totalAnggota);
+                    }
+                },
                 columns: [{
                         data: null,
+                        // ... (lanjutan kode columns SINDEN Jenderal)
                         defaultContent: '',
                         className: 'dtr-control text-start',
                         orderable: false,

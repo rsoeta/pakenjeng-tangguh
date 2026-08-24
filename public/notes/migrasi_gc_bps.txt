@@ -1,0 +1,41 @@
+ALTER TABLE `dtsen_kk`
+ADD COLUMN `nik_kepala_keluarga` VARCHAR(20) NULL AFTER `kepala_keluarga`,
+ADD COLUMN `kode_pos` VARCHAR(10) NULL AFTER `alamat`,
+ADD COLUMN `nama_jalan` VARCHAR(150) NULL AFTER `kode_pos`,
+ADD COLUMN `nomor_rumah` VARCHAR(20) NULL AFTER `nama_jalan`,
+ADD COLUMN `dusun` VARCHAR(100) NULL AFTER `nomor_rumah`,
+ADD COLUMN `is_alamat_sesuai_kk` ENUM('Ya', 'Tidak') DEFAULT 'Ya' AFTER `dusun`;
+
+ALTER TABLE `dtsen_rt`
+ADD COLUMN `jenis_bangunan` VARCHAR(100) NULL AFTER `kepemilikan_rumah`,
+ADD COLUMN `is_tinggal_bersama` ENUM('Ya', 'Tidak') NULL AFTER `jenis_bangunan`,
+ADD COLUMN `jumlah_kk_dalam_rumah` INT NULL AFTER `is_tinggal_bersama`,
+ADD COLUMN `jumlah_orang_dalam_rumah` INT NULL AFTER `jumlah_kk_dalam_rumah`,
+ADD COLUMN `perkiraan_harga_sewa` DECIMAL(12,2) NULL AFTER `jumlah_orang_dalam_rumah`,
+ADD COLUMN `foto_kamar_mandi` VARCHAR(255) NULL AFTER `foto_rumah_dalam`;
+
+ALTER TABLE `dtsen_se`
+ADD COLUMN `pengeluaran_listrik` DECIMAL(12,2) NULL AFTER `rata_pengeluaran_bulanan`,
+ADD COLUMN `pengeluaran_pulsa` DECIMAL(12,2) NULL AFTER `pengeluaran_listrik`,
+ADD COLUMN `pengeluaran_internet` DECIMAL(12,2) NULL AFTER `pengeluaran_pulsa`,
+ADD COLUMN `pengeluaran_makan_mingguan` DECIMAL(12,2) NULL AFTER `pengeluaran_internet`,
+ADD COLUMN `pengeluaran_non_makan_bulanan` DECIMAL(12,2) NULL AFTER `pengeluaran_makan_mingguan`,
+ADD COLUMN `pengeluaran_non_makan_tahunan` DECIMAL(12,2) NULL AFTER `pengeluaran_non_makan_bulanan`,
+ADD COLUMN `pendapatan_gaji` DECIMAL(12,2) NULL AFTER `pengeluaran_non_makan_tahunan`,
+ADD COLUMN `pendapatan_usaha` DECIMAL(12,2) NULL AFTER `pendapatan_gaji`,
+ADD COLUMN `pendapatan_lainnya` DECIMAL(12,2) NULL AFTER `pendapatan_usaha`;
+
+ALTER TABLE `dtsen_rt` 
+ADD COLUMN `bukti_kepemilikan` VARCHAR(100) NULL AFTER `kepemilikan_rumah`,
+ADD COLUMN `no_kk_lainnya` TEXT NULL AFTER `jumlah_kk_dalam_rumah`;
+
+ALTER TABLE `dtsen_rt` ADD COLUMN `jumlah_meteran_listrik` INT NULL AFTER `sumber_listrik`;
+
+ALTER TABLE `dtsen_rt` 
+ADD COLUMN `nomor_pelanggan` TEXT NULL AFTER `jumlah_meteran_listrik`,
+ADD COLUMN `nomor_meter` TEXT NULL AFTER `nomor_pelanggan`,
+ADD COLUMN `daya_listrik` TEXT NULL AFTER `nomor_meter`;
+
+ALTER TABLE `dtsen_art` 
+ADD COLUMN `no_hp` VARCHAR(20) NULL AFTER `nik`,
+ADD COLUMN `rekening_aktif` VARCHAR(50) NULL AFTER `pekerjaan`;
