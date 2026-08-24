@@ -196,9 +196,6 @@
             }
         });
 
-        // ⚠️ PENTING: Jangan tulis startKamera(); lagi di sini, 
-        // karena sudah otomatis dipanggil di dalam fungsi Html5Qrcode.getCameras() di atas.
-
         function prosesDataQR(decodedText, mode) {
             try {
                 let dataQR = JSON.parse(decodedText);
@@ -240,16 +237,21 @@
                                 });
                                 $('#last_scan_result').html('<i class="fas fa-exclamation-triangle text-warning"></i> ' + res.nama + ' (Duplikat)');
                             } else {
+                                // 🚀 BUKA TOPENG ERROR DARI CONTROLLER DI SINI
                                 Toast.fire({
                                     icon: 'error',
-                                    title: 'Gagal diproses!'
+                                    title: res.message || 'Gagal diproses!'
                                 });
                             }
                         },
-                        error: function() {
+                        error: function(xhr) {
+                            // 🚀 BUKA TOPENG ERROR HTTP (MISAL: 500 INTERNAL SERVER ERROR)
+                            let errorMsg = xhr.responseJSON && xhr.responseJSON.message ?
+                                xhr.responseJSON.message :
+                                'Gangguan Jaringan/Server!';
                             Toast.fire({
                                 icon: 'error',
-                                title: 'Gangguan Jaringan/Server!'
+                                title: errorMsg
                             });
                         },
                         complete: function() {

@@ -25,8 +25,19 @@
                 <div class="card-body p-3 bg-light border-bottom">
                     <div class="card shadow-sm">
 
+                        <!-- 🚀 GRID DIUBAH JADI 4 KOLOM (col-md-3) -->
                         <div class="row align-items-end">
-                            <div class="col-4 col-md-4 mb-2">
+                            <!-- 🚀 GANTI JADI DROPDOWN NO BAST -->
+                            <div class="col-6 col-md-3 mb-2">
+                                <label class="small font-weight-bold">Filter Tahap (No. BAST)</label>
+                                <select id="filter_bast" class="form-control form-control-sm">
+                                    <option value="">-- Semua Tahap --</option>
+                                    <?php foreach ($list_bast as $bast): ?>
+                                        <option value="<?= esc($bast['no_bast']) ?>"><?= esc($bast['no_bast']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-6 col-md-3 mb-2">
                                 <label class="small font-weight-bold">Filter RW</label>
                                 <select id="filter_rw" class="form-control form-control-sm">
                                     <option value="">-- Semua RW --</option>
@@ -35,7 +46,7 @@
                                     <?php endfor; ?>
                                 </select>
                             </div>
-                            <div class="col-4 col-md-4 mb-2">
+                            <div class="col-6 col-md-3 mb-2">
                                 <label class="small font-weight-bold">Filter RT</label>
                                 <select id="filter_rt" class="form-control form-control-sm">
                                     <option value="">-- Semua RT --</option>
@@ -44,7 +55,7 @@
                                     <?php endfor; ?>
                                 </select>
                             </div>
-                            <div class="col-4 col-md-4 mb-2">
+                            <div class="col-6 col-md-3 mb-2">
                                 <button class="btn btn-sm btn-primary w-100 shadow-sm" id="btnFilter"><i class="fas fa-filter mr-1"></i> Terapkan</button>
                             </div>
                         </div>
@@ -83,10 +94,17 @@
             processing: true,
             serverSide: true,
             responsive: true,
+
+            // 🚀 TAMBAHAN SUPER PENTING:
+            searchDelay: 800, // Tunggu 800ms setelah user berhenti mengetik baru kirim AJAX
+            deferRender: true, // Mempercepat rendering DOM HTML di browser
+
+            // 1. Di dalam inisialisasi DataTables (ajax.data)
             ajax: {
                 url: "<?= base_url('banpang/datatable') ?>",
                 type: "POST",
                 data: function(d) {
+                    d.filter_bast = $('#filter_bast').val(); // <-- Pastikan namanya filter_bast
                     d.filter_rw = $('#filter_rw').val();
                     d.filter_rt = $('#filter_rt').val();
                     d.<?= csrf_token() ?> = "<?= csrf_hash() ?>";
@@ -105,7 +123,7 @@
             language: {
                 search: "_INPUT_",
                 searchPlaceholder: "Cari Nama / NIK / No PBP...",
-                processing: '<i class="fas fa-spinner fa-spin fa-2x text-primary"></i>'
+                processing: '<i class="fas fa-spinner fa-spin fa-2x text-primary"></i> Memuat Data...'
             }
         });
 
@@ -114,20 +132,20 @@
             tableBanpang.ajax.reload();
         });
 
-        // 🚀 EVENT TRIGGER: EKSPOR EXCEL NATIVE
+        // 2. Di dalam Event Trigger Tombol Ekspor Excel
         $('#btnExportExcel').click(function() {
+            let bast = $('#filter_bast').val(); // 🚀 UBAH JADI BAST
             let rw = $('#filter_rw').val();
             let rt = $('#filter_rt').val();
-            // Buka tab baru menembak rute Excel dengan query string filter aktif
-            window.open("<?= base_url('banpang/exportExcel') ?>?filter_rw=" + rw + "&filter_rt=" + rt, '_blank');
+            window.open("<?= base_url('banpang/exportExcel') ?>?filter_bast=" + bast + "&filter_rw=" + rw + "&filter_rt=" + rt, '_blank');
         });
 
-        // 🚀 EVENT TRIGGER: CETAK PDF LAPORAN DESA
+        // 3. Di dalam Event Trigger Tombol Cetak PDF
         $('#btnCetakPdf').click(function() {
+            let bast = $('#filter_bast').val(); // 🚀 UBAH JADI BAST
             let rw = $('#filter_rw').val();
             let rt = $('#filter_rt').val();
-            // Buka tab baru menembak rute PDF dengan query string filter aktif
-            window.open("<?= base_url('banpang/exportPdf') ?>?filter_rw=" + rw + "&filter_rt=" + rt, '_blank');
+            window.open("<?= base_url('banpang/exportPdf') ?>?filter_bast=" + bast + "&filter_rw=" + rw + "&filter_rt=" + rt, '_blank');
         });
 
     });

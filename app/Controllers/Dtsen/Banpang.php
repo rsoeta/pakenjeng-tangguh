@@ -28,14 +28,25 @@ class Banpang extends BaseController
     // ========================================================
     public function index()
     {
+        // 🚀 Ambil daftar No BAST unik dari database untuk Dropdown Filter
+        $list_bast = $this->db->table('dtsen_banpang')
+            ->select('no_bast')
+            ->where('no_bast IS NOT NULL')
+            ->where('no_bast !=', '')
+            ->groupBy('no_bast')
+            ->orderBy('no_bast', 'DESC')
+            ->get()
+            ->getResultArray();
+
         $data = [
-            'title' => 'Rekapitulasi Bantuan Pangan (QR)'
+            'title'     => 'Rekapitulasi Bantuan Pangan (QR)',
+            'list_bast' => $list_bast // 🚀 Kirim array ini ke View
         ];
         return view('dtsen/banpang/v_rekap', $data);
     }
 
     // ========================================================
-    // 🚀 DATATABLES REKAP BANPANG (ANTI-GANDA SUBQUERY)
+    // 🚀 DATATABLES REKAP BANPANG (SUPER CEPAT + AWAL KOSONG)
     // ========================================================
     public function datatable()
     {
@@ -50,23 +61,33 @@ class Banpang extends BaseController
         $length = $request->getPost('length');
         $search = $request->getPost('search')['value'] ?? '';
 
-        $filter_rw = $request->getPost('filter_rw');
-        $filter_rt = $request->getPost('filter_rt');
+        // 🚀 TANGKAP FILTER DARI FRONTEND
+        $filter_bast = $request->getPost('filter_bast');
+        $filter_rw   = $request->getPost('filter_rw');
+        $filter_rt   = $request->getPost('filter_rt');
 
-        $user   = $this->authModel->getUserId();
-        $roleId = session()->get('role_id') ?? $user['role_id'] ?? 4;
+        // 🚀 ATURAN MUTLAK: JIKA KETIGA FILTER KOSONG (DAN TIDAK SEDANG MENCARI), KEMBALIKAN KOSONG!
+        if (empty($filter_bast) && empty($filter_rw) && empty($filter_rt) && empty($search)) {
+            return $this->response->setJSON([
+                'draw'            => intval($draw),
+                'recordsTotal'    => 0,
+                'recordsFiltered' => 0,
+                'data'            => []
+            ]);
+        }
+
+        $user     = $this->authModel->getUserId();
+        $roleId   = session()->get('role_id') ?? $user['role_id'] ?? 4;
         $kodeDesa = session()->get('kode_desa') ?? ($user['kode_desa'] ?? '');
 
-        // 🚀 KUNCI ANTI GANDA: Subquery untuk mengambil 1 riwayat KK terbaru per NIK
-        $subqueryART = '(SELECT nik, MAX(id_kk) as id_kk FROM dtsen_art WHERE deleted_at IS NULL GROUP BY nik)';
-
+        // 🚀 BUILDER UTAMA (TANPA SUBQUERY)
         $builder = $this->db->table('dtsen_banpang b')
-            ->select('b.*, rt.rt, rt.rw, k.alamat')
-            ->join($subqueryART . ' a', 'a.nik = b.nik_kpm', 'left') // <- JOIN dari Subquery
+            ->select('b.id, b.no_pbp, b.no_bast, b.nik_kpm, b.nama_kpm, b.status_kelengkapan, b.waktu_scan, MAX(rt.rt) AS rt, MAX(rt.rw) AS rw, MAX(k.alamat) AS alamat')
+            ->join('dtsen_art a', 'a.nik = b.nik_kpm AND a.deleted_at IS NULL', 'left')
             ->join('dtsen_kk k', 'k.id_kk = a.id_kk AND k.deleted_at IS NULL', 'left')
             ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left');
 
-        // 🔐 TERAPKAN TRAIT WILAYAH FILTER (DENGAN LOGIKA PINTAR/BYPASS)
+        // 🔐 TERAPKAN TRAIT WILAYAH FILTER
         if ($roleId > 3 || !empty($filter_rw) || !empty($filter_rt)) {
             $filterData = [
                 'kode_desa'     => $kodeDesa,
@@ -75,16 +96,25 @@ class Banpang extends BaseController
             $this->applyWilayahFilter($builder, $filterData, $roleId);
         }
 
-        // Hitung Total Data (Sudah akurat karena tidak ada groupBy)
-        $totalRecords = $builder->countAllResults(false);
+        // 🔍 TERAPKAN FILTER TAHAP (BAST)
+        if (!empty($filter_bast)) {
+            $builder->where('b.no_bast', trim($filter_bast));
+        }
 
-        // 🔍 FILTER DINAMIS DARI FRONTEND
+        // 🔍 TERAPKAN FILTER WILAYAH
         if (!empty($filter_rw)) {
             $builder->where('rt.rw', str_pad($filter_rw, 3, '0', STR_PAD_LEFT));
         }
         if (!empty($filter_rt)) {
             $builder->where('rt.rt', str_pad($filter_rt, 3, '0', STR_PAD_LEFT));
         }
+
+        // 🚀 PENGUNCI DATA
+        $builder->groupBy('b.id');
+
+        $totalRecords = $builder->countAllResults(false);
+
+        // 🔍 PENCARIAN TEKS (GLOBAL SEARCH)
         if (!empty($search)) {
             $builder->groupStart()
                 ->like('b.nik_kpm', $search)
@@ -95,7 +125,6 @@ class Banpang extends BaseController
 
         $filteredRecords = $builder->countAllResults(false);
 
-        // Urutkan yang terbaru discan berada di paling atas
         $builder->orderBy('b.waktu_scan', 'DESC');
 
         if ($length != -1) {
@@ -109,7 +138,7 @@ class Banpang extends BaseController
 
         foreach ($query as $row) {
             $nikLengkap = esc($row['nik_kpm']);
-            $nikMasked = strlen($nikLengkap) >= 16 ? substr($nikLengkap, 0, 8) . '********' : $nikLengkap;
+            $nikMasked  = strlen($nikLengkap) >= 16 ? substr($nikLengkap, 0, 8) . '********' : $nikLengkap;
 
             $teksAlamat = !empty($row['alamat']) ? esc($row['alamat']) . '<br>' : '';
             $alamat = (!empty($row['rt']) && !empty($row['rw']))
@@ -134,7 +163,7 @@ class Banpang extends BaseController
         }
 
         return $this->response->setJSON([
-            'draw'            => $draw,
+            'draw'            => intval($draw),
             'recordsTotal'    => $totalRecords,
             'recordsFiltered' => $filteredRecords,
             'data'            => $data
@@ -142,20 +171,21 @@ class Banpang extends BaseController
     }
 
     // ========================================================
-    // 🟢 EXPORT EXCEL NATIVE (USING PHPSPREADSHEET)
+    // 🟢 EXPORT EXCEL NATIVE (SUPER CEPAT / OPTIMIZED)
     // ========================================================
     public function exportExcel()
     {
-        $filter_rw = $this->request->getGet('filter_rw');
-        $filter_rt = $this->request->getGet('filter_rt');
+        $filter_pbp = $this->request->getGet('filter_pbp'); // Tambahkan ini
+        $filter_rw  = $this->request->getGet('filter_rw');
+        $filter_rt  = $this->request->getGet('filter_rt');
 
         $user   = $this->authModel->getUserId();
         $roleId = session()->get('role_id') ?? $user['role_id'] ?? 4;
         $kodeDesa = session()->get('kode_desa') ?? ($user['kode_desa'] ?? '');
 
-        // 🚀 TAMBAH k.alamat
+        // 🚀 SAMAKAN DENGAN DATATABLES: Gunakan MAX untuk menghindari Cartesian Product
         $builder = $this->db->table('dtsen_banpang b')
-            ->select('b.*, rt.rt, rt.rw, k.alamat')
+            ->select('b.no_pbp, b.no_bast, b.nik_kpm, b.nama_kpm, b.waktu_scan, MAX(rt.rt) AS rt, MAX(rt.rw) AS rw, MAX(k.alamat) AS alamat')
             ->join('dtsen_art a', 'a.nik = b.nik_kpm AND a.deleted_at IS NULL', 'left')
             ->join('dtsen_kk k', 'k.id_kk = a.id_kk AND k.deleted_at IS NULL', 'left')
             ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left');
@@ -169,6 +199,11 @@ class Banpang extends BaseController
             $this->applyWilayahFilter($builder, $filterData, $roleId);
         }
 
+        // 🚀 FILTER TAHAP / NO BAST
+        if (!empty($filter_bast)) {
+            $builder->where('b.no_bast', trim($filter_bast));
+        }
+
         if (!empty($filter_rw)) {
             $builder->where('rt.rw', str_pad($filter_rw, 3, '0', STR_PAD_LEFT));
         }
@@ -178,14 +213,17 @@ class Banpang extends BaseController
 
         // 🚀 KUNCI ANTI GANDA
         $builder->groupBy('b.id');
+        $builder->orderBy('MAX(rt.rw)', 'ASC')->orderBy('MAX(rt.rt)', 'ASC')->orderBy('b.nama_kpm', 'ASC');
 
-        $builder->orderBy('rt.rw', 'ASC')->orderBy('rt.rt', 'ASC')->orderBy('b.nama_kpm', 'ASC');
         $query = $builder->get()->getResultArray();
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // 🚀 UPGRADE: Lebar Judul disesuaikan sampai kolom I (karena tambah 1 kolom alamat)
+        // 🚀 Set memory limit untuk jaga-jaga jika data membengkak
+        ini_set('memory_limit', '512M');
+        ini_set('max_execution_time', '300'); // Beri waktu 5 menit maksimal
+
         $sheet->setCellValue('A1', 'DAFTAR REKAPITULASI PENYALURAN BANTUAN PANGAN (BANPANG)');
         $sheet->mergeCells('A1:I1');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(12);
@@ -198,7 +236,6 @@ class Banpang extends BaseController
         $sheet->mergeCells('A2:I2');
         $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-        // 🚀 UPGRADE: Sisipkan Header 'Alamat', lalu RT dan RW terpisah
         $headers = ['No', 'No. PBP (Undangan)', 'No. BAST', 'NIK KPM', 'Nama Penerima Manfaat', 'Alamat', 'RT', 'RW', 'Waktu Pengambilan'];
         $sheet->fromArray($headers, NULL, 'A4');
         $sheet->getStyle('A4:I4')->getFont()->setBold(true);
@@ -212,12 +249,9 @@ class Banpang extends BaseController
             $sheet->setCellValueExplicit('C' . $rowNum, $row['no_bast'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet->setCellValueExplicit('D' . $rowNum, $row['nik_kpm'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet->setCellValue('E' . $rowNum, $row['nama_kpm']);
-
-            // 🚀 Kolom F untuk Alamat, Kolom G untuk RT, Kolom H untuk RW
             $sheet->setCellValue('F' . $rowNum, !empty($row['alamat']) ? $row['alamat'] : '-');
             $sheet->setCellValueExplicit('G' . $rowNum, !empty($row['rt']) ? $row['rt'] : '-', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet->setCellValueExplicit('H' . $rowNum, !empty($row['rw']) ? $row['rw'] : '-', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-
             $sheet->setCellValue('I' . $rowNum, date('d-m-Y H:i:s', strtotime($row['waktu_scan'])));
             $rowNum++;
         }
@@ -238,20 +272,21 @@ class Banpang extends BaseController
     }
 
     // ========================================================
-    // 🔴 CETAK PDF REPORT (OFFICIAL VILLAGE STANDARDIZED)
+    // 🔴 CETAK PDF REPORT (SUPER CEPAT / OPTIMIZED)
     // ========================================================
     public function exportPdf()
     {
-        $filter_rw = $this->request->getGet('filter_rw');
-        $filter_rt = $this->request->getGet('filter_rt');
+        $filter_pbp = $this->request->getGet('filter_pbp'); // Tambahkan ini
+        $filter_rw  = $this->request->getGet('filter_rw');
+        $filter_rt  = $this->request->getGet('filter_rt');
 
         $user   = $this->authModel->getUserId();
         $roleId = session()->get('role_id') ?? $user['role_id'] ?? 4;
         $kodeDesa = session()->get('kode_desa') ?? ($user['kode_desa'] ?? '');
 
-        // 🚀 TAMBAH k.alamat
+        // 🚀 SAMAKAN DENGAN DATATABLES
         $builder = $this->db->table('dtsen_banpang b')
-            ->select('b.*, rt.rt, rt.rw, k.alamat')
+            ->select('b.no_pbp, b.no_bast, b.nik_kpm, b.nama_kpm, b.waktu_scan, MAX(rt.rt) AS rt, MAX(rt.rw) AS rw, MAX(k.alamat) AS alamat')
             ->join('dtsen_art a', 'a.nik = b.nik_kpm AND a.deleted_at IS NULL', 'left')
             ->join('dtsen_kk k', 'k.id_kk = a.id_kk AND k.deleted_at IS NULL', 'left')
             ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left');
@@ -265,6 +300,11 @@ class Banpang extends BaseController
             $this->applyWilayahFilter($builder, $filterData, $roleId);
         }
 
+        // 🚀 FILTER TAHAP / NO BAST
+        if (!empty($filter_bast)) {
+            $builder->where('b.no_bast', trim($filter_bast));
+        }
+
         if (!empty($filter_rw)) {
             $builder->where('rt.rw', str_pad($filter_rw, 3, '0', STR_PAD_LEFT));
         }
@@ -274,8 +314,8 @@ class Banpang extends BaseController
 
         // 🚀 KUNCI ANTI GANDA
         $builder->groupBy('b.id');
+        $builder->orderBy('MAX(rt.rw)', 'ASC')->orderBy('MAX(rt.rt)', 'ASC')->orderBy('b.nama_kpm', 'ASC');
 
-        $builder->orderBy('rt.rw', 'ASC')->orderBy('rt.rt', 'ASC')->orderBy('b.nama_kpm', 'ASC');
         $query = $builder->get()->getResultArray();
 
         $data = [
@@ -312,17 +352,22 @@ class Banpang extends BaseController
         $nik     = trim($this->request->getPost('nik'));
         $nama    = trim($this->request->getPost('nama'));
 
-        if (empty($no_pbp) || empty($nik)) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Format QR tidak valid!']);
+        // Pastikan QR memiliki No BAST, karena ini kunci tahapan kita
+        if (empty($no_pbp) || empty($nik) || empty($no_bast)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Format QR tidak valid atau No. BAST kosong!']);
         }
 
-        // 🛡️ RADAR ANTI-DOUBLE: Cegah No PBP discan dua kali
-        $cek = $this->db->table('dtsen_banpang')->where('no_pbp', $no_pbp)->countAllResults();
+        // 🛡️ RADAR ANTI-DOUBLE MULTI-TAHAP: Cegah KPM scan 2x di Tahap/BAST yang sama
+        $cek = $this->db->table('dtsen_banpang')
+            ->where('nik_kpm', $nik)
+            ->where('no_bast', $no_bast)
+            ->countAllResults();
+
         if ($cek > 0) {
             return $this->response->setJSON([
                 'status'  => 'warning',
                 'nama'    => $nama,
-                'message' => 'Sudah pernah di-scan sebelumnya!'
+                'message' => 'KPM sudah mengambil jatah untuk Tahap (BAST) ini!'
             ]);
         }
 
@@ -344,7 +389,11 @@ class Banpang extends BaseController
                 'message' => 'Berhasil direkap!'
             ]);
         } catch (\Exception $e) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menyimpan database!']);
+            // 🚀 Tampilkan pesan error aslinya dari MySQL!
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Gagal: ' . $e->getMessage()
+            ]);
         }
     }
 

@@ -1,0 +1,13 @@
+ALTER TABLE dtsen_banpang ADD INDEX (nik_kpm);
+ALTER TABLE dtsen_art ADD INDEX (nik);
+
+ALTER TABLE dtsen_banpang ADD INDEX (no_bast);
+
+-- 1. Hancurkan gembok lama yang namanya ternyata 'unique_pbp'
+ALTER TABLE dtsen_banpang DROP INDEX unique_pbp;
+
+-- 2. Jadikan no_pbp sebagai Index biasa (agar pencarian tetap ngebut)
+ALTER TABLE dtsen_banpang ADD INDEX (no_pbp);
+
+-- 3. Pasang Gembok Ganda (Composite Unique) untuk BAST dan NIK
+ALTER TABLE dtsen_banpang ADD UNIQUE KEY unique_scan_tahapan (no_bast, nik_kpm);
