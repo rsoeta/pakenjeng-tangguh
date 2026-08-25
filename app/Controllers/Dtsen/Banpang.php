@@ -175,9 +175,12 @@ class Banpang extends BaseController
     // ========================================================
     public function exportExcel()
     {
-        $filter_pbp = $this->request->getGet('filter_pbp'); // Tambahkan ini
+        // 🚀 UBAH getPost MENJADI getGet
+        $filter_bast = $this->request->getGet('filter_bast');
         $filter_rw  = $this->request->getGet('filter_rw');
         $filter_rt  = $this->request->getGet('filter_rt');
+
+        // ... (kode ke bawahnya biarkan sama persis, sudah aman) ...
 
         $user   = $this->authModel->getUserId();
         $roleId = session()->get('role_id') ?? $user['role_id'] ?? 4;
@@ -276,7 +279,7 @@ class Banpang extends BaseController
     // ========================================================
     public function exportPdf()
     {
-        $filter_pbp = $this->request->getGet('filter_pbp'); // Tambahkan ini
+        $filter_bast = $this->request->getGet('filter_bast');
         $filter_rw  = $this->request->getGet('filter_rw');
         $filter_rt  = $this->request->getGet('filter_rt');
 
