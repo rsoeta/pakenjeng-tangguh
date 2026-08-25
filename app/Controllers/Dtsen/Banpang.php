@@ -216,7 +216,10 @@ class Banpang extends BaseController
 
         // 🚀 KUNCI ANTI GANDA
         $builder->groupBy('b.id');
-        $builder->orderBy('MAX(rt.rw)', 'ASC')->orderBy('MAX(rt.rt)', 'ASC')->orderBy('b.nama_kpm', 'ASC');
+
+        // 🚀 URUTKAN BERDASARKAN NO PBP (DEFAULT)
+        // Mbah sisakan nama_kpm sebagai urutan cadangan jika sewaktu-waktu ada No PBP yang kembar/kosong
+        $builder->orderBy('b.no_pbp', 'ASC')->orderBy('b.nama_kpm', 'ASC');
 
         $query = $builder->get()->getResultArray();
 
@@ -317,7 +320,10 @@ class Banpang extends BaseController
 
         // 🚀 KUNCI ANTI GANDA
         $builder->groupBy('b.id');
-        $builder->orderBy('MAX(rt.rw)', 'ASC')->orderBy('MAX(rt.rt)', 'ASC')->orderBy('b.nama_kpm', 'ASC');
+
+        // 🚀 URUTKAN BERDASARKAN NO PBP (DEFAULT)
+        // Mbah sisakan nama_kpm sebagai urutan cadangan jika sewaktu-waktu ada No PBP yang kembar/kosong
+        $builder->orderBy('b.no_pbp', 'ASC')->orderBy('b.nama_kpm', 'ASC');
 
         $query = $builder->get()->getResultArray();
 
