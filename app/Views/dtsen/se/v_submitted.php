@@ -20,7 +20,7 @@
                             <th>No.</th>
                             <th>Kepala Keluarga</th>
                             <th>No KK</th>
-                            <th>Status</th>
+                            <th>Desil</th> <!-- 🚀 UBAH DI SINI -->
                             <th>Tanggal Dibuat</th>
                             <th>Petugas</th>
                             <th>Aksi</th>
@@ -106,8 +106,20 @@
                 },
 
                 {
-                    data: 'status',
-                    render: () => `<span class="badge bg-info">SUBMITTED</span>`
+                    data: 'kategori_desil',
+                    className: 'text-center',
+                    render: function(data) {
+                        if (!data || data === '0' || data === '') {
+                            return `<span class="badge bg-secondary px-2 py-1">-</span>`;
+                        }
+
+                        // Warnai badge sesuai tingkat prioritas (1-3 hijau, 4-5 kuning, >5 merah)
+                        let bgClass = 'bg-danger';
+                        if (data <= 3) bgClass = 'bg-success';
+                        else if (data <= 5) bgClass = 'bg-warning text-dark';
+
+                        return `<span class="badge ${bgClass} px-2 py-1 shadow-sm">Desil ${data}</span>`;
+                    }
                 },
                 {
                     data: 'updated_at',

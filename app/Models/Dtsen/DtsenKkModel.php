@@ -18,7 +18,13 @@ class DtsenKkModel extends Model
         'id_rt',
         'no_kk',
         'kepala_keluarga',
+        'nik_kepala_keluarga', // 🚀 ELEMEN BARU BPS
         'alamat',
+        'kode_pos',            // 🚀 ELEMEN BARU BPS
+        'nama_jalan',          // 🚀 ELEMEN BARU BPS
+        'nomor_rumah',         // 🚀 ELEMEN BARU BPS
+        'dusun',               // 🚀 ELEMEN BARU BPS
+        'is_alamat_sesuai_kk', // 🚀 ELEMEN BARU BPS
         'status_kepemilikan_rumah',
         'jumlah_anggota',
         'program_bansos',
@@ -33,7 +39,6 @@ class DtsenKkModel extends Model
         'updated_by',
         'deleted_at',
         'delete_reason'
-
     ];
     protected $useTimestamps    = true;
 

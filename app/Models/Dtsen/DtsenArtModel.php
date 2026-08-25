@@ -29,6 +29,8 @@ class DtsenArtModel extends Model
         'foto_identitas',
         'ibu_kandung',
         'program_bansos',
+        'no_hp',
+        'rekening_aktif',
         'created_at',
         'updated_at',
         'created_by',

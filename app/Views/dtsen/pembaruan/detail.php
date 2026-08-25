@@ -139,10 +139,10 @@ $roleId = session()->get('role_id') ?? 0;
 
             <ul class="nav nav-tabs" id="pembaruanTabs" role="tablist">
                 <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabKeluarga" role="tab">Data Keluarga</a></li>
-                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-anggota" role="tab">Anggota</a></li>
                 <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabRumah" role="tab">Rumah</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabFoto" role="tab">Foto</a></li>
                 <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabAset" role="tab">Aset</a></li>
-                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabFoto" role="tab">Foto & Geotag</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-anggota" role="tab">Anggota</a></li>
             </ul>
 
 
@@ -150,17 +150,17 @@ $roleId = session()->get('role_id') ?? 0;
                 <div class="tab-pane fade show active" id="tabKeluarga" role="tabpanel">
                     <?= $this->include('dtsen/pembaruan/tab_keluarga'); ?>
                 </div>
-                <div class="tab-pane fade" id="tab-anggota" role="tabpanel">
-                    <?= $this->include('dtsen/pembaruan/tab_anggota'); ?>
-                </div>
                 <div class="tab-pane fade" id="tabRumah" role="tabpanel">
                     <?= $this->include('dtsen/pembaruan/tab_rumah'); ?>
+                </div>
+                <div class="tab-pane fade" id="tabFoto" role="tabpanel">
+                    <?= $this->include('dtsen/pembaruan/tab_foto'); ?>
                 </div>
                 <div class="tab-pane fade" id="tabAset" role="tabpanel">
                     <?= $this->include('dtsen/pembaruan/tab_aset'); ?>
                 </div>
-                <div class="tab-pane fade" id="tabFoto" role="tabpanel">
-                    <?= $this->include('dtsen/pembaruan/tab_foto'); ?>
+                <div class="tab-pane fade" id="tab-anggota" role="tabpanel">
+                    <?= $this->include('dtsen/pembaruan/tab_anggota'); ?>
                 </div>
             </div>
 

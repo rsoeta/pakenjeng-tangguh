@@ -35,7 +35,12 @@ $editable = ($roleId <= 4);
                                 💼 Tenaga Kerja <span class="badge bg-secondary ms-1" id="badgeKerja">⚠️</span>
                             </a>
                         </li>
-                        <!-- 🚀 TAB KEPEMILIKAN USAHA SUDAH DIHAPUS SESUAI INSTRUKSI -->
+                        <li class="nav-item" role="presentation">
+                            <a href="javascript:void(0)" class="nav-link" id="tab-usaha-tab" data-bs-toggle="tab"
+                                data-bs-target="#tab-usaha" role="tab" style="display:block !important; text-decoration:none;">
+                                🏢 Kepemilikan Usaha <span class="badge bg-secondary ms-1" id="badgeUsaha">⚠️</span>
+                            </a>
+                        </li>
                         <li class="nav-item" role="presentation">
                             <a href="javascript:void(0)" class="nav-link" id="tab-kesehatan-tab" data-bs-toggle="tab"
                                 data-bs-target="#tab-kesehatan" role="tab" style="display:block !important; text-decoration:none;">
@@ -45,14 +50,13 @@ $editable = ($roleId <= 4);
                     </ul>
 
                     <div class="tab-content pt-3">
-
-                        <!-- ========================================== -->
-                        <!-- 1. TAB IDENTITAS -->
-                        <!-- ========================================== -->
                         <div class="tab-pane fade show active" id="tab-identitas" role="tabpanel">
                             <div class="row g-4">
                                 <div class="row align-items-center border-bottom pb-1 mt-3 mb-1">
-                                    <label class="col-md-5 col-12 col-form-label fw-bold">Status Keberadaan</label>
+                                    <label class="col-md-5 col-12 col-form-label fw-bold">
+                                        Status Keberadaan
+                                    </label>
+
                                     <div class="col-md-7 col-12">
                                         <select class="form-select required" name="status_keberadaan" id="status_keberadaan">
                                             <option value="">Pilih...</option>
@@ -66,60 +70,67 @@ $editable = ($roleId <= 4);
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
+
                                     <div class="row g-3">
+
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Nama Lengkap</label>
                                             <input type="text" class="form-control required upper" name="nama" id="nama">
                                         </div>
+
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">NIK</label>
                                             <input type="text" class="form-control required onlynum16" name="nik" id="nik" maxlength="16">
                                         </div>
+
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Nomor KK</label>
                                             <input type="text" class="form-control required onlynum16" name="individu_no_kk" id="individu_no_kk" maxlength="16">
-                                        </div>
-
-                                        <!-- 🚀 ELEMEN BARU BPS: NOMOR HANDPHONE -->
-                                        <div class="col-md-12">
-                                            <label class="form-label fw-bold">Nomor Handphone</label>
-                                            <input type="text" class="form-control onlynum" name="no_hp" id="no_hp" maxlength="15" placeholder="Contoh: 08123456789">
-                                            <small class="text-muted fst-italic">Kosongkan bagian ini jika yang bersangkutan tidak memiliki nomor handphone.</small>
                                         </div>
 
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Tanggal Lahir</label>
                                             <input type="date" class="form-control required" name="tanggal_lahir" id="tanggal_lahir">
                                         </div>
+
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Tempat Lahir</label>
                                             <input type="text" class="form-control required upper" name="tempat_lahir" id="tempat_lahir">
                                         </div>
+
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Hubungan dengan Kepala Keluarga</label>
                                             <select class="form-select required" name="hubungan" id="hubungan"></select>
                                         </div>
+
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Status Kawin</label>
                                             <select class="form-select required" name="status_kawin" id="status_kawin"></select>
                                         </div>
+
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Nama Ibu Kandung</label>
                                             <input type="text" class="form-control required upper" name="ibu_kandung" id="ibu_kandung">
                                         </div>
+
                                     </div>
+
                                 </div>
 
                                 <div class="col-lg-6">
+
                                     <div class="row g-3">
+
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Pendidikan Terakhir</label>
                                             <select class="form-select required" name="pendidikan_terakhir" id="pendidikan_terakhir"></select>
                                         </div>
+
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Pekerjaan</label>
                                             <select class="form-select required" name="pekerjaan" id="pekerjaan"></select>
                                         </div>
+
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Jenis Kelamin</label>
                                             <div class="d-flex gap-3">
@@ -133,8 +144,10 @@ $editable = ($roleId <= 4);
                                                 </div>
                                             </div>
                                         </div>
+
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold border-bottom pb-1">Wilayah Capil (Sesuai Data Kependudukan)</label>
+
                                             <div class="row g-2 mt-1">
                                                 <div class="col-md-3">
                                                     <label class="form-label small">Provinsi</label>
@@ -153,6 +166,7 @@ $editable = ($roleId <= 4);
                                                     <select class="form-select required" id="ind_desa" name="desa"></select>
                                                 </div>
                                             </div>
+
                                             <div class="mb-3 mt-3">
                                                 <label class="form-label fw-semibold">Alamat Domisili</label>
                                                 <div class="bg-light border rounded-3 p-3 small">
@@ -163,17 +177,20 @@ $editable = ($roleId <= 4);
                                                     </div>
                                                 </div>
                                             </div>
+
                                         </div>
+
                                     </div>
+
                                 </div>
+
+
                             </div>
                         </div>
 
-                        <!-- ========================================== -->
-                        <!-- 2. TAB PENDIDIKAN -->
-                        <!-- ========================================== -->
                         <div class="tab-pane fade" id="tab-pendidikan" role="tabpanel" aria-labelledby="tab-pendidikan-tab">
                             <div class="row g-3">
+
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Partisipasi Sekolah</label>
                                     <select class="form-select required" name="partisipasi_sekolah" id="partisipasi_sekolah">
@@ -183,6 +200,7 @@ $editable = ($roleId <= 4);
                                         <option value="Tidak Bersekolah Lagi">Tidak Bersekolah Lagi</option>
                                     </select>
                                 </div>
+
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Jenjang & Jenis Pendidikan</label>
                                     <select class="form-select" name="jenjang_pendidikan" id="jenjang_pendidikan">
@@ -212,9 +230,8 @@ $editable = ($roleId <= 4);
                                         <option value="S2">S2</option>
                                         <option value="S3">S3</option>
                                     </select>
-                                    <!-- 🚀 ELEMEN ERROR REAL-TIME -->
-                                    <div id="fb_jenjang" class="invalid-feedback small fw-bold"></div>
                                 </div>
+
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Kelas Tertinggi yang Pernah Ditamatkan</label>
                                     <select class="form-select" name="kelas_tertinggi" id="kelas_tertinggi">
@@ -229,9 +246,8 @@ $editable = ($roleId <= 4);
                                         <option value="7">7</option>
                                         <option value="8 (Tamat & Lulus)">8 (Tamat & Lulus)</option>
                                     </select>
-                                    <!-- 🚀 ELEMEN ERROR REAL-TIME -->
-                                    <div id="fb_kelas" class="invalid-feedback small fw-bold"></div>
                                 </div>
+
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Ijazah/STTB Tertinggi</label>
                                     <select class="form-select" name="ijazah_tertinggi" id="ijazah_tertinggi">
@@ -261,221 +277,55 @@ $editable = ($roleId <= 4);
                                         <option value="S2">S2</option>
                                         <option value="S3">S3</option>
                                     </select>
-                                    <!-- 🚀 ELEMEN ERROR REAL-TIME -->
-                                    <div id="fb_ijazah" class="invalid-feedback small fw-bold"></div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- ========================================== -->
-                        <!-- 3. TAB TENAGA KERJA -->
-                        <!-- ========================================== -->
                         <div class="tab-pane fade" id="tab-kerja" role="tabpanel" aria-labelledby="tab-kerja-tab">
-                            <div class="row g-4">
+                            <div class="row g-3">
 
-                                <div class="col-md-12">
-                                    <label class="form-label fw-bold">Jenis Lapangan Usaha / Profesi Pekerjaan Utama</label>
-                                    <select class="form-select select2-init" name="lapangan_usaha" id="lapangan_usaha">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Apakah bekerja/membantu bekerja selama seminggu terakhir?</label>
+                                    <select class="form-select required" name="bekerja_seminggu" id="bekerja_seminggu">
                                         <option value="">Pilih...</option>
-                                        <?php
-                                        // 🚀 185 OPSI PROFESI BPS
-                                        $profesiList = [
-                                            "Tidak Bekerja",
-                                            "Agen Tenaga Kerja",
-                                            "Ahli Sejarah dan Cagar budaya",
-                                            "Akuntan",
-                                            "Analis Keuangan",
-                                            "Anggota DPD",
-                                            "Anggota DPR RI/MPR RI",
-                                            "Anggota DPRD Provinsi/ Anggota DPRD Kabupaten/Kota",
-                                            "Apoteker",
-                                            "Arsiparis",
-                                            "Arsitek",
-                                            "Asisten Apoteker",
-                                            "Atase",
-                                            "Atlet/Olahragawan",
-                                            "Awak Kapal",
-                                            "Bhikkhu",
-                                            "Biarawan",
-                                            "Biarawati",
-                                            "Bidan",
-                                            "Broker/Pialang Saham",
-                                            "Bupati",
-                                            "Buruh Angkut Barang",
-                                            "Buruh Bangunan",
-                                            "Buruh Industri",
-                                            "Buruh Perikanan",
-                                            "Buruh Pertambangan",
-                                            "Buruh Pertanian/Kehutanan",
-                                            "Buruh Peternakan",
-                                            "Camat",
-                                            "Chef",
-                                            "Chief Executive Officer (CEO)",
-                                            "Dokter Gigi",
-                                            "Dokter Hewan",
-                                            "Dokter Spesialis",
-                                            "Dokter Umum",
-                                            "Dosen",
-                                            "Duta Besar",
-                                            "Empu Keris",
-                                            "Fotografer",
-                                            "Gembala",
-                                            "Gubernur",
-                                            "Guru",
-                                            "Hakim",
-                                            "Hakim Agung",
-                                            "Imam Masjid",
-                                            "Jaksa",
-                                            "Jaksa Agung",
-                                            "Jiaosheng",
-                                            "Juru Gambar Teknik/Drafter",
-                                            "Kameramen",
-                                            "Kapten Kapal",
-                                            "Kasir",
-                                            "Kepala Desa",
-                                            "Ketua Adat",
-                                            "Ketua Organisasi",
-                                            "Konsultan",
-                                            "Kreator Konten",
-                                            "Kurator",
-                                            "Kurir",
-                                            "Lurah",
-                                            "Makelar",
-                                            "Manajer",
-                                            "Masinis",
-                                            "Mekanik",
-                                            "Menteri/Kepala Badan (setingkat Menteri)/Wakil Menteri/Wakil Kepala Badan",
-                                            "Nakhoda",
-                                            "Nelayan",
-                                            "Notaris",
-                                            "Operator Layanan Pelanggan (Customer Service)",
-                                            "Operator Mesin",
-                                            "Pandita",
-                                            "Panitera Pengadilan",
-                                            "Paraji",
-                                            "Paranormal",
-                                            "Pastor",
-                                            "Pedagang",
-                                            "Pedagang Asongan/Keliling Makanan",
-                                            "Pedagang Asongan/Keliling Nonmakanan",
-                                            "Pedagang Online",
-                                            "Pegawai Pemerintah dengan Perjanjian Kerja (PPPK)",
-                                            "Pekerja Garmen/Konveksi",
-                                            "Pekerja Percetakan",
-                                            "Pekerja Profesional Penjualan (agen asuransi, sales penjualan, dll)",
-                                            "Pekerja Sosial",
-                                            "Pelaku Ekosistem Musik",
-                                            "Pelaku Ekosistem Perfilman",
-                                            "Pelaku Ekosistem Seni Pertunjukan",
-                                            "Pelaku Ekosistem Seni Rupa dan Kriya",
-                                            "Pelatih/ Instruktur Olahraga",
-                                            "Pelayan Toko",
-                                            "Pembantu/Asisten Rumah Tangga",
-                                            "Pemberi Pinjaman",
-                                            "Pembuat Makanan/Juru Masak",
-                                            "Pembuat Minuman (Barista, Bartender, dll)",
-                                            "Pembuat Rokok/Cerutu/Tembakau Gulung",
-                                            "Pembuat Sepatu dan Tas",
-                                            "Pembudi Daya Ikan dan Biota Air Lainnya",
-                                            "Pemulung",
-                                            "Penagih Hutang (Debt Collector)",
-                                            "Penasihat Spiritual",
-                                            "Penata Busana",
-                                            "Penata Rambut",
-                                            "Penata Rias",
-                                            "Penata Suara",
-                                            "Pendeta",
-                                            "Peneliti",
-                                            "Penerjemah",
-                                            "Pengacara",
-                                            "Pengasuh Anak (Baby Sitter)",
-                                            "Pengelola Gedung/Properti",
-                                            "Pengemudi Ojek Online",
-                                            "Pengemudi Ojek Pangkalan",
-                                            "Pengepul",
-                                            "Penjaga Keamanan/Satpam",
-                                            "Penjahit",
-                                            "Penulis",
-                                            "Penyelenggara Acara (Event Organizer/EO)",
-                                            "Penyiar Radio",
-                                            "Penyiar Televisi",
-                                            "Perajin Batu",
-                                            "Perajin Kayu, Bambu, dan Anyaman",
-                                            "Perajin Kulit dan Tekstil",
-                                            "Perajin Logam",
-                                            "Perajin Perhiasan",
-                                            "Perajin Tembikar/Keramik",
-                                            "Peramal",
-                                            "Perancang Busana/Desainer",
-                                            "Perangkat Desa",
-                                            "Perawat",
-                                            "Petani/Pekebun/Petani Hutan",
-                                            "Peternak",
-                                            "Petugas Pemadam Kebakaran",
-                                            "Petugas Stasiun Pengisian Bahan Bakar",
-                                            "Pilot",
-                                            "Pinandita",
-                                            "PNS Fungsional Tertentu",
-                                            "PNS Fungsional Umum",
-                                            "PNS Struktural",
-                                            "Polisi",
-                                            "Pramugara/i",
-                                            "Pramusaji",
-                                            "Presiden",
-                                            "Programer",
-                                            "Psikiater",
-                                            "Psikolog",
-                                            "Pustakawan",
-                                            "Resepsionis",
-                                            "Sekretaris",
-                                            "Seniman/Artis",
-                                            "Sopir",
-                                            "Supervisor/Mandor",
-                                            "Tabib",
-                                            "Teknisi",
-                                            "Teller Bank",
-                                            "Tenaga Cuci",
-                                            "Tenaga Humas",
-                                            "Tenaga Kebersihan",
-                                            "Tenaga Tata Usaha",
-                                            "Tentara Nasional Indonesia (TNI)",
-                                            "Tukang Bangunan",
-                                            "Tukang Cat",
-                                            "Tukang Cukur",
-                                            "Tukang Fotokopi",
-                                            "Tukang Gigi",
-                                            "Tukang Kaca",
-                                            "Tukang Kayu",
-                                            "Tukang Kunci",
-                                            "Tukang Las/Pandai Besi",
-                                            "Tukang Listrik",
-                                            "Tukang Pijat",
-                                            "Tukang Pipa",
-                                            "Tukang Sablon",
-                                            "Tukang Sol Sepatu",
-                                            "Tukang Tambal Ban",
-                                            "Tukang Tebang Kayu",
-                                            "Uskup",
-                                            "Ustaz/Mubalig",
-                                            "Wakil Bupati",
-                                            "Wakil Gubernur",
-                                            "Wakil Presiden",
-                                            "Wakil Walikota",
-                                            "Walikota",
-                                            "Wartawan",
-                                            "Wenshi",
-                                            "Xueshi",
-                                            "Lainnya"
-                                        ];
-                                        foreach ($profesiList as $p) {
-                                            echo "<option value=\"$p\">$p</option>";
-                                        }
-                                        ?>
+                                        <option value="Ya">Ya</option>
+                                        <option value="Tidak">Tidak</option>
                                     </select>
                                 </div>
 
-                                <!-- 🚀 BERI ID div_status_pekerjaan PADA BUNGKUS INI -->
-                                <div class="col-md-12" id="div_status_pekerjaan">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Jenis Lapangan Usaha Pekerjaan Utama</label>
+                                    <select class="form-select" name="lapangan_usaha" id="lapangan_usaha">
+                                        <option value="">Pilih...</option>
+                                        <option value="Pertanian tanaman padi & palawija">Pertanian tanaman padi & palawija</option>
+                                        <option value="Hortikultura">Hortikultura</option>
+                                        <option value="Perkebunan">Perkebunan</option>
+                                        <option value="Perikanan">Perikanan</option>
+                                        <option value="Peternakan">Peternakan</option>
+                                        <option value="Kehutanan & pertanian lainnya">Kehutanan & pertanian lainnya</option>
+                                        <option value="Pertambangan/penggalian">Pertambangan/penggalian</option>
+                                        <option value="Industri pengolahan">Industri pengolahan</option>
+                                        <option value="Pengolahan, listrik, gas, uap/air panas dan udara dingin">Pengolahan, listrik, gas, uap/air panas dan udara dingin</option>
+                                        <option value="Pengolahan air, air limbah, pengelolaan dan daur ulang sampah">Pengolahan air, air limbah, pengelolaan dan daur ulang sampah</option>
+                                        <option value="Konstruksi">Konstruksi</option>
+                                        <option value="Perdagangan besar & eceran, reparasi/perawatan kendaraan">Perdagangan besar & eceran, reparasi/perawatan kendaraan</option>
+                                        <option value="Pengangkutan dan pergudangan">Pengangkutan dan pergudangan</option>
+                                        <option value="Penyediaan akomodasi & makan minum">Penyediaan akomodasi & makan minum</option>
+                                        <option value="Informasi & komunikasi">Informasi & komunikasi</option>
+                                        <option value="Keuangan & asuransi">Keuangan & asuransi</option>
+                                        <option value="Real estate">Real estate</option>
+                                        <option value="Aktivitas profesional, ilmiah & teknis">Aktivitas profesional, ilmiah & teknis</option>
+                                        <option value="Aktivitas penyewaan, agen perjalanan, dan penunjang usaha lainnya">Aktivitas penyewaan, agen perjalanan, dan penunjang usaha lainnya</option>
+                                        <option value="Administrasi pemerintahan, pertahanan, dan jaminan sosial wajib">Administrasi pemerintahan, pertahanan, dan jaminan sosial wajib</option>
+                                        <option value="Pendidikan">Pendidikan</option>
+                                        <option value="Aktivitas kesehatan manusia & sosial">Aktivitas kesehatan manusia & sosial</option>
+                                        <option value="Kesenian, hiburan & rekreasi">Kesenian, hiburan & rekreasi</option>
+                                        <option value="Aktivitas jasa lainnya">Aktivitas jasa lainnya</option>
+                                        <option value="Aktivitas keluarga sebagai pemberi kerja">Aktivitas keluarga sebagai pemberi kerja</option>
+                                        <option value="Aktivitas badan internasional & ekstra internasional lainnya">Aktivitas badan internasional & ekstra internasional lainnya</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
                                     <label class="form-label fw-bold">Status dalam Pekerjaan Utama</label>
                                     <select class="form-select" name="status_pekerjaan" id="status_pekerjaan">
                                         <option value="">Pilih...</option>
@@ -490,39 +340,155 @@ $editable = ($roleId <= 4);
                                     </select>
                                 </div>
 
-                                <!-- 🚀 ELEMEN BARU BPS: REKENING / DOMPET DIGITAL -->
-                                <div class="col-md-12 border-top pt-3">
-                                    <label class="form-label fw-bold text-primary">
-                                        Apakah <span class="bg-warning text-dark px-1 rounded label-nama-anggota">Anggota Keluarga ini</span> memiliki rekening aktif atau dompet digital?
-                                    </label>
-                                    <div class="border border-primary border-opacity-50 rounded p-3 bg-light">
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="radio" name="rekening_aktif" id="rek_usaha" value="Ya untuk usaha">
-                                            <label class="form-check-label" for="rek_usaha">Ya untuk usaha</label>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Pendapatan Sebulan Terakhir</label>
+                                    <select class="form-select" name="pendapatan" id="pendapatan">
+                                        <option value="" selected disabled>-- Pilih Pendapatan --</option>
+                                        <option value="Tidak Ada Penghasilan">Tidak Ada Penghasilan</option>
+                                        <option value="<1 Juta Per Bulan">&lt;1 Juta Per Bulan</option>
+                                        <option value=">=1 Jt Per Bulan -<UMK">&gt;=1 Jt Per Bulan - &lt; UMK</option>
+                                        <option value="UMK">UMK</option>
+                                        <option value=">UMK - 10 Jt Per Bulan">&gt; UMK - 10 Jt Per Bulan</option>
+                                        <option value=">10 Jt Per Bulan">&gt; 10 Jt Per Bulan</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label class="form-label fw-bold">Keterampilan Khusus / Sertifikat Keahlian yang Dimiliki</label>
+                                    <div class="border rounded p-2" style="max-height: 250px; overflow-y:auto;">
+                                        <?php
+                                        $skills = [
+                                            "Pemrograman dan pengembangan perangkat lunak",
+                                            "Keamanan cyber",
+                                            "Jaringan dan administrasi sistem",
+                                            "Data science dan analisis data",
+                                            "Manajemen proyek",
+                                            "Pemasaran",
+                                            "Keuangan dan akuntansi",
+                                            "Sumber daya manusia",
+                                            "Desain grafis",
+                                            "Desain interior",
+                                            "Fotografi dan videografi",
+                                            "Seni rupa dan ilustrasi",
+                                            "Penerjemahan dan interpretasi",
+                                            "Penulisan kreatif dan jurnalistik",
+                                            "Public speaking dan presentasi",
+                                            "Komunikasi pemasaran",
+                                            "Keperawatan dan medis",
+                                            "Kesehatan mental dan konseling",
+                                            "Kebugaran dan pelatihan personal",
+                                            "Nutrisi dan dietetik",
+                                            "Teknik elektro dan elektronik",
+                                            "Teknik sipil dan arsitektur",
+                                            "Teknik mesin (bengkel dll)",
+                                            "Energi dan lingkungan",
+                                            "Pengajaran dan pembelajaran",
+                                            "Pengembangan kurikulum",
+                                            "Pendidikan anak usia dini",
+                                            "Pelatihan dan pengembangan profesional",
+                                            "Kuliner",
+                                            "Pertukangan",
+                                            "Menjahit",
+                                            "Mengajar",
+                                            "Mengasuh anak",
+                                            "Mengemudi roda 2",
+                                            "Mengemudi roda 4",
+                                            "Mengemudi kendaraan besar/berat",
+                                            "Bertani"
+                                        ];
+                                        foreach ($skills as $s) {
+                                            echo "
+                                        <div class='form-check form-check-inline'>
+                                            <input class='form-check-input skill-check' type='checkbox' name='keterampilan[]' value='$s' id='skill_" . md5($s) . "'>
+                                            <label class='form-check-label small' for='skill_" . md5($s) . "'>$s</label>
+                                        </div>";
+                                        }
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="tab-usaha" role="tabpanel" aria-labelledby="tab-usaha-tab">
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Apakah memiliki usaha sendiri atau bersama keluarga?</label>
+                                    <select class="form-select required" name="memiliki_usaha" id="memiliki_usaha">
+                                        <option value="">Pilih...</option>
+                                        <option value="Tidak">Tidak</option>
+                                        <option value="Ya">Ya</option>
+                                    </select>
+                                </div>
+
+                                <div id="form_usaha_detail" class="mt-3" style="display: none;">
+                                    <div class="row g-3">
+
+                                        <div class="col-12 col-md-6">
+                                            <div class="row g-3">
+
+                                                <div class="col-12">
+                                                    <label class="form-label fw-bold">
+                                                        Jumlah usaha sendiri/bersama yang dimiliki
+                                                    </label>
+                                                    <input type="number"
+                                                        class="form-control required-if-ya"
+                                                        name="jumlah_usaha"
+                                                        id="jumlah_usaha"
+                                                        placeholder="Contoh: 1">
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <label class="form-label fw-bold">
+                                                        Jumlah pekerja yang dibayar pada usaha utama
+                                                    </label>
+                                                    <input type="number"
+                                                        class="form-control required-if-ya"
+                                                        name="pekerja_dibayar"
+                                                        id="pekerja_dibayar"
+                                                        placeholder="Contoh: 2">
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <label class="form-label fw-bold">
+                                                        Jumlah pekerja yang tidak dibayar pada usaha utama
+                                                    </label>
+                                                    <input type="number"
+                                                        class="form-control required-if-ya"
+                                                        name="pekerja_tidak_dibayar"
+                                                        id="pekerja_tidak_dibayar"
+                                                        placeholder="Contoh: 1">
+                                                </div>
+
+                                            </div>
                                         </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="radio" name="rekening_aktif" id="rek_pribadi" value="Ya untuk pribadi">
-                                            <label class="form-check-label" for="rek_pribadi">Ya untuk pribadi</label>
+
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label fw-bold">
+                                                Omzet per Bulan
+                                            </label>
+                                            <select class="form-select required-if-ya"
+                                                name="omzet_bulanan"
+                                                id="omzet_bulanan">
+                                                <option value="">Pilih...</option>
+                                                <option value="Belum Ditentukan">Belum Ditentukan</option>
+                                                <option value="< 5 Juta (Ultra Mikro)">&lt; 5 Juta (Ultra Mikro)</option>
+                                                <option value="5 < 15 Juta (Ultra Mikro)">5 - &lt;15 Juta (Ultra Mikro)</option>
+                                                <option value="15 < 25 Juta (Ultra Mikro)">15 - &lt;25 Juta (Ultra Mikro)</option>
+                                                <option value="25 < 167 Juta (Mikro)">25 - &lt;167 Juta (Mikro)</option>
+                                                <option value="167 < 1.250 Juta (Kecil)">167 - &lt;1.250 Juta (Kecil)</option>
+                                                <option value="1.250 < 4.167 Juta (Menengah)">1.250 - &lt;4.167 Juta (Menengah)</option>
+                                                <option value=">=4.167 Juta (Besar)">≥ 4.167 Juta (Besar)</option>
+                                            </select>
                                         </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="radio" name="rekening_aktif" id="rek_keduanya" value="Ya untuk usaha dan pribadi">
-                                            <label class="form-check-label" for="rek_keduanya">Ya untuk usaha dan pribadi</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="rekening_aktif" id="rek_tidak" value="Tidak ada">
-                                            <label class="form-check-label" for="rek_tidak">Tidak ada</label>
-                                        </div>
+
                                     </div>
                                 </div>
 
                             </div>
                         </div>
-
-                        <!-- ========================================== -->
-                        <!-- 4. TAB KESEHATAN -->
-                        <!-- ========================================== -->
                         <div class="tab-pane fade" id="tab-kesehatan" role="tabpanel" aria-labelledby="tab-kesehatan-tab">
                             <div class="row g-3">
+
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Status Hamil <span class="text-muted small">(hanya untuk perempuan)</span></label>
                                     <select class="form-select required" name="status_hamil" id="status_hamil">
@@ -531,11 +497,20 @@ $editable = ($roleId <= 4);
                                         <option value="Tidak">Tidak</option>
                                     </select>
                                 </div>
+
                                 <div class="col-md-12">
                                     <label class="form-label fw-bold">Penyandang Disabilitas</label>
                                     <div class="border rounded p-3" style="max-height: 200px; overflow-y:auto;">
                                         <?php
-                                        $disabilities = ['Fisik', 'Mental', 'Intelektual', 'Sensorik Netra', 'Sensorik Rungu', 'Sensorik Wicara', 'Sensorik Ganda/Multi'];
+                                        $disabilities = [
+                                            'Fisik',
+                                            'Mental',
+                                            'Intelektual',
+                                            'Sensorik Netra',
+                                            'Sensorik Rungu',
+                                            'Sensorik Wicara',
+                                            'Sensorik Ganda/Multi'
+                                        ];
                                         foreach ($disabilities as $d) {
                                             echo "
                                                 <div class='form-check form-check-inline'>
@@ -546,6 +521,7 @@ $editable = ($roleId <= 4);
                                         ?>
                                     </div>
                                 </div>
+
                                 <div class="col-md-12 mt-3">
                                     <label class="form-label fw-bold">Keluhan Kesehatan Kronis / Menahun</label>
                                     <select class="form-select required" name="penyakit_kronis" id="penyakit_kronis">
@@ -570,6 +546,7 @@ $editable = ($roleId <= 4);
                                         <option value="Lainnya">Lainnya</option>
                                     </select>
                                 </div>
+
                             </div>
                         </div>
 
@@ -599,58 +576,3 @@ $editable = ($roleId <= 4);
         overflow-y: auto;
     }
 </style>
-
-<script>
-    // Script UI/UX untuk mengganti placeholder "Anggota Keluarga Ini" dengan Nama yang diketik
-    document.addEventListener("DOMContentLoaded", function() {
-        const inputNama = document.getElementById('nama');
-        const labelsNama = document.querySelectorAll('.label-nama-anggota');
-
-        if (inputNama) {
-            inputNama.addEventListener('input', function() {
-                const nama = this.value.trim().toUpperCase();
-                labelsNama.forEach(lbl => {
-                    lbl.textContent = nama !== '' ? nama : 'Anggota Keluarga Ini';
-                });
-            });
-        }
-    });
-</script>
-
-<script>
-    // Script UI/UX untuk mengganti placeholder "Anggota Keluarga Ini" dengan Nama yang diketik
-    document.addEventListener("DOMContentLoaded", function() {
-        const inputNama = document.getElementById('nama');
-        const labelsNama = document.querySelectorAll('.label-nama-anggota');
-
-        if (inputNama) {
-            inputNama.addEventListener('input', function() {
-                const nama = this.value.trim().toUpperCase();
-                labelsNama.forEach(lbl => {
-                    lbl.textContent = nama !== '' ? nama : 'Anggota Keluarga Ini';
-                });
-            });
-        }
-    });
-
-    // ==============================================================
-    // 🚀 INISIALISASI SELECT2 UNTUK PROFESI PEKERJAAN (SEARCHABLE)
-    // ==============================================================
-    $(document).ready(function() {
-        // Kita pasang event saat Modal selesai terbuka agar lebar Select2 dirender dengan sempurna
-        $('#modalAnggota').on('shown.bs.modal', function() {
-            $('#lapangan_usaha').select2({
-                dropdownParent: $('#modalAnggota'), // ⚠️ Wajib agar search box tidak terhalang (bug z-index modal)
-                width: '100%',
-                placeholder: '-- Ketik untuk mencari profesi --'
-            });
-        });
-
-        // Hancurkan Select2 saat modal ditutup untuk mencegah duplikasi/error jika dibuka lagi
-        $('#modalAnggota').on('hidden.bs.modal', function() {
-            if ($('#lapangan_usaha').hasClass("select2-hidden-accessible")) {
-                $('#lapangan_usaha').select2('destroy');
-            }
-        });
-    });
-</script>

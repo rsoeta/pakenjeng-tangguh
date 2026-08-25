@@ -47,20 +47,21 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                     </div>
                     <div class="card-body">
                         <?php
+                        // 🚀 PENYESUAIAN ARRAY ASET SESUAI BPS
                         $asetBergerak = [
-                            'Tabung Gas 5,5 kg atau lebih' => 'tabung_gas',
+                            'Tabung Gas 3 KG' => 'tabung_gas_3kg',          // Di urutan pertama
+                            'Tabung Gas 5,5 kg atau lebih' => 'tabung_gas', // Menyusul di urutan kedua
                             'Lemari es / Kulkas' => 'kulkas',
                             'Air Conditioner (AC)' => 'ac',
+                            'Emas / Perhiasan (gram)' => 'emas',
+                            'Komputer / Laptop / Tablet' => 'laptop',
+                            'Sepeda Motor' => 'sepeda_motor',
+                            'Mobil' => 'mobil',
                             'Pemanas Air (Water Heater)' => 'water_heater',
                             'Telepon Rumah (PSTN)' => 'telepon_rumah',
                             'Televisi Layar Datar (min. 30 inci)' => 'tv_lcd',
-                            'Emas / Perhiasan (min. 10 gram)' => 'emas',
-                            'Komputer / Laptop / Tablet' => 'laptop',
-                            'Sepeda Motor' => 'sepeda_motor',
                             'Sepeda' => 'sepeda',
-                            'Mobil' => 'mobil',
                             'Perahu' => 'perahu',
-                            'Kapal / Perahu Motor' => 'kapal_motor',
                             'Smartphone' => 'smartphone'
                         ];
                         ?>
@@ -68,9 +69,25 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                         <div class="row">
                             <?php foreach ($asetBergerak as $label => $name): ?>
                                 <div class="col-md-6 mb-2">
-                                    <label class="form-label"><?= esc($label) ?></label>
-                                    <input type="number" min="0" class="form-control form-control-sm"
-                                        name="<?= $name ?>" value="<?= esc($aset[$name] ?? 0) ?>" <?= $disabled ?>>
+                                    <label class="form-label text-primary fw-semibold"><?= esc($label) ?></label>
+
+                                    <!-- Tambahkan ID di sini -->
+                                    <input type="number" min="0" class="form-control form-control-sm border-primary"
+                                        name="<?= $name ?>" id="<?= $name ?>" value="<?= esc($aset[$name] ?? 0) ?>" <?= $disabled ?>>
+
+                                    <?php if ($name === 'sepeda_motor'): ?>
+                                        <!-- 🚀 ELEMEN DINAMIS: Nilai Sepeda Motor -->
+                                        <div id="div_nilai_sepeda_motor" class="mt-2 p-2 bg-light border border-primary rounded" style="display: none;">
+                                            <label class="form-label text-primary mb-1">Total Nilai Aset Motor (Rp) <span class="text-danger">*</span></label>
+                                            <input type="text" name="nilai_sepeda_motor" id="nilai_sepeda_motor" class="form-control form-control-sm rupiah border-primary" value="<?= esc($aset['nilai_sepeda_motor'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
+                                        </div>
+                                    <?php elseif ($name === 'mobil'): ?>
+                                        <!-- 🚀 ELEMEN DINAMIS: Nilai Mobil -->
+                                        <div id="div_nilai_mobil" class="mt-2 p-2 bg-light border border-primary rounded" style="display: none;">
+                                            <label class="form-label text-primary mb-1">Total Nilai Aset Mobil (Rp) <span class="text-danger">*</span></label>
+                                            <input type="text" name="nilai_mobil" id="nilai_mobil" class="form-control form-control-sm rupiah border-primary" value="<?= esc($aset['nilai_mobil'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -113,53 +130,56 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
+                            <!-- 🚀 ELEMEN BARU: Luas Sawah (m²) & Nilai -->
                             <div class="col-md-4">
-                                <label class="form-label">Luas Sawah / Kebun <span class="text-danger">*</span></label>
-                                <select name="luas_sawah"
-                                    class="form-select form-select-sm <?= $disabled ? '' : 'required-field' ?>"
-                                    <?= $disabled ?> <?= $disabled ? '' : 'required' ?>>
-                                    <option value="">Pilih</option>
-                                    <option value="TIDAK MEMILIKI" <?= ($aset['luas_sawah'] ?? '') === 'TIDAK MEMILIKI' ? 'selected' : '' ?>>TIDAK MEMILIKI</option>
-                                    <option value="KURANG DARI 1000 M2" <?= ($aset['luas_sawah'] ?? '') === 'KURANG DARI 1000 M2' ? 'selected' : '' ?>>KURANG DARI 1000 M2</option>
-                                    <option value="1000-5000 M2" <?= ($aset['luas_sawah'] ?? '') === '1000-5000 M2' ? 'selected' : '' ?>>1000-5000 M2</option>
-                                    <option value="5000-10000 M2" <?= ($aset['luas_sawah'] ?? '') === '5000-10000 M2' ? 'selected' : '' ?>>5000-10000 M2</option>
-                                    <option value="LEBIH DARI 10000 M2" <?= ($aset['luas_sawah'] ?? '') === 'LEBIH DARI 10000 M2' ? 'selected' : '' ?>>LEBIH DARI 10000 M2</option>
-                                </select>
+                                <label class="form-label">Luas Sawah / Kebun (m²) <span class="text-danger">*</span></label>
+                                <input type="number" min="0" step="0.01" name="luas_sawah" id="luas_sawah"
+                                    class="form-control form-control-sm <?= $disabled ? '' : 'required-field' ?>"
+                                    value="<?= esc($aset['luas_sawah'] ?? '') ?>" <?= $disabled ?> <?= $disabled ? '' : 'required' ?> placeholder="Ketik 0 jika tidak punya">
                                 <?php if (!$disabled): ?>
                                     <div class="invalid-feedback">
-                                        Wajib memilih luas sawah / kebun.
+                                        Wajib mengisi luas (isi 0 jika tidak memiliki).
                                     </div>
                                 <?php endif; ?>
+
+                                <!-- 🚀 ELEMEN DINAMIS: Nilai Sawah -->
+                                <div id="div_nilai_sawah" class="mt-2 p-2 bg-light border border-primary rounded" style="display: none;">
+                                    <label class="form-label text-primary mb-1">Total Nilai Aset Sawah (Rp) <span class="text-danger">*</span></label>
+                                    <input type="text" name="nilai_sawah" id="nilai_sawah" class="form-control form-control-sm rupiah border-primary" value="<?= esc($aset['nilai_sawah'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
+                                    <div class="invalid-feedback">Wajib diisi karena luas > 0</div>
+                                </div>
                             </div>
 
+                            <!-- Memiliki Lahan (Tetap Ada) -->
                             <div class="col-md-4">
                                 <label class="form-label">Memiliki Lahan (selain yang ditempati)</label>
                                 <select name="memiliki_lahan"
                                     id="memiliki_lahan"
                                     class="form-select form-select-sm bg-light"
-                                    readonly
-                                    tabindex="-1"
-                                    data-auto="true">
-                                    <option value="">Pilih</option>
-                                    <option value="YA" <?= ($aset['memiliki_lahan'] ?? '') === 'YA' ? 'selected' : '' ?>>YA</option>
+                                    readonly tabindex="-1" data-auto="true">
                                     <option value="TIDAK" <?= ($aset['memiliki_lahan'] ?? '') === 'TIDAK' ? 'selected' : '' ?>>TIDAK</option>
+                                    <option value="YA" <?= ($aset['memiliki_lahan'] ?? '') === 'YA' ? 'selected' : '' ?>>YA</option>
                                 </select>
                             </div>
 
+                            <!-- 🚀 ELEMEN BARU: Rumah/Bangunan Lain (Unit) & Nilai -->
                             <div class="col-md-4">
-                                <label class="form-label">Rumah / Bangunan Ditempati Lain <span class="text-danger">*</span></label>
-                                <select name="rumah_lain"
-                                    class="form-select form-select-sm <?= $disabled ? '' : 'required-field' ?>"
-                                    <?= $disabled ?> <?= $disabled ? '' : 'required' ?>>
-                                    <option value="">Pilih</option>
-                                    <option value="YA" <?= ($aset['rumah_lain'] ?? '') === 'YA' ? 'selected' : '' ?>>YA</option>
-                                    <option value="TIDAK" <?= ($aset['rumah_lain'] ?? '') === 'TIDAK' ? 'selected' : '' ?>>TIDAK</option>
-                                </select>
+                                <label class="form-label">Rumah / Bangunan Lain (Unit) <span class="text-danger">*</span></label>
+                                <input type="number" min="0" name="rumah_lain" id="rumah_lain"
+                                    class="form-control form-control-sm <?= $disabled ? '' : 'required-field' ?>"
+                                    value="<?= esc($aset['rumah_lain'] ?? '') ?>" <?= $disabled ?> <?= $disabled ? '' : 'required' ?> placeholder="Ketik 0 jika tidak punya">
                                 <?php if (!$disabled): ?>
                                     <div class="invalid-feedback">
-                                        Wajib memilih kepemilikan rumah lain.
+                                        Wajib mengisi jumlah unit (isi 0 jika tidak memiliki).
                                     </div>
                                 <?php endif; ?>
+
+                                <!-- 🚀 ELEMEN DINAMIS: Nilai Rumah Lain -->
+                                <div id="div_nilai_rumah" class="mt-2 p-2 bg-light border border-primary rounded" style="display: none;">
+                                    <label class="form-label text-primary mb-1">Total Nilai Aset Rumah (Rp) <span class="text-danger">*</span></label>
+                                    <input type="text" name="nilai_rumah_lain" id="nilai_rumah_lain" class="form-control form-control-sm rupiah border-primary" value="<?= esc($aset['nilai_rumah_lain'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
+                                    <div class="invalid-feedback">Wajib diisi karena unit > 0</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -171,7 +191,7 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
 
     <?php if ($editable): ?>
         <div class="text-end mt-4">
-            <button type="button" id="btnSimpanAset" class="btn btn-success">
+            <button type="button" id="btnSimpanAset" class="btn btn-success rounded-pill px-4 shadow-sm">
                 <i class="fas fa-save"></i> Simpan Perubahan
             </button>
         </div>
@@ -184,19 +204,90 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
 
 <script>
     $(function() {
+        // ====================================================
+        // 🚀 LOGIKA DINAMIS: NILAI ASET MUNCUL JIKA ANGKA > 0
+        // ====================================================
+        function toggleNilaiSawah() {
+            const val = parseFloat($('#luas_sawah').val()) || 0;
+            if (val > 0) {
+                $('#div_nilai_sawah').slideDown();
+                $('#nilai_sawah').prop('required', true);
+
+                // 🚀 AUTO-SET MEMILIKI LAHAN = YA
+                $('#memiliki_lahan').val('YA');
+            } else {
+                $('#div_nilai_sawah').slideUp();
+                $('#nilai_sawah').prop('required', false).val('');
+
+                // 🚀 AUTO-SET MEMILIKI LAHAN = TIDAK
+                $('#memiliki_lahan').val('TIDAK');
+            }
+        }
+
+        function toggleNilaiRumah() {
+            const val = parseInt($('#rumah_lain').val()) || 0;
+            if (val > 0) {
+                $('#div_nilai_rumah').slideDown();
+                $('#nilai_rumah_lain').prop('required', true);
+            } else {
+                $('#div_nilai_rumah').slideUp();
+                $('#nilai_rumah_lain').prop('required', false).val('');
+            }
+        }
+
+        // Jalankan saat diketik
+        $('#luas_sawah').on('input change', toggleNilaiSawah);
+        $('#rumah_lain').on('input change', toggleNilaiRumah);
+
+        // Panggil saat halaman pertama kali diload (untuk prefill dari database)
+        toggleNilaiSawah();
+        toggleNilaiRumah();
+
+        // ====================================================
+        // 🚀 LOGIKA DINAMIS: NILAI KENDARAAN (MOTOR & MOBIL)
+        // ====================================================
+        function toggleNilaiMotor() {
+            const val = parseInt($('#sepeda_motor').val()) || 0;
+            if (val > 0) {
+                $('#div_nilai_sepeda_motor').slideDown();
+                $('#nilai_sepeda_motor').prop('required', true);
+            } else {
+                $('#div_nilai_sepeda_motor').slideUp();
+                $('#nilai_sepeda_motor').prop('required', false).val('');
+            }
+        }
+
+        function toggleNilaiMobil() {
+            const val = parseInt($('#mobil').val()) || 0;
+            if (val > 0) {
+                $('#div_nilai_mobil').slideDown();
+                $('#nilai_mobil').prop('required', true);
+            } else {
+                $('#div_nilai_mobil').slideUp();
+                $('#nilai_mobil').prop('required', false).val('');
+            }
+        }
+
+        // Jalankan saat diketik
+        $('#sepeda_motor').on('input change', toggleNilaiMotor);
+        $('#mobil').on('input change', toggleNilaiMobil);
+
+        // Panggil saat halaman pertama kali diload
+        toggleNilaiMotor();
+        toggleNilaiMobil();
+
         $('#btnSimpanAset').on('click', function(e) {
-            e.preventDefault(); // Mencegah form reload
+            e.preventDefault();
 
             const form = $('#formAset')[0];
 
-            // 🚀 BUG FIX: Validasi kelengkapan form sebelum mengirim data ke server
             if (!form.checkValidity()) {
                 form.classList.add('was-validated');
                 Swal.fire({
                     icon: 'warning',
                     title: 'Isian Belum Lengkap',
                     text: 'Silakan periksa kembali field yang bertanda bintang (*).',
-                    width: '320px', // Perkecil untuk kenyamanan mobile
+                    width: '320px',
                     customClass: {
                         title: 'fs-5',
                         content: 'fs-6'
@@ -213,7 +304,7 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                         icon: 'success',
                         title: 'Berhasil!',
                         text: 'Data aset berhasil disimpan.',
-                        width: '320px', // Perkecil untuk kenyamanan mobile
+                        width: '320px',
                         customClass: {
                             title: 'fs-5',
                             content: 'fs-6'
@@ -224,7 +315,7 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                         icon: 'error',
                         title: 'Gagal!',
                         text: res.message || 'Terjadi kesalahan.',
-                        width: '320px', // Perkecil untuk kenyamanan mobile
+                        width: '320px',
                         customClass: {
                             title: 'fs-5',
                             content: 'fs-6'
@@ -236,7 +327,7 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                     icon: 'error',
                     title: 'Gagal!',
                     text: 'Tidak dapat terhubung ke server.',
-                    width: '320px', // Perkecil untuk kenyamanan mobile
+                    width: '320px',
                     customClass: {
                         title: 'fs-5',
                         content: 'fs-6'
