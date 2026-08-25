@@ -130,23 +130,27 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <!-- 🚀 ELEMEN BARU: Luas Sawah (m²) & Nilai -->
+                            <!-- 🚀 ELEMEN BARU (BPS): Jumlah Titik Lahan Sawah/Kebun & Nilai -->
                             <div class="col-md-4">
-                                <label class="form-label">Luas Sawah / Kebun (m²) <span class="text-danger">*</span></label>
-                                <input type="number" min="0" step="0.01" name="luas_sawah" id="luas_sawah"
+                                <label class="form-label" title="Dihitung per titik lokasi/RT, bukan meter persegi">
+                                    Jumlah Titik Lahan Sawah/Kebun <span class="text-danger">*</span>
+                                </label>
+                                <!-- step diubah jadi 1 karena hitungannya unit/titik, bukan desimal -->
+                                <input type="number" min="0" step="1" name="luas_sawah" id="luas_sawah"
                                     class="form-control form-control-sm <?= $disabled ? '' : 'required-field' ?>"
                                     value="<?= esc($aset['luas_sawah'] ?? '') ?>" <?= $disabled ?> <?= $disabled ? '' : 'required' ?> placeholder="Ketik 0 jika tidak punya">
+
                                 <?php if (!$disabled): ?>
                                     <div class="invalid-feedback">
-                                        Wajib mengisi luas (isi 0 jika tidak memiliki).
+                                        Wajib mengisi jumlah lokasi (isi 0 jika tidak memiliki).
                                     </div>
                                 <?php endif; ?>
 
                                 <!-- 🚀 ELEMEN DINAMIS: Nilai Sawah -->
                                 <div id="div_nilai_sawah" class="mt-2 p-2 bg-light border border-primary rounded" style="display: none;">
-                                    <label class="form-label text-primary mb-1">Total Nilai Aset Sawah (Rp) <span class="text-danger">*</span></label>
+                                    <label class="form-label text-primary mb-1">Total Nilai Aset Lahan (Rp) <span class="text-danger">*</span></label>
                                     <input type="text" name="nilai_sawah" id="nilai_sawah" class="form-control form-control-sm rupiah border-primary" value="<?= esc($aset['nilai_sawah'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
-                                    <div class="invalid-feedback">Wajib diisi karena luas > 0</div>
+                                    <div class="invalid-feedback">Wajib diisi karena jumlah lahan > 0</div>
                                 </div>
                             </div>
 
