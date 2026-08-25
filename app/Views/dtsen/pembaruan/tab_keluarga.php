@@ -132,14 +132,14 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                     <div class="col-md-6">
                         <label class="form-label fw-semibold text-primary">Nama Jalan / Gang</label>
                         <div class="input-group">
-                            <input type="text" class="form-control upper border-primary" id="nama_jalan" name="nama_jalan" value="<?= esc($perumahan['nama_jalan'] ?? '') ?>" <?= $disabled ?> placeholder="Contoh: JL. BUNGBULANG">
+                            <input type="text" class="form-control upper border-primary" id="nama_jalan" name="nama_jalan" value="<?= esc($perumahan['nama_jalan'] ?? '') ?>" <?= $disabled ?> placeholder="Contoh: JL. BUNGBULANG" required>
                             <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#nama_jalan" title="Salin Nama Jalan"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold text-primary">Nomor Rumah</label>
                         <div class="input-group">
-                            <input type="text" class="form-control upper border-primary" id="nomor_rumah" name="nomor_rumah" value="<?= esc($perumahan['nomor_rumah'] ?? '') ?>" <?= $disabled ?> placeholder="Contoh: 12A">
+                            <input type="text" class="form-control upper border-primary" id="nomor_rumah" name="nomor_rumah" value="<?= esc($perumahan['nomor_rumah'] ?? '') ?>" <?= $disabled ?> placeholder="Contoh: 12A" required>
                             <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#nomor_rumah" title="Salin Nomor Rumah"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
@@ -149,14 +149,14 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                     <div class="col-md-4">
                         <label class="form-label fw-semibold text-primary">Dusun / SLS</label>
                         <div class="input-group">
-                            <input type="text" class="form-control upper border-primary" id="dusun" name="dusun" value="<?= esc($perumahan['dusun'] ?? '') ?>" <?= $disabled ?> placeholder="Contoh: NAGRAK">
+                            <input type="text" class="form-control upper border-primary" id="dusun" name="dusun" value="<?= esc($perumahan['dusun'] ?? '') ?>" <?= $disabled ?> placeholder="Contoh: NAGRAK" required>
                             <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#dusun" title="Salin Dusun"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-semibold text-primary">Kode Pos</label>
                         <div class="input-group">
-                            <input type="text" class="form-control onlynum border-primary" id="kode_pos" name="kode_pos" value="<?= esc($perumahan['kode_pos'] ?? '') ?>" <?= $disabled ?> maxlength="5" placeholder="5 Digit Kode Pos">
+                            <input type="text" class="form-control onlynum border-primary" id="kode_pos" name="kode_pos" value="<?= esc($perumahan['kode_pos'] ?? '') ?>" <?= $disabled ?> maxlength="5" placeholder="5 Digit Kode Pos" required>
                             <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#kode_pos" title="Salin Kode Pos"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
@@ -179,14 +179,14 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Latitude</label>
                         <div class="input-group">
-                            <input type="text" id="latitude" name="latitude" class="form-control" value="<?= esc($geo['lat'] ?? '') ?>" readonly>
+                            <input type="text" id="latitude" name="latitude" class="form-control" value="<?= esc($geo['lat'] ?? '') ?>" readonly required>
                             <button class="btn btn-outline-secondary" type="button" id="btnCopyLat" title="Salin Latitude"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Longitude</label>
                         <div class="input-group">
-                            <input type="text" id="longitude" name="longitude" class="form-control" value="<?= esc($geo['lng'] ?? '') ?>" readonly>
+                            <input type="text" id="longitude" name="longitude" class="form-control" value="<?= esc($geo['lng'] ?? '') ?>" readonly required>
                             <button class="btn btn-outline-secondary" type="button" id="btnCopyLng" title="Salin Longitude"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
