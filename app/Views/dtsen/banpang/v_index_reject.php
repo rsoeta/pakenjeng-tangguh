@@ -408,6 +408,46 @@
         });
     }
 
+    // 🚀 FUNGSI AJAX EKSEKUSI HAPUS REJECT
+    function hapusReject(id) {
+        Swal.fire({
+            title: 'Hapus KPM Ini?',
+            text: "Data KPM beserta foto yang sudah diunggah akan dihapus permanen dan tidak bisa dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-trash-alt mr-1"></i> Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Tampilkan Loading
+                Swal.fire({
+                    title: 'Menghapus Data...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                // Tembak ke Backend
+                $.post('<?= base_url('banpang/hapusReject') ?>', {
+                    id: id,
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                }, function(res) {
+                    if (res.status === 'success') {
+                        Swal.fire('Terhapus!', res.message, 'success').then(() => {
+                            // Reload Datatables dengan halus
+                            $('#tableReject').DataTable().ajax.reload(null, false);
+                        });
+                    } else {
+                        Swal.fire('Gagal!', res.message, 'error');
+                    }
+                }, 'json').fail(function() {
+                    Swal.fire('Error Server!', 'Gagal menghubungi server.', 'error');
+                });
+            }
+        });
+    }
+
     // ========================================================
     // ⚙️ INISIALISASI DATATABLES DLL
     // ========================================================

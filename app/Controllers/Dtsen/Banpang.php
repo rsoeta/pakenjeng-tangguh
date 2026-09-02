@@ -942,6 +942,17 @@ class Banpang extends BaseController
                 $btnAksi   = '<a href="' . $urlKamera . '" class="btn btn-sm btn-primary shadow-sm font-weight-bold" title="Ambil Foto"><i class="fas fa-camera mr-1"></i> Foto</a>';
             }
 
+            // 🚀 TAMBAHAN: Tombol Hapus (Khusus Admin / Role ID <= 3)
+            $btnHapus = '';
+            if ($roleId <= 3) {
+                $btnHapus = '<button class="btn btn-sm btn-danger shadow-sm font-weight-bold ml-1" onclick="hapusReject(' . $row['id'] . ')" title="Hapus KPM"><i class="fas fa-trash-alt"></i></button>';
+            }
+
+            // 🚀 PERBAIKAN: Gabungkan tombol Aksi & Hapus sejajar menggunakan d-flex
+            $aksiGabungan = '<div class="d-flex justify-content-center">' . $btnAksi . $btnHapus . '</div>';
+
+            // ... (lanjutkan ke bagian masking NIK) ...
+
             // 🚀 PERBAIKAN: Masking Inline (Membuka Teks Saat Di-hover atau Diklik)
             $nikAsli = trim($row['nik']);
             $maskedNik = $nikAsli;
@@ -976,7 +987,7 @@ class Banpang extends BaseController
                 'nama'         => $row['nama'],
                 'wilayah'      => $wilayahText,
                 'status_badge' => $statusBadge,
-                'aksi'         => $btnAksi
+                'aksi'         => $aksiGabungan
             ];
         }
 
@@ -1221,5 +1232,36 @@ class Banpang extends BaseController
             'status'  => 'success',
             'message' => 'Data KPM berhasil dimasukkan ke daftar Reject.'
         ]);
+    }
+
+    // ========================================================
+    // 🗑️ FITUR: HAPUS DATA REJECT (KHUSUS ADMIN)
+    // ========================================================
+    public function hapusReject()
+    {
+        if (!$this->request->isAJAX()) return $this->response->setStatusCode(403);
+
+        $id = $this->request->getPost('id');
+        $rejectModel = new \App\Models\Dtsen\BanpangRejectModel();
+
+        $kpm = $rejectModel->find($id);
+        if (!$kpm) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Data KPM tidak ditemukan di database.']);
+        }
+
+        // 🚀 HAPUS FILE FISIK FOTO JIKA ADA (Agar Server Tidak Bengkak)
+        if (!empty($kpm['foto_ktp_sinden']) && file_exists(ROOTPATH . 'public/' . $kpm['foto_ktp_sinden'])) {
+            unlink(ROOTPATH . 'public/' . $kpm['foto_ktp_sinden']);
+        }
+        if (!empty($kpm['foto_pbp_sinden']) && file_exists(ROOTPATH . 'public/' . $kpm['foto_pbp_sinden'])) {
+            unlink(ROOTPATH . 'public/' . $kpm['foto_pbp_sinden']);
+        }
+
+        // Hapus Data dari Database
+        if ($rejectModel->delete($id)) {
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Data KPM beserta berkas fotonya berhasil dihapus permanen.']);
+        } else {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Sistem gagal menghapus data KPM.']);
+        }
     }
 }
