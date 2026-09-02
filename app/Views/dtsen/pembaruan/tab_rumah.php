@@ -420,25 +420,25 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                     <div class="col-md-4">
                         <label class="form-label">Listrik per Bulan (Rp)</label>
                         <div class="input-group has-validation">
-                            <input type="text" name="pengeluaran_listrik" id="pengeluaran_listrik" class="form-control rupiah" value="<?= esc($se['pengeluaran_listrik'] ?? '') ?>" <?= $readonly ?> placeholder="Min. 10000">
+                            <input type="text" name="pengeluaran_listrik" id="pengeluaran_listrik" class="form-control rupiah" value="<?= esc($se['pengeluaran_listrik'] ?? '') ?>" <?= $readonly ?> placeholder="Cth: 10000">
                             <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#pengeluaran_listrik" title="Salin Listrik"><i class="fas fa-copy"></i></button>
-                            <div class="invalid-feedback small fw-bold"><i class="fas fa-exclamation-circle"></i> Minimal Rp 1.000</div>
+                            <!-- <div class="invalid-feedback small fw-bold"><i class="fas fa-exclamation-circle"></i> Minimal Rp 1.000</div> -->
                         </div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Pulsa per Bulan (Rp)</label>
                         <div class="input-group has-validation">
-                            <input type="text" name="pengeluaran_pulsa" id="pengeluaran_pulsa" class="form-control rupiah" value="<?= esc($se['pengeluaran_pulsa'] ?? '') ?>" <?= $readonly ?> placeholder="Min. 10000 atau 0">
+                            <input type="text" name="pengeluaran_pulsa" id="pengeluaran_pulsa" class="form-control rupiah" value="<?= esc($se['pengeluaran_pulsa'] ?? '') ?>" <?= $readonly ?> placeholder="Cth: 10000 atau 0">
                             <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#pengeluaran_pulsa" title="Salin Pulsa"><i class="fas fa-copy"></i></button>
-                            <div class="invalid-feedback small fw-bold"><i class="fas fa-exclamation-circle"></i> Minimal Rp 1.000</div>
+                            <!-- <div class="invalid-feedback small fw-bold"><i class="fas fa-exclamation-circle"></i> Minimal Rp 1.000</div> -->
                         </div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Internet per Bulan (Rp)</label>
                         <div class="input-group has-validation">
-                            <input type="text" name="pengeluaran_internet" id="pengeluaran_internet" class="form-control rupiah" value="<?= esc($se['pengeluaran_internet'] ?? '') ?>" <?= $readonly ?> placeholder="Min. 10000 atau 0">
+                            <input type="text" name="pengeluaran_internet" id="pengeluaran_internet" class="form-control rupiah" value="<?= esc($se['pengeluaran_internet'] ?? '') ?>" <?= $readonly ?> placeholder="Cth: 10000 atau 0">
                             <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#pengeluaran_internet" title="Salin Internet"><i class="fas fa-copy"></i></button>
-                            <div class="invalid-feedback small fw-bold"><i class="fas fa-exclamation-circle"></i> Minimal Rp 1.000</div>
+                            <!-- <div class="invalid-feedback small fw-bold"><i class="fas fa-exclamation-circle"></i> Minimal Rp 1.000</div> -->
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -449,19 +449,28 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label text-danger">Bukan Makanan Rutin per <u>Bulan</u> (Rp)</label>
+                        <label class="form-label text-danger">Bukan Makanan Rutin <u>Bulanan</u> (Rp)</label>
                         <div class="input-group has-validation">
                             <input type="text" name="pengeluaran_non_makan_bulanan" id="pengeluaran_non_makan_bulanan" class="form-control rupiah border-danger" value="<?= esc($se['pengeluaran_non_makan_bulanan'] ?? '') ?>" <?= $readonly ?> placeholder="Listrik + Pulsa + Internet">
+
+                            <!-- 🚀 TOMBOL KALKULATOR -->
+                            <button class="btn btn-outline-info btn-calc" type="button" data-target="#pengeluaran_non_makan_bulanan" data-title="Kalkulator Rutin Bulanan" title="Hitung Akumulasi Bulanan" <?= $readonly ?>><i class="fas fa-calculator"></i></button>
+
                             <button class="btn btn-outline-danger btn-copy-input" type="button" data-target="#pengeluaran_non_makan_bulanan" title="Salin Bukan Makanan Bulanan"><i class="fas fa-copy"></i></button>
                             <!-- 🚀 PESAN ERROR DINAMIS -->
                             <div id="feedback_non_makan" class="invalid-feedback small fw-bold"></div>
                         </div>
                         <small class="text-muted" style="font-size: 0.7rem;">(Min. Akumulasi Listrik, Pulsa & Internet)</small>
                     </div>
+
                     <div class="col-md-4">
-                        <label class="form-label">Bukan Makanan Rutin per <u>Tahun</u> (Rp)</label>
+                        <label class="form-label">Bukan Makanan Rutin <u>Tahunan</u> (Rp)</label>
                         <div class="input-group">
                             <input type="text" name="pengeluaran_non_makan_tahunan" id="pengeluaran_non_makan_tahunan" class="form-control rupiah" value="<?= esc($se['pengeluaran_non_makan_tahunan'] ?? '') ?>" <?= $readonly ?> placeholder="0">
+
+                            <!-- 🚀 TOMBOL KALKULATOR -->
+                            <button class="btn btn-outline-info btn-calc" type="button" data-target="#pengeluaran_non_makan_tahunan" data-title="Kalkulator Rutin Tahunan" title="Hitung Akumulasi Tahunan" <?= $readonly ?>><i class="fas fa-calculator"></i></button>
+
                             <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#pengeluaran_non_makan_tahunan" title="Salin Bukan Makanan Tahunan"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
@@ -503,6 +512,38 @@ $se   = $payload['sosial_ekonomi'] ?? [];
         <?php endif; ?>
 
     </form>
+</div>
+
+<!-- 🚀 MODAL KALKULATOR AKUMULASI BPS -->
+<div class="modal fade" id="modalKalkulator" tabindex="-1" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content shadow-lg border-info">
+            <div class="modal-header bg-info text-white py-2">
+                <h6 class="modal-title font-weight-bold" id="modalKalkulatorTitle"><i class="fas fa-calculator mr-1"></i> Kalkulator</h6>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-3 bg-light">
+                <div id="kalkulator_inputs">
+                    <!-- Baris input akan di-generate oleh JS -->
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-primary w-100 mt-2 font-weight-bold border-dashed" id="btn_add_calc_row">
+                    <i class="fas fa-plus mr-1"></i> Tambah Item Lainnya
+                </button>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center bg-white p-2 rounded border border-success">
+                    <span class="font-weight-bold text-dark">Total:</span>
+                    <span class="font-weight-bold text-success" id="kalkulator_total" style="font-size: 1.1rem;">Rp 0</span>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <input type="hidden" id="kalkulator_target_input">
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-sm btn-info font-weight-bold" id="btn_apply_kalkulator"><i class="fas fa-check mr-1"></i> Terapkan</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- ============================== -->

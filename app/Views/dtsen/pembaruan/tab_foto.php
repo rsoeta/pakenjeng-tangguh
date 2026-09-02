@@ -20,43 +20,43 @@ $foto = $payload['foto'] ?? [];
         <input type="hidden" name="no_kk" value="<?= esc($payload['no_kk'] ?? $perumahan['no_kk'] ?? '') ?>">
         <input type="hidden" name="kepala_keluarga" value="<?= esc($payload['kepala_keluarga'] ?? $perumahan['kepala_keluarga'] ?? '') ?>">
 
-        <!-- 🚀 4 KOLOM FOTO SEJAJAR -->
+        <!-- 🚀 4 KOLOM FOTO (2 BARIS DI MOBILE, 1 BARIS DI DESKTOP) -->
         <div class="row g-2">
             <!-- Foto KTP/KK -->
-            <div class="col-md-3 mb-3 text-center">
+            <div class="col-6 col-md-3 mb-3 text-center">
                 <label class="fw-semibold d-block small">Foto KTP / KK</label>
                 <img src="<?= base_url($foto['ktp_kk'] ?? 'data/usulan/foto_identitas/noimage.png') ?>"
-                    class="img-fluid rounded border mb-2 img-download" id="previewKtp" style="max-height: 180px; cursor: pointer; object-fit: cover; width: 100%;" onerror="this.src='<?= base_url('data/usulan/foto_identitas/noimage.png') ?>'">
+                    class="img-fluid rounded border mb-2 img-download" id="previewKtp" style="aspect-ratio: 3/4; cursor: pointer; object-fit: cover; width: 100%;" onerror="this.src='<?= base_url('data/usulan/foto_identitas/noimage.png') ?>'">
                 <?php if ($editable): ?>
                     <input type="file" name="foto_ktp" id="fotoKtp" class="form-control form-control-sm" accept="image/*" capture="environment">
                 <?php endif; ?>
             </div>
 
             <!-- Foto Rumah Depan -->
-            <div class="col-md-3 mb-3 text-center">
+            <div class="col-6 col-md-3 mb-3 text-center">
                 <label class="fw-semibold d-block small">Tampak Depan</label>
                 <img src="<?= base_url($foto['depan'] ?? 'data/usulan/foto_rumah/noimage.png') ?>"
-                    class="img-fluid rounded border mb-2 img-download" id="previewDepan" style="max-height: 180px; cursor: pointer; object-fit: cover; width: 100%;" onerror="this.src='<?= base_url('data/usulan/foto_rumah/noimage.png') ?>'">
+                    class="img-fluid rounded border mb-2 img-download" id="previewDepan" style="aspect-ratio: 3/4; cursor: pointer; object-fit: cover; width: 100%;" onerror="this.src='<?= base_url('data/usulan/foto_rumah/noimage.png') ?>'">
                 <?php if ($editable): ?>
                     <input type="file" name="foto_depan" id="fotoDepan" class="form-control form-control-sm" accept="image/*" capture="environment">
                 <?php endif; ?>
             </div>
 
             <!-- Foto Rumah Dalam -->
-            <div class="col-md-3 mb-3 text-center">
+            <div class="col-6 col-md-3 mb-3 text-center">
                 <label class="fw-semibold d-block small">Ruang Tamu / Dalam</label>
                 <img src="<?= base_url($foto['dalam'] ?? 'data/usulan/foto_rumah_dalam/noimage.png') ?>"
-                    class="img-fluid rounded border mb-2 img-download" id="previewDalam" style="max-height: 180px; cursor: pointer; object-fit: cover; width: 100%;" onerror="this.src='<?= base_url('data/usulan/foto_rumah_dalam/noimage.png') ?>'">
+                    class="img-fluid rounded border mb-2 img-download" id="previewDalam" style="aspect-ratio: 3/4; cursor: pointer; object-fit: cover; width: 100%;" onerror="this.src='<?= base_url('data/usulan/foto_rumah_dalam/noimage.png') ?>'">
                 <?php if ($editable): ?>
                     <input type="file" name="foto_dalam" id="fotoDalam" class="form-control form-control-sm" accept="image/*" capture="environment">
                 <?php endif; ?>
             </div>
 
-            <!-- 🚀 TAMBAHAN: Foto Kamar Mandi -->
-            <div class="col-md-3 mb-3 text-center">
+            <!-- Foto Kamar Mandi -->
+            <div class="col-6 col-md-3 mb-3 text-center">
                 <label class="fw-semibold d-block small">Kamar Mandi / WC</label>
                 <img src="<?= base_url($foto['kamar_mandi'] ?? 'data/usulan/foto_kamar_mandi/noimage.png') ?>"
-                    class="img-fluid rounded border mb-2 img-download" id="previewKamarMandi" style="max-height: 180px; cursor: pointer; object-fit: cover; width: 100%;" onerror="this.src='<?= base_url('data/usulan/foto_kamar_mandi/noimage.png') ?>'">
+                    class="img-fluid rounded border mb-2 img-download" id="previewKamarMandi" style="aspect-ratio: 3/4; cursor: pointer; object-fit: cover; width: 100%;" onerror="this.src='<?= base_url('data/usulan/foto_kamar_mandi/noimage.png') ?>'">
                 <?php if ($editable): ?>
                     <input type="file" name="foto_kamar_mandi" id="fotoKamarMandi" class="form-control form-control-sm" accept="image/*" capture="environment">
                 <?php endif; ?>

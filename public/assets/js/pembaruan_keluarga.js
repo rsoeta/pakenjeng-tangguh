@@ -1043,6 +1043,104 @@ $(document).ready(function () {
         }
     }
 
+    // Fungsi Format Rupiah Khusus Kalkulator
+    function formatRupiahCalc(angka) {
+        let number_string = angka.replace(/[^,\d]/g, '').toString(),
+            split = number_string.split(','),
+            sisa = split[0].length % 3,
+            rupiah = split[0].substr(0, sisa),
+            ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+    
+        if (ribuan) {
+            let separator = sisa ? '.' : '';
+            rupiah += separator + ribuan.join('.');
+        }
+        return rupiah;
+    }
+    
+    // 1. EVENT: Buka Modal Kalkulator
+    $('.btn-calc').click(function() {
+        let target = $(this).data('target');
+        let title = $(this).data('title');
+    
+        $('#kalkulator_target_input').val(target);
+        $('#modalKalkulatorTitle').html('<i class="fas fa-calculator mr-1"></i> ' + title);
+    
+        // Bersihkan modal
+        $('#kalkulator_inputs').html('');
+        $('#kalkulator_total').text('Rp 0').data('raw', 0);
+    
+        // Siapkan baris input default sesuai target
+        if (target === '#pengeluaran_non_makan_bulanan') {
+            addCalcRow('Listrik');
+            addCalcRow('Pulsa / Kuota');
+            addCalcRow('Air / PDAM');
+        } else {
+            addCalcRow('Pakaian / Sandang');
+            addCalcRow('Pendidikan');
+            addCalcRow('Kesehatan / Obat');
+        }
+    
+        $('#modalKalkulator').modal('show');
+    });
+    
+    // 2. EVENT: Tambah Baris Baru
+    $('#btn_add_calc_row').click(function() {
+        addCalcRow('Item Lainnya...');
+    });
+    
+    // Fungsi Render HTML Baris Input
+    function addCalcRow(placeholder) {
+        let html = `
+            <div class="input-group input-group-sm mb-2 calc-row shadow-sm">
+                <div class="input-group-prepend">
+                    <span class="input-group-text bg-white" style="width: 120px; font-size:0.75rem;">${placeholder}</span>
+                </div>
+                <input type="text" class="form-control calc-input rupiah-calc" placeholder="0">
+                <div class="input-group-append">
+                    <button class="btn btn-danger btn-remove-calc-row" type="button" title="Hapus"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+        `;
+        $('#kalkulator_inputs').append(html);
+    }
+    
+    // 3. EVENT: Hapus Baris
+    $(document).on('click', '.btn-remove-calc-row', function() {
+        $(this).closest('.calc-row').remove();
+        hitungTotalKalkulator();
+    });
+    
+    // 4. EVENT: Ketik Nominal & Hitung Otomatis
+    $(document).on('keyup', '.rupiah-calc', function() {
+        $(this).val(formatRupiahCalc($(this).val()));
+        hitungTotalKalkulator();
+    });
+    
+    // Fungsi Menghitung Total Akumulasi
+    function hitungTotalKalkulator() {
+        let total = 0;
+        $('.calc-input').each(function() {
+            let val = $(this).val().replace(/\./g, '');
+            if (val) total += parseInt(val);
+        });
+        $('#kalkulator_total').text('Rp ' + formatRupiahCalc(total.toString()));
+        $('#kalkulator_total').data('raw', total);
+    }
+    
+    // 5. EVENT: Tombol Terapkan (Kirim hasil ke Input Utama)
+    $('#btn_apply_kalkulator').click(function() {
+        let target = $('#kalkulator_target_input').val();
+        let totalRaw = $('#kalkulator_total').data('raw') || 0;
+    
+        if (totalRaw > 0) {
+            $(target).val(formatRupiahCalc(totalRaw.toString()));
+            // Trigger event change jika ada validasi lain yang memantau form utama
+            $(target).trigger('change'); 
+        }
+        
+        $('#modalKalkulator').modal('hide');
+    });
 });
 
 /* ======================================================
