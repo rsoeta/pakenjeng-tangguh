@@ -1141,6 +1141,8 @@ $(document).ready(function () {
         
         $('#modalKalkulator').modal('hide');
     });
+
+    
 });
 
 /* ======================================================
@@ -1168,68 +1170,208 @@ $(document).on('anggota:saved', function() {
 });
 
 
-    $(document).on('submit', '#formInputDesil', function(e) {
+$(document).on('submit', '#formInputDesil', function(e) {
 
-        e.preventDefault(); // ⛔ cegah reload default
+    e.preventDefault(); // ⛔ cegah reload default
 
-        const form = $(this);
-        const actionUrl = form.attr('action');
-        const formData = form.serialize();
+    const form = $(this);
+    const actionUrl = form.attr('action');
+    const formData = form.serialize();
 
-        $.ajax({
-            url: actionUrl,
-            type: 'POST',
-            data: formData,
-            dataType: 'json',
-            beforeSend: function() {
-                Swal.fire({
-                    title: 'Memproses...',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-            },
-            success: function(response) {
-
-                if (response.status === 'success') {
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil',
-                        text: 'Kategori desil berhasil diperbarui.',
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(() => {
-                        // location.reload(); // 🔄 reload setelah sukses
-                        location.href = location.href; // alternatif reload dengan cache-busting
-                    });
-
-                } else if (response.status === 'forbidden') {
-
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Akses Ditolak',
-                        text: response.message
-                    });
-
-                } else {
-
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: response.message || 'Terjadi kesalahan.'
-                    });
-
+    $.ajax({
+        url: actionUrl,
+        type: 'POST',
+        data: formData,
+        dataType: 'json',
+        beforeSend: function() {
+            Swal.fire({
+                title: 'Memproses...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
-            },
-            error: function() {
+            });
+        },
+        success: function(response) {
+
+            if (response.status === 'success') {
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: 'Kategori desil berhasil diperbarui.',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    // location.reload(); // 🔄 reload setelah sukses
+                    location.href = location.href; // alternatif reload dengan cache-busting
+                });
+
+            } else if (response.status === 'forbidden') {
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Akses Ditolak',
+                    text: response.message
+                });
+
+            } else {
 
                 Swal.fire({
                     icon: 'error',
-                    title: 'Server Error',
-                    text: 'Tidak dapat menghubungi server.'
+                    title: 'Gagal',
+                    text: response.message || 'Terjadi kesalahan.'
+                });
+
+            }
+        },
+        error: function() {
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Server Error',
+                text: 'Tidak dapat menghubungi server.'
+            });
+        }
+    });
+});
+
+// ========================================================
+// 🚀 FITUR KALKULATOR SWEETALERT2 (MOBILE COMPACT)
+// ========================================================
+window.bukaKalkulator = function(tipe, targetId) {
+    let title = '';
+    let htmlContent = '';
+
+    if (tipe === 'bulanan') {
+        title = 'Rincian Bulanan';
+        htmlContent = `
+            <div class="text-left" style="font-size: 0.85rem;">
+                <label class="mb-1 font-weight-bold">Listrik / Token</label>
+                <input type="text" class="form-control form-control-sm mb-2 calc-input" placeholder="Rp 0">
+                <label class="mb-1 font-weight-bold">Pulsa / Paket Data</label>
+                <input type="text" class="form-control form-control-sm mb-2 calc-input" placeholder="Rp 0">
+                <label class="mb-1 font-weight-bold">Air / PAM / Gas</label>
+                <input type="text" class="form-control form-control-sm mb-2 calc-input" placeholder="Rp 0">
+                <label class="mb-1 font-weight-bold">Lain-lain</label>
+                <input type="text" class="form-control form-control-sm mb-3 calc-input" placeholder="Rp 0">
+                <hr class="my-2">
+                <label class="mb-1 font-weight-bold text-primary">Total Akumulasi</label>
+                <input type="text" id="calc_total" class="form-control form-control-sm font-weight-bold text-success bg-light" readonly value="0">
+            </div>
+        `;
+    } else if (tipe === 'tahunan') {
+        title = 'Rincian Tahunan';
+        htmlContent = `
+            <div class="text-left" style="font-size: 0.85rem;">
+                <label class="mb-1 font-weight-bold">Pendidikan (SPP, dll)</label>
+                <input type="text" class="form-control form-control-sm mb-2 calc-input" placeholder="Rp 0">
+                <label class="mb-1 font-weight-bold">Kesehatan (Berobat)</label>
+                <input type="text" class="form-control form-control-sm mb-2 calc-input" placeholder="Rp 0">
+                <label class="mb-1 font-weight-bold">Pakaian / Sepatu</label>
+                <input type="text" class="form-control form-control-sm mb-2 calc-input" placeholder="Rp 0">
+                <label class="mb-1 font-weight-bold">Pajak (PBB, Kendaraan)</label>
+                <input type="text" class="form-control form-control-sm mb-2 calc-input" placeholder="Rp 0">
+                <label class="mb-1 font-weight-bold">Lain-lain</label>
+                <input type="text" class="form-control form-control-sm mb-3 calc-input" placeholder="Rp 0">
+                <hr class="my-2">
+                <label class="mb-1 font-weight-bold text-primary">Total Akumulasi</label>
+                <input type="text" id="calc_total" class="form-control form-control-sm font-weight-bold text-success bg-light" readonly value="0">
+            </div>
+        `;
+    } else if (tipe === 'mingguan_makan') {
+        title = 'Kalkulator Makan';
+        htmlContent = `
+            <div class="text-left" style="font-size: 0.85rem;">
+                <label class="mb-1 font-weight-bold">Biaya Makan per Orang / Hari</label>
+                <input type="text" id="calc_makan_harian" class="form-control form-control-sm mb-2" placeholder="Rp 0">
+                
+                <label class="mb-1 font-weight-bold">Jumlah Anggota Keluarga (Jiwa)</label>
+                <input type="number" id="calc_jumlah_anggota" class="form-control form-control-sm mb-3" min="1" placeholder="Misal: 4">
+                
+                <hr class="my-2">
+                <label class="mb-1 font-weight-bold text-primary">Rumus: Harian × Jiwa × 7 Hari</label>
+                <input type="text" id="calc_total" class="form-control form-control-sm font-weight-bold text-success bg-light" readonly value="0">
+            </div>
+        `;
+    }
+
+    Swal.fire({
+        title: `<div style="font-size: 1.1rem; border-bottom: 2px solid #17a2b8; padding-bottom: 5px;">${title}</div>`,
+        html: htmlContent,
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-check"></i> Terapkan',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#28a745',
+        width: '320px',
+        padding: '0.8em',
+        customClass: {
+            title: 'mb-0',
+            actions: 'mt-2'
+        },
+        didOpen: () => {
+            const totalInput = Swal.getHtmlContainer().querySelector('#calc_total');
+
+            const formatRp = (angka) => {
+                let val = angka.replace(/[^,\d]/g, '').toString();
+                let split = val.split(',');
+                let sisa = split[0].length % 3;
+                let rupiah = split[0].substr(0, sisa);
+                let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+                if (ribuan) rupiah += (sisa ? '.' : '') + ribuan.join('.');
+                return split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+            };
+
+            if (tipe === 'mingguan_makan') {
+                const inputHarian = Swal.getHtmlContainer().querySelector('#calc_makan_harian');
+                const inputAnggota = Swal.getHtmlContainer().querySelector('#calc_jumlah_anggota');
+
+                const hitungMakan = () => {
+                    let harian = parseInt(inputHarian.value.replace(/\./g, '')) || 0;
+                    let anggota = parseInt(inputAnggota.value) || 0;
+                    let total = harian * anggota * 7;
+                    totalInput.value = formatRp(total.toString());
+                };
+
+                inputHarian.addEventListener('input', function() {
+                    this.value = formatRp(this.value);
+                    hitungMakan();
+                });
+                inputAnggota.addEventListener('input', hitungMakan);
+
+            } else {
+                const inputs = Swal.getHtmlContainer().querySelectorAll('.calc-input');
+                inputs.forEach(input => {
+                    input.addEventListener('input', function() {
+                        this.value = formatRp(this.value);
+                        
+                        let total = 0;
+                        inputs.forEach(inp => {
+                            let angka = inp.value.replace(/\./g, '');
+                            if (angka) total += parseInt(angka);
+                        });
+                        totalInput.value = formatRp(total.toString());
+                    });
                 });
             }
-        });
+        },
+        preConfirm: () => {
+            return Swal.getHtmlContainer().querySelector('#calc_total').value;
+        }
+    }).then((result) => {
+        if (result.isConfirmed && result.value !== "0" && result.value !== "") {
+            let targetInput = $(targetId);
+            targetInput.val(result.value);
+            targetInput.trigger('input').trigger('change');
+            
+            Swal.fire({
+                toast: true,
+                position: 'top',
+                icon: 'success',
+                title: 'Total disalin!',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        }
     });
+};

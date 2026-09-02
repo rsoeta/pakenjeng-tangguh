@@ -27,12 +27,49 @@
     <section class="content">
         <div class="container-fluid mb-5">
             <?php $roleId = session()->get('role_id'); ?>
+            <!-- 🚀 FILTER AREA (BAST, RW, RT, STATUS) -->
             <div class="row mb-3">
-                <div class="col-12 col-md-4">
+                <div class="col-6 col-md-3 mb-2">
+                    <label class="small font-weight-bold">Filter Tahap (No. BAST)</label>
+                    <select id="filter_bast" class="form-control form-control-sm">
+                        <option value="">-- Semua Tahap --</option>
+                        <?php if (isset($list_bast)): ?>
+                            <?php foreach ($list_bast as $index => $bast): ?>
+                                <!-- 🚀 Tambahkan logika selected pada indeks ke-0 (data terbaru) -->
+                                <option value="<?= esc($bast['no_bast']) ?>" <?= $index === 0 ? 'selected' : '' ?>>
+                                    <?= esc($bast['no_bast']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
+
+                <div class="col-6 col-md-3 mb-2">
+                    <label class="small font-weight-bold">Filter RW</label>
+                    <select id="filter_rw" class="form-control form-control-sm">
+                        <option value="">-- Semua RW --</option>
+                        <?php for ($i = 1; $i <= 20; $i++): ?>
+                            <option value="<?= str_pad($i, 3, '0', STR_PAD_LEFT) ?>"><?= str_pad($i, 3, '0', STR_PAD_LEFT) ?></option>
+                        <?php endfor; ?>
+                    </select>
+                </div>
+
+                <div class="col-6 col-md-3 mb-2">
+                    <label class="small font-weight-bold">Filter RT</label>
+                    <select id="filter_rt" class="form-control form-control-sm">
+                        <option value="">-- Semua RT --</option>
+                        <?php for ($i = 1; $i <= 15; $i++): ?>
+                            <option value="<?= str_pad($i, 3, '0', STR_PAD_LEFT) ?>"><?= str_pad($i, 3, '0', STR_PAD_LEFT) ?></option>
+                        <?php endfor; ?>
+                    </select>
+                </div>
+
+                <div class="col-6 col-md-3 mb-2">
+                    <label class="small font-weight-bold">Filter Status</label>
                     <select id="filterStatus" class="form-control form-control-sm border-info shadow-sm font-weight-bold text-info">
                         <option value="all">Tampilkan Semua Status</option>
-                        <option value="0" <?= $roleId == 4 ? 'selected' : '' ?>>❌ Belum Difoto (Tugas Pentri)</option>
-                        <option value="1" <?= $roleId < 4 ? 'selected' : '' ?>>⏳ Selesai Difoto (Menunggu Verifikasi Admin)</option>
+                        <option value="0" <?= isset($roleId) && $roleId == 4 ? 'selected' : '' ?>>❌ Belum Difoto</option>
+                        <option value="1" <?= isset($roleId) && $roleId < 4 ? 'selected' : '' ?>>⏳ Menunggu Verifikasi</option>
                         <option value="2">✅ Diverifikasi & Layak</option>
                     </select>
                 </div>
@@ -384,8 +421,11 @@
                 url: '<?= base_url('banpang/reject/datatable') ?>',
                 type: 'POST',
                 data: function(d) {
-                    d.<?= csrf_token() ?> = '<?= csrf_hash() ?>';
-                    d.filter_status = $('#filterStatus').val(); // 🚀 Kirim status terpilih
+                    d.filter_bast = $('#filter_bast').val();
+                    d.filter_rw = $('#filter_rw').val();
+                    d.filter_rt = $('#filter_rt').val();
+                    d.filterStatus = $('#filterStatus').val();
+                    d.<?= csrf_token() ?> = "<?= csrf_hash() ?>";
                 }
             },
             columns: [{
@@ -434,9 +474,10 @@
             }
         });
 
-        // 🚀 Trigger Reload Tabel otomatis saat opsi Filter diubah
-        $('#filterStatus').change(function() {
-            tableReject.ajax.reload();
+        // 🚀 TRIGGER AUTO-RELOAD SAAT FILTER BERUBAH
+        $('#filter_bast, #filter_rw, #filter_rt, #filterStatus').on('change', function() {
+            // Gunakan nama variabel yang benar: tableReject
+            tableReject.ajax.reload(null, false);
         });
 
         // 📥 Eksekusi AJAX Import Excel

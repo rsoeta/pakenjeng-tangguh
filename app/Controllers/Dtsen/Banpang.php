@@ -806,8 +806,19 @@ class Banpang extends BaseController
     // ========================================================
     public function indexReject()
     {
+        // 🚀 Ambil daftar No BAST unik dari database untuk Dropdown Filter
+        $list_bast = $this->db->table('dtsen_banpang')
+            ->select('no_bast')
+            ->where('no_bast IS NOT NULL')
+            ->where('no_bast !=', '')
+            ->groupBy('no_bast')
+            ->orderBy('no_bast', 'DESC')
+            ->get()
+            ->getResultArray();
+
         $data = [
-            'title' => 'Rekapitulasi Bantuan Pangan (Reject Bulog)'
+            'title' => 'Rekapitulasi Bantuan Pangan (Reject Bulog)',
+            'list_bast' => $list_bast // 🚀 Kirim array ini ke View
         ];
         return view('dtsen/banpang/v_index_reject', $data);
     }
@@ -849,18 +860,36 @@ class Banpang extends BaseController
             'wilayah_tugas' => trim($wilTugas ?? '')
         ];
 
+        // ... (kode di atasnya tetap sama)
         // Trait otomatis membaca alias 'rt'
         $this->applyWilayahFilter($builder, $filterData, $roleId);
 
-        // 🚀 PERBAIKAN 3: Tangkap & Eksekusi Filter Status
-        $filterStatus = $this->request->getPost('filter_status');
+        // 🚀 PERBAIKAN: Tangkap & Eksekusi Filter Tahap (BAST)
+        $filterBast = $this->request->getPost('filter_bast');
+        if (!empty($filterBast)) {
+            $builder->where('br.no_bast', trim($filterBast));
+        }
+
+        // 🚀 PERBAIKAN: Tangkap & Eksekusi Filter RW & RT
+        $filterRw = $this->request->getPost('filter_rw');
+        if (!empty($filterRw)) {
+            $builder->where('rt.rw', str_pad($filterRw, 3, '0', STR_PAD_LEFT));
+        }
+
+        $filterRt = $this->request->getPost('filter_rt');
+        if (!empty($filterRt)) {
+            $builder->where('rt.rt', str_pad($filterRt, 3, '0', STR_PAD_LEFT));
+        }
+
+        // 🚀 PERBAIKAN: Samakan penamaan variabel 'filterStatus' sesuai kiriman AJAX Frontend
+        $filterStatus = $this->request->getPost('filterStatus');
         if ($filterStatus !== 'all' && $filterStatus !== null && $filterStatus !== '') {
             $builder->where('br.is_redocumented', $filterStatus);
         }
 
         // 3. Logika Pencarian DataTables (Search Box)
-        // ...
         $searchValue = $this->request->getPost('search')['value'] ?? '';
+        // ... (kode di bawahnya tetap sama)
         if (!empty($searchValue)) {
             $builder->groupStart()
                 ->like('br.nik', $searchValue)
@@ -1158,11 +1187,15 @@ class Banpang extends BaseController
         $alokasi_bulan = $this->request->getPost('alokasi_bulan');
         $alokasi_tahun = $this->request->getPost('alokasi_tahun');
 
-        $cekData = $rejectModel->where('no_pbp', $no_pbp)->first();
+        // 🚀 RADAR ANTI-DOUBLE: Cek berdasarkan No PBP DAN No BAST
+        $cekData = $rejectModel->where('no_pbp', $no_pbp)
+            ->where('no_bast', $no_bast)
+            ->first();
+
         if ($cekData) {
             return $this->response->setJSON([
                 'status'  => 'error',
-                'message' => 'No. PBP ini sudah ada di dalam daftar Reject.'
+                'message' => 'No. PBP ini sudah ada di dalam daftar Reject untuk tahap (BAST) tersebut.'
             ]);
         }
 

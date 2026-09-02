@@ -445,6 +445,8 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                         <label class="form-label">Makan per <u>Minggu</u> (Rp)</label>
                         <div class="input-group">
                             <input type="text" name="pengeluaran_makan_mingguan" id="pengeluaran_makan_mingguan" class="form-control rupiah" value="<?= esc($se['pengeluaran_makan_mingguan'] ?? '') ?>" <?= $readonly ?> placeholder="0">
+                            <!-- 🚀 TOMBOL KALKULATOR MAKAN MINGGUAN -->
+                            <button class="btn btn-outline-info" type="button" onclick="bukaKalkulator('mingguan_makan', '#pengeluaran_makan_mingguan')" <?= $readonly ?> title="Hitung Makan Mingguan"><i class="fas fa-calculator"></i></button>
                             <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#pengeluaran_makan_mingguan" title="Salin Makan Mingguan"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
