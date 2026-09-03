@@ -837,7 +837,8 @@ class Banpang extends BaseController
         // 1. Inisialisasi Builder & Kaitan Tabel (JOIN)
         $builder = $db->table('dtsen_banpang_reject br');
 
-        $builder->select('br.*, rt.rt, rt.rw');
+        // 🚀 PERBAIKAN: Tambahkan kk.alamat ke dalam select
+        $builder->select('br.*, rt.rt, rt.rw, kk.alamat');
         $builder->join('dtsen_kk kk', 'kk.no_kk = br.no_kk AND kk.deleted_at IS NULL', 'left');
         $builder->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left');
 
@@ -927,11 +928,13 @@ class Banpang extends BaseController
                 $statusBadge = '<span class="badge bg-warning text-dark px-2 py-1"><i class="fas fa-camera mr-1"></i> Belum Difoto</span>';
             }
 
-            // Tampilan Wilayah Text (Alamat PBP di atas RT/RW)
-            $alamatPbp = esc($row['alamat_pbp']);
+            // 🚀 PERBAIKAN: Prioritaskan alamat dari tabel KK. Jika kosong, gunakan alamat_pbp bawaan BULOG.
+            $alamatUtama = !empty($row['alamat']) ? esc($row['alamat']) : esc($row['alamat_pbp']);
+
+            // Tampilan Wilayah Text
             $wilayahText = !empty($row['rt'])
-                ? "{$alamatPbp}<br><small class='text-muted font-weight-bold'><i class='fas fa-map-marker-alt mr-1'></i>RT {$row['rt']} / RW {$row['rw']}</small>"
-                : $alamatPbp;
+                ? "{$alamatUtama}<br><small class='text-muted font-weight-bold'><i class='fas fa-map-marker-alt mr-1'></i>RT {$row['rt']} / RW {$row['rw']}</small>"
+                : $alamatUtama;
 
             // Jika status 1 (menunggu) ATAU 2 (terverifikasi), kunci ke tombol 'Lihat'
             if ($row['is_redocumented'] == 1 || $row['is_redocumented'] == 2) {
