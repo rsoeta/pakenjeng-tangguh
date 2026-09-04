@@ -956,14 +956,27 @@ class Banpang extends BaseController
                 $btnAksi   = '<a href="' . $urlKamera . '" class="btn btn-sm btn-primary shadow-sm font-weight-bold" title="Ambil Foto"><i class="fas fa-camera mr-1"></i> Foto</a>';
             }
 
-            // 🚀 TAMBAHAN: Tombol Hapus (Khusus Admin / Role ID <= 3)
+            // 🚀 TAMBAHAN: Tombol Edit & Hapus (Khusus Admin / Role ID <= 3)
+            $btnEdit = '';
             $btnHapus = '';
             if ($roleId <= 3) {
+                // Ambil catatan (antisipasi jika Jenderal menggunakan field 'notes' atau 'catatan' di DB)
+                $catatanAktual = !empty($row['notes']) ? $row['notes'] : ($row['catatan'] ?? '');
+
+                // Tombol Edit (Menyimpan data langsung di dalam atribut HTML agar super cepat)
+                $btnEdit = '<button class="btn btn-sm btn-warning shadow-sm font-weight-bold ml-1 btn-edit-reject" ' .
+                    'data-id="' . $row['id'] . '" ' .
+                    'data-catatan="' . esc($catatanAktual) . '" ' .
+                    'data-bulan="' . $row['alokasi_bulan'] . '" ' .
+                    'data-tahun="' . $row['alokasi_tahun'] . '" ' .
+                    'data-alamat="' . esc($row['alamat_pbp']) . '" ' .
+                    'title="Edit Data"><i class="fas fa-edit"></i></button>';
+
                 $btnHapus = '<button class="btn btn-sm btn-danger shadow-sm font-weight-bold ml-1" onclick="hapusReject(' . $row['id'] . ')" title="Hapus KPM"><i class="fas fa-trash-alt"></i></button>';
             }
 
-            // 🚀 PERBAIKAN: Gabungkan tombol Aksi & Hapus sejajar menggunakan d-flex
-            $aksiGabungan = '<div class="d-flex justify-content-center">' . $btnAksi . $btnHapus . '</div>';
+            // 🚀 PERBAIKAN: Gabungkan tombol Aksi, Edit, & Hapus sejajar menggunakan d-flex
+            $aksiGabungan = '<div class="d-flex justify-content-center">' . $btnAksi . $btnEdit . $btnHapus . '</div>';
 
             // ... (lanjutkan ke bagian masking NIK) ...
 
@@ -1287,6 +1300,39 @@ class Banpang extends BaseController
             return $this->response->setJSON(['status' => 'success', 'message' => 'Data KPM beserta berkas fotonya berhasil dihapus permanen.']);
         } else {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Sistem gagal menghapus data KPM.']);
+        }
+    }
+
+    // ========================================================
+    // ✏️ FITUR: UPDATE DATA REJECT MANUAL (KHUSUS ADMIN)
+    // ========================================================
+    public function updateRejectManual()
+    {
+        if (!$this->request->isAJAX()) return $this->response->setStatusCode(403);
+
+        $id = $this->request->getPost('id');
+        $rejectModel = new \App\Models\Dtsen\BanpangRejectModel();
+
+        // Siapkan data yang akan diupdate
+        $dataUpdate = [
+            'alokasi_bulan' => $this->request->getPost('alokasi_bulan'),
+            'alokasi_tahun' => $this->request->getPost('alokasi_tahun'),
+            'alamat_pbp'    => $this->request->getPost('alamat_pbp'),
+            // Jaga-jaga agar sinkron dengan model BULOG Jenderal, update dua-duanya
+            'notes'         => $this->request->getPost('catatan'),
+            'catatan'       => $this->request->getPost('catatan')
+        ];
+
+        if ($rejectModel->update($id, $dataUpdate)) {
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Catatan & data KPM berhasil diperbarui.'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Sistem gagal memperbarui data.'
+            ]);
         }
     }
 }

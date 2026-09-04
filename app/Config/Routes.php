@@ -496,6 +496,7 @@ $routes->group('banpang', ['filter' => ['authfilterdtks', 'menufilterdtks']], st
 	$routes->get('searchKpmAjax', 'Dtsen\Banpang::searchKpmAjax');
 	$routes->post('simpanRejectManual', 'Dtsen\Banpang::simpanRejectManual');
 	$routes->post('hapusReject', 'Dtsen\Banpang::hapusReject');
+	$routes->post('updateRejectManual', 'Dtsen\Banpang::updateRejectManual');
 });
 
 // Frontend article view

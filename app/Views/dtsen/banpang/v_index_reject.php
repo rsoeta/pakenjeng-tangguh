@@ -232,6 +232,63 @@
             </div>
         </div>
     </div>
+
+    <!-- 🚀 MODAL EDIT REJECT -->
+    <div class="modal fade" id="modalEditReject" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title font-weight-bold"><i class="fas fa-edit mr-1"></i> Edit Catatan & Alokasi</h5>
+                    <button type="button" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formEditReject">
+                        <input type="hidden" id="edit_id" name="id">
+
+                        <div class="row">
+                            <!-- Form Alokasi Bulan -->
+                            <div class="col-md-12 form-group">
+                                <label class="d-block font-weight-bold mb-2">Alokasi Bulan <span class="text-danger">*</span></label>
+                                <div class="d-flex flex-wrap">
+                                    <?php foreach ($bulan_list as $val => $nama) : ?>
+                                        <div class="custom-control custom-radio custom-control-inline mb-2 mr-3">
+                                            <input type="radio" id="edit_bulan<?= $val ?>" name="alokasi_bulan" class="custom-control-input" value="<?= $val ?>" required>
+                                            <label class="custom-control-label cursor-pointer" for="edit_bulan<?= $val ?>"><?= $nama ?></label>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+
+                            <!-- Form Alokasi Tahun -->
+                            <div class="col-md-4 form-group">
+                                <label>Alokasi Tahun <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="edit_alokasi_tahun" name="alokasi_tahun" required>
+                            </div>
+
+                            <!-- Form Alamat -->
+                            <div class="col-md-8 form-group">
+                                <label>Alamat (Opsional)</label>
+                                <input type="text" class="form-control" id="edit_alamat" name="alamat_pbp" placeholder="Nama Jalan / Kp.">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="font-weight-bold text-danger">Catatan Reject / Alasan <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="edit_catatan" name="catatan" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light justify-content-between">
+                    <button type="button" class="btn btn-secondary rounded-pill px-3" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-warning font-weight-bold rounded-pill px-4" id="btnUpdateReject">
+                        <i class="fas fa-save mr-1"></i> Simpan Perubahan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 <?php endif; ?>
 
 <script>
@@ -697,6 +754,71 @@
                         title: 'Server Error',
                         text: 'Gagal menghubungi server.'
                     });
+                }
+            });
+        });
+
+        // 🚀 1. BUKA MODAL EDIT & ISI DATA OTOMATIS
+        $(document).on('click', '.btn-edit-reject', function() {
+            let id = $(this).data('id');
+            let catatan = $(this).data('catatan');
+            let bulan = $(this).data('bulan');
+            let tahun = $(this).data('tahun');
+            let alamat = $(this).data('alamat');
+
+            // Isi nilai form
+            $('#edit_id').val(id);
+            $('#edit_catatan').val(catatan);
+            $('#edit_alokasi_tahun').val(tahun);
+            $('#edit_alamat').val(alamat);
+
+            // Centang radio button bulan sesuai data
+            $('input[name="alokasi_bulan"][id^="edit_bulan"]').prop('checked', false); // Reset semua
+            if (bulan) {
+                $('#edit_bulan' + parseInt(bulan)).prop('checked', true); // Centang yang cocok
+            }
+
+            // Tampilkan Modal
+            $('#modalEditReject').modal('show');
+        });
+
+        // 🚀 2. EKSEKUSI UPDATE DATA AJAX
+        $('#btnUpdateReject').click(function() {
+            if (!$('#edit_catatan').val()) {
+                Swal.fire('Peringatan', 'Catatan Reject tidak boleh kosong!', 'warning');
+                return;
+            }
+
+            let btn = $(this);
+            let originalText = btn.html();
+            btn.html('<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...').prop('disabled', true);
+
+            $.ajax({
+                url: '<?= base_url('banpang/updateRejectManual') ?>',
+                type: 'POST',
+                // Gabungkan serialize form dengan token CSRF
+                data: $('#formEditReject').serialize() + '&<?= csrf_token() ?>=<?= csrf_hash() ?>',
+                dataType: 'json',
+                success: function(res) {
+                    btn.html(originalText).prop('disabled', false);
+                    if (res.status === 'success') {
+                        $('#modalEditReject').modal('hide');
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: res.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        // Reload Tabel secara halus
+                        $('#tableReject').DataTable().ajax.reload(null, false);
+                    } else {
+                        Swal.fire('Gagal', res.message, 'error');
+                    }
+                },
+                error: function() {
+                    btn.html(originalText).prop('disabled', false);
+                    Swal.fire('Error Server', 'Gagal menghubungi server.', 'error');
                 }
             });
         });
