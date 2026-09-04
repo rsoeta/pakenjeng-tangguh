@@ -451,14 +451,14 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label text-danger">Bukan Makanan Rutin <u>Bulanan</u> (Rp)</label>
+                        <label class="form-label">Bukan Makanan Rutin per <u>Bulan</u> (Rp)</label>
                         <div class="input-group has-validation">
                             <input type="text" name="pengeluaran_non_makan_bulanan" id="pengeluaran_non_makan_bulanan" class="form-control rupiah border-danger" value="<?= esc($se['pengeluaran_non_makan_bulanan'] ?? '') ?>" <?= $readonly ?> placeholder="Listrik + Pulsa + Internet">
 
                             <!-- 🚀 TOMBOL KALKULATOR -->
                             <button class="btn btn-outline-info btn-calc" type="button" data-target="#pengeluaran_non_makan_bulanan" data-title="Kalkulator Rutin Bulanan" title="Hitung Akumulasi Bulanan" <?= $readonly ?>><i class="fas fa-calculator"></i></button>
 
-                            <button class="btn btn-outline-danger btn-copy-input" type="button" data-target="#pengeluaran_non_makan_bulanan" title="Salin Bukan Makanan Bulanan"><i class="fas fa-copy"></i></button>
+                            <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#pengeluaran_non_makan_bulanan" title="Salin Bukan Makanan Bulanan"><i class="fas fa-copy"></i></button>
                             <!-- 🚀 PESAN ERROR DINAMIS -->
                             <div id="feedback_non_makan" class="invalid-feedback small fw-bold"></div>
                         </div>

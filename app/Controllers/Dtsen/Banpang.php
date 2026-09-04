@@ -668,8 +668,11 @@ class Banpang extends BaseController
                 'foto_ktp_sinden'   => 'uploads/banpang_reject/' . $newKtpName,
                 'foto_pbp_sinden'   => 'uploads/banpang_reject/' . $newPbpName,
                 'is_redocumented'   => 1,
-                // 🚀 PERBAIKAN: Simpan ID Petugas, bukan namanya
-                'updated_by_pentri' => $idPentri
+                'updated_by_pentri' => $idPentri,
+                // 🚀 TAMBAHAN: Simpan status & identitas penerima aktual
+                'status_serah'      => $this->request->getPost('status_serah'),
+                'nik_pengganti'     => $this->request->getPost('nik_pengganti'),
+                'nama_pengganti'    => $this->request->getPost('nama_pengganti')
             ];
 
             $banpangRejectModel->update($idKpm, $dataUpdate);
@@ -936,9 +939,17 @@ class Banpang extends BaseController
                 ? "{$alamatUtama}<br><small class='text-muted font-weight-bold'><i class='fas fa-map-marker-alt mr-1'></i>RT {$row['rt']} / RW {$row['rw']}</small>"
                 : $alamatUtama;
 
+            // 🚀 SIAPKAN TEKS STATUS UNTUK DIKIRIM KE MODAL JS
+            $statusSerahJS = !empty($row['status_serah']) ? esc($row['status_serah']) : 'Normal (Diterima YBS)';
+            if ($row['status_serah'] !== 'Normal' && !empty($row['status_serah'])) {
+                $namaPenggantiJS = !empty($row['nama_pengganti']) ? esc($row['nama_pengganti']) : 'Perwakilan';
+                $statusSerahJS = esc($row['status_serah']) . ' - ' . $namaPenggantiJS;
+            }
+
             // Jika status 1 (menunggu) ATAU 2 (terverifikasi), kunci ke tombol 'Lihat'
             if ($row['is_redocumented'] == 1 || $row['is_redocumented'] == 2) {
-                $btnAksi = '<button class="btn btn-sm btn-outline-success font-weight-bold" onclick="lihatFoto(' . $row['id'] . ', \'' . $row['foto_ktp_sinden'] . '\', \'' . $row['foto_pbp_sinden'] . '\', ' . $row['is_redocumented'] . ')" title="Lihat Hasil"><i class="fas fa-image mr-1"></i> Lihat</button>';
+                // 🚀 PERBAIKAN: Perhatikan parameter ke-5 ( \'' . $statusSerahJS . '\' )
+                $btnAksi = '<button class="btn btn-sm btn-outline-success font-weight-bold" onclick="lihatFoto(' . $row['id'] . ', \'' . $row['foto_ktp_sinden'] . '\', \'' . $row['foto_pbp_sinden'] . '\', ' . $row['is_redocumented'] . ', \'' . $statusSerahJS . '\')" title="Lihat Hasil"><i class="fas fa-image mr-1"></i> Lihat</button>';
             } else {
                 // Tombol Kamera untuk PENTRI jika status masih 0
                 $urlKamera = base_url('banpang/reject/kamera/' . $row['id']);
@@ -983,12 +994,23 @@ class Banpang extends BaseController
                     ' <button class="btn btn-xs btn-light border-0 p-0 ml-1" onclick="copyToClipboard(\'' . esc($pbpAsli) . '\')" title="Salin No. PBP"><i class="fas fa-copy text-secondary"></i></button>';
             }
 
+            // 🚀 FORMAT NAMA KPM & PENGGANTI JIKA ADA
+            $namaKpm = '<span class="font-weight-bold text-dark">' . esc($row['nama']) . '</span>';
+            if (!empty($row['status_serah']) && $row['status_serah'] !== 'Normal') {
+                $namaPengganti = !empty($row['nama_pengganti']) ? esc($row['nama_pengganti']) : 'Perwakilan';
+                $namaKpm .= '<br><small class="text-danger font-weight-bold"><i class="fas fa-exchange-alt mr-1"></i> ' . esc($row['status_serah']) . ': ' . $namaPengganti . '</small>';
+            }
+
+            // 🚀 FORMAT CATATAN / NOTES
+            $catatanText = !empty($row['notes']) ? '<small class="text-muted">' . esc($row['notes']) . '</small>' : '-';
+
             $result[] = [
                 'no'           => $no++,
                 'no_pbp'       => $maskedPbp,
                 'nik'          => $maskedNik,
-                'nama'         => $row['nama'],
+                'nama'         => $namaKpm,
                 'wilayah'      => $wilayahText,
+                'catatan'      => $catatanText, // Kolom Baru
                 'status_badge' => $statusBadge,
                 'aksi'         => $aksiGabungan
             ];

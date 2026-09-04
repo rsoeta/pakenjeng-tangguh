@@ -81,10 +81,11 @@
                             <thead class="bg-light text-secondary text-center">
                                 <tr>
                                     <th width="5%">No</th>
-                                    <th width="15%">No. PBP</th>
-                                    <th width="15%">NIK</th>
-                                    <th>Nama KPM</th>
-                                    <th width="20%">Wilayah</th>
+                                    <th width="12%">No. PBP</th>
+                                    <th width="12%">NIK</th>
+                                    <th width="20%">KPM & Penerima</th>
+                                    <th width="18%">Wilayah</th>
+                                    <th width="13%">Catatan</th>
                                     <th width="10%">Status</th>
                                     <th width="10%">Aksi</th>
                                 </tr>
@@ -237,8 +238,8 @@
     // ========================================================
     // 📸 FUNGSI GLOBAL: HARUS DI LUAR $(document).ready
     // ========================================================
-    // 🚀 PERBAIKAN: Tambahkan parameter 'status' di akhir fungsi
-    function lihatFoto(id, fotoKtp, fotoPbp, status) {
+    // 🚀 PERBAIKAN: Tambahkan parameter 'statusSerahInfo' di akhir
+    function lihatFoto(id, fotoKtp, fotoPbp, status, statusSerahInfo) {
         let baseUrl = '<?= base_url() ?>';
         let urlKtp = baseUrl + '/' + fotoKtp;
         let urlPbp = baseUrl + '/' + fotoPbp;
@@ -248,6 +249,11 @@
         let filenamePbp = fotoPbp.split('/').pop();
 
         let htmlContent = `
+        <!-- 🚀 TAMBAHAN: Tampilan Status Serah Readonly di Paling Atas -->
+        <div class="alert p-2 text-center text-sm font-weight-bold mb-3 shadow-sm" style="border: 1px dashed #d39e00; background-color: #fff3cd; color: #856404;">
+            <i class="fas fa-users mr-1"></i> Status Penerima: <span class="text-danger">${statusSerahInfo || 'Normal'}</span>
+        </div>
+
         <div class="mt-2">
             <div class="text-left mb-2">
                 <span class="badge bg-info text-white"><i class="fas fa-id-card mr-1"></i> Foto KTP</span>
@@ -269,14 +275,13 @@
                 </a>
             </div>
         </div>
-    `;
+        `;
 
-        // 🚀 PERBAIKAN 3: Kondisional Tombol Validasi Berdasarkan Status Data
+        // 🚀 KONDISIONAL TOMBOL VALIDASI (Tetap Sama)
         if (roleId === 3) {
             htmlContent += `<hr class="mt-4 mb-3">`;
 
             if (status === 1) {
-                // Tampilkan tombol eksekusi hanya jika statusnya masih 1 (Menunggu Verifikasi)
                 htmlContent += `
                 <h6 class="font-weight-bold text-dark mb-3"><i class="fas fa-user-shield mr-1"></i> Aksi Admin (Validasi)</h6>
                 <div class="row">
@@ -291,14 +296,13 @@
                         </button>
                     </div>
                 </div>
-            `;
+                `;
             } else if (status === 2) {
-                // Jika statusnya sudah 2 (Diverifikasi), kunci tombol dan tampilkan alert hijau penanda aman
                 htmlContent += `
                 <div class="alert alert-success p-2 text-center text-sm mb-0 font-weight-bold shadow-sm border-0">
                     <i class="fas fa-check-double mr-1"></i> Data Ini Telah Diverifikasi & Valid SINDEN
                 </div>
-            `;
+                `;
             }
         }
 
@@ -484,12 +488,16 @@
                 },
                 {
                     data: 'nama',
-                    className: 'align-middle text-primary font-weight-bold'
+                    className: 'align-middle'
                 },
                 {
                     data: 'wilayah',
                     className: 'align-middle text-sm'
                 },
+                {
+                    data: 'catatan',
+                    className: 'align-middle text-sm'
+                }, // 🚀 SISIPKAN DI SINI
                 {
                     data: 'status_badge',
                     className: 'text-center align-middle',

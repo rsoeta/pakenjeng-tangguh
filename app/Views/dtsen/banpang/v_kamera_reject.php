@@ -41,6 +41,28 @@
             <form id="formDokumentasi" enctype="multipart/form-data">
                 <input type="hidden" name="id" value="<?= $kpm['id'] ?>">
 
+                <!-- 🚀 TAMBAHAN: STATUS PENERIMA BANTUAN -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white p-2 border-bottom-0 text-center">
+                        <span class="font-weight-bold text-dark"><i class="fas fa-users text-warning mr-1"></i> 3. Status Penerima</span>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="form-group mb-2">
+                            <select name="status_serah" id="statusSerah" class="form-control font-weight-bold" required>
+                                <option value="Normal" selected>✅ Normal (Diterima YBS)</option>
+                                <option value="Perwakilan 1 KK">👨‍👩‍👧 Perwakilan 1 KK</option>
+                                <option value="Perwakilan Beda KK">🤝 Perwakilan Beda KK</option>
+                                <option value="Pengganti">🔄 Pengganti (Meninggal/Pindah)</option>
+                            </select>
+                        </div>
+                        <div id="formPengganti" class="d-none mt-3 p-3 bg-light rounded border">
+                            <label class="small font-weight-bold text-danger">Identitas Penerima Kuasa / Pengganti:</label>
+                            <input type="number" name="nik_pengganti" class="form-control form-control-sm mb-2" placeholder="NIK Pengganti...">
+                            <input type="text" name="nama_pengganti" class="form-control form-control-sm" placeholder="Nama Lengkap Pengganti...">
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card shadow-sm mb-3">
                     <div class="card-header bg-white p-2 border-bottom-0 text-center">
                         <span class="font-weight-bold text-dark"><i class="fas fa-id-badge text-info mr-1"></i> 1. Foto KTP Asli</span>
@@ -70,6 +92,7 @@
                         </button>
                     </div>
                 </div>
+
 
                 <button type="submit" class="btn btn-primary btn-lg btn-block shadow font-weight-bold p-3 mb-4 rounded-pill" id="btnSimpan">
                     <i class="fas fa-cloud-upload-alt mr-2"></i> Simpan & Kirim
@@ -186,6 +209,20 @@
                     });
                 }
             });
+        });
+
+        // 4. Logika Buka/Tutup Form Pengganti
+        $('#statusSerah').change(function() {
+            if ($(this).val() !== 'Normal') {
+                $('#formPengganti').removeClass('d-none').hide().slideDown();
+                $('input[name="nama_pengganti"]').prop('required', true); // Nama wajib diisi jika diwakilkan
+            } else {
+                $('#formPengganti').slideUp(function() {
+                    $(this).addClass('d-none');
+                });
+                $('input[name="nama_pengganti"]').prop('required', false).val('');
+                $('input[name="nik_pengganti"]').val('');
+            }
         });
     });
 </script>
