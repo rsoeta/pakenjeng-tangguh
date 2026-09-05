@@ -132,7 +132,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title"><i class="fas fa-plus-circle mr-1"></i> Tambah KPM Reject (Manual)</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close text-white" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -224,7 +224,7 @@
                     </form>
                 </div>
                 <div class="modal-footer bg-light justify-content-between">
-                    <button type="button" class="btn btn-secondary rounded-pill px-3" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-secondary rounded-pill px-3" data-dismiss="modal" data-bs-dismiss="modal">Batal</button>
                     <button type="button" class="btn btn-primary rounded-pill px-4" id="btnSimpanReject">
                         <i class="fas fa-save mr-1"></i> Simpan ke Daftar Reject
                     </button>
@@ -239,7 +239,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-warning text-dark">
                     <h5 class="modal-title font-weight-bold"><i class="fas fa-edit mr-1"></i> Edit Catatan & Alokasi</h5>
-                    <button type="button" class="close text-dark" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close text-white" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -281,7 +281,7 @@
                     </form>
                 </div>
                 <div class="modal-footer bg-light justify-content-between">
-                    <button type="button" class="btn btn-secondary rounded-pill px-3" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-secondary rounded-pill px-3" data-dismiss="modal" data-bs-dismiss="modal">Batal</button>
                     <button type="button" class="btn btn-warning font-weight-bold rounded-pill px-4" id="btnUpdateReject">
                         <i class="fas fa-save mr-1"></i> Simpan Perubahan
                     </button>
@@ -505,6 +505,32 @@
                 }, 'json').fail(function() {
                     Swal.fire('Error Server!', 'Gagal menghubungi server.', 'error');
                 });
+            }
+        });
+    }
+
+    // 🚀 FUNGSI TAMPILKAN QR CODE (SWEETALERT2 MOBILE COMPACT)
+    function tampilkanQr(qrDataRaw) {
+        // Encode data JSON ke format URL-safe
+        let encodedData = encodeURIComponent(qrDataRaw);
+        // Kita gunakan API publik yang stabil dan cepat untuk generate gambar QR
+        let qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodedData;
+
+        Swal.fire({
+            title: '<h6 class="font-weight-bold mb-0 text-dark"><i class="fas fa-qrcode mr-1"></i> QR Code KPM</h6>',
+            html: `
+                <div class="text-center mt-2">
+                    <img src="${qrUrl}" alt="QR Code" class="img-fluid border p-2 rounded shadow-sm" style="max-width: 250px; background: white;">
+                    <div class="mt-3 text-left bg-light p-2 rounded border" style="font-size: 0.75rem; word-break: break-all;">
+                        <span class="font-weight-bold text-secondary d-block mb-1">Payload JSON:</span>
+                        <code>${qrDataRaw}</code>
+                    </div>
+                </div>
+            `,
+            showCloseButton: true,
+            showConfirmButton: false,
+            customClass: {
+                popup: 'swal2-sm' // 🚀 Sesuai instruksi: Perkecil ukuran SweetAlert2 untuk mobile
             }
         });
     }
@@ -821,6 +847,25 @@
                     Swal.fire('Error Server', 'Gagal menghubungi server.', 'error');
                 }
             });
+        });
+
+        // 🚀 JURUS SAPU BERSIH: Kosongkan form & Select2 setiap kali modal Tambah tertutup
+        $('#modalTambahReject').on('hidden.bs.modal', function() {
+            // 1. Reset semua input text, angka, dan radio button
+            $('#formTambahReject')[0].reset();
+
+            // 2. Kosongkan riwayat pencarian Select2 AJAX yang memberatkan memori
+            if ($.fn.select2) {
+                $('#selectCariKpm').empty().trigger('change');
+            }
+
+            // 3. Kembalikan input alokasi tahun ke tahun saat ini
+            $('#add_alokasi_tahun').val(new Date().getFullYear());
+        });
+
+        // 🚀 JURUS SAPU BERSIH 2: Kosongkan form Edit saat modal tertutup
+        $('#modalEditReject').on('hidden.bs.modal', function() {
+            $('#formEditReject')[0].reset();
         });
 
     });

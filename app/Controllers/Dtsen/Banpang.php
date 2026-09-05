@@ -963,7 +963,6 @@ class Banpang extends BaseController
                 // Ambil catatan (antisipasi jika Jenderal menggunakan field 'notes' atau 'catatan' di DB)
                 $catatanAktual = !empty($row['notes']) ? $row['notes'] : ($row['catatan'] ?? '');
 
-                // Tombol Edit (Menyimpan data langsung di dalam atribut HTML agar super cepat)
                 $btnEdit = '<button class="btn btn-sm btn-warning shadow-sm font-weight-bold ml-1 btn-edit-reject" ' .
                     'data-id="' . $row['id'] . '" ' .
                     'data-catatan="' . esc($catatanAktual) . '" ' .
@@ -975,10 +974,21 @@ class Banpang extends BaseController
                 $btnHapus = '<button class="btn btn-sm btn-danger shadow-sm font-weight-bold ml-1" onclick="hapusReject(' . $row['id'] . ')" title="Hapus KPM"><i class="fas fa-trash-alt"></i></button>';
             }
 
-            // 🚀 PERBAIKAN: Gabungkan tombol Aksi, Edit, & Hapus sejajar menggunakan d-flex
-            $aksiGabungan = '<div class="d-flex justify-content-center">' . $btnAksi . $btnEdit . $btnHapus . '</div>';
+            // 🚀 FITUR BARU: Racik Data JSON untuk QR Code
+            $qrData = json_encode([
+                'no_pbp'  => trim($row['no_pbp']), // Gunakan data asli, bukan yang sudah di-masking
+                'no_bast' => trim($row['no_bast']),
+                'nik'     => trim($row['nik']),
+                'nama'    => trim($row['nama'])
+            ]);
+            // Amankan JSON agar tidak merusak atribut HTML (Wajib!)
+            $qrDataEscaped = htmlspecialchars($qrData, ENT_QUOTES, 'UTF-8');
 
-            // ... (lanjutkan ke bagian masking NIK) ...
+            // Tombol Tampilkan QR
+            $btnQr = '<button class="btn btn-sm btn-dark shadow-sm font-weight-bold ml-1" onclick="tampilkanQr(\'' . $qrDataEscaped . '\')" title="Tampilkan QR Code"><i class="fas fa-qrcode"></i></button>';
+
+            // 🚀 PERBAIKAN: Gabungkan tombol Aksi, QR, Edit, & Hapus sejajar
+            $aksiGabungan = '<div class="d-flex justify-content-center">' . $btnAksi . $btnQr . $btnEdit . $btnHapus . '</div>';
 
             // 🚀 PERBAIKAN: Masking Inline (Membuka Teks Saat Di-hover atau Diklik)
             $nikAsli = trim($row['nik']);
