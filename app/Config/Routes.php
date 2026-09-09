@@ -590,12 +590,14 @@ $routes->group('pbi', ['filter' => ['authfilterdtks', 'globalview', 'menufilterd
 
 		$routes->get('downloadTemplate', 'Dtks\Pbi\Reaktivasi::downloadTemplate');
 
+
 		$routes->get('summary', 'Dtks\Pbi\Reaktivasi::summary');
 		$routes->get('riwayat', 'Dtks\Pbi\Reaktivasi::riwayat');
 		$routes->get('detail/(:num)', 'Dtks\Pbi\Reaktivasi::detail/$1');
 		$routes->get('dropdown-status', 'Dtks\Pbi\Reaktivasi::dropdownStatus');
 
 		$routes->post('ajukan', 'Dtks\Pbi\Reaktivasi::ajukan');
+		$routes->post('tolakDanHapusFile/(:num)', 'Dtks\Pbi\Reaktivasi::tolakDanHapusFile/$1');
 		$routes->post('store', 'Dtks\Pbi\Reaktivasi::store');
 		$routes->post('upload-excel', 'Dtks\Pbi\Reaktivasi::uploadExcel');
 
