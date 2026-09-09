@@ -151,6 +151,22 @@ class Banpang extends BaseController
 
             $waktuScan = date('d/m/Y H:i:s', strtotime($row['waktu_scan']));
 
+            // 🚀 FITUR BARU: Racik Data JSON untuk QR Code
+            $qrData = json_encode([
+                'no_pbp'  => trim($row['no_pbp']), // Gunakan data asli
+                'no_bast' => trim($row['no_bast']),
+                'nik'     => trim($nikLengkap),    // Gunakan data asli (belum dimasker)
+                'nama'    => trim($row['nama_kpm'])
+            ]);
+            // Amankan JSON agar tidak merusak atribut HTML (Wajib!)
+            $qrDataEscaped = htmlspecialchars($qrData, ENT_QUOTES, 'UTF-8');
+
+            // Tombol Detail (Bawaan)
+            $btnDetail = '<button class="btn btn-xs btn-outline-primary" title="Detail"><i class="fas fa-search"></i></button>';
+
+            // Tombol Tampilkan QR
+            $btnQr = '<button class="btn btn-xs btn-dark shadow-sm ml-1" onclick="tampilkanQr(\'' . $qrDataEscaped . '\')" title="Tampilkan QR Code"><i class="fas fa-qrcode"></i></button>';
+
             $data[] = [
                 $no++,
                 esc($row['no_pbp']),
@@ -158,7 +174,8 @@ class Banpang extends BaseController
                 $alamat,
                 $waktuScan,
                 $status,
-                '<button class="btn btn-xs btn-outline-primary" title="Detail"><i class="fas fa-search"></i></button>'
+                // 🚀 Gabungkan tombol Detail dan QR secara sejajar
+                '<div class="d-flex justify-content-center align-items-center">' . $btnDetail . $btnQr . '</div>'
             ];
         }
 

@@ -149,6 +149,50 @@
         });
 
     });
+
+    // 🚀 FUNGSI TAMPILKAN QR CODE (SWEETALERT2 MOBILE COMPACT & HUMAN-READABLE)
+    function tampilkanQr(qrDataRaw) {
+        // Encode data JSON ke format URL-safe untuk API
+        let encodedData = encodeURIComponent(qrDataRaw);
+        let qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodedData;
+
+        // 🚀 BONGKAR JSON UNTUK TAMPILAN MANUSIAWI
+        let dataObj = JSON.parse(qrDataRaw);
+
+        Swal.fire({
+            title: '<h6 class="font-weight-bold mb-0 text-dark"><i class="fas fa-qrcode mr-1"></i> Identitas QR KPM</h6>',
+            html: `
+                <div class="text-center mt-2">
+                    <img src="${qrUrl}" alt="QR Code" class="img-fluid border p-2 rounded shadow-sm mb-3" style="max-width: 200px; background: white;">
+                    
+                    <!-- 🚀 TAMPILAN TABEL INFO HUMAN-READABLE -->
+                    <div class="text-left bg-light p-2 rounded border" style="font-size: 0.85rem;">
+                        <div class="d-flex justify-content-between mb-1 border-bottom pb-1">
+                            <span class="text-muted">Nama</span>
+                            <span class="font-weight-bold text-dark text-right">${dataObj.nama}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1 border-bottom pb-1">
+                            <span class="text-muted">NIK</span>
+                            <span class="font-weight-bold text-dark text-right">${dataObj.nik}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1 border-bottom pb-1">
+                            <span class="text-muted">No. PBP</span>
+                            <span class="font-weight-bold text-primary text-right">${dataObj.no_pbp}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Tahap/BAST</span>
+                            <span class="font-weight-bold text-success text-right">${dataObj.no_bast}</span>
+                        </div>
+                    </div>
+                </div>
+            `,
+            showCloseButton: true,
+            showConfirmButton: false,
+            customClass: {
+                popup: 'swal2-sm' // Ukuran mini khas mobile
+            }
+        });
+    }
 </script>
 
 <?= $this->endSection() ?>
