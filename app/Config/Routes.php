@@ -588,6 +588,8 @@ $routes->group('pbi', ['filter' => ['authfilterdtks', 'globalview', 'menufilterd
 		$routes->get('/', 'Dtks\Pbi\Reaktivasi::index');
 		$routes->match(['GET', 'POST'], 'tabel', 'Dtks\Pbi\Reaktivasi::tabel_data');
 
+		$routes->get('downloadTemplate', 'Dtks\Pbi\Reaktivasi::downloadTemplate');
+
 		$routes->get('summary', 'Dtks\Pbi\Reaktivasi::summary');
 		$routes->get('riwayat', 'Dtks\Pbi\Reaktivasi::riwayat');
 		$routes->get('detail/(:num)', 'Dtks\Pbi\Reaktivasi::detail/$1');

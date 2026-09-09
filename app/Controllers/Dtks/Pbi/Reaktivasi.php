@@ -864,46 +864,6 @@ class Reaktivasi extends BaseController
         ]);
     }
 
-    // public function kirimSiks($id)
-    // {
-    //     if (session('role_id') !== self::ROLE_DESA) {
-    //         return $this->response->setJSON([
-    //             'success' => false,
-    //             'message' => 'Unauthorized',
-    //         ]);
-    //     }
-
-    //     $record = $this->model->find($id);
-
-    //     if (! $record) {
-    //         return $this->response->setJSON(['success' => false, 'message' => 'Data tidak ditemukan']);
-    //     }
-
-    //     if ((int) $record['desa_id'] !== (int) session('desa_id')) {
-    //         return $this->response->setJSON([
-    //             'success' => false,
-    //             'message' => 'Unauthorized',
-    //         ]);
-    //     }
-
-    //     if ((int) $record['status_pengajuan'] !== PbiReaktivasiModel::STATUS_DISETUJUI) {
-    //         return $this->response->setJSON([
-    //             'success' => false,
-    //             'message' => 'Status tidak valid untuk dikirim ke SIKS.',
-    //         ]);
-    //     }
-
-    //     $this->model->update($id, [
-    //         'status_pengajuan' => PbiReaktivasiModel::STATUS_DIAJUKAN_SIKS,
-    //         'tanggal_kirim_siks' => date('Y-m-d H:i:s'),
-    //     ]);
-
-    //     return $this->response->setJSON([
-    //         'success' => true,
-    //         'message' => 'Data berhasil dikirim ke SIKS.',
-    //     ]);
-    // }
-
     public function uploadExcel()
     {
         if (
@@ -1229,5 +1189,55 @@ class Reaktivasi extends BaseController
             'success' => true,
             'message' => 'Berhasil dikirim ke SIKS'
         ]);
+    }
+
+    // ========================================================
+    // 📥 FITUR: DOWNLOAD TEMPLATE EXCEL VERIVALI
+    // ========================================================
+    public function downloadTemplate()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Menyusun Header sesuai urutan index row di fungsi uploadExcel
+        $headers = [
+            'A1' => 'NO',               // index 0 (Abaikan/Bebas)
+            'B1' => 'NAMA',             // index 1
+            'C1' => 'NOKA JKN',         // index 2
+            'D1' => 'NIK',              // index 3
+            'E1' => 'NO KK',            // index 4
+            'F1' => 'DESIL NASIONAL',   // index 5
+            'G1' => 'KEPESERTAAN',      // index 6
+            'H1' => 'STATUS',           // index 7
+            'I1' => 'KODE DESA',        // index 8
+            'J1' => 'RW',               // index 9
+            'K1' => 'RT',               // index 10
+            'L1' => 'ALAMAT',           // index 11
+        ];
+
+        foreach ($headers as $cell => $val) {
+            $sheet->setCellValue($cell, $val);
+        }
+
+        // Percantik tampilan header (Bold & Auto-size)
+        $sheet->getStyle('A1:L1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:L1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('FFEFEFEF'); // Warna latar abu-abu terang
+
+        foreach (range('A', 'L') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $filename = 'Template_Upload_Verivali_PBI.xlsx';
+
+        // Buffer output untuk CI4 agar tidak bentrok dengan headers bawaan PHP
+        ob_start();
+        $writer->save('php://output');
+        $excelData = ob_get_contents();
+        ob_end_clean();
+
+        return $this->response->download($filename, $excelData)
+            ->setContentType('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     }
 }

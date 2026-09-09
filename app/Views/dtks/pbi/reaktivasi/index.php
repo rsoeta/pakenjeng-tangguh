@@ -121,7 +121,13 @@
                                 <!-- Upload Excel -->
                                 <?php if (session('role_id') < 4) : ?>
                                     <div class="col-md-4 col-12">
-                                        <label class="form-label small mb-1">Upload Data Verivali</label>
+                                        <div class="d-flex justify-content-between align-items-end mb-1">
+                                            <label class="form-label small mb-0">Upload Data Verivali</label>
+                                            <!-- 🚀 TOMBOL DOWNLOAD TEMPLATE -->
+                                            <a href="<?= base_url('pbi/reaktivasi/downloadTemplate') ?>" class="text-success small text-decoration-none fw-bold" title="Download Format Excel">
+                                                <i class="fas fa-file-excel me-1"></i> Template
+                                            </a>
+                                        </div>
                                         <form id="formUploadExcel" enctype="multipart/form-data" class="d-flex gap-2">
                                             <input type="file"
                                                 name="file_excel"
