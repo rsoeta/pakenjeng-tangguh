@@ -1240,4 +1240,55 @@ class Reaktivasi extends BaseController
         return $this->response->download($filename, $excelData)
             ->setContentType('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     }
+
+    // ========================================================
+    // 🗑️ FITUR: TOLAK PENGAJUAN & HAPUS BERKAS INVALID/ISENG
+    // ========================================================
+    public function tolakDanHapusFile($id)
+    {
+        if ((int) session('role_id') !== self::ROLE_DESA) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ]);
+        }
+
+        $data = $this->model->find($id);
+
+        if (!$data) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ]);
+        }
+
+        // Bisa ditolak saat status masih "Diajukan" (1) atau "Diverifikasi" (2)
+        if (!in_array((int)$data['status_pengajuan'], [1, 2])) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Status tidak valid untuk ditolak.'
+            ]);
+        }
+
+        // 1. Hapus file fisik dari direktori server
+        if (!empty($data['surat_faskes'])) {
+            $filePath = FCPATH . 'uploads/pbi/' . $data['surat_faskes'];
+            if (is_file($filePath)) {
+                unlink($filePath);
+            }
+        }
+
+        // 2. Update status ke Ditolak (4) dan kosongkan nama file di DB
+        $this->model->update($id, [
+            'status_pengajuan' => 4, // 4 = STATUS_DITOLAK
+            'tanggal_ditolak'  => date('Y-m-d H:i:s'),
+            'verified_by'      => session('id'),
+            'surat_faskes'     => null // Kosongkan karena file sudah dimusnahkan
+        ]);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Pengajuan ditolak dan lampiran iseng berhasil dihapus permanen.'
+        ]);
+    }
 }

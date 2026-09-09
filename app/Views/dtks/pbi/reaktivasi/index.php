@@ -756,12 +756,17 @@
                         <iframe src="/uploads/pbi/${res.surat_faskes}" 
                                 style="width:100%;height:400px;border-radius:6px;"></iframe>
 
-                        <div class="mt-3">
+                        <div class="mt-3 d-flex align-items-center">
                             <a href="/uploads/pbi/${res.surat_faskes}" 
                             target="_blank" 
-                            class="btn btn-primary btn-sm">
+                            class="btn btn-primary btn-sm ${!res.surat_faskes ? 'd-none' : ''}">
                                 <i class="bi bi-download me-1"></i> Download
                             </a>
+                            
+                            <!-- 🚀 TOMBOL TOLAK & HAPUS BERKAS -->
+                            <button type="button" class="btn btn-danger btn-sm ms-2 d-none" id="btnTolakHapus" data-id="${res.id}">
+                                <i class="fas fa-trash-alt me-1"></i> Tolak & Hapus Berkas Invalid
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -777,6 +782,11 @@
                 $('#btnSetujui').addClass('d-none');
                 $('#btnTolak').addClass('d-none');
                 $('#btnKirimSiks').addClass('d-none');
+
+                if (status == 1 || status == 2) {
+                    // Munculkan tombol sapu bersih jika masih dalam tahap awal/verifikasi
+                    $('#btnTolakHapus').removeClass('d-none');
+                }
 
                 if (status == 2) {
                     // Diverifikasi → bisa setujui/tolak
@@ -800,6 +810,52 @@
             });
         });
 
+        // ==========================
+        // AKSI: TOLAK & HAPUS GAMBAR
+        // ==========================
+        $(document).on('click', '#btnTolakHapus', function() {
+            const id = $(this).data('id');
+
+            Swal.fire({
+                title: 'Tolak & Hapus Berkas?',
+                text: "Pengajuan akan otomatis DITOLAK dan file gambar yang diunggah akan DIHAPUS PERMANEN dari server!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-trash-alt me-1"></i> Ya, Tolak & Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Memusnahkan Berkas...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    $.ajax({
+                        url: '/pbi/reaktivasi/tolakDanHapusFile/' + id,
+                        type: 'POST',
+                        dataType: 'json',
+                        // Tambahkan baris data: { ... } di bawah jika aplikasi Jenderal mewajibkan token CSRF
+                        success: function(res) {
+                            if (res.success) {
+                                Swal.fire('Berhasil!', res.message, 'success');
+                                $('#modalVerifikasi').modal('hide');
+                                // Reload Datatables (Sesuaikan dengan nama variabel tabel Jenderal)
+                                if (typeof table !== 'undefined') table.ajax.reload(null, false);
+                                else location.reload();
+                            } else {
+                                Swal.fire('Gagal!', res.message, 'error');
+                            }
+                        },
+                        error: function() {
+                            Swal.fire('Error Server!', 'Gagal menghubungi server.', 'error');
+                        }
+                    });
+                }
+            });
+        });
 
         /* ==========================
            SETUJUI
