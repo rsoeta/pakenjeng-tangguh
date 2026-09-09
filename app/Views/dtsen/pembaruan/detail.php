@@ -124,6 +124,11 @@ $roleId = session()->get('role_id') ?? 0;
                             </span>
                         <?php endif; ?>
 
+                        <!-- 🚀 TOMBOL GRAFIK DESIL PINDAH KE HEADER -->
+                        <button type="button" class="btn btn-primary btn-sm shadow-sm px-3 py-1 fw-bold" data-bs-toggle="modal" data-bs-target="#modalChartDesil">
+                            <i class="fas fa-chart-line me-1"></i> Grafik Desil
+                        </button>
+
                         <?php if ($user['role_id'] <= 3): ?>
                             <button id="btnApply"
                                 class="btn btn-outline-dark btn-sm shadow-sm px-3 py-1"

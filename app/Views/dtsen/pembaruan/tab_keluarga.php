@@ -222,25 +222,30 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
     </div>
 
     <!-- ============================= -->
-    <!-- 📊 CARD GRAFIK RIWAYAT DESIL -->
+    <!-- 📊 MODAL UTAMA: GRAFIK DESIL -->
     <!-- ============================= -->
-    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
-        <div>
-            <h5 class="fw-bold mb-0">Grafik Riwayat Desil Keluarga</h5>
-            <small class="text-muted">Monitoring perubahan kesejahteraan per triwulan</small>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <?php if ($editable && ($user['role_id'] ?? 99) <= 3): ?>
-                <div class="text-end mb-2">
-                    <button class="btn btn-outline-dark btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalHistoricalDesil"><i class="fas fa-history me-1"></i> Tambah Snapshot</button>
-                    <button class="btn btn-outline-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalInputDesil" data-id="<?= $id_kk ?>" data-nokk="<?= esc($kkData['no_kk'] ?? '') ?>" data-nama="<?= esc($kkData['kepala_keluarga'] ?? '') ?>" data-alamat="<?= esc($kkData['alamat'] ?? '') ?>" data-desil="<?= esc($kategori_desil ?? '') ?>"><i class="fas fa-hand-holding-heart me-1"></i> Update Desil</button>
-                    <button type="button" id="btnSyncDesil" class="btn btn-outline-primary btn-sm rounded-pill px-3"><i class="fas fa-sync-alt me-1"></i> Sync</button>
+    <div class="modal fade" id="modalChartDesil" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered"> <!-- Pakai modal-xl agar grafiknya luas & mantap -->
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-chart-line me-2"></i> Grafik Riwayat Desil Keluarga</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-            <?php endif; ?>
+                <div class="modal-body p-4">
+                    <div class="d-flex justify-content-end align-items-center gap-2 mb-3 pb-3 border-bottom">
+                        <?php if ($editable && ($user['role_id'] ?? 99) <= 3): ?>
+                            <button class="btn btn-outline-dark btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalHistoricalDesil"><i class="fas fa-history me-1"></i> Tambah Snapshot</button>
+                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalInputDesil" data-id="<?= $id_kk ?>" data-nokk="<?= esc($kkData['no_kk'] ?? '') ?>" data-nama="<?= esc($kkData['kepala_keluarga'] ?? '') ?>" data-alamat="<?= esc($kkData['alamat'] ?? '') ?>" data-desil="<?= esc($kategori_desil ?? '') ?>"><i class="fas fa-hand-holding-heart me-1"></i> Update Desil</button>
+                            <button type="button" id="btnSyncDesil" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold"><i class="fas fa-sync-alt me-1"></i> Sync</button>
+                        <?php endif; ?>
+                    </div>
+                    <!-- Wadah Grafik -->
+                    <div id="desilChart" style="min-height:350px;"></div>
+                    <div id="desilTrendInfo" class="mt-3 small text-muted"></div>
+                </div>
+            </div>
         </div>
     </div>
-    <div id="desilChart" style="min-height:320px;"></div>
-    <div id="desilTrendInfo" class="mt-3 small text-muted"></div>
 </div>
 
 <div class="modal fade" id="modalHistoricalDesil" tabindex="-1">
@@ -651,23 +656,35 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
     }
 
     // Panggil langsung tanpa tunggu tab event
-    document.addEventListener("DOMContentLoaded", function() {
-        setTimeout(loadDesilChart, 300);
-    });
+    // document.addEventListener("DOMContentLoaded", function() {
+    //     setTimeout(loadDesilChart, 300);
+    // });
 
     // Render saat tab keluarga aktif
-    document.addEventListener('shown.bs.tab', function(event) {
-        const targetId = event.target.getAttribute('data-bs-target');
-        if (targetId === '#tabKeluarga') {
-            loadDesilChart();
-        }
-    });
+    // document.addEventListener('shown.bs.tab', function(event) {
+    //     const targetId = event.target.getAttribute('data-bs-target');
+    //     if (targetId === '#tabKeluarga') {
+    //         loadDesilChart();
+    //     }
+    // });
 
     // Jika tab keluarga sudah aktif saat load
-    document.addEventListener("DOMContentLoaded", function() {
-        const activeTab = document.querySelector('.nav-link.active');
-        if (activeTab && activeTab.getAttribute('data-bs-target') === '#tabKeluarga') {
-            loadDesilChart();
+    // document.addEventListener("DOMContentLoaded", function() {
+    //     const activeTab = document.querySelector('.nav-link.active');
+    //     if (activeTab && activeTab.getAttribute('data-bs-target') === '#tabKeluarga') {
+    //         loadDesilChart();
+    //     }
+    // });
+
+    // 🚀 Render grafik HANYA saat Modal Grafik Desil terbuka (Mencegah bug width 0px ApexCharts)
+    document.getElementById('modalChartDesil').addEventListener('shown.bs.modal', function() {
+        loadDesilChart();
+    });
+
+    // 🚀 Sabuk Pengaman: Perbaiki scrolling halaman jika modal bertumpuk ditutup
+    document.addEventListener('hidden.bs.modal', function(event) {
+        if (document.querySelectorAll('.modal.show').length > 0) {
+            document.body.classList.add('modal-open');
         }
     });
 

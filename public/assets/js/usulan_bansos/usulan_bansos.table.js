@@ -219,30 +219,36 @@ $(document).ready(function () {
                 },
 
                 {
-                    data: 'nik',
-                    title: 'NIK',
-                    // 🚀 TAMBAHKAN type dan row DI SINI
-                    render: function(nik, type, row) { 
-                        if (!nik) return '-';
+                    data: null,
+                    title: 'NIK / No. KK',
+                    className: 'align-middle',
+                    render: function(data, type, row) { 
+                        let nik = row.nik ? row.nik : '-';
+                        let noKk = row.no_kk ? row.no_kk : '-';
 
                         // 🚀 KUNCI SAKTI: Kembalikan NIK utuh untuk filter dan sort
                         if (type === 'filter' || type === 'sort') {
-                            return nik;
+                            return nik + ' ' + noKk;
                         }
 
                         // 🚀 Panggil fungsi penyensoran untuk tampilan
                         let maskedNik = maskNumberJS(nik);
+                        let maskedKk = maskNumberJS(noKk);
                         
                         return `
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <span class="me-2 nik-text">${maskedNik}</span>
-                            
-                            <button class="btn btn-outline-primary btn-sm btnCopyNIK" 
-                                    data-nik="${nik}">
-                                <i class="fas fa-copy"></i>
-                            </button>
+                        <div class="d-flex flex-column w-100" style="font-size: 0.9rem;">
+                            <!-- Baris NIK -->
+                            <div class="d-flex justify-content-between align-items-center mb-1 border-bottom pb-1">
+                                <div><small class="text-muted mr-1">NIK:</small><span class="font-weight-bold nik-text">${maskedNik}</span></div>
+                                <button class="btn btn-outline-primary btn-sm btnCopyNIK p-0 px-1" data-nik="${nik}" title="Salin NIK"><i class="fas fa-copy" style="font-size: 0.75rem;"></i></button>
+                            </div>
+                            <!-- Baris No. KK -->
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div><small class="text-muted mr-1">KK:</small><span class="font-weight-bold text-info nik-text">${maskedKk}</span></div>
+                                <button class="btn btn-outline-info btn-sm btnCopyNIK p-0 px-1" data-nik="${noKk}" title="Salin No. KK"><i class="fas fa-copy" style="font-size: 0.75rem;"></i></button>
+                            </div>
                         </div>
-                    `;
+                        `;
                     }
                 },
 
@@ -349,30 +355,36 @@ $(document).ready(function () {
                 },
 
                {
-                    data: 'nik',
-                    title: 'NIK',
-                    // 🚀 TAMBAHKAN type dan row DI SINI
-                    render: function(nik, type, row) { 
-                        if (!nik) return '-';
+                    data: null,
+                    title: 'NIK / No. KK',
+                    className: 'align-middle',
+                    render: function(data, type, row) { 
+                        let nik = row.nik ? row.nik : '-';
+                        let noKk = row.no_kk ? row.no_kk : '-';
 
                         // 🚀 KUNCI SAKTI: Kembalikan NIK utuh untuk filter dan sort
                         if (type === 'filter' || type === 'sort') {
-                            return nik;
+                            return nik + ' ' + noKk;
                         }
 
                         // 🚀 Panggil fungsi penyensoran untuk tampilan
                         let maskedNik = maskNumberJS(nik);
+                        let maskedKk = maskNumberJS(noKk);
                         
                         return `
-                        <div class="d-flex justify-content-between align-items-center w-100">
-                            <span class="me-2 nik-text">${maskedNik}</span>
-                            
-                            <button class="btn btn-outline-primary btn-sm btnCopyNIK" 
-                                    data-nik="${nik}">
-                                <i class="fas fa-copy"></i>
-                            </button>
+                        <div class="d-flex flex-column w-100" style="font-size: 0.9rem;">
+                            <!-- Baris NIK -->
+                            <div class="d-flex justify-content-between align-items-center mb-1 border-bottom pb-1">
+                                <div><small class="text-muted mr-1">NIK:</small><span class="font-weight-bold nik-text">${maskedNik}</span></div>
+                                <button class="btn btn-outline-primary btn-sm btnCopyNIK p-0 px-1" data-nik="${nik}" title="Salin NIK"><i class="fas fa-copy" style="font-size: 0.75rem;"></i></button>
+                            </div>
+                            <!-- Baris No. KK -->
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div><small class="text-muted mr-1">KK:</small><span class="font-weight-bold text-info nik-text">${maskedKk}</span></div>
+                                <button class="btn btn-outline-info btn-sm btnCopyNIK p-0 px-1" data-nik="${noKk}" title="Salin No. KK"><i class="fas fa-copy" style="font-size: 0.75rem;"></i></button>
+                            </div>
                         </div>
-                    `;
+                        `;
                     }
                 },
 

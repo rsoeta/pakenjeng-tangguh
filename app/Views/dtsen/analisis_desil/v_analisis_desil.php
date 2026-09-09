@@ -142,16 +142,18 @@
                 <div class="card-body p-3">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle w-100" id="tableDesil">
-                            <thead>
+                            <thead class="bg-light text-center">
                                 <tr>
                                     <th>No</th>
                                     <th>Kepala Keluarga</th>
-                                    <th>Alamat</th>
-                                    <th class="text-center">Awal</th>
-                                    <th class="text-center">Akhir</th>
-                                    <th>Status Desil</th>
+                                    <th>Wilayah</th>
+                                    <th>Desil Awal</th>
+                                    <th>Desil Akhir</th>
+                                    <th>Status</th>
                                     <th>Bansos Aktif</th>
-                                    <th>Prediksi Sistem</th>
+                                    <th>Prediksi</th>
+                                    <!-- 🚀 TAMBAHKAN KOLOM AKSI DI SINI -->
+                                    <th width="10%">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
