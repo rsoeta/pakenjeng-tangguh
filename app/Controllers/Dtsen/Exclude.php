@@ -93,6 +93,7 @@ class Exclude extends BaseController
                 m.no_rek,
                 m.bukti_penutupan,
                 a.nama as nama_master,
+                k.id_kk,
                 rt.rt,
                 rt.rw
             ")
@@ -307,6 +308,37 @@ class Exclude extends BaseController
                         $btnAksi .= '<a href="' . base_url('uploads/bukti_judol/' . trim($fb)) . '" target="_blank" class="btn btn-sm btn-success shadow-sm px-2" title="Lihat Foto Bukti ' . ($idx + 1) . '"><i class="fas fa-file-image"></i></a>';
                     }
                 }
+
+                // ===============================================================
+                // 🚀 FITUR BARU: TOMBOL LIHAT FOTO RUMAH DEPAN DARI USULAN (JSON)
+                // ===============================================================
+                if (!empty($row['id_kk'])) {
+                    $usulan = $db->table('dtsen_usulan')
+                        ->select('payload')
+                        ->where('dtsen_kk_id', $row['id_kk'])
+                        ->whereIn('status', ['draft', 'submitted', 'verified', 'diverifikasi'])
+                        ->orderBy('id', 'DESC')
+                        ->get()
+                        ->getRowArray();
+
+                    if (!empty($usulan['payload'])) {
+                        $payloadUsulan = json_decode($usulan['payload'], true);
+
+                        // 🚀 PERBAIKAN: Ambil langsung dari key ['foto']['depan'] sesuai standar PembaruanKeluarga
+                        $pathFoto = $payloadUsulan['foto']['depan'] ?? null;
+
+                        if (!empty($pathFoto)) {
+                            $urlFoto = base_url($pathFoto);
+
+                            // 🚀 Atur nama file unduhan agar rapi saat masuk ke komputer operator
+                            $namaFileUnduhan = 'Rumah_Depan_' . $row['nik'] . '.jpg';
+
+                            // 🚀 Ganti target="_blank" menjadi atribut download
+                            $btnAksi .= '<a href="' . $urlFoto . '" download="' . $namaFileUnduhan . '" class="btn btn-sm btn-info shadow-sm px-2 ms-1" title="Unduh Foto Rumah Tampak Depan"><i class="fas fa-home"></i></a>';
+                        }
+                    }
+                }
+                // ===============================================================
 
                 // 4. 🚀 TOMBOL HAPUS (Eksklusif Khusus Role < 4 / Operator ke atas)
                 if ($roleId < 4) {
