@@ -66,16 +66,20 @@
                         <div class="col-6 col-md-3">
                             <label class="small fw-bold">Bandingkan Dari <span class="text-danger">*</span></label>
                             <select id="periode_awal" class="form-control select2">
-                                <?php foreach ($periodes as $p): ?>
-                                    <option value="<?= $p['periode_label'] ?>"><?= $p['periode_label'] ?></option>
+                                <?php foreach ($periodes as $key => $p): ?>
+                                    <!-- 🚀 Pilih index 1 (periode sebelumnya). Jika data cuma 1, fallback ke index 0 -->
+                                    <?php $isSelectedAwal = ($key == 1 || (count($periodes) == 1 && $key == 0)) ? 'selected' : ''; ?>
+                                    <option value="<?= $p['periode_label'] ?>" <?= $isSelectedAwal ?>><?= $p['periode_label'] ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
+
                         <div class="col-6 col-md-3">
                             <label class="small fw-bold">Bandingkan Ke <span class="text-danger">*</span></label>
                             <select id="periode_akhir" class="form-control select2">
-                                <?php foreach ($periodes as $p): ?>
-                                    <option value="<?= $p['periode_label'] ?>"><?= $p['periode_label'] ?></option>
+                                <?php foreach ($periodes as $key => $p): ?>
+                                    <!-- 🚀 Default selalu pilih index 0 (periode paling baru) -->
+                                    <option value="<?= $p['periode_label'] ?>" <?= ($key == 0) ? 'selected' : '' ?>><?= $p['periode_label'] ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -177,9 +181,16 @@
             "processing": true,
             "serverSide": false,
             "responsive": true,
+
+            // 🚀 TAMBAHKAN BARIS INI UNTUK DEFAULT SORTING KE KOLOM PREDIKSI (Indeks 7)
+            "order": [
+                [7, "asc"]
+            ],
+
             // Menambahkan 'l' ke dalam kolom agar bersanding dengan tombol Export dan Search
             "dom": '<"row align-items-center"<"col-md-4"l><"col-md-4 text-center"B><"col-md-4"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
             "buttons": [{
+                // ... (konfigurasi export excel tetap sama) ...
                 extend: 'excelHtml5',
                 text: '<i class="fas fa-file-excel"></i> Export Excel',
                 className: 'btn btn-success btn-sm mb-3 shadow-sm text-white',
@@ -242,9 +253,27 @@
                 }
             },
             "columnDefs": [{
-                "className": "text-center",
-                "targets": [0, 3, 4]
-            }]
+                    "searchable": false,
+                    "orderable": false,
+                    "targets": 0
+                },
+                {
+                    "className": "text-center",
+                    "targets": [0, 3, 4]
+                }
+            ]
+        });
+
+        // ... (penutup dari var table = $('#tableDesil').DataTable({...}); )
+
+        // 🚀 KUNCI NOMOR URUT AGAR TETAP BERURUTAN DINAMIS
+        table.on('order.dt search.dt', function() {
+            table.column(0, {
+                search: 'applied',
+                order: 'applied'
+            }).nodes().each(function(cell, i) {
+                cell.innerHTML = i + 1;
+            });
         });
 
         // 🚀 Trigger Auto-Reload saat Dropdown Berubah

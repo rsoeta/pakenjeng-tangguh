@@ -278,9 +278,13 @@ class Exclude extends BaseController
             if ($roleId <= 5) {
                 $btnAksi = '<div class="d-flex gap-1 justify-content-center">';
 
+                // 🚀 PERBAIKAN FINAL: addslashes() dulu (untuk JS), baru htmlspecialchars() (untuk atribut HTML)
+                // Kita gunakan $namaFinal agar datanya sinkron dengan tampilan tabel
+                $namaAman = htmlspecialchars(addslashes($namaFinal ?? ''), ENT_QUOTES, 'UTF-8');
+
                 // 1. Tombol PROSES (Gambar Gear/Setting)
                 $btnAksi .= '
-                    <button type="button" class="btn btn-sm btn-outline-warning shadow-sm px-2" onclick="cetakSuratJudol(\'' . $row['id_exclude'] . '\', \'' . $row['nik'] . '\', \'' . esc($row['nama']) . '\')" title="Proses Surat & Upload Bukti">
+                    <button type="button" class="btn btn-sm btn-outline-warning shadow-sm px-2" onclick="cetakSuratJudol(\'' . $row['id_exclude'] . '\', \'' . $row['nik'] . '\', \'' . $namaAman . '\')" title="Proses Surat & Upload Bukti">
                         <i class="fas fa-cogs"></i>
                     </button>
                 ';
@@ -307,7 +311,7 @@ class Exclude extends BaseController
                 // 4. 🚀 TOMBOL HAPUS (Eksklusif Khusus Role < 4 / Operator ke atas)
                 if ($roleId < 4) {
                     $btnAksi .= '
-                        <button type="button" class="btn btn-sm btn-danger shadow-sm px-2" onclick="hapusExclude(\'' . $row['id_exclude'] . '\', \'' . esc($row['nama']) . '\')" title="Hapus Data KPM">
+                        <button type="button" class="btn btn-sm btn-danger shadow-sm px-2" onclick="hapusExclude(\'' . $row['id_exclude'] . '\', \'' . $namaAman . '\')" title="Hapus Data KPM">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     ';
