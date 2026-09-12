@@ -314,8 +314,7 @@ class Users extends BaseController
         } else {
             $session->setFlashdata('danger', 'Status gagal diubah');
         }
-        return redirect()->to('/dtks/users');
-        // }
+        return redirect()->to('/users');
     }
 
     public function saveRole()

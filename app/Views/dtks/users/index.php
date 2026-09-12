@@ -309,6 +309,95 @@
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="modalAdd" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Form. <?= $title1; ?></h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <form action="/user_tambah" method="POST" id="mainform">
+                        <?= csrf_field(); ?>
+                        <div class="form-group my-1">
+                            <input type="text" class="form-control form-control form-control-user" name="fullname" aria-describedby="emailHelp" placeholder="Masukan Nama Lengkap" value="<?= set_value('fullname'); ?>">
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group my-1">
+                                    <input type="numeric" class="form-control form-control form-control-user" name="nik" aria-describedby="emailHelp" placeholder="Masukan No. KTP/NIK" value="<?= set_value('nik'); ?>">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group my-1">
+                                    <input type="numeric" class="form-control form-control form-control-user" name="nope" aria-describedby="emailHelp" placeholder="Masukan No. Handphone" value="<?= set_value('nope'); ?>">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group my-1">
+                            <input type="email" class="form-control form-control form-control-user" name="email" aria-describedby="emailHelp" placeholder="Masukan Email" value="<?= set_value('email'); ?>">
+                        </div>
+                        <div class="form-group my-1">
+                            <select id="kecamatan" name="kecamatan" class="form-control form-control form-control-user" disabled="true">
+                                <option value="">-- Pilih Kecamatan --</option>
+                                <?php foreach ($kecamatan as $row) { ?>
+                                    <option <?= $kode_kec == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id'] ?>" <?= set_select('kecamatan', $row['id']); ?>> <?php echo $row['name']; ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                        <div class="form-group my-1">
+                            <select id="kelurahan" name="kelurahan" class="form-control form-control form-control-user">
+                                <option value="">-- Pilih Desa / Kelurahan --</option>
+                                <?php foreach ($desa as $row) { ?>
+                                    <option value="<?= $row['id'] ?>" <?= set_select('kelurahan', $row['id']); ?>> <?php echo $row['name']; ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                        <div class="form-group my-1">
+                            <select id="no_rw" name="no_rw" class="form-control form-control form-control-user">
+                                <option value="">-- Pilih RW --</option>
+                                <?php foreach ($datarw as $row) { ?>
+                                    <option value="<?= $row['no_rw'] ?>" <?= set_select('no_rw', $row['no_rw']); ?>> <?php echo $row['no_rw']; ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                        <!-- tambah input wilayah tugas -->
+                        <div class="form-group my-1">
+                            <input type="text" name="wilayah_tugas" id="wilayah_tugas" class="form-control form-control form-control-user" placeholder="Wilayah Tugas" value="<?= set_value('wilayah_tugas'); ?>">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group my-1">
+                                    <input type="password" class="form-control form-control form-control-user" name="password" placeholder="Password" id="password1" value="<?= set_value('password'); ?>">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group my-1">
+                                    <input type="password" class="form-control form-control form-control-user" name="password_confirm" placeholder="Password confirm" id="password2" value="<?= set_value('password_confirm'); ?>">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group my-1">
+                            <div class="custom-control custom-checkbox small">
+                                <input type="checkbox" class="custom-control-input" id="checkbox">
+                                <label class="custom-control-label" for="checkbox"> Tampilkan kata sandi</label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="formTambahUser" type="submit" class="btn btn-primary btn-block">
+                                <?= $title1; ?>
+                            </button>
+                        </div>
+                        <hr>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     $(document).ready(function() {
         // 1. Reset Form Role
@@ -582,93 +671,39 @@
     }
 </script>
 
-<!-- Modal -->
-<div class="modal fade" id="modalAdd" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Form. <?= $title1; ?></h5>
-                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <form action="/user_tambah" method="POST" id="mainform">
-                        <?= csrf_field(); ?>
-                        <div class="form-group my-1">
-                            <input type="text" class="form-control form-control form-control-user" name="fullname" aria-describedby="emailHelp" placeholder="Masukan Nama Lengkap" value="<?= set_value('fullname'); ?>">
-                        </div>
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="form-group my-1">
-                                    <input type="numeric" class="form-control form-control form-control-user" name="nik" aria-describedby="emailHelp" placeholder="Masukan No. KTP/NIK" value="<?= set_value('nik'); ?>">
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group my-1">
-                                    <input type="numeric" class="form-control form-control form-control-user" name="nope" aria-describedby="emailHelp" placeholder="Masukan No. Handphone" value="<?= set_value('nope'); ?>">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group my-1">
-                            <input type="email" class="form-control form-control form-control-user" name="email" aria-describedby="emailHelp" placeholder="Masukan Email" value="<?= set_value('email'); ?>">
-                        </div>
-                        <div class="form-group my-1">
-                            <select id="kecamatan" name="kecamatan" class="form-control form-control form-control-user" disabled="true">
-                                <option value="">-- Pilih Kecamatan --</option>
-                                <?php foreach ($kecamatan as $row) { ?>
-                                    <option <?= $kode_kec == $row['id'] ? 'selected' : ''; ?> value="<?= $row['id'] ?>" <?= set_select('kecamatan', $row['id']); ?>> <?php echo $row['name']; ?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
-                        <div class="form-group my-1">
-                            <select id="kelurahan" name="kelurahan" class="form-control form-control form-control-user">
-                                <option value="">-- Pilih Desa / Kelurahan --</option>
-                                <?php foreach ($desa as $row) { ?>
-                                    <option value="<?= $row['id'] ?>" <?= set_select('kelurahan', $row['id']); ?>> <?php echo $row['name']; ?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
-                        <div class="form-group my-1">
-                            <select id="no_rw" name="no_rw" class="form-control form-control form-control-user">
-                                <option value="">-- Pilih RW --</option>
-                                <?php foreach ($datarw as $row) { ?>
-                                    <option value="<?= $row['no_rw'] ?>" <?= set_select('no_rw', $row['no_rw']); ?>> <?php echo $row['no_rw']; ?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
-                        <!-- tambah input wilayah tugas -->
-                        <div class="form-group my-1">
-                            <input type="text" name="wilayah_tugas" id="wilayah_tugas" class="form-control form-control form-control-user" placeholder="Wilayah Tugas" value="<?= set_value('wilayah_tugas'); ?>">
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group my-1">
-                                    <input type="password" class="form-control form-control form-control-user" name="password" placeholder="Password" id="password1" value="<?= set_value('password'); ?>">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group my-1">
-                                    <input type="password" class="form-control form-control form-control-user" name="password_confirm" placeholder="Password confirm" id="password2" value="<?= set_value('password_confirm'); ?>">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group my-1">
-                            <div class="custom-control custom-checkbox small">
-                                <input type="checkbox" class="custom-control-input" id="checkbox">
-                                <label class="custom-control-label" for="checkbox"> Tampilkan kata sandi</label>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button id="formTambahUser" type="submit" class="btn btn-primary btn-block">
-                                <?= $title1; ?>
-                            </button>
-                        </div>
-                        <hr>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- ========================================== -->
+<!-- 🚀 PENANGKAP FLASHDATA & NOTIFIKASI -->
+<!-- ========================================== -->
+<?php if (session()->getFlashdata('success')) : ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: '<?= session()->getFlashdata('success') ?>',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        });
+    </script>
+<?php endif; ?>
+
+<?php if (session()->getFlashdata('danger')) : ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: '<?= session()->getFlashdata('danger') ?>',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        });
+    </script>
+<?php endif; ?>
 
 <?= $this->endSection(); ?>

@@ -84,6 +84,7 @@ class Exclude extends BaseController
         $builder = $db->table('dtsen_kpm_exclude m')
             ->select("
                 m.id_exclude, 
+                m.status_klarifikasi,
                 m.nama, 
                 m.nik, 
                 m.no_kk,
@@ -98,6 +99,7 @@ class Exclude extends BaseController
                 rt.rw
             ")
             ->join('dtsen_art a', 'a.nik = m.nik AND a.deleted_at IS NULL', 'left')
+            // ... (kode lainnya tetap sama)
             ->join('dtsen_kk k', 'k.id_kk = a.id_kk AND k.deleted_at IS NULL', 'left')
             ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left');
 
@@ -131,12 +133,16 @@ class Exclude extends BaseController
         // ==========================================
         $filterRw = $this->request->getPost('filter_rw');
         $filterRt = $this->request->getPost('filter_rt');
+        $filterStatus = $this->request->getPost('filter_status');
 
         if (!empty($filterRw)) {
             $builder->where("CAST(rt.rw AS UNSIGNED) = ", (int)$filterRw);
         }
         if (!empty($filterRt)) {
             $builder->where("CAST(rt.rt AS UNSIGNED) = ", (int)$filterRt);
+        }
+        if (!empty($filterStatus)) {
+            $builder->where('m.status_klarifikasi', (int)$filterStatus);
         }
 
         // 3. 🔍 PENCARIAN GLOBAL
@@ -146,6 +152,7 @@ class Exclude extends BaseController
                 ->orLike('m.nik', $search)
                 ->orLike('m.no_kk', $search) // 👈 TAMBAHKAN BARIS INI
                 ->orLike('m.keterangan', $search)
+                ->orLike('m.status_klarifikasi', $search) // 🚀 TAMBAHKAN BARIS INI
                 ->groupEnd();
         }
 
@@ -154,7 +161,7 @@ class Exclude extends BaseController
         $recordsFiltered = $builderClone->countAllResults();
 
         // 5. PENGURUTAN (SORTING)
-        $columnOrder = [null, 'm.nama', 'm.nik', 'm.keterangan', 'm.bank', 'm.tgl_nonaktif'];
+        $columnOrder = [null, 'm.nama', 'm.nik', 'm.keterangan', 'm.bank', 'm.tgl_nonaktif', 'm.status_klarifikasi'];
         if (isset($post['order'])) {
             $colIndex = (int) $post['order'][0]['column'];
             $dir      = $post['order'][0]['dir'] === 'asc' ? 'ASC' : 'DESC';
@@ -219,6 +226,13 @@ class Exclude extends BaseController
             $namaWilayah = '<b>' . esc($namaFinal) . '</b><br>';
             $namaWilayah .= '<small class="text-muted">RT ' . $rtStr . ' / RW ' . $rwStr . '</small>';
 
+            // 🚀 BUNGKUS BADGE STATUS KLARIFIKASI DI BAWAH NAMA WILAYAH
+            if (isset($row['status_klarifikasi']) && $row['status_klarifikasi'] == 1) {
+                $namaWilayah .= '<br><span class="badge bg-success mt-1"><i class="fas fa-check-circle"></i> Berhasil Klarifikasi</span>';
+            } else {
+                $namaWilayah .= '<br><span class="badge bg-danger mt-1"><i class="fas fa-times-circle"></i> Belum Klarifikasi</span>';
+            }
+
             // 🛡️ BUNGKUS DENGAN CLASS "data-rahasia" AGAR NGE-BLUR (Dilengkapi Tombol Salin)
             $realNik = esc($row['nik']);
             $realKk  = esc($row['no_kk'] ?? '-');
@@ -274,75 +288,94 @@ class Exclude extends BaseController
             $tgl = !empty($row['tgl_nonaktif']) ? date('d/m/Y', strtotime($row['tgl_nonaktif'])) : '-';
 
             $btnAksi = '-';
+            $btnDokumen = '-'; // 🚀 VARIABEL BARU UNTUK KOLOM DOKUMEN
 
             // 🔐 Buka akses untuk Pentri (4) dan Petugas Entri (5)
             if ($roleId <= 5) {
-                $btnAksi = '<div class="d-flex gap-1 justify-content-center">';
+                $btnAksi = '<div class="d-flex gap-1 justify-content-center flex-wrap">';
+                $btnDokumenStr = ''; // Penampung sementara untuk dokumen
 
                 // 🚀 PERBAIKAN FINAL: addslashes() dulu (untuk JS), baru htmlspecialchars() (untuk atribut HTML)
-                // Kita gunakan $namaFinal agar datanya sinkron dengan tampilan tabel
                 $namaAman = htmlspecialchars(addslashes($namaFinal ?? ''), ENT_QUOTES, 'UTF-8');
 
+                // ==========================================
+                // 🎯 KOLOM AKSI UTAMA
+                // ==========================================
                 // 1. Tombol PROSES (Gambar Gear/Setting)
                 $btnAksi .= '
-                    <button type="button" class="btn btn-sm btn-outline-warning shadow-sm px-2" onclick="cetakSuratJudol(\'' . $row['id_exclude'] . '\', \'' . $row['nik'] . '\', \'' . $namaAman . '\')" title="Proses Surat & Upload Bukti">
+                    <button type="button" class="btn btn-sm btn-warning shadow-sm px-2" onclick="cetakSuratJudol(\'' . $row['id_exclude'] . '\', \'' . $row['nik'] . '\', \'' . $namaAman . '\')" title="Proses Surat & Upload Bukti">
                         <i class="fas fa-cogs"></i>
                     </button>
                 ';
 
-                // 2. DETEKSI & TAMPILKAN TOMBOL DOWNLOAD SURAT WORD
-                $filePernyataan = 'uploads/surat_judol/Pernyataan_Judol_' . $row['nik'] . '.docx';
-                $fileBA         = 'uploads/surat_judol/BA_Klarifikasi_' . $row['nik'] . '.docx';
+                // ==========================================
+                // 📂 KOLOM DOKUMEN & LAMPIRAN
+                // ==========================================
+                // 1. Cek Surat Word
+                $filePernyataanWord = 'uploads/surat_judol/Pernyataan_Judol_' . $row['nik'] . '.docx';
+                $fileBAWord         = 'uploads/surat_judol/BA_Klarifikasi_' . $row['nik'] . '.docx';
 
-                if (file_exists(FCPATH . $filePernyataan)) {
-                    $btnAksi .= '<a href="' . base_url($filePernyataan) . '" target="_blank" class="btn btn-sm btn-primary shadow-sm px-2" title="Unduh Surat Pernyataan"><i class="fas fa-file-word"></i></a>';
-                } elseif (file_exists(FCPATH . $fileBA)) {
-                    $btnAksi .= '<a href="' . base_url($fileBA) . '" target="_blank" class="btn btn-sm btn-primary shadow-sm px-2" title="Unduh Surat BA"><i class="fas fa-file-word"></i></a>';
+                if (file_exists(FCPATH . $filePernyataanWord)) {
+                    $btnDokumenStr .= '<a href="' . base_url($filePernyataanWord) . '" target="_blank" class="btn btn-sm btn-primary shadow-sm px-2" title="Unduh Surat Pernyataan (Word)"><i class="fas fa-file-word"></i></a>';
+                } elseif (file_exists(FCPATH . $fileBAWord)) {
+                    $btnDokumenStr .= '<a href="' . base_url($fileBAWord) . '" target="_blank" class="btn btn-sm btn-primary shadow-sm px-2" title="Unduh Surat BA (Word)"><i class="fas fa-file-word"></i></a>';
                 }
 
-                // 3. TAMPILKAN TOMBOL DOWNLOAD BUKTI ASLI (Bisa Lebih dari 1)
+                // 2. Cek Foto Bukti Asli
                 $fileBukti = $row['bukti_penutupan'] ?? null;
                 if (!empty($fileBukti)) {
                     $arrBukti = explode(',', $fileBukti);
                     foreach ($arrBukti as $idx => $fb) {
-                        $btnAksi .= '<a href="' . base_url('uploads/bukti_judol/' . trim($fb)) . '" target="_blank" class="btn btn-sm btn-success shadow-sm px-2" title="Lihat Foto Bukti ' . ($idx + 1) . '"><i class="fas fa-file-image"></i></a>';
+                        $btnDokumenStr .= '<a href="' . base_url('uploads/bukti_judol/' . trim($fb)) . '" target="_blank" class="btn btn-sm btn-success shadow-sm px-2" title="Lihat Foto Bukti ' . ($idx + 1) . '"><i class="fas fa-file-image"></i></a>';
                     }
                 }
 
-                // ===============================================================
-                // 🚀 FITUR BARU: TOMBOL LIHAT FOTO RUMAH DEPAN DARI USULAN (JSON)
-                // ===============================================================
+                // 3. Cek Foto Rumah Tampak Depan
                 if (!empty($row['id_kk'])) {
-                    $usulan = $db->table('dtsen_usulan')
-                        ->select('payload')
-                        ->where('dtsen_kk_id', $row['id_kk'])
-                        ->whereIn('status', ['draft', 'submitted', 'verified', 'diverifikasi'])
-                        ->orderBy('id', 'DESC')
-                        ->get()
-                        ->getRowArray();
-
+                    $usulan = $db->table('dtsen_usulan')->select('payload')->where('dtsen_kk_id', $row['id_kk'])->whereIn('status', ['draft', 'submitted', 'verified', 'diverifikasi'])->orderBy('id', 'DESC')->get()->getRowArray();
                     if (!empty($usulan['payload'])) {
                         $payloadUsulan = json_decode($usulan['payload'], true);
-
-                        // 🚀 PERBAIKAN: Ambil langsung dari key ['foto']['depan'] sesuai standar PembaruanKeluarga
                         $pathFoto = $payloadUsulan['foto']['depan'] ?? null;
-
                         if (!empty($pathFoto)) {
-                            $urlFoto = base_url($pathFoto);
-
-                            // 🚀 Atur nama file unduhan agar rapi saat masuk ke komputer operator
                             $namaFileUnduhan = 'Rumah_Depan_' . $row['nik'] . '.jpg';
-
-                            // 🚀 Ganti target="_blank" menjadi atribut download
-                            $btnAksi .= '<a href="' . $urlFoto . '" download="' . $namaFileUnduhan . '" class="btn btn-sm btn-info shadow-sm px-2 ms-1" title="Unduh Foto Rumah Tampak Depan"><i class="fas fa-home"></i></a>';
+                            $btnDokumenStr .= '<a href="' . base_url($pathFoto) . '" download="' . $namaFileUnduhan . '" class="btn btn-sm btn-info shadow-sm px-2" title="Unduh Foto Rumah Tampak Depan"><i class="fas fa-home"></i></a>';
                         }
                     }
                 }
-                // ===============================================================
 
-                // 4. 🚀 TOMBOL HAPUS (Eksklusif Khusus Role < 4 / Operator ke atas)
+                // 4. Cek Brankas Rahasia (WRITEPATH)
+                $pathRahasia = WRITEPATH . 'uploads/klarifikasi_judol/';
+
+                $filePernyataanPdf = $pathRahasia . 'Pernyataan_Judol_' . $row['nik'] . '.pdf';
+                if (file_exists($filePernyataanPdf)) {
+                    $btnDokumenStr .= '<a href="' . site_url('exclude/download_dokumen/Pernyataan_Judol_' . $row['nik'] . '.pdf') . '" class="btn btn-sm btn-danger shadow-sm px-2" title="Unduh Pernyataan (Dari Brankas)"><i class="fas fa-file-pdf"></i></a>';
+                }
+
+                $fileLampiranPdf = $pathRahasia . 'Lampiran_Pernyataan_Judol_' . $row['nik'] . '.pdf';
+                if (file_exists($fileLampiranPdf)) {
+                    $btnDokumenStr .= '<a href="' . site_url('exclude/download_dokumen/Lampiran_Pernyataan_Judol_' . $row['nik'] . '.pdf') . '" class="btn btn-sm btn-outline-danger shadow-sm px-2" title="Unduh Lampiran"><i class="fas fa-file-pdf"></i></a>';
+                }
+
+                $dokFiles = glob($pathRahasia . 'Dokumentasi_Judol_' . $row['nik'] . '_*.*');
+                if ($dokFiles) {
+                    foreach ($dokFiles as $idx => $dok) {
+                        $btnDokumenStr .= '<a href="' . site_url('exclude/download_dokumen/' . basename($dok)) . '" class="btn btn-sm btn-dark shadow-sm px-2" title="Unduh Dokumentasi ' . ($idx + 1) . '"><i class="fas fa-camera"></i></a>';
+                    }
+                }
+
+                // Bungkus tombol dokumen jika ada isinya
+                if (!empty($btnDokumenStr)) {
+                    $btnDokumen = '<div class="d-flex gap-1 justify-content-center flex-wrap">' . $btnDokumenStr . '</div>';
+                }
+
+                // ==========================================
+                // Lanjutan Kolom AKSI UTAMA (Role < 4)
+                // ==========================================
                 if ($roleId < 4) {
                     $btnAksi .= '
+                        <button type="button" class="btn btn-sm btn-outline-success shadow-sm px-2" onclick="uploadKlarifikasi(\'' . $row['id_exclude'] . '\', \'' . $row['nik'] . '\', \'' . $namaAman . '\')" title="Upload Dokumen Hasil Klarifikasi (PDF & Foto)">
+                            <i class="fas fa-upload"></i>
+                        </button>
                         <button type="button" class="btn btn-sm btn-danger shadow-sm px-2" onclick="hapusExclude(\'' . $row['id_exclude'] . '\', \'' . $namaAman . '\')" title="Hapus Data KPM">
                             <i class="fas fa-trash-alt"></i>
                         </button>
@@ -352,6 +385,7 @@ class Exclude extends BaseController
                 $btnAksi .= '</div>';
             }
 
+            // 🚀 MASUKKAN KEDUA VARIABEL KE DALAM DATA ARRAY
             $data[] = [
                 $no++,
                 $namaWilayah,
@@ -359,7 +393,8 @@ class Exclude extends BaseController
                 $keterangan,
                 $dataBank,
                 $tgl,
-                $btnAksi
+                $btnDokumen, // 👈 KOLOM BARU (DOKUMEN)
+                $btnAksi     // 👈 KOLOM AKSI UTAMA
             ];
         }
 
@@ -783,6 +818,105 @@ class Exclude extends BaseController
             return $this->response->setJSON(['status' => true, 'message' => 'Data KPM beserta file lampirannya berhasil dibumihanguskan.']);
         } else {
             return $this->response->setJSON(['status' => false, 'message' => 'Gagal menghapus data dari server.']);
+        }
+    }
+
+    // ========================================================
+    // 🚀 UPLOAD KLARIFIKASI (DISIMPAN KE WRITEPATH/RAHASIA)
+    // ========================================================
+    public function upload_klarifikasi()
+    {
+        if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
+
+        $idExclude = $this->request->getPost('id_exclude');
+        $nik       = $this->request->getPost('nik');
+
+        if (empty($idExclude) || empty($nik)) {
+
+            return $this->response->setJSON(['status' => false, 'message' => 'Data KPM tidak valid.']);
+        }
+
+        // 🛡️ TENTUKAN FOLDER RAHASIA (Di luar folder public)
+        $uploadPath = WRITEPATH . 'uploads/klarifikasi_judol/';
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0777, true);
+        }
+
+        $fileSurat       = $this->request->getFile('file_surat');
+        $fileLampiran    = $this->request->getFile('file_lampiran');
+        $fileDokumentasi = $this->request->getFileMultiple('file_dokumentasi');
+
+        // 1. Eksekusi Surat Pernyataan (WAJIB PDF)
+        if ($fileSurat && $fileSurat->isValid() && !$fileSurat->hasMoved()) {
+            if ($fileSurat->getExtension() !== 'pdf') {
+                return $this->response->setJSON(['status' => false, 'message' => 'Surat Klarifikasi wajib berformat PDF.']);
+            }
+            // Format nama file sesuai request Jenderal
+            $namaSurat = 'Pernyataan_Judol_' . $nik . '.pdf';
+            $fileSurat->move($uploadPath, $namaSurat, true); // True = overwrite file lama
+        } else {
+            return $this->response->setJSON(['status' => false, 'message' => 'Surat Klarifikasi gagal diunggah!']);
+        }
+
+        // 2. Eksekusi Lampiran Surat (OPSIONAL PDF)
+        if ($fileLampiran && $fileLampiran->isValid() && !$fileLampiran->hasMoved()) {
+            if ($fileLampiran->getExtension() === 'pdf') {
+                $namaLampiran = 'Lampiran_Pernyataan_Judol_' . $nik . '.pdf';
+                $fileLampiran->move($uploadPath, $namaLampiran, true);
+            }
+        }
+
+        // 3. Eksekusi Foto Dokumentasi (WAJIB MULTIPLE)
+        if ($fileDokumentasi) {
+            $dokCount = 1;
+            foreach ($fileDokumentasi as $dok) {
+                if ($dok->isValid() && !$dok->hasMoved()) {
+                    $ext = strtolower($dok->getExtension());
+                    if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+                        // Namakan dengan timestamp agar unik jika upload banyak foto
+                        $namaDok = 'Dokumentasi_Judol_' . $nik . '_' . time() . '_' . $dokCount . '.' . $ext;
+                        $dok->move($uploadPath, $namaDok);
+                        $dokCount++;
+                    }
+                }
+            }
+        }
+
+        // ... (kode upload dokumentasi sebelumnya) ...
+
+        // 🚀 UPDATE STATUS KLARIFIKASI KE DATABASE AGAR BISA DIFILTER
+        $db = \Config\Database::connect();
+        $db->table('dtsen_kpm_exclude')
+            ->where('id_exclude', $idExclude)
+            ->update(['status_klarifikasi' => 1]);
+
+        return $this->response->setJSON([
+            'status' => true,
+            'message' => 'Dokumen berhasil diamankan ke dalam brankas server!'
+        ]);
+    }
+
+    // ========================================================
+    // 🚀 GERBANG DOWNLOAD FILE RAHASIA (DIKUNCI UNTUK ROLE < 5)
+    // ========================================================
+    public function download_dokumen($filename)
+    {
+        $roleId = session()->get('role_id');
+
+        // 🛡️ VALIDASI HAK AKSES KETAT
+        if ($roleId >= 5) {
+            return exit('🚫 AKSES DITOLAK: Anda tidak memiliki wewenang untuk mengunduh dokumen rahasia ini.');
+        }
+
+        // Bersihkan nama file dari karakter berbahaya (Directory Traversal Attack)
+        $cleanFilename = basename($filename);
+        $filePath      = WRITEPATH . 'uploads/klarifikasi_judol/' . $cleanFilename;
+
+        if (file_exists($filePath)) {
+            // Gunakan fungsi bawaan CI4 untuk memaksa browser mengunduh file
+            return $this->response->download($filePath, null);
+        } else {
+            return exit('⚠️ File tidak ditemukan di dalam brankas server.');
         }
     }
 }

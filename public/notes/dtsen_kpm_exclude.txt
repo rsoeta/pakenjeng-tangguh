@@ -17,3 +17,5 @@ CREATE TABLE `dtsen_kpm_exclude` (
 
 ALTER TABLE `dtsen_kpm_exclude` 
 ADD COLUMN `bukti_penutupan` varchar(255) DEFAULT NULL COMMENT 'Path file foto/scan bukti penutupan rekening' AFTER `keterangan`;
+
+ALTER TABLE dtsen_kpm_exclude ADD COLUMN status_klarifikasi TINYINT(1) DEFAULT 0 AFTER keterangan;

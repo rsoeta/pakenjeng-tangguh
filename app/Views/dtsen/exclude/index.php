@@ -106,27 +106,37 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                             <!-- 🎯 ACTION BAR: Filter & Tombol (Responsive) -->
                             <div class="row mb-3 align-items-end" style="position: relative; z-index: 2;">
 
-                                <!-- Bagian Kiri: Filter Wilayah -->
-                                <div class="col-md-5 col-12 mb-3 mb-md-0 d-flex gap-2">
-                                    <div class="w-50">
-                                        <label class="form-label text-muted small fw-bold mb-1">Filter RW</label>
-                                        <select id="filter_rw" class="form-select border-danger shadow-sm">
-                                            <option value="">-- Semua RW --</option>
-                                            <?php foreach ($rwList as $rw): ?>
-                                                <option value="<?= esc($rw['rw']) ?>"><?= str_pad($rw['rw'], 3, '0', STR_PAD_LEFT) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <div class="w-50">
-                                        <label class="form-label text-muted small fw-bold mb-1">Filter RT</label>
-                                        <select id="filter_rt" class="form-select border-danger shadow-sm" disabled>
-                                            <option value="">-- Semua RT --</option>
-                                        </select>
+                                <!-- Bagian Kiri: Filter Wilayah & Status -->
+                                <div class="col-md-7 col-12 mb-3 mb-md-0">
+                                    <div class="row g-2">
+                                        <div class="col-4">
+                                            <label class="form-label text-muted small fw-bold mb-1">Filter RW</label>
+                                            <select id="filter_rw" class="form-select border-danger shadow-sm">
+                                                <option value="">-- Semua RW --</option>
+                                                <?php foreach ($rwList as $rw): ?>
+                                                    <option value="<?= esc($rw['rw']) ?>"><?= str_pad($rw['rw'], 3, '0', STR_PAD_LEFT) ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label text-muted small fw-bold mb-1">Filter RT</label>
+                                            <select id="filter_rt" class="form-select border-danger shadow-sm" disabled>
+                                                <option value="">-- Semua RT --</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label text-muted small fw-bold mb-1">Status Klarifikasi</label>
+                                            <select id="filter_status" class="form-select border-info shadow-sm">
+                                                <option value="">-- Semua Status --</option>
+                                                <option value="0">Belum Klarifikasi</option>
+                                                <option value="1">Berhasil Klarifikasi</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Bagian Kanan: Deretan Tombol -->
-                                <div class="col-md-7 col-12 d-flex gap-2 justify-content-md-end flex-wrap">
+                                <!-- Bagian Kanan: Deretan Tombol (Ubah col-md-7 jadi col-md-5) -->
+                                <div class="col-md-5 col-12 d-flex gap-2 justify-content-md-end align-items-end flex-wrap">
                                     <button id="btnResetFilter" class="btn btn-secondary shadow-sm fw-bold flex-grow-1 flex-md-grow-0">
                                         <i class="fas fa-sync-alt me-1"></i> Reset
                                     </button>
@@ -148,15 +158,15 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                             <div class="table-responsive" style="position: relative; z-index: 2;">
                                 <table id="tableExclude" class="table table-bordered table-hover w-100 text-sm">
                                     <thead class="table-light">
-                                        <!-- ... (Thead tabel tetap sama) ... -->
                                         <tr>
                                             <th class="text-center" width="5%">No</th>
-                                            <th width="25%">Nama KPM & Wilayah</th>
+                                            <th width="20%">Nama KPM & Wilayah</th>
                                             <th width="15%">NIK & KK</th>
-                                            <th width="25%">Keterangan Blacklist</th>
+                                            <th width="15%">Keterangan Blacklist</th>
                                             <th width="15%">Data Bank</th>
-                                            <th width="15%">Tanggal Nonaktif</th>
-                                            <th width="15%">Aksi</th>
+                                            <th width="10%">Tgl Nonaktif</th>
+                                            <th width="10%">Berkas Dokumen</th> <!-- 🚀 TAMBAHKAN INI -->
+                                            <th width="10%">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -324,8 +334,9 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                     data: function(d) {
                         d.<?= csrf_token() ?> = '<?= csrf_hash() ?>';
                         // Sisipkan nilai filter ke dalam request DataTables
-                        d.filter_rw = $('#filter_rw').val();
-                        d.filter_rt = $('#filter_rt').val();
+                        d.rw = $('#filter_rw').val();
+                        d.rt = $('#filter_rt').val();
+                        d.filter_status = $('#filter_status').val(); // 🚀 TAMBAHKAN BARIS INI
                     }
                 },
                 columnDefs: [{
@@ -376,8 +387,14 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
             $('#tableExclude').DataTable().ajax.reload();
         });
 
+        $('#filter_status').on('change', function() {
+            $('#tableExclude').DataTable().ajax.reload();
+        });
+
         $('#btnResetFilter').on('click', function() {
             $('#filter_rw').val('').trigger('change');
+            $('#filter_rt').val('').trigger('change');
+            $('#filter_status').val('').trigger('change');
             $('#tableExclude').DataTable().search('').ajax.reload(); // Reset search box & reload
         });
 
@@ -776,6 +793,122 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                                 popup: 'swal2-small'
                             }
                         });
+                    }
+                });
+            }
+        });
+    }
+
+    // ========================================================
+    // 🚀 FUNGSI UPLOAD DOKUMEN KLARIFIKASI (PDF & FOTO)
+    // ========================================================
+    function uploadKlarifikasi(id, nik, nama) {
+        Swal.fire({
+            title: 'Upload Hasil Klarifikasi',
+            html: `
+                <div class="text-start small text-muted mb-3 border-bottom pb-2">
+                    Upload berkas final untuk KPM: <br><b class="text-dark">${nama}</b> (${nik})
+                </div>
+
+                <div class="mb-3 text-start">
+                    <label class="form-label fw-bold small text-primary mb-1">1. Surat Klarifikasi (PDF) <span class="text-danger">*</span></label>
+                    <input type="file" id="file_surat" class="form-control form-control-sm shadow-sm border-primary" accept=".pdf">
+                    <small class="text-muted" style="font-size:0.7rem;">File Pernyataan / BA yang sudah ditandatangani.</small>
+                </div>
+
+                <div class="mb-3 text-start">
+                    <label class="form-label fw-bold small text-secondary mb-1">2. Lampiran (PDF) <span class="text-muted fw-normal">(Opsional)</span></label>
+                    <input type="file" id="file_lampiran" class="form-control form-control-sm shadow-sm" accept=".pdf">
+                </div>
+
+                <div class="text-start">
+                    <label class="form-label fw-bold small text-primary mb-1">3. Foto Dokumentasi (JPG/PNG) <span class="text-danger">*</span></label>
+                    <input type="file" id="file_dokumentasi" class="form-control form-control-sm shadow-sm border-primary" accept=".jpg,.jpeg,.png" multiple>
+                    <small class="text-muted" style="font-size:0.7rem;">Foto KPM, Pelaku, dan Aparat Desa (Bisa pilih > 1 foto).</small>
+                </div>
+            `,
+            showCancelButton: true,
+            showCloseButton: true,
+            confirmButtonText: '<i class="fas fa-cloud-upload-alt me-1"></i> Upload & Simpan',
+            cancelButtonText: 'Batal',
+            customClass: {
+                popup: 'swal2-small',
+                confirmButton: 'btn btn-success shadow-sm mx-1',
+                cancelButton: 'btn btn-secondary shadow-sm mx-1'
+            },
+            buttonsStyling: false,
+            preConfirm: () => {
+                let fileSurat = document.getElementById('file_surat').files[0];
+                let fileLampiran = document.getElementById('file_lampiran').files[0];
+                let fileDokumentasi = document.getElementById('file_dokumentasi').files;
+
+                if (!fileSurat) {
+                    Swal.showValidationMessage('Surat Klarifikasi (PDF) wajib diunggah!');
+                    return false;
+                }
+                if (fileDokumentasi.length === 0) {
+                    Swal.showValidationMessage('Minimal 1 Foto Dokumentasi wajib diunggah!');
+                    return false;
+                }
+
+                let formData = new FormData();
+                formData.append('id_exclude', id);
+                formData.append('nik', nik);
+                formData.append('file_surat', fileSurat);
+
+                if (fileLampiran) {
+                    formData.append('file_lampiran', fileLampiran);
+                }
+
+                for (let i = 0; i < fileDokumentasi.length; i++) {
+                    formData.append('file_dokumentasi[]', fileDokumentasi[i]);
+                }
+
+                formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+                return formData;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let formData = result.value;
+
+                Swal.fire({
+                    title: 'Mengirim Data...',
+                    text: 'Mohon tunggu, sedang mengunggah file ke server.',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                $.ajax({
+                    // Rute ini nanti akan kita buat di Controller
+                    url: '<?= site_url('exclude/upload_klarifikasi') ?>',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(res) {
+                        if (res.status) {
+                            $('#tableExclude').DataTable().ajax.reload(null, false);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: res.message,
+                                customClass: {
+                                    popup: 'swal2-small'
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: res.message,
+                                customClass: {
+                                    popup: 'swal2-small'
+                                }
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error Server', 'Terjadi kesalahan saat mengunggah file.', 'error');
                     }
                 });
             }

@@ -278,6 +278,10 @@ $routes->group('exclude', ['namespace' => 'App\Controllers\Dtsen', 'filter' => [
 	$routes->post('proses_surat', 'Exclude::proses_surat');
 
 	$routes->post('delete', 'Exclude::delete');
+
+	// 🚀 RUTE BARU UNTUK UPLOAD & DOWNLOAD FILE KLARIFIKASI EKSKLUSIF
+	$routes->post('upload_klarifikasi', 'Exclude::upload_klarifikasi');
+	$routes->get('download_dokumen/(:any)', 'Exclude::download_dokumen/$1');
 });
 
 // 🌍 API Wilayah Lokal (Dropdown berantai untuk DTSEN)
