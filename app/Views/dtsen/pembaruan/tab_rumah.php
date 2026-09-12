@@ -481,21 +481,24 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                 <h6 class="fw-bold text-secondary mb-3 border-top pt-3">B. Rincian Pendapatan / Penghasilan Bulanan</h6>
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="form-label">Gaji / Upah Utama (Rp)</label>
+                        <label class="form-label fw-bold mb-0">Gaji / Upah Utama (Rp)</label>
+                        <small class="text-muted d-block mb-2" style="font-size: 0.75rem; line-height: 1.2;">Gaji, tunjangan, uang makan, honor, lembur, dll</small>
                         <div class="input-group">
                             <input type="text" name="pendapatan_gaji" id="pendapatan_gaji" class="form-control rupiah" value="<?= esc($se['pendapatan_gaji'] ?? '') ?>" <?= $readonly ?> placeholder="0">
                             <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#pendapatan_gaji" title="Salin Gaji"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Hasil Usaha / Bisnis (Rp)</label>
+                        <label class="form-label fw-bold mb-0">Hasil Usaha / Bisnis (Rp)</label>
+                        <small class="text-muted d-block mb-2" style="font-size: 0.75rem; line-height: 1.2;">Offline: warung, kosan, dll. Online: affiliate, olshop, dll</small>
                         <div class="input-group">
                             <input type="text" name="pendapatan_usaha" id="pendapatan_usaha" class="form-control rupiah" value="<?= esc($se['pendapatan_usaha'] ?? '') ?>" <?= $readonly ?> placeholder="0">
                             <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#pendapatan_usaha" title="Salin Hasil Usaha"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Lainnya (Pensiun/Kupon/Dll) (Rp)</label>
+                        <label class="form-label fw-bold mb-0">Lainnya (Rp)</label>
+                        <small class="text-muted d-block mb-2" style="font-size: 0.75rem; line-height: 1.2;">Misal: transfer, pemberian, passive income, pensiunan</small>
                         <div class="input-group">
                             <input type="text" name="pendapatan_lainnya" id="pendapatan_lainnya" class="form-control rupiah" value="<?= esc($se['pendapatan_lainnya'] ?? '') ?>" <?= $readonly ?> placeholder="0">
                             <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#pendapatan_lainnya" title="Salin Lainnya"><i class="fas fa-copy"></i></button>

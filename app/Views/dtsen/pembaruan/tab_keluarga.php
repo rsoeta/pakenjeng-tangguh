@@ -457,17 +457,28 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
     });
 
     // =============================
-    // 🌍 INISIALISASI PETA LEAFLET
+    // 🌍 INISIALISASI PETA LEAFLET (MODE SATELIT ESRI)
     // =============================
     document.addEventListener("DOMContentLoaded", function() {
         const latInput = document.getElementById('latitude');
         const lngInput = document.getElementById('longitude');
         let lat = latInput.value ? parseFloat(latInput.value) : -6.895;
         let lng = lngInput.value ? parseFloat(lngInput.value) : 107.634;
-        const map = L.map('map').setView([lat, lng], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 18,
-            attribution: '&copy; OpenStreetMap contributors'
+
+        const map = L.map('map').setView([lat, lng], 17); // Default kita turunkan sedikit ke 17 agar aman
+
+        // 🚀 MENGGUNAKAN SATELIT ESRI WORLD IMAGERY DENGAN ANTI-BLANK
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 20, // Peta boleh di-zoom sedekat mungkin oleh jari operator
+            maxNativeZoom: 17, // 🚀 TAPI server hanya akan dipanggil maksimal sampai zoom 17 (Mencegah Error)
+            attribution: 'Tiles &copy; Esri'
+        }).addTo(map);
+
+        // Lapisan label nama jalan (Opsional)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
+            maxZoom: 20,
+            maxNativeZoom: 18,
+            attribution: '&copy; CARTO'
         }).addTo(map);
 
         let marker = null;
@@ -476,6 +487,8 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                 draggable: <?= $editable ? 'true' : 'false' ?>
             }).addTo(map);
         }
+
+        // ... (Sisa kode drag marker, get location, dan copy clipboard di bawahnya TETAP SAMA) ...
 
         if (marker && <?= $editable ? 'true' : 'false' ?>) {
             marker.on('dragend', function(e) {
@@ -489,15 +502,20 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
         if (btnGetLocation) {
             btnGetLocation.addEventListener('click', function() {
                 if (!navigator.geolocation) return Swal.fire("Error", "GPS Tidak Didukung", "error");
+
                 Swal.fire({
-                    title: "Mencari lokasi...",
+                    title: "Mengunci Satelit GPS...",
+                    text: "Berdiri di luar ruangan agar lebih akurat.",
                     didOpen: () => Swal.showLoading()
                 });
+
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
                         Swal.close();
                         const userLat = position.coords.latitude;
                         const userLng = position.coords.longitude;
+                        const accuracy = position.coords.accuracy; // 🚀 Mendapatkan radius akurasi dalam satuan meter
+
                         latInput.value = userLat.toFixed(6);
                         lngInput.value = userLng.toFixed(6);
 
@@ -513,22 +531,30 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                             marker.setLatLng([userLat, userLng]);
                         }
 
-                        map.setView([userLat, userLng], 17);
+                        // Cari baris ini di dalam getCurrentPosition
+                        map.setView([userLat, userLng], 18); // 🚀 Ubah dari 19 menjadi 18
+
+                        // 🚀 Berikan informasi akurasi kepada operator
+                        let iconType = accuracy <= 20 ? 'success' : 'warning';
+                        let accMsg = accuracy <= 20 ? 'Sangat Akurat' : 'Cek Peta (Geser pin jika kurang pas)';
+
                         Swal.fire({
                             toast: true,
                             position: 'bottom-end',
-                            icon: 'success',
-                            title: 'Lokasi diambil!',
-                            timer: 2000,
+                            icon: iconType,
+                            title: `Akurasi: ${accuracy.toFixed(0)} Meter`,
+                            text: accMsg,
+                            timer: 4500,
                             showConfirmButton: false
                         });
                     },
                     function(error) {
                         Swal.close();
-                        Swal.fire("Gagal", "Aktifkan GPS Anda.", "warning");
+                        Swal.fire("Gagal", "Pastikan GPS/Lokasi HP menyala dan izinkan browser mengaksesnya.", "warning");
                     }, {
                         enableHighAccuracy: true,
-                        timeout: 8000
+                        timeout: 15000, // 🚀 Beri waktu lebih lama agar HP sempat menangkap sinyal GPS asli
+                        maximumAge: 0 // 🚀 PAKSA sistem mengambil data real-time, JANGAN gunakan cache lokasi
                     }
                 );
             });
