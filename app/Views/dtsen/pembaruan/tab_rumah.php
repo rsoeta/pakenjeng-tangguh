@@ -128,11 +128,10 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                     <div class="col-md-2">
                         <label class="form-label text-primary">Jml Orang dlm Rumah</label>
                         <div class="input-group">
-                            <!-- 🚀 Hapus bg-light dan readonly hardcode, ganti placeholder -->
-                            <input type="number" min="1" name="jumlah_orang_dalam_rumah" id="jumlah_orang_dalam_rumah" class="form-control border-primary" value="<?= esc($kond['jumlah_orang_dalam_rumah'] ?? '') ?>" <?= $readonly ?> placeholder="Misal: 4">
+                            <!-- 🚀 PERBAIKAN: Gunakan $perumahan['kondisi'] yang sudah di-Smart Merge dari Controller -->
+                            <input type="number" min="1" name="jumlah_orang_dalam_rumah" id="jumlah_orang_dalam_rumah" class="form-control border-primary" value="<?= esc($perumahan['kondisi']['jumlah_orang_dalam_rumah'] ?? '') ?>" <?= $readonly ?> placeholder="Misal: 4">
                             <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#jumlah_orang_dalam_rumah" title="Salin Jml Orang"><i class="fas fa-copy"></i></button>
                         </div>
-                        <!-- 🚀 Ganti keterangan kecilnya agar petugas paham -->
                         <small class="text-muted" style="font-size: 0.7rem;">*Total seluruh penghuni atap</small>
                     </div>
 

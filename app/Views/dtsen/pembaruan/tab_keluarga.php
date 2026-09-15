@@ -816,22 +816,26 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
 
 <script>
     // ==========================================
-    // 🚀 SINKRONISASI JUMLAH ANGGOTA OTOMATIS
+    // 🚀 SINKRONISASI JUMLAH ANGGOTA OTOMATIS (SMART MODE)
     // ==========================================
     window.updateJumlahAnggotaOtomatis = function(totalAnggota) {
-        // Tembak angkanya ke Tab Keluarga
+        // Tembak angkanya ke Tab Keluarga (Selalu update)
         const inputKeluarga = document.getElementById('auto_jumlah_anggota');
         if (inputKeluarga) {
             inputKeluarga.value = totalAnggota;
         }
 
-        // Tembak angkanya ke Tab Rumah
+        // Tembak angkanya ke Tab Rumah (Secara Cerdas)
         const inputRumah = document.getElementById('jumlah_orang_dalam_rumah');
         if (inputRumah) {
-            // Catatan: Jika ada keluarga lain (Jml KK > 1), logika BPS biasanya 
-            // "Jml Orang dlm Rumah" bisa jadi lebih besar dari "Jml Anggota Keluarga".
-            // Tapi sebagai nilai dasar, kita set sama dengan jumlah anggota.
-            inputRumah.value = totalAnggota;
+            let orangSaatIni = parseInt(inputRumah.value) || 0;
+
+            // 🚀 SMART UPDATE: 
+            // Hanya timpa jika kosong, atau jika jumlah orang saat ini 
+            // ternyata lebih sedikit dari jumlah anggota keluarga inti.
+            if (orangSaatIni < parseInt(totalAnggota)) {
+                inputRumah.value = totalAnggota;
+            }
         }
     };
 

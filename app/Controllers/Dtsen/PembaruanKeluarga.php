@@ -107,6 +107,37 @@ class PembaruanKeluarga extends BaseController
                 ($kkData['status_kepemilikan_rumah'] ?? null) ??
                 '';
 
+            // ========================================================================
+            // 🚀 SMART MERGE KONDISI RUMAH
+            // Prioritas 1: Ambil dari Payload Usulan (Data Terbaru)
+            // Prioritas 2: Jika kosong, ambil dari Master RT
+            // ========================================================================
+            $kondPayload = $payloadPerumahan['kondisi'] ?? [];
+            $kondisiFinal = [
+                'luas_lantai'              => $kondPayload['luas_lantai'] ?? $rtData['luas_lantai'] ?? null,
+                'jenis_lantai'             => $kondPayload['jenis_lantai'] ?? $rtData['jenis_lantai'] ?? null,
+                'kondisi_lantai'           => $kondPayload['kondisi_lantai'] ?? $rtData['kondisi_lantai'] ?? null,
+                'jenis_dinding'            => $kondPayload['jenis_dinding'] ?? $rtData['jenis_dinding'] ?? null,
+                'kondisi_dinding'          => $kondPayload['kondisi_dinding'] ?? $rtData['kondisi_dinding'] ?? null,
+                'jenis_atap'               => $kondPayload['jenis_atap'] ?? $rtData['jenis_atap'] ?? null, // 🚀 Bugfix: sebelumnya kondisi_atap
+                'kondisi_atap'             => $kondPayload['kondisi_atap'] ?? $rtData['kondisi_atap'] ?? null,
+                'bahan_bakar'              => $kondPayload['bahan_bakar'] ?? $rtData['bahan_bakar'] ?? null,
+                'sumber_air'               => $kondPayload['sumber_air'] ?? $rtData['sumber_air'] ?? null,
+                'sumber_listrik'           => $kondPayload['sumber_listrik'] ?? $rtData['sumber_listrik'] ?? null,
+                'jumlah_meteran_listrik'   => $kondPayload['jumlah_meteran_listrik'] ?? $rtData['jumlah_meteran_listrik'] ?? null,
+                'nomor_pelanggan'          => $kondPayload['nomor_pelanggan'] ?? $rtData['nomor_pelanggan'] ?? null,
+                'nomor_meter'              => $kondPayload['nomor_meter'] ?? $rtData['nomor_meter'] ?? null,
+                'daya_listrik'             => $kondPayload['daya_listrik'] ?? $rtData['daya_listrik'] ?? null,
+                'jenis_bangunan'           => $kondPayload['jenis_bangunan'] ?? $rtData['jenis_bangunan'] ?? null,
+                'is_tinggal_bersama'       => $kondPayload['is_tinggal_bersama'] ?? $rtData['is_tinggal_bersama'] ?? null,
+                'jumlah_kk_dalam_rumah'    => $kondPayload['jumlah_kk_dalam_rumah'] ?? $rtData['jumlah_kk_dalam_rumah'] ?? null,
+                'no_kk_lainnya'            => $kondPayload['no_kk_lainnya'] ?? $rtData['no_kk_lainnya'] ?? null,
+                'jumlah_orang_dalam_rumah' => $kondPayload['jumlah_orang_dalam_rumah'] ?? $rtData['jumlah_orang_dalam_rumah'] ?? null, // 🚀 Ini yang akan langsung terupdate!
+                'perkiraan_harga_sewa'     => $kondPayload['perkiraan_harga_sewa'] ?? $rtData['perkiraan_harga_sewa'] ?? null,
+                'bukti_kepemilikan'        => $kondPayload['bukti_kepemilikan'] ?? $rtData['bukti_kepemilikan'] ?? null,
+                'status_kepemilikan'       => $kondPayload['status_kepemilikan'] ?? $statusKepemilikan,
+            ];
+
             // 7) MODE MASTER
             if (empty($usulan['id'])) {
                 $perumahan = [
@@ -127,30 +158,8 @@ class PembaruanKeluarga extends BaseController
                     'kategori_adat'       => $kkData['kategori_adat'] ?? 'Tidak',
                     'nama_suku'           => $kkData['nama_suku'] ?? '',
                     'wilayah_nama'        => $wilayahNama,
-                    'kondisi'             => $rtData ? [
-                        'luas_lantai'              => $rtData['luas_lantai'] ?? null,
-                        'jenis_lantai'             => $rtData['jenis_lantai'] ?? null,
-                        'kondisi_lantai'           => $rtData['kondisi_lantai'] ?? null,
-                        'jenis_dinding'            => $rtData['jenis_dinding'] ?? null,
-                        'kondisi_dinding'          => $rtData['kondisi_dinding'] ?? null,
-                        'jenis_atap'               => $rtData['kondisi_atap'] ?? null,
-                        'kondisi_atap'             => $rtData['kondisi_atap'] ?? null,
-                        'bahan_bakar'              => $rtData['bahan_bakar'] ?? null,
-                        'sumber_air'               => $rtData['sumber_air'] ?? null,
-                        'sumber_listrik'           => $rtData['sumber_listrik'] ?? null,
-                        'jumlah_meteran_listrik'   => $rtData['jumlah_meteran_listrik'] ?? null,
-                        'nomor_pelanggan'          => $rtData['nomor_pelanggan'] ?? null,
-                        'nomor_meter'              => $rtData['nomor_meter'] ?? null,
-                        'daya_listrik'             => $rtData['daya_listrik'] ?? null,
-                        'jenis_bangunan'           => $rtData['jenis_bangunan'] ?? null,
-                        'is_tinggal_bersama'       => $rtData['is_tinggal_bersama'] ?? null,
-                        'jumlah_kk_dalam_rumah'    => $rtData['jumlah_kk_dalam_rumah'] ?? null,
-                        'no_kk_lainnya'            => $rtData['no_kk_lainnya'] ?? null,
-                        'jumlah_orang_dalam_rumah' => $rtData['jumlah_orang_dalam_rumah'] ?? null,
-                        'perkiraan_harga_sewa'     => $rtData['perkiraan_harga_sewa'] ?? null,
-                        'bukti_kepemilikan'        => $rtData['bukti_kepemilikan'] ?? null,
-                    ] : ($payloadPerumahan['kondisi'] ?? []),
-                    'sanitasi' => $payloadPerumahan['sanitasi'] ?? []
+                    'kondisi'             => $kondisiFinal, // 🚀 Gunakan array pintar yang baru diracik
+                    'sanitasi'            => $payloadPerumahan['sanitasi'] ?? []
                 ];
 
                 $payload['perumahan'] = $perumahan;
@@ -160,6 +169,8 @@ class PembaruanKeluarga extends BaseController
                 // 🚀 PREFILL GEO (Dari dtsen_rt)
                 $payload['geo'] = ['lat' => $rtData['latitude'] ?? '', 'lng' => $rtData['longitude'] ?? ''];
 
+                // ... (kode perumahan) ...
+
                 return view('dtsen/pembaruan/detail', [
                     'title' => 'Detail Pembaruan Keluarga',
                     'namaApp' => nameApp(),
@@ -167,11 +178,12 @@ class PembaruanKeluarga extends BaseController
                     'kkData' => $kkData,
                     'rtData' => $rtData,
                     'perumahan' => $perumahan,
+                    'kond' => $kondisiFinal, // 🚀 SUNTIKAN SAPU JAGAT: Kirim data kondisi terbaru ke View
                     'anggota' => $anggota,
                     'payload' => $payload,
                     'usulan' => $usulan,
-                    'id_kk' => $kkData['id_kk'],
-                    'sumber' => 'utama',
+                    'id_kk' => $usulan['dtsen_kk_id'] ?? $kkData['id_kk'],
+                    'sumber' => 'usulan', // (atau 'utama' untuk mode 7)
                     'kategori_desil' => $kategoriDesil,
                     'is_submitted_ready' => $is_submitted_ready
                 ]);
@@ -200,11 +212,13 @@ class PembaruanKeluarga extends BaseController
                 'kategori_adat'       => $payloadPerumahan['kategori_adat'] ?? '',
                 'nama_suku'           => $payloadPerumahan['nama_suku'] ?? '',
                 'wilayah_nama'        => $wilayahNama,
-                'kondisi'             => $payload['perumahan']['kondisi'],
+                'kondisi'             => $kondisiFinal, // 🚀 Sama, gunakan array pintar agar sinkron
                 'sanitasi'            => $payload['perumahan']['sanitasi'],
             ];
 
             $anggota = $db->table('dtsen_usulan_art')->where('dtsen_usulan_id', $usulan['id'])->where('deleted_at', null)->get()->getResultArray();
+
+            // ... (kode perumahan) ...
 
             return view('dtsen/pembaruan/detail', [
                 'title' => 'Detail Pembaruan Keluarga',
@@ -213,11 +227,12 @@ class PembaruanKeluarga extends BaseController
                 'kkData' => $kkData,
                 'rtData' => $rtData,
                 'perumahan' => $perumahan,
+                'kond' => $kondisiFinal, // 🚀 SUNTIKAN SAPU JAGAT: Kirim data kondisi terbaru ke View
                 'anggota' => $anggota,
                 'payload' => $payload,
                 'usulan' => $usulan,
                 'id_kk' => $usulan['dtsen_kk_id'] ?? $kkData['id_kk'],
-                'sumber' => 'usulan',
+                'sumber' => 'usulan', // (atau 'utama' untuk mode 7)
                 'kategori_desil' => $kategoriDesil,
                 'is_submitted_ready' => $is_submitted_ready
             ]);
