@@ -83,7 +83,7 @@
                             <select id="filter_locked" class="form-control form-control-sm border bg-light rounded-pill px-3">
                                 <option value="">Semua Status</option>
                                 <option value="1">🔒 Terkunci</option>
-                                <option value="0">🔓 Terbuka</option>
+                                <option value="0" selected>🔓 Terbuka</option> <!-- 🚀 TAMBAHKAN 'selected' DI SINI -->
                             </select>
                         </div>
                     </div>
@@ -354,8 +354,15 @@
             ]
         });
 
-        // 🚀 Aktifkan Tombol Filter
+        // 🚀 Aktifkan Tombol Filter (Manual / Refresh)
         $('#btn_filter').click(function() {
+            tableDokumentasi.ajax.reload();
+        });
+
+        // ==========================================
+        // 🚀 FITUR BARU: AUTO-FILTER (TRIGGER SAAT DROPDOWN DIUBAH)
+        // ==========================================
+        $('#filter_rw, #filter_rt, #filter_tahap, #filter_jenis, #filter_locked').on('change', function() {
             tableDokumentasi.ajax.reload();
         });
 
