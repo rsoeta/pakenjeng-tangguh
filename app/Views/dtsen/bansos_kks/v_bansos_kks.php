@@ -140,52 +140,58 @@
         <h5 class="offcanvas-title"><i class="fas fa-edit mr-2"></i> Form Dokumentasi Penyaluran</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="offcanvas-body bg-light p-0">
-        <form id="formBansosKKS" enctype="multipart/form-data">
+    <!-- 🚀 KUNCI 1: Tambahkan overflow-hidden agar layar utama tidak ikut tembus scroll -->
+    <div class="offcanvas-body bg-light p-0 overflow-hidden">
+
+        <!-- 🚀 KUNCI 2: Jadikan form sebagai Flex container dengan tinggi 100% -->
+        <form id="formBansosKKS" enctype="multipart/form-data" class="d-flex flex-column h-100">
             <?= csrf_field(); ?>
 
             <input type="hidden" name="id" id="id_dokumentasi">
 
-            <div class="p-3">
+            <!-- 🚀 KUNCI 3: flex-grow-1 overflow-auto (Area ini yang bisa di-scroll) -->
+            <div class="p-2 p-md-4 flex-grow-1 overflow-auto">
+
                 <div class="card card-primary card-outline shadow-sm mb-3">
-                    <div class="card-body">
-                        <div class="form-group row align-items-center">
-                            <label for="nik_search" class="col-4 col-form-label" style="font-size: 0.9rem;">Cari NIK / KKS</label>
+                    <div class="card-body p-3">
+                        <div class="form-group row align-items-center mb-3">
+                            <label for="nik_search" class="col-4 col-form-label fw-bold">Cari NIK/KKS</label>
                             <div class="col-8">
+                                <!-- 🚀 Hapus form-control-sm -->
                                 <select class="form-control" id="nik_search" name="nik_search" style="width: 100%;"></select>
-                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Ketik NIK atau Nomor KKS</small>
                             </div>
                         </div>
-                        <hr class="my-2">
-                        <div class="form-group row mb-2">
-                            <label class="col-4 col-form-label small">Nama KPM</label>
+                        <hr class="my-3">
+                        <div class="form-group row mb-3">
+                            <label class="col-4 col-form-label text-muted">Nama KPM</label>
                             <div class="col-8">
-                                <input type="text" class="form-control bg-white form-control-sm" id="nama_kpm" name="nama_kpm" readonly placeholder="Otomatis...">
+                                <input type="text" class="form-control bg-light" id="nama_kpm" name="nama_kpm" readonly placeholder="Otomatis...">
                                 <input type="hidden" id="nik_kpm_hidden" name="nik_kpm">
                             </div>
                         </div>
                         <div class="form-group row mb-0">
-                            <label class="col-4 col-form-label small">Nomor KKS</label>
+                            <label class="col-4 col-form-label text-muted">Nomor KKS</label>
                             <div class="col-8">
-                                <input type="text" class="form-control bg-white form-control-sm text-primary font-weight-bold" id="no_kks" name="no_kks" readonly placeholder="Otomatis...">
+                                <input type="text" class="form-control bg-light text-primary fw-bold" id="no_kks" name="no_kks" readonly placeholder="Otomatis...">
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="card shadow-sm mb-3">
-                    <div class="card-body">
+                    <div class="card-body p-3">
                         <div class="form-group row mb-3">
-                            <label class="col-4 col-form-label small">Jenis Bansos <span class="text-danger">*</span></label>
+                            <label class="col-4 col-form-label">Jenis Bansos <span class="text-danger">*</span></label>
                             <div class="col-8">
-                                <div class="btn-group btn-group-toggle btn-group-bansos d-flex" data-toggle="buttons">
-                                    <label class="btn btn-sm flex-fill">
+                                <div class="btn-group btn-group-toggle btn-group-bansos d-flex w-100" data-toggle="buttons">
+                                    <!-- 🚀 Hapus btn-sm -->
+                                    <label class="btn btn-outline-primary flex-fill">
                                         <input type="radio" name="jenis_bansos" value="PKH" required> PKH
                                     </label>
-                                    <label class="btn btn-sm flex-fill">
+                                    <label class="btn btn-outline-primary flex-fill">
                                         <input type="radio" name="jenis_bansos" value="SEMBAKO"> SMBK
                                     </label>
-                                    <label class="btn btn-sm flex-fill">
+                                    <label class="btn btn-outline-primary flex-fill">
                                         <input type="radio" name="jenis_bansos" value="PKH + SEMBAKO"> MIX
                                     </label>
                                 </div>
@@ -193,31 +199,28 @@
                         </div>
 
                         <div class="form-group row mb-3">
-                            <label class="col-4 col-form-label small">Tahap & Tahun <span class="text-danger">*</span></label>
+                            <label class="col-4 col-form-label">Tahap & Thn <span class="text-danger">*</span></label>
                             <div class="col-8">
-                                <div class="row">
-                                    <div class="col-5 pr-1">
-                                        <select class="form-control form-control-sm" name="tahun_salur" required>
+                                <div class="row g-2">
+                                    <div class="col-5">
+                                        <select class="form-control" name="tahun_salur" required>
                                             <option value="<?= date('Y') ?>"><?= date('Y') ?></option>
                                             <option value="<?= date('Y') - 1 ?>"><?= date('Y') - 1 ?></option>
                                         </select>
                                     </div>
-                                    <div class="col-7 pl-1">
-                                        <?php
-                                        // 🚀 Menghitung tahap berdasarkan bulan berjalan (Kuartal 1-4)
-                                        $tahapSekarang = ceil(date('n') / 3);
-                                        ?>
-                                        <div class="btn-group btn-group-toggle d-flex" data-toggle="buttons">
-                                            <label class="btn btn-xs flex-fill py-1 <?= ($tahapSekarang == 1) ? 'active' : '' ?>">
+                                    <div class="col-7">
+                                        <?php $tahapSekarang = ceil(date('n') / 3); ?>
+                                        <div class="btn-group btn-group-toggle d-flex w-100" data-toggle="buttons">
+                                            <label class="btn btn-outline-info flex-fill px-1 <?= ($tahapSekarang == 1) ? 'active' : '' ?>">
                                                 <input type="radio" name="tahap_salur" value="Tahap 1" <?= ($tahapSekarang == 1) ? 'checked' : '' ?> required> T.1
                                             </label>
-                                            <label class="btn btn-xs flex-fill py-1 <?= ($tahapSekarang == 2) ? 'active' : '' ?>">
+                                            <label class="btn btn-outline-info flex-fill px-1 <?= ($tahapSekarang == 2) ? 'active' : '' ?>">
                                                 <input type="radio" name="tahap_salur" value="Tahap 2" <?= ($tahapSekarang == 2) ? 'checked' : '' ?> required> T.2
                                             </label>
-                                            <label class="btn btn-xs flex-fill py-1 <?= ($tahapSekarang == 3) ? 'active' : '' ?>">
+                                            <label class="btn btn-outline-info flex-fill px-1 <?= ($tahapSekarang == 3) ? 'active' : '' ?>">
                                                 <input type="radio" name="tahap_salur" value="Tahap 3" <?= ($tahapSekarang == 3) ? 'checked' : '' ?> required> T.3
                                             </label>
-                                            <label class="btn btn-xs flex-fill py-1 <?= ($tahapSekarang == 4) ? 'active' : '' ?>">
+                                            <label class="btn btn-outline-info flex-fill px-1 <?= ($tahapSekarang == 4) ? 'active' : '' ?>">
                                                 <input type="radio" name="tahap_salur" value="Tahap 4" <?= ($tahapSekarang == 4) ? 'checked' : '' ?> required> T.4
                                             </label>
                                         </div>
@@ -227,22 +230,23 @@
                         </div>
 
                         <div class="form-group row mb-3">
-                            <label class="col-4 col-form-label small">Nominal (Rp) <span class="text-danger">*</span></label>
+                            <label class="col-4 col-form-label">Nominal (Rp) <span class="text-danger">*</span></label>
                             <div class="col-8">
-                                <div class="input-group input-group-sm">
+                                <div class="input-group">
                                     <input type="text" class="form-control font-weight-bold text-success" id="nominal_cair" name="nominal_cair" placeholder="0" required>
                                     <div class="input-group-append">
-                                        <button class="btn btn-outline-secondary" type="button" id="add_thousands"><strong>+000</strong></button>
+                                        <!-- 🚀 Hapus btn-sm -->
+                                        <button class="btn btn-outline-secondary px-3" type="button" id="add_thousands"><strong>+000</strong></button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="form-group row mb-0">
-                            <label class="col-4 col-form-label small">Status Salur <span class="text-danger">*</span></label>
+                            <label class="col-4 col-form-label">Status Salur <span class="text-danger">*</span></label>
                             <div class="col-8">
-                                <select class="form-control form-control-sm" name="status_salur" id="status_salur" required>
-                                    <option value="">-- Pilih (Kosongkan jika PR) --</option>
+                                <select class="form-control" name="status_salur" id="status_salur" required>
+                                    <option value="">-- Pilih --</option>
                                     <option value="Sukses Salur">Sukses Salur</option>
                                     <option value="Saldo Kosong">Saldo Kosong</option>
                                     <option value="KKS Rusak/Hilang">KKS Rusak/Hilang</option>
@@ -254,27 +258,94 @@
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-6 mb-3">
-                        <div class="card card-outline card-success h-100">
-                            <div class="card-body p-2 text-center">
-                                <label class="small d-block mb-1">Foto KPM + KKS <span class="text-danger">*</span></label>
-                                <img id="prev_kpm" src="<?= base_url('assets/img/no-image.svg'); ?>" class="img-fluid border rounded mb-2" style="aspect-ratio: 1/1; object-fit: cover;">
-                                <div class="custom-file">
+                <!-- 🚀 CSS RESPONSIVE KHUSUS UPLOAD FOTO (BERDASARKAN CONTAINER) -->
+                <style>
+                    /* 1. Default (HP/Mobile) - Ringkas & Padat */
+                    .preview-foto-kpm {
+                        width: 100%;
+                        height: 150px;
+                        object-fit: cover;
+                    }
+
+                    .upload-btn-responsive {
+                        height: 25px;
+                    }
+
+                    .upload-btn-responsive .custom-file-input,
+                    .upload-btn-responsive .custom-file-label {
+                        height: 25px;
+                        /* padding: 8px 10px; */
+                        line-height: 20px;
+                        font-size: 0.75rem;
+                    }
+
+                    /* 2. Layar Lebar (Tablet/Laptop) - Card Gagah & Proporsional */
+                    @media (min-width: 768px) {
+                        .foto-card-container {
+                            max-height: 400px;
+                            min-height: 200px;
+                            /* 🚀 PENAMPUNG DIPAKSA TINGGI DI LAPTOP */
+                            display: flex;
+                            flex-direction: column;
+                        }
+
+                        .foto-card-body {
+                            display: flex;
+                            flex-direction: column;
+                            flex-grow: 1;
+                        }
+
+                        .preview-foto-kpm {
+                            flex-grow: 1;
+                            /* 🚀 Foto melar otomatis mengisi sisa ruang Card */
+                            /* height: auto; */
+                            height: 100%;
+                            min-height: 200px;
+                        }
+
+                        .upload-btn-responsive {
+                            height: 25px;
+                            /* margin-top: 15px; */
+                            /* Jarak antara foto dan tombol */
+                        }
+
+                        .upload-btn-responsive .custom-file-input,
+                        .upload-btn-responsive .custom-file-label {
+                            height: 25px;
+                            /* padding: 10px 15px; */
+                            line-height: 23px;
+                            font-size: 0.9rem;
+                        }
+                    }
+                </style>
+
+                <div class="row g-3">
+                    <div class="col-6">
+                        <!-- 🚀 Tambahkan class foto-card-container di sini -->
+                        <div class="card card-outline card-success mb-0 h-100 foto-card-container">
+                            <!-- 🚀 Tambahkan class foto-card-body di sini -->
+                            <div class="card-body p-3 text-center foto-card-body">
+                                <label class="d-block mb-2 fw-bold text-muted">Foto KPM+KKS <span class="text-danger">*</span></label>
+                                <img id="prev_kpm" src="<?= base_url('assets/img/no-image.svg'); ?>" class="img-fluid border rounded mb-3 preview-foto-kpm">
+
+                                <div class="custom-file upload-btn-responsive">
                                     <input type="file" class="custom-file-input" name="foto_kpm_kks" id="foto_kpm_kks" accept="image/*">
-                                    <label class="custom-file-label small" for="foto_kpm_kks">Upload...</label>
+                                    <label class="custom-file-label text-left text-truncate" for="foto_kpm_kks">Pilih foto...</label>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-6 mb-3">
-                        <div class="card card-outline card-success h-100">
-                            <div class="card-body p-2 text-center">
-                                <label class="small d-block mb-1">Foto Struk/Uang <span class="text-danger">*</span></label>
-                                <img id="prev_bukti" src="<?= base_url('assets/img/no-image.svg'); ?>" class="img-fluid border rounded mb-2" style="aspect-ratio: 1/1; object-fit: cover;">
-                                <div class="custom-file">
+                    <div class="col-6">
+                        <!-- 🚀 Tambahkan class foto-card-container di sini -->
+                        <div class="card card-outline card-success mb-0 h-100 foto-card-container">
+                            <!-- 🚀 Tambahkan class foto-card-body di sini -->
+                            <div class="card-body p-3 text-center foto-card-body">
+                                <label class="d-block mb-2 fw-bold text-muted">Foto Bukti/Uang <span class="text-danger">*</span></label>
+                                <img id="prev_bukti" src="<?= base_url('assets/img/no-image.svg'); ?>" class="img-fluid border rounded mb-3 preview-foto-kpm">
+
+                                <div class="custom-file upload-btn-responsive">
                                     <input type="file" class="custom-file-input" name="foto_bukti_transaksi" id="foto_bukti_transaksi" accept="image/*">
-                                    <label class="custom-file-label small" for="foto_bukti_transaksi">Upload...</label>
+                                    <label class="custom-file-label text-left text-truncate" for="foto_bukti_transaksi">Pilih foto...</label>
                                 </div>
                             </div>
                         </div>
@@ -283,13 +354,16 @@
 
                 <input type="hidden" id="lat" name="latitude">
                 <input type="hidden" id="lng" name="longitude">
-            </div>
 
-            <div class="p-3 bg-white border-top sticky-bottom">
+            </div> <!-- Akhir Area Scrollable -->
+
+            <!-- 🚀 KUNCI 4: Tombol Footer di luar area scroll, lepas atribut sticky-bottom -->
+            <div class="p-3 bg-white border-top">
                 <button type="submit" id="btnSimpan" class="btn btn-primary btn-block py-2 rounded-pill shadow">
                     <i class="fas fa-save mr-1"></i> Simpan Dokumentasi
                 </button>
             </div>
+
         </form>
     </div>
 </div>
