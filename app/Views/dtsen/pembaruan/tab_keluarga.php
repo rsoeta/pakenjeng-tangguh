@@ -278,12 +278,11 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                     </div>
 
                     <!-- Triwulan -->
-                    <div class="mb-3">
+                    <!-- <div class="mb-3">
                         <label class="form-label fw-bold">Periode Triwulan</label>
 
                         <div class="row g-2 text-center">
 
-                            <!-- TW1 -->
                             <div class="col-6 col-md-3">
                                 <input type="radio" class="btn-check" name="triwulan" id="tw1" value="1" required>
 
@@ -296,7 +295,6 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                                 </label>
                             </div>
 
-                            <!-- TW2 -->
                             <div class="col-6 col-md-3">
                                 <input type="radio" class="btn-check" name="triwulan" id="tw2" value="2">
 
@@ -309,7 +307,6 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                                 </label>
                             </div>
 
-                            <!-- TW3 -->
                             <div class="col-6 col-md-3">
                                 <input type="radio" class="btn-check" name="triwulan" id="tw3" value="3">
 
@@ -322,7 +319,6 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                                 </label>
                             </div>
 
-                            <!-- TW4 -->
                             <div class="col-6 col-md-3">
                                 <input type="radio" class="btn-check" name="triwulan" id="tw4" value="4">
 
@@ -336,6 +332,16 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                             </div>
 
                         </div>
+                    </div> -->
+                    <!-- Triwulan -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Periode Triwulan</label>
+                        <div class="input-group">
+                            <span class="input-group-text fw-bold text-primary">TW</span>
+                            <!-- 🚀 UBAH JADI INPUT NUMBER (Mendukung Desimal) -->
+                            <input type="number" class="form-control" name="triwulan" id="inputTriwulan" step="0.1" min="1" max="4.9" placeholder="Contoh: 3 atau 3.1" required>
+                        </div>
+                        <small class="text-muted fst-italic mt-1 d-block">Gunakan titik (.) untuk angka desimal sisipan (misal: 3.1)</small>
                     </div>
 
                     <!-- Desil -->
@@ -680,27 +686,6 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                 desilChartInstance.render();
             });
     }
-
-    // Panggil langsung tanpa tunggu tab event
-    // document.addEventListener("DOMContentLoaded", function() {
-    //     setTimeout(loadDesilChart, 300);
-    // });
-
-    // Render saat tab keluarga aktif
-    // document.addEventListener('shown.bs.tab', function(event) {
-    //     const targetId = event.target.getAttribute('data-bs-target');
-    //     if (targetId === '#tabKeluarga') {
-    //         loadDesilChart();
-    //     }
-    // });
-
-    // Jika tab keluarga sudah aktif saat load
-    // document.addEventListener("DOMContentLoaded", function() {
-    //     const activeTab = document.querySelector('.nav-link.active');
-    //     if (activeTab && activeTab.getAttribute('data-bs-target') === '#tabKeluarga') {
-    //         loadDesilChart();
-    //     }
-    // });
 
     // 🚀 Render grafik HANYA saat Modal Grafik Desil terbuka (Mencegah bug width 0px ApexCharts)
     document.getElementById('modalChartDesil').addEventListener('shown.bs.modal', function() {

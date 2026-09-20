@@ -2393,13 +2393,87 @@ class PembaruanKeluarga extends BaseController
         }
     }
 
+    // public function addHistoricalDesil()
+    // {
+    //     try {
+    //         $session = session();
+    //         $roleId = $session->get('role_id') ?? 99;
+
+    //         // 🔒 Hanya role <= 3 yang boleh
+    //         if ($roleId > 3) {
+    //             return $this->response->setJSON([
+    //                 'status' => 'error',
+    //                 'message' => 'Anda tidak memiliki akses untuk menambahkan snapshot historis.'
+    //             ]);
+    //         }
+
+    //         $post = $this->request->getPost();
+    //         $userId = $session->get('id_user') ?? 0;
+
+    //         $idKk     = $post['id_kk'] ?? null;
+    //         $tahun    = (int) ($post['tahun'] ?? 0);
+    //         $triwulan = (int) ($post['triwulan'] ?? 0);
+
+    //         // 🚀 PERBAIKAN: Tangkap desil secara mentah dulu
+    //         $desilRaw = $post['desil'] ?? null;
+
+    //         // 🚀 PERBAIKAN: Validasi harus mengecek jika desil benar-benar tidak dikirim atau string kosong
+    //         if (!$idKk || $desilRaw === null || $desilRaw === '' || !$tahun || !$triwulan) {
+    //             return $this->response->setJSON([
+    //                 'status' => 'error',
+    //                 'message' => 'Data tidak lengkap.'
+    //             ]);
+    //         }
+
+    //         // Pastikan desil menjadi integer (0 akan tetap 0)
+    //         $desil = (int) $desilRaw;
+
+    //         // 🔍 Cek apakah sudah ada periode ini
+    //         $existing = $this->db->table('dtsen_desil_history')
+    //             ->where([
+    //                 'id_kk'    => $idKk,
+    //                 'tahun'    => $tahun,
+    //                 'triwulan' => $triwulan
+    //             ])
+    //             ->get()
+    //             ->getRowArray();
+
+    //         if ($existing) {
+    //             return $this->response->setJSON([
+    //                 'status' => 'error',
+    //                 'message' => 'Snapshot periode ini sudah ada.'
+    //             ]);
+    //         }
+
+    //         $label = 'TW' . $triwulan . ' ' . $tahun;
+
+    //         $this->db->table('dtsen_desil_history')->insert([
+    //             'id_kk'         => $idKk,
+    //             'desil'         => $desil,
+    //             'tahun'         => $tahun,
+    //             'triwulan'      => $triwulan,
+    //             'periode_label' => $label,
+    //             'source'        => 'historical_manual',
+    //             'created_by'    => $userId
+    //         ]);
+
+    //         return $this->response->setJSON([
+    //             'status' => 'success',
+    //             'message' => 'Snapshot historis berhasil ditambahkan.'
+    //         ]);
+    //     } catch (\Throwable $e) {
+    //         return $this->response->setJSON([
+    //             'status' => 'error',
+    //             'message' => $e->getMessage()
+    //         ]);
+    //     }
+    // }
     public function addHistoricalDesil()
     {
         try {
             $session = session();
             $roleId = $session->get('role_id') ?? 99;
 
-            // 🔒 Hanya role <= 3 yang boleh
             if ($roleId > 3) {
                 return $this->response->setJSON([
                     'status' => 'error',
@@ -2412,12 +2486,11 @@ class PembaruanKeluarga extends BaseController
 
             $idKk     = $post['id_kk'] ?? null;
             $tahun    = (int) ($post['tahun'] ?? 0);
-            $triwulan = (int) ($post['triwulan'] ?? 0);
 
-            // 🚀 PERBAIKAN: Tangkap desil secara mentah dulu
+            // 🚀 PERBAIKAN FATAL: Gunakan floatval() agar angka desimal (3.1) tidak jadi bulat (3)
+            $triwulan = floatval($post['triwulan'] ?? 0);
             $desilRaw = $post['desil'] ?? null;
 
-            // 🚀 PERBAIKAN: Validasi harus mengecek jika desil benar-benar tidak dikirim atau string kosong
             if (!$idKk || $desilRaw === null || $desilRaw === '' || !$tahun || !$triwulan) {
                 return $this->response->setJSON([
                     'status' => 'error',
@@ -2425,7 +2498,6 @@ class PembaruanKeluarga extends BaseController
                 ]);
             }
 
-            // Pastikan desil menjadi integer (0 akan tetap 0)
             $desil = (int) $desilRaw;
 
             // 🔍 Cek apakah sudah ada periode ini

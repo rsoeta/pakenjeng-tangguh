@@ -172,9 +172,12 @@ if (!function_exists('getPeriodeDesil')) {
     function getPeriodeDesil($date = null)
     {
         $date = $date ?? date('Y-m-d');
-
         $tahun = (int) date('Y', strtotime($date));
+
+        // 🚀 KUNCI: Biarkan getTriwulanFromDate menghitung, 
+        // tapi pastikan outputnya tidak dibulatkan secara paksa jadi int
         $triwulan = getTriwulanFromDate($date);
+
         $label = "TW{$triwulan} {$tahun}";
 
         return [
@@ -184,3 +187,20 @@ if (!function_exists('getPeriodeDesil')) {
         ];
     }
 }
+
+// if (!function_exists('getPeriodeDesil')) {
+//     function getPeriodeDesil($date = null)
+//     {
+//         $date = $date ?? date('Y-m-d');
+
+//         $tahun = (int) date('Y', strtotime($date));
+//         $triwulan = getTriwulanFromDate($date);
+//         $label = "TW{$triwulan} {$tahun}";
+
+//         return [
+//             'tahun' => $tahun,
+//             'triwulan' => $triwulan,
+//             'label' => $label
+//         ];
+//     }
+// }
