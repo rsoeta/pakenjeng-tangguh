@@ -778,7 +778,7 @@ class PembaruanKeluarga extends BaseController
                     'individu_no_kk' => $post['individu_no_kk'] ?? null,
                     'nik' => $post['nik'] ?? null,
                     'nama' => $post['nama'] ?? null,
-                    'no_hp' => $post['no_hp'] ?? null, // 🚀 NEW
+                    'no_hp' => $post['no_hp'] ?? null,
                     'tempat_lahir' => $post['tempat_lahir'] ?? null,
                     'tanggal_lahir' => $post['tanggal_lahir'] ?? null,
                     'jenis_kelamin' => $post['jenis_kelamin'] ?? null,
@@ -841,6 +841,98 @@ class PembaruanKeluarga extends BaseController
         }
     }
 
+    // public function getAnggotaDetail($id = null)
+    // {
+    //     try {
+    //         $db = \Config\Database::connect();
+    //         $genModel = new \App\Models\GenModel();
+
+    //         if (empty($id) || !is_numeric($id)) {
+    //             return $this->response->setJSON([
+    //                 'status' => 'empty',
+    //                 'data' => [
+    //                     'usulan_id' => null,
+    //                     'anggota_prefill' => [],
+    //                     'dropdowns' => [
+    //                         'status_kawin' => $genModel->getDataStatusKawin(),
+    //                         'hubungan' => $genModel->getDataShdk(),
+    //                         'pekerjaan' => $genModel->getPendudukPekerjaan(),
+    //                         'pendidikan' => $genModel->getPendidikan(),
+    //                     ]
+    //                 ]
+    //             ]);
+    //         }
+
+    //         $usulanArt = $db->table('dtsen_usulan_art')->where('id', $id)->get()->getRowArray();
+    //         $usulan_id = null;
+    //         $anggota_prefill = [];
+
+    //         if ($usulanArt) {
+    //             $payload = json_decode($usulanArt['payload_member'] ?? '{}', true);
+    //             $anggota_prefill = array_merge(
+    //                 [
+    //                     'id' => $usulanArt['id'],
+    //                     'dtsen_usulan_id' => $usulanArt['dtsen_usulan_id'],
+    //                     'nik' => $usulanArt['nik'],
+    //                     'nama' => $usulanArt['nama'],
+    //                     'hubungan' => $usulanArt['hubungan'],
+    //                 ],
+    //                 [
+    //                     'individu_no_kk' => $payload['identitas']['individu_no_kk'] ?? '',
+    //                     'no_hp' => $payload['identitas']['no_hp'] ?? '',
+    //                     'tempat_lahir' => $payload['identitas']['tempat_lahir'] ?? '',
+    //                     'tanggal_lahir' => $payload['identitas']['tanggal_lahir'] ?? '',
+    //                     'jenis_kelamin' => $payload['identitas']['jenis_kelamin'] ?? '',
+    //                     'status_kawin' => $payload['identitas']['status_kawin'] ?? '',
+    //                     'hubungan_keluarga' => $payload['identitas']['hubungan'] ?? '',
+    //                     'pekerjaan' => $payload['identitas']['pekerjaan'] ?? '',
+    //                     'pendidikan_terakhir' => $payload['identitas']['pendidikan_terakhir'] ?? '',
+    //                     'ibu_kandung' => $payload['identitas']['ibu_kandung'] ?? '',
+    //                     'provinsi' => $payload['identitas']['provinsi'] ?? '',
+    //                     'kabupaten' => $payload['identitas']['kabupaten'] ?? '',
+    //                     'kecamatan' => $payload['identitas']['kecamatan'] ?? '',
+    //                     'desa' => $payload['identitas']['desa'] ?? '',
+    //                     'status_keberadaan' => $payload['identitas']['status_keberadaan'] ?? 'Belum Ditentukan',
+    //                     'partisipasi_sekolah' => $payload['pendidikan']['partisipasi_sekolah'] ?? '',
+    //                     'jenjang_pendidikan'  => $payload['pendidikan']['jenjang_pendidikan'] ?? '',
+    //                     'kelas_tertinggi'     => $payload['pendidikan']['kelas_tertinggi'] ?? '',
+    //                     'ijazah_tertinggi'   => $payload['pendidikan']['ijazah_tertinggi'] ?? '',
+    //                     'bekerja_seminggu' => $payload['tenaga_kerja']['bekerja_seminggu'] ?? '',
+    //                     'lapangan_usaha'     => $payload['tenaga_kerja']['lapangan_usaha'] ?? '',
+    //                     'status_pekerjaan'   => $payload['tenaga_kerja']['status_pekerjaan'] ?? '',
+    //                     'pendapatan'         => $payload['tenaga_kerja']['pendapatan'] ?? '',
+    //                     'rekening_aktif'     => $payload['tenaga_kerja']['rekening_aktif'] ?? '', // 🚀 NEW
+    //                     'keterampilan'       => $payload['tenaga_kerja']['keterampilan'] ?? [],
+    //                     'status_hamil'       => $payload['kesehatan']['status_hamil'] ?? '',
+    //                     'penyakit_kronis'    => $payload['kesehatan']['penyakit_kronis'] ?? '',
+    //                     'disabilitas'        => $payload['kesehatan']['disabilitas'] ?? [],
+    //                 ]
+    //             );
+    //             $usulan_id = $usulanArt['dtsen_usulan_id'];
+    //         } else {
+    //             $art = $db->table('dtsen_art a')->select('a.*, kk.no_kk as individu_no_kk, kk.kepala_keluarga')->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'left')->where('a.id_art', $id)->get()->getRowArray();
+    //             if (!$art) return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak ditemukan.']);
+    //             $anggota_prefill = $art;
+    //         }
+
+    //         $refStatusKawin = $genModel->getDataStatusKawin();
+    //         $refShdk        = $genModel->getDataShdk();
+    //         $refPekerjaan   = $genModel->getPendudukPekerjaan();
+    //         $refPendidikan  = $genModel->getPendidikan();
+
+    //         return $this->response->setJSON([
+    //             'status'  => 'success',
+    //             'data'    => [
+    //                 'usulan_id' => $usulan_id,
+    //                 'anggota_prefill' => $anggota_prefill,
+    //                 'dropdowns' => ['status_kawin' => $refStatusKawin, 'hubungan' => $refShdk, 'pekerjaan' => $refPekerjaan, 'pendidikan' => $refPendidikan]
+    //             ]
+    //         ]);
+    //     } catch (\Throwable $e) {
+    //         return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
+    //     }
+    // }
+
     public function getAnggotaDetail($id = null)
     {
         try {
@@ -866,7 +958,42 @@ class PembaruanKeluarga extends BaseController
             $usulanArt = $db->table('dtsen_usulan_art')->where('id', $id)->get()->getRowArray();
             $usulan_id = null;
             $anggota_prefill = [];
+            $art = null;
 
+            // 🚀 SMART SENSOR: Jika tidak ditemukan di usulan_art (Berarti tombol masih pakai ID Master lama)
+            if (!$usulanArt) {
+                $art = $db->table('dtsen_art a')
+                    ->select('a.*, kk.no_kk as individu_no_kk, kk.kepala_keluarga')
+                    ->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'left')
+                    ->where('a.id_art', $id)
+                    ->get()->getRowArray();
+
+                if ($art) {
+                    // Cari tahu apakah keluarga ini sedang punya draft usulan berjalan
+                    $activeUsulan = $db->table('dtsen_usulan')
+                        ->where('dtsen_kk_id', $art['id_kk'])
+                        ->whereIn('status', ['draft', 'submitted'])
+                        ->orderBy('id', 'DESC')
+                        ->get()->getRowArray();
+
+                    if ($activeUsulan) {
+                        // Jika ada, cari apakah orang ini (berdasarkan NIK) sudah pernah disimpan di draft
+                        $usulanArtDraft = $db->table('dtsen_usulan_art')
+                            ->where('dtsen_usulan_id', $activeUsulan['id'])
+                            ->where('nik', $art['nik'])
+                            ->get()->getRowArray();
+
+                        // Jika ketemu, kita paksa sistem pakai data dari draft ini!
+                        if ($usulanArtDraft) {
+                            $usulanArt = $usulanArtDraft;
+                        }
+                    }
+                }
+            }
+
+            // =========================================================
+            // 🚀 PERAKITAN DATA KE FRONTEND
+            // =========================================================
             if ($usulanArt) {
                 $payload = json_decode($usulanArt['payload_member'] ?? '{}', true);
                 $anggota_prefill = array_merge(
@@ -878,41 +1005,46 @@ class PembaruanKeluarga extends BaseController
                         'hubungan' => $usulanArt['hubungan'],
                     ],
                     [
-                        'individu_no_kk' => $payload['identitas']['individu_no_kk'] ?? '',
-                        'no_hp' => $payload['identitas']['no_hp'] ?? '', // 🚀 NEW
-                        'tempat_lahir' => $payload['identitas']['tempat_lahir'] ?? '',
-                        'tanggal_lahir' => $payload['identitas']['tanggal_lahir'] ?? '',
-                        'jenis_kelamin' => $payload['identitas']['jenis_kelamin'] ?? '',
-                        'status_kawin' => $payload['identitas']['status_kawin'] ?? '',
-                        'hubungan_keluarga' => $payload['identitas']['hubungan'] ?? '',
-                        'pekerjaan' => $payload['identitas']['pekerjaan'] ?? '',
+                        'individu_no_kk'      => $payload['identitas']['individu_no_kk'] ?? '',
+                        'no_hp'               => $payload['identitas']['no_hp'] ?? '',
+                        'tempat_lahir'        => $payload['identitas']['tempat_lahir'] ?? '',
+                        'tanggal_lahir'       => $payload['identitas']['tanggal_lahir'] ?? '',
+                        'jenis_kelamin'       => $payload['identitas']['jenis_kelamin'] ?? '',
+                        'status_kawin'        => $payload['identitas']['status_kawin'] ?? '',
+                        'hubungan_keluarga'   => $payload['identitas']['hubungan'] ?? '',
+                        'pekerjaan'           => $payload['identitas']['pekerjaan'] ?? '',
                         'pendidikan_terakhir' => $payload['identitas']['pendidikan_terakhir'] ?? '',
-                        'ibu_kandung' => $payload['identitas']['ibu_kandung'] ?? '',
-                        'provinsi' => $payload['identitas']['provinsi'] ?? '',
-                        'kabupaten' => $payload['identitas']['kabupaten'] ?? '',
-                        'kecamatan' => $payload['identitas']['kecamatan'] ?? '',
-                        'desa' => $payload['identitas']['desa'] ?? '',
-                        'status_keberadaan' => $payload['identitas']['status_keberadaan'] ?? 'Belum Ditentukan',
+                        'ibu_kandung'         => $payload['identitas']['ibu_kandung'] ?? '',
+                        'provinsi'            => $payload['identitas']['provinsi'] ?? '',
+                        'kabupaten'           => $payload['identitas']['kabupaten'] ?? '',
+                        'kecamatan'           => $payload['identitas']['kecamatan'] ?? '',
+                        'desa'                => $payload['identitas']['desa'] ?? '',
+                        'status_keberadaan'   => $payload['identitas']['status_keberadaan'] ?? 'Belum Ditentukan',
                         'partisipasi_sekolah' => $payload['pendidikan']['partisipasi_sekolah'] ?? '',
                         'jenjang_pendidikan'  => $payload['pendidikan']['jenjang_pendidikan'] ?? '',
                         'kelas_tertinggi'     => $payload['pendidikan']['kelas_tertinggi'] ?? '',
-                        'ijazah_tertinggi'   => $payload['pendidikan']['ijazah_tertinggi'] ?? '',
-                        'bekerja_seminggu' => $payload['tenaga_kerja']['bekerja_seminggu'] ?? '',
-                        'lapangan_usaha'     => $payload['tenaga_kerja']['lapangan_usaha'] ?? '',
-                        'status_pekerjaan'   => $payload['tenaga_kerja']['status_pekerjaan'] ?? '',
-                        'pendapatan'         => $payload['tenaga_kerja']['pendapatan'] ?? '',
-                        'rekening_aktif'     => $payload['tenaga_kerja']['rekening_aktif'] ?? '', // 🚀 NEW
-                        'keterampilan'       => $payload['tenaga_kerja']['keterampilan'] ?? [],
-                        'status_hamil'       => $payload['kesehatan']['status_hamil'] ?? '',
-                        'penyakit_kronis'    => $payload['kesehatan']['penyakit_kronis'] ?? '',
-                        'disabilitas'        => $payload['kesehatan']['disabilitas'] ?? [],
+                        'ijazah_tertinggi'    => $payload['pendidikan']['ijazah_tertinggi'] ?? '',
+                        'bekerja_seminggu'    => $payload['tenaga_kerja']['bekerja_seminggu'] ?? '',
+                        'lapangan_usaha'      => $payload['tenaga_kerja']['lapangan_usaha'] ?? '',
+                        'status_pekerjaan'    => $payload['tenaga_kerja']['status_pekerjaan'] ?? '',
+                        'pendapatan'          => $payload['tenaga_kerja']['pendapatan'] ?? '',
+                        'rekening_aktif'      => $payload['tenaga_kerja']['rekening_aktif'] ?? '',
+                        'keterampilan'        => $payload['tenaga_kerja']['keterampilan'] ?? [],
+                        'status_hamil'        => $payload['kesehatan']['status_hamil'] ?? '',
+                        'penyakit_kronis'     => $payload['kesehatan']['penyakit_kronis'] ?? '',
+                        'disabilitas'         => $payload['kesehatan']['disabilitas'] ?? [],
                     ]
                 );
                 $usulan_id = $usulanArt['dtsen_usulan_id'];
             } else {
-                $art = $db->table('dtsen_art a')->select('a.*, kk.no_kk as individu_no_kk, kk.kepala_keluarga')->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'left')->where('a.id_art', $id)->get()->getRowArray();
                 if (!$art) return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak ditemukan.']);
+
                 $anggota_prefill = $art;
+
+                // 🚀 ANTI-BOCOR JS: Pastikan key elemen baru ada meskipun nilainya kosong
+                // Ini akan memaksa JS untuk me-reset inputan form, bukan mendiamkannya
+                $anggota_prefill['no_hp'] = $art['no_hp'] ?? '';
+                $anggota_prefill['rekening_aktif'] = $art['rekening_aktif'] ?? '';
             }
 
             $refStatusKawin = $genModel->getDataStatusKawin();
