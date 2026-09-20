@@ -79,13 +79,23 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                                         <!-- 🚀 ELEMEN DINAMIS: Nilai Sepeda Motor -->
                                         <div id="div_nilai_sepeda_motor" class="mt-2 p-2 bg-light border border-primary rounded" style="display: none;">
                                             <label class="form-label text-primary mb-1">Total Nilai Aset Motor (Rp) <span class="text-danger">*</span></label>
-                                            <input type="text" name="nilai_sepeda_motor" id="nilai_sepeda_motor" class="form-control form-control-sm rupiah border-primary" value="<?= esc($aset['nilai_sepeda_motor'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" name="nilai_sepeda_motor" id="nilai_sepeda_motor" class="form-control rupiah border-primary" value="<?= esc($aset['nilai_sepeda_motor'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
+                                                <?php if (!$disabled): ?>
+                                                    <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#nilai_sepeda_motor" title="Salin Nilai Motor"><i class="fas fa-copy"></i></button>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
                                     <?php elseif ($name === 'mobil'): ?>
                                         <!-- 🚀 ELEMEN DINAMIS: Nilai Mobil -->
                                         <div id="div_nilai_mobil" class="mt-2 p-2 bg-light border border-primary rounded" style="display: none;">
                                             <label class="form-label text-primary mb-1">Total Nilai Aset Mobil (Rp) <span class="text-danger">*</span></label>
-                                            <input type="text" name="nilai_mobil" id="nilai_mobil" class="form-control form-control-sm rupiah border-primary" value="<?= esc($aset['nilai_mobil'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" name="nilai_mobil" id="nilai_mobil" class="form-control rupiah border-primary" value="<?= esc($aset['nilai_mobil'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
+                                                <?php if (!$disabled): ?>
+                                                    <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#nilai_mobil" title="Salin Nilai Mobil"><i class="fas fa-copy"></i></button>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -130,6 +140,31 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
+                            <!-- 🚀 ELEMEN BARU: Rumah/Bangunan Lain (Unit) & Nilai -->
+                            <div class="col-md-4">
+                                <label class="form-label">Rumah / Bangunan Lain (Unit) <span class="text-danger">*</span></label>
+                                <input type="number" min="0" name="rumah_lain" id="rumah_lain"
+                                    class="form-control form-control-sm <?= $disabled ? '' : 'required-field' ?>"
+                                    value="<?= esc($aset['rumah_lain'] ?? '') ?>" <?= $disabled ?> <?= $disabled ? '' : 'required' ?> placeholder="Ketik 0 jika tidak punya">
+                                <?php if (!$disabled): ?>
+                                    <div class="invalid-feedback">
+                                        Wajib mengisi jumlah unit (isi 0 jika tidak memiliki).
+                                    </div>
+                                <?php endif; ?>
+
+                                <!-- 🚀 ELEMEN DINAMIS: Nilai Rumah Lain -->
+                                <div id="div_nilai_rumah" class="mt-2 p-2 bg-light border border-primary rounded" style="display: none;">
+                                    <label class="form-label text-primary mb-1">Total Nilai Aset Rumah (Rp) <span class="text-danger">*</span></label>
+                                    <div class="input-group input-group-sm has-validation">
+                                        <input type="text" name="nilai_rumah_lain" id="nilai_rumah_lain" class="form-control rupiah border-primary" value="<?= esc($aset['nilai_rumah_lain'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
+                                        <?php if (!$disabled): ?>
+                                            <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#nilai_rumah_lain" title="Salin Nilai Rumah"><i class="fas fa-copy"></i></button>
+                                        <?php endif; ?>
+                                        <div class="invalid-feedback">Wajib diisi karena unit > 0</div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- 🚀 ELEMEN BARU (BPS): Jumlah Titik Lahan Sawah/Kebun & Nilai -->
                             <div class="col-md-4">
                                 <label class="form-label" title="Dihitung per titik lokasi/RT, bukan meter persegi">
@@ -149,8 +184,15 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                                 <!-- 🚀 ELEMEN DINAMIS: Nilai Sawah -->
                                 <div id="div_nilai_sawah" class="mt-2 p-2 bg-light border border-primary rounded" style="display: none;">
                                     <label class="form-label text-primary mb-1">Total Nilai Aset Lahan (Rp) <span class="text-danger">*</span></label>
-                                    <input type="text" name="nilai_sawah" id="nilai_sawah" class="form-control form-control-sm rupiah border-primary" value="<?= esc($aset['nilai_sawah'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
-                                    <div class="invalid-feedback">Wajib diisi karena jumlah lahan > 0</div>
+                                    <div class="input-group input-group-sm has-validation">
+                                        <input type="text" name="nilai_sawah" id="nilai_sawah" class="form-control rupiah border-primary" value="<?= esc($aset['nilai_sawah'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
+                                        <?php if (!$disabled): ?>
+                                            <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#nilai_sawah" title="Salin Nilai Lahan"><i class="fas fa-copy"></i></button>
+                                        <?php endif; ?>
+
+                                        <!-- 🚀 TAMBAHKAN ID err_nilai_sawah DI SINI -->
+                                        <div id="err_nilai_sawah" class="invalid-feedback">Wajib diisi karena jumlah lahan > 0</div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -164,26 +206,6 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                                     <option value="TIDAK" <?= ($aset['memiliki_lahan'] ?? '') === 'TIDAK' ? 'selected' : '' ?>>TIDAK</option>
                                     <option value="YA" <?= ($aset['memiliki_lahan'] ?? '') === 'YA' ? 'selected' : '' ?>>YA</option>
                                 </select>
-                            </div>
-
-                            <!-- 🚀 ELEMEN BARU: Rumah/Bangunan Lain (Unit) & Nilai -->
-                            <div class="col-md-4">
-                                <label class="form-label">Rumah / Bangunan Lain (Unit) <span class="text-danger">*</span></label>
-                                <input type="number" min="0" name="rumah_lain" id="rumah_lain"
-                                    class="form-control form-control-sm <?= $disabled ? '' : 'required-field' ?>"
-                                    value="<?= esc($aset['rumah_lain'] ?? '') ?>" <?= $disabled ?> <?= $disabled ? '' : 'required' ?> placeholder="Ketik 0 jika tidak punya">
-                                <?php if (!$disabled): ?>
-                                    <div class="invalid-feedback">
-                                        Wajib mengisi jumlah unit (isi 0 jika tidak memiliki).
-                                    </div>
-                                <?php endif; ?>
-
-                                <!-- 🚀 ELEMEN DINAMIS: Nilai Rumah Lain -->
-                                <div id="div_nilai_rumah" class="mt-2 p-2 bg-light border border-primary rounded" style="display: none;">
-                                    <label class="form-label text-primary mb-1">Total Nilai Aset Rumah (Rp) <span class="text-danger">*</span></label>
-                                    <input type="text" name="nilai_rumah_lain" id="nilai_rumah_lain" class="form-control form-control-sm rupiah border-primary" value="<?= esc($aset['nilai_rumah_lain'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
-                                    <div class="invalid-feedback">Wajib diisi karena unit > 0</div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -209,25 +231,43 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
 <script>
     $(function() {
         // ====================================================
-        // 🚀 LOGIKA DINAMIS: NILAI ASET MUNCUL JIKA ANGKA > 0
+        // 🚀 LOGIKA DINAMIS & VALIDASI BPS: ASET LAHAN
+        // 1 Titik = Minimal Rp 6.000.000
         // ====================================================
-        function toggleNilaiSawah() {
-            const val = parseFloat($('#luas_sawah').val()) || 0;
-            if (val > 0) {
+        function cekStandarSawahBPS() {
+            let jmlSawah = parseInt($('#luas_sawah').val()) || 0;
+            let rawNilai = $('#nilai_sawah').val().replace(/[^0-9]/g, '');
+            let nilaiSawah = parseInt(rawNilai) || 0;
+
+            if (jmlSawah > 0) {
                 $('#div_nilai_sawah').slideDown();
                 $('#nilai_sawah').prop('required', true);
 
                 // 🚀 AUTO-SET MEMILIKI LAHAN = YA
                 $('#memiliki_lahan').val('YA');
+
+                // Hitung nilai minimal (Jumlah Titik x Rp 6.000.000)
+                let minNilaiBPS = jmlSawah * 6000000;
+
+                if (nilaiSawah < minNilaiBPS) {
+                    let formatMin = new Intl.NumberFormat('id-ID').format(minNilaiBPS);
+                    $('#nilai_sawah').addClass('is-invalid').removeClass('border-primary');
+                    $('#err_nilai_sawah').text('Total Nilai Aset minimal bernilai Rp ' + formatMin);
+                } else {
+                    $('#nilai_sawah').removeClass('is-invalid').addClass('border-primary');
+                }
             } else {
                 $('#div_nilai_sawah').slideUp();
-                $('#nilai_sawah').prop('required', false).val('');
+                $('#nilai_sawah').prop('required', false).removeClass('is-invalid');
 
                 // 🚀 AUTO-SET MEMILIKI LAHAN = TIDAK
                 $('#memiliki_lahan').val('TIDAK');
             }
         }
 
+        // ====================================================
+        // 🚀 LOGIKA DINAMIS: NILAI RUMAH, MOTOR, & MOBIL
+        // ====================================================
         function toggleNilaiRumah() {
             const val = parseInt($('#rumah_lain').val()) || 0;
             if (val > 0) {
@@ -239,17 +279,6 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
             }
         }
 
-        // Jalankan saat diketik
-        $('#luas_sawah').on('input change', toggleNilaiSawah);
-        $('#rumah_lain').on('input change', toggleNilaiRumah);
-
-        // Panggil saat halaman pertama kali diload (untuk prefill dari database)
-        toggleNilaiSawah();
-        toggleNilaiRumah();
-
-        // ====================================================
-        // 🚀 LOGIKA DINAMIS: NILAI KENDARAAN (MOTOR & MOBIL)
-        // ====================================================
         function toggleNilaiMotor() {
             const val = parseInt($('#sepeda_motor').val()) || 0;
             if (val > 0) {
@@ -272,19 +301,48 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
             }
         }
 
-        // Jalankan saat diketik
+        // 🎯 EVENT LISTENER (Jalankan saat diketik)
+        $('#luas_sawah, #nilai_sawah').on('input change', cekStandarSawahBPS);
+        $('#rumah_lain').on('input change', toggleNilaiRumah);
         $('#sepeda_motor').on('input change', toggleNilaiMotor);
         $('#mobil').on('input change', toggleNilaiMobil);
 
-        // Panggil saat halaman pertama kali diload
+        // 🎯 INISIALISASI SAAT HALAMAN DIBUKA (Untuk prefill data)
+        cekStandarSawahBPS();
+        toggleNilaiRumah();
         toggleNilaiMotor();
         toggleNilaiMobil();
 
+        // ====================================================
+        // 💾 EVENT SIMPAN ASET (Dengan Gatekeeper BPS)
+        // ====================================================
         $('#btnSimpanAset').on('click', function(e) {
             e.preventDefault();
 
-            const form = $('#formAset')[0];
+            // 1️⃣ GATEKEEPER 1: Cek Standar Nilai Lahan BPS
+            let jmlSawah = parseInt($('#luas_sawah').val()) || 0;
+            let rawNilai = $('#nilai_sawah').val().replace(/[^0-9]/g, '');
+            let nilaiSawah = parseInt(rawNilai) || 0;
+            let minNilaiBPS = jmlSawah * 6000000;
 
+            if (jmlSawah > 0 && nilaiSawah < minNilaiBPS) {
+                let formatMin = new Intl.NumberFormat('id-ID').format(minNilaiBPS);
+                $('#nilai_sawah').focus();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Data Aset Tidak Logis',
+                    text: 'Sesuai standar BPS, untuk ' + jmlSawah + ' lokasi lahan, Total Nilai Aset minimal bernilai Rp ' + formatMin,
+                    width: '320px',
+                    customClass: {
+                        title: 'fs-5',
+                        content: 'fs-6'
+                    }
+                });
+                return; // 🛑 Hentikan proses simpan!
+            }
+
+            // 2️⃣ GATEKEEPER 2: Cek Validitas Form HTML5 (Wajib Isi)
+            const form = $('#formAset')[0];
             if (!form.checkValidity()) {
                 form.classList.add('was-validated');
                 Swal.fire({
@@ -297,9 +355,10 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                         content: 'fs-6'
                     }
                 });
-                return;
+                return; // 🛑 Hentikan proses simpan!
             }
 
+            // 3️⃣ JIKA LOLOS SEMUA -> PROSES AJAX SIMPAN
             const formData = $('#formAset').serialize();
 
             $.post('<?= base_url('pembaruan-keluarga/save-aset') ?>', formData, function(res) {
@@ -337,6 +396,42 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                         content: 'fs-6'
                     }
                 });
+            });
+        });
+    });
+    // =======================================================
+    // 📋 FUNGSI SALIN KE CLIPBOARD (DINAMIS UNTUK SEMUA INPUT)
+    // =======================================================
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.btn-copy-input').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Ambil ID target dari atribut data-target
+                const targetSelector = this.getAttribute('data-target');
+                const inputEl = document.querySelector(targetSelector);
+
+                if (inputEl && inputEl.value.trim() !== '') {
+                    // Salin ke clipboard
+                    navigator.clipboard.writeText(inputEl.value.trim()).then(() => {
+                        Swal.fire({
+                            toast: true,
+                            position: 'bottom-end',
+                            icon: 'success',
+                            title: 'Teks disalin!',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    });
+                } else {
+                    // Jika inputan masih kosong
+                    Swal.fire({
+                        toast: true,
+                        position: 'bottom-end',
+                        icon: 'warning',
+                        title: 'Kolom masih kosong!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
             });
         });
     });
