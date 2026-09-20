@@ -169,8 +169,11 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                     <div class="col-md-4">
                         <label class="form-label text-primary">Perkiraan Sewa/Bulan</label>
                         <div class="input-group has-validation">
-                            <input type="text" name="perkiraan_harga_sewa" id="perkiraan_harga_sewa" class="form-control rupiah border-primary" value="<?= esc($kond['perkiraan_harga_sewa'] ?? '') ?>" <?= $readonly ?> placeholder="Rp...">
+                            <!-- 🚀 TAMBAHKAN 'required' DI UJUNG INPUT INI -->
+                            <input type="text" name="perkiraan_harga_sewa" id="perkiraan_harga_sewa" class="form-control rupiah border-primary" value="<?= esc($kond['perkiraan_harga_sewa'] ?? '') ?>" <?= $readonly ?> placeholder="Rp..." required>
+
                             <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#perkiraan_harga_sewa" title="Salin Harga Sewa"><i class="fas fa-copy"></i></button>
+
                             <!-- 🚀 ELEMEN PESAN ERROR REAL-TIME -->
                             <div class="invalid-feedback small fw-bold">
                                 <i class="fas fa-exclamation-circle"></i> Harga sewa minimal Rp 50.000
@@ -774,16 +777,32 @@ $se   = $payload['sosial_ekonomi'] ?? [];
             return parseInt(val.replace(/\D/g, '')) || 0;
         };
 
-        // ============ VALIDASI REAL-TIME: HARGA SEWA ============
-        $('#perkiraan_harga_sewa').on('input change', function() {
-            const sewa = getInt(this); // Mengambil nilai angka bersih
+        // ==========================================
+        // 🚀 VALIDASI REAL-TIME: PERKIRAAN HARGA SEWA
+        // ==========================================
+        $('#perkiraan_harga_sewa').on('input keyup change', function() {
+            // 1. Bersihkan titik/koma agar menjadi angka murni
+            let rawValue = $(this).val().replace(/[^0-9]/g, '');
+            let numValue = parseInt(rawValue) || 0;
 
-            if (sewa > 0 && sewa < 50000) {
-                // Jika isian di bawah 50rb, ubah kotak jadi merah dan munculkan pesan
-                $(this).addClass('is-invalid border-danger').removeClass('border-primary');
+            // 2. Jika di bawah 50.000 atau kosong, tembakkan error!
+            if (numValue < 50000) {
+                $(this).addClass('is-invalid').removeClass('border-primary');
             } else {
-                // Jika sudah 50rb atau kosong, hapus warna merah
-                $(this).removeClass('is-invalid border-danger').addClass('border-primary');
+                $(this).removeClass('is-invalid').addClass('border-primary');
+            }
+        });
+
+        // 🚀 BLOKIR TOMBOL SIMPAN JIKA MASIH ERROR
+        $('#formRumahFull').on('submit', function(e) {
+            let rawValue = $('#perkiraan_harga_sewa').val().replace(/[^0-9]/g, '');
+            let numValue = parseInt(rawValue) || 0;
+
+            if (numValue < 50000) {
+                e.preventDefault(); // Hentikan proses simpan
+                $('#perkiraan_harga_sewa').addClass('is-invalid').focus();
+                Swal.fire('Peringatan!', 'Perkiraan harga sewa tidak boleh kosong atau di bawah Rp 50.000', 'warning');
+                return false;
             }
         });
 
