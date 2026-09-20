@@ -231,7 +231,7 @@ class DtsenKkModel extends Model
 
         /**
          * ======================================================
-         * 3️⃣ HITUNG STATUS FINAL
+         * 3️⃣ HITUNG STATUS FINAL (SMART MERGE & CASE-INSENSITIVE)
          * ======================================================
          */
         foreach ($keluarga as &$row) {
@@ -240,32 +240,30 @@ class DtsenKkModel extends Model
 
             if (!isset($usulanMap[$row['id_kk']])) continue;
 
-            $u = $usulanMap[$row['id_kk']] ?? null;
+            $u = $usulanMap[$row['id_kk']];
+
+            // 🚀 KUNCI SAKTI: Paksa semua status dari DB jadi huruf kecil
+            // agar PHP in_array() tidak kebingungan!
+            $dbStatus = strtolower(trim($u['status']));
 
             if ($u) {
                 $payload = json_decode($u['payload'], true);
                 $p = $payload['perumahan'] ?? [];
 
                 // 🔥 OVERRIDE RW/RT
-                if (!empty($p['rw'])) {
-                    $row['rw'] = $p['rw'];
-                }
-                if (!empty($p['rt'])) {
-                    $row['rt'] = $p['rt'];
-                }
+                if (!empty($p['rw'])) $row['rw'] = $p['rw'];
+                if (!empty($p['rt'])) $row['rt'] = $p['rt'];
 
                 // 🔥 TAMBAHKAN INI (FIX ALAMAT)
-                if (!empty($p['alamat'])) {
-                    // $row['alamat'] = $p['alamat'];
-                    $row['alamat'] = $p['alamat'] ?? $row['alamat'];
-                }
+                if (!empty($p['alamat'])) $row['alamat'] = $p['alamat'] ?? $row['alamat'];
             }
 
-            // $u = $usulanMap[$row['id_kk']];
-            $row['usulan_status'] = $u['status'];
+            // Simpan status yang sudah dinormalkan ke array row
+            $row['usulan_status'] = $dbStatus;
 
-            if ($u['status'] === 'draft') {
-                $payload = json_decode($u['payload'], true);
+            // 🚀 PERBAIKAN: Evaluasi kelengkapan payload menggunakan status yang sudah dinormalkan
+            if (in_array($dbStatus, ['draft', 'submitted'])) {
+                $payload = json_decode($u['payload'], true) ?? [];
                 if ($this->isPayloadLengkap($payload)) {
                     $row['is_submitted_ready'] = 1;
                 }
@@ -278,70 +276,70 @@ class DtsenKkModel extends Model
          * 3.5️⃣ FILTER RW / RT / DESIL (BARU)
          * ======================================================
          */
-        $keluarga = array_values(array_filter($keluarga, function ($row) use ($filter) {
+        // $keluarga = array_values(array_filter($keluarga, function ($row) use ($filter) {
 
-            // RW: Gunakan isset dan !== '' agar 0 (jika ada RW 0) tidak dianggap kosong
-            if (isset($filter['rw']) && $filter['rw'] !== '' && $filter['rw'] !== 'all') {
-                if ((string)$row['rw'] !== (string)$filter['rw']) {
-                    return false;
-                }
-            }
+        //     // RW: Gunakan isset dan !== '' agar 0 (jika ada RW 0) tidak dianggap kosong
+        //     if (isset($filter['rw']) && $filter['rw'] !== '' && $filter['rw'] !== 'all') {
+        //         if ((string)$row['rw'] !== (string)$filter['rw']) {
+        //             return false;
+        //         }
+        //     }
 
-            // RT
-            if (isset($filter['rt']) && $filter['rt'] !== '' && $filter['rt'] !== 'all') {
-                if ((string)$row['rt'] !== (string)$filter['rt']) {
-                    return false;
-                }
-            }
+        //     // RT
+        //     if (isset($filter['rt']) && $filter['rt'] !== '' && $filter['rt'] !== 'all') {
+        //         if ((string)$row['rt'] !== (string)$filter['rt']) {
+        //             return false;
+        //         }
+        //     }
 
-            // 🚀 PERBAIKAN DESIL: Jangan gunakan empty(), karena empty("0") itu TRUE!
-            if (isset($filter['desil']) && $filter['desil'] !== '' && $filter['desil'] !== 'all') {
+        //     // 🚀 PERBAIKAN DESIL: Jangan gunakan empty(), karena empty("0") itu TRUE!
+        //     if (isset($filter['desil']) && $filter['desil'] !== '' && $filter['desil'] !== 'all') {
 
-                // Jika user memilih filter "Belum" (Singkronkan dengan value HTML)
-                if ($filter['desil'] === 'belum' || $filter['desil'] === 'none') {
-                    // Jika dia Punya desil (termasuk 0), maka singkirkan dari hasil filter "Belum"
-                    if ($row['kategori_desil'] !== null && $row['kategori_desil'] !== '') {
-                        return false;
-                    }
-                }
-                // Jika user memfilter angka (0, 1, 2, dst)
-                else {
-                    // Pastikan datanya tidak null/kosong sebelum dicocokkan angkanya
-                    if ($row['kategori_desil'] === null || $row['kategori_desil'] === '') {
-                        return false;
-                    }
+        //         // Jika user memilih filter "Belum" (Singkronkan dengan value HTML)
+        //         if ($filter['desil'] === 'belum' || $filter['desil'] === 'none') {
+        //             // Jika dia Punya desil (termasuk 0), maka singkirkan dari hasil filter "Belum"
+        //             if ($row['kategori_desil'] !== null && $row['kategori_desil'] !== '') {
+        //                 return false;
+        //             }
+        //         }
+        //         // Jika user memfilter angka (0, 1, 2, dst)
+        //         else {
+        //             // Pastikan datanya tidak null/kosong sebelum dicocokkan angkanya
+        //             if ($row['kategori_desil'] === null || $row['kategori_desil'] === '') {
+        //                 return false;
+        //             }
 
-                    if ((int)$row['kategori_desil'] !== (int)$filter['desil']) {
-                        return false;
-                    }
-                }
-            }
+        //             if ((int)$row['kategori_desil'] !== (int)$filter['desil']) {
+        //                 return false;
+        //             }
+        //         }
+        //     }
 
-            return true;
-        }));
+        //     return true;
+        // }));
 
         /**
          * ======================================================
-         * 4️⃣ FILTER STATUS (SUDAH STABIL — JANGAN DIUBAH)
+         * 4️⃣ FILTER STATUS (SMART DOWNGRADE)
          * ======================================================
          */
         if (!empty($filter['status']) && $filter['status'] !== 'all') {
 
             $keluarga = array_values(array_filter($keluarga, function ($row) use ($filter) {
 
-                $status = $filter['status'];
+                $status = strtolower(trim($filter['status'])); // Jaga-jaga input dari frontend
 
                 if ($status === 'none') {
                     return empty($row['usulan_status']);
                 }
 
                 if ($status === 'draft') {
-                    return $row['usulan_status'] === 'draft'
+                    return in_array($row['usulan_status'], ['draft', 'submitted'])
                         && (int)$row['is_submitted_ready'] === 0;
                 }
 
                 if ($status === 'submitted') {
-                    return $row['usulan_status'] === 'draft'
+                    return in_array($row['usulan_status'], ['draft', 'submitted'])
                         && (int)$row['is_submitted_ready'] === 1;
                 }
 
@@ -356,18 +354,48 @@ class DtsenKkModel extends Model
         return $keluarga;
     }
 
-    // 🚀 PERBAIKAN: Ubah private menjadi public
+    // // 🚀 PERBAIKAN: Ubah private menjadi public
+    // public function isPayloadLengkap(array $payload): bool
+    // {
+    //     return !empty($payload['perumahan']['no_kk'])
+    //         && !empty($payload['perumahan']['kepala_keluarga'])
+    //         && !empty($payload['perumahan']['alamat'])
+    //         && !empty($payload['perumahan']['wilayah'])
+    //         && !empty($payload['perumahan']['kondisi'])
+    //         && !empty($payload['perumahan']['sanitasi'])
+    //         && !empty($payload['foto']['ktp_kk'])
+    //         && !empty($payload['foto']['depan'])
+    //         && !empty($payload['foto']['dalam']);
+    // }
+    // 🚀 PERBAIKAN: Validasi Cerdas (Smart Payload Validation)
     public function isPayloadLengkap(array $payload): bool
     {
-        return !empty($payload['perumahan']['no_kk'])
+        // 1. Pengecekan Master Data Dasar
+        $isDasarLengkap = !empty($payload['perumahan']['no_kk'])
             && !empty($payload['perumahan']['kepala_keluarga'])
             && !empty($payload['perumahan']['alamat'])
             && !empty($payload['perumahan']['wilayah'])
             && !empty($payload['perumahan']['kondisi'])
-            && !empty($payload['perumahan']['sanitasi'])
-            && !empty($payload['foto']['ktp_kk'])
-            && !empty($payload['foto']['depan'])
-            && !empty($payload['foto']['dalam']);
+            && !empty($payload['perumahan']['sanitasi']);
+
+        // 2. 🚀 SENSOR BARU: Pengecekan Elemen Baru BPS di Array Kondisi
+        // Pastikan field krusial ini tidak bolong atau bernilai 0
+        $kondisi = $payload['perumahan']['kondisi'] ?? [];
+        $isKondisiLengkap = !empty($kondisi['jumlah_orang_dalam_rumah'])
+            && !empty($kondisi['perkiraan_harga_sewa'])
+            && !empty($kondisi['jenis_bangunan'])
+            && !empty($kondisi['status_kepemilikan']);
+
+        // 3. 🚀 SENSOR BARU: Pengecekan 4 Pilar Foto (Termasuk Kamar Mandi / WC)
+        // Kita gunakan fallback ('mck' atau 'kamar_mandi') untuk berjaga-jaga nama key-nya
+        $foto = $payload['foto'] ?? [];
+        $isFotoLengkap = !empty($foto['ktp_kk'])
+            && !empty($foto['depan'])
+            && !empty($foto['dalam'])
+            && (!empty($foto['mck']) || !empty($foto['kamar_mandi']));
+
+        // Harus memenuhi KETIGA syarat utama barulah sah menjadi Submitted
+        return $isDasarLengkap && $isKondisiLengkap && $isFotoLengkap;
     }
 
     /**

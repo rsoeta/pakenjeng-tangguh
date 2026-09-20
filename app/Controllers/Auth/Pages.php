@@ -77,17 +77,145 @@ class Pages extends BaseController
         return view('dtks/auth/login', $data);
     }
 
+    // public function index()
+    // {
+    //     $session = session();
+    //     $kodeDesa     = $session->get('kode_desa');
+    //     $roleId       = $session->get('role_id');
+    //     $rwUser       = $session->get('level');
+    //     $filterRW     = $this->request->getPost('filterRW') ?? null;
+    //     $wilayahTugas = $session->get('wilayah_tugas');
+    //     $userId       = $session->get('id'); // Diperlukan untuk pelacakan tugas spesifik user
+
+    //     $db = \Config\Database::connect();
+
+    //     $filter = [
+    //         'kode_desa'     => $kodeDesa,
+    //         'rw'            => ($roleId >= 4 ? $rwUser : null),
+    //         'wilayah_tugas' => $wilayahTugas,
+    //     ];
+
+    //     // 🔹 Total Keluarga (BNBA)
+    //     $totalKK = $this->DtsenKkModel->countVerifiedByUser($roleId, $filter);
+
+    //     // 🔹 Total Draft (status = 'draft')
+    //     $totalDraft = $this->DtsenDraftModel->countDraftByUser($roleId, $filter);
+
+    //     // 🔹 Total Submitted (menggunakan query submitted builder)
+    //     $totalSubmitted = $this->DtsenDraftModel->countSubmittedByUser($roleId, $filter);
+
+    //     // 🔹 Data Desil (kategori kesejahteraan)
+    //     $dataDesil = $this->DtsenSeModel->getDesilByRole($roleId, $filter);
+
+    //     // 🔹 Total Usulan Bansos Bulan Ini
+    //     $totalUsulan = $this->DtsenUsulanBansosModel->countUsulanBansosBulanIni($roleId, $filter);
+
+    //     // =======================================================
+    //     // 🚀 CEK PEMULIHAN DATA WILAYAH RT/RW
+    //     // =======================================================
+    //     $menuPemulihan = $db->table('tb_menu')
+    //         ->where('tm_url', 'pembaruan-keluarga/pemulihan')
+    //         ->where('tm_status', 1)
+    //         ->get()
+    //         ->getRowArray();
+
+    //     $jumlahBermasalah = 0;
+
+    //     if ($menuPemulihan) {
+    //         $jumlahBermasalah = $db->table('dtsen_kk k')
+    //             ->join('dtsen_rt r', 'k.id_rt = r.id_rt', 'left')
+    //             ->where('k.deleted_at IS NULL')
+    //             ->groupStart()
+    //             ->where('r.rt', null)
+    //             ->orWhere('r.rt', '')
+    //             ->orWhere('r.rw', null)
+    //             ->orWhere('r.rw', '')
+    //             ->orWhere('LENGTH(r.rt) <', 3)
+    //             ->orWhere('LENGTH(r.rw) <', 3)
+    //             ->groupEnd()
+    //             ->countAllResults();
+    //     }
+
+    //     // =======================================================
+    //     // 🚀 CEK TUGAS ANOMALI (KHUSUS PETUGAS ENTRI / ROLE 4)
+    //     // =======================================================
+    //     $total_anomali_tugas = 0;
+    //     if ($roleId == 4) {
+    //         $total_anomali_tugas = $db->table('dtsen_anomali')
+    //             ->where('petugas_entri_id', $userId)
+    //             ->groupStart()
+    //             ->where('status_anomali', 'open')
+    //             ->orWhere('status_anomali', 'rejected') // Termasuk data yang ditolak Operator
+    //             ->groupEnd()
+    //             ->countAllResults();
+    //     }
+
+    //     // 🔹 Deadline (optional)
+    //     $deadline = $this->GenModel->getDeadline();
+    //     $dd_waktu_start = null;
+    //     $dd_waktu_end = null;
+    //     if (!empty($deadline)) {
+    //         foreach ($deadline as $d) {
+    //             $dd_waktu_start = date_create($d['dd_waktu_start']);
+    //             $dd_waktu_end = date_create($d['dd_waktu_end']);
+    //         }
+    //     }
+
+    //     // =======================================================
+    //     // 🚀 AMBIL MENU PRIORITAS UNTUK DASHBOARD (DENGAN PARENT)
+    //     // =======================================================
+    //     $menuPrioritas = $db->table('tb_menu m')
+    //         ->select('m.*, p.tm_nama as parent_nama')
+    //         ->join('tb_menu p', 'm.tm_parent_id = p.tm_id', 'left')
+    //         ->where('m.tm_status', 1)
+    //         ->where('m.tm_is_dashboard', 1)
+    //         ->orderBy('m.tm_urutan', 'ASC')
+    //         ->get()
+    //         ->getResultArray();
+
+    //     // 🔹 Siapkan Data ke View
+    //     $data = [
+    //         'title'               => 'Dashboard',
+    //         'totalKK'             => $totalKK,
+    //         'totalUsulan'         => $totalUsulan,
+    //         'totalDraft'          => $totalDraft,
+    //         'totalSubmitted'      => $totalSubmitted,
+    //         'dataDesil'           => $dataDesil,
+    //         'dd_waktu_start'      => $dd_waktu_start,
+    //         'dd_waktu_end'        => $dd_waktu_end,
+    //         'user_login'          => $this->AuthModel->getUserId(),
+    //         'menu_pemulihan'      => $menuPemulihan,
+    //         'total_masalah'       => $jumlahBermasalah,
+    //         'total_anomali_tugas' => $total_anomali_tugas, // 🚀 Variabel Anomali dimasukkan ke View
+    //         'menu_prioritas'      => $menuPrioritas
+    //     ];
+
+    //     // ✅ Set Flashdata untuk notifikasi login
+    //     if (!session()->getFlashdata('login_success')) {
+    //         session()->setFlashdata('login_success', true);
+    //     }
+
+    //     // 🚀 BUG FIX: Hapus limitasi lama, izinkan Role <= 7 mengakses Dashboard Utama
+    //     if (session()->get('status') == 1 && $roleId <= 7) {
+    //         return view('dashboard', $data);
+    //     }
+
+    //     // 🛡️ Fallback pengaman jika sesi aneh atau role > 7 mencoba akses
+    //     return redirect()->to(base_url('home'))->with('error', 'Akses ditolak atau sesi tidak valid.');
+    // }
     public function index()
     {
         $session = session();
         $kodeDesa     = $session->get('kode_desa');
         $roleId       = $session->get('role_id');
         $rwUser       = $session->get('level');
-        $filterRW     = $this->request->getPost('filterRW') ?? null;
         $wilayahTugas = $session->get('wilayah_tugas');
         $userId       = $session->get('id'); // Diperlukan untuk pelacakan tugas spesifik user
 
         $db = \Config\Database::connect();
+
+        // 🚀 KUNCI SAKTI: Panggil model utama yang punya logika saringan pintar
+        $kkModel = new \App\Models\Dtsen\DtsenKkModel();
 
         $filter = [
             'kode_desa'     => $kodeDesa,
@@ -95,20 +223,44 @@ class Pages extends BaseController
             'wilayah_tugas' => $wilayahTugas,
         ];
 
-        // 🔹 Total Keluarga (BNBA)
-        $totalKK = $this->DtsenKkModel->countVerifiedByUser($roleId, $filter);
+        // 🔹 Total Keluarga (BNBA) - Bebas dari masalah
+        // $totalKK = $kkModel->countVerifiedByUser($roleId, $filter);
 
-        // 🔹 Total Draft (status = 'draft')
-        $totalDraft = $this->DtsenDraftModel->countDraftByUser($roleId, $filter);
+        // =======================================================
+        // 🚀 PENGHITUNGAN TOTAL KELUARGA (SMART COUNT)
+        // Kita tinggalkan fungsi lama (countVerifiedByUser) dan
+        // gunakan getFilteredData agar hasilnya 100% sama dengan tabel
+        // =======================================================
+        $dataTotal = $kkModel->getFilteredData($filter);
+        $totalKK = count($dataTotal);
 
-        // 🔹 Total Submitted (menggunakan query submitted builder)
-        $totalSubmitted = $this->DtsenDraftModel->countSubmittedByUser($roleId, $filter);
+        // =======================================================
+        // 🚀 PENGHITUNGAN DRAFT & SUBMITTED (SMART COUNT)
+        // Kita gunakan getFilteredData agar logika isPayloadLengkap() ikut berjalan!
+        // =======================================================
+
+        // 1. Ambil data dengan filter DRAFT
+        $filterDraft = $filter;
+        $filterDraft['status'] = 'draft';
+        $dataDraft = $kkModel->getFilteredData($filterDraft);
+        $totalDraft = count($dataDraft); // Hitung array hasil saringannya
+
+        // 2. Ambil data dengan filter SUBMITTED
+        $filterSubmitted = $filter;
+        $filterSubmitted['status'] = 'submitted';
+        $dataSubmitted = $kkModel->getFilteredData($filterSubmitted);
+        $totalSubmitted = count($dataSubmitted); // Hitung array hasil saringannya
+
+        // =======================================================
 
         // 🔹 Data Desil (kategori kesejahteraan)
-        $dataDesil = $this->DtsenSeModel->getDesilByRole($roleId, $filter);
+        // Mbah perbarui pemanggilan agar pakai property/instance yang benar jika belum diload
+        $DtsenSeModel = new \App\Models\Dtsen\DtsenSeModel();
+        $dataDesil = $DtsenSeModel->getDesilByRole($roleId, $filter);
 
         // 🔹 Total Usulan Bansos Bulan Ini
-        $totalUsulan = $this->DtsenUsulanBansosModel->countUsulanBansosBulanIni($roleId, $filter);
+        $DtsenUsulanBansosModel = new \App\Models\Dtsen\DtsenUsulanBansosModel();
+        $totalUsulan = $DtsenUsulanBansosModel->countUsulanBansosBulanIni($roleId, $filter);
 
         // =======================================================
         // 🚀 CEK PEMULIHAN DATA WILAYAH RT/RW
@@ -151,7 +303,8 @@ class Pages extends BaseController
         }
 
         // 🔹 Deadline (optional)
-        $deadline = $this->GenModel->getDeadline();
+        $GenModel = new \App\Models\GenModel();
+        $deadline = $GenModel->getDeadline();
         $dd_waktu_start = null;
         $dd_waktu_end = null;
         if (!empty($deadline)) {
@@ -174,6 +327,7 @@ class Pages extends BaseController
             ->getResultArray();
 
         // 🔹 Siapkan Data ke View
+        $AuthModel = new \App\Models\Dtks\AuthModel();
         $data = [
             'title'               => 'Dashboard',
             'totalKK'             => $totalKK,
@@ -183,10 +337,10 @@ class Pages extends BaseController
             'dataDesil'           => $dataDesil,
             'dd_waktu_start'      => $dd_waktu_start,
             'dd_waktu_end'        => $dd_waktu_end,
-            'user_login'          => $this->AuthModel->getUserId(),
+            'user_login'          => $AuthModel->getUserId(),
             'menu_pemulihan'      => $menuPemulihan,
             'total_masalah'       => $jumlahBermasalah,
-            'total_anomali_tugas' => $total_anomali_tugas, // 🚀 Variabel Anomali dimasukkan ke View
+            'total_anomali_tugas' => $total_anomali_tugas,
             'menu_prioritas'      => $menuPrioritas
         ];
 

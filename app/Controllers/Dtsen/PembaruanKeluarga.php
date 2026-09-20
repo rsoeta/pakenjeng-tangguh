@@ -76,8 +76,12 @@ class PembaruanKeluarga extends BaseController
                 }
             }
 
+            // =======================================================
+            // 🚀 SMART STATUS VALIDATION
+            // Cek kelengkapan payload baik untuk status Draft maupun Submitted
+            // =======================================================
             $is_submitted_ready = 0;
-            if (($usulan['status'] ?? '') === 'draft' && !empty($payload)) {
+            if (in_array(($usulan['status'] ?? ''), ['draft', 'submitted']) && !empty($payload)) {
                 if ($kkModel->isPayloadLengkap($payload)) {
                     $is_submitted_ready = 1;
                 }
@@ -1598,20 +1602,218 @@ class PembaruanKeluarga extends BaseController
         return $this->respond(['data' => []]);
     }
 
+    // /**
+    //  * Ambil data usulan (status = draft) untuk DataTables (Draft Pembaruan)
+    //  * Route recommended: GET /pembaruan-keluarga/data
+    //  */
+    // public function getDataDraft()
+    // {
+    //     try {
+    //         $session        = session();
+    //         $kodeDesa       = $session->get('kode_desa');
+    //         $wilayahTugas   = $session->get('wilayah_tugas');
+    //         $roleId         = (int) ($session->get('role_id') ?? 99);
+    //         $status         = $this->request->getGet('status') ?? 'draft';
+
+    //         $db = $this->db;
+
+    //         $builder = $db->table('dtsen_usulan us')
+    //             ->select("
+    //             us.id, us.usulan_no, us.jenis, us.status, us.dtsen_kk_id, 
+    //             us.no_kk_target, us.created_at, us.updated_at,
+    //             kk.no_kk, kk.kepala_keluarga, 
+    //             se.kategori_desil,
+    //             r.rw, r.rt,
+    //             COALESCE(u.fullname, us.created_by) AS created_by_name,
+    //             COALESCE(u.id, NULL) AS created_by_id,
+    //             COALESCE(us.payload, '{}') AS payload,
+    //             (SELECT COUNT(1) FROM dtsen_usulan_art aua WHERE aua.dtsen_usulan_id = us.id) AS jumlah_art_usulan
+    //         ")
+    //             ->join('dtsen_kk kk', 'kk.id_kk = us.dtsen_kk_id', 'left')
+    //             ->join('dtsen_se se', 'se.id_kk = us.dtsen_kk_id', 'left') // 🚀 JOIN TABEL SE
+    //             ->join('dtsen_rt r', 'r.id_rt = kk.id_rt', 'left')
+    //             ->join('dtks_users u', ' (u.id = us.created_by OR u.nik = us.created_by) ', 'left', false)
+    //             ->where('us.status', $status);
+
+    //         // Filter desa
+    //         if (!empty($kodeDesa)) {
+    //             $builder->where('r.kode_desa', $kodeDesa);
+    //         }
+
+    //         // Filter wilayah tugas (role >= 4)
+    //         if (!empty($wilayahTugas) && $roleId >= 4) {
+    //             $parsed = $this->parseWilayahTugas($wilayahTugas);
+
+    //             $builder->groupStart(); // where group RW/RT
+
+    //             foreach ($parsed as $group) {
+    //                 $builder->orGroupStart()
+    //                     ->where('r.rw', $group['rw']);
+
+    //                 if (!empty($group['rt'])) {
+    //                     $builder->whereIn('r.rt', $group['rt']);
+    //                 }
+
+    //                 $builder->groupEnd();
+    //             }
+
+    //             $builder->groupEnd();
+    //         }
+
+    //         $builder->orderBy('us.updated_at', 'ASC');
+
+    //         $rows = $builder->get()->getResultArray();
+
+    //         // 🔄 Format output baris
+    //         foreach ($rows as &$r) {
+
+    //             $payload = json_decode($r['payload'], true) ?? [];
+
+    //             $r['no_kk'] = $r['no_kk'] ?? $r['no_kk_target'] ?? '';
+    //             $r['nama_kepala'] =
+    //                 $r['kepala_keluarga'] ??
+    //                 ($payload['kepala_keluarga'] ?? '') ??
+    //                 '';
+
+    //             $r['rw_rt'] = "RW {$r['rw']} / RT {$r['rt']}";
+    //             $r['created_by_name'] = $r['created_by_name'] ?? '-';
+    //             $r['jumlah_art_usulan'] = (int) ($r['jumlah_art_usulan'] ?? 0);
+    //         }
+    //         unset($r);
+
+    //         return $this->response->setJSON(['data' => $rows]);
+    //     } catch (\Throwable $e) {
+    //         log_message('error', '❌ getDataDraft() error: ' . $e->getMessage());
+    //         return $this->response
+    //             ->setStatusCode(500)
+    //             ->setJSON([
+    //                 'error' => true,
+    //                 'message' => 'Gagal mengambil data draft: ' . $e->getMessage()
+    //             ]);
+    //     }
+    // }
+
+    // /**
+    //  * Ambil data usulan (status = draft) yang sudah lengkap untuk DataTables (Submitted Pembaruan)
+    //  * Route recommended: GET /pembaruan-keluarga/data?submitted=1
+    //  */
+    // private function getSubmittedData()
+    // {
+    //     try {
+    //         $session        = session();
+    //         $kodeDesa       = $session->get('kode_desa');
+    //         $wilayahTugas   = $session->get('wilayah_tugas');
+    //         $roleId         = (int) ($session->get('role_id') ?? 99);
+
+    //         $db = \Config\Database::connect();
+
+    //         $builder = $db->table('dtsen_usulan u')
+    //             ->select("
+    //             u.id, u.no_kk_target, u.status,
+    //             u.created_at, u.updated_at,
+    //             petugas.fullname AS created_by_name,
+    //             petugas.nope AS created_by_nope,
+    //             JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.kepala_keluarga')) AS nama_kepala,
+    //             r.rw, r.rt,
+    //             se.kategori_desil
+    //         ")
+    //             ->join('dtks_users petugas', 'petugas.id = u.created_by', 'left')
+    //             ->join('dtsen_kk kk', 'kk.id_kk = u.dtsen_kk_id', 'left')
+    //             ->join('dtsen_se se', 'se.id_kk = u.dtsen_kk_id', 'left')
+    //             ->join('dtsen_rt r', 'r.id_rt = kk.id_rt', 'left')
+
+    //             ->where('u.status', 'draft')
+    //             ->where('JSON_LENGTH(u.payload) >', 0)
+
+    //             // Wajib field perumahan
+    //             ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.no_kk')) <> ''")
+    //             ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.kepala_keluarga')) <> ''")
+    //             ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.alamat')) <> ''")
+
+    //             ->where("
+    //             JSON_EXTRACT(u.payload, '$.perumahan.kondisi') IS NOT NULL
+    //             AND JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.kondisi')) > 0
+    //         ")
+
+    //             ->where("
+    //             JSON_EXTRACT(u.payload, '$.perumahan.wilayah') IS NOT NULL
+    //             AND JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.wilayah')) > 0
+    //         ")
+
+    //             ->where("
+    //             JSON_EXTRACT(u.payload, '$.perumahan.sanitasi') IS NOT NULL
+    //             AND JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.sanitasi')) > 0
+    //         ")
+
+    //             // Validasi foto wajib
+    //             ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.ktp_kk')) <> ''")
+    //             ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.dalam')) <> ''")
+    //             ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.depan')) <> ''")
+
+    //             // Validasi ART wajib lengkap
+    //             ->where('EXISTS (
+    //             SELECT 1
+    //             FROM dtsen_usulan_art a
+    //             WHERE a.dtsen_usulan_id = u.id
+    //             AND JSON_LENGTH(a.payload_member) > 0
+
+    //             AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.identitas.nik")) <> ""
+    //             AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.identitas.nama")) <> ""
+    //             AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.identitas.jenis_kelamin")) <> ""
+    //             AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.pendidikan.jenjang_pendidikan")) <> ""
+    //             AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.kesehatan.penyakit_kronis")) <> ""
+    //             AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.tenaga_kerja.pendapatan")) <> ""
+    //         )');
+
+    //         // Filter desa
+    //         if (!empty($kodeDesa)) {
+    //             $builder->where('r.kode_desa', $kodeDesa);
+    //         }
+
+    //         // Filter wilayah tugas (role >= 4)
+    //         if (!empty($wilayahTugas) && $roleId >= 4) {
+    //             $parsed = $this->parseWilayahTugas($wilayahTugas);
+
+    //             $builder->groupStart();
+    //             foreach ($parsed as $group) {
+    //                 $builder->orGroupStart()
+    //                     ->where('r.rw', $group['rw']);
+
+    //                 if (!empty($group['rt'])) {
+    //                     $builder->whereIn('r.rt', $group['rt']);
+    //                 }
+
+    //                 $builder->groupEnd();
+    //             }
+    //             $builder->groupEnd();
+    //         }
+
+    //         $builder->orderBy('u.updated_at', 'ASC');
+
+    //         $result = $builder->get()->getResultArray();
+
+    //         return $this->respond(['data' => $result]);
+    //     } catch (\Throwable $e) {
+    //         log_message('error', '❌ getSubmittedData error: ' . $e->getMessage());
+    //         return $this->respond([
+    //             'error' => true,
+    //             'message' => 'Gagal mengambil data submitted: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
     /**
-     * Ambil data usulan (status = draft) untuk DataTables (Draft Pembaruan)
-     * Route recommended: GET /pembaruan-keluarga/data
+     * Ambil data usulan untuk DataTables (Draft Pembaruan)
      */
     public function getDataDraft()
     {
         try {
-            $session        = session();
-            $kodeDesa       = $session->get('kode_desa');
-            $wilayahTugas   = $session->get('wilayah_tugas');
-            $roleId         = (int) ($session->get('role_id') ?? 99);
-            $status         = $this->request->getGet('status') ?? 'draft';
+            $session      = session();
+            $kodeDesa     = $session->get('kode_desa');
+            $wilayahTugas = $session->get('wilayah_tugas');
+            $roleId       = (int) ($session->get('role_id') ?? 99);
 
             $db = $this->db;
+            $kkModel = new \App\Models\Dtsen\DtsenKkModel();
 
             $builder = $db->table('dtsen_usulan us')
                 ->select("
@@ -1626,86 +1828,73 @@ class PembaruanKeluarga extends BaseController
                 (SELECT COUNT(1) FROM dtsen_usulan_art aua WHERE aua.dtsen_usulan_id = us.id) AS jumlah_art_usulan
             ")
                 ->join('dtsen_kk kk', 'kk.id_kk = us.dtsen_kk_id', 'left')
-                ->join('dtsen_se se', 'se.id_kk = us.dtsen_kk_id', 'left') // 🚀 JOIN TABEL SE
+                ->join('dtsen_se se', 'se.id_kk = us.dtsen_kk_id', 'left')
                 ->join('dtsen_rt r', 'r.id_rt = kk.id_rt', 'left')
                 ->join('dtks_users u', ' (u.id = us.created_by OR u.nik = us.created_by) ', 'left', false)
-                ->where('us.status', $status);
+                ->whereIn('us.status', ['draft', 'submitted']); // 🚀 AMBIL KEDUANYA UNTUK DISORTIR CERDAS
 
-            // Filter desa
             if (!empty($kodeDesa)) {
                 $builder->where('r.kode_desa', $kodeDesa);
             }
 
-            // Filter wilayah tugas (role >= 4)
             if (!empty($wilayahTugas) && $roleId >= 4) {
                 $parsed = $this->parseWilayahTugas($wilayahTugas);
-
-                $builder->groupStart(); // where group RW/RT
-
+                $builder->groupStart();
                 foreach ($parsed as $group) {
-                    $builder->orGroupStart()
-                        ->where('r.rw', $group['rw']);
-
-                    if (!empty($group['rt'])) {
-                        $builder->whereIn('r.rt', $group['rt']);
-                    }
-
+                    $builder->orGroupStart()->where('r.rw', $group['rw']);
+                    if (!empty($group['rt'])) $builder->whereIn('r.rt', $group['rt']);
                     $builder->groupEnd();
                 }
-
                 $builder->groupEnd();
             }
 
             $builder->orderBy('us.updated_at', 'ASC');
-
             $rows = $builder->get()->getResultArray();
 
-            // 🔄 Format output baris
-            foreach ($rows as &$r) {
+            $filteredRows = [];
 
+            foreach ($rows as $r) {
                 $payload = json_decode($r['payload'], true) ?? [];
 
-                $r['no_kk'] = $r['no_kk'] ?? $r['no_kk_target'] ?? '';
-                $r['nama_kepala'] =
-                    $r['kepala_keluarga'] ??
-                    ($payload['kepala_keluarga'] ?? '') ??
-                    '';
+                // 🚀 SMART FILTER: Jika payload SUDAH LENGKAP, jangan tampilkan di tabel Draft!
+                if ($kkModel->isPayloadLengkap($payload)) {
+                    continue;
+                }
 
+                $r['no_kk'] = $r['no_kk'] ?? $r['no_kk_target'] ?? '';
+                $r['nama_kepala'] = $r['kepala_keluarga'] ?? ($payload['perumahan']['kepala_keluarga'] ?? '') ?? '';
                 $r['rw_rt'] = "RW {$r['rw']} / RT {$r['rt']}";
                 $r['created_by_name'] = $r['created_by_name'] ?? '-';
                 $r['jumlah_art_usulan'] = (int) ($r['jumlah_art_usulan'] ?? 0);
-            }
-            unset($r);
 
-            return $this->response->setJSON(['data' => $rows]);
+                // Hapus payload agar response JSON lebih ringan
+                unset($r['payload']);
+                $filteredRows[] = $r;
+            }
+
+            return $this->response->setJSON(['data' => $filteredRows]);
         } catch (\Throwable $e) {
-            log_message('error', '❌ getDataDraft() error: ' . $e->getMessage());
-            return $this->response
-                ->setStatusCode(500)
-                ->setJSON([
-                    'error' => true,
-                    'message' => 'Gagal mengambil data draft: ' . $e->getMessage()
-                ]);
+            return $this->response->setStatusCode(500)->setJSON(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 
     /**
-     * Ambil data usulan (status = draft) yang sudah lengkap untuk DataTables (Submitted Pembaruan)
-     * Route recommended: GET /pembaruan-keluarga/data?submitted=1
+     * Ambil data usulan yang sudah LENGKAP untuk DataTables (Submitted)
      */
     private function getSubmittedData()
     {
         try {
-            $session        = session();
-            $kodeDesa       = $session->get('kode_desa');
-            $wilayahTugas   = $session->get('wilayah_tugas');
-            $roleId         = (int) ($session->get('role_id') ?? 99);
+            $session      = session();
+            $kodeDesa     = $session->get('kode_desa');
+            $wilayahTugas = $session->get('wilayah_tugas');
+            $roleId       = (int) ($session->get('role_id') ?? 99);
 
             $db = \Config\Database::connect();
+            $kkModel = new \App\Models\Dtsen\DtsenKkModel();
 
             $builder = $db->table('dtsen_usulan u')
                 ->select("
-                u.id, u.no_kk_target, u.status,
+                u.id, u.no_kk_target, u.status, u.payload,
                 u.created_at, u.updated_at,
                 petugas.fullname AS created_by_name,
                 petugas.nope AS created_by_nope,
@@ -1717,84 +1906,43 @@ class PembaruanKeluarga extends BaseController
                 ->join('dtsen_kk kk', 'kk.id_kk = u.dtsen_kk_id', 'left')
                 ->join('dtsen_se se', 'se.id_kk = u.dtsen_kk_id', 'left')
                 ->join('dtsen_rt r', 'r.id_rt = kk.id_rt', 'left')
+                ->whereIn('u.status', ['draft', 'submitted']) // 🚀 KITA SAPU BERSIH JSON QUERY LAMA
+                ->where('JSON_LENGTH(u.payload) >', 0);
 
-                ->where('u.status', 'draft')
-                ->where('JSON_LENGTH(u.payload) >', 0)
-
-                // Wajib field perumahan
-                ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.no_kk')) <> ''")
-                ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.kepala_keluarga')) <> ''")
-                ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.alamat')) <> ''")
-
-                ->where("
-                JSON_EXTRACT(u.payload, '$.perumahan.kondisi') IS NOT NULL
-                AND JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.kondisi')) > 0
-            ")
-
-                ->where("
-                JSON_EXTRACT(u.payload, '$.perumahan.wilayah') IS NOT NULL
-                AND JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.wilayah')) > 0
-            ")
-
-                ->where("
-                JSON_EXTRACT(u.payload, '$.perumahan.sanitasi') IS NOT NULL
-                AND JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.sanitasi')) > 0
-            ")
-
-                // Validasi foto wajib
-                ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.ktp_kk')) <> ''")
-                ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.dalam')) <> ''")
-                ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.depan')) <> ''")
-
-                // Validasi ART wajib lengkap
-                ->where('EXISTS (
-                SELECT 1
-                FROM dtsen_usulan_art a
-                WHERE a.dtsen_usulan_id = u.id
-                AND JSON_LENGTH(a.payload_member) > 0
-
-                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.identitas.nik")) <> ""
-                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.identitas.nama")) <> ""
-                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.identitas.jenis_kelamin")) <> ""
-                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.pendidikan.jenjang_pendidikan")) <> ""
-                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.kesehatan.penyakit_kronis")) <> ""
-                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, "$.tenaga_kerja.pendapatan")) <> ""
-            )');
-
-            // Filter desa
             if (!empty($kodeDesa)) {
                 $builder->where('r.kode_desa', $kodeDesa);
             }
 
-            // Filter wilayah tugas (role >= 4)
             if (!empty($wilayahTugas) && $roleId >= 4) {
                 $parsed = $this->parseWilayahTugas($wilayahTugas);
-
                 $builder->groupStart();
                 foreach ($parsed as $group) {
-                    $builder->orGroupStart()
-                        ->where('r.rw', $group['rw']);
-
-                    if (!empty($group['rt'])) {
-                        $builder->whereIn('r.rt', $group['rt']);
-                    }
-
+                    $builder->orGroupStart()->where('r.rw', $group['rw']);
+                    if (!empty($group['rt'])) $builder->whereIn('r.rt', $group['rt']);
                     $builder->groupEnd();
                 }
                 $builder->groupEnd();
             }
 
             $builder->orderBy('u.updated_at', 'ASC');
+            $rows = $builder->get()->getResultArray();
 
-            $result = $builder->get()->getResultArray();
+            $filteredRows = [];
 
-            return $this->respond(['data' => $result]);
+            foreach ($rows as $r) {
+                $payload = json_decode($r['payload'], true) ?? [];
+
+                // 🚀 SMART FILTER: HANYA tampilkan di tabel Submitted jika payload BENAR-BENAR LENGKAP
+                if ($kkModel->isPayloadLengkap($payload)) {
+                    // Buang payload dari response JSON agar browser tidak berat
+                    unset($r['payload']);
+                    $filteredRows[] = $r;
+                }
+            }
+
+            return $this->respond(['data' => $filteredRows]);
         } catch (\Throwable $e) {
-            log_message('error', '❌ getSubmittedData error: ' . $e->getMessage());
-            return $this->respond([
-                'error' => true,
-                'message' => 'Gagal mengambil data submitted: ' . $e->getMessage()
-            ], 500);
+            return $this->respond(['error' => true, 'message' => $e->getMessage()], 500);
         }
     }
 

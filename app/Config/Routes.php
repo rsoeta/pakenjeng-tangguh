@@ -129,7 +129,6 @@ $routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview
 	$routes->get('arsip', 'Dtsen\DtsenSe::arsip'); // Halaman Arsip
 	// 📡 Routing Data AJAX
 	$routes->post('tabel_data', 'Dtsen\DtsenSe::tabel_data');
-	// $routes->post('tabel_pemulihan', 'Dtsen\DtsenSe::tabel_pemulihan');
 	$routes->post('autofix_rt_rw', 'Dtsen\DtsenSe::autofix_rt_rw');
 
 	$routes->get('detail/(:num)', 'Dtsen\PembaruanKeluarga::detail/$1');
@@ -148,7 +147,6 @@ $routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview
 	// 🧍‍♂️ Prefill Data Individu
 	$routes->get('get-anggota-detail/(:num)', 'Dtsen\PembaruanKeluarga::getAnggotaDetail/$1');
 
-	// $routes->get('data', 'Dtsen\PembaruanKeluarga::getDataDraft');
 	$routes->get('data', 'Dtsen\PembaruanKeluarga::data');
 	$routes->get('lanjutkan/(:num)', 'Dtsen\PembaruanKeluarga::lanjutkan/$1');
 	$routes->get('get-anggota-list/(:num)', 'Dtsen\PembaruanKeluarga::getAnggotaList/$1');

@@ -20,7 +20,7 @@
                             <th>No.</th>
                             <th>Kepala Keluarga</th>
                             <th>No KK</th>
-                            <th>Desil</th> <!-- 🚀 UBAH DI SINI -->
+                            <th>Desil</th>
                             <th>Tanggal Dibuat</th>
                             <th>Petugas</th>
                             <th>Aksi</th>

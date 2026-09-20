@@ -95,15 +95,13 @@ $roleId = session()->get('role_id') ?? 0;
                         <?php if (!$usulanStatus || $sumber === 'utama'): ?>
                             <span class="badge bg-secondary px-2 py-1 small">Belum Ada Pembaruan</span>
 
-                        <?php elseif ($usulanStatus === 'draft'): ?>
+                        <?php elseif ($usulanStatus === 'draft' || $usulanStatus === 'submitted'): ?>
+                            <!-- 🚀 SMART BADGE: Tampilan dikendalikan penuh oleh kelengkapan isi data -->
                             <?php if ($isReady === 1): ?>
                                 <span class="badge bg-info text-dark px-2 py-1 small">Submitted</span>
                             <?php else: ?>
                                 <span class="badge bg-warning text-dark px-2 py-1 small">Draft</span>
                             <?php endif; ?>
-
-                        <?php elseif ($usulanStatus === 'submitted'): ?>
-                            <span class="badge bg-info text-dark px-2 py-1 small">Submitted</span>
 
                         <?php elseif ($usulanStatus === 'verified' || $usulanStatus === 'diverifikasi'): ?>
                             <span class="badge bg-primary px-2 py-1 small">Verified</span>

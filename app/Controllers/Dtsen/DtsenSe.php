@@ -150,11 +150,21 @@ class DtsenSe extends Controller
             // 5️⃣ AMBIL DATA
             $dataKeluarga = $this->kkModel->getFilteredData($filter);
 
+            // // 6️⃣ TAMBAHKAN FLAG AKSES
+            // $canInputDesil = ($roleId <= 3);
+
+            // foreach ($dataKeluarga as &$row) {
+            //     $row['can_input_desil'] = $canInputDesil;
+            // }
             // 6️⃣ TAMBAHKAN FLAG AKSES
             $canInputDesil = ($roleId <= 3);
 
             foreach ($dataKeluarga as &$row) {
                 $row['can_input_desil'] = $canInputDesil;
+
+                // 🚀 HAPUS SENSOR CERDAS DI SINI!
+                // is_submitted_ready sudah dihitung dengan sangat akurat 
+                // oleh Step 3 di dalam DtsenKkModel -> getFilteredData()
             }
 
             return $this->response->setJSON([

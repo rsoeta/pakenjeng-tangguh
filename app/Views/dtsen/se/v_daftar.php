@@ -268,19 +268,16 @@
                     className: 'text-start',
                     render: function(status, type, row) {
 
-                        if (!status) {
+                        if (!status || status === 'none') {
                             return `<span class="badge bg-secondary">Belum Ada Pembaruan</span>`;
                         }
 
-                        if (status === 'draft') {
+                        // 🚀 SMART BADGE: Gabungkan Draft & Submitted, biarkan kelengkapan data yang menentukan nasibnya!
+                        if (status === 'draft' || status === 'submitted') {
                             if (row.is_submitted_ready == 1) {
                                 return `<span class="badge bg-info text-dark">Submitted</span>`;
                             }
                             return `<span class="badge bg-warning text-dark">Draft</span>`;
-                        }
-
-                        if (status === 'submitted') {
-                            return `<span class="badge bg-info text-dark">Submitted</span>`;
                         }
 
                         if (status === 'verified' || status === 'diverifikasi') {
