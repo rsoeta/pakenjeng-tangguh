@@ -182,12 +182,124 @@ class DtsenSe extends Controller
     }
 
     // 📝 Update kategori desil
+    // public function updateDesil()
+    // {
+    //     log_message('error', 'POST: ' . json_encode($this->request->getPost()));
+
+    //     try {
+
+    //         $session = session();
+    //         $role_id = (int) $session->get('role_id');
+    //         $userId  = $session->get('id_user') ?? 0;
+
+    //         // 🚫 Proteksi Role
+    //         if ($role_id > 3) {
+    //             return $this->response->setJSON([
+    //                 'status' => 'forbidden',
+    //                 'message' => 'Anda tidak memiliki izin untuk mengubah kategori desil.'
+    //             ]);
+    //         }
+
+    //         $idKk = (int) $this->request->getPost('id_kk');
+    //         $kategoriDesil = (int) $this->request->getPost('kategori_desil');
+
+    //         // 🔎 Validasi input
+    //         if (!$idKk || $kategoriDesil < 0 || $kategoriDesil > 10) {
+    //             return $this->response->setJSON([
+    //                 'status' => 'error',
+    //                 'message' => 'Data desil tidak valid.'
+    //             ]);
+    //         }
+
+    //         $db = db_connect();
+    //         $db->transBegin();
+
+    //         // =========================
+    //         // 1️⃣ UPDATE dtsen_se
+    //         // =========================
+    //         $cek = $db->table('dtsen_se')
+    //             ->where('id_kk', $idKk)
+    //             ->get()
+    //             ->getRow();
+
+    //         if ($cek) {
+    //             $db->table('dtsen_se')
+    //                 ->where('id_kk', $idKk)
+    //                 ->update([
+    //                     'kategori_desil' => $kategoriDesil,
+    //                     'updated_at'     => date('Y-m-d H:i:s')
+    //                 ]);
+    //         } else {
+    //             $db->table('dtsen_se')->insert([
+    //                 'id_kk'           => $idKk,
+    //                 'kategori_desil'  => $kategoriDesil,
+    //                 'created_at'      => date('Y-m-d H:i:s')
+    //             ]);
+    //         }
+
+    //         // =========================
+    //         // 2️⃣ TENTUKAN TRIWULAN BERJALAN
+    //         // =========================
+    //         $bulan = (int) date('n');
+    //         $tahun = (int) date('Y');
+    //         $triwulan = (int) ceil($bulan / 3);
+    //         $label = 'TW' . $triwulan . ' ' . $tahun;
+
+    //         // =========================
+    //         // INSERT / UPDATE HISTORI
+    //         // =========================
+
+    //         $exists = $db->table('dtsen_desil_history')
+    //             ->where([
+    //                 'id_kk'    => $idKk,
+    //                 'tahun'    => $tahun,
+    //                 'triwulan' => $triwulan
+    //             ])
+    //             ->get()
+    //             ->getRow();
+
+    //         if ($exists) {
+
+    //             $db->table('dtsen_desil_history')
+    //                 ->where('id', $exists->id)
+    //                 ->update([
+    //                     'desil'      => $kategoriDesil,
+    //                     'created_by' => $userId
+    //                 ]);
+    //         } else {
+
+    //             $db->table('dtsen_desil_history')->insert([
+    //                 'id_kk'         => $idKk,
+    //                 'desil'         => $kategoriDesil,
+    //                 'tahun'         => $tahun,
+    //                 'triwulan'      => $triwulan,
+    //                 'periode_label' => $label,
+    //                 'source'        => 'manual_input',
+    //                 'created_by'    => $userId
+    //             ]);
+    //         }
+
+    //         $db->transCommit();
+
+    //         return $this->response->setJSON([
+    //             'status' => 'success'
+    //         ]);
+    //     } catch (\Throwable $e) {
+
+    //         if (isset($db)) $db->transRollback();
+
+    //         return $this->response->setJSON([
+    //             'status' => 'error',
+    //             'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+    //         ]);
+    //     }
+    // }
+    // 📝 Update kategori desil
     public function updateDesil()
     {
         log_message('error', 'POST: ' . json_encode($this->request->getPost()));
 
         try {
-
             $session = session();
             $role_id = (int) $session->get('role_id');
             $userId  = $session->get('id_user') ?? 0;
@@ -203,11 +315,15 @@ class DtsenSe extends Controller
             $idKk = (int) $this->request->getPost('id_kk');
             $kategoriDesil = (int) $this->request->getPost('kategori_desil');
 
+            // 🚀 TANGKAP TAHUN DAN TRIWULAN DARI FORM (Menggunakan Float untuk Triwulan)
+            $tahun_berlaku = (int) $this->request->getPost('tahun_berlaku');
+            $triwulan_berlaku = floatval($this->request->getPost('triwulan_berlaku'));
+
             // 🔎 Validasi input
-            if (!$idKk || $kategoriDesil < 0 || $kategoriDesil > 10) {
+            if (!$idKk || $kategoriDesil < 0 || $kategoriDesil > 10 || !$tahun_berlaku || !$triwulan_berlaku) {
                 return $this->response->setJSON([
                     'status' => 'error',
-                    'message' => 'Data desil tidak valid.'
+                    'message' => 'Data desil atau periode tidak valid/lengkap.'
                 ]);
             }
 
@@ -215,7 +331,7 @@ class DtsenSe extends Controller
             $db->transBegin();
 
             // =========================
-            // 1️⃣ UPDATE dtsen_se
+            // 1️⃣ UPDATE dtsen_se (Tabel Master Desil Nasional Terkini)
             // =========================
             $cek = $db->table('dtsen_se')
                 ->where('id_kk', $idKk)
@@ -238,28 +354,20 @@ class DtsenSe extends Controller
             }
 
             // =========================
-            // 2️⃣ TENTUKAN TRIWULAN BERJALAN
+            // 2️⃣ INSERT / UPDATE HISTORI (Menggunakan Periode Form)
             // =========================
-            $bulan = (int) date('n');
-            $tahun = (int) date('Y');
-            $triwulan = (int) ceil($bulan / 3);
-            $label = 'TW' . $triwulan . ' ' . $tahun;
-
-            // =========================
-            // INSERT / UPDATE HISTORI
-            // =========================
+            $label = 'TW' . $triwulan_berlaku . ' ' . $tahun_berlaku;
 
             $exists = $db->table('dtsen_desil_history')
                 ->where([
                     'id_kk'    => $idKk,
-                    'tahun'    => $tahun,
-                    'triwulan' => $triwulan
+                    'tahun'    => $tahun_berlaku,
+                    'triwulan' => $triwulan_berlaku
                 ])
                 ->get()
                 ->getRow();
 
             if ($exists) {
-
                 $db->table('dtsen_desil_history')
                     ->where('id', $exists->id)
                     ->update([
@@ -267,12 +375,11 @@ class DtsenSe extends Controller
                         'created_by' => $userId
                     ]);
             } else {
-
                 $db->table('dtsen_desil_history')->insert([
                     'id_kk'         => $idKk,
                     'desil'         => $kategoriDesil,
-                    'tahun'         => $tahun,
-                    'triwulan'      => $triwulan,
+                    'tahun'         => $tahun_berlaku,
+                    'triwulan'      => $triwulan_berlaku,
                     'periode_label' => $label,
                     'source'        => 'manual_input',
                     'created_by'    => $userId

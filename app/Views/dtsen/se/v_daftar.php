@@ -123,7 +123,8 @@
     </section>
 </div>
 
-...
+<!-- 🚀 KUNCI SAKTI: Panggil modal dari file terpisah agar dirender ke halaman ini -->
+<?= $this->include('dtsen/se/modal_input_desil') ?>
 
 <script>
     $(document).ready(function() {
@@ -326,8 +327,9 @@
                                     data-nama="${row.kepala_keluarga}"
                                     data-nokk="${row.no_kk}"
                                     data-alamat="${row.alamat}"
-                                    data-desil="${row.kategori_desil ?? ''}">
-                                    <i class="fas fa-hand-holding-heart"></i>
+                                    data-desil="${row.kategori_desil ?? ''}"
+                                    title="Update Desil">
+                                    <i class="fas fa-balance-scale"></i>
                                 </button>
                             `;
                         }
@@ -473,6 +475,105 @@
             }, 800);
         });
 
+        // ... (Kode sebelumnya) ...
+
+        // ==============================================================
+        // 🚀 EVENT: BUKA MODAL UPDATE DESIL DARI TABEL DAFTAR KELUARGA
+        // ==============================================================
+        $(document).on('click', '.btnInputDesil', function(e) {
+            e.preventDefault(); // Mencegah aksi bawaan tombol
+
+            // Ambil data dari atribut tombol
+            const id = $(this).attr('data-id');
+            const nama = $(this).attr('data-nama');
+            const nokk = $(this).attr('data-nokk');
+            const alamat = $(this).attr('data-alamat');
+            const desil = $(this).attr('data-desil');
+
+            // Temukan modal
+            const modal = $('#modalInputDesil');
+
+            // Suntikkan data ke dalam form modal
+            modal.find('#modal_id_kk').val(id);
+            modal.find('#modal_no_kk').val(nokk);
+            modal.find('#modal_kepala_keluarga').val(nama);
+            modal.find('#modal_alamat').val(alamat);
+
+            // Perhatikan: pastikan select merespon perubahan value
+            modal.find('#kategori_desil').val(desil).trigger('change');
+
+            // 🚀 Otomatis set form Periode ke Triwulan Berjalan saat modal dibuka
+            const d = new Date();
+            const currentYear = d.getFullYear();
+            const currentMonth = d.getMonth() + 1;
+            const currentTw = Math.ceil(currentMonth / 3);
+
+            modal.find('#tahun_berlaku').val(currentYear);
+            modal.find('#triwulan_berlaku').val(currentTw);
+
+            // Tampilkan modal ke layar menggunakan method Bootstrap 5 via jQuery
+            modal.modal('show');
+        });
+
+        // ==============================================================
+        // 🚀 EVENT: SUBMIT FORM UPDATE DESIL (VIA AJAX)
+        // ==============================================================
+        $('#formInputDesil').on('submit', function(e) {
+            e.preventDefault(); // 🛑 CEGAH BROWSER PINDAH HALAMAN!
+
+            const form = $(this);
+            const btnSubmit = form.find('button[type="submit"]');
+            const originalText = btnSubmit.html();
+
+            // Ubah tombol jadi status loading agar tidak diklik dua kali
+            btnSubmit.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Menyimpan...');
+
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                dataType: 'json',
+                success: function(res) {
+                    // Kembalikan kondisi tombol
+                    btnSubmit.prop('disabled', false).html(originalText);
+
+                    if (res.status === 'success') {
+                        // Tampilkan notifikasi sukses elegan
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Kategori desil berhasil diperbarui.',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+
+                        // Sembunyikan modal
+                        $('#modalInputDesil').modal('hide');
+
+                        // 🚀 REFRESH TABEL TANPA RELOAD HALAMAN
+                        tableKeluarga.ajax.reload(null, false);
+                    } else {
+                        // Jika ada validasi error dari server
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: res.message || 'Gagal memperbarui desil.'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    // Kembalikan kondisi tombol jika server down/error 500
+                    btnSubmit.prop('disabled', false).html(originalText);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Server',
+                        text: 'Gagal terhubung ke server atau terjadi kesalahan sistem.'
+                    });
+                }
+            });
+        });
+
+        // ... (Kode selanjutnya) ...
         // ========================= 🔥 HAPUS KELUARGA =========================
         $(document).on('click', '.btnDeleteKeluarga', function() {
             let id = $(this).data('id');
