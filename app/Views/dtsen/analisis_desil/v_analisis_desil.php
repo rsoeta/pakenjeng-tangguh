@@ -184,7 +184,8 @@
 
             // 🚀 TAMBAHKAN BARIS INI UNTUK DEFAULT SORTING KE KOLOM PREDIKSI (Indeks 7)
             "order": [
-                [7, "asc"]
+                [5, "asc"], // Urutkan berdasarkan kolom Status (indeks 5) secara ascending
+                [7, "asc"] // Urutkan berdasarkan kolom Prediksi (indeks 7) secara descending
             ],
 
             // Menambahkan 'l' ke dalam kolom agar bersanding dengan tombol Export dan Search
