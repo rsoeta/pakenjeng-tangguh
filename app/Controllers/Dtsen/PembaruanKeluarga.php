@@ -941,7 +941,8 @@ class PembaruanKeluarga extends BaseController
                         'rekening_aktif'      => $payload['tenaga_kerja']['rekening_aktif'] ?? '',
                         'keterampilan'        => $payload['tenaga_kerja']['keterampilan'] ?? [],
                         'status_hamil'        => $payload['kesehatan']['status_hamil'] ?? '',
-                        'penyakit_kronis'     => $payload['kesehatan']['penyakit_kronis'] ?? '',
+                        // 🚀 PAKSA MENJADI ARRAY: Agar JS tidak kebingungan saat prefill checkbox
+                        'penyakit_kronis'     => isset($payload['kesehatan']['penyakit_kronis']) ? (is_array($payload['kesehatan']['penyakit_kronis']) ? $payload['kesehatan']['penyakit_kronis'] : [$payload['kesehatan']['penyakit_kronis']]) : [],
                         'disabilitas'         => $payload['kesehatan']['disabilitas'] ?? [],
                     ]
                 );
@@ -952,9 +953,10 @@ class PembaruanKeluarga extends BaseController
                 $anggota_prefill = $art;
 
                 // 🚀 ANTI-BOCOR JS: Pastikan key elemen baru ada meskipun nilainya kosong
-                // Ini akan memaksa JS untuk me-reset inputan form, bukan mendiamkannya
                 $anggota_prefill['no_hp'] = $art['no_hp'] ?? '';
                 $anggota_prefill['rekening_aktif'] = $art['rekening_aktif'] ?? '';
+                $anggota_prefill['penyakit_kronis'] = []; // Master lama belum ada penyakit kronis (array kosong)
+                $anggota_prefill['disabilitas'] = [];
             }
 
             $refStatusKawin = $genModel->getDataStatusKawin();

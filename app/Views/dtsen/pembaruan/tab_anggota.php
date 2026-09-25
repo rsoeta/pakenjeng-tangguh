@@ -663,7 +663,27 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 
                 // Prefill Tab Kesehatan
                 $('#status_hamil').val(d.status_hamil ?? '');
-                $('#penyakit_kronis').val(d.penyakit_kronis ?? '');
+
+                // 🚀 PREFILL SMART CHECKBOX: Penyakit Kronis
+                $('.kronis-check').prop('checked', false); // Bersihkan dulu
+                if (Array.isArray(d.penyakit_kronis)) {
+                    d.penyakit_kronis.forEach(val => {
+                        $(`.kronis-check[value="${val}"]`).prop('checked', true);
+                    });
+                } else if (typeof d.penyakit_kronis === 'string' && d.penyakit_kronis.trim() !== '') {
+                    try {
+                        // Coba parsing jika bentuknya string JSON "[...]"
+                        const parsed = JSON.parse(d.penyakit_kronis);
+                        if (Array.isArray(parsed)) {
+                            parsed.forEach(val => {
+                                $(`.kronis-check[value="${val}"]`).prop('checked', true);
+                            });
+                        }
+                    } catch (e) {
+                        // Jika bukan JSON array, berarti data Master lama (string tunggal, misal: "Asma")
+                        $(`.kronis-check[value="${d.penyakit_kronis}"]`).prop('checked', true);
+                    }
+                }
 
                 // ♿ Disabilitas
                 if (Array.isArray(d.disabilitas)) {
