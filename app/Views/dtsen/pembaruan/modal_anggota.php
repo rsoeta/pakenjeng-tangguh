@@ -69,22 +69,43 @@ $editable = ($roleId <= 4);
                                     <div class="row g-3">
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Nama Lengkap</label>
-                                            <input type="text" class="form-control required upper" name="nama" id="nama">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control required upper" name="nama" id="nama">
+                                                <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#nama" title="Salin">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">NIK</label>
-                                            <input type="text" class="form-control required onlynum16" name="nik" id="nik" maxlength="16" inputmode="numeric" pattern="[0-9]*">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control required onlynum16" name="nik" id="nik" maxlength="16" inputmode="numeric" pattern="[0-9]*">
+                                                <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#nik" title="Salin">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Nomor KK</label>
-                                            <input type="text" class="form-control required onlynum16" name="individu_no_kk" id="individu_no_kk" maxlength="16" inputmode="numeric" pattern="[0-9]*">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control required onlynum16" name="individu_no_kk" id="individu_no_kk" maxlength="16" inputmode="numeric" pattern="[0-9]*">
+                                                <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#individu_no_kk" title="Salin">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <!-- 🚀 ELEMEN BARU BPS: NOMOR HANDPHONE -->
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Nomor Handphone</label>
-                                            <input type="text" class="form-control onlynum" name="no_hp" id="no_hp" maxlength="13" inputmode="numeric" pattern="[0-9]*" placeholder="Contoh: 08123456789">
-                                            <div class="invalid-feedback small fw-bold">Nomor Handphone harus 10-13 digit angka dan diawali 08</div>
+                                            <div class="input-group has-validation">
+                                                <input type="text" class="form-control onlynum" name="no_hp" id="no_hp" minlength="10" maxlength="13" inputmode="numeric" pattern="[0-9]*" placeholder="Contoh: 08123456789">
+                                                <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#no_hp" title="Salin">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                                <!-- Catatan: Untuk input-group, validasi perlu bantuan class 'has-validation' di container -->
+                                                <div class="invalid-feedback small fw-bold w-100">Nomor Handphone harus 10-13 digit angka dan diawali 08</div>
+                                            </div>
                                             <small class="text-muted fst-italic">Kosongkan bagian ini jika yang bersangkutan tidak memiliki nomor handphone.</small>
                                         </div>
                                         <div class="col-md-6">
@@ -106,6 +127,9 @@ $editable = ($roleId <= 4);
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Nama Ibu Kandung</label>
                                             <input type="text" class="form-control required upper" name="ibu_kandung" id="ibu_kandung">
+                                            <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#ibu_kandung" title="Salin">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -688,6 +712,38 @@ $editable = ($roleId <= 4);
             } else if (val !== 'Tidak Ada' && isChecked) {
                 // 2. Jika "Penyakit Lain" Dicentang -> Otomatis hapus centang pada "Tidak Ada"
                 $('.kronis-check[value="Tidak Ada"]').prop('checked', false);
+            }
+        });
+
+        // =======================================================
+        // 📋 FUNGSI SALIN KE CLIPBOARD (VERSI DELEGASI JQUERY)
+        // =======================================================
+        $(document).on('click', '.btn-copy-input', function(e) {
+            e.preventDefault(); // Mencegah aksi submit form jika tombol dipicu tak sengaja
+
+            const targetSelector = $(this).attr('data-target');
+            const inputEl = $(targetSelector);
+
+            if (inputEl.length && inputEl.val().trim() !== '') {
+                navigator.clipboard.writeText(inputEl.val().trim()).then(() => {
+                    Swal.fire({
+                        toast: true,
+                        position: 'bottom-end',
+                        icon: 'success',
+                        title: 'Teks disalin!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                });
+            } else {
+                Swal.fire({
+                    toast: true,
+                    position: 'bottom-end',
+                    icon: 'warning',
+                    title: 'Kolom masih kosong!',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
             }
         });
     });
