@@ -1214,8 +1214,33 @@ class PembaruanKeluarga extends BaseController
             // 🟦 5. Update Status Usulan
             $this->db->table('dtsen_usulan')->where('id', $usulan_id)->update(['status' => 'diverifikasi', 'verified_at' => date('Y-m-d H:i:s')]);
 
+            // =======================================================
+            // 🔔 6. JADWALKAN PENGINGAT (REMINDER LOG)
+            // =======================================================
+            // Cek apakah sudah ada reminder yang pending untuk KK ini
+            $existingReminder = $this->db->table('dtsen_kk_reminder_log')
+                ->where('kk_id', $idKk)
+                ->where('status', 'pending')
+                ->get()
+                ->getRowArray();
+
+            if (!$existingReminder) {
+                // 🚀 KOREKSI: Buat jadwal baru (3 bulan dari sekarang)
+                $dueDate = date('Y-m-d H:i:s', strtotime('+3 months'));
+
+                // Pastikan admin_id valid (jika string 'system', kita ganti jadi 0)
+                $adminId = is_numeric($userId) ? $userId : 0;
+
+                $this->db->table('dtsen_kk_reminder_log')->insert([
+                    'kk_id'    => $idKk,
+                    'admin_id' => $adminId,
+                    'due_date' => $dueDate,
+                    'status'   => 'pending'
+                ]);
+            }
+
             $this->db->transCommit();
-            return $this->response->setJSON(['status' => 'success', 'message' => 'Data usulan berhasil diterapkan.', 'redirect' => base_url('dtsen-se')]);
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Data usulan berhasil diterapkan dan jadwal pengingat telah dibuat.', 'redirect' => base_url('dtsen-se')]);
         } catch (\Throwable $e) {
             $this->db->transRollback();
             return $this->response->setJSON(['status' => 'error', 'message' => 'Gagal menerapkan data: ' . $e->getMessage()]);
