@@ -609,7 +609,19 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 $('#nik').val(d.nik ?? '');
                 $('#nama').val(d.nama ?? '');
                 $('#tempat_lahir').val(d.tempat_lahir ?? '');
-                $('#tanggal_lahir').val(d.tanggal_lahir ?? '');
+                // $('#tanggal_lahir').val(d.tanggal_lahir ?? '');
+                // 🚀 PREFILL: Konversi balik YYYY-MM-DD (DB) ke DD-MM-YYYY (Layar)
+                const tglDB = d.tanggal_lahir ?? '';
+                $('#tanggal_lahir').val(tglDB); // Isi Ghost Input
+
+                if (tglDB && tglDB.includes('-')) {
+                    const parts = tglDB.split('-');
+                    if (parts.length === 3) {
+                        $('#tanggal_lahir_display').val(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                    }
+                } else {
+                    $('#tanggal_lahir_display').val('');
+                }
 
                 // 🚀 PREFILL: Elemen Baru BPS (No HP)
                 $('#no_hp').val(d.no_hp ?? '');

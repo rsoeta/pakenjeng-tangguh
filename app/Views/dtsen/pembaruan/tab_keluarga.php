@@ -45,9 +45,12 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <label for="keluarga_no_kk" class="form-label fw-semibold">Nomor KK <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="text" class="form-control onlynum16" id="keluarga_no_kk" name="no_kk" value="<?= esc($perumahan['no_kk'] ?? '') ?>" <?= $disabled ?> maxlength="16" minlength="16" required>
+                        <!-- 🚀 TAMBAHKAN has-validation -->
+                        <div class="input-group has-validation">
+                            <!-- 🚀 TAMBAHKAN inputmode="numeric" dan pattern -->
+                            <input type="text" class="form-control onlynum16" id="keluarga_no_kk" name="no_kk" value="<?= esc($perumahan['no_kk'] ?? '') ?>" <?= $disabled ?> maxlength="16" minlength="16" inputmode="numeric" pattern="[0-9]*" required>
                             <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#keluarga_no_kk" title="Salin Nomor KK"><i class="fas fa-copy"></i></button>
+                            <div class="invalid-feedback small fw-bold w-100">Nomor KK harus tepat 16 digit angka.</div>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -59,9 +62,12 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-semibold text-primary">NIK Kepala Keluarga <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="text" class="form-control onlynum16 border-primary" id="nik_kepala_keluarga" name="nik_kepala_keluarga" value="<?= esc($perumahan['nik_kepala_keluarga'] ?? '') ?>" <?= $disabled ?> maxlength="16" minlength="16" placeholder="Ketik NIK 16 digit..." required>
+                        <!-- 🚀 TAMBAHKAN has-validation -->
+                        <div class="input-group has-validation">
+                            <!-- 🚀 TAMBAHKAN inputmode="numeric" dan pattern -->
+                            <input type="text" class="form-control onlynum16 border-primary" id="nik_kepala_keluarga" name="nik_kepala_keluarga" value="<?= esc($perumahan['nik_kepala_keluarga'] ?? '') ?>" <?= $disabled ?> maxlength="16" minlength="16" inputmode="numeric" pattern="[0-9]*" placeholder="Ketik NIK 16 digit..." required>
                             <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#nik_kepala_keluarga" title="Salin NIK"><i class="fas fa-copy"></i></button>
+                            <div class="invalid-feedback small fw-bold w-100">NIK harus tepat 16 digit angka.</div>
                         </div>
                     </div>
                 </div>
@@ -802,6 +808,37 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                     });
                 }
             });
+        });
+    });
+
+    $(document).ready(function() {
+        // ==============================================================
+        // 🚀 GATEKEEPER KETAT: NIK & NO KK (HANYA ANGKA, TEPAT 16 DIGIT)
+        // ==============================================================
+        $('.onlynum16').on('input', function() {
+            // 1. Sapu bersih semua karakter selain angka (huruf, spasi, simbol akan langsung hilang)
+            this.value = this.value.replace(/\D/g, '');
+
+            // 2. Potong paksa jika lebih dari 16 digit (mengantisipasi operator yang paste data dari Excel)
+            if (this.value.length > 16) {
+                this.value = this.value.slice(0, 16);
+            }
+
+            // 3. Validasi Real-time: Jika diketik tapi belum 16 digit, nyalakan garis merah
+            if (this.value.length > 0 && this.value.length < 16) {
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        // 4. Trigger tambahan saat operator pindah kolom (blur)
+        $('.onlynum16').on('blur', function() {
+            if (this.value.length > 0 && this.value.length !== 16) {
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
         });
     });
 </script>

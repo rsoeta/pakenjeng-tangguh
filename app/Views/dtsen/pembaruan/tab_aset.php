@@ -79,22 +79,26 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                                         <!-- 🚀 ELEMEN DINAMIS: Nilai Sepeda Motor -->
                                         <div id="div_nilai_sepeda_motor" class="mt-2 p-2 bg-light border border-primary rounded" style="display: none;">
                                             <label class="form-label text-primary mb-1">Total Nilai Aset Motor (Rp) <span class="text-danger">*</span></label>
-                                            <div class="input-group input-group-sm">
-                                                <input type="text" name="nilai_sepeda_motor" id="nilai_sepeda_motor" class="form-control rupiah border-primary" value="<?= esc($aset['nilai_sepeda_motor'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
+                                            <div class="input-group input-group-sm has-validation">
+                                                <!-- 🚀 KOREKSI: data-qty-target diubah menjadi #sepeda_motor -->
+                                                <input type="text" name="nilai_sepeda_motor" id="nilai_sepeda_motor" class="form-control rupiah border-primary val-min-aset" data-min="500000" data-qty-target="#sepeda_motor" value="<?= esc($aset['nilai_sepeda_motor'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
                                                 <?php if (!$disabled): ?>
                                                     <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#nilai_sepeda_motor" title="Salin Nilai Motor"><i class="fas fa-copy"></i></button>
                                                 <?php endif; ?>
+                                                <div class="invalid-feedback small fw-bold w-100">Nilai Aset minimal bernilai Rp 500.000</div>
                                             </div>
                                         </div>
                                     <?php elseif ($name === 'mobil'): ?>
                                         <!-- 🚀 ELEMEN DINAMIS: Nilai Mobil -->
                                         <div id="div_nilai_mobil" class="mt-2 p-2 bg-light border border-primary rounded" style="display: none;">
                                             <label class="form-label text-primary mb-1">Total Nilai Aset Mobil (Rp) <span class="text-danger">*</span></label>
-                                            <div class="input-group input-group-sm">
-                                                <input type="text" name="nilai_mobil" id="nilai_mobil" class="form-control rupiah border-primary" value="<?= esc($aset['nilai_mobil'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
+                                            <div class="input-group input-group-sm has-validation">
+                                                <!-- 🚀 KOREKSI: data-qty-target diubah menjadi #mobil -->
+                                                <input type="text" name="nilai_mobil" id="nilai_mobil" class="form-control rupiah border-primary val-min-aset" data-min="10000000" data-qty-target="#mobil" value="<?= esc($aset['nilai_mobil'] ?? '') ?>" <?= $disabled ?> placeholder="Rp...">
                                                 <?php if (!$disabled): ?>
                                                     <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#nilai_mobil" title="Salin Nilai Mobil"><i class="fas fa-copy"></i></button>
                                                 <?php endif; ?>
+                                                <div class="invalid-feedback small fw-bold w-100">Nilai Aset minimal bernilai Rp 10.000.000</div>
                                             </div>
                                         </div>
                                     <?php endif; ?>
@@ -229,6 +233,64 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
 </div>
 
 <script>
+    $(document).ready(function() {
+
+        // ==============================================================
+        // 🚀 VALIDASI BATAS MINIMAL ASET (DINAMIS DENGAN KELIPATAN JUMLAH)
+        // ==============================================================
+        function validateMinAset(el) {
+            const $el = $(el);
+            const minLimitBase = parseInt($el.data('min'), 10);
+            const qtyTarget = $el.data('qty-target'); // Ambil ID input jumlah
+
+            // Cari nilai jumlah unitnya, jika kosong atau tidak valid, anggap 1
+            let qty = 1;
+            if (qtyTarget && $(qtyTarget).length) {
+                qty = parseInt($(qtyTarget).val(), 10) || 1;
+            }
+
+            // Hitung batas minimal sesungguhnya (Kelipatan)
+            const actualMinLimit = minLimitBase * qty;
+
+            // Bersihkan format rupiah dari input nilai
+            let rawValue = $el.val().replace(/\./g, '');
+            if (rawValue === '') {
+                $el.removeClass('is-invalid');
+                return;
+            }
+
+            const numValue = parseInt(rawValue, 10);
+            const $feedback = $el.siblings('.invalid-feedback'); // Target pesan error
+
+            // Cek apakah di bawah standar
+            if (numValue < actualMinLimit) {
+                $el.addClass('is-invalid');
+                // Ubah teks peringatan secara real-time dengan format Rupiah
+                const formatRupiah = new Intl.NumberFormat('id-ID').format(actualMinLimit);
+                $feedback.text(`Total nilai minimal untuk ${qty} unit adalah Rp ${formatRupiah}`);
+            } else {
+                $el.removeClass('is-invalid');
+            }
+        }
+
+        // 1. Trigger saat input nilai aset itu sendiri diketik/berubah
+        $('.val-min-aset').on('input change', function() {
+            validateMinAset(this);
+        });
+
+        // 2. 🚀 Trigger JUGA saat input JUMLAH (qty) diubah
+        $('.val-min-aset').each(function() {
+            const qtyTarget = $(this).data('qty-target');
+            if (qtyTarget) {
+                // Gunakan delegasi event agar bisa mendeteksi perubahan dari elemen lain
+                $(document).on('input change', qtyTarget, () => {
+                    validateMinAset(this);
+                });
+            }
+        });
+
+    });
+
     $(function() {
         // ====================================================
         // 🚀 LOGIKA DINAMIS & VALIDASI BPS: ASET LAHAN
@@ -332,6 +394,22 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                     icon: 'warning',
                     title: 'Data Aset Tidak Logis',
                     text: 'Sesuai standar BPS, untuk ' + jmlSawah + ' lokasi lahan, Total Nilai Aset minimal bernilai Rp ' + formatMin,
+                    width: '320px',
+                    customClass: {
+                        title: 'fs-5',
+                        content: 'fs-6'
+                    }
+                });
+                return; // 🛑 Hentikan proses simpan!
+            }
+
+            // 🚀 TAMBAHAN: GATEKEEPER 1.5 - Cek Garis Merah pada Motor & Mobil
+            if ($('.val-min-aset.is-invalid').length > 0) {
+                $('.val-min-aset.is-invalid').first().focus(); // Fokus ke elemen pertama yang salah
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Data Aset Tidak Logis',
+                    text: 'Silakan perbaiki total nilai aset (Motor/Mobil) yang ditandai dengan warna merah.',
                     width: '320px',
                     customClass: {
                         title: 'fs-5',

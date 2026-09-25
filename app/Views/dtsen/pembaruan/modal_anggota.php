@@ -108,9 +108,22 @@ $editable = ($roleId <= 4);
                                             </div>
                                             <small class="text-muted fst-italic">Kosongkan bagian ini jika yang bersangkutan tidak memiliki nomor handphone.</small>
                                         </div>
-                                        <div class="col-md-6">
+                                        <!-- <div class="col-md-6">
                                             <label class="form-label fw-bold">Tanggal Lahir</label>
                                             <input type="date" class="form-control required" name="tanggal_lahir" id="tanggal_lahir">
+                                        </div> -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Tanggal Lahir</label>
+                                            <div class="input-group has-validation">
+                                                <input type="text" class="form-control required" id="tanggal_lahir_display" placeholder="DD-MM-YYYY" maxlength="10" inputmode="numeric">
+                                                <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#tanggal_lahir_display" title="Salin">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                                <!-- 🚀 PESAN ERROR KALENDER -->
+                                                <div class="invalid-feedback small fw-bold w-100">Format tanggal tidak valid atau tidak masuk akal.</div>
+                                            </div>
+                                            <input type="hidden" name="tanggal_lahir" id="tanggal_lahir">
+                                            <small class="text-muted fst-italic">Ketik angka saja, strip otomatis (Contoh: 31121992)</small>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Tempat Lahir</label>
@@ -746,6 +759,73 @@ $editable = ($roleId <= 4);
                     showConfirmButton: false,
                     timer: 1500
                 });
+            }
+        });
+
+        // ==============================================================
+        // 🚀 SMART DATE MASKING & VALIDATION: TANGGAL LAHIR (DD-MM-YYYY)
+        // ==============================================================
+
+        // Fungsi terpisah agar bisa dipanggil saat 'input' dan 'blur'
+        function validateDateString(val) {
+            if (val.length !== 10) return false;
+            const parts = val.split('-');
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10);
+            const year = parseInt(parts[2], 10);
+
+            const checkDate = new Date(year, month - 1, day);
+            const isCalendarValid = (
+                checkDate.getFullYear() === year &&
+                checkDate.getMonth() === month - 1 &&
+                checkDate.getDate() === day
+            );
+
+            const currentYear = new Date().getFullYear();
+            const isYearReasonable = year >= 1900 && year <= currentYear;
+
+            return isCalendarValid && isYearReasonable;
+        }
+
+        $('#tanggal_lahir_display').on('input', function() {
+            let val = this.value.replace(/\D/g, '');
+
+            if (val.length > 2 && val.length <= 4) {
+                val = val.slice(0, 2) + '-' + val.slice(2);
+            } else if (val.length > 4) {
+                val = val.slice(0, 2) + '-' + val.slice(2, 4) + '-' + val.slice(4, 8);
+            }
+            this.value = val;
+
+            const $feedback = $(this).siblings('.invalid-feedback');
+
+            if (val.length === 10) {
+                if (validateDateString(val)) {
+                    const parts = val.split('-');
+                    $('#tanggal_lahir').val(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                    $(this).removeClass('is-invalid');
+                } else {
+                    $('#tanggal_lahir').val('');
+                    $(this).addClass('is-invalid');
+                    $feedback.text('Format tanggal tidak valid (Misal: 30 Februari).');
+                }
+            } else {
+                // Jangan merah saat operator masih asyik mengetik, tapi amankan Ghost Input
+                $('#tanggal_lahir').val('');
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        // 🚀 TRIGGER KETAT SAAT PINDAH KOLOM (BLUR)
+        $('#tanggal_lahir_display').on('blur', function() {
+            let val = $(this).val();
+            const $feedback = $(this).siblings('.invalid-feedback');
+
+            // Jika kolom tidak kosong, tapi panjangnya belum 10 karakter (misal: 31-07-92)
+            if (val.length > 0 && val.length < 10) {
+                $(this).addClass('is-invalid');
+                $feedback.text('Gunakan 8 digit angka lengkap dengan tahun (Contoh: 31071992).');
+                $('#tanggal_lahir').val(''); // Pastikan database tidak menerima data ini
             }
         });
     });
