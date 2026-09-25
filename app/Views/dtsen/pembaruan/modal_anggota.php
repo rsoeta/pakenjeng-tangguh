@@ -73,20 +73,20 @@ $editable = ($roleId <= 4);
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">NIK</label>
-                                            <input type="text" class="form-control required onlynum16" name="nik" id="nik" maxlength="16">
+                                            <input type="text" class="form-control required onlynum16" name="nik" id="nik" maxlength="16" inputmode="numeric" pattern="[0-9]*">
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Nomor KK</label>
-                                            <input type="text" class="form-control required onlynum16" name="individu_no_kk" id="individu_no_kk" maxlength="16">
+                                            <input type="text" class="form-control required onlynum16" name="individu_no_kk" id="individu_no_kk" maxlength="16" inputmode="numeric" pattern="[0-9]*">
                                         </div>
 
                                         <!-- 🚀 ELEMEN BARU BPS: NOMOR HANDPHONE -->
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Nomor Handphone</label>
-                                            <input type="text" class="form-control onlynum" name="no_hp" id="no_hp" maxlength="15" placeholder="Contoh: 08123456789">
+                                            <input type="text" class="form-control onlynum" name="no_hp" id="no_hp" maxlength="13" inputmode="numeric" pattern="[0-9]*" placeholder="Contoh: 08123456789">
+                                            <div class="invalid-feedback small fw-bold">Nomor Handphone harus 10-13 digit angka dan diawali 08</div>
                                             <small class="text-muted fst-italic">Kosongkan bagian ini jika yang bersangkutan tidak memiliki nomor handphone.</small>
                                         </div>
-
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Tanggal Lahir</label>
                                             <input type="date" class="form-control required" name="tanggal_lahir" id="tanggal_lahir">
@@ -650,6 +650,33 @@ $editable = ($roleId <= 4);
         $('#modalAnggota').on('hidden.bs.modal', function() {
             if ($('#lapangan_usaha').hasClass("select2-hidden-accessible")) {
                 $('#lapangan_usaha').select2('destroy');
+            }
+        });
+
+        // ==========================================
+        // 🚀 KAWALAN KETAT INPUT ANGKA & VALIDASI HP
+        // ==========================================
+
+        // 1. Sapu bersih karakter selain angka secara real-time
+        $('#nik, #individu_no_kk, #no_hp').on('input', function() {
+            this.value = this.value.replace(/\D/g, '');
+        });
+
+        // 2. Validasi Khusus Nomor Handphone (Format BPS)
+        $('#no_hp').on('input change', function() {
+            let val = $(this).val();
+
+            // Jika dikosongkan, hapus error (karena field ini opsional)
+            if (val === '') {
+                $(this).removeClass('is-invalid');
+                return;
+            }
+
+            // Rule: Harus diawali '08' DAN panjang 10 s/d 13 digit
+            if (!val.startsWith('08') || val.length < 10 || val.length > 13) {
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
             }
         });
     });

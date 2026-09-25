@@ -278,62 +278,6 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                     </div>
 
                     <!-- Triwulan -->
-                    <!-- <div class="mb-3">
-                        <label class="form-label fw-bold">Periode Triwulan</label>
-
-                        <div class="row g-2 text-center">
-
-                            <div class="col-6 col-md-3">
-                                <input type="radio" class="btn-check" name="triwulan" id="tw1" value="1" required>
-
-                                <label class="card border-primary h-100 cursor-pointer p-2"
-                                    for="tw1">
-
-                                    <div class="fw-bold text-primary">TW 1</div>
-                                    <small class="text-muted">Jan – Mar</small>
-
-                                </label>
-                            </div>
-
-                            <div class="col-6 col-md-3">
-                                <input type="radio" class="btn-check" name="triwulan" id="tw2" value="2">
-
-                                <label class="card border-success h-100 cursor-pointer p-2"
-                                    for="tw2">
-
-                                    <div class="fw-bold text-success">TW 2</div>
-                                    <small class="text-muted">Apr – Jun</small>
-
-                                </label>
-                            </div>
-
-                            <div class="col-6 col-md-3">
-                                <input type="radio" class="btn-check" name="triwulan" id="tw3" value="3">
-
-                                <label class="card border-warning h-100 cursor-pointer p-2"
-                                    for="tw3">
-
-                                    <div class="fw-bold text-warning">TW 3</div>
-                                    <small class="text-muted">Jul – Sep</small>
-
-                                </label>
-                            </div>
-
-                            <div class="col-6 col-md-3">
-                                <input type="radio" class="btn-check" name="triwulan" id="tw4" value="4">
-
-                                <label class="card border-danger h-100 cursor-pointer p-2"
-                                    for="tw4">
-
-                                    <div class="fw-bold text-danger">TW 4</div>
-                                    <small class="text-muted">Okt – Des</small>
-
-                                </label>
-                            </div>
-
-                        </div>
-                    </div> -->
-                    <!-- Triwulan -->
                     <div class="mb-3">
                         <label class="form-label fw-bold">Periode Triwulan</label>
                         <div class="input-group">
