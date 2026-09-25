@@ -126,10 +126,12 @@ $editable = ($roleId <= 4);
                                         </div>
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Nama Ibu Kandung</label>
-                                            <input type="text" class="form-control required upper" name="ibu_kandung" id="ibu_kandung">
-                                            <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#ibu_kandung" title="Salin">
-                                                <i class="fas fa-copy"></i>
-                                            </button>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control required upper" name="ibu_kandung" id="ibu_kandung">
+                                                <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#ibu_kandung" title="Salin">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
