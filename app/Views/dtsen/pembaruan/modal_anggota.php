@@ -548,27 +548,22 @@ $editable = ($roleId <= 4);
                                 </div>
                                 <div class="col-md-12 mt-3">
                                     <label class="form-label fw-bold">Keluhan Kesehatan Kronis / Menahun</label>
-                                    <select class="form-select required" name="penyakit_kronis" id="penyakit_kronis">
-                                        <option value="">Pilih...</option>
-                                        <option value="Tidak Ada">Tidak Ada</option>
-                                        <option value="Hipertensi (darah tinggi)">Hipertensi (Darah Tinggi)</option>
-                                        <option value="Rematik">Rematik</option>
-                                        <option value="Asma">Asma</option>
-                                        <option value="Masalah jantung">Masalah Jantung</option>
-                                        <option value="Diabetes (kencing manis)">Diabetes (Kencing Manis)</option>
-                                        <option value="Tuberculosis (TBC)">Tuberculosis (TBC)</option>
-                                        <option value="Stroke">Stroke</option>
-                                        <option value="Kanker atau tumor ganas">Kanker atau Tumor Ganas</option>
-                                        <option value="Gagal ginjal">Gagal Ginjal</option>
-                                        <option value="Haemophilia">Haemophilia</option>
-                                        <option value="HIV/AIDS">HIV/AIDS</option>
-                                        <option value="Kolesterol">Kolesterol</option>
-                                        <option value="Sirosis hati">Sirosis Hati</option>
-                                        <option value="Thalasimia">Thalasimia</option>
-                                        <option value="Leukimia">Leukimia</option>
-                                        <option value="Alzheimer">Alzheimer</option>
-                                        <option value="Lainnya">Lainnya</option>
-                                    </select>
+                                    <div class="border rounded p-3" style="max-height: 200px; overflow-y:auto; background-color: #f8f9fa;">
+                                        <?php
+                                        $penyakitKronisList = ['Tidak Ada', 'Hipertensi (darah tinggi)', 'Rematik', 'Asma', 'Masalah jantung', 'Diabetes (kencing manis)', 'Tuberculosis (TBC)', 'Stroke', 'Kanker atau tumor ganas', 'Gagal ginjal', 'Haemophilia', 'HIV/AIDS', 'Kolesterol', 'Sirosis hati', 'Thalasimia', 'Leukimia', 'Alzheimer', 'Lainnya'];
+
+                                        foreach ($penyakitKronisList as $idx => $pk) {
+                                            // Menggunakan index ($idx) agar ID elemen aman dari spasi dan tanda kurung
+                                            $safeId = 'kronis_' . $idx;
+                                            echo "
+                                                <div class='form-check mb-2'>
+                                                    <input class='form-check-input kronis-check' type='checkbox' name='penyakit_kronis[]' value='$pk' id='$safeId'>
+                                                    <label class='form-check-label small text-dark' for='$safeId'>$pk</label>
+                                                </div>";
+                                        }
+                                        ?>
+                                    </div>
+                                    <small class="text-muted fst-italic mt-1 d-block">Pilih semua keluhan kesehatan yang dialami (bisa lebih dari satu).</small>
                                 </div>
                             </div>
                         </div>
@@ -677,6 +672,22 @@ $editable = ($roleId <= 4);
                 $(this).addClass('is-invalid');
             } else {
                 $(this).removeClass('is-invalid');
+            }
+        });
+
+        // ==============================================================
+        // 🚀 SMART CHECKBOX: PENYAKIT KRONIS (MUTUALLY EXCLUSIVE)
+        // ==============================================================
+        $('.kronis-check').on('change', function() {
+            const val = $(this).val();
+            const isChecked = $(this).prop('checked');
+
+            if (val === 'Tidak Ada' && isChecked) {
+                // 1. Jika "Tidak Ada" Dicentang -> Hapus centang semua penyakit lainnya
+                $('.kronis-check').not(this).prop('checked', false);
+            } else if (val !== 'Tidak Ada' && isChecked) {
+                // 2. Jika "Penyakit Lain" Dicentang -> Otomatis hapus centang pada "Tidak Ada"
+                $('.kronis-check[value="Tidak Ada"]').prop('checked', false);
             }
         });
     });

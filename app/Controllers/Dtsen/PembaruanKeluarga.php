@@ -809,7 +809,9 @@ class PembaruanKeluarga extends BaseController
                 'kesehatan' => [
                     'status_hamil' => $post['status_hamil'] ?? null,
                     'disabilitas' => $post['disabilitas'] ?? [],
-                    'penyakit_kronis' => $post['penyakit_kronis'] ?? null,
+                    // 🚀 PERUBAHAN BPS: Pastikan penyakit_kronis ditangkap sebagai array. 
+                    // Jika null, jadikan array kosong []. Jika dikirim string tunggal, paksa jadi array.
+                    'penyakit_kronis' => isset($post['penyakit_kronis']) ? (is_array($post['penyakit_kronis']) ? $post['penyakit_kronis'] : [$post['penyakit_kronis']]) : [],
                 ],
             ];
 
@@ -840,98 +842,6 @@ class PembaruanKeluarga extends BaseController
             return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
-
-    // public function getAnggotaDetail($id = null)
-    // {
-    //     try {
-    //         $db = \Config\Database::connect();
-    //         $genModel = new \App\Models\GenModel();
-
-    //         if (empty($id) || !is_numeric($id)) {
-    //             return $this->response->setJSON([
-    //                 'status' => 'empty',
-    //                 'data' => [
-    //                     'usulan_id' => null,
-    //                     'anggota_prefill' => [],
-    //                     'dropdowns' => [
-    //                         'status_kawin' => $genModel->getDataStatusKawin(),
-    //                         'hubungan' => $genModel->getDataShdk(),
-    //                         'pekerjaan' => $genModel->getPendudukPekerjaan(),
-    //                         'pendidikan' => $genModel->getPendidikan(),
-    //                     ]
-    //                 ]
-    //             ]);
-    //         }
-
-    //         $usulanArt = $db->table('dtsen_usulan_art')->where('id', $id)->get()->getRowArray();
-    //         $usulan_id = null;
-    //         $anggota_prefill = [];
-
-    //         if ($usulanArt) {
-    //             $payload = json_decode($usulanArt['payload_member'] ?? '{}', true);
-    //             $anggota_prefill = array_merge(
-    //                 [
-    //                     'id' => $usulanArt['id'],
-    //                     'dtsen_usulan_id' => $usulanArt['dtsen_usulan_id'],
-    //                     'nik' => $usulanArt['nik'],
-    //                     'nama' => $usulanArt['nama'],
-    //                     'hubungan' => $usulanArt['hubungan'],
-    //                 ],
-    //                 [
-    //                     'individu_no_kk' => $payload['identitas']['individu_no_kk'] ?? '',
-    //                     'no_hp' => $payload['identitas']['no_hp'] ?? '',
-    //                     'tempat_lahir' => $payload['identitas']['tempat_lahir'] ?? '',
-    //                     'tanggal_lahir' => $payload['identitas']['tanggal_lahir'] ?? '',
-    //                     'jenis_kelamin' => $payload['identitas']['jenis_kelamin'] ?? '',
-    //                     'status_kawin' => $payload['identitas']['status_kawin'] ?? '',
-    //                     'hubungan_keluarga' => $payload['identitas']['hubungan'] ?? '',
-    //                     'pekerjaan' => $payload['identitas']['pekerjaan'] ?? '',
-    //                     'pendidikan_terakhir' => $payload['identitas']['pendidikan_terakhir'] ?? '',
-    //                     'ibu_kandung' => $payload['identitas']['ibu_kandung'] ?? '',
-    //                     'provinsi' => $payload['identitas']['provinsi'] ?? '',
-    //                     'kabupaten' => $payload['identitas']['kabupaten'] ?? '',
-    //                     'kecamatan' => $payload['identitas']['kecamatan'] ?? '',
-    //                     'desa' => $payload['identitas']['desa'] ?? '',
-    //                     'status_keberadaan' => $payload['identitas']['status_keberadaan'] ?? 'Belum Ditentukan',
-    //                     'partisipasi_sekolah' => $payload['pendidikan']['partisipasi_sekolah'] ?? '',
-    //                     'jenjang_pendidikan'  => $payload['pendidikan']['jenjang_pendidikan'] ?? '',
-    //                     'kelas_tertinggi'     => $payload['pendidikan']['kelas_tertinggi'] ?? '',
-    //                     'ijazah_tertinggi'   => $payload['pendidikan']['ijazah_tertinggi'] ?? '',
-    //                     'bekerja_seminggu' => $payload['tenaga_kerja']['bekerja_seminggu'] ?? '',
-    //                     'lapangan_usaha'     => $payload['tenaga_kerja']['lapangan_usaha'] ?? '',
-    //                     'status_pekerjaan'   => $payload['tenaga_kerja']['status_pekerjaan'] ?? '',
-    //                     'pendapatan'         => $payload['tenaga_kerja']['pendapatan'] ?? '',
-    //                     'rekening_aktif'     => $payload['tenaga_kerja']['rekening_aktif'] ?? '', // 🚀 NEW
-    //                     'keterampilan'       => $payload['tenaga_kerja']['keterampilan'] ?? [],
-    //                     'status_hamil'       => $payload['kesehatan']['status_hamil'] ?? '',
-    //                     'penyakit_kronis'    => $payload['kesehatan']['penyakit_kronis'] ?? '',
-    //                     'disabilitas'        => $payload['kesehatan']['disabilitas'] ?? [],
-    //                 ]
-    //             );
-    //             $usulan_id = $usulanArt['dtsen_usulan_id'];
-    //         } else {
-    //             $art = $db->table('dtsen_art a')->select('a.*, kk.no_kk as individu_no_kk, kk.kepala_keluarga')->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'left')->where('a.id_art', $id)->get()->getRowArray();
-    //             if (!$art) return $this->response->setJSON(['status' => 'error', 'message' => 'Data tidak ditemukan.']);
-    //             $anggota_prefill = $art;
-    //         }
-
-    //         $refStatusKawin = $genModel->getDataStatusKawin();
-    //         $refShdk        = $genModel->getDataShdk();
-    //         $refPekerjaan   = $genModel->getPendudukPekerjaan();
-    //         $refPendidikan  = $genModel->getPendidikan();
-
-    //         return $this->response->setJSON([
-    //             'status'  => 'success',
-    //             'data'    => [
-    //                 'usulan_id' => $usulan_id,
-    //                 'anggota_prefill' => $anggota_prefill,
-    //                 'dropdowns' => ['status_kawin' => $refStatusKawin, 'hubungan' => $refShdk, 'pekerjaan' => $refPekerjaan, 'pendidikan' => $refPendidikan]
-    //             ]
-    //         ]);
-    //     } catch (\Throwable $e) {
-    //         return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
-    //     }
-    // }
 
     public function getAnggotaDetail($id = null)
     {
