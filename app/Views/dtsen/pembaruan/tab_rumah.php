@@ -692,10 +692,13 @@ $se   = $payload['sosial_ekonomi'] ?? [];
             const container = $('#container_meteran_listrik');
             let count = parseInt($('#jumlah_meteran_listrik').val()) || 0;
 
-            // Batasi agar user tidak iseng mengisi angka terlalu besar (misal 100)
+            // 🚀 VALIDASI KETAT: Cegah angka negatif dan batasi maksimal 10
             if (count > 10) {
                 count = 10;
                 $('#jumlah_meteran_listrik').val(10);
+            } else if (count < 0) {
+                count = 0;
+                $('#jumlah_meteran_listrik').val(0);
             }
 
             // Amankan nilai yang sedang diketik user agar tidak hilang saat re-render
@@ -722,28 +725,30 @@ $se   = $payload['sosial_ekonomi'] ?? [];
 
                     // Buat Opsi Dropdown Daya
                     let opsiDaya = ['TANPA METERAN', '450 WATT', '900 WATT', '1.300 WATT', '2.200 WATT', '> 2.200 WATT', '< = 900 WATT', '> 900 WATT'];
-                    let optHtml = '<option value="">[Pilih]</option>';
+                    let optHtml = '<option value="">[Pilih Daya]</option>';
                     opsiDaya.forEach(o => {
                         optHtml += `<option value="${o}" ${o === valDay ? 'selected' : ''}>${o}</option>`;
                     });
 
+                    // 🚀 PENYEMPURNAAN HTML: Toleransi PLN 10-13 Digit (Sesuai kondisi real di lapangan)
                     container.append(`
                         <div class="row g-2 mb-2 pb-2 ${i < count - 1 ? 'border-bottom' : ''}">
-                            <div class="col-12"><label class="form-label small fw-bold text-secondary mb-0">Meteran ke-${i+1}</label></div>
+                            <div class="col-12"><label class="form-label small fw-bold text-secondary mb-0">Meteran ke-${i+1} <span class="text-danger">*</span></label></div>
                             <div class="col-md-4">
-                                <div class="input-group">
-                                    <input type="text" id="nomor_pelanggan_${i}" name="nomor_pelanggan[]" class="form-control form-control-sm onlynum input-pelanggan" value="${valPel}" placeholder="Nomor Pelanggan PLN">
+                                <div class="input-group has-validation">
+                                    <input type="text" id="nomor_pelanggan_${i}" name="nomor_pelanggan[]" class="form-control form-control-sm onlynum-dynamic input-pelanggan" value="${valPel}" placeholder="ID Pelanggan (10-13 Digit)" minlength="10" maxlength="13" inputmode="numeric" pattern="[0-9]*" required>
                                     <button class="btn btn-outline-secondary btn-sm btn-copy-input" type="button" data-target="#nomor_pelanggan_${i}" title="Salin Nomor Pelanggan"><i class="fas fa-copy"></i></button>
+                                    <div class="invalid-feedback small w-100">Wajib diisi 10-13 digit angka.</div>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="input-group">
-                                    <input type="text" id="nomor_meter_${i}" name="nomor_meter[]" class="form-control form-control-sm onlynum input-meter" value="${valMet}" placeholder="Nomor Meter PLN">
+                                <div class="input-group has-validation">
+                                    <input type="text" id="nomor_meter_${i}" name="nomor_meter[]" class="form-control form-control-sm onlynum-dynamic input-meter" value="${valMet}" placeholder="Nomor Meter (10-13 Digit)" minlength="10" maxlength="13" inputmode="numeric" pattern="[0-9]*">
                                     <button class="btn btn-outline-secondary btn-sm btn-copy-input" type="button" data-target="#nomor_meter_${i}" title="Salin Nomor Meter"><i class="fas fa-copy"></i></button>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <select name="daya_listrik[]" class="form-select form-select-sm input-daya">
+                                <select name="daya_listrik[]" class="form-select form-select-sm input-daya" required>
                                     ${optHtml}
                                 </select>
                             </div>
@@ -754,6 +759,11 @@ $se   = $payload['sosial_ekonomi'] ?? [];
         }
 
         $('#jumlah_meteran_listrik').on('input change', renderMeteranListrik);
+
+        // 🚀 GATEKEEPER DELEGASI: Untuk elemen input dinamis (hanya angka)
+        $(document).on('input', '.onlynum-dynamic', function() {
+            this.value = this.value.replace(/\D/g, '');
+        });
 
         // ============ LISTRIK DYNAMIC (RADIO VERSION) ============
         function toggleListrikFields() {
