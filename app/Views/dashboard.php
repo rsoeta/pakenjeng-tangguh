@@ -41,6 +41,46 @@ $roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
         margin-top: 2rem;
     }
 
+    /* ✨ FLUID FLEXBOX UNTUK MENU PRIORITAS (SANGAT RESPONSIVE) */
+    .priority-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 0;
+    }
+
+    /* ATURAN GLOBAL HARUS DI ATAS (Berlaku untuk Desktop & Tablet) */
+    .priority-item {
+        flex-grow: 1;
+        flex-basis: 200px;
+        /* Di desktop minimal 200px sebelum wrap */
+        min-width: 200px;
+    }
+
+    /* ATURAN MOBILE HARUS DI BAWAH (Menimpa aturan global saat layar mengecil) */
+    @media (max-width: 767.98px) {
+        .priority-item {
+            /* Di HP, paksa minimal 2 kolom (50% - gap) */
+            flex-basis: calc(50% - 0.5rem);
+            min-width: unset;
+            /* Hapus batasan 200px agar bisa muat 2 di layar HP kecil */
+        }
+
+        .priority-item .stat-icon {
+            font-size: 1.5rem;
+        }
+
+        .priority-item h6 {
+            font-size: 0.85rem;
+        }
+    }
+
+    /* ✨ Gaya khusus untuk Card Menu Prioritas Dinamis */
+    .priority-card {
+        border-top: 4px solid #4facfe;
+        background: linear-gradient(to bottom, #ffffff, #f8fbff);
+    }
+
     .stat-card {
         background: white;
         border-radius: 15px;
@@ -171,23 +211,10 @@ $roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
         <?php endif; ?>
 
         <?php if (!empty($menu_prioritas)): ?>
-            <?php
-            // ✨ HITUNG JUMLAH MENU
-            $jmlMenu = count($menu_prioritas);
-
-            // ✨ LOGIKA KELAS DINAMIS (TANPA WHITESPACE DI DESKTOP)
-            if ($jmlMenu == 1) {
-                $colClass = 'col-12'; // 1 Menu: Full layar HP & Desktop
-            } elseif ($jmlMenu == 2) {
-                $colClass = 'col-6';  // 2 Menu: Dibagi 2 rata di HP & Desktop (50:50)
-            } else {
-                $colClass = 'col-6 col-md-4'; // >= 3 Menu: Di HP bagi 2, di Desktop maksimal 3 sejajar
-            }
-            ?>
-
             <h5 class="mt-4 mb-2 fw-bold text-secondary"><i class="fas fa-bolt text-warning"></i> Menu Prioritas & Akses Cepat</h5>
 
-            <div class="row mt-0">
+            <!-- 🚀 MENGGUNAKAN FLEXBOX CONTAINER -->
+            <div class="priority-container mb-3">
                 <?php foreach ($menu_prioritas as $mp): ?>
                     <?php
                     // ✨ LOGIKA PENGGABUNGAN NAMA: "Parent Child"
@@ -195,7 +222,8 @@ $roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
                         ? $mp['parent_nama'] . ' ' . $mp['tm_nama']
                         : $mp['tm_nama'];
                     ?>
-                    <div class="<?= $colClass ?> mb-3">
+                    <!-- 🚀 MENGGUNAKAN FLEX ITEM -->
+                    <div class="priority-item">
                         <div class="stat-card priority-card shadow-sm h-100" onclick="window.location='<?= base_url($mp['tm_url']) ?>'">
                             <div class="stat-icon text-info"><i class="<?= esc($mp['tm_icon']) ?>"></i></div>
                             <h6 class="fw-bold mt-2 text-dark"><?= esc(strtoupper($judulMenu)) ?></h6>
