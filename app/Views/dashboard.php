@@ -34,11 +34,22 @@ $roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
         opacity: 0.9;
     }
 
+    /* 🚀 1. ATURAN DEFAULT DESKTOP (Layar Penuh = 4 Kolom) */
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
+        /* Paksa 4 kartu berjajar rapi */
         gap: 1rem;
-        margin-top: 2rem;
+        margin-top: 1rem;
+        align-items: stretch;
+    }
+
+    /* 🚀 2. ATURAN SETENGAH LAYAR / TABLET (Maks 1200px = Grid 2x2) */
+    @media (max-width: 1200px) {
+        .stats-grid {
+            /* Memaksa kartu menjadi 2 baris x 2 kolom. Selamat tinggal ruang kosong! */
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
 
     /* ✨ FLUID FLEXBOX UNTUK MENU PRIORITAS (SANGAT RESPONSIVE) */
@@ -57,24 +68,6 @@ $roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
         min-width: 200px;
     }
 
-    /* ATURAN MOBILE HARUS DI BAWAH (Menimpa aturan global saat layar mengecil) */
-    @media (max-width: 767.98px) {
-        .priority-item {
-            /* Di HP, paksa minimal 2 kolom (50% - gap) */
-            flex-basis: calc(50% - 0.5rem);
-            min-width: unset;
-            /* Hapus batasan 200px agar bisa muat 2 di layar HP kecil */
-        }
-
-        .priority-item .stat-icon {
-            font-size: 1.5rem;
-        }
-
-        .priority-item h6 {
-            font-size: 0.85rem;
-        }
-    }
-
     /* ✨ Gaya khusus untuk Card Menu Prioritas Dinamis */
     .priority-card {
         border-top: 4px solid #4facfe;
@@ -89,6 +82,13 @@ $roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
         box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
         transition: all 0.3s ease;
         cursor: pointer;
+        /* 🚀 KUNCI KEDUA: Jadikan flex column agar bisa mendistribusikan sisa ruang kosong */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        /* Konten ke tengah vertikal */
+        height: 100%;
+        /* Wajib diisi agar mengikuti stretch dari grid parent */
     }
 
     .stat-card:hover {
@@ -99,6 +99,20 @@ $roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
     .stat-icon {
         font-size: 1.8rem;
         margin-bottom: .5rem;
+    }
+
+    .stat-card h6 {
+        margin-bottom: 0.5rem;
+        flex-grow: 1;
+        /* Biarkan judul mengambil sisa ruang kosong jika judulnya panjang */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .stat-card h3 {
+        margin-bottom: 0;
+        font-weight: bold;
     }
 
     /* ✨ Gaya khusus untuk Card Menu Prioritas Dinamis */
@@ -119,14 +133,48 @@ $roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
         box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     }
 
-    @media (max-width: 768px) {
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
+    /* 🚀 3. ATURAN SMARTPHONE (Maks 767px = Paksa 2 Kolom Bersisian) */
+    @media (max-width: 767.98px) {
+
+        .priority-item {
+            /* Di HP, paksa minimal 2 kolom (50% - gap) */
+            flex-basis: calc(50% - 0.5rem);
+            min-width: unset;
+            /* Hapus batasan 200px agar bisa muat 2 di layar HP kecil */
         }
 
-        .hero-banner {
-            padding: 1.5rem;
-            font-size: .9rem;
+        .priority-item .stat-icon {
+            font-size: 1.5rem;
+        }
+
+        .priority-item h6 {
+            font-size: 0.85rem;
+        }
+
+        .stats-grid {
+            /* 🚀 UBAH DARI 1fr MENJADI 2 KOLOM */
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            /* Rapatkan sedikit celah antar kartu di layar HP */
+        }
+
+        /* 🚀 SESUAIKAN SKALA KONTEN AGAR TIDAK KEPOTONG DI HP */
+        .stats-grid .stat-card {
+            padding: 1rem 0.5rem;
+        }
+
+        .stats-grid .stat-icon {
+            font-size: 1.3rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .stats-grid h6 {
+            font-size: 0.75rem;
+            line-height: 1.2;
+        }
+
+        .stats-grid h3 {
+            font-size: 1.25rem;
         }
     }
 </style>
