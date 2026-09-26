@@ -831,6 +831,19 @@ $editable = ($roleId <= 4);
         });
 
         // 🚀 TELEPORTASI MODAL ANGGOTA KE LUAR TAB-PANE
-        $('#modalAnggota').appendTo('body');
+        // $('#modalAnggota').appendTo('body');
+
+        // ==============================================================
+        // 🚀 CLEANUP STANDAR (BEBAS BENTROK)
+        // ==============================================================
+        $('#modalAnggota').on('hidden.bs.modal', function() {
+            // Hapus sisa layar hitam khusus modal saja, biarkan offcanvas tetap hidup
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open').css({
+                'padding-right': '',
+                'overflow': ''
+            });
+            document.documentElement.style.overflow = '';
+        });
     });
 </script>
