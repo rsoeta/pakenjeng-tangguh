@@ -446,6 +446,8 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                         title: 'Berhasil!',
                         text: 'Data aset berhasil disimpan.',
                         width: '320px',
+                        showConfirmButton: false, // 🚀 Hilangkan tombol OK
+                        timer: 1500, // 🚀 Hilang otomatis dalam 1,5 detik
                         customClass: {
                             title: 'fs-5',
                             content: 'fs-6'
