@@ -565,16 +565,6 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
         }
     });
 
-    document.addEventListener('shown.bs.tab', function(event) {
-        if (event.target.getAttribute('data-bs-target') === '#tabRumah') {
-
-            $('#rumah_provinsi, #rumah_regency, #rumah_district, #rumah_village').select2({
-                width: '100%'
-            });
-
-        }
-    });
-
     document.getElementById('btnSyncDesil')?.addEventListener('click', function() {
 
         const btn = this;

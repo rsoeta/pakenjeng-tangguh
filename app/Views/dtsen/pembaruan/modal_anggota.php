@@ -6,46 +6,53 @@ $editable = ($roleId <= 4);
 <div class="modal fade" id="modalAnggota" tabindex="-1" aria-labelledby="modalAnggotaLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-sm-down">
         <div class="modal-content">
-            <form id="formAnggota" autocomplete="off">
+            <!-- 🚀 1. TAMBAHKAN KELAS FLEXBOX PADA FORM AGAR FOOTER TERDORONG KE BAWAH -->
+            <form id="formAnggota" autocomplete="off" class="d-flex flex-column w-100 h-100 overflow-hidden">
                 <input type="hidden" id="id_kk" name="id_kk" value="<?= $payload['id_kk'] ?? '' ?>">
 
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title fw-bold" id="modalAnggotaLabel">🧍‍♂️ Pembaruan Data Individu</h5>
-                    <!-- 🚀 PERBAIKAN: Gunakan <button> agar fokus terlepas dengan benar saat ditutup -->
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <div class="modal-body" style="max-height: calc(100vh - 200px); overflow-y:auto;">
-                    <ul class="nav nav-tabs" id="tabAnggotaTabs" role="tablist">
-                        <li class="nav-item">
-                            <a href="javascript:void(0)" class="nav-link active" id="tab-identitas-tab" data-bs-toggle="tab"
-                                data-bs-target="#tab-identitas" role="tab" aria-controls="tab-identitas"
-                                aria-selected="true" style="display:block !important; text-decoration:none;">
-                                📋 Data Pokok Individu <span class="badge bg-secondary ms-1" id="badgeIdentitas">⚠️</span>
-                            </a>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <a href="javascript:void(0)" class="nav-link" id="tab-pendidikan-tab" data-bs-toggle="tab"
-                                data-bs-target="#tab-pendidikan" role="tab" style="display:block !important; text-decoration:none;">
-                                🎓 Pendidikan <span class="badge bg-secondary ms-1" id="badgePendidikan">⚠️</span>
-                            </a>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <a href="javascript:void(0)" class="nav-link" id="tab-kerja-tab" data-bs-toggle="tab"
-                                data-bs-target="#tab-kerja" role="tab" style="display:block !important; text-decoration:none;">
-                                💼 Tenaga Kerja <span class="badge bg-secondary ms-1" id="badgeKerja">⚠️</span>
-                            </a>
-                        </li>
-                        <!-- 🚀 TAB KEPEMILIKAN USAHA SUDAH DIHAPUS SESUAI INSTRUKSI -->
-                        <li class="nav-item" role="presentation">
-                            <a href="javascript:void(0)" class="nav-link" id="tab-kesehatan-tab" data-bs-toggle="tab"
-                                data-bs-target="#tab-kesehatan" role="tab" style="display:block !important; text-decoration:none;">
-                                ❤️ Kesehatan <span class="badge bg-secondary ms-1" id="badgeKesehatan">⚠️</span>
-                            </a>
-                        </li>
-                    </ul>
+                <!-- 🚀 2. HAPUS INLINE STYLE MANUAL & HILANGKAN PADDING BAWAAN (p-0) -->
+                <div class="modal-body p-0">
 
-                    <div class="tab-content pt-3">
+                    <!-- 🚀 3. BUNGKUS NAV-TABS DENGAN STICKY-TOP AGAR SELALU MENGAMBANG DI ATAS -->
+                    <div class="sticky-top bg-white pt-3 px-3 border-bottom" style="z-index: 1020;">
+                        <ul class="nav nav-tabs border-0" id="tabAnggotaTabs" role="tablist">
+                            <li class="nav-item">
+                                <a href="javascript:void(0)" class="nav-link active" id="tab-identitas-tab" data-bs-toggle="tab"
+                                    data-bs-target="#tab-identitas" role="tab" aria-controls="tab-identitas"
+                                    aria-selected="true" style="display:block !important; text-decoration:none;">
+                                    📋 Data Pokok Individu <span class="badge bg-secondary ms-1" id="badgeIdentitas">⚠️</span>
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a href="javascript:void(0)" class="nav-link" id="tab-pendidikan-tab" data-bs-toggle="tab"
+                                    data-bs-target="#tab-pendidikan" role="tab" style="display:block !important; text-decoration:none;">
+                                    🎓 Pendidikan <span class="badge bg-secondary ms-1" id="badgePendidikan">⚠️</span>
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a href="javascript:void(0)" class="nav-link" id="tab-kerja-tab" data-bs-toggle="tab"
+                                    data-bs-target="#tab-kerja" role="tab" style="display:block !important; text-decoration:none;">
+                                    💼 Tenaga Kerja <span class="badge bg-secondary ms-1" id="badgeKerja">⚠️</span>
+                                </a>
+                            </li>
+                            <!-- 🚀 TAB KEPEMILIKAN USAHA SUDAH DIHAPUS SESUAI INSTRUKSI -->
+                            <li class="nav-item" role="presentation">
+                                <a href="javascript:void(0)" class="nav-link" id="tab-kesehatan-tab" data-bs-toggle="tab"
+                                    data-bs-target="#tab-kesehatan" role="tab" style="display:block !important; text-decoration:none;">
+                                    ❤️ Kesehatan <span class="badge bg-secondary ms-1" id="badgeKesehatan">⚠️</span>
+                                </a>
+                            </li>
+                        </ul>
+
+                    </div> <!-- 🚀 INI ADALAH PENUTUP DARI DIV STICKY-TOP DI ATAS -->
+
+                    <!-- 🚀 4. PINDAHKAN PADDING KE TAB-CONTENT (p-3) -->
+                    <div class="tab-content p-3">
 
                         <!-- ========================================== -->
                         <!-- 1. TAB IDENTITAS -->
@@ -89,7 +96,8 @@ $editable = ($roleId <= 4);
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Nomor KK</label>
                                             <div class="input-group">
-                                                <input type="text" class="form-control required onlynum16" name="individu_no_kk" id="individu_no_kk" maxlength="16" inputmode="numeric" pattern="[0-9]*">
+                                                <!-- 🚀 UBAH: Tambah readonly, bg-light, dan hapus tombol copy -->
+                                                <input type="text" class="form-control required onlynum16 bg-light" name="individu_no_kk" id="individu_no_kk" maxlength="16" inputmode="numeric" pattern="[0-9]*" readonly tabindex="-1" placeholder="Otomatis dari Tab Keluarga">
                                                 <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#individu_no_kk" title="Salin">
                                                     <i class="fas fa-copy"></i>
                                                 </button>
@@ -109,10 +117,6 @@ $editable = ($roleId <= 4);
                                             </div>
                                             <small class="text-muted fst-italic">Kosongkan bagian ini jika yang bersangkutan tidak memiliki nomor handphone.</small>
                                         </div>
-                                        <!-- <div class="col-md-6">
-                                            <label class="form-label fw-bold">Tanggal Lahir</label>
-                                            <input type="date" class="form-control required" name="tanggal_lahir" id="tanggal_lahir">
-                                        </div> -->
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Tanggal Lahir</label>
                                             <div class="input-group has-validation">
@@ -176,21 +180,29 @@ $editable = ($roleId <= 4);
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold border-bottom pb-1">Wilayah Capil (Sesuai Data Kependudukan)</label>
                                             <div class="row g-2 mt-1">
+                                                <!-- 🚀 UBAH: Tambah bg-light, readonly, dan CSS pointer-events none -->
+                                                <style>
+                                                    .locked-select {
+                                                        pointer-events: none;
+                                                        background-color: #e9ecef !important;
+                                                        opacity: 1;
+                                                    }
+                                                </style>
                                                 <div class="col-md-3">
                                                     <label class="form-label small">Provinsi</label>
-                                                    <select class="form-select required" id="ind_provinsi" name="provinsi"></select>
+                                                    <select class="form-select required locked-select" id="ind_provinsi" name="provinsi" tabindex="-1" readonly></select>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class="form-label small">Kabupaten/Kota</label>
-                                                    <select class="form-select required" id="ind_kabupaten" name="kabupaten"></select>
+                                                    <select class="form-select required locked-select" id="ind_kabupaten" name="kabupaten" tabindex="-1" readonly></select>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class="form-label small">Kecamatan</label>
-                                                    <select class="form-select required" id="ind_kecamatan" name="kecamatan"></select>
+                                                    <select class="form-select required locked-select" id="ind_kecamatan" name="kecamatan" tabindex="-1" readonly></select>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class="form-label small">Kel/Desa</label>
-                                                    <select class="form-select required" id="ind_desa" name="desa"></select>
+                                                    <select class="form-select required locked-select" id="ind_desa" name="desa" tabindex="-1" readonly></select>
                                                 </div>
                                             </div>
                                             <div class="mb-3 mt-3">
@@ -314,7 +326,7 @@ $editable = ($roleId <= 4);
                             <div class="row g-4">
 
                                 <div class="col-md-12">
-                                    <label class="form-label fw-bold">Jenis Lapangan Usaha / Profesi Pekerjaan Utama</label>
+                                    <label class="form-label fw-bold">Jenis Lapangan Usaha / Profesi Pekerjaan Utama <span class="text-danger small fw-normal">* (Wajib usia > 5 thn)</span></label>
                                     <select class="form-select select2-init" name="lapangan_usaha" id="lapangan_usaha">
                                         <option value="">Pilih...</option>
                                         <?php
@@ -516,7 +528,7 @@ $editable = ($roleId <= 4);
 
                                 <!-- 🚀 BERI ID div_status_pekerjaan PADA BUNGKUS INI -->
                                 <div class="col-md-12" id="div_status_pekerjaan">
-                                    <label class="form-label fw-bold">Status dalam Pekerjaan Utama</label>
+                                    <label class="form-label fw-bold">Status dalam Pekerjaan Utama <span class="text-danger small fw-normal">* (Wajib usia > 5 thn)</span></label>
                                     <select class="form-select" name="status_pekerjaan" id="status_pekerjaan">
                                         <option value="">Pilih...</option>
                                         <option value="Berusaha sendiri">Berusaha sendiri</option>
@@ -533,7 +545,7 @@ $editable = ($roleId <= 4);
                                 <!-- 🚀 ELEMEN BARU BPS: REKENING / DOMPET DIGITAL -->
                                 <div class="col-md-12 border-top pt-3">
                                     <label class="form-label fw-bold text-primary">
-                                        Apakah <span class="bg-warning text-dark px-1 rounded label-nama-anggota">Anggota Keluarga ini</span> memiliki rekening aktif atau dompet digital?
+                                        Apakah <span class="bg-warning text-dark px-1 rounded label-nama-anggota">Anggota Keluarga ini</span> memiliki rekening aktif? <span class="text-danger small fw-normal">* (Wajib usia > 5 thn)</span>
                                     </label>
                                     <div class="border border-primary border-opacity-50 rounded p-3 bg-light">
                                         <div class="form-check mb-2">
@@ -588,7 +600,7 @@ $editable = ($roleId <= 4);
                                 </div>
                                 <div class="col-md-12 mt-3">
                                     <label class="form-label fw-bold">Keluhan Kesehatan Kronis / Menahun</label>
-                                    <div class="border rounded p-3" style="max-height: 200px; overflow-y:auto; background-color: #f8f9fa;">
+                                    <div class="border rounded p-3" style="min-height: 300px; overflow-y:auto; background-color: #f8f9fa;">
                                         <?php
                                         $penyakitKronisList = ['Tidak Ada', 'Hipertensi (darah tinggi)', 'Rematik', 'Asma', 'Masalah jantung', 'Diabetes (kencing manis)', 'Tuberculosis (TBC)', 'Stroke', 'Kanker atau tumor ganas', 'Gagal ginjal', 'Haemophilia', 'HIV/AIDS', 'Kolesterol', 'Sirosis hati', 'Thalasimia', 'Leukimia', 'Alzheimer', 'Lainnya'];
 
@@ -611,12 +623,19 @@ $editable = ($roleId <= 4);
                     </div>
                 </div>
 
-                <div class="modal-footer sticky-bottom bg-light">
+                <!-- 🚀 FLEXBOX: Kiri-Kanan (justify-content-between) -->
+                <div class="modal-footer bg-light d-flex justify-content-between">
                     <?php if ($editable): ?>
-                        <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Simpan</button>
-                    <?php else: ?>
-                        <!-- 🚀 PERBAIKAN: Gunakan <button> alih-alih <a> -->
                         <button type="button" class="btn btn-secondary px-4 shadow-sm" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i> Tutup
+                        </button>
+                        <!-- 🚀 BERI ID dan Gembok Default (disabled) -->
+                        <button type="submit" class="btn btn-success px-4 shadow-sm" id="btnSimpanAnggota" disabled>
+                            <i class="fas fa-save me-1"></i> Simpan
+                        </button>
+                    <?php else: ?>
+                        <!-- Jika read-only, tombol tutup memanjang penuh atau tetap di kanan -->
+                        <button type="button" class="btn btn-secondary px-4 shadow-sm w-100" data-bs-dismiss="modal">
                             <i class="fas fa-times me-1"></i> Tutup
                         </button>
                     <?php endif; ?>

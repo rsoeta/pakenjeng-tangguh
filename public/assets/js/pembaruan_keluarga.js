@@ -497,9 +497,14 @@ $(document).ready(function () {
 
         if (profesi === 'Tidak Bekerja') {
             $divStatus.slideUp(200); // Sembunyikan dengan animasi halus
-            $inputStatus.val('').removeClass('is-invalid'); // Kosongkan & hapus error (jika ada)
+            
+            // 🚀 KUNCI MATI FISIKNYA! Agar Indikator Hijau mengabaikannya (:not(:disabled))
+            $inputStatus.val('').prop('disabled', true).removeClass('is-invalid'); 
         } else {
             $divStatus.slideDown(200); // Tampilkan kembali
+            
+            // 🚀 BUKA KEMBALI KUNCINYA JIKA PROFESI BUKAN "TIDAK BEKERJA"
+            $inputStatus.prop('disabled', false); 
         }
     }
 
@@ -526,22 +531,50 @@ $(document).ready(function () {
     // (tidak memaksa modal terbuka)
     // applyRules(); // Uncomment kalau perlu pada page load
 
+    // /* ======================================================
+    //  🏡 Prefill Wilayah Select2 (AJAX)
+    // ======================================================= */
+
+    // function prefillWilayah(wilayah, wilayahNama) {
+    //     if (!wilayah || !wilayahNama) {
+    //         console.warn("⚠️ Data wilayah tidak lengkap di payload.");
+    //         return;
+    //     }
+
+    //     // console.log("✅ Prefill Wilayah:", wilayah, wilayahNama);
+
+    //     const setSelect2Value = (selector, id, text) => {
+    //         if (!id || !text) return;
+    //         const $select = $(selector);
+    //         if ($select.length) {
+    //             const option = new Option(text, id, true, true);
+    //             $select.append(option).trigger('change');
+    //         }
+    //     };
+
+    //     // delay agar select2 siap
+    //     setTimeout(() => {
+    //         setSelect2Value("#rumah_provinsi, #provinsi", wilayah.provinsi, wilayahNama.provinsi);
+    //         setSelect2Value("#rumah_regency, #kabupaten", wilayah.kabupaten, wilayahNama.kabupaten);
+    //         setSelect2Value("#rumah_district, #kecamatan", wilayah.kecamatan, wilayahNama.kecamatan);
+    //         setSelect2Value("#rumah_village, #desa", wilayah.desa, wilayahNama.desa);
+    //     }, 400);
+    // }
     /* ======================================================
      🏡 Prefill Wilayah Select2 (AJAX)
     ======================================================= */
-
     function prefillWilayah(wilayah, wilayahNama) {
         if (!wilayah || !wilayahNama) {
             console.warn("⚠️ Data wilayah tidak lengkap di payload.");
             return;
         }
 
-        // console.log("✅ Prefill Wilayah:", wilayah, wilayahNama);
-
         const setSelect2Value = (selector, id, text) => {
             if (!id || !text) return;
             const $select = $(selector);
             if ($select.length) {
+                // 🚀 Hapus isi lama agar tidak menumpuk duplikat saat edit berkali-kali
+                $select.empty(); 
                 const option = new Option(text, id, true, true);
                 $select.append(option).trigger('change');
             }
@@ -549,10 +582,16 @@ $(document).ready(function () {
 
         // delay agar select2 siap
         setTimeout(() => {
+            // 🚀 PASANG GEMBOK: Beritahu sistem bahwa ini adalah proses prefill otomatis!
+            window.isPrefillingWilayah = true; 
+
             setSelect2Value("#rumah_provinsi, #provinsi", wilayah.provinsi, wilayahNama.provinsi);
             setSelect2Value("#rumah_regency, #kabupaten", wilayah.kabupaten, wilayahNama.kabupaten);
             setSelect2Value("#rumah_district, #kecamatan", wilayah.kecamatan, wilayahNama.kecamatan);
             setSelect2Value("#rumah_village, #desa", wilayah.desa, wilayahNama.desa);
+
+            // 🚀 BUKA GEMBOK: Setelah prefill selesai (beri jeda 300ms), kembalikan ke mode normal
+            setTimeout(() => { window.isPrefillingWilayah = false; }, 300);
         }, 400);
     }
 
@@ -605,92 +644,96 @@ $(document).ready(function () {
     /* ======================================================
      🌍 Inisialisasi Select2 Wilayah AJAX Berantai
     ======================================================= */
-    function initSelect2Wilayah() {
-        const select2Base = {
-            theme: 'bootstrap-5',
-            width: '100%',
-            placeholder: 'Pilih...',
-            allowClear: true,
-            ajax: {
-                delay: 250,
-                dataType: 'json',
-                processResults: data => ({ results: data.map(item => ({ id: item.id, text: item.name })) })
-            }
-        };
+    // function initSelect2Wilayah() {
+    //     const select2Base = {
+    //         theme: 'bootstrap-5',
+    //         width: '100%',
+    //         placeholder: 'Pilih...',
+    //         allowClear: true,
+    //         ajax: {
+    //             delay: 250,
+    //             dataType: 'json',
+    //             processResults: data => ({ results: data.map(item => ({ id: item.id, text: item.name })) })
+    //         }
+    //     };
 
-        // Helper: buat select2 dengan opsi, optional dropdownParent
-        function attachSelect2(selector, ajaxUrl, dropdownParentEl = null, transportFn = null) {
-            const cfg = $.extend(true, {}, select2Base);
-            if (ajaxUrl) cfg.ajax = $.extend({}, cfg.ajax, { url: ajaxUrl });
-            if (transportFn) cfg.ajax.transport = transportFn;
-            if (dropdownParentEl && dropdownParentEl.length) cfg.dropdownParent = dropdownParentEl;
-            $(selector).select2(cfg);
-        }
+    //     // Helper: buat select2 dengan opsi, optional dropdownParent
+    //     function attachSelect2(selector, ajaxUrl, dropdownParentEl = null, transportFn = null) {
+    //         const cfg = $.extend(true, {}, select2Base);
+    //         if (ajaxUrl) cfg.ajax = $.extend({}, cfg.ajax, { url: ajaxUrl });
+    //         if (transportFn) cfg.ajax.transport = transportFn;
+    //         if (dropdownParentEl && dropdownParentEl.length) cfg.dropdownParent = dropdownParentEl;
+    //         $(selector).select2(cfg);
+    //     }
 
-        // elemen modal (jika ada)
-        const $modal = $('#modalAnggota');
+    //     // 🚀 OBAT PENCARIAN MACET: Beritahu Select2 bahwa induknya adalah formDataKeluarga
+    //     const mainParent = $('#formDataKeluarga').length ? $('#formDataKeluarga') : null;
 
-        // Provinsi
-        attachSelect2('#rumah_provinsi, #provinsi', baseUrl + '/api/villages/provinces', null);
+    //     // Provinsi
+    //     attachSelect2('#rumah_provinsi, #provinsi', baseUrl + '/api/villages/provinces', mainParent);
 
-        // Kabupaten (bergantung prov)
-        attachSelect2('#rumah_regency, #kabupaten', null, null, function(params, success, failure) {
-            const provID = $('#rumah_provinsi').val() || $('#provinsi').val();
-            if (!provID) return success([]);
-            $.ajax({ url: baseUrl + '/api/villages/regencies/' + provID, dataType: 'json', success, error: failure });
-        });
+    //     // Kabupaten (bergantung prov)
+    //     attachSelect2('#rumah_regency, #kabupaten', null, mainParent, function(params, success, failure) {
+    //         const provID = $('#rumah_provinsi').val() || $('#provinsi').val();
+    //         if (!provID) return success([]);
+    //         $.ajax({ url: baseUrl + '/api/villages/regencies/' + provID, dataType: 'json', success, error: failure });
+    //     });
 
-        // Kecamatan
-        attachSelect2('#rumah_district, #kecamatan', null, null, function(params, success, failure) {
-            const kabID = $('#rumah_regency').val() || $('#kabupaten').val();
-            if (!kabID) return success([]);
-            $.ajax({ url: baseUrl + '/api/villages/districts/' + kabID, dataType: 'json', success, error: failure });
-        });
+    //     // Kecamatan
+    //     attachSelect2('#rumah_district, #kecamatan', null, mainParent, function(params, success, failure) {
+    //         const kabID = $('#rumah_regency').val() || $('#kabupaten').val();
+    //         if (!kabID) return success([]);
+    //         $.ajax({ url: baseUrl + '/api/villages/districts/' + kabID, dataType: 'json', success, error: failure });
+    //     });
 
-        // Desa
-        attachSelect2('#rumah_village, #desa', null, null, function(params, success, failure) {
-            const kecID = $('#rumah_district').val() || $('#kecamatan').val();
-            if (!kecID) return success([]);
-            $.ajax({ url: baseUrl + '/api/villages/villages/' + kecID, dataType: 'json', success, error: failure });
-        });
+    //     // Desa
+    //     attachSelect2('#rumah_village, #desa', null, mainParent, function(params, success, failure) {
+    //         const kecID = $('#rumah_district').val() || $('#kecamatan').val();
+    //         if (!kecID) return success([]);
+    //         $.ajax({ url: baseUrl + '/api/villages/villages/' + kecID, dataType: 'json', success, error: failure });
+    //     });
 
-        // ---- IMPORTANT: re-initialize selects that are *inside modal* with dropdownParent to ensure dropdown appears above modal ----
-        if ($modal.length) {
-            ['#provinsi', '#kabupaten', '#kecamatan', '#desa'].forEach(sel => {
-                // destroy existing select2 (if initialized), then re-init with dropdownParent
-                if ($(sel).data('select2')) $(sel).select2('destroy');
-            });
+    //     // ---- IMPORTANT: re-initialize selects that are *inside modal* with dropdownParent to ensure dropdown appears above modal ----
+    //     if ($modal.length) {
+    //         ['#provinsi', '#kabupaten', '#kecamatan', '#desa'].forEach(sel => {
+    //             // destroy existing select2 (if initialized), then re-init with dropdownParent
+    //             if ($(sel).data('select2')) $(sel).select2('destroy');
+    //         });
 
-            // attach with dropdownParent = modal
-            attachSelect2('#provinsi', baseUrl + '/api/villages/provinces', $modal);
-            attachSelect2('#kabupaten', null, $modal, function(params, success, failure) {
-                const provID = $('#provinsi').val();
-                if (!provID) return success([]);
-                $.ajax({ url: baseUrl + '/api/villages/regencies/' + provID, dataType: 'json', success, error: failure });
-            });
-            attachSelect2('#kecamatan', null, $modal, function(params, success, failure) {
-                const kabID = $('#kabupaten').val();
-                if (!kabID) return success([]);
-                $.ajax({ url: baseUrl + '/api/villages/districts/' + kabID, dataType: 'json', success, error: failure });
-            });
-            attachSelect2('#desa', null, $modal, function(params, success, failure) {
-                const kecID = $('#kecamatan').val();
-                if (!kecID) return success([]);
-                $.ajax({ url: baseUrl + '/api/villages/villages/' + kecID, dataType: 'json', success, error: failure });
-            });
-        }
+    //         // attach with dropdownParent = modal
+    //         attachSelect2('#provinsi', baseUrl + '/api/villages/provinces', $modal);
+    //         attachSelect2('#kabupaten', null, $modal, function(params, success, failure) {
+    //             const provID = $('#provinsi').val();
+    //             if (!provID) return success([]);
+    //             $.ajax({ url: baseUrl + '/api/villages/regencies/' + provID, dataType: 'json', success, error: failure });
+    //         });
+    //         attachSelect2('#kecamatan', null, $modal, function(params, success, failure) {
+    //             const kabID = $('#kabupaten').val();
+    //             if (!kabID) return success([]);
+    //             $.ajax({ url: baseUrl + '/api/villages/districts/' + kabID, dataType: 'json', success, error: failure });
+    //         });
+    //         attachSelect2('#desa', null, $modal, function(params, success, failure) {
+    //             const kecID = $('#kecamatan').val();
+    //             if (!kecID) return success([]);
+    //             $.ajax({ url: baseUrl + '/api/villages/villages/' + kecID, dataType: 'json', success, error: failure });
+    //         });
+    //     }
 
-        // Reset dependensi saat ganti
-        $('#rumah_provinsi, #provinsi').on('change', function () {
-            $('#rumah_regency, #kabupaten, #rumah_district, #kecamatan, #rumah_village, #desa').val(null).trigger('change');
-        });
-        $('#rumah_regency, #kabupaten').on('change', function () {
-            $('#rumah_district, #kecamatan, #rumah_village, #desa').val(null).trigger('change');
-        });
-        $('#rumah_district, #kecamatan').on('change', function () {
-            $('#rumah_village, #desa').val(null).trigger('change');
-        });
-    }
+    //     // Reset dependensi saat ganti
+    //     $('#rumah_provinsi, #provinsi').on('change', function () {
+    //         // 🚀 CEGAH PENGHAPUSAN SAAT SEDANG PREFILL
+    //         if (window.isPrefillingWilayah) return; 
+    //         $('#rumah_regency, #kabupaten, #rumah_district, #kecamatan, #rumah_village, #desa').val(null).trigger('change');
+    //     });
+    //     $('#rumah_regency, #kabupaten').on('change', function () {
+    //         if (window.isPrefillingWilayah) return; 
+    //         $('#rumah_district, #kecamatan, #rumah_village, #desa').val(null).trigger('change');
+    //     });
+    //     $('#rumah_district, #kecamatan').on('change', function () {
+    //         if (window.isPrefillingWilayah) return; 
+    //         $('#rumah_village, #desa').val(null).trigger('change');
+    //     });
+    // }
 
 
     /* ======================================================
@@ -947,12 +990,7 @@ $(document).ready(function () {
     /* ======================================================
      🚀 Inisialisasi Saat Halaman Siap
     ======================================================= */
-    initSelect2Wilayah();
-
-    // Prefill payload dari PHP
-    if (typeof payload !== 'undefined' && payload.perumahan) {
-        prefillRumah(payload.perumahan);
-    }
+    // initSelect2Wilayah();
 
     // Preview Foto
     $('#foto_ktp').on('change', function () { readPreview(this, '#previewKtp'); });

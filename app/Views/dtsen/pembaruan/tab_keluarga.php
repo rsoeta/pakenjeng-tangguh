@@ -5,7 +5,23 @@ $disabled = $editable ? '' : 'disabled';
 $readonly = $editable ? '' : 'readonly';
 
 $geo = $payload['geo'] ?? [];
-$wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
+
+// 🚀 OBAT DATA HILANG: Ambil langsung dari $payload karena Controller lupa mengirimkannya di $perumahan.
+$wil = $payload['perumahan']['wilayah'] ?? [];
+
+// 🚀 FALLBACK CERDAS (Untuk Mode Master/Data Lama): 
+// Jika payload kosong tapi Master RT punya kode BPS 10 digit, kita ekstrak langsung ID-nya!
+if (empty($wil['provinsi']) && !empty($rtData['kode_desa'])) {
+    $kd = $rtData['kode_desa'];
+    if (strlen($kd) >= 10) {
+        $wil = [
+            'provinsi'  => substr($kd, 0, 2),
+            'kabupaten' => substr($kd, 0, 4),
+            'kecamatan' => substr($kd, 0, 7),
+            'desa'      => $kd
+        ];
+    }
+}
 ?>
 
 <style>
@@ -119,15 +135,24 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
                         <div class="row g-3">
                             <div class="col-md-8">
                                 <label class="form-label text-primary">Alamat Lengkap</label>
-                                <input name="alamat" class="form-control upper border-primary" <?= $readonly ?> value="<?= esc($perumahan['alamat'] ?? '') ?>" placeholder="Masukkan alamat lengkap sesuai KTP">
+                                <div class="input-group">
+                                    <input name="alamat" id="alamat" class="form-control upper border-primary" <?= $readonly ?> value="<?= esc($perumahan['alamat'] ?? '') ?>" placeholder="Masukkan alamat lengkap sesuai KTP">
+                                    <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#alamat" title="Salin Jumlah Anggota"><i class="fas fa-copy"></i></button>
+                                </div>
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label text-primary">RT</label>
-                                <input type="text" name="rt" class="form-control border-primary" value="<?= esc($perumahan['rt'] ?? '') ?>" <?= $readonly ?>>
+                                <div class="input-group">
+                                    <input type="text" name="rt" id="rt" class="form-control border-primary" value="<?= esc($perumahan['rt'] ?? '') ?>" <?= $readonly ?>>
+                                    <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#rt" title="Salin Jumlah Anggota"><i class="fas fa-copy"></i></button>
+                                </div>
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label text-primary">RW</label>
-                                <input type="text" name="rw" class="form-control border-primary" value="<?= esc($perumahan['rw'] ?? '') ?>" <?= $readonly ?>>
+                                <div class="input-group">
+                                    <input type="text" name="rw" id="rw" class="form-control border-primary" value="<?= esc($perumahan['rw'] ?? '') ?>" <?= $readonly ?>>
+                                    <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#rt" title="Salin Jumlah Anggota"><i class="fas fa-copy"></i></button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -234,9 +259,11 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
 
 <script>
     // =============================
-    // 🌍 SELECT2 WILAYAH DOMISILI (Pindahan dari Tab Rumah)
+    // 🌍 SELECT2 WILAYAH DOMISILI (Pencarian Lokal Super Cepat)
     // =============================
     document.addEventListener("DOMContentLoaded", function() {
+        const apiBase = window.baseUrl + '/api/villages';
+
         async function fetchJSON(url) {
             const res = await fetch(url, {
                 credentials: 'same-origin'
@@ -245,49 +272,71 @@ $wil = $perumahan['wilayah'] ?? []; // 🚀 Penampung data wilayah domisili
             return res.json();
         }
 
+        // 🚀 Inisialisasi Select2 Normal (Tanpa AJAX)
         $('#rumah_provinsi, #rumah_regency, #rumah_district, #rumah_village').select2({
-            width: '100%'
+            width: '100%',
+            theme: 'bootstrap-5',
+            dropdownParent: $('#formDataKeluarga') // Mencegah bug fokus hilang
         });
 
+        // 🚀 OBAT DATA HILANG: Sesuaikan key dengan format array backend (Bahasa Indonesia)
         const pre = {
-            province: "<?= esc($wil['province'] ?? '') ?>",
-            regency: "<?= esc($wil['regency'] ?? '') ?>",
-            district: "<?= esc($wil['district'] ?? '') ?>",
-            village: "<?= esc($wil['village'] ?? '') ?>"
+            province: "<?= esc($wil['provinsi'] ?? '') ?>",
+            regency: "<?= esc($wil['kabupaten'] ?? '') ?>",
+            district: "<?= esc($wil['kecamatan'] ?? '') ?>",
+            village: "<?= esc($wil['desa'] ?? '') ?>"
         };
 
-        fetchJSON('/api/villages/provinces').then(data => {
+        // 1. Load Provinsi Pertama Kali
+        fetchJSON(apiBase + '/provinces').then(data => {
+            if (!data) return;
+            $('#rumah_provinsi').empty().append('<option value="">[Pilih Provinsi]</option>');
             for (const p of data) {
                 $('#rumah_provinsi').append(`<option value="${p.id}" ${(p.id == pre.province) ? 'selected' : ''}>${p.name}</option>`);
             }
             if (pre.province) $('#rumah_provinsi').trigger('change');
         });
 
+        // 2. Load Kabupaten (Berdasarkan Provinsi)
         $('#rumah_provinsi').on('change', function() {
+            if (window.isPrefillingWilayah) return; // 🚀 Patuhi Gembok Prefill!
+
             const id = $(this).val();
-            $('#rumah_regency, #rumah_district, #rumah_village').html('<option value="">[Pilih]</option>');
+            $('#rumah_regency').empty().append('<option value="">[Pilih Kabupaten]</option>');
+            $('#rumah_district').empty().append('<option value="">[Pilih Kecamatan]</option>');
+            $('#rumah_village').empty().append('<option value="">[Pilih Desa]</option>');
+
             if (!id) return;
-            fetchJSON(`/api/villages/regencies/${id}`).then(data => {
+            fetchJSON(apiBase + `/regencies/${id}`).then(data => {
                 for (const r of data) $('#rumah_regency').append(`<option value="${r.id}" ${(r.id == pre.regency) ? 'selected' : ''}>${r.name}</option>`);
                 if (pre.regency) $('#rumah_regency').trigger('change');
             });
         });
 
+        // 3. Load Kecamatan (Berdasarkan Kabupaten)
         $('#rumah_regency').on('change', function() {
+            if (window.isPrefillingWilayah) return;
+
             const id = $(this).val();
-            $('#rumah_district, #rumah_village').html('<option value="">[Pilih]</option>');
+            $('#rumah_district').empty().append('<option value="">[Pilih Kecamatan]</option>');
+            $('#rumah_village').empty().append('<option value="">[Pilih Desa]</option>');
+
             if (!id) return;
-            fetchJSON(`/api/villages/districts/${id}`).then(data => {
+            fetchJSON(apiBase + `/districts/${id}`).then(data => {
                 for (const d of data) $('#rumah_district').append(`<option value="${d.id}" ${(d.id == pre.district) ? 'selected' : ''}>${d.name}</option>`);
                 if (pre.district) $('#rumah_district').trigger('change');
             });
         });
 
+        // 4. Load Desa (Berdasarkan Kecamatan)
         $('#rumah_district').on('change', function() {
+            if (window.isPrefillingWilayah) return;
+
             const id = $(this).val();
-            $('#rumah_village').html('<option value="">[Pilih]</option>');
+            $('#rumah_village').empty().append('<option value="">[Pilih Desa]</option>');
+
             if (!id) return;
-            fetchJSON(`/api/villages/villages/${id}`).then(data => {
+            fetchJSON(apiBase + `/villages/${id}`).then(data => {
                 for (const v of data) $('#rumah_village').append(`<option value="${v.id}" ${(v.id == pre.village) ? 'selected' : ''}>${v.name}</option>`);
             });
         });

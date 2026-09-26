@@ -137,36 +137,157 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         }
 
         /* ============================================================
-         * 🧠 Validasi Tab dan Input Wajib
+         * 🧠 SMART TAB INDICATOR & BUTTON LOCKER
          * ============================================================ */
-        function validateTab(tabId) {
-            let valid = true;
-            document.querySelectorAll(`${tabId} .required`).forEach(el => {
-                if (!el.value.trim()) {
-                    el.classList.add("is-invalid");
+        window.validateAllTabs = function() {
+            const tabs = ["#tab-identitas", "#tab-pendidikan", "#tab-kerja", "#tab-kesehatan"];
+
+            // 🚀 Bantuan Ekstra: Kunci paksa status pekerjaan jika "Tidak Bekerja"
+            if ($('#lapangan_usaha').val() === 'Tidak Bekerja') {
+                $('#status_pekerjaan').val('').prop('disabled', true).removeClass('is-invalid');
+            }
+
+            $('#jenjang_pendidikan, #kelas_tertinggi, #ijazah_tertinggi, #lapangan_usaha, #status_pekerjaan').addClass('required');
+
+            let isAllTabsValid = true; // 🚀 Master Kunci Tombol Simpan
+
+            tabs.forEach(tabId => {
+                let valid = true;
+                const $tab = $(tabId);
+
+                // 1. Cek elemen .required normal
+                $tab.find('.required:not(:disabled)').each(function() {
+                    let val = $(this).val();
+                    if (!val || String(val).trim() === '') {
+                        $(this).addClass('is-invalid');
+                        valid = false;
+                    } else {
+                        if (!['jenjang_pendidikan', 'kelas_tertinggi', 'ijazah_tertinggi'].includes($(this).attr('id'))) {
+                            $(this).removeClass('is-invalid');
+                        }
+                    }
+                });
+
+                // 2. 🚀 CEK SPESIFIK RADIO BUTTON REKENING (Khusus Tab Kerja)
+                if (tabId === "#tab-kerja") {
+                    let isRekDisabled = $('input[name="rekening_aktif"]').prop('disabled');
+                    let $rekContainer = $('input[name="rekening_aktif"]').closest('.border');
+
+                    if (!isRekDisabled) {
+                        // Jika aktif tapi belum ada yang dipilih -> MERAH
+                        if (!$('input[name="rekening_aktif"]:checked').val()) {
+                            $('#rek_usaha').addClass('is-invalid'); // Flag virtual
+                            $rekContainer.removeClass('border-primary').addClass('border-danger');
+                            valid = false;
+                        } else {
+                            // Sudah dipilih -> HIJAU
+                            $('#rek_usaha').removeClass('is-invalid');
+                            $rekContainer.removeClass('border-danger').addClass('border-primary');
+                        }
+                    } else {
+                        // Jika anak Balita (disabled) -> AMAN
+                        $('#rek_usaha').removeClass('is-invalid');
+                        $rekContainer.removeClass('border-danger').addClass('border-primary');
+                    }
+                }
+
+                // 3. Cek Error Pintar (Apakah ada kotak merah di tab ini?)
+                if ($tab.find('.is-invalid').length > 0) {
                     valid = false;
-                } else el.classList.remove("is-invalid");
+                }
+
+                // 4. Update Lencana 🟢 / ⚠️
+                const badgeMap = {
+                    "#tab-identitas": "#badgeIdentitas",
+                    "#tab-pendidikan": "#badgePendidikan",
+                    "#tab-kerja": "#badgeKerja",
+                    "#tab-kesehatan": "#badgeKesehatan"
+                };
+
+                if (badgeMap[tabId]) {
+                    $(badgeMap[tabId]).text(valid ? "🟢" : "⚠️");
+                }
+
+                // Jika ada 1 saja tab yang ⚠️, maka tombol simpan tetap TERKUNCI
+                if (!valid) {
+                    isAllTabsValid = false;
+                }
             });
 
-            const badgeMap = {
-                "#tab-identitas": "#badgeIdentitas",
-                "#tab-pendidikan": "#badgePendidikan",
-                "#tab-kerja": "#badgeKerja",
-                "#tab-usaha": "#badgeUsaha",
-                "#tab-kesehatan": "#badgeKesehatan"
-            };
+            // 🚀 EKSEKUSI GEMBOK TOMBOL SIMPAN
+            $('#btnSimpanAnggota').prop('disabled', !isAllTabsValid);
+        };
 
-            const badge = badgeMap[tabId];
-            if (badge) document.querySelector(badge).textContent = valid ? "🟢" : "⚠️";
+        // Delegasi Event Tetap Sama
+        $('#formAnggota').on('change input', 'input, select, textarea', function() {
+            setTimeout(validateAllTabs, 100);
+        });
 
-            return valid;
-        }
+        // 🚀 Beri jeda sedikit lebih lama (400ms) saat modal terbuka 
+        // agar data prefill AJAX selesai merender sebelum Indikator mengeceknya
+        $('#modalAnggota').on('shown.bs.modal', function() {
+            setTimeout(validateAllTabs, 400);
+        });
 
         document.querySelectorAll(".required").forEach(el => {
             el.addEventListener("change", () => {
                 const parentTab = el.closest(".tab-pane");
                 if (parentTab) validateTab(`#${parentTab.id}`);
             });
+        });
+
+        // ==============================================================
+        // 🚀 DYNAMIC LOCK: TAB TENAGA KERJA (Berdasarkan Usia Real-Time)
+        // ==============================================================
+        function toggleKunciTenagaKerja() {
+            let tglLahir = $('#tanggal_lahir').val();
+            let usia = 0;
+            let isBalitaOrEmpty = true; // Default: KUNCI!
+
+            // Hitung umur secara presisi
+            if (tglLahir && tglLahir.length === 10) {
+                let dob = new Date(tglLahir);
+                let today = new Date();
+                usia = today.getFullYear() - dob.getFullYear();
+                if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) {
+                    usia--;
+                }
+
+                // Jika usianya di atas 5 tahun, BUKA KUNCI
+                if (usia > 5) {
+                    isBalitaOrEmpty = false;
+                }
+            }
+
+            // Eksekusi Kunci / Buka Kunci HTML
+            $('#status_pekerjaan').prop('disabled', isBalitaOrEmpty);
+            $('input[name="rekening_aktif"]').prop('disabled', isBalitaOrEmpty);
+            $('#lapangan_usaha').prop('disabled', isBalitaOrEmpty);
+
+            // Jika terkunci, SIKAT BERSIH isiannya agar data kotor tidak masuk ke database
+            if (isBalitaOrEmpty) {
+                $('#status_pekerjaan').val('');
+                $('input[name="rekening_aktif"]').prop('checked', false);
+
+                // Khusus Select2, butuh trigger change agar UI-nya kembali ke placeholder
+                $('#lapangan_usaha').val('').trigger('change.select2');
+
+                // Matikan paksa pesan error merah jika ada
+                $('#lapangan_usaha, #status_pekerjaan, #rek_usaha').removeClass('is-invalid');
+                $('#lapangan_usaha').next('.select2-container').find('.select2-selection').removeClass('border-danger');
+                $('input[name="rekening_aktif"]').closest('.border').removeClass('border-danger').addClass('border-primary');
+            }
+        }
+
+        // 1. Pemicu saat operator mengetik/memperbaiki Tanggal Lahir
+        // Gunakan timeout kecil agar hidden input #tanggal_lahir sempat diisi oleh script sebelumnya
+        $('#tanggal_lahir_display').on('keyup blur change', function() {
+            setTimeout(toggleKunciTenagaKerja, 150);
+        });
+
+        // 2. Pemicu saat Modal pertama kali terbuka (Edit / Tambah Baru)
+        $('#modalAnggota').on('shown.bs.modal', function() {
+            setTimeout(toggleKunciTenagaKerja, 150);
         });
 
         function validateTenagaKerja() {
@@ -271,6 +392,20 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         $('#memiliki_usaha').on('change', toggleUsahaDetail);
         console.log("Usaha:", $('#memiliki_usaha').val());
 
+        // ==============================================================
+        // 🚀 SINKRONISASI MUTLAK: TAB KELUARGA -> MODAL ANGGOTA
+        // ==============================================================
+        function syncKeluargaKeAnggota() {
+            // 1. Tarik Nomor KK dari Tab Keluarga
+            $('#individu_no_kk').val($('#keluarga_no_kk').val());
+
+            // 2. KLONING CEPAT Wilayah (Copy isi option HTML-nya agar tidak perlu load AJAX lagi!)
+            $('#ind_provinsi').html($('#rumah_provinsi').html()).val($('#rumah_provinsi').val());
+            $('#ind_kabupaten').html($('#rumah_regency').html()).val($('#rumah_regency').val());
+            $('#ind_kecamatan').html($('#rumah_district').html()).val($('#rumah_district').val());
+            $('#ind_desa').html($('#rumah_village').html()).val($('#rumah_village').val());
+        }
+
         /* ======================================================
         💾 EVENT SUBMIT FORM ANGGOTA (Tambah / Edit)
         ====================================================== */
@@ -306,6 +441,81 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         el.addClass('is-invalid');
                     } else if (value.length === 16) {
                         el.removeClass('is-invalid');
+                    }
+                }
+            });
+
+            // ==============================================================
+            // 2.5 🚀 SMART VALIDATION: TAB TENAGA KERJA (HANYA USIA > 5 TAHUN)
+            // ==============================================================
+            let tglLahir = $('#tanggal_lahir').val();
+            let usia = 0;
+
+            if (tglLahir) {
+                let dob = new Date(tglLahir);
+                let today = new Date();
+                usia = today.getFullYear() - dob.getFullYear();
+                // Koreksi bulan & hari jika belum ulang tahun
+                if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) {
+                    usia--;
+                }
+            }
+
+            // Bersihkan sisa error visual sebelumnya
+            $('#lapangan_usaha, #status_pekerjaan, #rek_usaha').removeClass('is-invalid');
+            $('#lapangan_usaha').next('.select2-container').find('.select2-selection').removeClass('border-danger');
+            let $rekContainer = $('input[name="rekening_aktif"]').closest('.border');
+            $rekContainer.removeClass('border-danger').addClass('border-primary');
+
+            // Eksekusi Hukuman HANYA jika bukan Balita
+            if (usia > 5) {
+                let kerjaError = false;
+
+                // Cek 1: Lapangan Usaha (Beri warna merah ke body Select2)
+                if (!$('#lapangan_usaha').val()) {
+                    $('#lapangan_usaha').addClass('is-invalid');
+                    $('#lapangan_usaha').next('.select2-container').find('.select2-selection').addClass('border-danger');
+                    kerjaError = true;
+                }
+
+                // Cek 2: Status Pekerjaan (DILONGGARKAN: Wajib KECUALI jika "Tidak Bekerja")
+                let lapanganUsahaVal = $('#lapangan_usaha').val();
+                if (lapanganUsahaVal !== 'Tidak Bekerja') {
+                    if (!$('#status_pekerjaan').val()) {
+                        $('#status_pekerjaan').addClass('is-invalid');
+                        kerjaError = true;
+                    }
+                }
+
+                // Cek 3: Rekening (Radio Button Group)
+                if (!$('input[name="rekening_aktif"]:checked').val()) {
+                    $('#rek_usaha').addClass('is-invalid'); // Flag jebakan untuk disapu oleh Gatekeeper ke-3
+                    $rekContainer.removeClass('border-primary').addClass('border-danger'); // Merahkan kotak
+                    kerjaError = true;
+                }
+
+                // Timpa pesan error default jika gagal di sini
+                if (kerjaError) {
+                    errorMessage = 'Anggota keluarga usia di atas 5 tahun WAJIB mengisi data Pekerjaan dan Kepemilikan Rekening pada Tab Tenaga Kerja!';
+                }
+            }
+
+            // ==============================================================
+            // 🚀 UX CERDAS: Kunci Status Pekerjaan jika "Tidak Bekerja"
+            // ==============================================================
+            $('#lapangan_usaha').on('change', function() {
+                let val = $(this).val();
+                let $statusPekerjaan = $('#status_pekerjaan');
+
+                // Jika usianya masih balita, kolom ini pasti sudah di-disabled oleh fungsi toggleKunciTenagaKerja()
+                // Jadi kita hanya perlu mengaturnya jika kolom ini sedang aktif
+                if (val === 'Tidak Bekerja') {
+                    $statusPekerjaan.val('').prop('disabled', true).removeClass('is-invalid');
+                } else {
+                    // Jangan sembarangan membuka kunci jika dia ternyata Balita!
+                    // Cek apakah select lapangan_usaha sedang di-disable atau tidak
+                    if (!$(this).prop('disabled')) {
+                        $statusPekerjaan.prop('disabled', false);
                     }
                 }
             });
@@ -459,7 +669,9 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     kab = d.kabupaten ?? '',
                     kec = d.kecamatan ?? '',
                     desa = d.desa ?? '';
-                loadProvinces(prov, () => loadRegencies(prov, kab, () => loadDistricts(kab, kec, () => loadVillages(kec, desa))));
+                // loadProvinces(prov, () => loadRegencies(prov, kab, () => loadDistricts(kab, kec, () => loadVillages(kec, desa))));
+                // 🚀 PAKSA SINKRONISASI DARI TAB KELUARGA (Mengabaikan data asli anggota)
+                syncKeluargaKeAnggota();
 
                 // Prefill Tab Pendidikan
                 $('#partisipasi_sekolah').val(d.partisipasi_sekolah ?? '');
@@ -603,9 +815,11 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 
                 $('#tabAnggotaTabs a:first').tab('show');
 
-                loadProvinces('', function() {
-                    console.log('✅ Daftar provinsi dimuat.');
-                });
+                // loadProvinces('', function() {
+                //     console.log('✅ Daftar provinsi dimuat.');
+                // });
+                // 🚀 LANGSUNG SINKRONISASI DARI TAB KELUARGA
+                syncKeluargaKeAnggota();
 
                 $('#modalAnggota').modal('show');
             }).fail(() => {
