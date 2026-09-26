@@ -11,7 +11,8 @@ $editable = ($roleId <= 4);
 
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title fw-bold" id="modalAnggotaLabel">🧍‍♂️ Pembaruan Data Individu</h5>
-                    <a href="javascript:void(0)" class="btn-close btn-close-white" data-bs-dismiss="modal" style="display:block !important; text-decoration:none;"></a>
+                    <!-- 🚀 PERBAIKAN: Gunakan <button> agar fokus terlepas dengan benar saat ditutup -->
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body" style="max-height: calc(100vh - 200px); overflow-y:auto;">
@@ -614,9 +615,10 @@ $editable = ($roleId <= 4);
                     <?php if ($editable): ?>
                         <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Simpan</button>
                     <?php else: ?>
-                        <a href="javascript:void(0)" class="btn btn-secondary px-4 shadow-sm" data-bs-dismiss="modal" style="display:inline-block !important; text-decoration:none;">
+                        <!-- 🚀 PERBAIKAN: Gunakan <button> alih-alih <a> -->
+                        <button type="button" class="btn btn-secondary px-4 shadow-sm" data-bs-dismiss="modal">
                             <i class="fas fa-times me-1"></i> Tutup
-                        </a>
+                        </button>
                     <?php endif; ?>
                 </div>
             </form>
@@ -633,23 +635,6 @@ $editable = ($roleId <= 4);
         overflow-y: auto;
     }
 </style>
-
-<script>
-    // Script UI/UX untuk mengganti placeholder "Anggota Keluarga Ini" dengan Nama yang diketik
-    document.addEventListener("DOMContentLoaded", function() {
-        const inputNama = document.getElementById('nama');
-        const labelsNama = document.querySelectorAll('.label-nama-anggota');
-
-        if (inputNama) {
-            inputNama.addEventListener('input', function() {
-                const nama = this.value.trim().toUpperCase();
-                labelsNama.forEach(lbl => {
-                    lbl.textContent = nama !== '' ? nama : 'Anggota Keluarga Ini';
-                });
-            });
-        }
-    });
-</script>
 
 <script>
     // Script UI/UX untuk mengganti placeholder "Anggota Keluarga Ini" dengan Nama yang diketik
@@ -828,5 +813,24 @@ $editable = ($roleId <= 4);
                 $('#tanggal_lahir').val(''); // Pastikan database tidak menerima data ini
             }
         });
+
+        // ==============================================================
+        // 🚀 ANTI-BUG BACKDROP: Hapus Fokus Modal (Aria-Hidden Fix)
+        // ==============================================================
+
+        // 1. Paksa tombol close melepaskan fokus saat diklik
+        $(document).on('click', '[data-bs-dismiss="modal"]', function() {
+            $(this).blur();
+        });
+
+        // 2. Sabuk Pengaman Ekstra: Sapu bersih semua sisa fokus setiap kali ada modal apapun yang mulai ditutup
+        $(document).on('hide.bs.modal', function() {
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
+        });
+
+        // 🚀 TELEPORTASI MODAL ANGGOTA KE LUAR TAB-PANE
+        $('#modalAnggota').appendTo('body');
     });
 </script>

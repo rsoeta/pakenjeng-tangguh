@@ -927,38 +927,17 @@ $(document).ready(function () {
             type: 'POST',
             data: form.serialize(),
             success: function(res) {
-
                 if (res.status === 'success') {
-
-                    Swal.fire('Berhasil', res.message, 'success');
-
+                    Swal.fire({ icon: 'success', title: 'Berhasil', text: res.message, timer: 1200, showConfirmButton: false });
                     $('#modalHistoricalDesil').modal('hide');
-
-                    // reload grafik
-                    // loadDesilHistory($('#id_kk').val());
-                    if (res.status === 'success') {
-
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: res.message,
-                            timer: 1200,
-                            showConfirmButton: false
-                        });
-
-                        // setTimeout(() => {
-                        //     window.location.reload(true);
-                        // }, 1200);
-                        setTimeout(() => {
-                            window.location.href = window.location.pathname + '?v=' + new Date().getTime();
-                        }, 1200);
-
+                    $('#formHistoricalDesil')[0].reset(); // Kosongkan form
+                    
+                    // Render ulang grafik secara otomatis
+                    if (typeof reloadDesilChart === 'function') {
+                        reloadDesilChart();
                     }
-
                 } else {
-
                     Swal.fire('Gagal', res.message, 'error');
-
                 }
             }
         });
@@ -1193,36 +1172,21 @@ $(document).on('submit', '#formInputDesil', function(e) {
             });
         },
         success: function(response) {
-
             if (response.status === 'success') {
-
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: 'Kategori desil berhasil diperbarui.',
-                    timer: 1500,
-                    showConfirmButton: false
+                    icon: 'success', title: 'Berhasil', text: 'Kategori desil berhasil diperbarui.',
+                    timer: 1500, showConfirmButton: false
                 }).then(() => {
-                    // location.reload(); // 🔄 reload setelah sukses
-                    location.href = location.href; // alternatif reload dengan cache-busting
+                    // TUTUP MODAL DAN RENDER ULANG GRAFIK (Tanpa reload halaman)
+                    $('#modalInputDesil').modal('hide');
+                    if (typeof reloadDesilChart === 'function') {
+                        reloadDesilChart();
+                    }
                 });
-
             } else if (response.status === 'forbidden') {
-
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Akses Ditolak',
-                    text: response.message
-                });
-
+                Swal.fire({ icon: 'warning', title: 'Akses Ditolak', text: response.message });
             } else {
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: response.message || 'Terjadi kesalahan.'
-                });
-
+                Swal.fire({ icon: 'error', title: 'Gagal', text: response.message || 'Terjadi kesalahan.' });
             }
         },
         error: function() {

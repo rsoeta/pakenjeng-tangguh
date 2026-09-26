@@ -1,4 +1,5 @@
-<div class="modal fade" id="modalInputDesil" tabindex="-1" aria-labelledby="modalInputDesilLabel" aria-hidden="true">
+<!-- 🚀 KOREKSI: Hapus atribut tabindex="-1" dan tambahkan data-bs-focus="false" -->
+<div class="modal fade" id="modalInputDesil" aria-labelledby="modalInputDesilLabel" aria-hidden="true" data-bs-focus="false">
     <div class="modal-dialog">
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-primary text-white">
@@ -26,7 +27,7 @@
                     </div>
 
                     <!-- 🚀 TAMBAHAN: Opsi Periode Agar Tidak Tertimpa Otomatis -->
-                    <div class="row g-2 bg-light p-2 rounded border">
+                    <div class="row g-2 bg-light p-2 rounded border my-2">
                         <div class="col-6">
                             <label class="form-label fw-bold small">Tahun Berlaku</label>
                             <select name="tahun_berlaku" id="tahun_berlaku" class="form-select form-select-sm" required>
@@ -40,8 +41,8 @@
                         </div>
                         <div class="col-6">
                             <label class="form-label fw-bold small">Periode (TW)</label>
-                            <!-- Input number mendukung desimal (1 s/d 4.9) -->
-                            <input type="number" step="0.1" min="1" max="4.9" name="triwulan_berlaku" id="triwulan_berlaku" class="form-control form-control-sm" value="<?= ceil(date('n') / 3) ?>" required>
+                            <!-- 🚀 PERBAIKAN MOBILE-FIRST: Gunakan type="text" dan inputmode="decimal" -->
+                            <input type="text" inputmode="decimal" name="triwulan_berlaku" id="triwulan_berlaku" class="form-control form-control-sm" value="<?= ceil(date('n') / 3) ?>" placeholder="1 - 4.9" required>
                             <small class="text-muted" style="font-size: 10px;">Bisa desimal (misal 3.1)</small>
                         </div>
                     </div>
