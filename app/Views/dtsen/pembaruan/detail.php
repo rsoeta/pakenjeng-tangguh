@@ -207,6 +207,8 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
 <!-- ============================================================== -->
 
 <div class="offcanvas offcanvas-end shadow-lg" id="offcanvasChartDesil" aria-labelledby="offcanvasChartDesilLabel" style="width: 800px; max-width: 100vw;">
+
+    <!-- 🚀 1. HEADER: Logo, Judul, & Identitas KK -->
     <div class="offcanvas-header bg-primary text-white d-flex flex-column align-items-start pb-3" style="border-bottom: 3px solid #ffc107;">
         <div class="d-flex justify-content-between w-100 align-items-center mb-2">
             <div class="d-flex align-items-center">
@@ -223,6 +225,8 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
             <div><i class="fas fa-user-circle me-2 text-warning"></i> Kepala Keluarga: <strong class="text-black"><?= esc($safeNama) ?></strong></div>
         </div>
     </div>
+
+    <!-- 🚀 2. BODY: Tombol Aksi & Render Grafik -->
     <div class="offcanvas-body p-4 flex-grow-1">
         <div class="d-flex justify-content-end align-items-center gap-2 mb-3 pb-3 border-bottom">
             <?php if ($isEditableUser && $roleId <= 3): ?>
@@ -233,6 +237,17 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
         </div>
         <div id="desilChart" style="min-height:350px;"></div>
         <div id="desilTrendInfo" class="mt-3 small text-muted"></div>
+    </div>
+
+    <!-- 🚀 3. FOOTER: Informasi Hak Cipta & Modul -->
+    <div class="offcanvas-footer mt-auto bg-light border-top p-3 text-center">
+        <h6 class="fw-bold text-primary mb-1" style="font-size: 0.9rem;">
+            <i class="fas fa-shield-alt me-1"></i> <?= nameApp(); ?> - <?= titleApp(); ?>
+        </h6>
+        <div class="text-muted" style="font-size: 0.75rem;">
+            &copy; <?= date('Y') ?> Pemerintah Desa Pasirlangu / Badan Pusat Statistik. Hak Cipta Dilindungi.<br>
+            <span class="fst-italic">Modul Analisis Desil & Kesejahteraan Sosial</span>
+        </div>
     </div>
 </div>
 
