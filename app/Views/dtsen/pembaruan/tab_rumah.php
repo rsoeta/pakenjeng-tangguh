@@ -84,15 +84,16 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                     </div>
                     <!-- 🚀 RADIO (2): Tinggal Bersama Keluarga Lain? -->
                     <div class="col-md-6">
-                        <label class="form-label text-primary">Tinggal Bersama Keluarga Lain?</label>
+                        <!-- Perubahan Label -->
+                        <label class="form-label text-primary">Apakah ada keluarga/KK LAIN di rumah ini?</label>
                         <div class="radio-group-box">
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="is_tinggal_bersama" id="tb_tidak" value="Tidak" <?= ($kond['is_tinggal_bersama'] ?? '') == 'Tidak' ? 'checked' : '' ?> <?= $disabled ?>>
-                                <label class="form-check-label" for="tb_tidak">Tidak (Sendiri)</label>
+                                <label class="form-check-label" for="tb_tidak">Tidak (Hanya 1 KK)</label>
                             </div>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="is_tinggal_bersama" id="tb_ya" value="Ya" <?= ($kond['is_tinggal_bersama'] ?? '') == 'Ya' ? 'checked' : '' ?> <?= $disabled ?>>
-                                <label class="form-check-label" for="tb_ya">Ya</label>
+                                <label class="form-check-label" for="tb_ya">Ya (Lebih dari 1 KK)</label>
                             </div>
                         </div>
                     </div>
@@ -103,15 +104,18 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                 <!-- ========================================== -->
                 <div class="row g-3 mb-3 pb-3 border-bottom">
                     <div class="col-md-3" id="div_jumlah_kk" style="display: none;">
-                        <label class="form-label text-primary">Jml KK dlm Rumah</label>
-                        <input type="number" name="jumlah_kk_dalam_rumah" id="jumlah_kk_dalam_rumah" class="form-control border-primary" value="<?= esc($kond['jumlah_kk_dalam_rumah'] ?? '') ?>" <?= $readonly ?> placeholder="Misal: 1" min="1">
+                        <!-- Perubahan Label & Tooltip -->
+                        <label class="form-label text-primary mb-1">Berapa Jml KK Lainnya?</label>
+                        <input type="number" name="jumlah_kk_dalam_rumah" id="jumlah_kk_dalam_rumah" class="form-control border-primary" value="<?= esc($kond['jumlah_kk_dalam_rumah'] ?? '') ?>" <?= $readonly ?> placeholder="Cth: 1" min="1">
+                        <small class="text-danger fw-bold d-block mt-1" style="font-size: 0.7rem;">*Jangan hitung KK yang sedang didata!</small>
                     </div>
 
                     <!-- 🚀 ELEMEN DINAMIS: List Input Nomor KK -->
                     <div class="col-md-12 mt-2" id="div_list_kk_lainnya" style="display: none;">
-                        <div class="p-3 bg-light border border-primary border-opacity-50 rounded">
-                            <label class="form-label text-primary mb-3">
-                                <i class="fas fa-info-circle me-1"></i> Tuliskan Nomor KK (16 Digit) dari keluarga selain Anda yang tinggal di rumah ini.
+                        <div class="p-3 bg-light border border-danger border-opacity-50 rounded">
+                            <label class="form-label text-danger mb-3">
+                                <i class="fas fa-exclamation-triangle me-1"></i> Masukkan 16-Digit No. KK keluarga <b>TAMBAHAN</b> tersebut. <br>
+                                <span class="text-muted small fw-normal ms-4">Dilarang memasukkan No. KK utama yang sedang didata saat ini!</span>
                             </label>
                             <!-- Di dalam div ini inputannya akan beranak-pinak -->
                             <div id="container_kk_lainnya" class="row g-2"></div>
@@ -420,11 +424,12 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                 <h6 class="fw-bold text-secondary mb-3">A. Rincian Pengeluaran Rutin</h6>
                 <div class="row g-3 mb-4">
                     <div class="col-md-4">
-                        <label class="form-label">Listrik per Bulan (Rp)</label>
+                        <label class="form-label">Listrik per Bulan (Rp) <span class="text-danger">*</span></label>
                         <div class="input-group has-validation">
-                            <input type="text" name="pengeluaran_listrik" id="pengeluaran_listrik" class="form-control rupiah" value="<?= esc($se['pengeluaran_listrik'] ?? '') ?>" <?= $readonly ?> placeholder="Cth: 10000">
+                            <input type="text" name="pengeluaran_listrik" id="pengeluaran_listrik" class="form-control rupiah" value="<?= esc($se['pengeluaran_listrik'] ?? '') ?>" <?= $readonly ?> placeholder="Cth: 10000" required>
                             <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#pengeluaran_listrik" title="Salin Listrik"><i class="fas fa-copy"></i></button>
-                            <!-- <div class="invalid-feedback small fw-bold"><i class="fas fa-exclamation-circle"></i> Minimal Rp 1.000</div> -->
+                            <!-- 🚀 WADAH ERROR DIAKTIFKAN KEMBALI -->
+                            <div class="invalid-feedback small fw-bold"><i class="fas fa-exclamation-circle"></i> Minimal Rp 1.000</div>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -605,9 +610,11 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                     container.append(`
                         <div class="col-md-4">
                             <label class="form-label small text-muted fw-bold">No. KK Keluarga ke-${i+1} <span class="text-danger">*</span></label>
-                            <div class="input-group">
+                            <div class="input-group has-validation">
                                 <input type="text" id="no_kk_lainnya_${i}" name="no_kk_lainnya[]" class="form-control form-control-sm border-primary input-kk-lainnya" value="${val}" maxlength="16" placeholder="16 Digit Nomor KK">
                                 <button class="btn btn-outline-primary btn-sm btn-copy-input" type="button" data-target="#no_kk_lainnya_${i}" title="Salin KK"><i class="fas fa-copy"></i></button>
+                                <!-- 🚀 WADAH TEGURAN HALUS -->
+                                <div class="invalid-feedback small fw-bold"></div>
                             </div>
                         </div>
                     `);
@@ -626,10 +633,31 @@ $se   = $payload['sosial_ekonomi'] ?? [];
         // Panggil fungsi render tiap kali angka jumlah KK diubah
         $('#jumlah_kk_dalam_rumah').on('input change', renderKKLainnya);
 
-        // Delegasi event khusus untuk field dinamis (Paksa 16 digit & hanya angka)
-        $(document).on('input', '.input-kk-lainnya', function() {
-            this.value = this.value.replace(/\\D/g, ''); // Sikat bersih selain angka
+        // ==============================================================
+        // 🚀 GATEKEEPER HALUS: Cek Digit & Cegah KK Utama Diinput Ulang
+        // ==============================================================
+        $(document).on('input blur change', '.input-kk-lainnya', function() {
+            // 1. Sikat bersih selain angka
+            this.value = this.value.replace(/\D/g, '');
             if (this.value.length > 16) this.value = this.value.slice(0, 16);
+
+            let kkLainnya = $(this).val();
+            let kkUtama = $('input[name="no_kk"]').val(); // Ambil No KK Utama
+            let $feedback = $(this).siblings('.invalid-feedback'); // Bidik wadah pesan merah
+
+            if (kkLainnya.length === 16 && kkLainnya === kkUtama) {
+                // Jika isinya persis sama dengan KK Utama -> Nyalakan Lampu Merah!
+                $(this).addClass('is-invalid border-danger');
+                $feedback.text('No. KK ini sudah didata sebagai keluarga utama.');
+            } else if (kkLainnya.length > 0 && kkLainnya.length < 16) {
+                // Jika belum 16 digit -> Tegur dengan halus
+                $(this).addClass('is-invalid border-danger');
+                $feedback.text('Nomor KK harus genap 16 digit.');
+            } else {
+                // Lolos semua syarat -> Matikan lampu merah
+                $(this).removeClass('is-invalid border-danger');
+            }
+
             checkKelengkapanRumah(); // Lapor ke Satpam Kelengkapan
         });
 
@@ -832,16 +860,23 @@ $se   = $payload['sosial_ekonomi'] ?? [];
             $(this).data('prev-val', getInt(this));
         });
 
-        $('#pengeluaran_listrik, #pengeluaran_pulsa, #pengeluaran_internet').on('input', function(e) {
-            // Validasi minimal Rp 1.000
+        $('#pengeluaran_listrik, #pengeluaran_pulsa, #pengeluaran_internet').on('input change', function(e) {
             const currentVal = getInt(this);
-            if (currentVal > 0 && currentVal < 1000) {
-                $(this).addClass('is-invalid border-danger').removeClass('border-primary');
+            const inputId = $(this).attr('id');
+
+            // 1. 🚀 VALIDASI KHUSUS BPS: Listrik Wajib Minimal 1000, Pulsa & Internet Bebas (Boleh 0)
+            if (inputId === 'pengeluaran_listrik') {
+                if (currentVal < 1000) {
+                    $(this).addClass('is-invalid border-danger').removeClass('border-primary');
+                } else {
+                    $(this).removeClass('is-invalid border-danger').addClass('border-primary');
+                }
             } else {
+                // Pulsa & Internet selalu aman dari garis merah angka 0
                 $(this).removeClass('is-invalid border-danger').addClass('border-primary');
             }
 
-            // 2. Tambahkan SELISIH (Delta) hanya jika user benar-benar mengetik manual (bukan karena load sistem)
+            // 2. Tambahkan SELISIH (Delta) hanya jika user benar-benar mengetik manual
             if (e.originalEvent) {
                 const prevVal = $(this).data('prev-val') || 0;
                 const delta = currentVal - prevVal; // Hitung penambahan/pengurangannya saja
@@ -938,9 +973,9 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                 const jml = parseInt($('#jumlah_kk_dalam_rumah').val()) || 0;
                 if (jml <= 0) missing.push('#jumlah_kk_dalam_rumah');
 
-                // Cek apakah ada inputan KK yg digitnya kurang dari 16 atau kosong
+                // Cek apakah ada inputan KK yg digitnya kurang dari 16, kosong, atau kena invalid (sama dengan KK Utama)
                 $('.input-kk-lainnya').each(function() {
-                    if ($(this).val().length !== 16) {
+                    if ($(this).val().length !== 16 || $(this).hasClass('is-invalid')) {
                         missing.push('no_kk_lainnya_tidak_valid');
                     }
                 });
