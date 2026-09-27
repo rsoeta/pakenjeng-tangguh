@@ -780,11 +780,20 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 }
 
                 // 🚀 PERUBAHAN: Bedakan judul Modal antara Edit dan Read-Only
-                $('#modalAnggotaLabel').text(isEditable ? 'Edit Anggota' : 'Detail Anggota');
+                // $('#modalAnggotaLabel').text(isEditable ? 'Edit Anggota' : 'Detail Anggota');
+
+                // 🚀 PERUBAHAN: Bedakan judul Modal antara Edit dan Read-Only + Nama Dinamis
+                let modeTeks = isEditable ? 'Edit Anggota:' : 'Detail Anggota:';
+                $('#mode_teks_header').text(modeTeks);
+
+                // Tampilkan nama di header (Jika nama kosong, tampilkan teks default)
+                let namaTampil = d.nama ? d.nama.toUpperCase() : 'TANPA NAMA';
+                $('#nama_anggota_header').text(namaTampil);
 
                 const idKk = $('#id_kk').val() || $('[name="id_kk"]').val();
                 $('[name="id_kk"]').val();
                 $('#formAnggota #id_kk').val(idKk);
+
                 $('#modalAnggota').modal('show');
                 setTimeout(applyRules, 30);
 
@@ -822,7 +831,9 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 
                 $('#formAnggota #id_kk').val(idKk);
 
-                $('#modalAnggotaLabel').text('Tambah Anggota Baru');
+                // 🚀 Kosongkan nama di header karena ini mode tambah baru
+                $('#mode_teks_header').text('Tambah Anggota Baru');
+                $('#nama_anggota_header').text('');
 
                 $('#ind_provinsi, #ind_kabupaten, #ind_kecamatan, #ind_desa').html('<option value="">Pilih...</option>').val('').trigger('change');
 

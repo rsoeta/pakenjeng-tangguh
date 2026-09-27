@@ -11,7 +11,10 @@ $editable = ($roleId <= 4);
                 <input type="hidden" id="id_kk" name="id_kk" value="<?= $payload['id_kk'] ?? '' ?>">
 
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold" id="modalAnggotaLabel">🧍‍♂️ Pembaruan Data Individu</h5>
+                    <h5 class="modal-title fw-bold" id="modalAnggotaLabel">
+                        🧍‍♂️ <span id="mode_teks_header">Pembaruan Data</span>
+                        <span id="nama_anggota_header" class="text-warning ms-1"></span>
+                    </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
@@ -661,17 +664,26 @@ $editable = ($roleId <= 4);
 </style>
 
 <script>
-    // Script UI/UX untuk mengganti placeholder "Anggota Keluarga Ini" dengan Nama yang diketik
+    // Script UI/UX untuk mengganti placeholder dan Judul Header secara real-time
     document.addEventListener("DOMContentLoaded", function() {
         const inputNama = document.getElementById('nama');
         const labelsNama = document.querySelectorAll('.label-nama-anggota');
+        const headerNama = document.getElementById('nama_anggota_header');
 
         if (inputNama) {
             inputNama.addEventListener('input', function() {
                 const nama = this.value.trim().toUpperCase();
+
+                // Ubah label di dalam form
                 labelsNama.forEach(lbl => {
                     lbl.textContent = nama !== '' ? nama : 'Anggota Keluarga Ini';
                 });
+
+                // 🚀 Ubah nama di Header Modal JIKA dalam mode Edit/Tambah
+                if (headerNama) {
+                    // Jika sedang mode Tambah (belum ada nama), langsung munculkan teks yang diketik
+                    headerNama.textContent = nama;
+                }
             });
         }
     });
