@@ -418,15 +418,15 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             let errorMessage = 'Pastikan kolom wajib terisi dan NIK/No KK terdiri dari 16 digit.';
 
             // 1. Cek semua input yang wajib diisi (Required)
-            form.find('.required').each(function() {
+            // 🚀 PERBAIKAN: Tambahkan filter :not(:disabled) agar elemen yang dikunci tidak dirazia!
+            form.find('.required:not(:disabled)').each(function() {
                 if (!$(this).val().trim()) {
                     // Jika kosong, berikan garis merah
                     $(this).addClass('is-invalid');
                 } else {
                     // 🚀 PENTING: Jangan langsung hapus class 'is-invalid' membabi buta!
-                    // Karena bisa jadi elemen ini sedang terkena validasi pintar dari Tab Pendidikan.
-                    // Khusus untuk field biasa (selain 3 dropdown pendidikan ini), jika sudah terisi, hapus merahnya.
-                    if (!['jenjang_pendidikan', 'kelas_tertinggi', 'ijazah_tertinggi'].includes($(this).attr('id'))) {
+                    // Jangan lupa masukkan 'lapangan_usaha' agar error BPS tidak terhapus.
+                    if (!['jenjang_pendidikan', 'kelas_tertinggi', 'ijazah_tertinggi', 'lapangan_usaha'].includes($(this).attr('id'))) {
                         $(this).removeClass('is-invalid');
                     }
                 }
