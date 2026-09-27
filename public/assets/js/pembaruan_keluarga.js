@@ -223,7 +223,8 @@ $(document).ready(function () {
 
         // Masih sekolah → ijazah harus lebih rendah
         if (ps === "Masih Sekolah") {
-            if (levelIjazah >= levelJenjang) {
+            // 🚀 PENGECUALIAN LEVEL 0: Anak SD/MI (Level 0) sangat wajar jika ijazahnya "Tidak Punya Ijazah SD" (Level 0)
+            if (levelIjazah >= levelJenjang && !(levelJenjang === 0 && levelIjazah === 0)) {
                 $('#ijazah_tertinggi').addClass('is-invalid');
                 $('#fb_ijazah').html('<i class="fas fa-exclamation-circle"></i> Ijazah tidak boleh sama/lebih tinggi dari jenjang yang sedang ditempuh.');
             }
