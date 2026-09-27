@@ -162,7 +162,9 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         $(this).addClass('is-invalid');
                         valid = false;
                     } else {
-                        if (!['jenjang_pendidikan', 'kelas_tertinggi', 'ijazah_tertinggi'].includes($(this).attr('id'))) {
+                        // 🚀 TAMBAHKAN 'lapangan_usaha' KE DALAM DAFTAR PENGECUALIAN INI!
+                        // Agar error pintar dari validateProfesiPendidikan tidak dihapus sembarangan
+                        if (!['jenjang_pendidikan', 'kelas_tertinggi', 'ijazah_tertinggi', 'lapangan_usaha'].includes($(this).attr('id'))) {
                             $(this).removeClass('is-invalid');
                         }
                     }

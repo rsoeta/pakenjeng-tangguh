@@ -524,6 +524,8 @@ $editable = ($roleId <= 4);
                                         }
                                         ?>
                                     </select>
+                                    <!-- 🚀 ELEMEN ERROR REAL-TIME UNTUK PROFESI vs PENDIDIKAN -->
+                                    <div id="fb_lapangan_usaha" class="invalid-feedback small fw-bold mt-1"></div>
                                 </div>
 
                                 <!-- 🚀 BERI ID div_status_pekerjaan PADA BUNGKUS INI -->

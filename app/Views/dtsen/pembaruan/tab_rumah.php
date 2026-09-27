@@ -474,13 +474,17 @@ $se   = $payload['sosial_ekonomi'] ?? [];
 
                     <div class="col-md-4">
                         <label class="form-label">Bukan Makanan Rutin <u>Tahunan</u> (Rp)</label>
-                        <div class="input-group">
+                        <!-- 🚀 TAMBAHKAN has-validation -->
+                        <div class="input-group has-validation">
                             <input type="text" name="pengeluaran_non_makan_tahunan" id="pengeluaran_non_makan_tahunan" class="form-control rupiah" value="<?= esc($se['pengeluaran_non_makan_tahunan'] ?? '') ?>" <?= $readonly ?> placeholder="0">
 
                             <!-- 🚀 TOMBOL KALKULATOR -->
                             <button class="btn btn-outline-info btn-calc" type="button" data-target="#pengeluaran_non_makan_tahunan" data-title="Kalkulator Rutin Tahunan" title="Hitung Akumulasi Tahunan" <?= $readonly ?>><i class="fas fa-calculator"></i></button>
 
                             <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#pengeluaran_non_makan_tahunan" title="Salin Bukan Makanan Tahunan"><i class="fas fa-copy"></i></button>
+
+                            <!-- 🚀 WADAH TEGURAN SATPAM -->
+                            <div id="feedback_tahunan" class="invalid-feedback small fw-bold"></div>
                         </div>
                     </div>
                 </div>
@@ -913,6 +917,35 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                 $('#feedback_non_makan').html(`<i class="fas fa-exclamation-circle"></i> Tidak boleh lebih kecil dari Rp ${new Intl.NumberFormat('id-ID').format(minNonMakan)}`);
             } else {
                 $(this).removeClass('is-invalid border-danger').addClass('border-primary');
+            }
+        });
+
+        // ==========================================================
+        // 🚀 SATPAM ANTI-MALAS: VALIDASI NON-MAKANAN TAHUNAN (STANDAR BPS)
+        // ==========================================================
+        $('#pengeluaran_non_makan_tahunan, #pengeluaran_non_makan_bulanan').on('input change', function() {
+            const bulanan = getInt('#pengeluaran_non_makan_bulanan');
+            const tahunan = getInt('#pengeluaran_non_makan_tahunan');
+            const $inputTahunan = $('#pengeluaran_non_makan_tahunan');
+            const $feedback = $('#feedback_tahunan');
+
+            if (tahunan > 0 && bulanan > 0) {
+                // 🚀 ATURAN 1: Mencegah Copy-Paste Buta (Tahunan == Bulanan)
+                if (tahunan === bulanan) {
+                    $inputTahunan.addClass('is-invalid border-danger').removeClass('border-primary');
+                    $feedback.html(`<i class="fas fa-exclamation-triangle"></i> Nominal sama persis dengan bulanan. Pengeluaran tahunan adalah item terpisah (Pakaian, PBB, STNK), BUKAN rekap bulanan!`);
+                }
+                // 🚀 ATURAN 2: Mencegah Asumsi "Bulanan x 12" (Salah Kaprah Konsep BPS)
+                else if (tahunan === (bulanan * 12)) {
+                    $inputTahunan.addClass('is-invalid border-danger').removeClass('border-primary');
+                    $feedback.html(`<i class="fas fa-exclamation-triangle"></i> Terdeteksi pengisian instan (Bulanan x 12). Pengeluaran Tahunan BPS berisi komponen berbeda (Servis, Uang Gedung, Cat Rumah), BUKAN akumulasi 12 bulan pengeluaran harian!`);
+                }
+                // Jika lolos (angkanya unik dan wajar)
+                else {
+                    $inputTahunan.removeClass('is-invalid border-danger').addClass('border-primary');
+                }
+            } else {
+                $inputTahunan.removeClass('is-invalid border-danger').removeClass('border-primary');
             }
         });
 

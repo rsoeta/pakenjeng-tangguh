@@ -241,37 +241,128 @@ $(document).ready(function () {
 
     $('#jenjang_pendidikan, #ijazah_tertinggi, #partisipasi_sekolah').on('change', validateJenjangIjazah);
 
-
     // ===================================================================
-    // 7. VALIDASI KELAS — FIX TAMAT & LULUS (KELAS 8 ALWAYS VALID)
+    // 7. 🚀 VALIDASI KELAS PINTAR (ANTI DATA SAMPAH)
     // ===================================================================
     function validateKelas() {
         const jenjang = $('#jenjang_pendidikan').val();
-        const kelas = parseInt($('#kelas_tertinggi').val());
+        const kelasVal = $('#kelas_tertinggi').val();
+        const ps = $('#partisipasi_sekolah').val();
+        const $kelas =$('#kelas_tertinggi');
+        const $fb =$('#fb_kelas');
 
         // Reset error state
-        $('#kelas_tertinggi').removeClass('is-invalid');
+        $kelas.removeClass('is-invalid');$fb.html('');
 
-        if (!kelas || !jenjang) return;
+        if (!kelasVal || !jenjang || !ps) return;
 
-        // FIX: Jika kelas = 8 → anggap "Tamat & Lulus", SELALU VALID
-        if (kelas === 8) return;
+        // 1. 🚀 Cegat Opsi "Tidak Punya Ijazah" di dropdown Kelas
+        if (kelasVal === "Tidak Punya Ijazah") {
+            if (jenjang !== "Belum Ditentukan" && jenjang !== "Tidak Punya Ijazah SD") {
+                $kelas.addClass('is-invalid');$fb.html('<i class="fas fa-exclamation-circle"></i> Opsi ini hanya logis untuk jenjang Belum Ditentukan / Tidak Punya Ijazah SD.');
+            }
+            return;
+        }
 
+        const kelas = parseInt(kelasVal);
+
+        // 2. 🚀 Cegat Logika Mustahil: Masih Sekolah tapi sudah Tamat
+        if (kelas === 8 && ps === "Masih Sekolah") {
+            $kelas.addClass('is-invalid');$fb.html('<i class="fas fa-exclamation-circle"></i> Jika statusnya "Masih Sekolah", kelas tertinggi tidak boleh "Tamat & Lulus".');
+            return;
+        }
+
+        // 3. 🚀 Cek Batas Logis Kelas (Misal: SMP maksimal kelas 3)
         let allowed = [];
         const lv = jenjangLevel[jenjang] ?? 0;
 
-        if (lv === 0) allowed = kelasValid.level0;
-        else if (lv === 1) allowed = kelasValid.level1;
-        else if (lv === 2) allowed = kelasValid.level2;
-        else if (lv >= 3) allowed = kelasValid.levelPT;
+        if (lv === 0) allowed = [1, 2, 3, 4, 5, 6];           // SD/MI
+        else if (lv === 1) allowed = [1, 2, 3];                // SMP/MTS
+        else if (lv === 2) allowed = [1, 2, 3, 4];             // SMA/SMK
+        else if (lv >= 3) allowed = [1, 2, 3, 4, 5, 6, 7, 8];  // Kuliah
 
-        if (!allowed.includes(kelas)) {
-            $('#kelas_tertinggi').addClass('is-invalid');
-            $('#fb_kelas').html(`<i class="fas fa-exclamation-circle"></i> Kelas ${kelas} tidak sesuai untuk jenjang ini.`);
+        // Jika BUKAN "Masih Sekolah", maka opsi 8 (Tamat & Lulus) otomatis diizinkan masuk daftar
+        if (ps !== "Masih Sekolah" && !allowed.includes(8)) {
+            allowed.push(8);
+        }
+
+        // 4. Eksekusi Hukuman
+        if (kelas !== 8 && !allowed.includes(kelas)) {
+            $kelas.addClass('is-invalid');$fb.html(`<i class="fas fa-exclamation-circle"></i> Kelas ${kelas} tidak tersedia/tidak logis untuk jenjang ${jenjang}.`);
         }
     }
 
+    // 🚀 UBAH TRIGGER: Wajib memantau perubahan Partisipasi Sekolah juga!
+    // (HAPUS fungsi trigger $('#kelas_tertinggi, #jenjang_pendidikan').on('change'...) yang lama)
+    $('#kelas_tertinggi, #jenjang_pendidikan, #partisipasi_sekolah').on('change', function() {
+        validateKelas();
+        // Paksa lencana indikator tab (🟢/⚠️) untuk mengecek ulang error
+        if (typeof validateAllTabs === 'function') validateAllTabs();
+    });
+
     $('#kelas_tertinggi, #jenjang_pendidikan').on('change', validateKelas);
+
+    // ===================================================================
+    // 8. 🚀 CROSS-VALIDATION: PROFESI vs PENDIDIKAN (BERBASIS IJAZAH)
+    // ===================================================================
+    function validateProfesiPendidikan() {
+        const profesi = $('#lapangan_usaha').val();
+        
+        // 🚀 1. UBAH TARGET PATOKAN MENJADI IJAZAH TERTINGGI
+        const ijazah = $('#ijazah_tertinggi').val(); 
+        
+        const $lapanganUsaha =$('#lapangan_usaha');
+        const $select2Selection =$lapanganUsaha.next('.select2-container').find('.select2-selection');
+        const $feedback =$('#fb_lapangan_usaha');
+
+        // Bersihkan state error sebelumnya
+        $lapanganUsaha.removeClass('is-invalid');$select2Selection.removeClass('border-danger');
+        
+        // 🚀 2. HAPUS CLASS d-block SAAT RESET
+        $feedback.text('').removeClass('d-block'); 
+
+        if (!profesi || !ijazah || profesi === 'Tidak Bekerja') return;
+
+        // Ambil level ijazah (menggunakan object jenjangLevel yang sudah ada)
+        const levelIjazah = jenjangLevel[ijazah] ?? 0;
+
+        // 🚀 ATURAN 1: Profesi Tingkat Tinggi (Wajib Minimal D4/S1 - Level 4)
+        const profesiTinggi = [
+            "Akuntan", "Analis Keuangan", "Apoteker", "Arsitek", 
+            "Dokter Gigi", "Dokter Hewan", "Dokter Spesialis", "Dokter Umum", 
+            "Dosen", "Hakim", "Hakim Agung", "Jaksa", "Jaksa Agung", 
+            "Konsultan", "Kurator", "Notaris", "Peneliti", "Pengacara", 
+            "Psikiater", "Psikolog"
+        ];
+
+        if (profesiTinggi.includes(profesi) && levelIjazah < 4) {
+            $lapanganUsaha.addClass('is-invalid');$select2Selection.addClass('border-danger');
+            
+            // 🚀 3. SUNTIKKAN d-block AGAR ERROR MUNCUL MEMBELAH SELECT2
+            $feedback.html(`<i class="fas fa-exclamation-circle"></i> Profesi <b>${profesi}</b> mengharuskan ijazah minimal D4/S1/Profesi sederajat.`).addClass('d-block');
+            return; 
+        }
+
+        // 🚀 ATURAN 2: Profesi Pejabat/Aparatur (Wajib Minimal SMA/Sederajat - Level 2)
+        const profesiMenengah = [
+            "Anggota DPD", "Anggota DPR RI/MPR RI", "Anggota DPRD Provinsi/ Anggota DPRD Kabupaten/Kota",
+            "Bupati", "Gubernur", "Wali Kota", "Wakil Bupati", "Wakil Gubernur", "Wakil Walikota",
+            "Camat", "Kepala Desa", "Lurah", "Menteri/Kepala Badan (setingkat Menteri)/Wakil Menteri/Wakil Kepala Badan",
+            "Presiden", "Wakil Presiden", "Polisi", "Tentara Nasional Indonesia (TNI)", "Pilot", "Pramugara/i", "Masinis"
+        ];
+
+        if (profesiMenengah.includes(profesi) && levelIjazah < 2) {
+            $lapanganUsaha.addClass('is-invalid');
+            $select2Selection.addClass('border-danger');$feedback.html(`<i class="fas fa-exclamation-circle"></i> Profesi <b>${profesi}</b> mengharuskan ijazah minimal SMA/Sederajat.`).addClass('d-block');
+        }
+    }
+
+    // 🚀 4. UBAH PEMICU (TRIGGER) AGAR MEMANTAU PERUBAHAN IJAZAH
+    $('#lapangan_usaha, #ijazah_tertinggi').on('change', function() {
+        validateProfesiPendidikan();
+        // Beri tahu Smart Indicator bahwa ada perubahan validasi
+        if (typeof validateAllTabs === 'function') validateAllTabs();
+    });
 
 
     /* ======================================================
