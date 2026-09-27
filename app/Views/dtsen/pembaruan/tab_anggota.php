@@ -163,8 +163,8 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         valid = false;
                     } else {
                         // 🚀 TAMBAHKAN 'lapangan_usaha' KE DALAM DAFTAR PENGECUALIAN INI!
-                        // Agar error pintar dari validateProfesiPendidikan tidak dihapus sembarangan
-                        if (!['partisipasi_sekolah', 'jenjang_pendidikan', 'kelas_tertinggi', 'ijazah_tertinggi', 'lapangan_usaha'].includes($(this).attr('id'))) {
+                        // 🚀 HAPUS partisipasi_sekolah dari daftar ini:
+                        if (!['jenjang_pendidikan', 'kelas_tertinggi', 'ijazah_tertinggi', 'lapangan_usaha'].includes($(this).attr('id'))) {
                             $(this).removeClass('is-invalid');
                         }
                     }
@@ -193,8 +193,8 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     }
                 }
 
-                // 3. Cek Error Pintar (Apakah ada kotak merah di tab ini?)
-                if ($tab.find('.is-invalid').length > 0) {
+                // 3. Cek Error Pintar (Hanya hitung elemen yang aktif / tidak dikunci)
+                if ($tab.find('.is-invalid:not(:disabled)').length > 0) {
                     valid = false;
                 }
 
@@ -426,7 +426,8 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 } else {
                     // 🚀 PENTING: Jangan langsung hapus class 'is-invalid' membabi buta!
                     // Jangan lupa masukkan 'lapangan_usaha' agar error BPS tidak terhapus.
-                    if (!['partisipasi_sekolah', 'jenjang_pendidikan', 'kelas_tertinggi', 'ijazah_tertinggi', 'lapangan_usaha'].includes($(this).attr('id'))) {
+                    // 🚀 HAPUS partisipasi_sekolah dari daftar ini:
+                    if (!['jenjang_pendidikan', 'kelas_tertinggi', 'ijazah_tertinggi', 'lapangan_usaha'].includes($(this).attr('id'))) {
                         $(this).removeClass('is-invalid');
                     }
                 }
@@ -512,8 +513,8 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 }
             }
 
-            // 3. 🚀 FINAL GATEKEEPER: Adakah elemen yang masih menyala merah?
-            const invalidElements = form.find('.is-invalid');
+            // 3. 🚀 FINAL GATEKEEPER: Abaikan elemen yang sedang dikunci (:not(:disabled))
+            const invalidElements = form.find('.is-invalid:not(:disabled)');
 
             if (invalidElements.length > 0) {
                 // Cek apakah errornya bersumber dari kecerdasan Tab Pendidikan
@@ -693,7 +694,25 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 syncKeluargaKeAnggota();
 
                 // Prefill Tab Pendidikan
-                $('#partisipasi_sekolah').val(d.partisipasi_sekolah ?? '');
+                let psVal = d.partisipasi_sekolah ?? '';
+
+                // 🚀 SMART BALITA: Jika balita (usia < 5 thn) dan data pendidikan masih kosong di DB, otomatis pasang 'Belum Pernah Sekolah'
+                let tglLahirVal = d.tanggal_lahir ?? '';
+                let usiaBalita = 0;
+                if (tglLahirVal) {
+                    let dob = new Date(tglLahirVal);
+                    let today = new Date();
+                    usiaBalita = today.getFullYear() - dob.getFullYear();
+                    if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) {
+                        usiaBalita--;
+                    }
+                }
+
+                if (usiaBalita < 5 && (!psVal || psVal === '')) {
+                    psVal = 'Belum Pernah Sekolah';
+                }
+
+                $('#partisipasi_sekolah').val(psVal).removeClass('is-invalid');
                 $('#jenjang_pendidikan').val(d.jenjang_pendidikan ?? '');
                 $('#kelas_tertinggi').val(d.kelas_tertinggi ?? '');
                 $('#ijazah_tertinggi').val(d.ijazah_tertinggi ?? '');
@@ -891,7 +910,14 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
          * 🎓 Disable jenjang bila belum pernah sekolah
          * ============================================================ */
         $('#partisipasi_sekolah').on('change', function() {
-            const disable = ($(this).val() === 'Belum Pernah Sekolah');
+            const val = $(this).val();
+
+            // 🚀 Bersihkan error pada diri sendiri jika sudah ada pilihan
+            if (val && val !== '') {
+                $(this).removeClass('is-invalid');
+            }
+
+            const disable = (val === 'Belum Pernah Sekolah');
             ['#jenjang_pendidikan', '#kelas_tertinggi', '#ijazah_tertinggi'].forEach(id => {
                 $(id).prop('disabled', disable);
                 if (disable) {
@@ -899,6 +925,10 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     $(id).val('').removeClass('is-invalid');
                 }
             });
+
+            if (disable) {
+                $('#fb_jenjang, #fb_kelas, #fb_ijazah').html('');
+            }
         });
 
         /* ============================================================
