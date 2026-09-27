@@ -96,7 +96,6 @@ $(document).ready(function () {
     // 1. LEVEL PENDIDIKAN
     // ------------------------
     const jenjangLevel = {
-        "Belum Ditentukan": 0,
         "Tidak Punya Ijazah SD": 0,
         "Paket A": 0, "SDLB": 0, "SD": 0, "MI": 0, "SPM/PDF Ula": 0,
 
@@ -156,7 +155,8 @@ $(document).ready(function () {
         }
 
         if (ps === "Belum Pernah Sekolah") {
-            fJenjang.val("Belum Ditentukan").prop('disabled', true);
+            // 🚀 PERBAIKAN: Jika belum pernah sekolah, jenjang harus KOSONG mutlak!
+            fJenjang.val("").prop('disabled', true);
             fKelas.val("").prop('disabled', true);
             fIjazah.val("Tidak Punya Ijazah SD").prop('disabled', true);
             return;
@@ -218,9 +218,6 @@ $(document).ready(function () {
 
         if (!jenjang || !ijazah) return;
 
-        // ✔ Abaikan validasi jika ijazah = Belum Ditentukan
-        if (ijazah === "Belum Ditentukan") return;
-
         const levelJenjang = jenjangLevel[jenjang] ?? 0;
         const levelIjazah = jenjangLevel[ijazah] ?? 0;
 
@@ -258,8 +255,10 @@ $(document).ready(function () {
 
         // 1. 🚀 Cegat Opsi "Tidak Punya Ijazah" di dropdown Kelas
         if (kelasVal === "Tidak Punya Ijazah") {
-            if (jenjang !== "Belum Ditentukan" && jenjang !== "Tidak Punya Ijazah SD") {
-                $kelas.addClass('is-invalid');$fb.html('<i class="fas fa-exclamation-circle"></i> Opsi ini hanya logis untuk jenjang Belum Ditentukan / Tidak Punya Ijazah SD.');
+            // Karena "Belum Ditentukan" sudah dihapus, opsi ini HANYA LOGIS jika jenjangnya "Tidak Punya Ijazah SD"
+            if (jenjang !== "Tidak Punya Ijazah SD") {
+                $kelas.addClass('is-invalid');
+                $fb.html('<i class="fas fa-exclamation-circle"></i> Opsi kelas "Tidak Punya Ijazah" hanya logis jika Jenjang Pendidikan juga "Tidak Punya Ijazah SD".');
             }
             return;
         }

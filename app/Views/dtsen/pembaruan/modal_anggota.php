@@ -64,7 +64,6 @@ $editable = ($roleId <= 4);
                                     <div class="col-md-7 col-12">
                                         <select class="form-select required" name="status_keberadaan" id="status_keberadaan">
                                             <option value="">Pilih...</option>
-                                            <option>Belum Ditentukan</option>
                                             <option>Tinggal Bersama Keluarga</option>
                                             <option>Meninggal</option>
                                             <option>Tidak Tinggal Bersama Keluarga/Pindah Ke Wilayah Lain</option>
@@ -239,7 +238,6 @@ $editable = ($roleId <= 4);
                                     <label class="form-label fw-bold">Jenjang & Jenis Pendidikan</label>
                                     <select class="form-select" name="jenjang_pendidikan" id="jenjang_pendidikan">
                                         <option value="">Pilih...</option>
-                                        <option value="Belum Ditentukan">Belum Ditentukan</option>
                                         <option value="Tidak Punya Ijazah SD">Tidak Punya Ijazah SD</option>
                                         <option value="Paket A">Paket A</option>
                                         <option value="SDLB">SDLB</option>
@@ -288,7 +286,6 @@ $editable = ($roleId <= 4);
                                     <label class="form-label fw-bold">Ijazah/STTB Tertinggi</label>
                                     <select class="form-select" name="ijazah_tertinggi" id="ijazah_tertinggi">
                                         <option value="">Pilih...</option>
-                                        <option value="Belum Ditentukan">Belum Ditentukan</option>
                                         <option value="Tidak Punya Ijazah SD">Tidak Punya Ijazah SD</option>
                                         <option value="Paket A">Paket A</option>
                                         <option value="SDLB">SDLB</option>
