@@ -221,7 +221,13 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="mt-2 small w-100 bg-white bg-opacity-10 p-2 rounded">
-            <div class="mb-1"><i class="fas fa-id-card me-2 text-warning"></i> No. KK: <strong class="text-black"><?= esc($safeNoKk) ?></strong></div>
+            <div class="mb-1">
+                <i class="fas fa-id-card me-2 text-warning"></i> No. KK:
+                <!-- 🚀 Tambahkan class, cursor pointer, title, dan data-value -->
+                <strong class="text-black copy-text-direct" style="cursor: pointer;" title="Klik untuk menyalin" data-value="<?= esc($safeNoKk) ?>">
+                    <?= esc($safeNoKk) ?>
+                </strong>
+            </div>
             <div><i class="fas fa-user-circle me-2 text-warning"></i> Kepala Keluarga: <strong class="text-black"><?= esc($safeNama) ?></strong></div>
         </div>
     </div>
@@ -635,6 +641,27 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
                 });
             });
 
+    });
+
+    // =======================================================
+    // 📋 FUNGSI SALIN KE CLIPBOARD (KLIK TEKS LANGSUNG)
+    // =======================================================
+    $(document).on('click', '.copy-text-direct', function() {
+        // Ambil nilai dari atribut data-value
+        const textToCopy = $(this).attr('data-value');
+
+        if (textToCopy && textToCopy.trim() !== '') {
+            navigator.clipboard.writeText(textToCopy.trim()).then(() => {
+                Swal.fire({
+                    toast: true,
+                    position: 'bottom-end',
+                    icon: 'success',
+                    title: 'No. KK disalin!',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            });
+        }
     });
 </script>
 
