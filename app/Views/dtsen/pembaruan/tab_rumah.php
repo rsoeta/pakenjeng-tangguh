@@ -777,6 +777,7 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                                 <div class="input-group has-validation">
                                     <input type="text" id="nomor_meter_${i}" name="nomor_meter[]" class="form-control form-control-sm onlynum-dynamic input-meter" value="${valMet}" placeholder="Nomor Meter (10-13 Digit)" minlength="10" maxlength="13" inputmode="numeric" pattern="[0-9]*">
                                     <button class="btn btn-outline-secondary btn-sm btn-copy-input" type="button" data-target="#nomor_meter_${i}" title="Salin Nomor Meter"><i class="fas fa-copy"></i></button>
+                                    <div class="invalid-feedback small w-100">Wajib diisi 10-13 digit angka.</div>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -1018,9 +1019,29 @@ $se   = $payload['sosial_ekonomi'] ?? [];
             if ($('input[name="sumber_listrik"]:checked').val() === 'Listrik PLN dengan meteran') {
                 if (!$('#jumlah_meteran_listrik').val()) missing.push('#jumlah_meteran_listrik');
 
-                // Pastikan Daya Listrik tiap meteran sudah dipilih (Nomor pelanggan boleh opsional/kosong jika tidak tahu)
+                // 1. Pastikan Daya Listrik Tiap Meteran Dipilih
                 $('.input-daya').each(function() {
                     if (!$(this).val()) missing.push('daya_listrik_kosong');
+                });
+
+                // 2. 🚀 WAJIB: ID Pelanggan (Minimal 10 Digit) + Visual Error
+                $('.input-pelanggan').each(function() {
+                    if (!$(this).val() || $(this).val().length < 10) {
+                        missing.push('id_pelanggan_tidak_valid');
+                        $(this).addClass('is-invalid border-danger'); // 🚀 Nyalakan Merah
+                    } else {
+                        $(this).removeClass('is-invalid border-danger'); // 🚀 Matikan Merah
+                    }
+                });
+
+                // 3. 🚀 WAJIB: Nomor Meter (Minimal 10 Digit) + Visual Error
+                $('.input-meter').each(function() {
+                    if (!$(this).val() || $(this).val().length < 10) {
+                        missing.push('nomor_meter_tidak_valid');
+                        $(this).addClass('is-invalid border-danger'); // 🚀 Nyalakan Merah
+                    } else {
+                        $(this).removeClass('is-invalid border-danger'); // 🚀 Matikan Merah
+                    }
                 });
             }
 
@@ -1043,7 +1064,7 @@ $se   = $payload['sosial_ekonomi'] ?? [];
         });
 
         // 🚀 Trigger untuk semua elemen radio dan input dinamis
-        $(document).on('change input', '.input-kk-lainnya, .input-daya', checkKelengkapanRumah);
+        $(document).on('change input', '.input-kk-lainnya, .input-daya, .input-pelanggan, .input-meter', checkKelengkapanRumah);
         $('.input-kondisi-lantai, .input-kondisi-dinding, .input-kondisi-atap, .input-bukti-kepemilikan').on('change', checkKelengkapanRumah);
 
         setTimeout(checkKelengkapanRumah, 250);
