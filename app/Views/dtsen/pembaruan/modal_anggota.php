@@ -523,6 +523,12 @@ $editable = ($roleId <= 4);
                                     </select>
                                     <!-- 🚀 ELEMEN ERROR REAL-TIME UNTUK PROFESI vs PENDIDIKAN -->
                                     <div id="fb_lapangan_usaha" class="invalid-feedback small fw-bold mt-1"></div>
+
+                                    <!-- 🚀 INPUT KHUSUS "LAINNYA" (Tersembunyi secara default) -->
+                                    <div id="div_lapangan_usaha_lainnya" class="mt-2" style="display: none;">
+                                        <input type="text" class="form-control upper" name="lapangan_usaha_lainnya" id="lapangan_usaha_lainnya" placeholder="Sebutkan profesi pekerjaan secara spesifik...">
+                                        <div class="invalid-feedback small fw-bold">Profesi spesifik wajib diisi jika memilih 'Lainnya'.</div>
+                                    </div>
                                 </div>
 
                                 <!-- 🚀 BERI ID div_status_pekerjaan PADA BUNGKUS INI -->

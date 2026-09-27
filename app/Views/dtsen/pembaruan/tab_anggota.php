@@ -473,15 +473,25 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             if (usia > 5) {
                 let kerjaError = false;
 
+                // 🚀 DEKLARASI DI AWAL: Ambil nilainya dulu sebelum dicek macam-macam!
+                let lapanganUsahaVal = $('#lapangan_usaha').val();
+
                 // Cek 1: Lapangan Usaha (Beri warna merah ke body Select2)
-                if (!$('#lapangan_usaha').val()) {
+                if (!lapanganUsahaVal) {
                     $('#lapangan_usaha').addClass('is-invalid');
                     $('#lapangan_usaha').next('.select2-container').find('.select2-selection').addClass('border-danger');
                     kerjaError = true;
                 }
 
+                // 🚀 Cek 1.5: Jika "Lainnya", maka input spesifik wajib diisi
+                if (lapanganUsahaVal === 'Lainnya') {
+                    if (!$('#lapangan_usaha_lainnya').val().trim()) {
+                        $('#lapangan_usaha_lainnya').addClass('is-invalid');
+                        kerjaError = true;
+                    }
+                }
+
                 // Cek 2: Status Pekerjaan (DILONGGARKAN: Wajib KECUALI jika "Tidak Bekerja")
-                let lapanganUsahaVal = $('#lapangan_usaha').val();
                 if (lapanganUsahaVal !== 'Tidak Bekerja') {
                     if (!$('#status_pekerjaan').val()) {
                         $('#status_pekerjaan').addClass('is-invalid');
@@ -501,26 +511,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     errorMessage = 'Anggota keluarga usia di atas 5 tahun WAJIB mengisi data Pekerjaan dan Kepemilikan Rekening pada Tab Tenaga Kerja!';
                 }
             }
-
-            // ==============================================================
-            // 🚀 UX CERDAS: Kunci Status Pekerjaan jika "Tidak Bekerja"
-            // ==============================================================
-            $('#lapangan_usaha').on('change', function() {
-                let val = $(this).val();
-                let $statusPekerjaan = $('#status_pekerjaan');
-
-                // Jika usianya masih balita, kolom ini pasti sudah di-disabled oleh fungsi toggleKunciTenagaKerja()
-                // Jadi kita hanya perlu mengaturnya jika kolom ini sedang aktif
-                if (val === 'Tidak Bekerja') {
-                    $statusPekerjaan.val('').prop('disabled', true).removeClass('is-invalid');
-                } else {
-                    // Jangan sembarangan membuka kunci jika dia ternyata Balita!
-                    // Cek apakah select lapangan_usaha sedang di-disable atau tidak
-                    if (!$(this).prop('disabled')) {
-                        $statusPekerjaan.prop('disabled', false);
-                    }
-                }
-            });
 
             // 3. 🚀 FINAL GATEKEEPER: Adakah elemen yang masih menyala merah?
             const invalidElements = form.find('.is-invalid');
@@ -607,6 +597,33 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             console.log('🧾 Modal Anggota terbuka, event submit aktif');
         });
 
+        // ==============================================================
+        // 🚀 UX CERDAS: Logika Lapangan Usaha (Tidak Bekerja & Lainnya)
+        // ==============================================================
+        $(document).on('change', '#lapangan_usaha', function() {
+            let val = $(this).val();
+            let $statusPekerjaan = $('#status_pekerjaan');
+            let $divLainnya = $('#div_lapangan_usaha_lainnya');
+            let $inputLainnya = $('#lapangan_usaha_lainnya');
+
+            // 1. Logika Toggle Input "Lainnya"
+            if (val === 'Lainnya') {
+                $divLainnya.slideDown();
+            } else {
+                $divLainnya.slideUp();
+                $inputLainnya.val('').removeClass('is-invalid');
+            }
+
+            // 2. Logika Kunci Status Pekerjaan
+            if (val === 'Tidak Bekerja') {
+                $statusPekerjaan.val('').prop('disabled', true).removeClass('is-invalid');
+            } else {
+                if (!$(this).prop('disabled')) {
+                    $statusPekerjaan.prop('disabled', false);
+                }
+            }
+        });
+
         /* ============================================================
          * ✏️ EVENT: Tombol Edit / Lihat Anggota
          * ============================================================ */
@@ -683,7 +700,9 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 
                 // Prefill Tab Kerja
                 $('#bekerja_seminggu').val(d.bekerja_seminggu ?? '');
-                $('#lapangan_usaha').val(d.lapangan_usaha ?? '');
+                // 🚀 TRIGGER: Panggil trigger change agar kolom Lainnya terbuka jika diperlukan
+                $('#lapangan_usaha').val(d.lapangan_usaha ?? '').trigger('change');
+                $('#lapangan_usaha_lainnya').val(d.lapangan_usaha_lainnya ?? '');
                 $('#status_pekerjaan').val(d.status_pekerjaan ?? '');
                 $('#pendapatan').val(d.pendapatan ?? '');
 

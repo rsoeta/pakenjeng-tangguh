@@ -801,10 +801,12 @@ class PembaruanKeluarga extends BaseController
                 'tenaga_kerja' => [
                     'bekerja_seminggu' => $post['bekerja_seminggu'] ?? null,
                     'lapangan_usaha' => $post['lapangan_usaha'] ?? null,
+                    // 🚀 TANGKAP INPUT PROFESI LAINNYA
+                    'lapangan_usaha_lainnya' => (($post['lapangan_usaha'] ?? '') === 'Lainnya') ? ($post['lapangan_usaha_lainnya'] ?? null) : null,
                     'status_pekerjaan' => $post['status_pekerjaan'] ?? null,
                     'pendapatan' => $post['pendapatan'] ?? null,
                     'keterampilan' => $post['keterampilan'] ?? [],
-                    'rekening_aktif' => $post['rekening_aktif'] ?? null // 🚀 NEW
+                    'rekening_aktif' => $post['rekening_aktif'] ?? null
                 ],
                 'kesehatan' => [
                     'status_hamil' => $post['status_hamil'] ?? null,
@@ -934,10 +936,12 @@ class PembaruanKeluarga extends BaseController
                         'jenjang_pendidikan'  => $payload['pendidikan']['jenjang_pendidikan'] ?? '',
                         'kelas_tertinggi'     => $payload['pendidikan']['kelas_tertinggi'] ?? '',
                         'ijazah_tertinggi'    => $payload['pendidikan']['ijazah_tertinggi'] ?? '',
-                        'bekerja_seminggu'    => $payload['tenaga_kerja']['bekerja_seminggu'] ?? '',
-                        'lapangan_usaha'      => $payload['tenaga_kerja']['lapangan_usaha'] ?? '',
-                        'status_pekerjaan'    => $payload['tenaga_kerja']['status_pekerjaan'] ?? '',
-                        'pendapatan'          => $payload['tenaga_kerja']['pendapatan'] ?? '',
+                        'bekerja_seminggu'       => $payload['tenaga_kerja']['bekerja_seminggu'] ?? '',
+                        'lapangan_usaha'         => $payload['tenaga_kerja']['lapangan_usaha'] ?? '',
+                        // 🚀 TAMBAHKAN BARIS INI: Jembatan data "Lainnya" ke Frontend
+                        'lapangan_usaha_lainnya' => $payload['tenaga_kerja']['lapangan_usaha_lainnya'] ?? '',
+                        'status_pekerjaan'       => $payload['tenaga_kerja']['status_pekerjaan'] ?? '',
+                        'pendapatan'             => $payload['tenaga_kerja']['pendapatan'] ?? '',
                         'rekening_aktif'      => $payload['tenaga_kerja']['rekening_aktif'] ?? '',
                         'keterampilan'        => $payload['tenaga_kerja']['keterampilan'] ?? [],
                         'status_hamil'        => $payload['kesehatan']['status_hamil'] ?? '',
@@ -955,6 +959,8 @@ class PembaruanKeluarga extends BaseController
                 // 🚀 ANTI-BOCOR JS: Pastikan key elemen baru ada meskipun nilainya kosong
                 $anggota_prefill['no_hp'] = $art['no_hp'] ?? '';
                 $anggota_prefill['rekening_aktif'] = $art['rekening_aktif'] ?? '';
+                // 🚀 TAMBAHKAN BARIS INI: Master lama dipastikan belum punya teks profesi spesifik
+                $anggota_prefill['lapangan_usaha_lainnya'] = '';
                 $anggota_prefill['penyakit_kronis'] = []; // Master lama belum ada penyakit kronis (array kosong)
                 $anggota_prefill['disabilitas'] = [];
             }
@@ -1207,7 +1213,6 @@ class PembaruanKeluarga extends BaseController
             ]
         ];
     }
-
 
     // 🗑️ Hapus anggota
     public function deleteAnggota()
