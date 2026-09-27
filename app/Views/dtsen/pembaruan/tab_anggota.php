@@ -164,7 +164,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     } else {
                         // 🚀 TAMBAHKAN 'lapangan_usaha' KE DALAM DAFTAR PENGECUALIAN INI!
                         // Agar error pintar dari validateProfesiPendidikan tidak dihapus sembarangan
-                        if (!['jenjang_pendidikan', 'kelas_tertinggi', 'ijazah_tertinggi', 'lapangan_usaha'].includes($(this).attr('id'))) {
+                        if (!['partisipasi_sekolah', 'jenjang_pendidikan', 'kelas_tertinggi', 'ijazah_tertinggi', 'lapangan_usaha'].includes($(this).attr('id'))) {
                             $(this).removeClass('is-invalid');
                         }
                     }
@@ -426,7 +426,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 } else {
                     // 🚀 PENTING: Jangan langsung hapus class 'is-invalid' membabi buta!
                     // Jangan lupa masukkan 'lapangan_usaha' agar error BPS tidak terhapus.
-                    if (!['jenjang_pendidikan', 'kelas_tertinggi', 'ijazah_tertinggi', 'lapangan_usaha'].includes($(this).attr('id'))) {
+                    if (!['partisipasi_sekolah', 'jenjang_pendidikan', 'kelas_tertinggi', 'ijazah_tertinggi', 'lapangan_usaha'].includes($(this).attr('id'))) {
                         $(this).removeClass('is-invalid');
                     }
                 }
@@ -698,6 +698,9 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 $('#kelas_tertinggi').val(d.kelas_tertinggi ?? '');
                 $('#ijazah_tertinggi').val(d.ijazah_tertinggi ?? '');
 
+                // 🚀 TRIGGER PERUBAHAN AGAR KOLOM LAIN TERKUNCI OTOMATIS JIKA BALITA
+                $('#partisipasi_sekolah').trigger('change');
+
                 // Prefill Tab Kerja
                 $('#bekerja_seminggu').val(d.bekerja_seminggu ?? '');
                 // 🚀 TRIGGER: Panggil trigger change agar kolom Lainnya terbuka jika diperlukan
@@ -891,7 +894,10 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             const disable = ($(this).val() === 'Belum Pernah Sekolah');
             ['#jenjang_pendidikan', '#kelas_tertinggi', '#ijazah_tertinggi'].forEach(id => {
                 $(id).prop('disabled', disable);
-                if (disable) $(id).val('');
+                if (disable) {
+                    // 🚀 PAKSA KOSONG & HAPUS MERAH SAAT TERKUNCI
+                    $(id).val('').removeClass('is-invalid');
+                }
             });
         });
 
