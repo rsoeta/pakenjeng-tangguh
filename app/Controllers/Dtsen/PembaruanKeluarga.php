@@ -1609,6 +1609,27 @@ class PembaruanKeluarga extends BaseController
             $anggotaFinal = array_values($gabungan);
 
             // =====================================================
+            // 🚀 SMART SORTING: Urutkan Silsilah (SHDK) lalu Usia
+            // =====================================================
+            usort($anggotaFinal, function ($a, $b) {
+                // 1. Urutkan berdasarkan ID Status Hubungan (Kepala Keluarga = 1, Istri = 2, Anak = 3, dst)
+                // Catatan: Data Utama pakai 'shdk', Data Usulan pakai 'hubungan'
+                $shdkA = (int)($a['shdk'] ?? $a['hubungan'] ?? 99);
+                $shdkB = (int)($b['shdk'] ?? $b['hubungan'] ?? 99);
+
+                if ($shdkA !== $shdkB) {
+                    return $shdkA <=> $shdkB;
+                }
+
+                // 2. Jika statusnya sama (misal: sama-sama "Anak"), urutkan dari Tertua -> Termuda
+                // Semakin kecil nilai strtotime (tahun lahir tua), semakin di atas posisinya
+                $tglA = strtotime($a['tanggal_lahir'] ?? '9999-12-31');
+                $tglB = strtotime($b['tanggal_lahir'] ?? '9999-12-31');
+
+                return $tglA <=> $tglB;
+            });
+
+            // =====================================================
             // 4️⃣ Kembalikan respons JSON
             // =====================================================
             if (empty($anggotaFinal)) {

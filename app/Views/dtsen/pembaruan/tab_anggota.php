@@ -801,9 +801,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     }
                 }
 
-                // 🚀 PERUBAHAN: Bedakan judul Modal antara Edit dan Read-Only
-                // $('#modalAnggotaLabel').text(isEditable ? 'Edit Anggota' : 'Detail Anggota');
-
                 // 🚀 PERUBAHAN: Bedakan judul Modal antara Edit dan Read-Only + Nama Dinamis
                 let modeTeks = isEditable ? 'Edit Anggota:' : 'Detail Anggota:';
                 $('#mode_teks_header').text(modeTeks);
@@ -815,6 +812,9 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 const idKk = $('#id_kk').val() || $('[name="id_kk"]').val();
                 $('[name="id_kk"]').val();
                 $('#formAnggota #id_kk').val(idKk);
+
+                // 🚀 RESET TAB KE AWAL: Paksa tab kembali ke "Data Pokok Individu" setiap kali modal Edit dibuka
+                $('#tabAnggotaTabs a:first').tab('show');
 
                 $('#modalAnggota').modal('show');
                 setTimeout(applyRules, 30);
@@ -1080,10 +1080,15 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                                     </a>
                                 `;
                             }
+                            // 🚀 TAMPILAN TOMBOL EDIT & HAPUS YANG LEBIH ELEGAN
                             return `
-                                <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-primary btnEditAnggota" data-id="${r.id_art ?? r.id}"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-danger btnHapusAnggota" data-id="${r.id_art ?? r.id}"><i class="fas fa-trash-alt"></i></button>
+                                <div class="btn-group btn-group-sm shadow-sm">
+                                    <button class="btn btn-primary btnEditAnggota" data-id="${r.id_art ?? r.id}" title="Edit Data Anggota">
+                                        <i class="fas fa-edit me-1"></i> Edit
+                                    </button>
+                                    <button class="btn btn-danger btnHapusAnggota" data-id="${r.id_art ?? r.id}" title="Hapus Data Anggota">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
                                 </div>
                             `;
                         }
@@ -1093,9 +1098,9 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     targets: '_all',
                     className: 'text-start align-middle'
                 }],
-                order: [
-                    [1, 'asc']
-                ]
+                // 🚀 MATIKAN SORTING BAWAAN DATATABLES!
+                // Gunakan order: [] agar DataTables menghormati urutan Silsilah Keluarga murni dari Server
+                order: []
             });
         }
 
