@@ -206,34 +206,47 @@ $(document).ready(function () {
 
 
     // ===================================================================
-    // 6. VALIDASI IJAZAH BERDASARKAN JENJANG
+    // 6. VALIDASI IJAZAH BERDASARKAN JENJANG & KELAS
     // ===================================================================
     function validateJenjangIjazah() {
         const ps = $('#partisipasi_sekolah').val();
         const jenjang = $('#jenjang_pendidikan').val();
         const ijazah = $('#ijazah_tertinggi').val();
+        const kelasVal = $('#kelas_tertinggi').val();
+        const kelas = parseInt(kelasVal);
 
         // Reset error state
         $('#ijazah_tertinggi').removeClass('is-invalid');
+        $('#fb_ijazah').html('');
 
         if (!jenjang || !ijazah) return;
 
         const levelJenjang = jenjangLevel[jenjang] ?? 0;
         const levelIjazah = jenjangLevel[ijazah] ?? 0;
 
-        // Masih sekolah → ijazah harus lebih rendah
+        // Aturan 1: Masih sekolah → ijazah harus lebih rendah
         if (ps === "Masih Sekolah") {
-            // 🚀 PENGECUALIAN LEVEL 0: Anak SD/MI (Level 0) sangat wajar jika ijazahnya "Tidak Punya Ijazah SD" (Level 0)
+            // PENGECUALIAN LEVEL 0: Anak SD/MI wajar ijazahnya "Tidak Punya Ijazah SD"
             if (levelIjazah >= levelJenjang && !(levelJenjang === 0 && levelIjazah === 0)) {
                 $('#ijazah_tertinggi').addClass('is-invalid');
                 $('#fb_ijazah').html('<i class="fas fa-exclamation-circle"></i> Ijazah tidak boleh sama/lebih tinggi dari jenjang yang sedang ditempuh.');
+                return;
             }
         }
 
-        // Tidak sekolah lagi → ijazah ≤ jenjang
+        // Aturan 2: Tidak sekolah lagi → ijazah ≤ jenjang
         if (ps === "Tidak Bersekolah Lagi" && levelIjazah > levelJenjang) {
             $('#ijazah_tertinggi').addClass('is-invalid');
             $('#fb_ijazah').html('<i class="fas fa-exclamation-circle"></i> Ijazah tidak boleh lebih tinggi dari jenjang pendidikan terakhir.');
+            return;
+        }
+
+        // 🚀 ATURAN 3 (VALIDASI SILANG): Jika Kelas = Tamat & Lulus, Ijazah WAJIB Setara Jenjang
+        if (kelas === 8 && jenjang !== "Tidak Punya Ijazah SD") {
+            if (levelIjazah !== levelJenjang || ijazah === "Tidak Punya Ijazah SD") {
+                $('#ijazah_tertinggi').addClass('is-invalid');
+                $('#fb_ijazah').html(`<i class="fas fa-exclamation-circle"></i> Karena kelas "Tamat & Lulus", Ijazah WAJIB setara jenjang ${jenjang}.`);
+            }
         }
     }
 
@@ -246,6 +259,7 @@ $(document).ready(function () {
         const jenjang = $('#jenjang_pendidikan').val();
         const kelasVal = $('#kelas_tertinggi').val();
         const ps = $('#partisipasi_sekolah').val();
+        const ijazah = $('#ijazah_tertinggi').val();
         const $kelas =$('#kelas_tertinggi');
         const $fb =$('#fb_kelas');
 
@@ -254,25 +268,34 @@ $(document).ready(function () {
 
         if (!kelasVal || !jenjang || !ps) return;
 
-        // 1. 🚀 Cegat Opsi "Tidak Punya Ijazah" di dropdown Kelas
+        // 1. Cegat Opsi "Tidak Punya Ijazah" di dropdown Kelas
         if (kelasVal === "Tidak Punya Ijazah") {
-            // Karena "Belum Ditentukan" sudah dihapus, opsi ini HANYA LOGIS jika jenjangnya "Tidak Punya Ijazah SD"
             if (jenjang !== "Tidak Punya Ijazah SD") {
-                $kelas.addClass('is-invalid');
-                $fb.html('<i class="fas fa-exclamation-circle"></i> Opsi kelas "Tidak Punya Ijazah" hanya logis jika Jenjang Pendidikan juga "Tidak Punya Ijazah SD".');
+                $kelas.addClass('is-invalid');$fb.html('<i class="fas fa-exclamation-circle"></i> Opsi kelas "Tidak Punya Ijazah" hanya logis jika Jenjang Pendidikan juga "Tidak Punya Ijazah SD".');
             }
             return;
         }
 
         const kelas = parseInt(kelasVal);
 
-        // 2. 🚀 Cegat Logika Mustahil: Masih Sekolah tapi sudah Tamat
+        // 2. Cegat Logika Mustahil: Masih Sekolah tapi sudah Tamat
         if (kelas === 8 && ps === "Masih Sekolah") {
             $kelas.addClass('is-invalid');$fb.html('<i class="fas fa-exclamation-circle"></i> Jika statusnya "Masih Sekolah", kelas tertinggi tidak boleh "Tamat & Lulus".');
             return;
         }
 
-        // 3. 🚀 Cek Batas Logis Kelas (Misal: SMP maksimal kelas 3)
+        // 2.5 🚀 ATURAN BARU: Jika punya Ijazah SETARA dengan Jenjang, WAJIB Tamat & Lulus
+        if (ijazah && ijazah !== "Tidak Punya Ijazah SD") {
+            const levelJenjang = jenjangLevel[jenjang] ?? 0;
+            const levelIjazah = jenjangLevel[ijazah] ?? -1;
+
+            if (levelJenjang === levelIjazah && kelas !== 8) {
+                $kelas.addClass('is-invalid');$fb.html(`<i class="fas fa-exclamation-circle"></i> Memiliki Ijazah setara ${jenjang}, maka Kelas WAJIB "8 (Tamat & Lulus)".`);
+                return;
+            }
+        }
+
+        // 3. Cek Batas Logis Kelas (Misal: SMP maksimal kelas 3)
         let allowed = [];
         const lv = jenjangLevel[jenjang] ?? 0;
 
@@ -281,7 +304,6 @@ $(document).ready(function () {
         else if (lv === 2) allowed = [1, 2, 3, 4];             // SMA/SMK
         else if (lv >= 3) allowed = [1, 2, 3, 4, 5, 6, 7, 8];  // Kuliah
 
-        // Jika BUKAN "Masih Sekolah", maka opsi 8 (Tamat & Lulus) otomatis diizinkan masuk daftar
         if (ps !== "Masih Sekolah" && !allowed.includes(8)) {
             allowed.push(8);
         }
@@ -292,10 +314,11 @@ $(document).ready(function () {
         }
     }
 
-    // 🚀 UBAH TRIGGER: Wajib memantau perubahan Partisipasi Sekolah juga!
-    // (HAPUS fungsi trigger $('#kelas_tertinggi, #jenjang_pendidikan').on('change'...) yang lama)
-    $('#kelas_tertinggi, #jenjang_pendidikan, #partisipasi_sekolah').on('change', function() {
+    // 🚀 TRIGGER SAPU JAGAT: Jika SATU diubah, periksa SEMUANYA!
+    $('#partisipasi_sekolah, #jenjang_pendidikan, #kelas_tertinggi, #ijazah_tertinggi').on('change', function() {
+        validateJenjangIjazah();
         validateKelas();
+        
         // Paksa lencana indikator tab (🟢/⚠️) untuk mengecek ulang error
         if (typeof validateAllTabs === 'function') validateAllTabs();
     });
