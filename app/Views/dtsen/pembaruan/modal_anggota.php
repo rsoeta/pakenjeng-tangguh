@@ -3,8 +3,35 @@
 $roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
 $editable = ($roleId <= 4);
 ?>
+
+<style>
+    /* 🚀 RACIKAN CSS MOBILE-FIRST UNTUK LEBAR MODAL */
+
+    /* 1. Tablet (Layar Sedang) */
+    @media (min-width: 768px) {
+        .modal-dialog-custom {
+            max-width: 85% !important;
+        }
+    }
+
+    /* 2. Notebook / Laptop / Setengah Layar (Sesuai Request Jenderal) */
+    @media (min-width: 992px) {
+        .modal-dialog-custom {
+            max-width: 75% !important;
+        }
+    }
+
+    /* 3. Monitor PC Super Lebar (Mencegah melar tak wajar) */
+    @media (min-width: 1400px) {
+        .modal-dialog-custom {
+            max-width: 1200px !important;
+        }
+    }
+</style>
+
 <div class="modal fade" id="modalAnggota" tabindex="-1" aria-labelledby="modalAnggotaLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-sm-down">
+    <!-- 🚀 BUANG class modal-xl dan style inline, GANTI dengan modal-dialog-custom -->
+    <div class="modal-dialog modal-dialog-custom modal-dialog-scrollable modal-fullscreen-sm-down">
         <div class="modal-content">
             <!-- 🚀 1. TAMBAHKAN KELAS FLEXBOX PADA FORM AGAR FOOTER TERDORONG KE BAWAH -->
             <form id="formAnggota" autocomplete="off" class="d-flex flex-column w-100 h-100 overflow-hidden">
