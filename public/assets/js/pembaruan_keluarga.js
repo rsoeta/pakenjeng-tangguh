@@ -880,6 +880,7 @@ $(document).ready(function () {
         let isValid = true;
 
         // 1) Sikat bersih huruf/simbol pada field Nomor (Hanya sisakan angka)
+        // 🚀 Aman: Jika NIK kosong, fungsi replace ini tidak akan error
         ['#keluarga_no_kk', '#nik_kepala_keluarga', '#kode_pos'].forEach(selector => {
             const el = form.find(selector);
             if (el.length) {
@@ -888,17 +889,15 @@ $(document).ready(function () {
         });
 
         // 2) Periksa SEMUA field wajib (.required atau ber-atribut required)
+        // 🚀 Aman: Karena 'required' sudah dihapus di HTML Kepala Keluarga, loop ini akan melewatinya
         form.find('.required, [required]').each(function() {
-            if (!$(this).val() || String($(this).val()).trim() === '') {
-                $(this).addClass('is-invalid');
-                if ($(this).hasClass('select2-hidden-accessible')) {
-                    $(this).next('.select2-container').find('.select2-selection').addClass('border-danger');
+            if (!$(this).val() || String($(this).val()).trim() === '') {$(this).addClass('is-invalid');
+                if ($(this).hasClass('select2-hidden-accessible')) {$(this).next('.select2-container').find('.select2-selection').addClass('border-danger');
                 }
                 isValid = false;
             } else {
                 $(this).removeClass('is-invalid');
-                if ($(this).hasClass('select2-hidden-accessible')) {
-                    $(this).next('.select2-container').find('.select2-selection').removeClass('border-danger');
+                if ($(this).hasClass('select2-hidden-accessible')) {$(this).next('.select2-container').find('.select2-selection').removeClass('border-danger');
                 }
             }
         });
@@ -922,7 +921,7 @@ $(document).ready(function () {
             Swal.fire({
                 icon: 'warning',
                 title: 'Isian Belum Lengkap',
-                text: 'Terdapat isian wajib (seperti Wilayah Capil atau Identitas) yang masih kosong. Silakan lengkapi kotak yang bergaris merah.',
+                text: 'Terdapat isian wajib (seperti Wilayah Capil) yang masih kosong. Silakan lengkapi kotak yang bergaris merah.',
                 confirmButtonText: 'Periksa Kembali'
             });
             return;

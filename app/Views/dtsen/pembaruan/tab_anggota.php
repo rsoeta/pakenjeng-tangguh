@@ -417,6 +417,23 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             const form = $(this);
             let errorMessage = 'Pastikan kolom wajib terisi dan NIK/No KK terdiri dari 16 digit.';
 
+            // 🚀 CEGAH DUPLIKASI KEPALA KELUARGA
+            let hubunganDipilih = $('#hubungan option:selected').text().toLowerCase();
+            let nikDiketik = $('#nik').val();
+
+            if (hubunganDipilih === 'kepala keluarga') {
+                // Jika user memilih SHDK Kepala Keluarga, cek apakah NIK Kepala Keluarga sudah ada
+                // (Gunakan var window.nikKepalaKeluargaAktif yang kita set di drawCallback)
+                if (window.nikKepalaKeluargaAktif && window.nikKepalaKeluargaAktif !== nikDiketik) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Dilarang Duplikat!',
+                        text: 'Dalam 1 rumah tangga tidak boleh ada lebih dari 1 Kepala Keluarga. Silakan pilih status hubungan lain, atau ubah/hapus Kepala Keluarga sebelumnya terlebih dahulu.'
+                    });
+                    return; // ⛔ Hentikan proses simpan!
+                }
+            }
+
             // 1. Cek semua input yang wajib diisi (Required)
             // 🚀 PERBAIKAN: Tambahkan filter :not(:disabled) agar elemen yang dikunci tidak dirazia!
             form.find('.required:not(:disabled)').each(function() {
@@ -1007,6 +1024,38 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     let totalAnggota = this.api().rows().count(); // Hitung jumlah data asli di dalam API DataTables
                     if (typeof window.updateJumlahAnggotaOtomatis === 'function') {
                         window.updateJumlahAnggotaOtomatis(totalAnggota);
+                    }
+
+                    // 🚀 SMART SYNC KEPALA KELUARGA: Cari NIK & Nama Kepala Keluarga lalu tembak ke Tab Keluarga
+                    let dtApi = this.api();
+                    let kepalaDitemukan = false;
+
+                    dtApi.rows().every(function() {
+                        let data = this.data();
+
+                        // Periksa apakah hubungan keluarga berbunyi "Kepala Keluarga" (Hati-hati, huruf besar/kecil berpengaruh)
+                        let hubungan = (data.hubungan_keluarga_label || data.jenis_shdk || data.hubungan_keluarga || '').toLowerCase();
+
+                        if (hubungan === 'kepala keluarga') {
+                            kepalaDitemukan = true;
+
+                            // Tembakkan ke input di Tab Keluarga
+                            $('#kepala_keluarga').val(data.nama ? data.nama.toUpperCase() : '');
+                            $('#nik_kepala_keluarga').val(data.nik || '');
+
+                            // Matikan peringatan merah jika sebelumnya sempat merah
+                            $('#kepala_keluarga, #nik_kepala_keluarga').removeClass('is-invalid');
+
+                            // 🚀 SIMPAN NIK KEPALA KELUARGA DI MEMORI WINDOW UNTUK CEGAH DUPLIKAT
+                            window.nikKepalaKeluargaAktif = data.nik;
+                        }
+                    });
+
+                    // Jika Kepala Keluarga terhapus (kosong), bersihkan juga form di Tab Keluarga
+                    if (!kepalaDitemukan) {
+                        $('#kepala_keluarga').val('');
+                        $('#nik_kepala_keluarga').val('');
+                        window.nikKepalaKeluargaAktif = null;
                     }
                 },
                 columns: [{

@@ -61,33 +61,32 @@ if (empty($wil['provinsi']) && !empty($rtData['kode_desa'])) {
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <label for="keluarga_no_kk" class="form-label fw-semibold">Nomor KK <span class="text-danger">*</span></label>
-                        <!-- 🚀 TAMBAHKAN has-validation -->
                         <div class="input-group has-validation">
-                            <!-- 🚀 TAMBAHKAN inputmode="numeric" dan pattern -->
                             <input type="text" class="form-control onlynum16" id="keluarga_no_kk" name="no_kk" value="<?= esc($perumahan['no_kk'] ?? '') ?>" <?= $disabled ?> maxlength="16" minlength="16" inputmode="numeric" pattern="[0-9]*" required>
                             <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#keluarga_no_kk" title="Salin Nomor KK"><i class="fas fa-copy"></i></button>
                             <div class="invalid-feedback small fw-bold w-100">Nomor KK harus tepat 16 digit angka.</div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label for="kepala_keluarga" class="form-label fw-semibold">Kepala Keluarga <span class="text-danger">*</span></label>
+                        <label for="kepala_keluarga" class="form-label fw-semibold">Kepala Keluarga</label>
                         <div class="input-group">
-                            <input type="text" class="form-control upper" id="kepala_keluarga" name="kepala_keluarga" value="<?= esc($perumahan['kepala_keluarga'] ?? '') ?>" <?= $disabled ?> required>
+                            <!-- 🚀 HAPUS atribut required -->
+                            <input type="text" class="form-control upper bg-light" id="kepala_keluarga" name="kepala_keluarga" value="<?= esc($perumahan['kepala_keluarga'] ?? '') ?>" <?= $disabled ?> readonly tabindex="-1" placeholder="Otomatis dari Tab Anggota">
                             <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#kepala_keluarga" title="Salin Kepala Keluarga"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-semibold text-primary">NIK Kepala Keluarga <span class="text-danger">*</span></label>
-                        <!-- 🚀 TAMBAHKAN has-validation -->
+                        <label class="form-label fw-semibold text-primary">NIK Kepala Keluarga</label>
                         <div class="input-group has-validation">
-                            <!-- 🚀 TAMBAHKAN inputmode="numeric" dan pattern -->
-                            <input type="text" class="form-control onlynum16 border-primary" id="nik_kepala_keluarga" name="nik_kepala_keluarga" value="<?= esc($perumahan['nik_kepala_keluarga'] ?? '') ?>" <?= $disabled ?> maxlength="16" minlength="16" inputmode="numeric" pattern="[0-9]*" placeholder="Ketik NIK 16 digit..." required>
+                            <!-- 🚀 HAPUS atribut required -->
+                            <input type="text" class="form-control onlynum16 border-primary bg-light" id="nik_kepala_keluarga" name="nik_kepala_keluarga" value="<?= esc($perumahan['nik_kepala_keluarga'] ?? '') ?>" <?= $disabled ?> maxlength="16" inputmode="numeric" pattern="[0-9]*" placeholder="Otomatis dari Tab Anggota" readonly tabindex="-1">
                             <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#nik_kepala_keluarga" title="Salin NIK"><i class="fas fa-copy"></i></button>
                             <div class="invalid-feedback small fw-bold w-100">NIK harus tepat 16 digit angka.</div>
                         </div>
                     </div>
                 </div>
 
+                <!-- 🚀 BUKA BARIS BARU DENGAN BENAR (Karena 12 Kolom sudah penuh di atas: 4 + 4 + 4) -->
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <label class="form-label fw-semibold text-primary">Jumlah Anggota Keluarga</label>
