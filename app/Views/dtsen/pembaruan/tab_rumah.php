@@ -969,8 +969,18 @@ $se   = $payload['sosial_ekonomi'] ?? [];
 
         // ============ KELENGKAPAN CHECK ============
         const requiredSelects = ['#luas_lantai', '#jenis_lantai', '#jenis_atap', '#bahan_bakar', '#sumber_air'];
-        // 🚀 BUG FIX: Tambahkan jenis_bangunan dan is_tinggal_bersama ke radar wajib
-        const requiredRadios = ['jenis_bangunan', 'is_tinggal_bersama', 'status_kepemilikan', 'sumber_listrik', 'fasilitas_bab'];
+
+        // 🚀 BUG FIX: Tambahkan 3 elemen Sanitasi yang tertinggal agar dicek ketat oleh Gatekeeper!
+        const requiredRadios = [
+            'jenis_bangunan',
+            'is_tinggal_bersama',
+            'status_kepemilikan',
+            'sumber_listrik',
+            'fasilitas_bab',
+            'jenis_kloset',
+            'pembuangan_tinja',
+            'jarak_air_ke_limbah'
+        ];
 
         function checkKelengkapanRumah() {
             let missing = [];
@@ -981,8 +991,15 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                 if (!el || el.value === null || el.value === '' || el.value === '0') missing.push(sel);
             });
 
-            // Cek Radio Buttons
+            // Cek Radio Buttons Dasar
             requiredRadios.forEach(name => {
+                // 🚀 PENGECUALIAN CERDAS SANITASI: Jika "Tidak ada fasilitas", JANGAN cari Kloset, Tinja & Jarak!
+                if ($('input[name="fasilitas_bab"]:checked').val() === 'Tidak ada fasilitas') {
+                    if (['jenis_kloset', 'pembuangan_tinja', 'jarak_air_ke_limbah'].includes(name)) {
+                        return; // Lewati pengecekan untuk 3 elemen ini
+                    }
+                }
+
                 if (!$(`input[name="${name}"]:checked`).val()) missing.push(name);
             });
 

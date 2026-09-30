@@ -170,7 +170,7 @@ if (empty($wil['provinsi']) && !empty($rtData['kode_desa'])) {
                     <div class="col-md-6">
                         <label class="form-label fw-semibold text-primary">Nomor Rumah</label>
                         <div class="input-group">
-                            <input type="text" class="form-control upper border-primary" id="nomor_rumah" name="nomor_rumah" value="<?= esc($perumahan['nomor_rumah'] ?? '') ?>" <?= $disabled ?> placeholder="Contoh: 12A" required>
+                            <input type="text" class="form-control upper border-primary" id="nomor_rumah" name="nomor_rumah" value="<?= esc($perumahan['nomor_rumah'] ?? '000') ?>" <?= $disabled ?> placeholder="Contoh: 12A" required>
                             <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#nomor_rumah" title="Salin Nomor Rumah"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
@@ -187,7 +187,7 @@ if (empty($wil['provinsi']) && !empty($rtData['kode_desa'])) {
                     <div class="col-md-4">
                         <label class="form-label fw-semibold text-primary">Kode Pos</label>
                         <div class="input-group">
-                            <input type="text" class="form-control onlynum border-primary" id="kode_pos" name="kode_pos" value="<?= esc($perumahan['kode_pos'] ?? '') ?>" <?= $disabled ?> maxlength="5" placeholder="5 Digit Kode Pos" required>
+                            <input type="text" class="form-control onlynum border-primary" id="kode_pos" name="kode_pos" value="<?= esc($perumahan['kode_pos'] ?? '44164') ?>" <?= $disabled ?> maxlength="5" placeholder="5 Digit Kode Pos" required>
                             <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#kode_pos" title="Salin Kode Pos"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
