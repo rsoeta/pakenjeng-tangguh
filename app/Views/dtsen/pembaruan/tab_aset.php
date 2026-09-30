@@ -72,8 +72,9 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                                     <label class="form-label text-primary fw-semibold"><?= esc($label) ?></label>
 
                                     <!-- Tambahkan ID di sini -->
+                                    <!-- 🚀 PEMBERSIH LEADING ZERO: Gunakan (int) agar '01' menjadi '1' -->
                                     <input type="number" min="0" class="form-control form-control-sm border-primary"
-                                        name="<?= $name ?>" id="<?= $name ?>" value="<?= esc($aset[$name] ?? 0) ?>" <?= $disabled ?>>
+                                        name="<?= $name ?>" id="<?= $name ?>" value="<?= (int)($aset[$name] ?? 0) ?>" <?= $disabled ?>>
 
                                     <?php if ($name === 'sepeda_motor'): ?>
                                         <!-- 🚀 ELEMEN DINAMIS: Nilai Sepeda Motor -->
@@ -209,8 +210,9 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                             <?php foreach ($ternak as $label => $name): ?>
                                 <div class="col-md-4 mb-2">
                                     <label class="form-label"><?= esc("Jumlah $label") ?></label>
+                                    <!-- 🚀 PEMBERSIH LEADING ZERO: Gunakan (int) agar '01' menjadi '1' -->
                                     <input type="number" min="0" class="form-control form-control-sm"
-                                        name="<?= $name ?>" value="<?= esc($aset[$name] ?? 0) ?>" <?= $disabled ?>>
+                                        name="<?= $name ?>" value="<?= (int)($aset[$name] ?? 0) ?>" <?= $disabled ?>>
                                 </div>
                             <?php endforeach; ?>
                         </div>
