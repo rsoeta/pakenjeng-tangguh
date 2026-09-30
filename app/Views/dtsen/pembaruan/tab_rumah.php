@@ -793,9 +793,25 @@ $se   = $payload['sosial_ekonomi'] ?? [];
 
         $('#jumlah_meteran_listrik').on('input change', renderMeteranListrik);
 
-        // 🚀 GATEKEEPER DELEGASI: Untuk elemen input dinamis (hanya angka)
-        $(document).on('input', '.onlynum-dynamic', function() {
-            this.value = this.value.replace(/\D/g, '');
+        // 🚀 GATEKEEPER DELEGASI: Untuk elemen input dinamis (hanya angka) + ANTI SPAM ANGKA NOL
+        $(document).on('input blur change', '.onlynum-dynamic', function(e) {
+            let val = this.value.replace(/\D/g, '');
+            this.value = val;
+
+            // Jika isinya angka NOL SEMUA (contoh: 00000000000) -> Tembak mati!
+            if (val.length > 0 && /^0+$/.test(val)) {
+                $(this).addClass('is-invalid border-danger');
+                $(this).siblings('.invalid-feedback').text('Tidak valid! Jangan diisi angka 0 semua.');
+            }
+            // Jika kurang dari 10 digit -> Tegur
+            else if (val.length > 0 && val.length < 10) {
+                $(this).addClass('is-invalid border-danger');
+                $(this).siblings('.invalid-feedback').text('Wajib diisi 10-13 digit angka.');
+            }
+            // Aman -> Matikan alarm
+            else {
+                $(this).removeClass('is-invalid border-danger');
+            }
         });
 
         // ============ LISTRIK DYNAMIC (RADIO VERSION) ============
@@ -1041,9 +1057,10 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                     if (!$(this).val()) missing.push('daya_listrik_kosong');
                 });
 
-                // 2. 🚀 WAJIB: ID Pelanggan (Minimal 10 Digit) + Visual Error
+                // 2. 🚀 WAJIB: ID Pelanggan (Minimal 10 Digit) + ANTI SPAM NOL
                 $('.input-pelanggan').each(function() {
-                    if (!$(this).val() || $(this).val().length < 10) {
+                    let val = $(this).val();
+                    if (!val || val.length < 10 || /^0+$/.test(val)) {
                         missing.push('id_pelanggan_tidak_valid');
                         $(this).addClass('is-invalid border-danger'); // 🚀 Nyalakan Merah
                     } else {
@@ -1051,9 +1068,10 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                     }
                 });
 
-                // 3. 🚀 WAJIB: Nomor Meter (Minimal 10 Digit) + Visual Error
+                // 3. 🚀 WAJIB: Nomor Meter (Minimal 10 Digit) + ANTI SPAM NOL
                 $('.input-meter').each(function() {
-                    if (!$(this).val() || $(this).val().length < 10) {
+                    let val = $(this).val();
+                    if (!val || val.length < 10 || /^0+$/.test(val)) {
                         missing.push('nomor_meter_tidak_valid');
                         $(this).addClass('is-invalid border-danger'); // 🚀 Nyalakan Merah
                     } else {
