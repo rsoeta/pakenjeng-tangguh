@@ -17,6 +17,8 @@ class AnalisisDesil extends BaseController
 
     public function index()
     {
+        $kodeDesa = session()->get('kode_desa');
+
         // 🚀 Ambil semua label periode yang ada di database agar future-proof
         $periodes = $this->db->table('dtsen_desil_history')
             ->select('periode_label, tahun, triwulan')
@@ -25,9 +27,19 @@ class AnalisisDesil extends BaseController
             ->orderBy('triwulan', 'DESC')
             ->get()->getResultArray();
 
+        // 🚀 AMBIL DAFTAR PETUGAS DI DESA INI
+        $petugas_list = $this->db->table('dtks_users')
+            ->select('id, fullname, wilayah_tugas')
+            ->where('kode_desa', $kodeDesa)
+            ->whereIn('role_id', [4]) // Sesuaikan dengan Role ID Petugas Lapangan/Operator
+            ->where('status', 1)
+            ->orderBy('fullname', 'ASC')
+            ->get()->getResultArray();
+
         $data = [
             'title'    => 'Dashboard Analisis Perubahan Desil',
             'periodes' => $periodes,
+            'petugas_list' => $petugas_list,
         ];
 
         return view('dtsen/analisis_desil/v_analisis_desil', $data);
@@ -65,13 +77,36 @@ class AnalisisDesil extends BaseController
                 $builder->where('rt.kode_desa', $kodeDesa);
             }
 
+            // 🚀 AWAL MODIFIKASI: LOGIKA FILTER PETUGAS
+            $wilTugasUntukQuery = $wilTugas; // Default: Pakai wilayah tugas akun yang sedang login
+            $roleUntukQuery = $roleId;       // Default: Pakai role akun yang sedang login
+
+            // Jika dropdown petugas dipilih
+            if (!empty($post['petugas_id'])) {
+                // Ambil data petugas dari database
+                $petugas = $this->db->table('dtks_users')
+                    ->select('wilayah_tugas, role_id')
+                    ->where('id', $post['petugas_id'])
+                    ->get()->getRow();
+
+                if ($petugas) {
+                    // Timpa variabel wilayah tugas dan role dengan milik petugas yang dipilih!
+                    $wilTugasUntukQuery = $petugas->wilayah_tugas;
+
+                    // Kita paksa role-nya menggunakan role si petugas (bukan Admin), 
+                    // agar Trait di bawah ini benar-benar mengaktifkan WHERE IN (wilayah_tugas)-nya.
+                    $roleUntukQuery = $petugas->role_id;
+                }
+            }
+
             // 2. 🔐 IMPLEMENTASI KARANTINA WILAYAH (TRAIT)
-            // Kosongkan 'kode_desa' agar Trait tidak menumpuk WHERE rt.kode_desa
             $filterData = [
                 'kode_desa'     => '',
-                'wilayah_tugas' => trim($wilTugas ?? '')
+                'wilayah_tugas' => trim($wilTugasUntukQuery ?? '')
             ];
-            $this->applyWilayahFilter($builder, $filterData, $roleId);
+            // Trait ini sekarang akan membaca wilayah petugas yang dipilih jika ada
+            $this->applyWilayahFilter($builder, $filterData, $roleUntukQuery);
+            // 🚀 AKHIR MODIFIKASI
 
             // 3. Terapkan Filter RW / RT dari Dropdown
             if (!empty($post['rw'])) {

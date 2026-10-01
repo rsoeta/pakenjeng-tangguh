@@ -44,8 +44,32 @@
             <!-- 🎛️ FILTER PANEL DINAMIS -->
             <div class="card shadow-sm border-top-primary mb-4">
                 <div class="card-body p-3">
+                    <?php
+                    // 🚀 KUNCI KEAMANAN: Cek Role User
+                    $roleId = session()->get('role_id');
+                    $userId = session()->get('id');
+                    $isLocked = ($roleId > 3); // Jika Petugas/Operator, kunci filter!
+                    ?>
                     <div class="row g-2">
-                        <div class="col-6 col-md-3">
+                        <!-- 🚀 BARIS 1 DI MOBILE (Petugas, RW, RT = Total 12 Kolom) | GABUNG DI DESKTOP -->
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <label class="small fw-bold text-primary"><i class="fas fa-user-tie"></i> Filter Petugas</label>
+                            <!-- Tambahkan atribut disabled jika isLocked true -->
+                            <select id="filter_petugas" class="form-select select2" <?= $isLocked ? 'disabled' : '' ?>>
+                                <?php if (!$isLocked): ?>
+                                    <option value="">-- Semua Petugas --</option>
+                                <?php endif; ?>
+
+                                <?php foreach ($petugas_list ?? [] as $ptg): ?>
+                                    <?php
+                                    // Paksa select nama dia sendiri jika dilock
+                                    $selected = ($isLocked && $ptg['id'] == $userId) ? 'selected' : '';
+                                    ?>
+                                    <option value="<?= $ptg['id'] ?>" <?= $selected ?>><?= ucwords(strtolower($ptg['fullname'])) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-3 col-md-2 col-lg-2">
                             <label class="small fw-bold">RW</label>
                             <select id="filter_rw" class="form-control select2">
                                 <option value="">-- Semua --</option>
@@ -54,7 +78,7 @@
                                 <?php endfor; ?>
                             </select>
                         </div>
-                        <div class="col-6 col-md-3">
+                        <div class="col-3 col-md-2 col-lg-2">
                             <label class="small fw-bold">RT</label>
                             <select id="filter_rt" class="form-control select2">
                                 <option value="">-- Semua --</option>
@@ -63,22 +87,21 @@
                                 <?php endfor; ?>
                             </select>
                         </div>
-                        <div class="col-6 col-md-3">
+
+                        <!-- 🚀 BARIS 2 DI MOBILE (Dari, Ke = Total 12 Kolom) | LANJUT BARIS 1 DI DESKTOP -->
+                        <div class="col-6 col-md-2 col-lg-3">
                             <label class="small fw-bold">Bandingkan Dari <span class="text-danger">*</span></label>
                             <select id="periode_awal" class="form-control select2">
                                 <?php foreach ($periodes as $key => $p): ?>
-                                    <!-- 🚀 Pilih index 1 (periode sebelumnya). Jika data cuma 1, fallback ke index 0 -->
                                     <?php $isSelectedAwal = ($key == 1 || (count($periodes) == 1 && $key == 0)) ? 'selected' : ''; ?>
                                     <option value="<?= $p['periode_label'] ?>" <?= $isSelectedAwal ?>><?= $p['periode_label'] ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-
-                        <div class="col-6 col-md-3">
+                        <div class="col-6 col-md-2 col-lg-2">
                             <label class="small fw-bold">Bandingkan Ke <span class="text-danger">*</span></label>
                             <select id="periode_akhir" class="form-control select2">
                                 <?php foreach ($periodes as $key => $p): ?>
-                                    <!-- 🚀 Default selalu pilih index 0 (periode paling baru) -->
                                     <option value="<?= $p['periode_label'] ?>" <?= ($key == 0) ? 'selected' : '' ?>><?= $p['periode_label'] ?></option>
                                 <?php endforeach; ?>
                             </select>
@@ -222,6 +245,7 @@
                     d.rt = $('#filter_rt').val();
                     d.periode_awal = $('#periode_awal').val();
                     d.periode_akhir = $('#periode_akhir').val();
+                    d.petugas_id = $('#filter_petugas').val(); // 🚀 Tangkap filter petugas
                     d['<?= csrf_token() ?>'] = '<?= csrf_hash() ?>';
                 },
                 // 🚀 Tangkap Data Summary yang dikirim Controller
@@ -278,7 +302,7 @@
         });
 
         // 🚀 Trigger Auto-Reload saat Dropdown Berubah
-        $('#filter_rw, #filter_rt, #periode_awal, #periode_akhir').on('change', function() {
+        $('#filter_rw, #filter_rt, #filter_petugas, #periode_awal, #periode_akhir').on('change', function() {
             table.ajax.reload();
         });
     });
