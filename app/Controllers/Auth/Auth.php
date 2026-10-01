@@ -96,17 +96,28 @@ class Auth extends BaseController
             // === 🧩 Jika Turnstile valid (atau dilewati di dev) ===
             if ($captchaVerified) {
 
-                // Buat session login user
+                // 🚀 1. BUAT TOKEN ACAK SEBAGAI KUNCI SESI
+                $sessionToken = bin2hex(random_bytes(32));
+
+                // Buat session login user bawaan
                 $this->setUserSession($user);
 
+                // 🚀 2. INJEKSI TOKEN KE DALAM SESSION AKTIF BROWSER INI
+                session()->set('session_token', $sessionToken);
+
                 $UsersLogin = new UsersLoginModel();
+
+                // 🚀 3. TAMBAHKAN TOKEN DAN IP ADDRESS KE DATABASE
                 $data_login = [
-                    'dul_du_id' => $user['id'],
+                    'dul_du_id'         => $user['id'],
                     'dul_last_activity' => date('Y-m-d H:i:s'),
+                    'dul_ip_address'    => $this->request->getIPAddress(), // Rekam IP agar lebih aman
+                    'dul_token'         => $sessionToken // Simpan kunci untuk dicek oleh Satpam (Filter)
                 ];
 
                 $last_login_record = $UsersLogin->where('dul_du_id', $user['id'])->first();
 
+                // Logika existing: Jika sudah ada, update record yang lama
                 if (!empty($last_login_record)) {
                     $pkName = $UsersLogin->primaryKey;
                     $data_login[$pkName] = $last_login_record[$pkName];
@@ -446,124 +457,6 @@ class Auth extends BaseController
         }
     }
 
-    // public function login()
-    // {
-    //     $data = [];
-
-    //     if ($this->request->getPost()) {
-
-    //         $rules = [
-    //             'email' => 'required|min_length[6]|max_length[50]|valid_email',
-    //             'password' => 'required|min_length[6]|max_length[255]|validateUser[email,password]',
-    //         ];
-
-    //         $errors = [
-    //             'password' => [
-    //                 'validateUser' => "User atau Password tidak sesuai",
-    //             ],
-    //         ];
-
-    //         if (!$this->validate($rules, $errors)) {
-    //             session()->setFlashdata('message', [
-    //                 'type' => 'error',
-    //                 'text' => 'User atau Password tidak sesuai!'
-    //             ]);
-    //             return view('dtks/auth/login', [
-    //                 "validation" => $this->validator,
-    //                 "title" => 'Login',
-    //             ]);
-    //         }
-
-    //         $model = new AuthModel();
-    //         $user = $model->where('email', $this->request->getVar('email'))->first();
-
-    //         // === 🧩 Tambahan: Deteksi environment ===
-    //         $isDev = (ENVIRONMENT === 'development');
-
-    //         $captchaVerified = false;
-
-    //         if ($isDev) {
-    //             // 🔹 Skip reCAPTCHA di local/dev
-    //             $captchaVerified = true;
-    //         } else {
-    //             // 🔹 Verifikasi reCAPTCHA di production
-    //             $secret = '6LctvBomAAAAAF900Ud_B6iOfcKX2R9ZvAGPg2bo'; // Ganti dengan secret key milikmu
-
-    //             $credential = [
-    //                 'secret' => $secret,
-    //                 'response' => $this->request->getVar('g-recaptcha-response')
-    //             ];
-
-    //             $verify = curl_init();
-    //             curl_setopt($verify, CURLOPT_URL, "https://www.google.com/recaptcha/api/siteverify");
-    //             curl_setopt($verify, CURLOPT_POST, true);
-    //             curl_setopt($verify, CURLOPT_POSTFIELDS, http_build_query($credential));
-    //             curl_setopt($verify, CURLOPT_SSL_VERIFYPEER, false);
-    //             curl_setopt($verify, CURLOPT_RETURNTRANSFER, true);
-    //             $response = curl_exec($verify);
-    //             curl_close($verify);
-
-    //             $status = json_decode($response, true);
-    //             $captchaVerified = isset($status['success']) && $status['success'] === true;
-    //         }
-
-    //         // === 🧩 Jika reCAPTCHA valid (atau dilewati di dev) ===
-    //         if ($captchaVerified) {
-
-    //             // Buat session login user
-    //             $this->setUserSession($user);
-
-    //             $UsersLogin = new UsersLoginModel();
-    //             $data_login = [
-    //                 'dul_du_id' => $user['id'],
-    //                 'dul_last_activity' => date('Y-m-d H:i:s'),
-    //             ];
-
-    //             $last_login_record = $UsersLogin->where('dul_du_id', $user['id'])->first();
-
-    //             if (!empty($last_login_record)) {
-    //                 // Ambil nama kolom primary key dari model Anda
-    //                 $pkName = $UsersLogin->primaryKey;
-    //                 $data_login[$pkName] = $last_login_record[$pkName];
-    //             }
-
-    //             // Save akan otomatis UPDATE jika $data_login memiliki Primary Key,
-    //             // dan otomatis INSERT jika tidak memiliki Primary Key.
-    //             $UsersLogin->save($data_login);
-
-    //             // Cek status aktif
-    //             if ($user['status'] !== 1) {
-    //                 session()->setFlashdata('message', [
-    //                     'type' => 'error',
-    //                     'text' => 'User Non-Aktif, Silakan hubungi Admin!'
-    //                 ]);
-    //                 return redirect()->to('/login');
-    //             }
-
-    //             // Cek redirect URL sebelumnya
-    //             $redirectUrl = session()->get('redirectUrl');
-    //             if ($redirectUrl) {
-    //                 session()->remove('redirectUrl');
-    //                 return redirect()->to(base_url($redirectUrl));
-    //             }
-
-    //             // Default redirect ke dashboard
-    //             return redirect()->to('/dashboard');
-    //         } else {
-    //             // === reCAPTCHA gagal diverifikasi ===
-    //             session()->setFlashdata('message', [
-    //                 'type' => 'error',
-    //                 'text' => 'Verifikasi reCAPTCHA gagal. Silakan coba lagi.'
-    //             ]);
-    //             return redirect()->to('/login')->withInput();
-    //         }
-    //     }
-
-    //     // Tampilkan form login awal
-    //     $data = ['title' => 'Sign In'];
-    //     return view('dtks/auth/login', $data);
-    // }
-
     public function redirectToExternalLink($externalLink = null)
     {
         if ($externalLink) {
@@ -624,102 +517,6 @@ class Auth extends BaseController
         ];
         return view('dtks/auth/lupa-password', $data);
     }
-
-    // public function requestReset()
-    // {
-    //     helper('opdtks_helper');
-
-    //     $email = $this->request->getPost('email');
-    //     $nik   = $this->request->getPost('nik');
-
-    //     // Validasi input
-    //     if (empty($email) || empty($nik)) {
-    //         session()->setFlashdata('message', [
-    //             'type' => 'error',
-    //             'text' => 'Email dan NIK wajib diisi.'
-    //         ]);
-    //         return redirect()->back()->withInput();
-    //     }
-
-    //     $user = $this->AuthModel
-    //         ->where('email', $email)
-    //         ->where('nik', $nik)
-    //         ->first();
-
-    //     if (!$user) {
-    //         session()->setFlashdata('message', [
-    //             'type' => 'error',
-    //             'text' => 'Data tidak ditemukan.'
-    //         ]);
-    //         return redirect()->back()->withInput();
-    //     }
-
-    //     try {
-    //         // Generate token dan simpan
-    //         $token = bin2hex(random_bytes(32));
-    //         $this->AuthModel->update($user['id'], [
-    //             'reset_token'  => $token,
-    //             'reset_expiry' => date('Y-m-d H:i:s', strtotime('+1 hour'))
-    //         ]);
-
-    //         // Siapkan email
-    //         $resetLink = base_url("reset-password?token={$token}");
-    //         $subject   = 'Reset Password Anda';
-    //         $message   = "
-    //         <p>Halo, <strong>{$user['fullname']}</strong>.</p>
-    //         <p>Kami menerima permintaan untuk mereset password akun Anda.</p>
-    //         <p>Silakan klik tautan berikut untuk melanjutkan proses:</p>
-    //         <p><a href='{$resetLink}' style='background:#28a745;color:white;padding:8px 12px;border-radius:4px;text-decoration:none;'>Reset Password</a></p>
-    //         <p>Link ini berlaku selama 1 jam.</p>
-    //         <hr>
-    //         <p>Abaikan pesan ini jika Anda tidak merasa meminta reset password.</p>
-    //     ";
-
-    //         // Load config email
-    //         $emailService = \Config\Services::email();
-    //         $config = config('Email');
-    //         $emailService->initialize((array)$config);
-
-    //         $emailService->setTo($user['email']);
-    //         $emailService->setFrom($config->fromEmail, $config->fromName);
-    //         $emailService->setSubject($subject);
-    //         $emailService->setMessage($message);
-
-    //         // Kirim email
-    //         if ($emailService->send()) {
-    //             session()->setFlashdata('message', [
-    //                 'type' => 'success',
-    //                 'text' => 'Email reset password telah dikirim ke alamat Anda.'
-    //             ]);
-    //             return redirect()->to(base_url('login'));
-    //         }
-
-    //         // Jika gagal kirim
-    //         $error = $emailService->printDebugger(['headers']);
-    //         log_message('error', 'Email gagal dikirim: ' . $error);
-
-    //         // Mode dev: tampilkan isi email
-    //         if (ENVIRONMENT === 'development') {
-    //             echo "<h3>Debug Email (Mode Dev)</h3>";
-    //             echo "<pre>{$error}</pre>";
-    //             echo "<hr><h4>Isi Email:</h4>{$message}";
-    //             exit;
-    //         }
-
-    //         session()->setFlashdata('message', [
-    //             'type' => 'error',
-    //             'text' => 'Terjadi kesalahan dalam pengiriman email. Silakan hubungi admin.'
-    //         ]);
-    //         return redirect()->back();
-    //     } catch (\Throwable $e) {
-    //         log_message('error', 'requestReset() error: ' . $e->getMessage());
-    //         session()->setFlashdata('message', [
-    //             'type' => 'error',
-    //             'text' => 'Terjadi kesalahan internal. Coba lagi nanti.'
-    //         ]);
-    //         return redirect()->back();
-    //     }
-    // }
 
     public function resetPassword()
     {
@@ -787,9 +584,15 @@ class Auth extends BaseController
             'reset_expiry' => null
         ]);
 
+        // 🚀 MITIGASI KEAMANAN TINGKAT TINGGI: LOGOUT SEMUA PERANGKAT!
+        // Begitu password berhasil di-reset, hapus semua sesi aktif di dtks_users_login.
+        // Detik itu juga, penyusup yang sedang asyik menggunakan akun ini akan langsung tertendang keluar!
+        $db = \Config\Database::connect();
+        $db->table('dtks_users_login')->where('dul_du_id', $user['id'])->delete();
+
         session()->setFlashdata('message', [
             'type' => 'success',
-            'text' => 'Password berhasil diubah. Silakan login dengan password baru Anda.',
+            'text' => 'Password berhasil diubah. Keamanan dipulihkan, Anda telah dilogout dari semua perangkat. Silakan login dengan password baru Anda.',
             'context' => 'processResetPassword' // Identifikasi konteks
         ]);
 
@@ -896,5 +699,20 @@ class Auth extends BaseController
                 'message' => 'Terjadi kesalahan internal.'
             ]);
         }
+    }
+
+    public function logoutAllDevices()
+    {
+        $userId = session()->get('id');
+        $db = \Config\Database::connect();
+
+        // 🚀 SAPU BERSIH: Hapus SEMUA token milik ID ini di tabel dtks_users_login
+        // Otomatis semua perangkat yang sedang login (termasuk milik penyusup) akan tertendang!
+        $db->table('dtks_users_login')->where('dul_du_id', $userId)->delete();
+
+        // Hancurkan session di perangkat Jenderal saat ini
+        session()->destroy();
+
+        return redirect()->to('/login')->with('success', 'Keamanan dipulihkan! Anda telah berhasil logout dari SELURUH perangkat.');
     }
 }

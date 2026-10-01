@@ -102,6 +102,11 @@
                                         href="#custom-tabs-three-home" role="tab" aria-controls="custom-tabs-three-home" aria-selected="true">
                                         <strong><i class="far fa-user"></i> Personal</strong></a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="custom-tabs-three-security-tab" data-toggle="pill"
+                                        href="#custom-tabs-three-security" role="tab" aria-controls="custom-tabs-three-security" aria-selected="false">
+                                        <strong><i class="fas fa-lock text-danger"></i> Keamanan</strong></a>
+                                </li>
                                 <?php if ($user_login['role_id'] <= 3): ?>
                                     <li class="nav-item">
                                         <a class="nav-link" id="custom-tabs-three-general-tab" data-toggle="pill"
@@ -192,6 +197,59 @@
 
                                             <button type="button" id="personalUpdate" class="btn btn-success btn-block">Update</button>
                                             <!-- /.card-body -->
+                                        </form>
+                                    </div>
+                                </div>
+                                <!-- TAB KEAMANAN / UBAH PASSWORD -->
+                                <div class="tab-pane fade" id="custom-tabs-three-security" role="tabpanel" aria-labelledby="custom-tabs-three-security-tab">
+                                    <div class="col-12 col-md-6 col-lg-5">
+                                        <form id="form_update_password" method="POST">
+                                            <div class="card card-outline card-danger shadow-sm mt-3">
+                                                <div class="card-header bg-danger text-white">
+                                                    <h3 class="card-title mb-0"><strong><i class="fas fa-key me-1"></i> Ubah Password</strong></h3>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="alert alert-warning small">
+                                                        <i class="fas fa-info-circle"></i> Mengubah password akan mengeluarkan Anda (Logout) dari seluruh perangkat yang terhubung.
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Password Lama <span class="text-danger">*</span></label>
+                                                        <div class="input-group">
+                                                            <input type="password" name="old_password" id="old_password" class="form-control" placeholder="Masukkan password saat ini" required>
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="#old_password" tabindex="-1">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Password Baru <span class="text-danger">*</span></label>
+                                                        <div class="input-group">
+                                                            <input type="password" name="new_password" id="new_password" class="form-control" placeholder="Minimal 6 karakter" required minlength="6">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="#new_password" tabindex="-1">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Konfirmasi Password Baru <span class="text-danger">*</span></label>
+                                                        <div class="input-group">
+                                                            <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="Ulangi password baru" required minlength="6">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="#confirm_password" tabindex="-1">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button type="submit" id="btnUpdatePassword" class="btn btn-danger btn-block mt-4 fw-bold">
+                                                        <i class="fas fa-shield-alt"></i> Simpan & Logout Semua Perangkat
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </form>
                                     </div>
                                 </div>
@@ -561,6 +619,82 @@
                     console.error(xhr.responseText);
                 }
             });
+        });
+
+        // ==========================================
+        // 🚀 PROSES UBAH PASSWORD & FORCE LOGOUT
+        // ==========================================
+        $('#form_update_password').on('submit', function(e) {
+            e.preventDefault();
+
+            var old_pass = $('#old_password').val();
+            var new_pass = $('#new_password').val();
+            var conf_pass = $('#confirm_password').val();
+
+            if (new_pass !== conf_pass) {
+                Swal.fire('Gagal!', 'Password Baru dan Konfirmasi Password tidak cocok!', 'warning');
+                return;
+            }
+
+            var btn = $('#btnUpdatePassword');
+            var originalText = btn.html();
+            btn.html('<i class="fas fa-spinner fa-spin"></i> Memproses...').prop('disabled', true);
+
+            $.ajax({
+                url: '<?= base_url('update_password'); ?>',
+                type: 'POST',
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(res) {
+                    if (res.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: res.message,
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            timer: 3500,
+                            timerProgressBar: true
+                        }).then(() => {
+                            window.location.href = res.redirect;
+                        });
+                    } else {
+                        btn.html(originalText).prop('disabled', false);
+                        Swal.fire('Gagal!', res.message, 'error');
+                    }
+                },
+                error: function() {
+                    btn.html(originalText).prop('disabled', false);
+                    Swal.fire('Error!', 'Terjadi kesalahan komunikasi dengan server.', 'error');
+                }
+            });
+        });
+
+        // ==========================================
+        // 🚀 TOGGLE SHOW/HIDE PASSWORD (INTERAKTIF)
+        // ==========================================
+        $('.toggle-password').on('click', function() {
+            var targetSelector = $(this).data('target');
+            var targetInput = $(targetSelector);
+
+            // Selector ini lebih aman, mendukung tag <i> maupun <svg> bawaan FontAwesome
+            var icon = $(this).find('.fas, .far, svg');
+
+            if (targetInput.attr('type') === 'password') {
+                // Tampilkan Password
+                targetInput.attr('type', 'text');
+
+                // Ganti icon ke mata dicoret & beri efek warna biru/primary
+                icon.removeClass('fa-eye').addClass('fa-eye-slash text-primary');
+                $(this).addClass('border-primary bg-light');
+            } else {
+                // Sembunyikan Password
+                targetInput.attr('type', 'password');
+
+                // Kembalikan ke mata terbuka & hapus efek warna
+                icon.removeClass('fa-eye-slash text-primary').addClass('fa-eye');
+                $(this).removeClass('border-primary bg-light');
+            }
         });
 
     });

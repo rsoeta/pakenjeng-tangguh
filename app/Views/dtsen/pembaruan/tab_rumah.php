@@ -107,13 +107,13 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                         <!-- Perubahan Label & Tooltip -->
                         <label class="form-label text-primary mb-1">Berapa Jml KK Lainnya?</label>
                         <input type="number" name="jumlah_kk_dalam_rumah" id="jumlah_kk_dalam_rumah" class="form-control border-primary" value="<?= esc($kond['jumlah_kk_dalam_rumah'] ?? '') ?>" <?= $readonly ?> placeholder="Cth: 1" min="1">
-                        <small class="text-danger fw-bold d-block mt-1" style="font-size: 0.7rem;">*Jangan hitung KK yang sedang didata!</small>
+                        <small class="text-black fw-bold d-block mt-1" style="font-size: 0.7rem;">*Jangan hitung KK yang sedang didata!</small>
                     </div>
 
                     <!-- 🚀 ELEMEN DINAMIS: List Input Nomor KK -->
                     <div class="col-md-12 mt-2" id="div_list_kk_lainnya" style="display: none;">
-                        <div class="p-3 bg-light border border-danger border-opacity-50 rounded">
-                            <label class="form-label text-danger mb-3">
+                        <div class="p-3 bg-light border border-black border-opacity-50 rounded">
+                            <label class="form-label text-black mb-3">
                                 <i class="fas fa-exclamation-triangle me-1"></i> Masukkan 16-Digit No. KK keluarga <b>TAMBAHAN</b> tersebut. <br>
                                 <span class="text-muted small fw-normal ms-4">Dilarang memasukkan No. KK utama yang sedang didata saat ini!</span>
                             </label>

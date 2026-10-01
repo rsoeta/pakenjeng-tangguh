@@ -196,4 +196,52 @@ class Profil_User extends BaseController
         $data = $this->LembagaModel->updatelembagaData($lp_id, $lembagaData);
         echo json_encode($data);
     }
+
+    public function update_password()
+    {
+        if ($this->request->isAJAX()) {
+            $id_user = session()->get('id');
+            $old_password = $this->request->getPost('old_password');
+            $new_password = $this->request->getPost('new_password');
+            $confirm_password = $this->request->getPost('confirm_password');
+
+            // 1. Validasi Input Dasar
+            if (empty($old_password) || empty($new_password) || empty($confirm_password)) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Semua kolom wajib diisi!']);
+            }
+
+            if ($new_password !== $confirm_password) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Password Baru dan Konfirmasi tidak sama!']);
+            }
+
+            if (strlen($new_password) < 6) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Password minimal terdiri dari 6 karakter!']);
+            }
+
+            // 2. Verifikasi Password Lama
+            $user = $this->AuthModel->find($id_user);
+            if (!password_verify($old_password, $user['password'])) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Password Lama Anda salah!']);
+            }
+
+            // 3. Update Password ke Database
+            $this->AuthModel->update($id_user, [
+                'password' => password_hash($new_password, PASSWORD_DEFAULT)
+            ]);
+
+            // 🚀 4. MITIGASI KEAMANAN TINGKAT TINGGI: FORCE LOGOUT
+            // Hapus semua sesi dari perangkat manapun untuk user ini
+            $db = \Config\Database::connect();
+            $db->table('dtks_users_login')->where('dul_du_id', $id_user)->delete();
+
+            // Hancurkan session Jenderal saat ini agar langsung terlempar ke halaman login
+            session()->destroy();
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Password berhasil diubah. Keamanan dipulihkan, sistem akan mengeluarkan Anda dari semua perangkat.',
+                'redirect' => base_url('login')
+            ]);
+        }
+    }
 }

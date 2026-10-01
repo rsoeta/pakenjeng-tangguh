@@ -78,7 +78,7 @@ $routes->get('pages', 'Auth\Pages::index', [
 
 $routes->get('getNilaiJumlah', 'Auth\Pages::getNilaiJumlah');
 
-$routes->get('logout', 'Auth\Auth::logout');
+$routes->get('logout', 'Auth\Auth::logoutAllDevices');
 
 $routes->get('redirect', 'Auth\Auth::redirectToExternalLink');
 
@@ -810,6 +810,7 @@ $routes->match(['GET', 'POST'], 'profil_user', 'Profil\Profil_User::index', ['fi
 $routes->post('update_user', 'Profil\Profil_User::update_user', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('submit_lembaga', 'Profil\Profil_User::submit_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('update_lembaga', 'Profil\Profil_User::update_lembaga', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
+$routes->post('update_password', 'Profil\Profil_User::update_password', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
 /**
  * =========================================================================
