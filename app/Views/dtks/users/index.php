@@ -163,14 +163,12 @@
                                     <th>NO</th>
                                     <th>NAMA LENGKAP</th>
                                     <th>WILAYAH AKTIF</th>
-                                    <th>NAMA DESA</th>
                                     <th>NO. RW</th>
                                     <th>NIK</th>
                                     <th>EMAIL</th>
                                     <th>NO. HP</th>
                                     <th>LEVEL</th>
                                     <th>USER IMAGE</th>
-                                    <th>DIBUAT PADA</th>
                                     <th>STATUS</th>
                                     <th>#</th>
                                 </tr>
@@ -182,7 +180,6 @@
                                         <td scope="row"><?= $i; ?></td>
                                         <td><?= $row['fullname']; ?></td>
                                         <td><?= tampilWilayahHumanis($row['wilayah_tugas']); ?></td>
-                                        <td><?= $row['nama_desa']; ?></td>
                                         <td><?= $row['level']; ?></td>
                                         <td><?= $row['nik']; ?></td>
                                         <td><?= $row['email']; ?></td>
@@ -209,17 +206,17 @@
                                             <?php } ?>
                                         </td>
                                         <td><a href="<?= Foto_Profil($row['user_image'], 'profil'); ?>" data-lightbox="<?= $row['fullname']; ?>" data-title="<?= $row['fullname']; ?>"><img src="<?= Foto_Profil($row['user_image'], 'profil'); ?>" alt="" style="border: 2px solid #ddd; border-radius: 5px; padding: 1px; width: 30px;"></a></td>
-                                        <td><?= $row['created_at']; ?></td>
                                         <td>
-                                            <?php $status = $row['status'] ?>
-                                            <?php if ($status == 1) { ?>
-                                                <a href="/update_status/<?php echo $row['id']; ?>/<?php echo $row['status']; ?>" class="btn btn-warning btn-sm rounded-pill">Active</a>
-                                                <!-- In these as we are creating an attribute and passing the values -->
-                                            <?php } else { ?>
-                                                <a href="/update_status/<?php echo $row['id']; ?>/<?php echo $row['status']; ?>" class="btn btn-dark btn-sm rounded-pill">Inactive</a>
-                                            <?php } ?>
+                                            <!-- 🚀 TOMBOL STATUS AJAX -->
+                                            <button type="button"
+                                                class="btn <?= ($row['status'] == 1) ? 'btn-warning' : 'btn-dark' ?> btn-sm rounded-pill btnToggleStatus shadow-sm"
+                                                data-id="<?= $row['id'] ?>"
+                                                data-status="<?= $row['status'] ?>">
+                                                <?= ($row['status'] == 1) ? 'Active' : 'Inactive' ?>
+                                            </button>
+
                                             <!-- tampilkan tombol reset -->
-                                            <button class="btn btn-info btn-sm rounded-pill" onclick="requestReset('<?= $row['id']; ?>')">
+                                            <button class="btn btn-info btn-sm rounded-pill shadow-sm" onclick="requestReset('<?= $row['id']; ?>')">
                                                 Reset Password
                                             </button>
                                         </td>
@@ -489,9 +486,14 @@
             let filterStatus = $('#filterStatus').val().toLowerCase();
             let filterRW = $('#filterRW').val().toLowerCase();
 
-            let roleText = data[8].toLowerCase();
-            let statusText = $(table.row(dataIndex).node()).find('td:eq(11) a').text().trim().toLowerCase();
-            let rwText = data[4].toLowerCase();
+            // 🚀 PERBAIKAN 1: Sesuaikan Index dengan struktur <th> HTML yang baru
+            let rwText = data[3].toLowerCase(); // NO. RW sekarang di index 3
+            let roleText = data[7].toLowerCase(); // LEVEL sekarang di index 7
+
+            // 🚀 PERBAIKAN 2: Selector Anti-Badai
+            // Daripada pakai urutan td:eq(11) yang rentan rusak jika kolom digeser,
+            // kita langsung cari elemen yang punya class .btnToggleStatus di baris tersebut.
+            let statusText = $(table.row(dataIndex).node()).find('.btnToggleStatus').text().trim().toLowerCase();
 
             if (filterStatus && filterStatus !== statusText) return false;
             if (filterRW && !rwText.includes(filterRW)) return false;
@@ -540,6 +542,76 @@
             'maxWidth': 800,
             'maxHeight': 800,
         })
+
+
+        // #kecamatan disable false on submit
+        $('#formTambahUser').click(function(e) {
+            e.preventDefault();
+            $('#kecamatan').prop('disabled', false);
+            $('#mainform').submit();
+        });
+
+        // ==========================================
+        // 🚀 EKSEKUTOR UBAH STATUS TANPA RELOAD
+        // ==========================================
+        $(document).on('click', '.btnToggleStatus', function(e) {
+            e.preventDefault();
+            let btn = $(this);
+            let uid = btn.data('id');
+            let ustatus = btn.data('status');
+
+            // Efek Loading di Tombol
+            let originalText = btn.text();
+            btn.html('<i class="fas fa-spinner fa-spin"></i>').prop('disabled', true);
+
+            $.ajax({
+                url: "<?= base_url('update_status') ?>/" + uid + "/" + ustatus,
+                type: 'GET', // Karena route match GET & POST
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }, // Paksa sebagai AJAX
+                dataType: 'json',
+                success: function(res) {
+                    if (res.status === 'success') {
+                        // 🚀 UPDATE DOM TOMBOL SECARA REALTIME
+                        if (res.new_status == 1) {
+                            btn.removeClass('btn-dark').addClass('btn-warning')
+                                .text('Active')
+                                .data('status', 1); // Update data-status untuk klik berikutnya
+                        } else {
+                            btn.removeClass('btn-warning').addClass('btn-dark')
+                                .text('Inactive')
+                                .data('status', 0);
+                        }
+
+                        // Tampilkan Notifikasi Toast
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: res.message,
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+
+                        // 🚀 PERINTAH SAKTI: Suruh DataTables menggambar ulang (re-filter) tanpa mereset halaman
+                        $('#tabelUser').DataTable().draw(false);
+
+                    } else {
+                        btn.html(originalText);
+                        Swal.fire('Gagal!', res.message, 'error');
+                    }
+                },
+                error: function() {
+                    btn.html(originalText);
+                    Swal.fire('Error!', 'Terjadi kesalahan jaringan atau server.', 'error');
+                },
+                complete: function() {
+                    btn.prop('disabled', false);
+                }
+            });
+        });
+
     });
 
     function hapus(id, fullname) {
@@ -581,31 +653,20 @@
         });
     }
 
-    $('document').ready(function() {
-        var pwd1 = $("#password1");
-        var pwd2 = $("#password2");
-        $('#checkbox').click(function() {
-            if (pwd1.attr('type') === "password" && pwd2.attr('type') === "password") {
-                pwd1.attr('type', 'text') && pwd2.attr('type', 'text');
-            } else {
-                pwd1.attr('type', 'password') && pwd2.attr('type', 'password');
-            }
-        });
-
-        if ($('#countdown').length) {
-            start_countdown();
+    var pwd1 = $("#password1");
+    var pwd2 = $("#password2");
+    $('#checkbox').click(function() {
+        if (pwd1.attr('type') === "password" && pwd2.attr('type') === "password") {
+            pwd1.attr('type', 'text') && pwd2.attr('type', 'text');
+        } else {
+            pwd1.attr('type', 'password') && pwd2.attr('type', 'password');
         }
-
-        // #kecamatan disable false on submit
-        $('#formTambahUser').click(function(e) {
-            e.preventDefault();
-            $('#kecamatan').prop('disabled', false);
-            $('#mainform').submit();
-        });
     });
-</script>
 
-<script>
+    if ($('#countdown').length) {
+        start_countdown();
+    }
+
     function requestReset(userId) {
         Swal.fire({
             title: "Kirim Reset Password?",

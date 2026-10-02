@@ -302,13 +302,45 @@ class Users extends BaseController
         }
     }
 
+    // public function update_status($uid, $ustatus)
+    // {
+    //     // if (null !== ($this->request->getVar('ustatus'))) {
+    //     $model = new UsersModel();
+    //     $updated_status = $model->update_status($uid, $ustatus);
+    //     $session = session();
+
+    //     if ($updated_status > 0) {
+    //         $session->setFlashdata('success', 'Status berhasil diubah');
+    //     } else {
+    //         $session->setFlashdata('danger', 'Status gagal diubah');
+    //     }
+    //     return redirect()->to('/users');
+    // }
     public function update_status($uid, $ustatus)
     {
-        // if (null !== ($this->request->getVar('ustatus'))) {
         $model = new UsersModel();
         $updated_status = $model->update_status($uid, $ustatus);
-        $session = session();
 
+        // 🚀 CEK JIKA REQUEST BERASAL DARI AJAX
+        if ($this->request->isAJAX()) {
+            if ($updated_status > 0) {
+                // Logika flip status: Jika tadinya 1 jadi 0, jika 0 jadi 1
+                $new_status = ($ustatus == 1) ? 0 : 1;
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'message' => 'Status user berhasil diperbarui!',
+                    'new_status' => $new_status
+                ]);
+            } else {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Gagal mengubah status user.'
+                ]);
+            }
+        }
+
+        // 🛡️ Fallback lama jika akses manual tanpa AJAX (untuk kompatibilitas)
+        $session = session();
         if ($updated_status > 0) {
             $session->setFlashdata('success', 'Status berhasil diubah');
         } else {
