@@ -36,6 +36,53 @@ class ReminderMonitor extends BaseController
     /**
      * DataTables AJAX list (GET)
      */
+    // public function listAjax()
+    // {
+    //     $request = $this->request;
+    //     $params = $request->getGet();
+
+    //     // basic query
+    //     $builder = $this->db->table('dtsen_kk_reminder_log r')
+    //         ->select('r.id, r.kk_id, r.admin_id, r.due_date, r.status, r.sent_at, kk.no_kk, kk.kepala_keluarga, u.fullname as admin_name, u.nope')
+    //         ->join('dtsen_kk kk', 'kk.id_kk = r.kk_id', 'left')
+    //         ->join('dtks_users u', 'u.id = r.admin_id', 'left');
+
+    //     // filters
+    //     if (!empty($params['status'])) {
+    //         $builder->where('r.status', $params['status']);
+    //     }
+
+    //     if (!empty($params['q'])) {
+    //         $q = trim($params['q']);
+    //         $builder->groupStart()
+    //             ->like('kk.no_kk', $q)
+    //             ->orLike('kk.kepala_keluarga', $q)
+    //             ->orLike('u.fullname', $q)
+    //             ->groupEnd();
+    //     }
+
+    //     // simple pagination for DataTables client-side processing
+    //     $data = $builder->orderBy('r.due_date', 'ASC')->get()->getResultArray();
+
+    //     // format response for DataTables (client-side)
+    //     $rows = [];
+    //     foreach ($data as $r) {
+    //         $rows[] = [
+    //             'id' => $r['id'],
+    //             'no_kk' => $r['no_kk'],
+    //             'nama_kk' => $r['kepala_keluarga'],
+    //             'admin' => $r['admin_name'],
+    //             'nope' => $r['nope'],
+    //             'due_date' => $r['due_date'],
+    //             'status' => $r['status'],
+    //             'sent_at' => $r['sent_at']
+    //         ];
+    //     }
+
+    //     return $this->response->setJSON([
+    //         'data' => $rows
+    //     ]);
+    // }
     public function listAjax()
     {
         $request = $this->request;
@@ -46,6 +93,12 @@ class ReminderMonitor extends BaseController
             ->select('r.id, r.kk_id, r.admin_id, r.due_date, r.status, r.sent_at, kk.no_kk, kk.kepala_keluarga, u.fullname as admin_name, u.nope')
             ->join('dtsen_kk kk', 'kk.id_kk = r.kk_id', 'left')
             ->join('dtks_users u', 'u.id = r.admin_id', 'left');
+
+        // 🚀 FILTER TANGGAL (Berdasarkan due_date)
+        if (!empty($params['start_date']) && !empty($params['end_date'])) {
+            $builder->where('DATE(r.due_date) >=', $params['start_date'])
+                ->where('DATE(r.due_date) <=', $params['end_date']);
+        }
 
         // filters
         if (!empty($params['status'])) {
@@ -81,6 +134,66 @@ class ReminderMonitor extends BaseController
 
         return $this->response->setJSON([
             'data' => $rows
+        ]);
+    }
+
+    public function summary()
+    {
+        $db = \Config\Database::connect();
+        $adminId = session()->get('id');
+        $request = $this->request;
+
+        // Tangkap parameter filter tanggal
+        $startDate = $request->getGet('start_date');
+        $endDate   = $request->getGet('end_date');
+
+        $now = date('Y-m-d H:i:s');
+        $todayStart = date('Y-m-d 00:00:00');
+        $todayEnd   = date('Y-m-d 23:59:59');
+        $nextHour   = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+        // Total Pending
+        $pending = $db->table('dtsen_kk_reminder_log')->where('admin_id', $adminId)->where('status', 'pending')->countAllResults();
+
+        // Sent Today
+        $sentToday = $db->table('dtsen_kk_reminder_log')->where('admin_id', $adminId)->where('status', 'sent')
+            ->where('sent_at >=', $todayStart)->where('sent_at <=', $todayEnd)->countAllResults();
+
+        // Failed
+        $failed = $db->table('dtsen_kk_reminder_log')->where('admin_id', $adminId)->where('status', 'failed')->countAllResults();
+
+        // Due Next 1 Hour
+        $dueNextHour = $db->table('dtsen_kk_reminder_log')->where('admin_id', $adminId)->where('status', 'pending')
+            ->where('due_date >=', $now)->where('due_date <=', $nextHour)->countAllResults();
+
+        // 🚀 HITUNG TOTAL KK YANG MASUK RADAR REMINDER
+        $builderKK = $db->table('dtsen_kk_reminder_log r')
+            ->select('COUNT(DISTINCT r.kk_id) as total_kk')
+            ->where('r.admin_id', $adminId);
+
+        // 🚀 HITUNG TOTAL JIWA (ART) DARI KK YANG MASUK RADAR REMINDER
+        $builderART = $db->table('dtsen_kk_reminder_log r')
+            ->select('COUNT(DISTINCT a.id_art) as total_art')
+            ->join('dtsen_art a', 'a.id_kk = r.kk_id', 'inner')
+            ->where('r.admin_id', $adminId)
+            ->where('a.deleted_at IS NULL');
+
+        // Jika filter tanggal diaktifkan, aplikasikan ke perhitungan KK dan ART
+        if (!empty($startDate) && !empty($endDate)) {
+            $builderKK->where('DATE(r.due_date) >=', $startDate)->where('DATE(r.due_date) <=', $endDate);
+            $builderART->where('DATE(r.due_date) >=', $startDate)->where('DATE(r.due_date) <=', $endDate);
+        }
+
+        $rowKK = $builderKK->get()->getRow();
+        $rowART = $builderART->get()->getRow();
+
+        return $this->response->setJSON([
+            'pending'       => $pending,
+            'sent_today'    => $sentToday,
+            'failed'        => $failed,
+            'due_next_hour' => $dueNextHour,
+            'total_kk'      => $rowKK ? $rowKK->total_kk : 0,
+            'total_art'     => $rowART ? $rowART->total_art : 0,
         ]);
     }
 
@@ -162,49 +275,49 @@ class ReminderMonitor extends BaseController
         return $template;
     }
 
-    public function summary()
-    {
-        $db = \Config\Database::connect();
-        $adminId = session()->get('id');
+    // public function summary()
+    // {
+    //     $db = \Config\Database::connect();
+    //     $adminId = session()->get('id');
 
-        $now = date('Y-m-d H:i:s');
-        $todayStart = date('Y-m-d 00:00:00');
-        $todayEnd   = date('Y-m-d 23:59:59');
-        $nextHour   = date('Y-m-d H:i:s', strtotime('+1 hour'));
+    //     $now = date('Y-m-d H:i:s');
+    //     $todayStart = date('Y-m-d 00:00:00');
+    //     $todayEnd   = date('Y-m-d 23:59:59');
+    //     $nextHour   = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
-        // Total Pending
-        $pending = $db->table('dtsen_kk_reminder_log')
-            ->where('admin_id', $adminId)
-            ->where('status', 'pending')
-            ->countAllResults();
+    //     // Total Pending
+    //     $pending = $db->table('dtsen_kk_reminder_log')
+    //         ->where('admin_id', $adminId)
+    //         ->where('status', 'pending')
+    //         ->countAllResults();
 
-        // Sent Today
-        $sentToday = $db->table('dtsen_kk_reminder_log')
-            ->where('admin_id', $adminId)
-            ->where('status', 'sent')
-            ->where('sent_at >=', $todayStart)
-            ->where('sent_at <=', $todayEnd)
-            ->countAllResults();
+    //     // Sent Today
+    //     $sentToday = $db->table('dtsen_kk_reminder_log')
+    //         ->where('admin_id', $adminId)
+    //         ->where('status', 'sent')
+    //         ->where('sent_at >=', $todayStart)
+    //         ->where('sent_at <=', $todayEnd)
+    //         ->countAllResults();
 
-        // Failed (future-ready)
-        $failed = $db->table('dtsen_kk_reminder_log')
-            ->where('admin_id', $adminId)
-            ->where('status', 'failed')
-            ->countAllResults();
+    //     // Failed (future-ready)
+    //     $failed = $db->table('dtsen_kk_reminder_log')
+    //         ->where('admin_id', $adminId)
+    //         ->where('status', 'failed')
+    //         ->countAllResults();
 
-        // Due Next 1 Hour
-        $dueNextHour = $db->table('dtsen_kk_reminder_log')
-            ->where('admin_id', $adminId)
-            ->where('status', 'pending')
-            ->where('due_date >=', $now)
-            ->where('due_date <=', $nextHour)
-            ->countAllResults();
+    //     // Due Next 1 Hour
+    //     $dueNextHour = $db->table('dtsen_kk_reminder_log')
+    //         ->where('admin_id', $adminId)
+    //         ->where('status', 'pending')
+    //         ->where('due_date >=', $now)
+    //         ->where('due_date <=', $nextHour)
+    //         ->countAllResults();
 
-        return $this->response->setJSON([
-            'pending' => $pending,
-            'sent_today' => $sentToday,
-            'failed' => $failed,
-            'due_next_hour' => $dueNextHour
-        ]);
-    }
+    //     return $this->response->setJSON([
+    //         'pending' => $pending,
+    //         'sent_today' => $sentToday,
+    //         'failed' => $failed,
+    //         'due_next_hour' => $dueNextHour
+    //     ]);
+    // }
 }
