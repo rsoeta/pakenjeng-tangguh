@@ -224,7 +224,7 @@
                                             <button type="button" class="btn btn-sm btn-outline-success" onclick="view('<?= $row['id']; ?>')">
                                                 <i class="fa fa-pen"></i>
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="hapus('<?= $row['id']; ?>','<?= $row['fullname']; ?>')">
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="hapus('<?= $row['id']; ?>','<?= $row['fullname']; ?>', this)">
                                                 <i class="fa fa-trash-alt"></i>
                                             </button>
                                         </td>
@@ -396,32 +396,101 @@
 </div>
 
 <script>
+    // 🚀 Inisialisasi variabel tabel secara global agar bisa diakses semua fungsi
+    var tableUserDt;
+
+    // ==========================================
+    // 🚀 FUNGSI SAKTI: SOFT RELOAD (DOM REPLACEMENT)
+    // ==========================================
+    window.refreshTableSPA = function() {
+        let currentPage = tableUserDt.page(); // Ingat halaman saat ini
+
+        // Ambil data HTML terbaru dari server secara diam-diam
+        $.get(location.href, function(data) {
+            let newDoc = new DOMParser().parseFromString(data, 'text/html');
+            let newTbody = $(newDoc).find('#tabelUser tbody').html();
+
+            // Hancurkan tabel lama, pasang data baru, lalu bangun kembali!
+            tableUserDt.clear().destroy();
+            $('#tabelUser tbody').html(newTbody);
+            tableUserDt = $('#tabelUser').DataTable({
+                responsive: true
+            });
+
+            // Kembalikan ke halaman sebelumnya dan jalankan ulang filter Custom
+            tableUserDt.page(currentPage).draw(false);
+        });
+    };
+
     $(document).ready(function() {
-        // 1. Reset Form Role
-        $('#btnBatalRole').click(function() {
-            $('#formRole')[0].reset();
-            $('#id_role').val('');
-            $('#old_id_role').val('');
-            $('#btnBatalRole').addClass('d-none');
-            $('#btnSimpanRole').removeClass('btn-warning').addClass('btn-success').html('<i class="fas fa-save"></i> Simpan Role');
+        // 1. Inisialisasi DataTable Awal
+        tableUserDt = $('#tabelUser').DataTable({
+            responsive: true
+        });
+        $('#tabelUser_wrapper .dataTables_length').appendTo('.dt-left');
+        $('#tabelUser_wrapper .dataTables_filter').appendTo('.dt-right');
+
+        // 2. Custom Filter (Anti-Badai Version)
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            // Pastikan filter ini hanya jalan untuk tabel user
+            if (settings.nTable.id !== 'tabelUser') {
+                return true;
+            }
+
+            let filterRole = $('#filterRole').val().toLowerCase();
+            let filterStatus = $('#filterStatus').val().toLowerCase();
+            let filterRW = $('#filterRW').val().toLowerCase();
+
+            let rwText = data[3].toLowerCase();
+            let roleText = data[7].toLowerCase();
+            // Selector aman melalui DOM Node bawaan datatable
+            let statusText = $(settings.aoData[dataIndex].nTr).find('.btnToggleStatus').text().trim().toLowerCase();
+
+            if (filterStatus && filterStatus !== statusText) return false;
+            if (filterRW && !rwText.includes(filterRW)) return false;
+            if (filterRole && !roleText.includes(filterRole)) return false;
+            return true;
         });
 
-        // 2. Lempar Data ke Form Edit
-        $(document).on('click', '.btnEditRole', function() {
-            let id = $(this).data('id');
-            let nama = $(this).data('nama');
-
-            // Isikan ke kedua field ID
-            $('#id_role').val(id);
-            $('#old_id_role').val(id);
-
-            $('#nm_role').val(nama);
-            $('#btnBatalRole').removeClass('d-none');
-            $('#btnSimpanRole').removeClass('btn-success').addClass('btn-warning').html('<i class="fas fa-check-circle"></i> Update Role');
-            $('#nm_role').focus();
+        $('#filterStatus, #filterRW, #filterRole').on('change', function() {
+            tableUserDt.draw();
         });
 
-        // 3. Proses Simpan / Update Role (AJAX)
+        // 3. 🚀 TAMBAH USER (Mode AJAX tanpa reload)
+        $('#mainform').on('submit', function(e) {
+            e.preventDefault();
+            $('#kecamatan').prop('disabled', false); // Aktifkan select agar terbaca serialize
+
+            let btn = $('#formTambahUser');
+            let ori = btn.html();
+            btn.html('<i class="fas fa-spinner fa-spin"></i> Menyimpan...').prop('disabled', true);
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(res) {
+                    if (res.status === 'success') {
+                        $('#modalAdd').modal('hide');
+                        $('#mainform')[0].reset();
+                        Swal.fire('Berhasil!', res.message, 'success');
+                        refreshTableSPA(); // Panggil Soft Reload!
+                    } else if (res.status === 'error') {
+                        let errorMsg = Object.values(res.errors).join('<br>');
+                        Swal.fire('Validasi Gagal!', errorMsg, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'Terjadi kesalahan pada server.', 'error');
+                },
+                complete: function() {
+                    btn.html(ori).prop('disabled', false);
+                }
+            });
+        });
+
+        // 4. 🚀 KELOLA ROLE: SIMPAN (Tanpa Reload)
         $('#formRole').submit(function(e) {
             e.preventDefault();
             Swal.fire({
@@ -432,23 +501,31 @@
 
             $.post('<?= base_url('users/saveRole') ?>', $(this).serialize(), function(res) {
                 if (res.status === 'success') {
-                    Swal.fire('Berhasil!', res.message, 'success').then(() => location.reload());
+                    Swal.fire('Berhasil!', res.message, 'success');
+                    $('#btnBatalRole').click(); // Reset form role
+
+                    // Update spesifik untuk tabel role di offcanvas
+                    $.get(location.href, function(data) {
+                        let newTable = $(data).find('#tabelRoleOffcanvas tbody').html();
+                        $('#tabelRoleOffcanvas tbody').html(newTable);
+                    });
+                    refreshTableSPA(); // Soft reload tabel utama agar dropdown terupdate
                 } else {
                     Swal.fire('Gagal!', res.message || 'Terjadi kesalahan.', 'error');
                 }
             }, 'json');
         });
 
-        // 4. Proses Hapus Role (AJAX)
+        // 5. 🚀 KELOLA ROLE: HAPUS (Tanpa Reload)
         $(document).on('click', '.btnHapusRole', function() {
-            let id = $(this).data('id');
+            let btn = $(this);
+            let id = btn.data('id');
             Swal.fire({
                 title: 'Hapus Role Ini?',
-                text: "Pastikan tidak ada User yang sedang menggunakan Role ini!",
+                text: "Pastikan tidak ada User yang menggunakan Role ini!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Ya, Hapus!'
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -456,7 +533,9 @@
                         id_role: id
                     }, function(res) {
                         if (res.status === 'success') {
-                            Swal.fire('Terhapus!', res.message, 'success').then(() => location.reload());
+                            Swal.fire('Terhapus!', res.message, 'success');
+                            btn.closest('tr').remove(); // Buang baris tabel offcanvas
+                            refreshTableSPA(); // Soft reload tabel utama
                         } else {
                             Swal.fire('Gagal!', res.message, 'error');
                         }
@@ -464,127 +543,30 @@
                 }
             });
         });
-    });
-</script>
-<!-- End of Main Content -->
 
-<script>
-    $(document).ready(function() {
-        // Setelah DataTable dibuat
-        let table = $('#tabelUser').DataTable({
-            responsive: true
-        });
-
-        // Pindahkan show entries & search ke layout baru
-        $('#tabelUser_wrapper .dataTables_length').appendTo('.dt-left');
-        $('#tabelUser_wrapper .dataTables_filter').appendTo('.dt-right');
-
-        // Custom filter (AND Filtering)
-        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-
-            let filterRole = $('#filterRole').val().toLowerCase();
-            let filterStatus = $('#filterStatus').val().toLowerCase();
-            let filterRW = $('#filterRW').val().toLowerCase();
-
-            // 🚀 PERBAIKAN 1: Sesuaikan Index dengan struktur <th> HTML yang baru
-            let rwText = data[3].toLowerCase(); // NO. RW sekarang di index 3
-            let roleText = data[7].toLowerCase(); // LEVEL sekarang di index 7
-
-            // 🚀 PERBAIKAN 2: Selector Anti-Badai
-            // Daripada pakai urutan td:eq(11) yang rentan rusak jika kolom digeser,
-            // kita langsung cari elemen yang punya class .btnToggleStatus di baris tersebut.
-            let statusText = $(table.row(dataIndex).node()).find('.btnToggleStatus').text().trim().toLowerCase();
-
-            if (filterStatus && filterStatus !== statusText) return false;
-            if (filterRW && !rwText.includes(filterRW)) return false;
-            if (filterRole && !roleText.includes(filterRole)) return false;
-
-            return true;
-        });
-
-        $('#filterStatus, #filterRW, #filterRole').on('change', function() {
-            table.draw();
-        });
-
-        // $('body').addClass('sidebar-collapse');
-
-        $('.tombolTambah').click(function(e) {
-            e.preventDefault();
-
-            $.ajax({
-                url: "<?= base_url('user/formTambah'); ?>",
-                dataType: "json",
-                type: "post",
-                data: {
-                    aksi: 0
-                },
-                success: function(response) {
-                    if (response.data) {
-                        $('.viewmodal').html(response.data).show();
-                        $('#modalTambahUser').on('shown.bs.modal', function(event) {
-                            // do something...
-                            $('#firstname').focus();
-                        });
-                        $('#modalTambahUser').modal('show');
-                    }
-                },
-                error: function(xhr, thrownError) {
-                    alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
-                }
-            });
-        });
-
-        lightbox.option({
-            'resizeDuration': 110,
-            'wrapAround': true,
-            'disableScrolling': true,
-            'fitImagesInViewport': true,
-            'maxWidth': 800,
-            'maxHeight': 800,
-        })
-
-
-        // #kecamatan disable false on submit
-        $('#formTambahUser').click(function(e) {
-            e.preventDefault();
-            $('#kecamatan').prop('disabled', false);
-            $('#mainform').submit();
-        });
-
-        // ==========================================
-        // 🚀 EKSEKUTOR UBAH STATUS TANPA RELOAD
-        // ==========================================
+        // 6. TOGGLE STATUS AKTIF/INAKTIF
         $(document).on('click', '.btnToggleStatus', function(e) {
             e.preventDefault();
             let btn = $(this);
             let uid = btn.data('id');
             let ustatus = btn.data('status');
-
-            // Efek Loading di Tombol
             let originalText = btn.text();
-            btn.html('<i class="fas fa-spinner fa-spin"></i>').prop('disabled', true);
 
+            btn.html('<i class="fas fa-spinner fa-spin"></i>').prop('disabled', true);
             $.ajax({
                 url: "<?= base_url('update_status') ?>/" + uid + "/" + ustatus,
-                type: 'GET', // Karena route match GET & POST
+                type: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
-                }, // Paksa sebagai AJAX
+                },
                 dataType: 'json',
                 success: function(res) {
                     if (res.status === 'success') {
-                        // 🚀 UPDATE DOM TOMBOL SECARA REALTIME
                         if (res.new_status == 1) {
-                            btn.removeClass('btn-dark').addClass('btn-warning')
-                                .text('Active')
-                                .data('status', 1); // Update data-status untuk klik berikutnya
+                            btn.removeClass('btn-dark').addClass('btn-warning').text('Active').data('status', 1);
                         } else {
-                            btn.removeClass('btn-warning').addClass('btn-dark')
-                                .text('Inactive')
-                                .data('status', 0);
+                            btn.removeClass('btn-warning').addClass('btn-dark').text('Inactive').data('status', 0);
                         }
-
-                        // Tampilkan Notifikasi Toast
                         Swal.fire({
                             toast: true,
                             position: 'top-end',
@@ -593,18 +575,11 @@
                             showConfirmButton: false,
                             timer: 2000
                         });
-
-                        // 🚀 PERINTAH SAKTI: Suruh DataTables menggambar ulang (re-filter) tanpa mereset halaman
-                        $('#tabelUser').DataTable().draw(false);
-
+                        tableUserDt.draw(false);
                     } else {
                         btn.html(originalText);
                         Swal.fire('Gagal!', res.message, 'error');
                     }
-                },
-                error: function() {
-                    btn.html(originalText);
-                    Swal.fire('Error!', 'Terjadi kesalahan jaringan atau server.', 'error');
                 },
                 complete: function() {
                     btn.prop('disabled', false);
@@ -614,29 +589,43 @@
 
     });
 
-    function hapus(id, fullname) {
-        tanya = confirm(`Anda yakin akan Menghapus ${fullname}?`);
-        if (tanya == true) {
-            $.ajax({
-                type: "post",
-                url: "<?= base_url('hapus'); ?>",
-                data: {
-                    id: id
-                },
-                dataType: "json",
-                success: function(response) {
-                    if (response.sukses) {
-                        window.location.reload();
+    // ==========================================
+    // 7. 🚀 HAPUS USER (DOM Removal Tanpa Reload)
+    // ==========================================
+    function hapus(id, fullname, el) {
+        Swal.fire({
+            title: `Hapus ${fullname}?`,
+            text: "Data yang dihapus tidak dapat dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Ya, Hapus!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "post",
+                    url: "<?= base_url('hapus'); ?>",
+                    data: {
+                        id: id
+                    },
+                    dataType: "json",
+                    success: function(res) {
+                        if (res.status === 'success') {
+                            Swal.fire('Terhapus!', res.message, 'success');
+                            // Lempar baris ke luar arena datatable
+                            tableUserDt.row($(el).parents('tr')).remove().draw(false);
+                        }
                     }
-                }
-            });
-        }
+                });
+            }
+        });
     }
 
+    // Modal Edit (Existing functionality)
     function view(id) {
         $.ajax({
             type: "post",
-            url: "<?= base_url("formview"); ?>",
+            url: "<?= base_url('formview'); ?>",
             data: {
                 id: id
             },
@@ -646,31 +635,19 @@
                     $('.viewmodal').html(response.sukses).show();
                     $('#modalview').modal('show');
                 }
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);
             }
         });
     }
+</script>
 
-    var pwd1 = $("#password1");
-    var pwd2 = $("#password2");
-    $('#checkbox').click(function() {
-        if (pwd1.attr('type') === "password" && pwd2.attr('type') === "password") {
-            pwd1.attr('type', 'text') && pwd2.attr('type', 'text');
-        } else {
-            pwd1.attr('type', 'password') && pwd2.attr('type', 'password');
-        }
-    });
-
-    if ($('#countdown').length) {
-        start_countdown();
-    }
-
+<script>
+    // ==========================================
+    // 🚀 FUNGSI RESET PASSWORD (VIA AJAX & WA/EMAIL)
+    // ==========================================
     function requestReset(userId) {
         Swal.fire({
             title: "Kirim Reset Password?",
-            text: "Link reset password akan dikirim ke email pengguna.",
+            text: "Link reset password akan dikirim ke WhatsApp dan Email pengguna.",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -681,7 +658,7 @@
 
                 Swal.fire({
                     title: "Memproses...",
-                    text: "Mohon tunggu sebentar",
+                    text: "Mohon tunggu sebentar, sistem sedang mengirim pesan...",
                     allowOutsideClick: false,
                     didOpen: () => Swal.showLoading()
                 });
@@ -702,19 +679,16 @@
                         Swal.close();
 
                         Swal.fire({
-                            title: "Informasi",
+                            title: data.status === "success" ? "Berhasil!" : "Gagal!",
                             text: data.message,
                             icon: data.status === "success" ? "success" : "error",
                             confirmButtonText: "OK"
                         });
 
-                        // Refresh badge setelah reset dikirim
+                        // 🚀 SINKRONISASI SPA: Refresh tabel secara diam-diam tanpa reload layar!
                         if (data.status === "success") {
-                            let badge = document.getElementById("badge-reset-" + userId);
-                            if (badge) {
-                                badge.classList.remove("badge-danger");
-                                badge.classList.add("badge-success");
-                                badge.textContent = "Sudah reset";
+                            if (typeof refreshTableSPA === "function") {
+                                refreshTableSPA();
                             }
                         }
                     })
@@ -722,7 +696,7 @@
                         Swal.close();
                         Swal.fire({
                             title: "Error",
-                            text: "Terjadi kesalahan pada server.",
+                            text: "Terjadi kesalahan koneksi atau server.",
                             icon: "error"
                         });
                         console.error(err);

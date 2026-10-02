@@ -131,7 +131,7 @@
                             toast: true,
                             position: 'top-end',
                             showConfirmButton: false,
-                            timer: 5000,
+                            timer: 3000,
                             timerProgressBar: true,
                             didOpen: (toast) => {
                                 toast.addEventListener('mouseenter', Swal.stopTimer)
@@ -143,10 +143,17 @@
                             icon: 'success',
                             title: response.sukses,
                         });
-                        $('#modalview').modal('hide');
-                        window.location.reload();
-                        // $('#tabelUser').draw();
 
+                        $('#modalview').modal('hide');
+
+                        // 🚀 GANTI RELOAD DENGAN SOFT-RELOAD SPA!
+                        // window.location.reload(); <- Ini dibuang!
+                        if (typeof refreshTableSPA === "function") {
+                            refreshTableSPA();
+                        } else {
+                            // Fallback darurat jika fungsi tidak terbaca
+                            window.location.reload();
+                        }
                     },
                     error: function(xhr, thrownError) {
                         alert(xhr.status + "\n" + xhr.responseText + "\n" + thrownError);

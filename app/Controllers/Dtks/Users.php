@@ -73,6 +73,153 @@ class Users extends BaseController
     }
 
     // function tambah user
+    // public function tambah()
+    // {
+    //     $kode_kab = Profil_Admin()['kode_kab'];
+    //     $kode_kec = Profil_Admin()['kode_kec'];
+    //     if ($this->request->getPost()) {
+    //         // let's do the validation here
+    //         $rules = [
+    //             'fullname' => [
+    //                 'label' => 'Nama Lengkap',
+    //                 'rules' => 'required|min_length[3]|max_length[100]',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi',
+    //                     'min_length' => '{field} terlalu pendek',
+    //                     'max_length' => '{field} terlalu panjang',
+    //                 ]
+    //             ],
+    //             'nik' => [
+    //                 'label' => 'NIK',
+    //                 'rules' => 'required|numeric|min_length[16]|max_length[16]|is_unique[dtks_users.nik]',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi',
+    //                     'numeric' => '{field} harus berupa angka',
+    //                     'min_length' => '{field} terlalu pendek',
+    //                     'max_length' => '{field} terlalu panjang',
+    //                     'is_unique' => '{field} sudah terdaftar',
+    //                 ]
+    //             ],
+    //             'nope' => [
+    //                 'label' => 'No. HP',
+    //                 'rules' => 'required|numeric|min_length[11]|max_length[20]|is_unique[dtks_users.nope]',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi',
+    //                     'numeric' => '{field} harus berupa angka',
+    //                     'min_length' => '{field} terlalu pendek',
+    //                     'max_length' => '{field} terlalu panjang',
+    //                     'is_unique' => '{field} sudah terdaftar',
+    //                 ]
+    //             ],
+    //             'email' => [
+    //                 'label' => 'Email',
+    //                 'rules' => 'required|min_length[6]|max_length[50]|valid_email|is_unique[dtks_users.email]',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi',
+    //                     'min_length' => '{field} terlalu pendek',
+    //                     'max_length' => '{field} terlalu panjang',
+    //                     'valid_email' => '{field} tidak valid',
+    //                     'is_unique' => '{field} sudah terdaftar',
+
+    //                 ]
+    //             ],
+    //             'wilayah_tugas' => [
+    //                 'label' => 'Wilayah Tugas',
+    //                 'rules' => 'required|min_length[3]|max_length[100]',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi',
+    //                     'min_length' => '{field} terlalu pendek',
+    //                     'max_length' => '{field} terlalu panjang',
+    //                 ]
+    //             ],
+    //             'password' => [
+    //                 'label' => 'Password',
+    //                 'rules' => 'required|min_length[6]|max_length[255]',
+    //                 'errors' => [
+    //                     'required' => '{field} harus diisi',
+    //                     'min_length' => '{field} terlalu pendek',
+    //                     'max_length' => '{field} terlalu panjang',
+    //                 ]
+    //             ],
+    //             'password_confirm' => [
+    //                 'label' => 'Ulangi Password',
+    //                 'rules' => 'matches[password]',
+    //                 'errors' => [
+    //                     'matches' => '{field} tidak sama'
+    //                 ]
+    //             ],
+    //         ];
+
+    //         if (!$this->validate($rules)) {
+    //             return view('/dtks/users/index', [
+    //                 "validation" => $this->validator,
+    //                 'namaApp' => 'Opr NewDTKS',
+    //                 'title' => 'Daftar Users',
+    //                 'title1' => 'Tambah User',
+    //                 'kode_kec' => $kode_kec,
+    //                 'kecamatan' => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
+    //                 'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
+    //                 'datarw' => $this->WilayahModel->getDataRW()->getResultArray(),
+    //                 'wilayahTugasOptions' => $this->WilayahModel->getWilayahTugasOptions(),
+    //                 'users' => $this->User->getFindAll()->getResultArray(),
+    //                 'user_login' => $this->AuthModel->getUserId(),
+    //                 'roles' => $this->Role->getRole()->getResultArray(),
+    //                 'statusRole' => $this->GenModel->getStatusRole(),
+
+    //             ]);
+    //         } else {
+    //             //strore the user to database
+    //             $model = new AuthModel();
+
+    //             if ($this->request->getVar('kelurahan') != '') {
+    //                 $kode_desa = $this->request->getVar('kelurahan');
+    //             } else {
+    //                 $kode_desa = null;
+    //             }
+
+    //             $newData = [
+    //                 'nik' => $this->request->getVar('nik'),
+    //                 // 'username' => $this->request->getVar('username'),
+    //                 'fullname' => strtoupper($this->request->getVar('fullname')),
+    //                 'email' => $this->request->getVar('email'),
+    //                 // if 
+    //                 'kode_desa' => $kode_desa,
+    //                 'kode_kec' => $this->request->getVar('kecamatan'),
+    //                 'kode_kab' => '32.05',
+    //                 'kode_prov' => '32',
+    //                 'status' => 0,
+    //                 'opr_sch' => strtoupper((string) ($this->request->getVar('opr_sch') ?? '')),
+    //                 'nope' => $this->request->getVar('nope'),
+    //                 'role_id' => 99,
+    //                 'wilayah_tugas' => $this->request->getVar('wilayah_tugas'),
+    //                 'password' => $this->request->getVar('password'),
+    //                 'created_at' => date('Y-m-d H:i:s'),
+    //             ];
+    //             // dd($newData);
+    //             $model->save($newData);
+    //             $session = session();
+    //             $session->setFlashdata('success', 'Registrasi Berhasil, silahkan hubungi Admin untuk aktivasi');
+    //             return redirect()->to('/users');
+    //         }
+    //     }
+    // }
+    // function hapus()
+    // {
+    //     if ($this->request->isAJAX()) {
+    //         $id = $this->request->getVar('id');
+
+    //         $this->User->delete($id);
+
+    //         $msg = [
+    //             'sukses' => 'User berhasil dihapus'
+    //         ];
+    //         echo json_encode($msg);
+    //     } else {
+    //         return redirect()->to('denied');
+    //         exit;
+    //     }
+    // }
+    // function tambah user
     public function tambah()
     {
         $kode_kab = Profil_Admin()['kode_kab'];
@@ -80,140 +227,74 @@ class Users extends BaseController
         if ($this->request->getPost()) {
             // let's do the validation here
             $rules = [
-                'fullname' => [
-                    'label' => 'Nama Lengkap',
-                    'rules' => 'required|min_length[3]|max_length[100]',
-                    'errors' => [
-                        'required' => '{field} harus diisi',
-                        'min_length' => '{field} terlalu pendek',
-                        'max_length' => '{field} terlalu panjang',
-                    ]
-                ],
-                'nik' => [
-                    'label' => 'NIK',
-                    'rules' => 'required|numeric|min_length[16]|max_length[16]|is_unique[dtks_users.nik]',
-                    'errors' => [
-                        'required' => '{field} harus diisi',
-                        'numeric' => '{field} harus berupa angka',
-                        'min_length' => '{field} terlalu pendek',
-                        'max_length' => '{field} terlalu panjang',
-                        'is_unique' => '{field} sudah terdaftar',
-                    ]
-                ],
-                'nope' => [
-                    'label' => 'No. HP',
-                    'rules' => 'required|numeric|min_length[11]|max_length[20]|is_unique[dtks_users.nope]',
-                    'errors' => [
-                        'required' => '{field} harus diisi',
-                        'numeric' => '{field} harus berupa angka',
-                        'min_length' => '{field} terlalu pendek',
-                        'max_length' => '{field} terlalu panjang',
-                        'is_unique' => '{field} sudah terdaftar',
-                    ]
-                ],
-                'email' => [
-                    'label' => 'Email',
-                    'rules' => 'required|min_length[6]|max_length[50]|valid_email|is_unique[dtks_users.email]',
-                    'errors' => [
-                        'required' => '{field} harus diisi',
-                        'min_length' => '{field} terlalu pendek',
-                        'max_length' => '{field} terlalu panjang',
-                        'valid_email' => '{field} tidak valid',
-                        'is_unique' => '{field} sudah terdaftar',
-
-                    ]
-                ],
-                'wilayah_tugas' => [
-                    'label' => 'Wilayah Tugas',
-                    'rules' => 'required|min_length[3]|max_length[100]',
-                    'errors' => [
-                        'required' => '{field} harus diisi',
-                        'min_length' => '{field} terlalu pendek',
-                        'max_length' => '{field} terlalu panjang',
-                    ]
-                ],
-                'password' => [
-                    'label' => 'Password',
-                    'rules' => 'required|min_length[6]|max_length[255]',
-                    'errors' => [
-                        'required' => '{field} harus diisi',
-                        'min_length' => '{field} terlalu pendek',
-                        'max_length' => '{field} terlalu panjang',
-                    ]
-                ],
-                'password_confirm' => [
-                    'label' => 'Ulangi Password',
-                    'rules' => 'matches[password]',
-                    'errors' => [
-                        'matches' => '{field} tidak sama'
-                    ]
-                ],
+                'fullname' => ['rules' => 'required|min_length[3]|max_length[100]'],
+                'nik'      => ['rules' => 'required|numeric|min_length[16]|max_length[16]|is_unique[dtks_users.nik]'],
+                'nope'     => ['rules' => 'required|numeric|min_length[11]|max_length[20]|is_unique[dtks_users.nope]'],
+                'email'    => ['rules' => 'required|min_length[6]|max_length[50]|valid_email|is_unique[dtks_users.email]'],
+                'wilayah_tugas'    => ['rules' => 'required|min_length[3]|max_length[100]'],
+                'password'         => ['rules' => 'required|min_length[6]|max_length[255]'],
+                'password_confirm' => ['rules' => 'matches[password]']
             ];
 
             if (!$this->validate($rules)) {
-                return view('/dtks/users/index', [
-                    "validation" => $this->validator,
-                    'namaApp' => 'Opr NewDTKS',
-                    'title' => 'Daftar Users',
-                    'title1' => 'Tambah User',
-                    'kode_kec' => $kode_kec,
-                    'kecamatan' => $this->WilayahModel->getKec($kode_kab)->getResultArray(),
-                    'desa' => $this->WilayahModel->orderBy('name', 'asc')->where('district_id', $kode_kec)->findAll(),
-                    'datarw' => $this->WilayahModel->getDataRW()->getResultArray(),
-                    'wilayahTugasOptions' => $this->WilayahModel->getWilayahTugasOptions(),
-                    'users' => $this->User->getFindAll()->getResultArray(),
-                    'user_login' => $this->AuthModel->getUserId(),
-                    'roles' => $this->Role->getRole()->getResultArray(),
-                    'statusRole' => $this->GenModel->getStatusRole(),
-
-                ]);
-            } else {
-                //strore the user to database
-                $model = new AuthModel();
-
-                if ($this->request->getVar('kelurahan') != '') {
-                    $kode_desa = $this->request->getVar('kelurahan');
-                } else {
-                    $kode_desa = null;
+                // 🚀 RESPON AJAX JIKA VALIDASI GAGAL
+                if ($this->request->isAJAX()) {
+                    return $this->response->setJSON([
+                        'status' => 'error',
+                        'errors' => $this->validator->getErrors()
+                    ]);
                 }
 
+                // Fallback (opsional jika bukan AJAX)
+                return redirect()->back()->withInput();
+            } else {
+                $model = new AuthModel();
+                $kode_desa = $this->request->getVar('kelurahan') != '' ? $this->request->getVar('kelurahan') : null;
+
                 $newData = [
-                    'nik' => $this->request->getVar('nik'),
-                    // 'username' => $this->request->getVar('username'),
-                    'fullname' => strtoupper($this->request->getVar('fullname')),
-                    'email' => $this->request->getVar('email'),
-                    // if 
-                    'kode_desa' => $kode_desa,
-                    'kode_kec' => $this->request->getVar('kecamatan'),
-                    'kode_kab' => '32.05',
-                    'kode_prov' => '32',
-                    'status' => 0,
-                    'opr_sch' => strtoupper((string) ($this->request->getVar('opr_sch') ?? '')),
-                    'nope' => $this->request->getVar('nope'),
-                    'role_id' => 99,
+                    'nik'           => $this->request->getVar('nik'),
+                    'fullname'      => strtoupper($this->request->getVar('fullname')),
+                    'email'         => $this->request->getVar('email'),
+                    'kode_desa'     => $kode_desa,
+                    'kode_kec'      => $this->request->getVar('kecamatan'),
+                    'kode_kab'      => '32.05',
+                    'kode_prov'     => '32',
+                    'status'        => 0,
+                    'opr_sch'       => strtoupper((string) ($this->request->getVar('opr_sch') ?? '')),
+                    'nope'          => $this->request->getVar('nope'),
+                    'role_id'       => 99,
                     'wilayah_tugas' => $this->request->getVar('wilayah_tugas'),
-                    'password' => $this->request->getVar('password'),
-                    'created_at' => date('Y-m-d H:i:s'),
+                    'password'      => $this->request->getVar('password'),
+                    'created_at'    => date('Y-m-d H:i:s'),
                 ];
-                // dd($newData);
+
                 $model->save($newData);
-                $session = session();
-                $session->setFlashdata('success', 'Registrasi Berhasil, silahkan hubungi Admin untuk aktivasi');
+
+                // 🚀 RESPON AJAX JIKA SUKSES MENYIMPAN
+                if ($this->request->isAJAX()) {
+                    return $this->response->setJSON([
+                        'status' => 'success',
+                        'message' => 'User baru berhasil didaftarkan!'
+                    ]);
+                }
+
+                session()->setFlashdata('success', 'Registrasi Berhasil');
                 return redirect()->to('/users');
             }
         }
     }
+
     function hapus()
     {
         if ($this->request->isAJAX()) {
             $id = $this->request->getVar('id');
-
             $this->User->delete($id);
 
-            $msg = [
-                'sukses' => 'User berhasil dihapus'
-            ];
-            echo json_encode($msg);
+            // 🚀 RESPON AJAX HAPUS SUKSES
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'User berhasil dihapus dari sistem.'
+            ]);
         } else {
             return redirect()->to('denied');
             exit;
