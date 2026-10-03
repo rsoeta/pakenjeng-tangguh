@@ -96,13 +96,15 @@
                             </select>
                         </div>
 
-                        <!-- Filter Status Kunci -->
+                        <!-- Filter Status Kunci & Kelengkapan -->
                         <div class="col-12 col-md-2">
-                            <label class="filter-label small fw-bold text-muted mb-1">Status Kunci</label>
+                            <label class="filter-label small fw-bold text-muted mb-1">Status Data</label>
                             <select id="filter_locked" class="form-control form-control-sm border bg-light rounded-pill px-3">
                                 <option value="">Semua Status</option>
-                                <option value="1">🔒 Terkunci</option>
-                                <option value="0" selected>🔓 Terbuka</option> <!-- 🚀 TAMBAHKAN 'selected' DI SINI -->
+                                <option value="divalidasi">🔒 Tervalidasi</option>
+                                <option value="terbuka" selected>🔓 Semua Terbuka</option>
+                                <option value="menunggu">⏳ Menunggu Validasi</option>
+                                <option value="pr">📝 Belum Dikerjakan</option>
                             </select>
                         </div>
                     </div>
@@ -469,16 +471,14 @@
                 },
                 dataType: "JSON",
                 success: function(res) {
-                    // ... (lanjutan script diagram Jenderal yang sudah ada di bawahnya) ...
                     if (res.categories.length > 0) {
-                        // Jika diagram sudah ada, cukup update datanya secara animasi!
                         if (chartPetugas) {
                             chartPetugas.xAxis[0].setCategories(res.categories, false);
-                            chartPetugas.series[0].setData(res.belum, false);
-                            chartPetugas.series[1].setData(res.terkunci, false);
+                            chartPetugas.series[0].setData(res.pr, false);
+                            chartPetugas.series[1].setData(res.menunggu, false);
+                            chartPetugas.series[2].setData(res.tervalidasi, false);
                             chartPetugas.redraw();
                         } else {
-                            // Render diagram baru (Desain 2D Flat Elegan - Mode Persentase)
                             chartPetugas = Highcharts.chart('chartProgresPetugas', {
                                 chart: {
                                     type: 'column',
@@ -498,25 +498,24 @@
                                 },
                                 yAxis: {
                                     min: 0,
-                                    max: 100, // 🚀 Sumbu Y mentok di 100%
+                                    max: 100,
                                     title: {
                                         text: 'Persentase Progres (%)'
                                     },
                                     labels: {
-                                        format: '{value}%' // 🚀 Tambahkan simbol %
+                                        format: '{value}%'
                                     }
                                 },
                                 tooltip: {
                                     headerFormat: '<b>{point.key}</b><br>',
-                                    // 🚀 Menampilkan format % dengan angka KPM asli di dalam kurung
                                     pointFormat: '<span style="color:{series.color}">\u25CF</span> {series.name}: <b>{point.percentage:.1f}%</b> <span style="font-size:0.85em; color:#666;">({point.y} KPM)</span>'
                                 },
                                 plotOptions: {
                                     column: {
-                                        stacking: 'percent', // 🚀 KUNCI SAKTI: Ubah nilai mutlak menjadi persentase!
+                                        stacking: 'percent',
                                         borderRadius: 4,
                                         borderWidth: 0,
-                                        dataLabels: { // 🚀 Tampilkan angka % di dalam batang diagram
+                                        dataLabels: {
                                             enabled: true,
                                             format: '{point.percentage:.0f}%',
                                             style: {
@@ -527,20 +526,25 @@
                                             filter: {
                                                 property: 'percentage',
                                                 operator: '>',
-                                                value: 5 // Sembunyikan label jika terlalu sempit (< 5%)
+                                                value: 5
                                             }
                                         }
                                     }
                                 },
                                 series: [{
-                                        name: 'Belum Terkunci',
-                                        data: res.belum,
-                                        color: '#ffc107' // Kuning
+                                        name: 'Belum Dikerjakan',
+                                        data: res.pr,
+                                        color: '#dc3545' // Merah (Danger)
                                     },
                                     {
-                                        name: 'Terkunci',
-                                        data: res.terkunci,
-                                        color: '#198754' // Hijau
+                                        name: 'Menunggu Validasi',
+                                        data: res.menunggu,
+                                        color: '#ffc107' // Kuning (Warning)
+                                    },
+                                    {
+                                        name: 'Tervalidasi',
+                                        data: res.tervalidasi,
+                                        color: '#198754' // Hijau (Success)
                                     }
                                 ],
                                 credits: {
@@ -549,7 +553,6 @@
                             });
                         }
                     } else {
-                        // Hancurkan diagram jika hasil filter kosong
                         if (chartPetugas) {
                             chartPetugas.destroy();
                             chartPetugas = null;

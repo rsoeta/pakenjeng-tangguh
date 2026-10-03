@@ -121,9 +121,19 @@ class BansosKKS extends BaseController
         if (!empty($filterTahap)) {
             $builder->where('b.tahap_salur', $filterTahap);
         }
-        // 🚀 TERAPKAN FILTER KUNCI JIKA DIPILIH
+        // 🚀 TERAPKAN FILTER KUNCI & STATUS KELENGKAPAN JIKA DIPILIH
         if ($filterLocked !== '' && $filterLocked !== null) {
-            $builder->where('b.is_locked', (int)$filterLocked);
+            if ($filterLocked === 'divalidasi') {
+                $builder->where('b.is_locked', 1);
+            } elseif ($filterLocked === 'terbuka') {
+                $builder->where('b.is_locked', 0); // Gabungan Menunggu & PR
+            } elseif ($filterLocked === 'menunggu') {
+                $builder->where('b.is_locked', 0);
+                $builder->where('b.status_kelengkapan', 1); // Sudah diisi foto tapi belum dikunci admin
+            } elseif ($filterLocked === 'pr') {
+                $builder->where('b.is_locked', 0);
+                $builder->where('b.status_kelengkapan', 0); // Masih kosong
+            }
         }
         // 🚀 Terapkan Filter Jenis Bansos (Logika Inklusi MIX)
         if (!empty($filterJenis)) {
@@ -1096,23 +1106,153 @@ class BansosKKS extends BaseController
     // ========================================================
     // 📊 GET DATA DIAGRAM KINERJA PETUGAS (AJAX + FILTER + MAPPING)
     // ========================================================
+    // public function chartData()
+    // {
+    //     try {
+    //         // 🚀 AMAN: Ambil langsung dari session agar tidak error 'Undefined array key'
+    //         $roleId = session()->get('role_id') ?? 4;
+    //         $userId = session()->get('id') ?? session()->get('id_user') ?? session()->get('user_id') ?? 0;
+    //         $kodeDesa = session()->get('kode_desa') ?? '';
+    //         $wilayahTugasAkun = session()->get('wilayah_tugas') ?? '';
+
+    //         // 1. TANGKAP SEMUA FILTER DARI VIEW
+    //         $filterRw     = $this->request->getPost('filter_rw');
+    //         $filterRt     = $this->request->getPost('filter_rt');
+    //         $filterTahap  = $this->request->getPost('filter_tahap');
+    //         $filterLocked = $this->request->getPost('filter_locked');
+    //         $filterJenis  = $this->request->getPost('filter_jenis');
+
+    //         // 2. AMBIL SEMUA PETUGAS ENTRI DI DESA INI (Role >= 4)
+    //         $petugasList = $this->db->table('dtks_users')
+    //             ->select('id, fullname, wilayah_tugas')
+    //             ->where('kode_desa', $kodeDesa)
+    //             ->where('role_id >=', 4)
+    //             ->where('status', 1)
+    //             ->get()->getResultArray();
+
+    //         // 🚀 Jika Petugas yang login, saring agar dia HANYA melihat performanya sendiri
+    //         if ($roleId >= 4) {
+    //             $petugasList = array_filter($petugasList, function ($p) use ($userId) {
+    //                 return $p['id'] == $userId;
+    //             });
+    //         }
+
+    //         if (empty($petugasList)) {
+    //             return $this->response->setJSON(['categories' => [], 'terkunci' => [], 'belum' => []]);
+    //         }
+
+    //         // 3. AMBIL SEMUA DATA KPM BANSOS
+    //         $builder = $this->db->table('dtsen_bansos_kks b')
+    //             ->select('b.id, b.is_locked, m.rw as m_rw, m.rt as m_rt, rt.rw as rt_rw, rt.rt as rt_rt')
+    //             ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
+    //             ->join('dtsen_art a', 'a.nik = b.nik_kpm', 'left')
+    //             ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left')
+    //             ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left');
+
+    //         // 🔐 TERAPKAN TRAIT WILAYAH FILTER
+    //         $filterData = [
+    //             'kode_desa'     => $kodeDesa,
+    //             'wilayah_tugas' => trim($wilayahTugasAkun)
+    //         ];
+    //         $this->applyWilayahFilter($builder, $filterData, $roleId);
+
+    //         // 🔍 TERAPKAN FILTER DINAMIS
+    //         if (!empty($filterRw)) $builder->where('m.rw', str_pad($filterRw, 3, '0', STR_PAD_LEFT));
+    //         if (!empty($filterRt)) $builder->where('m.rt', str_pad($filterRt, 3, '0', STR_PAD_LEFT));
+    //         if (!empty($filterTahap)) $builder->where('b.tahap_salur', $filterTahap);
+    //         if ($filterLocked !== '' && $filterLocked !== null) $builder->where('b.is_locked', (int)$filterLocked);
+    //         if (!empty($filterJenis)) {
+    //             if ($filterJenis === 'PKH') $builder->whereIn('b.jenis_bansos', ['PKH', 'PKH + SEMBAKO']);
+    //             elseif ($filterJenis === 'SEMBAKO') $builder->whereIn('b.jenis_bansos', ['SEMBAKO', 'PKH + SEMBAKO']);
+    //             else $builder->where('b.jenis_bansos', $filterJenis);
+    //         }
+
+    //         // 🛡️ Optimasi: Hindari duplikat perhitungan akibat join
+    //         $allBansos = $builder->groupBy('b.id')->get()->getResultArray();
+
+    //         $categories = [];
+    //         $terkunci   = [];
+    //         $belum      = [];
+
+    //         // 4. 🚀 LOGIKA PEMETAAN KPM KE PETUGAS BERDASARKAN WILAYAH KERJA
+    //         foreach ($petugasList as $ptg) {
+    //             // 🛡️ Amankan dengan (string) casting untuk hindari error trim(null) di PHP 8
+    //             $wilayahTugas = trim((string)($ptg['wilayah_tugas'] ?? ''));
+    //             if (empty($wilayahTugas)) continue;
+
+    //             $ptgWilayah = [];
+    //             $blocks = explode('|', $wilayahTugas);
+    //             foreach ($blocks as $block) {
+    //                 $parts = explode(':', $block);
+    //                 if (!isset($parts[0]) || trim($parts[0]) === '') continue;
+
+    //                 $rwP = str_pad(trim($parts[0]), 3, '0', STR_PAD_LEFT);
+    //                 $rtClean = [];
+    //                 if (isset($parts[1]) && trim($parts[1]) !== '') {
+    //                     $rtsP = explode(',', $parts[1]);
+    //                     foreach ($rtsP as $rtP) {
+    //                         if (trim($rtP) !== '') $rtClean[] = str_pad(trim($rtP), 3, '0', STR_PAD_LEFT);
+    //                     }
+    //                 }
+    //                 $ptgWilayah[$rwP] = $rtClean;
+    //             }
+
+    //             $countTerkunci = 0;
+    //             $countBelum    = 0;
+
+    //             foreach ($allBansos as $b) {
+    //                 $rwKpm = str_pad(trim((string)($b['m_rw'] ?? $b['rt_rw'] ?? '')), 3, '0', STR_PAD_LEFT);
+    //                 $rtKpm = str_pad(trim((string)($b['m_rt'] ?? $b['rt_rt'] ?? '')), 3, '0', STR_PAD_LEFT);
+
+    //                 if (isset($ptgWilayah[$rwKpm])) {
+    //                     if (empty($ptgWilayah[$rwKpm]) || in_array($rtKpm, $ptgWilayah[$rwKpm])) {
+    //                         if ($b['is_locked'] == 1) {
+    //                             $countTerkunci++;
+    //                         } else {
+    //                             $countBelum++;
+    //                         }
+    //                     }
+    //                 }
+    //             }
+
+    //             if ($countTerkunci > 0 || $countBelum > 0) {
+    //                 $categories[] = ucwords(strtolower($ptg['fullname']));
+    //                 $terkunci[]   = $countTerkunci;
+    //                 $belum[]      = $countBelum;
+    //             }
+    //         }
+
+    //         return $this->response->setJSON([
+    //             'categories' => array_values($categories),
+    //             'terkunci'   => array_values($terkunci),
+    //             'belum'      => array_values($belum)
+    //         ]);
+    //     } catch (\Throwable $e) {
+    //         // 🚀 Jika terjadi error apapun, kembalikan JSON bersih agar halaman tidak macet
+    //         return $this->response->setJSON([
+    //             'categories' => [],
+    //             'terkunci'   => [],
+    //             'belum'      => []
+    //         ]);
+    //     }
+    // }
+    // ========================================================
+    // 📊 GET DATA DIAGRAM KINERJA PETUGAS (AJAX + FILTER + MAPPING)
+    // ========================================================
     public function chartData()
     {
         try {
-            // 🚀 AMAN: Ambil langsung dari session agar tidak error 'Undefined array key'
             $roleId = session()->get('role_id') ?? 4;
             $userId = session()->get('id') ?? session()->get('id_user') ?? session()->get('user_id') ?? 0;
             $kodeDesa = session()->get('kode_desa') ?? '';
             $wilayahTugasAkun = session()->get('wilayah_tugas') ?? '';
 
-            // 1. TANGKAP SEMUA FILTER DARI VIEW
             $filterRw     = $this->request->getPost('filter_rw');
             $filterRt     = $this->request->getPost('filter_rt');
             $filterTahap  = $this->request->getPost('filter_tahap');
             $filterLocked = $this->request->getPost('filter_locked');
             $filterJenis  = $this->request->getPost('filter_jenis');
 
-            // 2. AMBIL SEMUA PETUGAS ENTRI DI DESA INI (Role >= 4)
             $petugasList = $this->db->table('dtks_users')
                 ->select('id, fullname, wilayah_tugas')
                 ->where('kode_desa', $kodeDesa)
@@ -1120,7 +1260,6 @@ class BansosKKS extends BaseController
                 ->where('status', 1)
                 ->get()->getResultArray();
 
-            // 🚀 Jika Petugas yang login, saring agar dia HANYA melihat performanya sendiri
             if ($roleId >= 4) {
                 $petugasList = array_filter($petugasList, function ($p) use ($userId) {
                     return $p['id'] == $userId;
@@ -1128,45 +1267,52 @@ class BansosKKS extends BaseController
             }
 
             if (empty($petugasList)) {
-                return $this->response->setJSON(['categories' => [], 'terkunci' => [], 'belum' => []]);
+                return $this->response->setJSON(['categories' => [], 'tervalidasi' => [], 'menunggu' => [], 'pr' => []]);
             }
 
-            // 3. AMBIL SEMUA DATA KPM BANSOS
+            // 🚀 PERBAIKAN: Masukkan b.status_kelengkapan dalam SELECT
             $builder = $this->db->table('dtsen_bansos_kks b')
-                ->select('b.id, b.is_locked, m.rw as m_rw, m.rt as m_rt, rt.rw as rt_rw, rt.rt as rt_rt')
+                ->select('b.id, b.is_locked, b.status_kelengkapan, m.rw as m_rw, m.rt as m_rt, rt.rw as rt_rw, rt.rt as rt_rt')
                 ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
                 ->join('dtsen_art a', 'a.nik = b.nik_kpm', 'left')
                 ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left')
                 ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left');
 
-            // 🔐 TERAPKAN TRAIT WILAYAH FILTER
-            $filterData = [
-                'kode_desa'     => $kodeDesa,
-                'wilayah_tugas' => trim($wilayahTugasAkun)
-            ];
+            $filterData = ['kode_desa' => $kodeDesa, 'wilayah_tugas' => trim($wilayahTugasAkun)];
             $this->applyWilayahFilter($builder, $filterData, $roleId);
 
-            // 🔍 TERAPKAN FILTER DINAMIS
             if (!empty($filterRw)) $builder->where('m.rw', str_pad($filterRw, 3, '0', STR_PAD_LEFT));
             if (!empty($filterRt)) $builder->where('m.rt', str_pad($filterRt, 3, '0', STR_PAD_LEFT));
             if (!empty($filterTahap)) $builder->where('b.tahap_salur', $filterTahap);
-            if ($filterLocked !== '' && $filterLocked !== null) $builder->where('b.is_locked', (int)$filterLocked);
             if (!empty($filterJenis)) {
                 if ($filterJenis === 'PKH') $builder->whereIn('b.jenis_bansos', ['PKH', 'PKH + SEMBAKO']);
                 elseif ($filterJenis === 'SEMBAKO') $builder->whereIn('b.jenis_bansos', ['SEMBAKO', 'PKH + SEMBAKO']);
                 else $builder->where('b.jenis_bansos', $filterJenis);
             }
 
-            // 🛡️ Optimasi: Hindari duplikat perhitungan akibat join
+            // 🚀 TERAPKAN FILTER DIAGRAM (Kecuali jika kosong)
+            if ($filterLocked !== '' && $filterLocked !== null) {
+                if ($filterLocked === 'divalidasi') {
+                    $builder->where('b.is_locked', 1);
+                } elseif ($filterLocked === 'terbuka') {
+                    $builder->where('b.is_locked', 0);
+                } elseif ($filterLocked === 'menunggu') {
+                    $builder->where('b.is_locked', 0);
+                    $builder->where('b.status_kelengkapan', 1);
+                } elseif ($filterLocked === 'pr') {
+                    $builder->where('b.is_locked', 0);
+                    $builder->where('b.status_kelengkapan', 0);
+                }
+            }
+
             $allBansos = $builder->groupBy('b.id')->get()->getResultArray();
 
-            $categories = [];
-            $terkunci   = [];
-            $belum      = [];
+            $categories  = [];
+            $tervalidasi = [];
+            $menunggu    = [];
+            $pr          = [];
 
-            // 4. 🚀 LOGIKA PEMETAAN KPM KE PETUGAS BERDASARKAN WILAYAH KERJA
             foreach ($petugasList as $ptg) {
-                // 🛡️ Amankan dengan (string) casting untuk hindari error trim(null) di PHP 8
                 $wilayahTugas = trim((string)($ptg['wilayah_tugas'] ?? ''));
                 if (empty($wilayahTugas)) continue;
 
@@ -1187,8 +1333,9 @@ class BansosKKS extends BaseController
                     $ptgWilayah[$rwP] = $rtClean;
                 }
 
-                $countTerkunci = 0;
-                $countBelum    = 0;
+                $countTervalidasi = 0;
+                $countMenunggu    = 0;
+                $countPR          = 0;
 
                 foreach ($allBansos as $b) {
                     $rwKpm = str_pad(trim((string)($b['m_rw'] ?? $b['rt_rw'] ?? '')), 3, '0', STR_PAD_LEFT);
@@ -1196,34 +1343,36 @@ class BansosKKS extends BaseController
 
                     if (isset($ptgWilayah[$rwKpm])) {
                         if (empty($ptgWilayah[$rwKpm]) || in_array($rtKpm, $ptgWilayah[$rwKpm])) {
+                            // 🚀 PECAH MENJADI 3 STATUS
                             if ($b['is_locked'] == 1) {
-                                $countTerkunci++;
+                                $countTervalidasi++;
                             } else {
-                                $countBelum++;
+                                if ($b['status_kelengkapan'] == 1) {
+                                    $countMenunggu++;
+                                } else {
+                                    $countPR++;
+                                }
                             }
                         }
                     }
                 }
 
-                if ($countTerkunci > 0 || $countBelum > 0) {
-                    $categories[] = ucwords(strtolower($ptg['fullname']));
-                    $terkunci[]   = $countTerkunci;
-                    $belum[]      = $countBelum;
+                if ($countTervalidasi > 0 || $countMenunggu > 0 || $countPR > 0) {
+                    $categories[]  = ucwords(strtolower($ptg['fullname']));
+                    $tervalidasi[] = $countTervalidasi;
+                    $menunggu[]    = $countMenunggu;
+                    $pr[]          = $countPR;
                 }
             }
 
             return $this->response->setJSON([
-                'categories' => array_values($categories),
-                'terkunci'   => array_values($terkunci),
-                'belum'      => array_values($belum)
+                'categories'  => array_values($categories),
+                'tervalidasi' => array_values($tervalidasi),
+                'menunggu'    => array_values($menunggu),
+                'pr'          => array_values($pr)
             ]);
         } catch (\Throwable $e) {
-            // 🚀 Jika terjadi error apapun, kembalikan JSON bersih agar halaman tidak macet
-            return $this->response->setJSON([
-                'categories' => [],
-                'terkunci'   => [],
-                'belum'      => []
-            ]);
+            return $this->response->setJSON(['categories' => [], 'tervalidasi' => [], 'menunggu' => [], 'pr' => []]);
         }
     }
 }
