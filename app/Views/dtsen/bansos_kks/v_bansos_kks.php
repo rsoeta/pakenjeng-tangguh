@@ -5,17 +5,23 @@
 <div class="content-wrapper mt-1">
     <div class="content-header">
         <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h4 class="m-0 fw-bold"><i class="fas fa-camera-retro text-primary mr-2"></i> <?= $title; ?></h4>
-                    <p class="text-muted">Kelola penyaluran bansos melalui KKS secara efisien</p>
+            <!-- 🚀 Gunakan d-flex dan justify-content-between agar judul dan breadcrumb selalu bersebelahan Kiri - Kanan -->
+            <div class="row mb-2 d-flex justify-content-between align-items-center">
+
+                <div class="col-auto">
+                    <h4 class="m-0 fw-bold fs-5"><i class="fas fa-camera-retro text-primary mr-2"></i> <?= $title; ?></h4>
+                    <!-- 🚀 Sembunyikan sub-judul di layar HP (d-none d-sm-block) agar tidak terlalu sesak -->
+                    <p class="text-muted small mb-0 d-none d-sm-block">Kelola penyaluran bansos melalui KKS secara efisien</p>
                 </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
+
+                <div class="col-auto">
+                    <!-- 🚀 Hapus float-sm-right, ganti dengan p-0 m-0 agar marginnya bersih -->
+                    <ol class="breadcrumb bg-transparent p-0 m-0">
                         <li class="breadcrumb-item"><a href="<?= base_url('dashboard'); ?>">Home</a></li>
                         <li class="breadcrumb-item active">Bansos KKS</li>
                     </ol>
                 </div>
+
             </div>
         </div>
     </div>
@@ -23,6 +29,19 @@
     <section class="content">
 
         <div class="container-fluid">
+            <!-- 🚀 DIAGRAM PROGRES KINERJA 3D -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm border-top-primary h-100">
+                        <div class="card-header bg-white border-bottom">
+                            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-chart-bar mr-2"></i> Progres Kinerja Petugas Entri</h6>
+                        </div>
+                        <div class="card-body p-2">
+                            <div id="chartProgresPetugas" style="height: 300px; width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="card filter-box mb-4 shadow-none border">
                 <div class="card-body p-3">
 
@@ -397,6 +416,9 @@
     </div>
 </div>
 
+<!-- 🚀 LIBRARY HIGHCHARTS 2D FLAT -->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+
 <script>
     $(document).ready(function() {
         // --- DATA TABLES ---
@@ -428,16 +450,129 @@
             ]
         });
 
-        // 🚀 Aktifkan Tombol Filter (Manual / Refresh)
+        // ==========================================
+        // 🚀 FUNGSI RENDER DIAGRAM 2D STACKED AJAX (PERSENTASE)
+        // ==========================================
+        var chartPetugas;
+
+        function loadChartData() {
+            $.ajax({
+                url: "<?= base_url('bansos-kks/chart-data') ?>",
+                type: "POST",
+                data: {
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>',
+                    filter_rw: $('#filter_rw').val(),
+                    filter_rt: $('#filter_rt').val(),
+                    filter_tahap: $('#filter_tahap').val(),
+                    filter_jenis: $('#filter_jenis').val(),
+                    filter_locked: '' // 🚀 KUNCI SAKTI: Khusus diagram, kita paksa selalu kosong agar bisa menumpuk 2 status!
+                },
+                dataType: "JSON",
+                success: function(res) {
+                    // ... (lanjutan script diagram Jenderal yang sudah ada di bawahnya) ...
+                    if (res.categories.length > 0) {
+                        // Jika diagram sudah ada, cukup update datanya secara animasi!
+                        if (chartPetugas) {
+                            chartPetugas.xAxis[0].setCategories(res.categories, false);
+                            chartPetugas.series[0].setData(res.belum, false);
+                            chartPetugas.series[1].setData(res.terkunci, false);
+                            chartPetugas.redraw();
+                        } else {
+                            // Render diagram baru (Desain 2D Flat Elegan - Mode Persentase)
+                            chartPetugas = Highcharts.chart('chartProgresPetugas', {
+                                chart: {
+                                    type: 'column',
+                                    backgroundColor: 'transparent'
+                                },
+                                title: {
+                                    text: null
+                                },
+                                xAxis: {
+                                    categories: res.categories,
+                                    labels: {
+                                        style: {
+                                            fontSize: '12px',
+                                            fontWeight: 'bold'
+                                        }
+                                    }
+                                },
+                                yAxis: {
+                                    min: 0,
+                                    max: 100, // 🚀 Sumbu Y mentok di 100%
+                                    title: {
+                                        text: 'Persentase Progres (%)'
+                                    },
+                                    labels: {
+                                        format: '{value}%' // 🚀 Tambahkan simbol %
+                                    }
+                                },
+                                tooltip: {
+                                    headerFormat: '<b>{point.key}</b><br>',
+                                    // 🚀 Menampilkan format % dengan angka KPM asli di dalam kurung
+                                    pointFormat: '<span style="color:{series.color}">\u25CF</span> {series.name}: <b>{point.percentage:.1f}%</b> <span style="font-size:0.85em; color:#666;">({point.y} KPM)</span>'
+                                },
+                                plotOptions: {
+                                    column: {
+                                        stacking: 'percent', // 🚀 KUNCI SAKTI: Ubah nilai mutlak menjadi persentase!
+                                        borderRadius: 4,
+                                        borderWidth: 0,
+                                        dataLabels: { // 🚀 Tampilkan angka % di dalam batang diagram
+                                            enabled: true,
+                                            format: '{point.percentage:.0f}%',
+                                            style: {
+                                                color: '#ffffff',
+                                                textOutline: 'none',
+                                                fontWeight: 'bold'
+                                            },
+                                            filter: {
+                                                property: 'percentage',
+                                                operator: '>',
+                                                value: 5 // Sembunyikan label jika terlalu sempit (< 5%)
+                                            }
+                                        }
+                                    }
+                                },
+                                series: [{
+                                        name: 'Belum Terkunci',
+                                        data: res.belum,
+                                        color: '#ffc107' // Kuning
+                                    },
+                                    {
+                                        name: 'Terkunci',
+                                        data: res.terkunci,
+                                        color: '#198754' // Hijau
+                                    }
+                                ],
+                                credits: {
+                                    enabled: false
+                                }
+                            });
+                        }
+                    } else {
+                        // Hancurkan diagram jika hasil filter kosong
+                        if (chartPetugas) {
+                            chartPetugas.destroy();
+                            chartPetugas = null;
+                        }
+                        $('#chartProgresPetugas').html('<div class="d-flex h-100 justify-content-center align-items-center text-muted fw-bold"><i class="fas fa-box-open mr-2"></i> Tidak ada data untuk filter ini.</div>');
+                    }
+                }
+            });
+        }
+
+        // 🚀 TRIGGER AWAL SAAT HALAMAN DIBUKA
+        loadChartData();
+
+        // 🚀 TRIGGER SAAT TOMBOL FILTER MANUAL DIKLIK
         $('#btn_filter').click(function() {
             tableDokumentasi.ajax.reload();
+            loadChartData();
         });
 
-        // ==========================================
-        // 🚀 FITUR BARU: AUTO-FILTER (TRIGGER SAAT DROPDOWN DIUBAH)
-        // ==========================================
+        // 🚀 TRIGGER SAAT DROPDOWN BERUBAH (AUTO-FILTER)
         $('#filter_rw, #filter_rt, #filter_tahap, #filter_jenis, #filter_locked').on('change', function() {
             tableDokumentasi.ajax.reload();
+            loadChartData();
         });
 
         // 🚀 FUNGSI EXPORT EXCEL MENGIKUTI FILTER
@@ -759,7 +894,14 @@
                 },
                 success: function(res) {
                     if (res.status === 'success') {
-                        Swal.fire('Berhasil', res.message, 'success').then(() => {
+                        // 🚀 MODIFIKASI SWEETALERT: Hilang otomatis dalam 1,5 detik
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: res.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
                             location.reload();
                         });
                     } else {
@@ -815,6 +957,7 @@
                                 Swal.fire('Terhapus!', res.message, 'success');
                                 // Reload tabel tanpa mereset halaman (tetap di page yang sama)
                                 $('#tableDokumentasi').DataTable().ajax.reload(null, false);
+                                loadChartData(); // 🚀 RELOAD DIAGRAM JUGA!
                             } else {
                                 Swal.fire('Gagal!', res.message, 'error');
                             }
@@ -825,27 +968,6 @@
                     });
                 }
             });
-        });
-
-        // 2. Reset Form saat klik "Tambah Baru" agar tidak terbawa data Edit
-        $('[data-bs-target="#offcanvasMaster"]').click(function() {
-            $('#formBansosKKS')[0].reset();
-            $('#id_dokumentasi').val(''); // Kosongkan ID agar dianggap Simpan Baru
-            $('.offcanvas-title').html('<i class="fas fa-plus-circle mr-2"></i> Tambah Dokumentasi Baru');
-            $('#nik_search').val(null).trigger('change');
-            $('#prev_kpm, #prev_bukti').attr('src', "<?= base_url('assets/images/image_not_available.jpg'); ?>");
-
-            // 🚀 Reset Jenis Bansos (kosongkan)
-            $('.btn-group-bansos .btn').removeClass('active');
-
-            // 🚀 Reset Tahap Salur ke bulan berjalan saat ini secara dinamis
-            $('.btn-group-toggle input[name="tahap_salur"]').parent().removeClass('active');
-            var currentMonth = new Date().getMonth() + 1; // getMonth() mulai dari 0, jadi ditambah 1
-            var currentTahap = Math.ceil(currentMonth / 3);
-            $("input[name='tahap_salur'][value='Tahap " + currentTahap + "']").prop('checked', true).parent().addClass('active');
-
-            // 🚀 Pastikan Dropdown Tahun juga kembali ke tahun ini
-            $("select[name='tahun_salur']").val(new Date().getFullYear());
         });
 
         // ==========================================
@@ -907,6 +1029,7 @@
                                     showConfirmButton: false
                                 });
                                 $('#tableDokumentasi').DataTable().ajax.reload(null, false);
+                                loadChartData(); // 🚀 RELOAD DIAGRAM JUGA!
                             } else {
                                 Swal.fire('Gagal!', res.message, 'error');
                             }

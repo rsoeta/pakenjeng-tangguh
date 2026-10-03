@@ -206,6 +206,8 @@ $routes->group('bansos-kks', ['filter' => 'authfilterdtks', 'menufilterdtks'], f
 	$routes->get('get-rt', 'Dtsen\BansosKKS::get_rt_ajax');
 	$routes->post('hapus', 'Dtsen\BansosKKS::hapus');
 	$routes->post('toggle-lock', 'Dtsen\BansosKKS::toggleLock');
+	// 🚀 ROUTE BARU UNTUK DIAGRAM DINAMIS
+	$routes->post('chart-data', 'Dtsen\BansosKKS::chartData');
 	// 🚀 ROUTE IMPORT TUGAS DOKUMENTASI KKS DARI SIKS-NG
 	$routes->post('importTugasExcel', 'Dtsen\BansosKKS::importTugasExcel');
 	$routes->get('exportExcel', 'Dtsen\BansosKKS::exportExcel');
