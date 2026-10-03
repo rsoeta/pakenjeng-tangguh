@@ -131,7 +131,7 @@
     <div class="login-logo">
         <img src="<?= base_url('assets/logo/SINDEN-logo.png'); ?>" alt="SINDEN Logo">
     </div>
-    <div class="title">SINDEN</div>
+    <!-- <div class="title">SINDEN</div> -->
     <div class="subtitle">Sistem Informasi Data Ekonomi dan Sosial Desa</div>
 
     <?php if (session()->get('success')): ?>
