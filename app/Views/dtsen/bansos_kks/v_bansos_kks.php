@@ -846,7 +846,7 @@
         });
 
         // ========================================================
-        // 🚀 LOGIKA AJAX SUBMIT (Perbaikan ekstensi SVG)
+        // 🚀 LOGIKA AJAX SUBMIT (MODE SPA - TANPA RELOAD)
         // ========================================================
         $('#formBansosKKS').on('submit', function(e) {
             e.preventDefault();
@@ -905,7 +905,22 @@
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            location.reload();
+                            // 🚀 1. TUTUP OFFCANVAS SECARA MANUAL
+                            var offcanvasEl = document.getElementById('offcanvasMaster');
+                            var myOffcanvas = window.BS5.Offcanvas.getInstance(offcanvasEl);
+                            if (myOffcanvas) {
+                                myOffcanvas.hide();
+                            }
+
+                            // 🚀 2. RELOAD DATA TABEL SECARA DIAM-DIAM (SPA)
+                            // Panggil DataTables ajax.reload (parameter false agar posisi paging tetap)
+                            $('#tableDokumentasi').DataTable().ajax.reload(null, false);
+
+                            // 🚀 3. RELOAD DIAGRAM SECARA DIAM-DIAM
+                            loadChartData();
+
+                            // Kembalikan tombol simpan ke kondisi awal
+                            $('#btnSimpan').prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Simpan Dokumentasi');
                         });
                     } else {
                         Swal.fire('Gagal', res.message, 'error');
