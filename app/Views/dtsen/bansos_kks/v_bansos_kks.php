@@ -716,7 +716,7 @@
         // ========================================================
         $('#tableDokumentasi').on('click', '.btn-edit', function() {
             var id = $(this).data('id');
-            var kelengkapan = $(this).data('kelengkapan'); // Menangkap chip pelacak dari PHP
+            var kelengkapan = $(this).data('kelengkapan');
 
             $.ajax({
                 url: "<?= base_url('bansos-kks/edit-ajax') ?>/" + id,
@@ -726,10 +726,8 @@
                     if (res.status === 'success') {
                         var d = res.data;
 
-                        // Reset Form 
                         $('#formBansosKKS')[0].reset();
 
-                        // Set Judul Berdasarkan Mode
                         if (roleId >= 4 && kelengkapan == 0) {
                             $('.offcanvas-title').html('<i class="fas fa-camera text-primary mr-2"></i> Lengkapi Dokumentasi');
                         } else if (roleId >= 4 && kelengkapan == 1) {
@@ -738,13 +736,11 @@
                             $('.offcanvas-title').html('<i class="fas fa-edit text-warning mr-2"></i> Edit Dokumentasi');
                         }
 
-                        // Isi Hidden ID
                         if ($('#id_dokumentasi').length == 0) {
                             $('#formBansosKKS').append('<input type="hidden" name="id" id="id_dokumentasi">');
                         }
                         $('#id_dokumentasi').val(d.id);
 
-                        // Isi Data Teks & Hidden
                         $('#nama_kpm').val(d.nama_kpm);
                         $('#no_kks').val(d.no_kks);
                         $('#nik_kpm_hidden').val(d.nik_kpm);
@@ -754,14 +750,18 @@
                         $('#nominal_cair').val(new Intl.NumberFormat('id-ID').format(d.nominal_cair));
                         $("select[name='status_salur']").val(d.status_salur);
 
-                        // 🚀 PECAH STRING TAHAP DAN TAHUN
+                        // 🚀 PERBAIKAN: Bersihkan & Set Tahap Salur
                         if (d.tahap_salur) {
                             var splitTahap = d.tahap_salur.split(' Tahun ');
                             var tahap = splitTahap[0];
                             var tahun = splitTahap[1];
 
-                            $('.btn-group-toggle input[name="tahap_salur"]').parent().removeClass('active');
-                            $("input[name='tahap_salur'][value='" + tahap + "']").prop('checked', true).parent().addClass('active');
+                            $('input[name="tahap_salur"]').prop('checked', false);
+                            $('.btn-group-toggle label.btn').removeClass('active');
+
+                            var targetTahap = $("input[name='tahap_salur'][value='" + tahap + "']");
+                            targetTahap.prop('checked', true);
+                            targetTahap.parent('label').addClass('active');
 
                             if ($("select[name='tahun_salur'] option[value='" + tahun + "']").length === 0) {
                                 $("select[name='tahun_salur']").append(new Option(tahun, tahun));
@@ -769,42 +769,39 @@
                             $("select[name='tahun_salur']").val(tahun);
                         }
 
-                        // Set Radio Button Jenis Bansos
-                        $('.btn-group-bansos input[name="jenis_bansos"]').parent().removeClass('active');
-                        $("input[name='jenis_bansos'][value='" + d.jenis_bansos + "']").prop('checked', true).parent().addClass('active');
+                        // 🚀 PERBAIKAN: Bersihkan & Set Jenis Bansos
+                        $('input[name="jenis_bansos"]').prop('checked', false);
+                        $('.btn-group-bansos label.btn').removeClass('active');
 
-                        // Tampilkan Preview Foto
+                        if (d.jenis_bansos) {
+                            var targetBansos = $("input[name='jenis_bansos'][value='" + d.jenis_bansos + "']");
+                            targetBansos.prop('checked', true);
+                            targetBansos.parent('label').addClass('active');
+                        }
+
                         var prevKpmSrc = d.foto_kpm_kks ? "<?= base_url('uploads/bansos') ?>/" + d.foto_kpm_kks : "<?= base_url('assets/img/no-image.svg') ?>";
                         var prevBuktiSrc = d.foto_bukti_transaksi ? "<?= base_url('uploads/bansos') ?>/" + d.foto_bukti_transaksi : "<?= base_url('assets/img/no-image.svg') ?>";
                         $('#prev_kpm').attr('src', prevKpmSrc);
                         $('#prev_bukti').attr('src', prevBuktiSrc);
 
-                        // SYNC SELECT2
                         var newOption = new Option("NIK: " + d.nik_kpm + " - " + d.nama_kpm, d.nik_kpm, true, true);
                         $('#nik_search').append(newOption).trigger('change');
 
-                        // ========================================================
-                        // 🚀 LOGIKA PENGGEMBOKAN SMART LOCK (TUGAS PENTRI)
-                        // ========================================================
-                        // 1. Reset semua gembokan dulu ke kondisi normal
                         $('#formBansosKKS').find('input, select, textarea, button[type="submit"]').prop('disabled', false).prop('readonly', false).removeClass('bg-light');
                         $('#btnSimpan').show();
 
                         if (roleId >= 4) {
                             if (kelengkapan == 0) {
-                                // MODE PENTRI LENGKAPI TUGAS: Kunci identitas & bansos
                                 $('#nama_kpm, #no_kks').prop('readonly', true).addClass('bg-light');
                                 $('input[name="jenis_bansos"], input[name="tahap_salur"]').prop('disabled', true);
                                 $('select[name="tahun_salur"]').prop('disabled', true).addClass('bg-light');
-                                $('#nik_search').prop('disabled', true); // Kunci Select2 NIK
+                                $('#nik_search').prop('disabled', true);
                             } else {
-                                // MODE PENTRI LIHAT DATA: Kunci Semua!
                                 $('#formBansosKKS').find('input, select, textarea').prop('disabled', true);
-                                $('#btnSimpan').hide(); // Sembunyikan tombol simpan
+                                $('#btnSimpan').hide();
                             }
                         }
 
-                        // TAMPILKAN OFFCANVAS
                         var offcanvasEl = document.getElementById('offcanvasMaster');
                         var myOffcanvas = window.BS5.Offcanvas.getInstance(offcanvasEl);
                         if (!myOffcanvas) {
@@ -817,42 +814,54 @@
         });
 
         // ========================================================
-        // 🚀 LOGIKA KLIK TOMBOL TAMBAH BARU
+        // 🚀 2. LOGIKA KLIK TOMBOL TAMBAH BARU
         // ========================================================
         $('[data-bs-target="#offcanvasMaster"]').on('click', function() {
-            // Reset Form ke kondisi perawan
             $('#formBansosKKS')[0].reset();
             $('#id_dokumentasi').val('');
             $('.offcanvas-title').html('<i class="fas fa-plus-circle text-primary mr-2"></i> Tambah Data Baru');
 
-            // Reset Select2 dan Preview Foto
             if ($('#nik_search').hasClass('select2-hidden-accessible')) {
                 $('#nik_search').val(null).trigger('change');
             }
             $('#prev_kpm, #prev_bukti').attr('src', '<?= base_url("assets/img/no-image.svg") ?>');
 
-            // Lepas semua gembokan form
             $('#formBansosKKS').find('input, select, textarea, button[type="submit"]').prop('disabled', false).prop('readonly', false).removeClass('bg-light');
             $('#btnSimpan').show();
 
-            // 🚀 JIKA ADMIN: Boleh simpan tanpa foto dan tanpa status (sebagai PR)
             if (roleId <= 3) {
                 $('#foto_kpm_kks, #foto_bukti_transaksi').prop('required', false);
-                $('#status_salur').prop('required', false); // 🚀 Matikan required status salur
+                $('#status_salur').prop('required', false);
             } else {
                 $('#foto_kpm_kks, #foto_bukti_transaksi').prop('required', true);
                 $('#status_salur').prop('required', true);
             }
+
+            // 🚀 PERBAIKAN MUTLAK: Hapus centang dan hilangkan warna tombol aktif
+            $('input[name="jenis_bansos"]').prop('checked', false);
+            $('.btn-group-bansos label.btn').removeClass('active');
+
+            $('input[name="tahap_salur"]').prop('checked', false);
+            $('.btn-group-toggle label.btn').removeClass('active');
+
+            // Set otomatis Tahap Salur berjalan
+            var currentMonth = new Date().getMonth() + 1;
+            var currentTahap = Math.ceil(currentMonth / 3);
+            var targetTahapBaru = $("input[name='tahap_salur'][value='Tahap " + currentTahap + "']");
+            targetTahapBaru.prop('checked', true);
+            targetTahapBaru.parent('label').addClass('active');
+
+            $("select[name='tahun_salur']").val(new Date().getFullYear());
         });
 
         // ========================================================
-        // 🚀 LOGIKA AJAX SUBMIT (MODE SPA - TANPA RELOAD)
+        // 🚀 3. LOGIKA AJAX SUBMIT (MODE SPA - TANPA RELOAD)
         // ========================================================
         $('#formBansosKKS').on('submit', function(e) {
             e.preventDefault();
 
             var statusSalur = $("select[name='status_salur']").val();
-            var isDraftAdmin = (roleId <= 3 && !statusSalur); // Deteksi mode Draft Admin
+            var isDraftAdmin = (roleId <= 3 && !statusSalur);
 
             if ($('#nik_kpm_hidden').val() === '') {
                 Swal.fire('Peringatan', 'Pilih NIK KPM dahulu!', 'warning');
@@ -863,7 +872,6 @@
                 return false;
             }
 
-            // 🚀 VALIDASI FOTO CERDAS (Perbaikan: Deteksi .svg)
             if (!isDraftAdmin) {
                 var isFotoKpmKosong = ($('#foto_kpm_kks').val() === '' && $('#prev_kpm').attr('src').includes('no-image.svg'));
                 var isFotoBuktiKosong = ($('#foto_bukti_transaksi').val() === '' && $('#prev_bukti').attr('src').includes('no-image.svg'));
@@ -879,7 +887,6 @@
                 }
             }
 
-            // Buka paksa field yang ter-disable agar value-nya terkirim ke Backend
             $(this).find(':disabled').prop('disabled', false);
 
             var formData = new FormData(this);
@@ -897,7 +904,15 @@
                 },
                 success: function(res) {
                     if (res.status === 'success') {
-                        // 🚀 MODIFIKASI SWEETALERT: Hilang otomatis dalam 1,5 detik
+
+                        // 🚀 PERBAIKAN: Kembalikan form ke keadaan perawan SESUDAH disubmit
+                        $('#formBansosKKS')[0].reset();
+                        $('input[name="jenis_bansos"], input[name="tahap_salur"]').prop('checked', false);
+                        $('.btn-group-bansos label.btn, .btn-group-toggle label.btn').removeClass('active');
+                        if ($('#nik_search').hasClass('select2-hidden-accessible')) {
+                            $('#nik_search').val(null).trigger('change');
+                        }
+
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil!',
@@ -905,21 +920,15 @@
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            // 🚀 1. TUTUP OFFCANVAS SECARA MANUAL
                             var offcanvasEl = document.getElementById('offcanvasMaster');
                             var myOffcanvas = window.BS5.Offcanvas.getInstance(offcanvasEl);
                             if (myOffcanvas) {
                                 myOffcanvas.hide();
                             }
 
-                            // 🚀 2. RELOAD DATA TABEL SECARA DIAM-DIAM (SPA)
-                            // Panggil DataTables ajax.reload (parameter false agar posisi paging tetap)
                             $('#tableDokumentasi').DataTable().ajax.reload(null, false);
-
-                            // 🚀 3. RELOAD DIAGRAM SECARA DIAM-DIAM
                             loadChartData();
 
-                            // Kembalikan tombol simpan ke kondisi awal
                             $('#btnSimpan').prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Simpan Dokumentasi');
                         });
                     } else {
