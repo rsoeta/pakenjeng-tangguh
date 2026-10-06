@@ -475,8 +475,6 @@
             }, 800);
         });
 
-        // ... (Kode sebelumnya) ...
-
         // ==============================================================
         // 🚀 EVENT: BUKA MODAL UPDATE DESIL DARI TABEL DAFTAR KELUARGA
         // ==============================================================
@@ -499,8 +497,11 @@
             modal.find('#modal_kepala_keluarga').val(nama);
             modal.find('#modal_alamat').val(alamat);
 
-            // Perhatikan: pastikan select merespon perubahan value
-            modal.find('#kategori_desil').val(desil).trigger('change');
+            // 🚀 PERBAIKAN: Logika Pengisian Radio Button (Pills)
+            modal.find('input[name="kategori_desil"]').prop('checked', false); // Bersihkan semua pil
+            if (desil && desil.trim() !== '') {
+                modal.find('input[name="kategori_desil"][value="' + desil.trim() + '"]').prop('checked', true);
+            }
 
             // 🚀 Otomatis set form Periode ke Triwulan Berjalan saat modal dibuka
             const d = new Date();

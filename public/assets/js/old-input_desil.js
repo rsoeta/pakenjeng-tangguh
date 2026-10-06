@@ -1,39 +1,28 @@
 $(document).ready(function () {
     // 🔘 Fungsi untuk membuka modal dengan data KK
-    $(document).on('click', '.btnInputDesil', function (e) {
-        e.preventDefault();
+    $(document).on('click', '.btnInputDesil', function () {
         const idKk = $(this).data('id');
         const noKk = $(this).data('nokk');
         const kepala = $(this).data('nama');
         const alamat = $(this).data('alamat');
-        const desil = String($(this).data('desil') || '').trim();
+        const desil = $(this).data('desil') || '';
 
-        const modalDesil = $('#modalInputDesil');
+        $('#modal_id_kk').val(idKk);
+        $('#modal_no_kk').val(noKk);
+        $('#modal_kepala_keluarga').val(kepala);
+        $('#modal_alamat').val(alamat);
+        $('#modal_kategori_desil').val(desil);
 
-        modalDesil.find('#modal_id_kk').val(idKk);
-        modalDesil.find('#modal_no_kk').val(noKk);
-        modalDesil.find('#modal_kepala_keluarga').val(kepala);
-        modalDesil.find('#modal_alamat').val(alamat);
-        
-        // 🚀 PERBAIKAN: Logika Pengisian Radio Button (Pills)
-        modalDesil.find('input[name="kategori_desil"]').prop('checked', false);
-        if (desil !== '') {
-            modalDesil.find('input[name="kategori_desil"][value="' + desil + '"]').prop('checked', true);
-        }
-
-        modalDesil.modal('show');
+        $('#modalInputDesil').modal('show');
     });
+    
+    
 });
-
 // 💾 Simpan data ke backend
 $('#formInputDesil').on('submit', function (e) {
     e.preventDefault();
 
     const formData = $(this).serialize();
-    const btnSubmit = $(this).find('button[type="submit"]');
-    const originalText = btnSubmit.html();
-
-    btnSubmit.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Menyimpan...');
 
     $.ajax({
         url: '/dtsen-se/update-desil',
@@ -41,7 +30,7 @@ $('#formInputDesil').on('submit', function (e) {
         data: formData,
         dataType: 'json',
         success: function (res) {
-            btnSubmit.prop('disabled', false).html(originalText);
+            console.log('Response JSON:', res);
             if (res && res.status === 'success') {
                 Swal.fire({
                     icon: 'success',
@@ -51,9 +40,7 @@ $('#formInputDesil').on('submit', function (e) {
                     showConfirmButton: false
                 });
                 $('#modalInputDesil').modal('hide');
-                if ($.fn.DataTable.isDataTable('#tableKeluarga')) {
-                    $('#tableKeluarga').DataTable().ajax.reload(null, false);
-                }
+                $('#tableKeluarga').DataTable().ajax.reload(null, false);
             } else {
                 Swal.fire({
                     icon: 'error',
@@ -63,8 +50,14 @@ $('#formInputDesil').on('submit', function (e) {
             }
         },
         error: function (xhr, status, error) {
-            btnSubmit.prop('disabled', false).html(originalText);
-            if (error && error.includes('content_script.js')) return; 
+            console.error('AJAX Error:', error, xhr.responseText);
+
+            // cek apakah error berasal dari ekstensi
+            if (error && error.includes('content_script.js')) {
+                console.warn('⚠️ Peringatan ekstensi browser terdeteksi, diabaikan.');
+                return; // abaikan error dari ekstensi
+            }
+
             Swal.fire({
                 icon: 'error',
                 title: 'Error!',

@@ -409,9 +409,9 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
     };
 
     // ==============================================================
-    // 🚀 PENGENDALI MODAL (TIDAK MENUTUP OFFCANVAS)
+    // 🚀 PENGENDALI MODAL (UPDATE DESIL - PILLS RADIO BUTTON)
     // ==============================================================
-    $(document).on('click', '.btnUpdateDesil', function(e) {
+    $(document).on('click', '.btnUpdateDesil, .btnInputDesil', function(e) {
         e.preventDefault();
         const btn = $(this);
         const modalDesil = $('#modalInputDesil');
@@ -420,9 +420,18 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
         modalDesil.find('#modal_no_kk').val(btn.attr('data-nokk'));
         modalDesil.find('#modal_kepala_keluarga').val(btn.attr('data-nama'));
         modalDesil.find('#modal_alamat').val(btn.attr('data-alamat'));
-        modalDesil.find('#kategori_desil').val(btn.attr('data-desil'));
 
-        // LANGSUNG BUKA MODAL TANPA MENUTUP OFFCANVAS
+        // 🚀 LOGIKA PENGISIAN TOMBOL RADIO DESIL
+        const desilVal = btn.attr('data-desil');
+        // Reset semua tombol radio terlebih dahulu agar bersih
+        modalDesil.find('input[name="kategori_desil"]').prop('checked', false);
+
+        // Jika ada nilai desil (bukan null/kosong), centang tombol yang sesuai
+        if (desilVal && desilVal.trim() !== '') {
+            modalDesil.find('input[name="kategori_desil"][value="' + desilVal.trim() + '"]').prop('checked', true);
+        }
+
+        // BUKA MODAL
         modalDesil.modal('show');
     });
 
