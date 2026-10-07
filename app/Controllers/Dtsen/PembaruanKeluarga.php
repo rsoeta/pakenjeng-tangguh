@@ -792,11 +792,17 @@ class PembaruanKeluarga extends BaseController
                     'kecamatan' => $post['kecamatan'] ?? null,
                     'desa' => $post['desa'] ?? null,
 
-                    // 🚀 TANGKAP ALAMAT PINDAH (Status 3 = Dalam Negeri, Status 4 = Luar Negeri)
+                    // 🚀 TANGKAP ALAMAT PINDAH DALAM NEGERI (Menggunakan field baru)
+                    'provinsi_tujuan' => $post['provinsi_tujuan'] ?? null,
+                    'kabupaten_tujuan' => $post['kabupaten_tujuan'] ?? null,
+                    'kecamatan_tujuan' => $post['kecamatan_tujuan'] ?? null,
+                    'desa_tujuan' => $post['desa_tujuan'] ?? null,
                     'alamat_tujuan' => $post['alamat_tujuan'] ?? null,
                     'rt_tujuan' => $post['rt_tujuan'] ?? null,
                     'rw_tujuan' => $post['rw_tujuan'] ?? null,
                     'dusun_tujuan' => $post['dusun_tujuan'] ?? null,
+
+                    // 🚀 TANGKAP ALAMAT PINDAH LUAR NEGERI
                     'negara_tujuan' => $post['negara_tujuan'] ?? null,
                 ],
                 'pendidikan' => [
@@ -1587,7 +1593,6 @@ class PembaruanKeluarga extends BaseController
                     continue;
                 }
 
-                // ... (kode ekstraksi awal)
                 $payload = [];
                 if (!empty($row['payload_member'])) {
                     $payload = json_decode($row['payload_member'], true) ?? [];
@@ -1599,17 +1604,31 @@ class PembaruanKeluarga extends BaseController
                 $row['tanggal_lahir'] = $identitas['tanggal_lahir'] ?? null;
                 $row['hubungan_keluarga_label'] = $row['jenis_shdk'] ?? $row['hubungan'] ?? '-';
 
+                // 🚀 TRANSLATOR STATUS LAMA KE ANGKA BARU (Backward Compatibility)
+                $statusInput = $identitas['status_keberadaan'] ?? null;
+                $statusMap = [
+                    'Tinggal Bersama Keluarga' => '1',
+                    'Meninggal' => '2',
+                    'Tidak Tinggal Bersama Keluarga/Pindah Ke Wilayah Lain' => '3',
+                    'Tidak Tinggal Bersama Keluarga/Pindah Ke Luar Negeri' => '4',
+                    'Sudah pisah kartu keluarga' => '5',
+                    'Tidak Ditemukan' => '6',
+                    'Tidak Ditemukan atau Tidak Dikenal' => '6',
+                    'Belum Ditentukan' => ''
+                ];
+                // Jika data lama, terjemahkan. Jika sudah angka, biarkan.
+                $row['status_keberadaan'] = $statusMap[$statusInput] ?? $statusInput;
+
                 // 🚀 AMBIL DATA PEKERJAAN
                 $pkInput = $payload['pekerjaan'] ?? $identitas['pekerjaan'] ?? null;
                 $row['pekerjaan_label'] = $pekerjaanMap[$pkInput] ?? $payload['pekerjaan_nama'] ?? $pkInput ?? '-';
 
-                // 🚀 AMBIL DATA WILAYAH CAPIL (Dari payload -> identitas)
+                // 🚀 AMBIL DATA WILAYAH CAPIL
                 $row['provinsi']  = $identitas['provinsi'] ?? null;
                 $row['kabupaten'] = $identitas['kabupaten'] ?? null;
                 $row['kecamatan'] = $identitas['kecamatan'] ?? null;
                 $row['desa']      = $identitas['desa'] ?? null;
 
-                // Timpa data utama bila NIK sama (jalur usulan draft terbaru)
                 $gabungan[$row['nik']] = $row;
             }
 

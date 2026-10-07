@@ -258,6 +258,11 @@ $editable = ($roleId <= 4);
                                                         <?= esc($payload['perumahan']['alamat'] ?? '-') ?>
                                                     </div>
                                                 </div>
+                                                <!-- 🚀 PENYELAMAT: Hidden inputs untuk menyimpan domisili tetap -->
+                                                <input type="hidden" name="provinsi" id="ind_provinsi_hidden">
+                                                <input type="hidden" name="kabupaten" id="ind_kabupaten_hidden">
+                                                <input type="hidden" name="kecamatan" id="ind_kecamatan_hidden">
+                                                <input type="hidden" name="desa" id="ind_desa_hidden">
                                             </div>
 
                                             <!-- B. Alamat Pindah Dalam Negeri (Dropdown Bertingkat) -->
@@ -270,26 +275,26 @@ $editable = ($roleId <= 4);
                                                         <select class="form-select form-select-sm alamat-wajib-dn" id="provinsi_tujuan_select">
                                                             <option value="">-- Pilih Provinsi --</option>
                                                         </select>
-                                                        <!-- 🚀 Hidden input ini yang akan dikirim ke Backend -->
-                                                        <input type="hidden" name="provinsi" id="provinsi_tujuan_nama">
+                                                        <!-- 🚀 PERBAIKAN: Ubah name menjadi "_tujuan" agar tidak membajak alamat asli -->
+                                                        <input type="hidden" name="provinsi_tujuan" id="provinsi_tujuan_nama">
                                                     </div>
                                                     <div class="col-md-6">
                                                         <select class="form-select form-select-sm alamat-wajib-dn" id="kabupaten_tujuan_select" disabled>
                                                             <option value="">-- Pilih Kab/Kota --</option>
                                                         </select>
-                                                        <input type="hidden" name="kabupaten" id="kabupaten_tujuan_nama">
+                                                        <input type="hidden" name="kabupaten_tujuan" id="kabupaten_tujuan_nama">
                                                     </div>
                                                     <div class="col-md-6">
                                                         <select class="form-select form-select-sm alamat-wajib-dn" id="kecamatan_tujuan_select" disabled>
                                                             <option value="">-- Pilih Kecamatan --</option>
                                                         </select>
-                                                        <input type="hidden" name="kecamatan" id="kecamatan_tujuan_nama">
+                                                        <input type="hidden" name="kecamatan_tujuan" id="kecamatan_tujuan_nama">
                                                     </div>
                                                     <div class="col-md-6">
                                                         <select class="form-select form-select-sm alamat-wajib-dn" id="desa_tujuan_select" disabled>
                                                             <option value="">-- Pilih Desa/Kelurahan --</option>
                                                         </select>
-                                                        <input type="hidden" name="desa" id="desa_tujuan_nama">
+                                                        <input type="hidden" name="desa_tujuan" id="desa_tujuan_nama">
                                                     </div>
                                                 </div>
 
@@ -305,7 +310,6 @@ $editable = ($roleId <= 4);
                                                         <input type="text" class="form-control form-control-sm alamat-wajib-dn onlynum" name="rw_tujuan" placeholder="RW (Mis: 002)" maxlength="3" autocomplete="off">
                                                     </div>
                                                     <div class="col-4">
-                                                        <!-- Dusun opsional, tidak wajib -->
                                                         <input type="text" class="form-control form-control-sm upper" name="dusun_tujuan" placeholder="Dusun (Ops.)" autocomplete="off">
                                                     </div>
                                                 </div>

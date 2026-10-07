@@ -71,7 +71,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             <th>Aksi</th>
         </tr>
     </thead>
-    <!-- ... (tabel DataTable Anggota di atasnya) ... -->
 </table>
 
 <!-- 🚀 KOTAK TOMBOL SELESAI / CEK STATUS -->
@@ -89,8 +88,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         </div>
     </div>
 <?php endif; ?>
-
-<!-- ... (script assets di bawahnya) ... -->
 
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
@@ -436,39 +433,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             setTimeout(toggleKunciTenagaKerja, 150);
         });
 
-        function validateTenagaKerja() {
-            const bekerja = $('#bekerja_seminggu').val();
-            const usaha = $('#lapangan_usaha').val();
-            const status = $('#status_pekerjaan').val();
-            const pendapatan = $('#pendapatan').val();
-            const valid = (bekerja && usaha && status && pendapatan);
-            $('#badgeKerja').text(valid ? '🟢' : '⚠️');
-            return valid;
-        }
-
-        function validateUsaha() {
-            const memilikiUsaha = $('#memiliki_usaha').val();
-            let valid = true;
-
-            if (memilikiUsaha === 'Ya') {
-                const jumlahUsaha = $('#jumlah_usaha').val();
-                const pekerjaDibayar = $('#pekerja_dibayar').val();
-                const pekerjaTidakDibayar = $('#pekerja_tidak_dibayar').val();
-                const omzetBulanan = $('#omzet_bulanan').val();
-                valid = (jumlahUsaha && pekerjaDibayar && pekerjaTidakDibayar && omzetBulanan);
-            }
-
-            $('#badgeUsaha').text(valid ? '🟢' : '⚠️');
-            return valid;
-        }
-
-        function validateKesehatan() {
-            const penyakitKronis = $('#penyakit_kronis').val();
-            const valid = (statusHamil && penyakitKronis);
-            $('#badgeKesehatan').text(valid ? '🟢' : '⚠️');
-            return valid;
-        }
-
         /* ============================================================
          * 🌍 FUNGSI: Chained Loading Wilayah (tanpa setTimeout)
          * ============================================================ */
@@ -533,23 +497,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 const selected = (id == selectedId) ? 'selected' : '';
                 el.append(`<option value="${id}" ${selected}>${name}</option>`);
             });
-        }
-
-        $('#memiliki_usaha').on('change', toggleUsahaDetail);
-        console.log("Usaha:", $('#memiliki_usaha').val());
-
-        // ==============================================================
-        // 🚀 SINKRONISASI MUTLAK: TAB KELUARGA -> MODAL ANGGOTA
-        // ==============================================================
-        function syncKeluargaKeAnggota() {
-            // 1. Tarik Nomor KK dari Tab Keluarga
-            $('#individu_no_kk').val($('#keluarga_no_kk').val());
-
-            // 2. KLONING CEPAT Wilayah (Copy isi option HTML-nya agar tidak perlu load AJAX lagi!)
-            $('#ind_provinsi').html($('#rumah_provinsi').html()).val($('#rumah_provinsi').val());
-            $('#ind_kabupaten').html($('#rumah_regency').html()).val($('#rumah_regency').val());
-            $('#ind_kecamatan').html($('#rumah_district').html()).val($('#rumah_district').val());
-            $('#ind_desa').html($('#rumah_village').html()).val($('#rumah_village').val());
         }
 
         /* ======================================================
@@ -710,7 +657,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 
             // 3. 🚀 FINAL GATEKEEPER: Abaikan elemen yang sedang dikunci (:not(:disabled))
             const invalidElements = form.find('.is-invalid:not(:disabled)');
-            // ... (Kode Jenderal selanjutnya mulai dari if (invalidElements.length > 0) dst tetap aman utuh) ...
 
             if (invalidElements.length > 0) {
                 // Cek apakah errornya bersumber dari kecerdasan Tab Pendidikan
@@ -836,12 +782,288 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         /* ============================================================
          * ✏️ EVENT: Tombol Edit / Lihat Anggota
          * ============================================================ */
+        // $(document).on('click', '.btnEditAnggota', function() {
+
+        //     const id = $(this).data('id');
+        //     if (!id) return Swal.fire("Info", "ID anggota tidak ditemukan.", "info");
+
+        //     const idKkGlobal = $('#id_kk').val();
+        //     $('#formAnggota')[0].reset(); // 🚀 Bersihkan sisa input sebelumnya
+        //     $('#formAnggota #id_kk').val(idKkGlobal);
+
+        //     Swal.fire({
+        //         title: 'Memuat data...',
+        //         allowOutsideClick: false,
+        //         didOpen: () => Swal.showLoading()
+        //     });
+
+        //     $.getJSON(`${window.baseUrl}/<?= ($roleId == 6) ? 'sensus-ekonomi' : 'pembaruan-keluarga' ?>/get-anggota-detail/${id}`, function(res) {
+        //         Swal.close();
+        //         if (res.status !== 'success') return Swal.fire("Gagal", res.message, "error");
+
+        //         const d = res.data.anggota_prefill;
+        //         const drop = res.data.dropdowns;
+
+        //         // Prefill semua input dasar
+        //         $('#nik').val(d.nik ?? '');
+        //         $('#nama').val(d.nama ?? '');
+        //         $('#tempat_lahir').val(d.tempat_lahir ?? '');
+
+        //         // 🚀 PREFILL: Konversi balik YYYY-MM-DD (DB) ke DD-MM-YYYY (Layar)
+        //         const tglDB = d.tanggal_lahir ?? '';
+        //         $('#tanggal_lahir').val(tglDB);
+
+        //         if (tglDB && tglDB.includes('-')) {
+        //             const parts = tglDB.split('-');
+        //             if (parts.length === 3) {
+        //                 $('#tanggal_lahir_display').val(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        //             }
+        //         } else {
+        //             $('#tanggal_lahir_display').val('');
+        //         }
+
+        //         // 🚀 PREFILL: Elemen Baru BPS (No HP)
+        //         $('#no_hp').val(d.no_hp ?? '');
+
+        //         // Prefill Jenis Kelamin
+        //         $('input[name="jenis_kelamin"]').prop('checked', false);
+        //         if (d.jenis_kelamin === 'L' || d.jenis_kelamin === 'P') {
+        //             $(`input[name="jenis_kelamin"][value="${d.jenis_kelamin}"]`).prop('checked', true);
+        //         }
+
+        //         updateSelectOptions('#status_kawin', drop.status_kawin, d.status_kawin ?? d.status_kawin_label);
+        //         updateSelectOptions('#hubungan', drop.hubungan, d.hubungan ?? d.hubungan_label);
+        //         updateSelectOptions('#pekerjaan', drop.pekerjaan, d.pekerjaan ?? d.pekerjaan_label);
+        //         updateSelectOptions('#pendidikan_terakhir', drop.pendidikan, d.pendidikan_terakhir ?? d.pendidikan_label);
+        //         $('#ibu_kandung').val(d.ibu_kandung ?? '');
+        //         $('#individu_no_kk').val($('#keluarga_no_kk').val()); // 🚀 Pastikan sinkron
+
+        //         // ==============================================================
+        //         // 🚀 TRANSLATOR STATUS KEBERADAAN (Dari Teks Lama BPS -> Kode Angka)
+        //         // ==============================================================
+        //         const statusMap = {
+        //             'Tinggal Bersama Keluarga': '1',
+        //             'Meninggal': '2',
+        //             'Tidak Tinggal Bersama Keluarga/Pindah Ke Wilayah Lain': '3',
+        //             'Tidak Tinggal Bersama Keluarga/Pindah Ke Luar Negeri': '4',
+        //             'Sudah pisah kartu keluarga': '5',
+        //             'Tidak Ditemukan': '6',
+        //             'Tidak Ditemukan atau Tidak Dikenal': '6',
+        //             'Belum Ditentukan': ''
+        //         };
+        //         let statusAsli = d.status_keberadaan ?? '';
+        //         let statusFinal = statusMap[statusAsli] || statusAsli;
+
+        //         // Set value dan trigger change agar form langsung Bereaksi (Kunci/Buka)
+        //         $('#status_keberadaan').val(statusFinal).trigger('change');
+
+        //         // ==============================================================
+        //         // 🚀 PERBAIKAN WILAYAH (API Cascading Dropdown Pindah)
+        //         // ==============================================================
+        //         if (statusFinal === '3') {
+        //             // Jika Pindah Dalam Negeri, ambil riwayat provinsi tujuan dari database
+        //             const provTujuan = d.provinsi_tujuan ?? '';
+        //             const kabTujuan = d.kabupaten_tujuan ?? '';
+        //             const kecTujuan = d.kecamatan_tujuan ?? '';
+        //             const desaTujuan = d.desa_tujuan ?? '';
+
+        //             // Panggil API secara berantai agar dropdown tujuan terisi otomatis
+        //             loadProvinces(provTujuan, () => loadRegencies(provTujuan, kabTujuan, () => loadDistricts(kabTujuan, kecTujuan, () => loadVillages(kecTujuan, desaTujuan))));
+
+        //             // Isi input teks manual lainnya
+        //             $('input[name="alamat_tujuan"]').val(d.alamat_tujuan ?? '');
+        //             $('input[name="rt_tujuan"]').val(d.rt_tujuan ?? '');
+        //             $('input[name="rw_tujuan"]').val(d.rw_tujuan ?? '');
+        //             $('input[name="dusun_tujuan"]').val(d.dusun_tujuan ?? '');
+        //         } else if (statusFinal === '4') {
+        //             // Jika Pindah Luar Negeri
+        //             $('input[name="negara_tujuan"]').val(d.negara_tujuan ?? '');
+        //         }
+
+        //         // 🚀 AMANKAN DOMISILI ASAL (Ke input hidden)
+        //         const provAsal = d.provinsi ?? $('#rumah_provinsi').val() ?? '';
+        //         const kabAsal = d.kabupaten ?? $('#rumah_regency').val() ?? '';
+        //         const kecAsal = d.kecamatan ?? $('#rumah_district').val() ?? '';
+        //         const desaAsal = d.desa ?? $('#rumah_village').val() ?? '';
+
+        //         $('#ind_provinsi_hidden').val(provAsal);
+        //         $('#ind_kabupaten_hidden').val(kabAsal);
+        //         $('#ind_kecamatan_hidden').val(kecAsal);
+        //         $('#ind_desa_hidden').val(desaAsal);
+
+        //         // 🚀 TAMPILKAN TEKS DOMISILI KE DROPDOWN TERKUNCI
+        //         $('#ind_provinsi').html($('#rumah_provinsi').html()).val(provAsal);
+        //         $('#ind_kabupaten').html($('#rumah_regency').html()).val(kabAsal);
+        //         $('#ind_kecamatan').html($('#rumah_district').html()).val(kecAsal);
+        //         $('#ind_desa').html($('#rumah_village').html()).val(desaAsal);
+
+        //         // ==============================================================
+        //         // 🚀 PREFILL TAB PENDIDIKAN & TENAGA KERJA
+        //         // ==============================================================
+        //         let psVal = d.partisipasi_sekolah ?? '';
+        //         let usiaBalita = 0;
+        //         if (tglDB) {
+        //             let dob = new Date(tglDB);
+        //             let today = new Date();
+        //             usiaBalita = today.getFullYear() - dob.getFullYear();
+        //             if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) usiaBalita--;
+        //         }
+
+        //         if (usiaBalita < 5 && (!psVal || psVal === '')) psVal = 'Belum Pernah Sekolah';
+
+        //         $('#partisipasi_sekolah').val(psVal).removeClass('is-invalid').trigger('change');
+        //         $('#jenjang_pendidikan').val(d.jenjang_pendidikan ?? '');
+        //         $('#kelas_tertinggi').val(d.kelas_tertinggi ?? '');
+        //         $('#ijazah_tertinggi').val(d.ijazah_tertinggi ?? '');
+
+        //         $('#bekerja_seminggu').val(d.bekerja_seminggu ?? '');
+        //         $('#lapangan_usaha').val(d.lapangan_usaha ?? '').trigger('change');
+        //         $('#lapangan_usaha_lainnya').val(d.lapangan_usaha_lainnya ?? '');
+        //         $('#status_pekerjaan').val(d.status_pekerjaan ?? '');
+        //         $('#pendapatan').val(d.pendapatan ?? '');
+
+        //         $('input[name="rekening_aktif"]').prop('checked', false);
+        //         if (d.rekening_aktif) {
+        //             $(`input[name="rekening_aktif"][value="${d.rekening_aktif}"]`).prop('checked', true);
+        //         }
+
+        //         $('#memiliki_usaha').val(d.memiliki_usaha || '');
+        //         $('#jumlah_usaha').val(d.jumlah_usaha || '');
+        //         $('#pekerja_dibayar').val(d.pekerja_dibayar || '');
+        //         $('#pekerja_tidak_dibayar').val(d.pekerja_tidak_dibayar || '');
+        //         $('#omzet_bulanan').val(d.omzet_bulanan || '');
+        //         toggleUsahaDetail();
+
+        //         // ==============================================================
+        //         // 🚀 PREFILL TAB KESEHATAN
+        //         // ==============================================================
+        //         $('#status_hamil').val(d.status_hamil ?? '');
+
+        //         $('.kronis-check').prop('checked', false);
+        //         if (Array.isArray(d.penyakit_kronis)) {
+        //             d.penyakit_kronis.forEach(val => $(`.kronis-check[value="${val}"]`).prop('checked', true));
+        //         } else if (typeof d.penyakit_kronis === 'string' && d.penyakit_kronis.trim() !== '') {
+        //             try {
+        //                 const parsed = JSON.parse(d.penyakit_kronis);
+        //                 if (Array.isArray(parsed)) parsed.forEach(val => $(`.kronis-check[value="${val}"]`).prop('checked', true));
+        //             } catch (e) {
+        //                 $(`.kronis-check[value="${d.penyakit_kronis}"]`).prop('checked', true);
+        //             }
+        //         }
+
+        //         if (Array.isArray(d.disabilitas)) {
+        //             $('.disab-check').prop('checked', false);
+        //             d.disabilitas.forEach(val => $(`.disab-check[value="${val}"]`).prop('checked', true));
+        //         } else if (typeof d.disabilitas === 'string' && d.disabilitas.trim() !== '') {
+        //             try {
+        //                 const parsed = JSON.parse(d.disabilitas);
+        //                 if (Array.isArray(parsed)) {
+        //                     $('.disab-check').prop('checked', false);
+        //                     parsed.forEach(val => $(`.disab-check[value="${val}"]`).prop('checked', true));
+        //                 }
+        //             } catch (e) {}
+        //         }
+
+        //         // ==============================================================
+        //         // 🚀 UI FINISHING
+        //         // ==============================================================
+        //         let modeTeks = isEditable ? 'Edit Anggota:' : 'Detail Anggota:';
+        //         $('#mode_teks_header').text(modeTeks);
+        //         $('#nama_anggota_header').text(d.nama ? d.nama.toUpperCase() : 'TANPA NAMA');
+        //         $('#formAnggota #id_kk').val($('#id_kk').val() || $('[name="id_kk"]').val());
+        //         $('#tabAnggotaTabs a:first').tab('show');
+
+        //         $('#modalAnggota').modal('show');
+
+        //         // Pastikan status_pekerjaan dll disesuaikan berdasarkan usia saat modal terbuka
+        //         setTimeout(toggleKunciTenagaKerja, 150);
+
+        //     }).fail(() => Swal.fire("Error", "Gagal memuat data anggota.", "error"));
+        // });
+
+        /* ======================================================
+        ➕ EVENT: Tambah Anggota Baru (Gunakan Modal yang Sama)
+        ====================================================== */
+        // $(document).on('click', '#btnTambahAnggota', function() {
+        //     console.log('🆕 Tambah Anggota Baru diklik');
+
+        //     Swal.fire({
+        //         title: 'Memuat form...',
+        //         allowOutsideClick: false,
+        //         didOpen: () => Swal.showLoading()
+        //     });
+
+        //     $.getJSON(`${window.baseUrl}/<?= ($roleId == 6) ? 'sensus-ekonomi' : 'pembaruan-keluarga' ?>/get-anggota-detail`, function(res) {
+        //         Swal.close();
+
+        //         // 🚀 ANTI-BOCOR: Hapus isi form secara paksa
+        //         $('#formAnggota')[0].reset();
+        //         $('#id_anggota').val('');
+        //         $('#no_hp').val('');
+        //         $('input[name="rekening_aktif"]').prop('checked', false);
+
+        //         const idKk = $('#id_kk').val() || $('[name="id_kk"]').val();
+
+        //         $('#formAnggota #id_kk').val(idKk);
+
+        //         // 🚀 Kosongkan nama di header karena ini mode tambah baru
+        //         $('#mode_teks_header').text('Tambah Anggota Baru');
+        //         $('#nama_anggota_header').text('');
+
+        //         $('#ind_provinsi, #ind_kabupaten, #ind_kecamatan, #ind_desa').html('<option value="">Pilih...</option>').val('').trigger('change');
+
+        //         $('.skill-check, .disab-check').prop('checked', false);
+
+        //         const drop = res.data?.dropdowns ?? {};
+        //         updateSelectOptions('#status_kawin', drop.status_kawin);
+        //         updateSelectOptions('#hubungan', drop.hubungan);
+        //         updateSelectOptions('#pekerjaan', drop.pekerjaan);
+        //         updateSelectOptions('#pendidikan_terakhir', drop.pendidikan);
+
+        //         $('#tabAnggotaTabs a:first').tab('show');
+
+        //         // 🚀 PERBAIKAN WILAYAH (TAMBAH BARU): Tembak langsung dari Tab Rumah
+        //         const prov = $('#rumah_provinsi').val() ?? '';
+        //         const kab = $('#rumah_regency').val() ?? '';
+        //         const kec = $('#rumah_district').val() ?? '';
+        //         const desa = $('#rumah_village').val() ?? '';
+
+        //         // Amankan Nomor KK & Hidden Input Domisili
+        //         $('#individu_no_kk').val($('#keluarga_no_kk').val());
+        //         $('#ind_provinsi_hidden').val(prov);
+        //         $('#ind_kabupaten_hidden').val(kab);
+        //         $('#ind_kecamatan_hidden').val(kec);
+        //         $('#ind_desa_hidden').val(desa);
+
+        //         // Tampilkan Teks Domisili ke Dropdown Terkunci
+        //         $('#ind_provinsi').html($('#rumah_provinsi').html()).val(prov);
+        //         $('#ind_kabupaten').html($('#rumah_regency').html()).val(kab);
+        //         $('#ind_kecamatan').html($('#rumah_district').html()).val(kec);
+        //         $('#ind_desa').html($('#rumah_village').html()).val(desa);
+
+        //         $('#modalAnggota').modal('show');
+        //     }).fail(() => {
+        //         Swal.close();
+        //         Swal.fire('Error', 'Gagal memuat form tambah anggota.', 'error');
+        //     });
+        // });
+
+        /* ============================================================
+         * ✏️ EVENT: Tombol Edit / Lihat Anggota
+         * ============================================================ */
         $(document).on('click', '.btnEditAnggota', function() {
 
             const id = $(this).data('id');
             if (!id) return Swal.fire("Info", "ID anggota tidak ditemukan.", "info");
 
             const idKkGlobal = $('#id_kk').val();
+            $('#formAnggota')[0].reset();
+
+            // 🚀 SAPU BERSIH ERROR DARI INTERAKSI SEBELUMNYA (ANTI-NYANGKUT)
+            $('#formAnggota').find('.is-invalid').removeClass('is-invalid');
+            $('#formAnggota').find('.border-danger').removeClass('border-danger');
+            $('#formAnggota').find('.invalid-feedback').html('').removeClass('d-block');
+
             $('#formAnggota #id_kk').val(idKkGlobal);
 
             Swal.fire({
@@ -861,10 +1083,9 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 $('#nik').val(d.nik ?? '');
                 $('#nama').val(d.nama ?? '');
                 $('#tempat_lahir').val(d.tempat_lahir ?? '');
-                // $('#tanggal_lahir').val(d.tanggal_lahir ?? '');
-                // 🚀 PREFILL: Konversi balik YYYY-MM-DD (DB) ke DD-MM-YYYY (Layar)
+
                 const tglDB = d.tanggal_lahir ?? '';
-                $('#tanggal_lahir').val(tglDB); // Isi Ghost Input
+                $('#tanggal_lahir').val(tglDB);
 
                 if (tglDB && tglDB.includes('-')) {
                     const parts = tglDB.split('-');
@@ -875,11 +1096,9 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     $('#tanggal_lahir_display').val('');
                 }
 
-                // 🚀 PREFILL: Elemen Baru BPS (No HP)
                 $('#no_hp').val(d.no_hp ?? '');
 
-                // Prefill Jenis Kelamin (radio button)
-                $('input[name="jenis_kelamin"]').prop('checked', false); // reset dulu
+                $('input[name="jenis_kelamin"]').prop('checked', false);
                 if (d.jenis_kelamin === 'L' || d.jenis_kelamin === 'P') {
                     $(`input[name="jenis_kelamin"][value="${d.jenis_kelamin}"]`).prop('checked', true);
                 }
@@ -889,60 +1108,97 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 updateSelectOptions('#pekerjaan', drop.pekerjaan, d.pekerjaan ?? d.pekerjaan_label);
                 updateSelectOptions('#pendidikan_terakhir', drop.pendidikan, d.pendidikan_terakhir ?? d.pendidikan_label);
                 $('#ibu_kandung').val(d.ibu_kandung ?? '');
-                $('#individu_no_kk').val(d.individu_no_kk);
-                $('#status_keberadaan').val(d.status_keberadaan ?? '');
+                $('#individu_no_kk').val($('#keluarga_no_kk').val());
 
-                // Prefill cascading wilayah
-                const prov = d.provinsi ?? '',
-                    kab = d.kabupaten ?? '',
-                    kec = d.kecamatan ?? '',
-                    desa = d.desa ?? '';
-                // loadProvinces(prov, () => loadRegencies(prov, kab, () => loadDistricts(kab, kec, () => loadVillages(kec, desa))));
-                // 🚀 PAKSA SINKRONISASI DARI TAB KELUARGA (Mengabaikan data asli anggota)
-                syncKeluargaKeAnggota();
+                const statusMap = {
+                    'Tinggal Bersama Keluarga': '1',
+                    'Meninggal': '2',
+                    'Tidak Tinggal Bersama Keluarga/Pindah Ke Wilayah Lain': '3',
+                    'Tidak Tinggal Bersama Keluarga/Pindah Ke Luar Negeri': '4',
+                    'Sudah pisah kartu keluarga': '5',
+                    'Tidak Ditemukan': '6',
+                    'Tidak Ditemukan atau Tidak Dikenal': '6',
+                    'Belum Ditentukan': ''
+                };
+                let statusAsli = d.status_keberadaan ?? '';
+                let statusFinal = statusMap[statusAsli] || statusAsli;
 
-                // Prefill Tab Pendidikan
+                $('#status_keberadaan').val(statusFinal).trigger('change');
+
+                if (statusFinal === '3') {
+                    const provTujuan = d.provinsi_tujuan ?? '';
+                    const kabTujuan = d.kabupaten_tujuan ?? '';
+                    const kecTujuan = d.kecamatan_tujuan ?? '';
+                    const desaTujuan = d.desa_tujuan ?? '';
+
+                    loadProvinces(provTujuan, () => loadRegencies(provTujuan, kabTujuan, () => loadDistricts(kabTujuan, kecTujuan, () => loadVillages(kecTujuan, desaTujuan))));
+
+                    $('input[name="alamat_tujuan"]').val(d.alamat_tujuan ?? '');
+                    $('input[name="rt_tujuan"]').val(d.rt_tujuan ?? '');
+                    $('input[name="rw_tujuan"]').val(d.rw_tujuan ?? '');
+                    $('input[name="dusun_tujuan"]').val(d.dusun_tujuan ?? '');
+                } else if (statusFinal === '4') {
+                    $('input[name="negara_tujuan"]').val(d.negara_tujuan ?? '');
+                }
+
+                // ==============================================================
+                // 🚀 AMANKAN DOMISILI ASAL (Penyelamat Data Kosong dari Tab Rumah)
+                // ==============================================================
+                // Ambil alamat dari Database Anggota, JIKA KOSONG, Kloning paksa dari Tab Keluarga!
+                const provAsal = (d.provinsi && d.provinsi !== '') ? d.provinsi : ($('#rumah_provinsi').val() ?? '');
+                const kabAsal = (d.kabupaten && d.kabupaten !== '') ? d.kabupaten : ($('#rumah_regency').val() ?? '');
+                const kecAsal = (d.kecamatan && d.kecamatan !== '') ? d.kecamatan : ($('#rumah_district').val() ?? '');
+                const desaAsal = (d.desa && d.desa !== '') ? d.desa : ($('#rumah_village').val() ?? '');
+
+                // 1. Amankan di Hidden Input agar tersimpan ke Database saat disubmit
+                $('#ind_provinsi_hidden').val(provAsal);
+                $('#ind_kabupaten_hidden').val(kabAsal);
+                $('#ind_kecamatan_hidden').val(kecAsal);
+                $('#ind_desa_hidden').val(desaAsal);
+
+                // 2. Tampilkan langsung di Dropdown Terkunci Modal Anggota (Kloning Teks)
+                $('#ind_provinsi').html($('#rumah_provinsi').html()).val(provAsal);
+                $('#ind_kabupaten').html($('#rumah_regency').html()).val(kabAsal);
+                $('#ind_kecamatan').html($('#rumah_district').html()).val(kecAsal);
+                $('#ind_desa').html($('#rumah_village').html()).val(desaAsal);
+
+                // ==============================================================
+                // 🚀 PREFILL TAB PENDIDIKAN & TENAGA KERJA
+                // ==============================================================
                 let psVal = d.partisipasi_sekolah ?? '';
-
-                // 🚀 SMART BALITA: Jika balita (usia < 5 thn) dan data pendidikan masih kosong di DB, otomatis pasang 'Belum Pernah Sekolah'
-                let tglLahirVal = d.tanggal_lahir ?? '';
                 let usiaBalita = 0;
-                if (tglLahirVal) {
-                    let dob = new Date(tglLahirVal);
+                if (tglDB) {
+                    let dob = new Date(tglDB);
                     let today = new Date();
                     usiaBalita = today.getFullYear() - dob.getFullYear();
-                    if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) {
-                        usiaBalita--;
-                    }
+                    if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) usiaBalita--;
                 }
 
-                if (usiaBalita < 5 && (!psVal || psVal === '')) {
-                    psVal = 'Belum Pernah Sekolah';
-                }
+                if (usiaBalita < 5 && (!psVal || psVal === '')) psVal = 'Belum Pernah Sekolah';
 
-                $('#partisipasi_sekolah').val(psVal).removeClass('is-invalid');
-                $('#jenjang_pendidikan').val(d.jenjang_pendidikan ?? '');
-                $('#kelas_tertinggi').val(d.kelas_tertinggi ?? '');
-                $('#ijazah_tertinggi').val(d.ijazah_tertinggi ?? '');
+                $('#partisipasi_sekolah').val(psVal).removeClass('is-invalid').trigger('change');
 
-                // 🚀 TRIGGER PERUBAHAN AGAR KOLOM LAIN TERKUNCI OTOMATIS JIKA BALITA
-                $('#partisipasi_sekolah').trigger('change');
+                // 🚀 COPOT PAKSA CLASS MERAH SAAT PREFILL (ANTI-NYANGKUT)
+                $('#jenjang_pendidikan').val(d.jenjang_pendidikan ?? '').removeClass('is-invalid');
+                $('#kelas_tertinggi').val(d.kelas_tertinggi ?? '').removeClass('is-invalid');
+                $('#ijazah_tertinggi').val(d.ijazah_tertinggi ?? '').removeClass('is-invalid');
 
-                // Prefill Tab Kerja
+                // 🚀 TRIGGER ULANG VALIDASI BPS SECARA HALUS AGAR MENGHITUNG ULANG
+                setTimeout(() => {
+                    $('#jenjang_pendidikan, #kelas_tertinggi, #ijazah_tertinggi').trigger('change');
+                }, 50);
+
                 $('#bekerja_seminggu').val(d.bekerja_seminggu ?? '');
-                // 🚀 TRIGGER: Panggil trigger change agar kolom Lainnya terbuka jika diperlukan
                 $('#lapangan_usaha').val(d.lapangan_usaha ?? '').trigger('change');
                 $('#lapangan_usaha_lainnya').val(d.lapangan_usaha_lainnya ?? '');
                 $('#status_pekerjaan').val(d.status_pekerjaan ?? '');
                 $('#pendapatan').val(d.pendapatan ?? '');
 
-                // 🚀 PREFILL: Rekening / Dompet Digital (Radio Button)
-                $('input[name="rekening_aktif"]').prop('checked', false); // Bersihkan dulu
+                $('input[name="rekening_aktif"]').prop('checked', false);
                 if (d.rekening_aktif) {
                     $(`input[name="rekening_aktif"][value="${d.rekening_aktif}"]`).prop('checked', true);
                 }
 
-                // Prefill Tab Usaha
                 $('#memiliki_usaha').val(d.memiliki_usaha || '');
                 $('#jumlah_usaha').val(d.jumlah_usaha || '');
                 $('#pekerja_dibayar').val(d.pekerja_dibayar || '');
@@ -950,48 +1206,34 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 $('#omzet_bulanan').val(d.omzet_bulanan || '');
                 toggleUsahaDetail();
 
-                // Prefill Tab Kesehatan
+                // ==============================================================
+                // 🚀 PREFILL TAB KESEHATAN
+                // ==============================================================
                 $('#status_hamil').val(d.status_hamil ?? '');
 
-                // 🚀 PREFILL SMART CHECKBOX: Penyakit Kronis
-                $('.kronis-check').prop('checked', false); // Bersihkan dulu
+                $('.kronis-check').prop('checked', false);
                 if (Array.isArray(d.penyakit_kronis)) {
-                    d.penyakit_kronis.forEach(val => {
-                        $(`.kronis-check[value="${val}"]`).prop('checked', true);
-                    });
+                    d.penyakit_kronis.forEach(val => $(`.kronis-check[value="${val}"]`).prop('checked', true));
                 } else if (typeof d.penyakit_kronis === 'string' && d.penyakit_kronis.trim() !== '') {
                     try {
-                        // Coba parsing jika bentuknya string JSON "[...]"
                         const parsed = JSON.parse(d.penyakit_kronis);
-                        if (Array.isArray(parsed)) {
-                            parsed.forEach(val => {
-                                $(`.kronis-check[value="${val}"]`).prop('checked', true);
-                            });
-                        }
+                        if (Array.isArray(parsed)) parsed.forEach(val => $(`.kronis-check[value="${val}"]`).prop('checked', true));
                     } catch (e) {
-                        // Jika bukan JSON array, berarti data Master lama (string tunggal, misal: "Asma")
                         $(`.kronis-check[value="${d.penyakit_kronis}"]`).prop('checked', true);
                     }
                 }
 
-                // ♿ Disabilitas
                 if (Array.isArray(d.disabilitas)) {
                     $('.disab-check').prop('checked', false);
-                    d.disabilitas.forEach(val => {
-                        $(`.disab-check[value="${val}"]`).prop('checked', true);
-                    });
+                    d.disabilitas.forEach(val => $(`.disab-check[value="${val}"]`).prop('checked', true));
                 } else if (typeof d.disabilitas === 'string' && d.disabilitas.trim() !== '') {
                     try {
                         const parsed = JSON.parse(d.disabilitas);
                         if (Array.isArray(parsed)) {
                             $('.disab-check').prop('checked', false);
-                            parsed.forEach(val => {
-                                $(`.disab-check[value="${val}"]`).prop('checked', true);
-                            });
+                            parsed.forEach(val => $(`.disab-check[value="${val}"]`).prop('checked', true));
                         }
-                    } catch (e) {
-                        console.warn("⚠️ d.disabilitas bukan array valid:", d.disabilitas);
-                    }
+                    } catch (e) {}
                 }
 
                 if (Array.isArray(d.keterampilan)) {
@@ -1004,44 +1246,26 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                             $('.skill-check').prop('checked', false);
                             parsed.forEach(val => $(`.skill-check[value="${val}"]`).prop('checked', true));
                         }
-                    } catch (e) {
-                        console.warn("⚠️ d.keterampilan bukan array valid:", d.keterampilan);
-                    }
+                    } catch (e) {}
                 }
 
-                // 🚀 PERUBAHAN: Bedakan judul Modal antara Edit dan Read-Only + Nama Dinamis
                 let modeTeks = isEditable ? 'Edit Anggota:' : 'Detail Anggota:';
                 $('#mode_teks_header').text(modeTeks);
-
-                // Tampilkan nama di header (Jika nama kosong, tampilkan teks default)
-                let namaTampil = d.nama ? d.nama.toUpperCase() : 'TANPA NAMA';
-                $('#nama_anggota_header').text(namaTampil);
-
-                const idKk = $('#id_kk').val() || $('[name="id_kk"]').val();
-                $('[name="id_kk"]').val();
-                $('#formAnggota #id_kk').val(idKk);
-
-                // 🚀 RESET TAB KE AWAL: Paksa tab kembali ke "Data Pokok Individu" setiap kali modal Edit dibuka
+                $('#nama_anggota_header').text(d.nama ? d.nama.toUpperCase() : 'TANPA NAMA');
+                $('#formAnggota #id_kk').val($('#id_kk').val() || $('[name="id_kk"]').val());
                 $('#tabAnggotaTabs a:first').tab('show');
 
                 $('#modalAnggota').modal('show');
-                setTimeout(applyRules, 30);
+
+                setTimeout(toggleKunciTenagaKerja, 150);
 
             }).fail(() => Swal.fire("Error", "Gagal memuat data anggota.", "error"));
-        });
-
-        $(document).on('shown.bs.modal', '#modalAnggota', function() {
-            if (typeof applyRules === "function") {
-                applyRules();
-            }
         });
 
         /* ======================================================
         ➕ EVENT: Tambah Anggota Baru (Gunakan Modal yang Sama)
         ====================================================== */
         $(document).on('click', '#btnTambahAnggota', function() {
-            console.log('🆕 Tambah Anggota Baru diklik');
-
             Swal.fire({
                 title: 'Memuat form...',
                 allowOutsideClick: false,
@@ -1053,9 +1277,15 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 
                 // 🚀 ANTI-BOCOR: Hapus isi form secara paksa
                 $('#formAnggota')[0].reset();
+
+                // 🚀 SAPU BERSIH ERROR DARI INTERAKSI SEBELUMNYA (ANTI-NYANGKUT)
+                $('#formAnggota').find('.is-invalid').removeClass('is-invalid');
+                $('#formAnggota').find('.border-danger').removeClass('border-danger');
+                $('#formAnggota').find('.invalid-feedback').html('').removeClass('d-block');
+
                 $('#id_anggota').val('');
-                $('#no_hp').val(''); // 🚀 Manual kosongkan No HP
-                $('input[name="rekening_aktif"]').prop('checked', false); // 🚀 Manual kosongkan Radio Rekening
+                $('#no_hp').val('');
+                $('input[name="rekening_aktif"]').prop('checked', false);
 
                 const idKk = $('#id_kk').val() || $('[name="id_kk"]').val();
 
@@ -1077,11 +1307,16 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 
                 $('#tabAnggotaTabs a:first').tab('show');
 
-                // loadProvinces('', function() {
-                //     console.log('✅ Daftar provinsi dimuat.');
-                // });
-                // 🚀 LANGSUNG SINKRONISASI DARI TAB KELUARGA
-                syncKeluargaKeAnggota();
+                const prov = $('#rumah_provinsi').val() ?? '';
+                const kab = $('#rumah_regency').val() ?? '';
+                const kec = $('#rumah_district').val() ?? '';
+                const desa = $('#rumah_village').val() ?? '';
+
+                $('#individu_no_kk').val($('#keluarga_no_kk').val());
+                $('#ind_provinsi_hidden').val(prov);
+                $('#ind_kabupaten_hidden').val(kab);
+                $('#ind_kecamatan_hidden').val(kec);
+                $('#ind_desa_hidden').val(desa);
 
                 $('#modalAnggota').modal('show');
             }).fail(() => {
@@ -1206,13 +1441,11 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         return json.data;
                     }
                 },
-                // ... (kode ajax SINDEN sebelumnya)
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/id.json'
                 },
-                // 🚀 TAMBAHKAN BLOK INI: Akan dipanggil otomatis tiap kali tabel selesai dimuat / di-refresh
                 drawCallback: function(settings) {
-                    let totalAnggota = this.api().rows().count(); // Hitung jumlah data asli di dalam API DataTables
+                    let totalAnggota = this.api().rows().count();
                     if (typeof window.updateJumlahAnggotaOtomatis === 'function') {
                         window.updateJumlahAnggotaOtomatis(totalAnggota);
                     }
@@ -1223,26 +1456,17 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 
                     dtApi.rows().every(function() {
                         let data = this.data();
-
-                        // Periksa apakah hubungan keluarga berbunyi "Kepala Keluarga" (Hati-hati, huruf besar/kecil berpengaruh)
                         let hubungan = (data.hubungan_keluarga_label || data.jenis_shdk || data.hubungan_keluarga || '').toLowerCase();
 
                         if (hubungan === 'kepala keluarga') {
                             kepalaDitemukan = true;
-
-                            // Tembakkan ke input di Tab Keluarga
                             $('#kepala_keluarga').val(data.nama ? data.nama.toUpperCase() : '');
                             $('#nik_kepala_keluarga').val(data.nik || '');
-
-                            // Matikan peringatan merah jika sebelumnya sempat merah
                             $('#kepala_keluarga, #nik_kepala_keluarga').removeClass('is-invalid');
-
-                            // 🚀 SIMPAN NIK KEPALA KELUARGA DI MEMORI WINDOW UNTUK CEGAH DUPLIKAT
                             window.nikKepalaKeluargaAktif = data.nik;
                         }
                     });
 
-                    // Jika Kepala Keluarga terhapus (kosong), bersihkan juga form di Tab Keluarga
                     if (!kepalaDitemukan) {
                         $('#kepala_keluarga').val('');
                         $('#nik_kepala_keluarga').val('');
@@ -1251,7 +1475,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 },
                 columns: [{
                         data: null,
-                        // ... (lanjutan kode columns SINDEN Jenderal)
                         defaultContent: '',
                         className: 'dtr-control text-start',
                         orderable: false,
@@ -1268,7 +1491,14 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         className: 'text-nowrap text-start fw-bold',
                         render: function(data, type, row) {
                             let nama = data || '-';
-                            let isLengkap = (row.provinsi && row.kabupaten && row.kecamatan && row.desa);
+
+                            // 🚀 SMART CHECK: Abaikan peringatan jika statusnya Meninggal (2), Pisah KK (5), atau Hilang (6)
+                            let status = (row.status_keberadaan !== null && row.status_keberadaan !== undefined) ? String(row.status_keberadaan).trim() : '';
+                            let isMeninggalAtauHilang = ['2', '5', '6'].includes(status);
+
+                            // Lengkap jika: Wilayah terisi, ATAU statusnya memang membebaskan pengisian wilayah
+                            let isLengkap = isMeninggalAtauHilang || (row.provinsi && row.kabupaten && row.kecamatan && row.desa);
+
                             if (!isLengkap && type === 'display') {
                                 return `${nama} <span class="badge bg-danger rounded-circle ms-2 shadow-sm" title="Data belum lengkap!" style="width: 14px; height: 14px; padding: 0; display: inline-flex; align-items: center; justify-content: center; animation: pulse 2s infinite; vertical-align: middle;"><i class="fas fa-exclamation" style="font-size: 8px;"></i></span>`;
                             }
@@ -1312,15 +1542,12 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         width: '140px',
                         render: function(r) {
                             if (!isEditable) {
-                                // 🚀 KITA GUNAKAN TAG <a> KEMBALI
-                                // Karena fieldset pembeku sudah dihapus, tag <a> sekarang bebas diklik!
                                 return `
                                     <a href="javascript:void(0)" class="btn btn-info btn-sm btnEditAnggota shadow-sm" data-id="${r.id_art ?? r.id}" title="Lihat Detail Data">
                                         <i class="fas fa-eye me-1"></i> Lihat
                                     </a>
                                 `;
                             }
-                            // 🚀 TAMPILAN TOMBOL EDIT & HAPUS YANG LEBIH ELEGAN
                             return `
                                 <div class="btn-group btn-group-sm shadow-sm">
                                     <button class="btn btn-primary btnEditAnggota" data-id="${r.id_art ?? r.id}" title="Edit Data Anggota">
@@ -1338,15 +1565,11 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     targets: '_all',
                     className: 'text-start align-middle'
                 }],
-                // 🚀 MATIKAN SORTING BAWAAN DATATABLES!
-                // Gunakan order: [] agar DataTables menghormati urutan Silsilah Keluarga murni dari Server
                 order: []
             });
         }
 
-        $(document).ready(function() {
-            initTableAnggota();
-        });
+        initTableAnggota();
         $(document).on('anggota:saved', function() {
             if (tableAnggota) tableAnggota.ajax.reload(null, false);
         });
@@ -1365,9 +1588,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 
             if ($.fn.DataTable.isDataTable('#tableAnggota')) {
                 tableAnggota.ajax.reload(function() {
-
                     Swal.close();
-
                     Swal.fire({
                         icon: 'success',
                         title: 'Berhasil!',
@@ -1375,7 +1596,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         timer: 800,
                         showConfirmButton: false
                     });
-
                 }, false);
             } else {
                 initTableAnggota();
@@ -1425,7 +1645,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         // ========================================================
         // 📋 FUNGSI SALIN KE CLIPBOARD (NIK & NO KK)
         // ========================================================
-
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -1483,7 +1702,11 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             table.rows().every(function() {
                 let data = this.data();
 
-                let isLengkap = (
+                // 🚀 SMART CHECK: Sama seperti kolom nama, konversi aman.
+                let status = (data.status_keberadaan !== null && data.status_keberadaan !== undefined) ? String(data.status_keberadaan).trim() : '';
+                let isMeninggalAtauHilang = ['2', '5', '6'].includes(status);
+
+                let isLengkap = isMeninggalAtauHilang || (
                     data.provinsi && String(data.provinsi).trim() !== '' &&
                     data.kabupaten && String(data.kabupaten).trim() !== '' &&
                     data.kecamatan && String(data.kecamatan).trim() !== '' &&
@@ -1499,7 +1722,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 Swal.fire({
                     icon: 'warning',
                     title: 'Data Anggota Belum Lengkap!',
-                    html: 'Masih ada anggota keluarga dengan tanda <span class="badge bg-danger rounded-circle p-1 mx-1"><i class="fas fa-exclamation" style="font-size: 10px;"></i></span><br><br>Silakan klik tombol <b><i class="fas fa-edit text-primary"></i> Edit</b> pada anggota tersebut dan pastikan seluruh isian datanya (termasuk Wilayah Capil) telah dilengkapi.',
+                    html: 'Masih ada anggota keluarga dengan tanda <span class="badge bg-danger rounded-circle p-1 mx-1"><i class="fas fa-exclamation" style="font-size: 10px;"></i></span><br><br>Silakan klik tombol <b><i class="fas fa-edit text-primary"></i> Edit</b> pada anggota tersebut dan lengkapi data yang masih kosong.',
                     confirmButtonText: 'Mengerti',
                     width: '350px',
                     customClass: {
@@ -1513,5 +1736,5 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             return true;
         };
 
-    });
+    }); // <-- Akhir dari document.ready
 </script>

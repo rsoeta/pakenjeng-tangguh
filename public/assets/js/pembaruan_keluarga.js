@@ -652,26 +652,22 @@ $(document).ready(function () {
         }
     });
 
-    // OPTIONAL: panggil applyRules() saat halaman ready jika modal sudah berisi nilai (edit inline)
-    // (tidak memaksa modal terbuka)
-    // applyRules(); // Uncomment kalau perlu pada page load
-
-    // /* ======================================================
-    //  🏡 Prefill Wilayah Select2 (AJAX)
-    // ======================================================= */
-
+    
+    /* ======================================================
+     🏡 Prefill Wilayah Select2 (AJAX) - DIBEKUKAN / DINONAKTIFKAN!
+     (Karena sudah digantikan oleh API EMSIFA di tab_anggota.php)
+    ======================================================= */
     // function prefillWilayah(wilayah, wilayahNama) {
     //     if (!wilayah || !wilayahNama) {
     //         console.warn("⚠️ Data wilayah tidak lengkap di payload.");
     //         return;
     //     }
 
-    //     // console.log("✅ Prefill Wilayah:", wilayah, wilayahNama);
-
     //     const setSelect2Value = (selector, id, text) => {
     //         if (!id || !text) return;
     //         const $select = $(selector);
     //         if ($select.length) {
+    //             $select.empty(); 
     //             const option = new Option(text, id, true, true);
     //             $select.append(option).trigger('change');
     //         }
@@ -679,14 +675,19 @@ $(document).ready(function () {
 
     //     // delay agar select2 siap
     //     setTimeout(() => {
+    //         window.isPrefillingWilayah = true; 
+
     //         setSelect2Value("#rumah_provinsi, #provinsi", wilayah.provinsi, wilayahNama.provinsi);
     //         setSelect2Value("#rumah_regency, #kabupaten", wilayah.kabupaten, wilayahNama.kabupaten);
     //         setSelect2Value("#rumah_district, #kecamatan", wilayah.kecamatan, wilayahNama.kecamatan);
     //         setSelect2Value("#rumah_village, #desa", wilayah.desa, wilayahNama.desa);
+
+    //         setTimeout(() => { window.isPrefillingWilayah = false; }, 300);
     //     }, 400);
     // }
+
     /* ======================================================
-     🏡 Prefill Wilayah Select2 (AJAX)
+     🏡 Prefill Wilayah Select2 (AJAX) - (HIDUP KEMBALI!)
     ======================================================= */
     function prefillWilayah(wilayah, wilayahNama) {
         if (!wilayah || !wilayahNama) {
@@ -710,10 +711,10 @@ $(document).ready(function () {
             // 🚀 PASANG GEMBOK: Beritahu sistem bahwa ini adalah proses prefill otomatis!
             window.isPrefillingWilayah = true; 
 
-            setSelect2Value("#rumah_provinsi, #provinsi", wilayah.provinsi, wilayahNama.provinsi);
-            setSelect2Value("#rumah_regency, #kabupaten", wilayah.kabupaten, wilayahNama.kabupaten);
-            setSelect2Value("#rumah_district, #kecamatan", wilayah.kecamatan, wilayahNama.kecamatan);
-            setSelect2Value("#rumah_village, #desa", wilayah.desa, wilayahNama.desa);
+            setSelect2Value("#rumah_provinsi", wilayah.provinsi, wilayahNama.provinsi);
+            setSelect2Value("#rumah_regency", wilayah.kabupaten, wilayahNama.kabupaten);
+            setSelect2Value("#rumah_district", wilayah.kecamatan, wilayahNama.kecamatan);
+            setSelect2Value("#rumah_village", wilayah.desa, wilayahNama.desa);
 
             // 🚀 BUKA GEMBOK: Setelah prefill selesai (beri jeda 300ms), kembalikan ke mode normal
             setTimeout(() => { window.isPrefillingWilayah = false; }, 300);
@@ -723,16 +724,9 @@ $(document).ready(function () {
     /* ======================================================
      🏠 Prefill Data Rumah (Kondisi + Sanitasi)
     ======================================================= */
-
     function prefillRumah(perumahan) {
-        if (!perumahan || typeof perumahan !== 'object') {
-            console.warn("⚠️ Data perumahan tidak ditemukan atau tidak valid.");
-            return;
-        }
+        if (!perumahan || typeof perumahan !== 'object') return;
 
-        // console.log("✅ Prefill Rumah:", perumahan);
-
-        // Kondisi rumah
         if (perumahan.kondisi) {
             $('#jenis_atap').val(perumahan.kondisi.jenis_atap || '');
             $('#jenis_lantai').val(perumahan.kondisi.jenis_lantai || '');
@@ -745,12 +739,8 @@ $(document).ready(function () {
             $('#nomor_pelanggan').val(perumahan.kondisi.nomor_pelanggan || '');
         }
 
-        // Status kepemilikan (ambil dari perumahan utama)
-        $('#status_kepemilikan')
-            .val(perumahan.status_kepemilikan)
-            .trigger('change');
+        $('#status_kepemilikan').val(perumahan.status_kepemilikan).trigger('change');
 
-        // Sanitasi
         if (perumahan.sanitasi) {
             $('#jenis_kloset').val(perumahan.sanitasi.jenis_kloset || '');
             $('#fasilitas_bab').val(perumahan.sanitasi.fasilitas_bab || '');
@@ -758,11 +748,9 @@ $(document).ready(function () {
             $('#jarak_air_ke_limbah').val(perumahan.sanitasi.jarak_air_ke_limbah || '');
         }
 
-        // Wilayah (kode + nama)
+        // 🚀 PANGGIL KEMBALI WILAYAHNYA
         if (perumahan.wilayah && perumahan.wilayah_nama) {
             prefillWilayah(perumahan.wilayah, perumahan.wilayah_nama);
-        } else {
-            console.warn("⚠️ Data wilayah tidak ditemukan di payload.");
         }
     }
 
