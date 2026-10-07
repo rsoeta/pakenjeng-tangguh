@@ -580,10 +580,13 @@ $(document).ready(function () {
 
                     tableDraft.ajax.reload(null, false);
 
+                    // 🚀 Hilangkan tombol OK, gunakan timer otomatis
                     Swal.fire({
                         icon: 'success',
                         title: 'Usulan ditolak dan dihapus',
-                        text: 'Pesan WA telah disiapkan, dan data usulan telah dihapus.'
+                        text: 'Pesan WA telah disiapkan, dan data usulan telah dihapus.',
+                        timer: 2000,
+                        showConfirmButton: false
                     });
                 },
                 error: function (xhr) {
@@ -622,7 +625,14 @@ $(document).ready(function () {
                 dataType: 'json',
                 success: res => {
                     if (res.success) {
-                        Swal.fire('Berhasil', res.message, 'success');
+                        // 🚀 Hilangkan tombol OK, gunakan timer otomatis
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: res.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
                         tableDraft.ajax.reload(null, false);
                     } else {
                         Swal.fire('Gagal', res.message, 'error');
@@ -659,7 +669,14 @@ $(document).ready(function () {
                 dataType: 'json',
                 success: res => {
                     if (res.success) {
-                        Swal.fire('Berhasil', res.message, 'success');
+                        // 🚀 Hilangkan tombol OK, gunakan timer otomatis
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: res.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
                         tableDraft.ajax.reload(null, false);
                         tableVerified.ajax.reload(null, false);
                     } else {
@@ -701,27 +718,31 @@ $(document).ready(function () {
     });
 
     /* ============================================================
-    🔍 FILTER HANDLER
+    🔍 FILTER HANDLER (AUTO-RELOAD)
     ============================================================ */
+    // 🚀 EVENT LISTENER: Tabel otomatis reload setiap kali ada dropdown yang diganti
+    $('#filterProgram, #filterCreatedBy, #filterRW, #filterRT, #filterBulan, #filterTahun').on('change', function () {
+        if (tableDraft) tableDraft.ajax.reload(null, false);
+        if (tableVerified) tableVerified.ajax.reload(null, false);
+    });
+
+    // Tombol Apply (Opsional, dibiarkan jika masih ingin digunakan)
     $('#btnApplyFilter').on('click', function () {
-        tableDraft.ajax.reload();
-        tableVerified.ajax.reload();
+        if (tableDraft) tableDraft.ajax.reload(null, false);
+        if (tableVerified) tableVerified.ajax.reload(null, false);
     });
 
     $('#btnResetFilter').on('click', function () {
-        $('#filterProgram').val('');
-        $('#filterCreatedBy').val('');
-        $('#filterRW').val('');
-        $('#filterRT').val('');
-        $('#filterBulan').val('');
-        $('#filterTahun').val('');
+        $('#filterProgram, #filterCreatedBy, #filterRW, #filterRT').val('');
+        
+        // 🚀 Kunci: Kembalikan ke bulan dan tahun saat ini, bukan dikosongkan
+        setDefaultPeriode();
 
-        tableDraft.ajax.reload();
-        tableVerified.ajax.reload();
+        if (tableDraft) tableDraft.ajax.reload(null, false);
+        if (tableVerified) tableVerified.ajax.reload(null, false);
     });
 
     $('#filterRW').on('change', function () {
-
         const rw = $(this).val();
 
         // Reset RT dulu
@@ -730,7 +751,6 @@ $(document).ready(function () {
         if (!rw) return;
 
         $.get(`/usulan-bansos/rt-by-rw/${rw}`, function(res) {
-
             if (!res || res.error) return;
 
             res.rt.forEach(item => {
@@ -738,9 +758,7 @@ $(document).ready(function () {
                     `<option value="${item.rt}">RT ${item.rt}</option>`
                 );
             });
-
         });
-
     });
     
 

@@ -171,7 +171,14 @@ $editable = ($roleId <= 4);
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Tempat Lahir</label>
-                                            <input type="text" class="form-control required upper" name="tempat_lahir" id="tempat_lahir">
+                                            <div class="input-group has-validation">
+                                                <input type="text" class="form-control required upper" name="tempat_lahir" id="tempat_lahir">
+                                                <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#tempat_lahir" title="Salin">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                                <div class="invalid-feedback small fw-bold w-100">Tempat lahir tidak boleh kosong.</div>
+                                            </div>
+                                            <small class="text-muted fst-italic">Pastikan tempat lahir diisi sesuai dengan Kartu Keluarga.</small>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Hubungan dengan Kepala Keluarga</label>
@@ -189,6 +196,7 @@ $editable = ($roleId <= 4);
                                                     <i class="fas fa-copy"></i>
                                                 </button>
                                             </div>
+                                            <small class="text-muted fst-italic">Isi dengan nama ibu kandung sesuai dengan Kartu Keluarga.</small>
                                         </div>
                                     </div>
                                 </div>

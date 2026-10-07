@@ -212,7 +212,7 @@
                     </div>
 
                     <div class="col-md-2 d-flex gap-2">
-                        <button id="btnApplyFilter" class="btn btn-primary w-100">Filter</button>
+                        <!-- <button id="btnApplyFilter" class="btn btn-primary w-100">Filter</button> -->
                         <button id="btnResetFilter" class="btn btn-secondary w-100">Reset</button>
                     </div>
 
