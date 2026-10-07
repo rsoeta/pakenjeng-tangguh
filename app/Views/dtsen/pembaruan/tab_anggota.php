@@ -110,6 +110,150 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 
     $(document).ready(function() {
 
+        // ==============================================================
+        // 🚀 SMART UI: LOGIKA TOGGLE STATUS KEBERADAAN
+        // ==============================================================
+        $(document).on('change', '#status_keberadaan', function() {
+            let val = $(this).val();
+            let form = $('#formAnggota');
+
+            // Definisikan kategori status
+            let isMeninggalAtauHilang = ['2', '5', '6'].includes(val);
+            let isPindahDN = (val === '3');
+            let isPindahLN = (val === '4');
+
+            // 1. LOGIKA KUNCI ELEMEN (READONLY/DISABLED)
+            if (isMeninggalAtauHilang) {
+                // Kunci semua input, select, textarea di dalam form
+                form.find('input, select, textarea').prop('disabled', true);
+
+                // KECUALI: Dropdown status ini sendiri, tombol close, dan input hidden (ID, NIK)
+                $('#status_keberadaan').prop('disabled', false);
+                form.find('input[type="hidden"]').prop('disabled', false);
+
+                // Munculkan notifikasi
+                $('#alert-keberadaan').html('<div class="alert alert-danger py-2 mb-0 shadow-sm border-danger"><i class="fas fa-lock me-2"></i> <strong>Terkunci:</strong> Seluruh isian data diabaikan karena status keberadaan anggota keluarga.</div>').slideDown();
+
+            } else {
+                // Buka kembali semua kuncian jika statusnya selain 2, 5, 6
+                form.find('input, select, textarea').prop('disabled', false);
+
+                if (val !== '1' && val !== '') {
+                    $('#alert-keberadaan').html('<div class="alert alert-warning py-2 mb-0 shadow-sm border-warning"><i class="fas fa-info-circle me-2"></i> <strong>Perhatian:</strong> Karena pindah, kelengkapan isian Pendidikan, Pekerjaan, dll akan disesuaikan.</div>').slideDown();
+                } else {
+                    $('#alert-keberadaan').slideUp();
+                }
+            }
+
+            // 2. LOGIKA TOGGLE ALAMAT
+            if (isPindahDN) {
+                $('#blok_alamat_tetap, #blok_alamat_pindah_ln').hide();
+                $('#blok_alamat_pindah_dn').fadeIn();
+                loadProvinsiTujuan(); // 🚀 PANGGIL API PROVINSI DI SINI!
+            } else if (isPindahLN) {
+                $('#blok_alamat_tetap, #blok_alamat_pindah_dn').hide();
+                $('#blok_alamat_pindah_ln').fadeIn();
+            } else {
+                $('#blok_alamat_tetap').fadeIn();
+                $('#blok_alamat_pindah_dn, #blok_alamat_pindah_ln').hide();
+                $('.alamat-wajib-dn, .alamat-wajib-ln').val('');
+            }
+        });
+
+        // ==============================================================
+        // 🌍 API WILAYAH INDONESIA (CASCADING DROPDOWN)
+        // Menggunakan public API EMSIFA (Cepat & Stabil)
+        // ==============================================================
+        const apiWilayah = 'https://www.emsifa.com/api-wilayah-indonesia/api';
+        let provLoaded = false;
+
+        function loadProvinsiTujuan() {
+            if (provLoaded) return;
+
+            $('#provinsi_tujuan_select').html('<option value="">Loading...</option>');
+
+            $.getJSON(`${apiWilayah}/provinces.json`, function(data) {
+                let options = '<option value="">-- Pilih Provinsi --</option>';
+                data.forEach(p => {
+                    options += `<option value="${p.id}" data-name="${p.name}">${p.name}</option>`;
+                });
+                $('#provinsi_tujuan_select').html(options);
+                provLoaded = true;
+            }).fail(function() {
+                $('#provinsi_tujuan_select').html('<option value="">Gagal memuat data</option>');
+            });
+        }
+
+        // 1. Aksi saat Provinsi dipilih -> Cari Kabupaten
+        $('#provinsi_tujuan_select').on('change', function() {
+            let id = $(this).val();
+            // 🚀 Tangkap NAMA Provinsi, bukan ID-nya
+            let name = $(this).find(':selected').attr('data-name') || '';
+            $('#provinsi_tujuan_nama').val(name);
+
+            $('#kabupaten_tujuan_select').html('<option value="">Loading...</option>').prop('disabled', true);
+            $('#kecamatan_tujuan_select').html('<option value="">-- Pilih Kecamatan --</option>').prop('disabled', true);
+            $('#desa_tujuan_select').html('<option value="">-- Pilih Desa/Kelurahan --</option>').prop('disabled', true);
+            $('#kabupaten_tujuan_nama, #kecamatan_tujuan_nama, #desa_tujuan_nama').val('');
+
+            if (id) {
+                $.getJSON(`${apiWilayah}/regencies/${id}.json`, function(data) {
+                    let options = '<option value="">-- Pilih Kab/Kota --</option>';
+                    data.forEach(k => {
+                        options += `<option value="${k.id}" data-name="${k.name}">${k.name}</option>`;
+                    });
+                    $('#kabupaten_tujuan_select').html(options).prop('disabled', false);
+                });
+            }
+        });
+
+        // 2. Aksi saat Kabupaten dipilih -> Cari Kecamatan
+        $('#kabupaten_tujuan_select').on('change', function() {
+            let id = $(this).val();
+            let name = $(this).find(':selected').attr('data-name') || '';
+            $('#kabupaten_tujuan_nama').val(name);
+
+            $('#kecamatan_tujuan_select').html('<option value="">Loading...</option>').prop('disabled', true);
+            $('#desa_tujuan_select').html('<option value="">-- Pilih Desa/Kelurahan --</option>').prop('disabled', true);
+            $('#kecamatan_tujuan_nama, #desa_tujuan_nama').val('');
+
+            if (id) {
+                $.getJSON(`${apiWilayah}/districts/${id}.json`, function(data) {
+                    let options = '<option value="">-- Pilih Kecamatan --</option>';
+                    data.forEach(k => {
+                        options += `<option value="${k.id}" data-name="${k.name}">${k.name}</option>`;
+                    });
+                    $('#kecamatan_tujuan_select').html(options).prop('disabled', false);
+                });
+            }
+        });
+
+        // 3. Aksi saat Kecamatan dipilih -> Cari Desa
+        $('#kecamatan_tujuan_select').on('change', function() {
+            let id = $(this).val();
+            let name = $(this).find(':selected').attr('data-name') || '';
+            $('#kecamatan_tujuan_nama').val(name);
+
+            $('#desa_tujuan_select').html('<option value="">Loading...</option>').prop('disabled', true);
+            $('#desa_tujuan_nama').val('');
+
+            if (id) {
+                $.getJSON(`${apiWilayah}/villages/${id}.json`, function(data) {
+                    let options = '<option value="">-- Pilih Desa/Kelurahan --</option>';
+                    data.forEach(d => {
+                        options += `<option value="${d.id}" data-name="${d.name}">${d.name}</option>`;
+                    });
+                    $('#desa_tujuan_select').html(options).prop('disabled', false);
+                });
+            }
+        });
+
+        // 4. Aksi saat Desa dipilih
+        $('#desa_tujuan_select').on('change', function() {
+            let name = $(this).find(':selected').attr('data-name') || '';
+            $('#desa_tujuan_nama').val(name);
+        });
+
         /* ============================================================
          * 🧩 Fungsi: Tampilkan form detail usaha bila memilih "Ya"
          * ============================================================ */
@@ -422,40 +566,82 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             let nikDiketik = $('#nik').val();
 
             if (hubunganDipilih === 'kepala keluarga') {
-                // Jika user memilih SHDK Kepala Keluarga, cek apakah NIK Kepala Keluarga sudah ada
-                // (Gunakan var window.nikKepalaKeluargaAktif yang kita set di drawCallback)
                 if (window.nikKepalaKeluargaAktif && window.nikKepalaKeluargaAktif !== nikDiketik) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Dilarang Duplikat!',
                         text: 'Dalam 1 rumah tangga tidak boleh ada lebih dari 1 Kepala Keluarga. Silakan pilih status hubungan lain, atau ubah/hapus Kepala Keluarga sebelumnya terlebih dahulu.'
                     });
-                    return; // ⛔ Hentikan proses simpan!
+                    return;
                 }
             }
 
+            // ==============================================================
+            // 🚀 SMART LOGIC: BACA STATUS KEBERADAAN (PENENTU VALIDASI)
+            // ==============================================================
+            let statusKeberadaan = $('#status_keberadaan').val();
+            let isTinggalBersama = (statusKeberadaan === '1'); // 1 = Tinggal bersama keluarga
+
+            // Jika statusnya belum dipilih sama sekali, blokir!
+            if (!statusKeberadaan) {
+                $('#status_keberadaan').addClass('is-invalid');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Perhatian',
+                    text: 'Status Keberadaan wajib dipilih!'
+                });
+                return;
+            } else {
+                $('#status_keberadaan').removeClass('is-invalid');
+            }
+
             // 1. Cek semua input yang wajib diisi (Required)
-            // 🚀 PERBAIKAN: Tambahkan filter :not(:disabled) agar elemen yang dikunci tidak dirazia!
             form.find('.required:not(:disabled)').each(function() {
+
+                // 🚀 KUNCI SAKTI: Jika ART meninggal/pindah, abaikan error di luar Tab Identitas!
+                let isDiLuarIdentitas = ($(this).closest('#tab-identitas').length === 0);
+                if (!isTinggalBersama && isDiLuarIdentitas) {
+                    $(this).removeClass('is-invalid');
+                    return true; // Lanjutkan loop (skip validasi ini)
+                }
+
                 if (!$(this).val().trim()) {
-                    // Jika kosong, berikan garis merah
                     $(this).addClass('is-invalid');
                 } else {
-                    // 🚀 PENTING: Jangan langsung hapus class 'is-invalid' membabi buta!
-                    // Jangan lupa masukkan 'lapangan_usaha' agar error BPS tidak terhapus.
-                    // 🚀 HAPUS partisipasi_sekolah dari daftar ini:
                     if (!['jenjang_pendidikan', 'kelas_tertinggi', 'ijazah_tertinggi', 'lapangan_usaha'].includes($(this).attr('id'))) {
                         $(this).removeClass('is-invalid');
                     }
                 }
             });
 
+            // 🚀 TAMBAHAN: Validasi Khusus Alamat Pindah
+            if (statusKeberadaan === '3') { // Pindah Dalam Negeri
+                form.find('.alamat-wajib-dn').each(function() {
+                    if (!$(this).val().trim()) {
+                        $(this).addClass('is-invalid');
+                        errorMessage = 'Mohon lengkapi seluruh kolom Alamat Tujuan (Provinsi hingga Desa)!';
+                    } else {
+                        $(this).removeClass('is-invalid');
+                    }
+                });
+            } else if (statusKeberadaan === '4') { // Pindah Luar Negeri
+                if (!form.find('input[name="negara_tujuan"]').val().trim()) {
+                    form.find('input[name="negara_tujuan"]').addClass('is-invalid');
+                    errorMessage = 'Sebutkan Nama Negara Tujuan!';
+                } else {
+                    form.find('input[name="negara_tujuan"]').removeClass('is-invalid');
+                }
+            }
+
+            // 🚀 Buka paksa field yang di-disabled tepat sebelum AJAX agar diserialize dengan benar!
+            form.find(':disabled').prop('disabled', false);
+
             // 2. Format dan cek presisi digit NIK / No KK
             ['#nik', '#keluarga_no_kk', '#individu_no_kk'].forEach(selector => {
                 const el = form.find(selector);
                 if (el.length) {
                     const value = el.val().replace(/\D/g, '');
-                    el.val(value); // Sikat huruf/simbol jadi angka murni
+                    el.val(value);
 
                     if (value.length > 0 && value.length !== 16) {
                         el.addClass('is-invalid');
@@ -466,7 +652,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             });
 
             // ==============================================================
-            // 2.5 🚀 SMART VALIDATION: TAB TENAGA KERJA (HANYA USIA > 5 TAHUN)
+            // 2.5 🚀 SMART VALIDATION: TAB TENAGA KERJA (HANYA DIEKSEKUSI JIKA TINGGAL BERSAMA)
             // ==============================================================
             let tglLahir = $('#tanggal_lahir').val();
             let usia = 0;
@@ -475,7 +661,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 let dob = new Date(tglLahir);
                 let today = new Date();
                 usia = today.getFullYear() - dob.getFullYear();
-                // Koreksi bulan & hari jika belum ulang tahun
                 if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) {
                     usia--;
                 }
@@ -487,21 +672,17 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             let $rekContainer = $('input[name="rekening_aktif"]').closest('.border');
             $rekContainer.removeClass('border-danger').addClass('border-primary');
 
-            // Eksekusi Hukuman HANYA jika bukan Balita
-            if (usia > 5) {
+            // 🚀 HANYA CEK TENAGA KERJA JIKA ART MASIH TINGGAL BERSAMA & USIA > 5 TAHUN
+            if (isTinggalBersama && usia > 5) {
                 let kerjaError = false;
-
-                // 🚀 DEKLARASI DI AWAL: Ambil nilainya dulu sebelum dicek macam-macam!
                 let lapanganUsahaVal = $('#lapangan_usaha').val();
 
-                // Cek 1: Lapangan Usaha (Beri warna merah ke body Select2)
                 if (!lapanganUsahaVal) {
                     $('#lapangan_usaha').addClass('is-invalid');
                     $('#lapangan_usaha').next('.select2-container').find('.select2-selection').addClass('border-danger');
                     kerjaError = true;
                 }
 
-                // 🚀 Cek 1.5: Jika "Lainnya", maka input spesifik wajib diisi
                 if (lapanganUsahaVal === 'Lainnya') {
                     if (!$('#lapangan_usaha_lainnya').val().trim()) {
                         $('#lapangan_usaha_lainnya').addClass('is-invalid');
@@ -509,7 +690,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     }
                 }
 
-                // Cek 2: Status Pekerjaan (DILONGGARKAN: Wajib KECUALI jika "Tidak Bekerja")
                 if (lapanganUsahaVal !== 'Tidak Bekerja') {
                     if (!$('#status_pekerjaan').val()) {
                         $('#status_pekerjaan').addClass('is-invalid');
@@ -517,14 +697,12 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     }
                 }
 
-                // Cek 3: Rekening (Radio Button Group)
                 if (!$('input[name="rekening_aktif"]:checked').val()) {
-                    $('#rek_usaha').addClass('is-invalid'); // Flag jebakan untuk disapu oleh Gatekeeper ke-3
-                    $rekContainer.removeClass('border-primary').addClass('border-danger'); // Merahkan kotak
+                    $('#rek_usaha').addClass('is-invalid');
+                    $rekContainer.removeClass('border-primary').addClass('border-danger');
                     kerjaError = true;
                 }
 
-                // Timpa pesan error default jika gagal di sini
                 if (kerjaError) {
                     errorMessage = 'Anggota keluarga usia di atas 5 tahun WAJIB mengisi data Pekerjaan dan Kepemilikan Rekening pada Tab Tenaga Kerja!';
                 }
@@ -532,6 +710,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 
             // 3. 🚀 FINAL GATEKEEPER: Abaikan elemen yang sedang dikunci (:not(:disabled))
             const invalidElements = form.find('.is-invalid:not(:disabled)');
+            // ... (Kode Jenderal selanjutnya mulai dari if (invalidElements.length > 0) dst tetap aman utuh) ...
 
             if (invalidElements.length > 0) {
                 // Cek apakah errornya bersumber dari kecerdasan Tab Pendidikan
@@ -613,6 +792,18 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 
         $('#modalAnggota').on('shown.bs.modal', function() {
             console.log('🧾 Modal Anggota terbuka, event submit aktif');
+        });
+
+        // Pemicu animasi peringatan saat dropdown Status Keberadaan diubah
+        $(document).on('change', '#status_keberadaan', function() {
+            if ($(this).val() !== '1' && $(this).val() !== '') {
+                $('#alert-keberadaan').slideDown();
+                // Opsional: Beri efek visual pada tab lain agar terlihat "tidak perlu diisi"
+                $('.nav-tabs a[href="#tab-pendidikan"], .nav-tabs a[href="#tab-tenaga-kerja"], .nav-tabs a[href="#tab-kesehatan"]').css('opacity', '0.5');
+            } else {
+                $('#alert-keberadaan').slideUp();
+                $('.nav-tabs a').css('opacity', '1');
+            }
         });
 
         // ==============================================================

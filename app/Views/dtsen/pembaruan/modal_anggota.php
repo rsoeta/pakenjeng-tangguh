@@ -89,16 +89,26 @@ $editable = ($roleId <= 4);
                         <!-- ========================================== -->
                         <div class="tab-pane fade show active" id="tab-identitas" role="tabpanel">
                             <div class="row g-4">
+
+                                <!-- 🚀 TAMBAHAN: Alert Dinamis jika ART sudah tidak ada di rumah -->
+                                <div class="col-12 mt-3" id="alert-keberadaan" style="display: none;">
+                                    <div class="alert alert-warning py-2 mb-0 shadow-sm border-warning">
+                                        <i class="fas fa-info-circle me-2"></i> <strong>Perhatian:</strong> Anggota keluarga tidak tinggal di rumah. Validasi data Pendidikan, Pekerjaan, dan Kesehatan akan dilewati.
+                                    </div>
+                                </div>
+
                                 <div class="row align-items-center border-bottom pb-1 mt-3 mb-1">
-                                    <label class="col-md-5 col-12 col-form-label fw-bold">Status Keberadaan</label>
+                                    <label class="col-md-5 col-12 col-form-label fw-bold">Status Keberadaan <span class="text-danger">*</span></label>
                                     <div class="col-md-7 col-12">
+                                        <!-- 🚀 PERBAIKAN: Gunakan Angka sbg Value, Teks menyesuaikan standar BPS SIK-NG -->
                                         <select class="form-select required" name="status_keberadaan" id="status_keberadaan">
-                                            <option value="">Pilih...</option>
-                                            <option>Tinggal Bersama Keluarga</option>
-                                            <option>Meninggal</option>
-                                            <option>Tidak Tinggal Bersama Keluarga/Pindah Ke Wilayah Lain</option>
-                                            <option>Tidak Tinggal Bersama Keluarga/Pindah Ke Luar Negeri</option>
-                                            <option>Tidak Ditemukan</option>
+                                            <option value="">-- Pilih Keberadaan --</option>
+                                            <option value="1">Tinggal bersama keluarga</option>
+                                            <option value="2">Meninggal</option>
+                                            <option value="3">Pindah ke daerah lain di Indonesia</option>
+                                            <option value="4">Pindah ke luar negeri</option>
+                                            <option value="5">Sudah pisah kartu keluarga</option>
+                                            <option value="6">Tidak ditemukan atau tidak dikenal</option>
                                         </select>
                                     </div>
                                 </div>
@@ -234,7 +244,12 @@ $editable = ($roleId <= 4);
                                                     <select class="form-select required locked-select" id="ind_desa" name="desa" tabindex="-1" readonly></select>
                                                 </div>
                                             </div>
-                                            <div class="mb-3 mt-3">
+                                            <!-- ========================================== -->
+                                            <!-- BLOK ALAMAT DINAMIS BERDASARKAN STATUS -->
+                                            <!-- ========================================== -->
+
+                                            <!-- A. Alamat Statis (Default) -->
+                                            <div class="mb-3 mt-3" id="blok_alamat_tetap">
                                                 <label class="form-label fw-semibold">Alamat Domisili</label>
                                                 <div class="bg-light border rounded-3 p-3 small">
                                                     <div>
@@ -243,6 +258,63 @@ $editable = ($roleId <= 4);
                                                         <?= esc($payload['perumahan']['alamat'] ?? '-') ?>
                                                     </div>
                                                 </div>
+                                            </div>
+
+                                            <!-- B. Alamat Pindah Dalam Negeri (Dropdown Bertingkat) -->
+                                            <div class="mb-3 mt-3 bg-light border border-info rounded-3 p-3" id="blok_alamat_pindah_dn" style="display: none;">
+                                                <label class="form-label fw-bold text-info"><i class="fas fa-map-marker-alt me-1"></i> Alamat Tujuan (Dalam Negeri)</label>
+
+                                                <!-- Baris 1: Dropdown Wilayah Bertingkat -->
+                                                <div class="row g-2 mt-1">
+                                                    <div class="col-md-6">
+                                                        <select class="form-select form-select-sm alamat-wajib-dn" id="provinsi_tujuan_select">
+                                                            <option value="">-- Pilih Provinsi --</option>
+                                                        </select>
+                                                        <!-- 🚀 Hidden input ini yang akan dikirim ke Backend -->
+                                                        <input type="hidden" name="provinsi" id="provinsi_tujuan_nama">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <select class="form-select form-select-sm alamat-wajib-dn" id="kabupaten_tujuan_select" disabled>
+                                                            <option value="">-- Pilih Kab/Kota --</option>
+                                                        </select>
+                                                        <input type="hidden" name="kabupaten" id="kabupaten_tujuan_nama">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <select class="form-select form-select-sm alamat-wajib-dn" id="kecamatan_tujuan_select" disabled>
+                                                            <option value="">-- Pilih Kecamatan --</option>
+                                                        </select>
+                                                        <input type="hidden" name="kecamatan" id="kecamatan_tujuan_nama">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <select class="form-select form-select-sm alamat-wajib-dn" id="desa_tujuan_select" disabled>
+                                                            <option value="">-- Pilih Desa/Kelurahan --</option>
+                                                        </select>
+                                                        <input type="hidden" name="desa" id="desa_tujuan_nama">
+                                                    </div>
+                                                </div>
+
+                                                <!-- Baris 2: Input Detail Jalan/RT/RW -->
+                                                <div class="row g-2 mt-2">
+                                                    <div class="col-12">
+                                                        <input type="text" class="form-control form-control-sm alamat-wajib-dn upper" name="alamat_tujuan" placeholder="Nama Jalan / Kampung / Perumahan" autocomplete="off">
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <input type="text" class="form-control form-control-sm alamat-wajib-dn onlynum" name="rt_tujuan" placeholder="RT (Mis: 001)" maxlength="3" autocomplete="off">
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <input type="text" class="form-control form-control-sm alamat-wajib-dn onlynum" name="rw_tujuan" placeholder="RW (Mis: 002)" maxlength="3" autocomplete="off">
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <!-- Dusun opsional, tidak wajib -->
+                                                        <input type="text" class="form-control form-control-sm upper" name="dusun_tujuan" placeholder="Dusun (Ops.)" autocomplete="off">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- C. Alamat Pindah Luar Negeri (Disembunyikan default) -->
+                                            <div class="mb-3 mt-3 bg-light border border-info rounded-3 p-3" id="blok_alamat_pindah_ln" style="display: none;">
+                                                <label class="form-label fw-bold text-info"><i class="fas fa-globe me-1"></i> Negara Tujuan Pindah</label>
+                                                <input type="text" class="form-control form-control-sm mt-1 alamat-wajib-ln" name="negara_tujuan" placeholder="Sebutkan Nama Negara Tujuan..." autocomplete="off">
                                             </div>
                                         </div>
                                     </div>

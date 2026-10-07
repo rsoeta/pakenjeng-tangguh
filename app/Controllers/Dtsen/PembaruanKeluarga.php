@@ -791,6 +791,13 @@ class PembaruanKeluarga extends BaseController
                     'kabupaten' => $post['kabupaten'] ?? null,
                     'kecamatan' => $post['kecamatan'] ?? null,
                     'desa' => $post['desa'] ?? null,
+
+                    // 🚀 TANGKAP ALAMAT PINDAH (Status 3 = Dalam Negeri, Status 4 = Luar Negeri)
+                    'alamat_tujuan' => $post['alamat_tujuan'] ?? null,
+                    'rt_tujuan' => $post['rt_tujuan'] ?? null,
+                    'rw_tujuan' => $post['rw_tujuan'] ?? null,
+                    'dusun_tujuan' => $post['dusun_tujuan'] ?? null,
+                    'negara_tujuan' => $post['negara_tujuan'] ?? null,
                 ],
                 'pendidikan' => [
                     'partisipasi_sekolah' => $post['partisipasi_sekolah'] ?? null,
