@@ -49,7 +49,14 @@
                         <label class="form-label fw-bold">Periode Triwulan</label>
                         <div class="input-group">
                             <span class="input-group-text fw-bold text-primary">TW</span>
-                            <input type="number" class="form-control" name="triwulan_berlaku" id="triwulan_berlaku" step="0.1" min="1" max="4.9" value="<?= ceil(date('n') / 3) ?>" placeholder="Contoh: 3 atau 3.1" required>
+                            <!-- 🚀 PERBAIKAN: Gunakan type="text" & inputmode="decimal" agar kursor tidak loncat -->
+                            <input type="text" class="form-control" name="triwulan_berlaku" id="triwulan_berlaku"
+                                inputmode="decimal"
+                                pattern="^[0-9]+([\.][0-9]+)?$"
+                                title="Gunakan angka atau desimal dengan titik (misal: 3 atau 3.1)"
+                                value="<?= ceil(date('n') / 3) ?>"
+                                placeholder="Contoh: 3 atau 3.1"
+                                autocomplete="off" required>
                         </div>
                         <small class="text-muted fst-italic">Digunakan untuk penandaan pada grafik (misal: 1, 2, atau 3.1).</small>
                     </div>

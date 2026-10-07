@@ -11,24 +11,24 @@ $menus = menu()
 
 <aside class="main-sidebar sidebar-sinden elevation-4">
 
-    <a href="/pages" class="brand-link border-bottom border-secondary">
-        <img src="<?= logoApp(); ?>" alt="Logo SINDEN" class="brand-image img-circle elevation-3" style="opacity: .8">
-    </a>
-
+    <!-- 🚀 Semua elemen dimasukkan ke dalam div.sidebar agar ikut ter-scroll dan tidak mengambang -->
     <div class="sidebar">
 
+        <!-- AREA LOGO & TITLE -->
         <div class="mt-3 pb-3 mb-3 border-bottom border-secondary text-center">
-            <div class="d-flex flex-column align-items-center">
-                <span class="text-white font-weight-bold text-uppercase" style="font-size: 0.95rem; letter-spacing: 1.5px;">
-                    <?= nameApp(); ?>
-                </span>
-                <span class="text-muted mt-1" style="font-size: 0.75rem;">
+            <a href="/pages" class="d-block mb-2 text-decoration-none text-center">
+                <!-- Class brand-image dibuang agar logo tidak dipaksa mengecil oleh bawaan AdminLTE -->
+                <img src="<?= logoApp(); ?>" alt="Logo SINDEN" style="max-height: 40px; opacity: .9;">
+            </a>
+            <div class="d-flex flex-column mt-2 text-center">
+                <!-- nameApp() dihapus, sisa titleApp() -->
+                <span class="text-muted" style="font-size: 0.75rem; line-height: 1.3;">
                     <?= titleApp(); ?>
                 </span>
             </div>
         </div>
 
-        <div class="px-3 mb-2">
+        <div class="px-3 mb-2 mt-2">
             <span class="text-uppercase text-muted text-xs font-weight-bold">Menu Utama</span>
         </div>
 

@@ -282,8 +282,9 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
                         <label class="form-label fw-bold">Periode Triwulan</label>
                         <div class="input-group">
                             <span class="input-group-text fw-bold text-primary">TW</span>
-                            <input type="number" class="form-control" name="triwulan" id="inputTriwulan" step="0.1" min="1" max="4.9" placeholder="Contoh: 3 atau 3.1" required>
+                            <input type="number" class="form-control" name="triwulan" id="inputTriwulan" step="0.1" min="1" max="4.9" value="<?= ceil(date('n') / 3) ?>" placeholder="Contoh: 3 atau 3.1" required>
                         </div>
+                        <small class="text-muted fst-italic">Digunakan untuk penandaan pada grafik (misal: 1, 2, atau 3.1).</small>
                     </div>
                     <!-- Desil -->
                     <div class="mb-3">
