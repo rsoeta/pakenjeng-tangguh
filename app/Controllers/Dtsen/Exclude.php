@@ -52,12 +52,12 @@ class Exclude extends BaseController
             ->select('rt')
             ->where('kode_desa', $kodeDesa)
             ->where("CAST(rw AS UNSIGNED) = ", (int)$rw)
+            ->groupBy('rt') // 🚀 KUNCI: Kelompokkan berdasarkan RT agar tidak ada data ganda (double)
             ->orderBy('CAST(rt AS UNSIGNED)', 'ASC')
             ->get()->getResultArray();
 
         return $this->response->setJSON($rtList);
     }
-
     /*
     |--------------------------------------------------------------------------
     | 🚀 FUNGSI DATATABLES SERVER-SIDE (Dengan Gembok Wilayah & Join Master)
@@ -129,10 +129,10 @@ class Exclude extends BaseController
         }
 
         // ==========================================
-        // 🎯 TANGKAP FILTER DROPDOWN RW & RT
+        // 🎯 TANGKAP FILTER DROPDOWN RW, RT & STATUS
         // ==========================================
-        $filterRw = $this->request->getPost('filter_rw');
-        $filterRt = $this->request->getPost('filter_rt');
+        $filterRw = $this->request->getPost('rw');
+        $filterRt = $this->request->getPost('rt');
         $filterStatus = $this->request->getPost('filter_status');
 
         if (!empty($filterRw)) {
@@ -141,7 +141,9 @@ class Exclude extends BaseController
         if (!empty($filterRt)) {
             $builder->where("CAST(rt.rt AS UNSIGNED) = ", (int)$filterRt);
         }
-        if (!empty($filterStatus)) {
+
+        // 🚀 SMART CHECK: Karena 0 dianggap empty() di PHP, kita harus periksa secara spesifik menggunakan is_numeric atau mengecek panjang string!
+        if ($filterStatus !== null && $filterStatus !== '') {
             $builder->where('m.status_klarifikasi', (int)$filterStatus);
         }
 
@@ -191,7 +193,6 @@ class Exclude extends BaseController
             $blocks = explode('|', $wilayahTugas);
             $totalBuilder->groupStart();
             foreach ($blocks as $block) {
-                // (Logika filter wilayah sama persis dengan di atas)
                 [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
                 $rwInt = (int) trim($rw);
                 if ($rwInt > 0) {
@@ -209,6 +210,17 @@ class Exclude extends BaseController
                 }
             }
             $totalBuilder->groupEnd();
+        }
+
+        // 🚀 TAMBAHKAN FILTER DROPDOWN KE QUERY TOTAL AGAR DATA PAGINATION TIDAK NGACO!
+        if (!empty($filterRw)) {
+            $totalBuilder->where("CAST(rt.rw AS UNSIGNED) = ", (int)$filterRw);
+        }
+        if (!empty($filterRt)) {
+            $totalBuilder->where("CAST(rt.rt AS UNSIGNED) = ", (int)$filterRt);
+        }
+        if ($filterStatus !== null && $filterStatus !== '') {
+            $totalBuilder->where('m.status_klarifikasi', (int)$filterStatus);
         }
 
         $recordsTotal = $totalBuilder->countAllResults();

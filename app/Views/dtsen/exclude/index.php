@@ -128,7 +128,7 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                                             <label class="form-label text-muted small fw-bold mb-1">Status Klarifikasi</label>
                                             <select id="filter_status" class="form-select border-info shadow-sm">
                                                 <option value="">-- Semua Status --</option>
-                                                <option value="0">Belum Klarifikasi</option>
+                                                <option value="0" selected>Belum Klarifikasi</option>
                                                 <option value="1">Berhasil Klarifikasi</option>
                                             </select>
                                         </div>

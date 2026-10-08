@@ -1288,14 +1288,11 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 $('input[name="rekening_aktif"]').prop('checked', false);
 
                 const idKk = $('#id_kk').val() || $('[name="id_kk"]').val();
-
                 $('#formAnggota #id_kk').val(idKk);
 
                 // 🚀 Kosongkan nama di header karena ini mode tambah baru
                 $('#mode_teks_header').text('Tambah Anggota Baru');
                 $('#nama_anggota_header').text('');
-
-                $('#ind_provinsi, #ind_kabupaten, #ind_kecamatan, #ind_desa').html('<option value="">Pilih...</option>').val('').trigger('change');
 
                 $('.skill-check, .disab-check').prop('checked', false);
 
@@ -1307,16 +1304,24 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 
                 $('#tabAnggotaTabs a:first').tab('show');
 
+                // 🚀 PERBAIKAN WILAYAH (TAMBAH BARU): Tembak langsung dari Tab Rumah
                 const prov = $('#rumah_provinsi').val() ?? '';
                 const kab = $('#rumah_regency').val() ?? '';
                 const kec = $('#rumah_district').val() ?? '';
                 const desa = $('#rumah_village').val() ?? '';
 
+                // 1. Amankan Nomor KK & Hidden Input Domisili
                 $('#individu_no_kk').val($('#keluarga_no_kk').val());
                 $('#ind_provinsi_hidden').val(prov);
                 $('#ind_kabupaten_hidden').val(kab);
                 $('#ind_kecamatan_hidden').val(kec);
                 $('#ind_desa_hidden').val(desa);
+
+                // 2. Tampilkan Teks Domisili ke Dropdown Terkunci (Bukan dikosongkan!)
+                $('#ind_provinsi').html($('#rumah_provinsi').html()).val(prov);
+                $('#ind_kabupaten').html($('#rumah_regency').html()).val(kab);
+                $('#ind_kecamatan').html($('#rumah_district').html()).val(kec);
+                $('#ind_desa').html($('#rumah_village').html()).val(desa);
 
                 $('#modalAnggota').modal('show');
             }).fail(() => {
