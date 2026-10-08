@@ -659,6 +659,9 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                             icon: 'success',
                             title: 'Berhasil!',
                             text: res.message,
+                            // 🚀 TAMBAHKAN TIMER DAN SEMBUNYIKAN TOMBOL
+                            timer: 1500,
+                            showConfirmButton: false,
                             customClass: {
                                 popup: 'swal2-small'
                             }
@@ -789,6 +792,9 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                             icon: 'success',
                             title: 'Tersimpan!',
                             text: res2.value.message,
+                            // 🚀 TAMBAHKAN TIMER DAN SEMBUNYIKAN TOMBOL
+                            timer: 1500,
+                            showConfirmButton: false,
                             customClass: {
                                 popup: 'swal2-small'
                             }
@@ -892,6 +898,9 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                                 icon: 'success',
                                 title: 'Berhasil!',
                                 text: res.message,
+                                // 🚀 TAMBAHKAN TIMER DAN SEMBUNYIKAN TOMBOL
+                                timer: 1500,
+                                showConfirmButton: false,
                                 customClass: {
                                     popup: 'swal2-small'
                                 }
@@ -948,6 +957,9 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                             icon: 'success',
                             title: 'Terhapus!',
                             text: res.message,
+                            // 🚀 TAMBAHKAN TIMER DAN SEMBUNYIKAN TOMBOL
+                            timer: 1500,
+                            showConfirmButton: false,
                             customClass: {
                                 popup: 'swal2-small'
                             }
