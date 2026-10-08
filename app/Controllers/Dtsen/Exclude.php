@@ -698,6 +698,36 @@ class Exclude extends BaseController
 
         $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($fileTemplate);
 
+        // ==============================================================
+        // 🚀 GENERATOR NOMOR SURAT & TANGGAL DINAMIS
+        // ==============================================================
+        // 1. Array Konverter Bulan ke Angka Romawi
+        $arrayBulan = [
+            1 => 'I',
+            2 => 'II',
+            3 => 'III',
+            4 => 'IV',
+            5 => 'V',
+            6 => 'VI',
+            7 => 'VII',
+            8 => 'VIII',
+            9 => 'IX',
+            10 => 'X',
+            11 => 'XI',
+            12 => 'XII'
+        ];
+        $bulanRomawi = $arrayBulan[(int)date('n')];
+        $tahun = date('Y');
+
+        // 2. Generate Nomor Urut (Menggunakan ID Exclude yang di-padding 3 digit, misal: 007)
+        // Pastikan variabel $id (dari $this->request->getPost('id')) sudah dideklarasikan sebelumnya
+        $nomorSurat = str_pad($id, 3, '0', STR_PAD_LEFT);
+
+        // 3. Inject ke Placeholder Word
+        $templateProcessor->setValue('nomor_surat', $nomorSurat);
+        $templateProcessor->setValue('bulan', $bulanRomawi);
+        $templateProcessor->setValue('tahun', $tahun);
+
         $templateProcessor->setValue('tgl_birokrasi', $this->format_tanggal_ba());
         $templateProcessor->setValue('tgl_sekarang', date('d-m-Y'));
         $templateProcessor->setValue('nama_kpm', $kpm['nama']);
