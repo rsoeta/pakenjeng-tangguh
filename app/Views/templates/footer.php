@@ -411,6 +411,11 @@
     document.addEventListener('DOMContentLoaded', startWIBClock);
 </script>
 
+<!-- ... script jQuery, Bootstrap, dan DataTables bawaan template ... -->
+
+<!-- 🚀 CONFIG & SHORTCUT DATATABLES GLOBAL -->
+<script src="<?= base_url('assets/js/datatables.config.js'); ?>"></script>
+
 </body>
 
 </html>

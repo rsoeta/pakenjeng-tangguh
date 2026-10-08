@@ -82,7 +82,11 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 <span class="text-muted small">Jika seluruh tab (Keluarga, Rumah, Foto, Aset, Anggota) telah diisi dengan lengkap, klik tombol di samping untuk mengecek status akhir usulan.</span>
             </div>
             <!-- 🚀 BUG FIX: Panggil cekKelengkapanAnggota() sebelum reload -->
-            <button type="button" class="btn btn-primary px-4 rounded-pill px-4 shadow-sm" onclick="if(typeof window.cekKelengkapanAnggota === 'function' && window.cekKelengkapanAnggota()) { window.location.reload(); }">
+            <!-- <button type="button" class="btn btn-primary px-4 rounded-pill px-4 shadow-sm" onclick="if(typeof window.cekKelengkapanAnggota === 'function' && window.cekKelengkapanAnggota()) { window.location.reload(); }">
+                <i class="fas fa-clipboard-check me-2"></i> Cek Status Kelengkapan Usulan
+            </button> -->
+            <!-- 🚀 BUG FIX & UPGRADE: Hapus onclick inline, ganti dengan ID pemicu -->
+            <button type="button" id="btnTriggerSimpanGlobal" class="btn btn-primary px-4 rounded-pill px-4 shadow-sm">
                 <i class="fas fa-clipboard-check me-2"></i> Cek Status Kelengkapan Usulan
             </button>
         </div>
@@ -94,7 +98,6 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-<script src="<?= base_url('assets/js/datatables.config.js'); ?>"></script>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1694,6 +1697,32 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                     title: 'Gagal menyalin NIK'
                 });
             });
+        });
+
+        // ========================================================
+        // 🚀 TRIGGER SIMPAN GLOBAL DARI TAB ANGGOTA
+        // ========================================================
+        $(document).on('click', '#btnTriggerSimpanGlobal', function() {
+
+            // 1. Cek dulu apakah seluruh data anggota sudah bebas dari tanda seru merah
+            if (typeof window.cekKelengkapanAnggota === 'function' && window.cekKelengkapanAnggota()) {
+
+                // 2. Lacak keberadaan tombol "Simpan Data & Lokasi" di Tab Keluarga
+                let btnTarget = $('#btnSimpanDataLokasi');
+
+                // (Fallback: Jika Jenderal lupa pasang ID di langkah 1, sistem akan mencari berdasarkan Teks-nya)
+                if (btnTarget.length === 0) {
+                    btnTarget = $('button[type="submit"]:contains("Simpan Data & Lokasi")');
+                }
+
+                // 3. Eksekusi klik otomatis seperti layaknya hantu! 👻
+                if (btnTarget.length > 0) {
+                    btnTarget.trigger('click');
+                } else {
+                    // Jika tombol tidak ditemukan di layar, kembalikan ke fungsi lawas (reload paksa)
+                    window.location.reload();
+                }
+            }
         });
 
         // ========================================================

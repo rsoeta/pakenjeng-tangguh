@@ -238,7 +238,11 @@ if (empty($wil['provinsi']) && !empty($rtData['kode_desa'])) {
                 <!-- TOMBOL SUBMIT KELUARGA -->
                 <?php if ($editable): ?>
                     <div class="text-end mt-4">
-                        <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm">
+                        <!-- <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm">
+                            <i class="fas fa-save me-1"></i> Simpan Data & Lokasi
+                        </button> -->
+                        <!-- 🚀 TAMBAHKAN ID: btnSimpanDataLokasi -->
+                        <button type="submit" id="btnSimpanDataLokasi" class="btn btn-success rounded-pill px-4 shadow-sm">
                             <i class="fas fa-save me-1"></i> Simpan Data & Lokasi
                         </button>
                     </div>

@@ -261,9 +261,6 @@
 
 <?= $this->include('dtsen/usulan_bansos/form_usulan_bansos'); ?>
 
-<!-- tambahkan script datatable datatables.config.js -->
-<script src="<?= base_url('assets/js/datatables.config.js'); ?>"></script>
-
 <script>
     window.userRole = <?= session()->get('role_id') ?? 99 ?>;
     window.userNik = "<?= session()->get('nik') ?>";
