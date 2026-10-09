@@ -411,7 +411,14 @@
     document.addEventListener('DOMContentLoaded', startWIBClock);
 </script>
 
-<!-- ... script jQuery, Bootstrap, dan DataTables bawaan template ... -->
+<!-- ... script jQuery & Bootstrap bawaan template ... -->
+
+<!-- 🚀 MESIN RENDER PDF.js (BYPASS ANDROID) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+    // Konfigurasi Worker PDF.js agar proses render tidak membuat web ngelag
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
 
 <!-- 🚀 CONFIG & SHORTCUT DATATABLES GLOBAL -->
 <script src="<?= base_url('assets/js/datatables.config.js'); ?>"></script>

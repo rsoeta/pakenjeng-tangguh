@@ -995,16 +995,16 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
         let url = $(this).data('url');
         let tipe = $(this).data('tipe');
 
-        // 📱 Deteksi Otomatis: Layar HP (< 768px) atau Desktop
         let isMobile = window.innerWidth < 768;
 
         if (tipe === 'image') {
+            // 🖼️ GAMBAR: Tampil normal
             Swal.fire({
                 imageUrl: url,
                 imageAlt: 'Preview Dokumen',
                 showConfirmButton: false,
                 showCloseButton: true,
-                width: isMobile ? '98%' : 'auto', // 🚀 Penuh di HP, Auto di Desktop
+                width: isMobile ? '98%' : 'auto',
                 padding: isMobile ? '0.5em' : '1.25em',
                 background: 'transparent',
                 backdrop: 'rgba(0,0,0,0.85)',
@@ -1013,17 +1013,61 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                 }
             });
         } else if (tipe === 'pdf') {
+            // 📄 PDF: RENDER MENGGUNAKAN PDF.JS (ANTI-DOWNLOAD ANDROID)
             Swal.fire({
-                // 🚀 Tinggi kanvas menyesuaikan layar (85vh di HP agar tombol close tidak tertutup)
-                html: `<iframe src="${url}" style="width:100%; height:${isMobile ? '85vh' : '80vh'}; border:none; border-radius:8px; background: white;"></iframe>`,
+                // Buat kontainer bergulir (scroll) dengan animasi loading
+                html: `<div id="pdf-container" style="width: 100%; height: ${isMobile ? '85vh' : '80vh'}; overflow-y: auto; overflow-x: hidden; background: #333; border-radius: 8px; text-align: center; padding: 10px;">
+                           <div id="pdf-loader" class="text-white mt-5">
+                               <i class="fas fa-spinner fa-spin fa-2x mb-2"></i><br>Meracik Dokumen PDF...
+                           </div>
+                       </div>`,
                 showConfirmButton: false,
                 showCloseButton: true,
-                width: isMobile ? '98%' : '80%', // 🚀 Melebar 98% khusus di layar HP
-                padding: isMobile ? '0' : '1.25em', // 🚀 Hilangkan padding di HP agar PDF luas
+                width: isMobile ? '98%' : '80%',
+                padding: isMobile ? '0' : '1.25em',
                 background: 'transparent',
                 backdrop: 'rgba(0,0,0,0.85)',
                 customClass: {
                     closeButton: 'btn btn-light rounded-circle shadow border-0 m-2'
+                },
+                didOpen: () => {
+                    // Eksekusi PDF.js setelah modal terbuka
+                    let container = document.getElementById('pdf-container');
+                    let loadingTask = pdfjsLib.getDocument(url);
+
+                    loadingTask.promise.then(function(pdf) {
+                        document.getElementById('pdf-loader').style.display = 'none'; // Matikan animasi loading
+
+                        // Looping untuk merender semua halaman jika PDF lebih dari 1 halaman
+                        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                            pdf.getPage(pageNum).then(function(page) {
+                                // Skala diperbesar agar resolusi kanvas tidak pecah di HP
+                                let viewport = page.getViewport({
+                                    scale: isMobile ? 1.5 : 2.0
+                                });
+
+                                // Buat kanvas baru untuk setiap halaman
+                                let canvas = document.createElement('canvas');
+                                canvas.style.marginBottom = '10px';
+                                canvas.style.maxWidth = '100%'; // Pastikan gambar tidak melebar keluar batas
+                                canvas.style.height = 'auto'; // Proporsi tetap terjaga
+                                canvas.style.borderRadius = '4px';
+                                container.appendChild(canvas);
+
+                                let context = canvas.getContext('2d');
+                                canvas.height = viewport.height;
+                                canvas.width = viewport.width;
+
+                                let renderContext = {
+                                    canvasContext: context,
+                                    viewport: viewport
+                                };
+                                page.render(renderContext);
+                            });
+                        }
+                    }).catch(function(error) {
+                        document.getElementById('pdf-loader').innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-triangle fa-2x mb-2"></i><br>Gagal memuat dokumen PDF.</span>';
+                    });
                 }
             });
         }
