@@ -18,15 +18,12 @@ $.extend(true, $.fn.dataTable.defaults, {
         }
     },
     columnDefs: [
-        { className: 'dtr-control text-center', orderable: false, targets: 0, responsivePriority: 1 },
+        { className: 'dtr-control text-center', orderable: false, targets: 0, responsivePriority: 1 }, // Tombol + (Collapse)
         { targets: 1, responsivePriority: 2 }, // No
-        { targets: 2, responsivePriority: 1 }, // NIK
-        { targets: 3, responsivePriority: 1 }, // Nama
-        { targets: 4, responsivePriority: 3 },
-        { targets: 5, responsivePriority: 4 },
-        { targets: 6, responsivePriority: 5 },
-        { targets: 7, responsivePriority: 6 },
-        { targets: -1, orderable: false, responsivePriority: 1 } // Kolom Aksi
+        { targets: 2, responsivePriority: 1 }, // NIK / Kolom Utama 1
+        { targets: 3, responsivePriority: 1 }, // Nama / Kolom Utama 2
+        // 🚀 HAPUS target 4, 5, 6, 7 agar tidak memicu error di tabel yang jumlah kolomnya sedikit
+        { targets: -1, orderable: false, responsivePriority: 1 } // Kolom Aksi (Selalu paling kanan)
     ],
     autoWidth: false,
     scrollX: false,

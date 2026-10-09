@@ -125,81 +125,85 @@
         if ($('#tablePemulihan').length) {
             tablePemulihan = $('#tablePemulihan').DataTable({
                 ajax: {
-                    url: '/dtsen-se/tabel_pemulihan', // ✅ UBAH KE SINI sesuai dengan Routes.php
+                    url: '/dtsen-se/tabel_pemulihan',
                     type: 'POST',
-                    dataSrc: 'data'
+                    dataSrc: 'data',
+                    // 🚀 WAJIB ADA: Kirim CSRF Token karena route menggunakan POST
+                    data: function(d) {
+                        d.<?= csrf_token() ?> = '<?= csrf_hash() ?>';
+                    }
                 },
                 responsive: true,
                 pageLength: 10,
                 autoWidth: false,
-
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
                 },
-
-                columns: [{
+                columns: [
+                    // Kolom 0: No
+                    {
                         data: null,
+                        defaultContent: '',
                         render: (d, t, r, m) => m.row + 1,
                         className: 'text-center'
                     },
+                    // Kolom 1: Kepala Keluarga
                     {
-                        data: 'kepala_keluarga'
+                        data: 'kepala_keluarga',
+                        defaultContent: '-'
                     },
-                    // 🔹 No KK
+                    // Kolom 2: No KK
                     {
                         data: 'no_kk',
+                        defaultContent: '-',
                         className: 'text-nowrap text-start',
                         render: function(noKK, type, row) {
                             if (!noKK) return '-';
 
-                            // 🚀 KUNCI SAKTINYA DITARUH DI SINI MBAH!
-                            // Kembalikan No KK asli khusus untuk mesin pencari (filter) dan pengurut (sort) DataTables
-                            if (type === 'filter' || type === 'sort') {
-                                return noKK;
-                            }
+                            // 🚀 Kembalikan No KK asli untuk pencarian (Search) dan pengurutan (Sort)
+                            if (type === 'filter' || type === 'sort') return noKK;
 
-                            // 🚀 Panggil fungsi penyensoran untuk tampilan (display)
+                            // 🚀 Tampilan visual yang disensor
                             let maskedKK = maskNumberJS(noKK);
                             return `
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="fw-semibold">${maskedKK}</span>
-                        <button 
-                            type="button"
-                            class="btn btn-outline-secondary btn-xs btnCopyNoKK"
-                            data-value="${noKK}"
-                            title="Salin No KK">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
-                `;
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-semibold">${maskedKK}</span>
+                                    <button type="button" class="btn btn-outline-secondary btn-xs btnCopyNoKK" data-value="${noKK}" title="Salin No KK">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            `;
                         }
                     },
-
+                    // Kolom 3: Alamat
                     {
                         data: 'alamat_rt',
+                        defaultContent: '-',
                         render: (d, t, r) => d || r.alamat_kk || '-'
                     },
+                    // Kolom 4: RT
                     {
                         data: 'rt',
+                        defaultContent: '-',
                         className: 'text-center fw-bold text-danger'
                     },
+                    // Kolom 5: RW
                     {
                         data: 'rw',
+                        defaultContent: '-',
                         className: 'text-center fw-bold text-danger'
                     },
-                    // ... kolom-kolom lainnya ...
+                    // Kolom 6: Aksi Pemulihan
                     {
                         data: null,
+                        defaultContent: '',
                         render: function(row) {
-                            // 🛡️ Tarik session role_id langsung secara aman
                             let roleId = <?= (int) session()->get('role_id') ?>;
 
-                            // Jika bukan Admin (role_id 4 atau 5), hanya tampilkan label
                             if (roleId > 3) {
                                 return '<span class="badge bg-secondary opacity-75"><i class="fas fa-hourglass-half"></i> Menunggu Admin</span>';
                             }
 
-                            // Logika tombol eksklusif untuk Admin (role_id 1, 2, 3)
                             let btnManual = `<a href="/pembaruan-keluarga/detail/${row.id_kk}" class="btn btn-outline-dark btn-sm me-1"><i class="fas fa-users-cog"></i> Manual</a>`;
                             let btnAuto = (row.rt && row.rw) ? `<button class="btn btn-warning btn-sm btnTriggerAutoFix" data-idrt="${row.id_rt}" data-rt="${row.rt}" data-rw="${row.rw}"><i class="fas fa-magic"></i> Auto-Fix</button>` : '';
 

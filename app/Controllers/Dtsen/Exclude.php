@@ -58,6 +58,7 @@ class Exclude extends BaseController
 
         return $this->response->setJSON($rtList);
     }
+
     /*
     |--------------------------------------------------------------------------
     | 🚀 FUNGSI DATATABLES SERVER-SIDE (Dengan Gembok Wilayah & Join Master)
@@ -333,12 +334,54 @@ class Exclude extends BaseController
                     $btnDokumenStr .= '<a href="' . base_url($fileBAWord) . '" target="_blank" class="btn btn-sm btn-primary shadow-sm px-2" title="Unduh Surat BA (Word)"><i class="fas fa-file-word"></i></a>';
                 }
 
-                // 2. Cek Foto Bukti Asli
+                // // 2. Cek Foto Bukti Asli
+                // $fileBukti = $row['bukti_penutupan'] ?? null;
+                // if (!empty($fileBukti)) {
+                //     $arrBukti = explode(',', $fileBukti);
+                //     foreach ($arrBukti as $idx => $fb) {
+                //         $btnDokumenStr .= '<a href="' . base_url('uploads/bukti_judol/' . trim($fb)) . '" target="_blank" class="btn btn-sm btn-success shadow-sm px-2" title="Lihat Foto Bukti ' . ($idx + 1) . '"><i class="fas fa-file-image"></i></a>';
+                //     }
+                // }
+
+                // // 3. Cek Foto Rumah Tampak Depan
+                // if (!empty($row['id_kk'])) {
+                //     $usulan = $db->table('dtsen_usulan')->select('payload')->where('dtsen_kk_id', $row['id_kk'])->whereIn('status', ['draft', 'submitted', 'verified', 'diverifikasi'])->orderBy('id', 'DESC')->get()->getRowArray();
+                //     if (!empty($usulan['payload'])) {
+                //         $payloadUsulan = json_decode($usulan['payload'], true);
+                //         $pathFoto = $payloadUsulan['foto']['depan'] ?? null;
+                //         if (!empty($pathFoto)) {
+                //             $namaFileUnduhan = 'Rumah_Depan_' . $row['nik'] . '.jpg';
+                //             $btnDokumenStr .= '<a href="' . base_url($pathFoto) . '" download="' . $namaFileUnduhan . '" class="btn btn-sm btn-info shadow-sm px-2" title="Unduh Foto Rumah Tampak Depan"><i class="fas fa-home"></i></a>';
+                //         }
+                //     }
+                // }
+
+                // // 4. Cek Brankas Rahasia (WRITEPATH)
+                // $pathRahasia = WRITEPATH . 'uploads/klarifikasi_judol/';
+
+                // $filePernyataanPdf = $pathRahasia . 'Pernyataan_Judol_' . $row['nik'] . '.pdf';
+                // if (file_exists($filePernyataanPdf)) {
+                //     $btnDokumenStr .= '<a href="' . site_url('exclude/download_dokumen/Pernyataan_Judol_' . $row['nik'] . '.pdf') . '" class="btn btn-sm btn-danger shadow-sm px-2" title="Unduh Pernyataan (Dari Brankas)"><i class="fas fa-file-pdf"></i></a>';
+                // }
+
+                // $fileLampiranPdf = $pathRahasia . 'Lampiran_Pernyataan_Judol_' . $row['nik'] . '.pdf';
+                // if (file_exists($fileLampiranPdf)) {
+                //     $btnDokumenStr .= '<a href="' . site_url('exclude/download_dokumen/Lampiran_Pernyataan_Judol_' . $row['nik'] . '.pdf') . '" class="btn btn-sm btn-outline-danger shadow-sm px-2" title="Unduh Lampiran"><i class="fas fa-file-pdf"></i></a>';
+                // }
+
+                // $dokFiles = glob($pathRahasia . 'Dokumentasi_Judol_' . $row['nik'] . '_*.*');
+                // if ($dokFiles) {
+                //     foreach ($dokFiles as $idx => $dok) {
+                //         $btnDokumenStr .= '<a href="' . site_url('exclude/download_dokumen/' . basename($dok)) . '" class="btn btn-sm btn-dark shadow-sm px-2" title="Unduh Dokumentasi ' . ($idx + 1) . '"><i class="fas fa-camera"></i></a>';
+                //     }
+                // }
+                // 2. Cek Foto Bukti Asli (UBAH JADI BUTTON LIGHTBOX)
                 $fileBukti = $row['bukti_penutupan'] ?? null;
                 if (!empty($fileBukti)) {
                     $arrBukti = explode(',', $fileBukti);
                     foreach ($arrBukti as $idx => $fb) {
-                        $btnDokumenStr .= '<a href="' . base_url('uploads/bukti_judol/' . trim($fb)) . '" target="_blank" class="btn btn-sm btn-success shadow-sm px-2" title="Lihat Foto Bukti ' . ($idx + 1) . '"><i class="fas fa-file-image"></i></a>';
+                        $urlImg = base_url('uploads/bukti_judol/' . trim($fb));
+                        $btnDokumenStr .= '<button type="button" data-url="' . $urlImg . '" data-tipe="image" class="btn btn-sm btn-success shadow-sm px-2 btn-preview" title="Preview Foto Bukti ' . ($idx + 1) . '"><i class="fas fa-file-image"></i></button>';
                     }
                 }
 
@@ -349,29 +392,31 @@ class Exclude extends BaseController
                         $payloadUsulan = json_decode($usulan['payload'], true);
                         $pathFoto = $payloadUsulan['foto']['depan'] ?? null;
                         if (!empty($pathFoto)) {
-                            $namaFileUnduhan = 'Rumah_Depan_' . $row['nik'] . '.jpg';
-                            $btnDokumenStr .= '<a href="' . base_url($pathFoto) . '" download="' . $namaFileUnduhan . '" class="btn btn-sm btn-info shadow-sm px-2" title="Unduh Foto Rumah Tampak Depan"><i class="fas fa-home"></i></a>';
+                            // Untuk rumah, jadikan Lightbox juga!
+                            $btnDokumenStr .= '<button type="button" data-url="' . base_url($pathFoto) . '" data-tipe="image" class="btn btn-sm btn-info shadow-sm px-2 btn-preview" title="Preview Foto Rumah Depan"><i class="fas fa-home"></i></button>';
                         }
                     }
                 }
 
-                // 4. Cek Brankas Rahasia (WRITEPATH)
+                // 4. Cek Brankas Rahasia (WRITEPATH) - UBAH JADI BUTTON LIGHTBOX
                 $pathRahasia = WRITEPATH . 'uploads/klarifikasi_judol/';
 
                 $filePernyataanPdf = $pathRahasia . 'Pernyataan_Judol_' . $row['nik'] . '.pdf';
                 if (file_exists($filePernyataanPdf)) {
-                    $btnDokumenStr .= '<a href="' . site_url('exclude/download_dokumen/Pernyataan_Judol_' . $row['nik'] . '.pdf') . '" class="btn btn-sm btn-danger shadow-sm px-2" title="Unduh Pernyataan (Dari Brankas)"><i class="fas fa-file-pdf"></i></a>';
+                    $btnDokumenStr .= '<button type="button" data-url="' . site_url('exclude/download_dokumen/Pernyataan_Judol_' . $row['nik'] . '.pdf') . '" data-tipe="pdf" class="btn btn-sm btn-danger shadow-sm px-2 btn-preview" title="Preview Pernyataan"><i class="fas fa-file-pdf"></i></button>';
                 }
 
                 $fileLampiranPdf = $pathRahasia . 'Lampiran_Pernyataan_Judol_' . $row['nik'] . '.pdf';
                 if (file_exists($fileLampiranPdf)) {
-                    $btnDokumenStr .= '<a href="' . site_url('exclude/download_dokumen/Lampiran_Pernyataan_Judol_' . $row['nik'] . '.pdf') . '" class="btn btn-sm btn-outline-danger shadow-sm px-2" title="Unduh Lampiran"><i class="fas fa-file-pdf"></i></a>';
+                    $btnDokumenStr .= '<button type="button" data-url="' . site_url('exclude/download_dokumen/Lampiran_Pernyataan_Judol_' . $row['nik'] . '.pdf') . '" data-tipe="pdf" class="btn btn-sm btn-outline-danger shadow-sm px-2 btn-preview" title="Preview Lampiran"><i class="fas fa-file-pdf"></i></button>';
                 }
 
                 $dokFiles = glob($pathRahasia . 'Dokumentasi_Judol_' . $row['nik'] . '_*.*');
                 if ($dokFiles) {
                     foreach ($dokFiles as $idx => $dok) {
-                        $btnDokumenStr .= '<a href="' . site_url('exclude/download_dokumen/' . basename($dok)) . '" class="btn btn-sm btn-dark shadow-sm px-2" title="Unduh Dokumentasi ' . ($idx + 1) . '"><i class="fas fa-camera"></i></a>';
+                        $ext = strtolower(pathinfo($dok, PATHINFO_EXTENSION));
+                        $tipe = in_array($ext, ['jpg', 'jpeg', 'png']) ? 'image' : 'pdf';
+                        $btnDokumenStr .= '<button type="button" data-url="' . site_url('exclude/download_dokumen/' . basename($dok)) . '" data-tipe="' . $tipe . '" class="btn btn-sm btn-dark shadow-sm px-2 btn-preview" title="Preview Dokumentasi ' . ($idx + 1) . '"><i class="fas fa-camera"></i></button>';
                     }
                 }
 
@@ -941,24 +986,56 @@ class Exclude extends BaseController
     // ========================================================
     // 🚀 GERBANG DOWNLOAD FILE RAHASIA (DIKUNCI UNTUK ROLE < 5)
     // ========================================================
+    // public function download_dokumen($filename)
+    // {
+    //     $roleId = session()->get('role_id');
+
+    //     // 🛡️ VALIDASI HAK AKSES KETAT
+    //     if ($roleId >= 5) {
+    //         return exit('🚫 AKSES DITOLAK: Anda tidak memiliki wewenang untuk mengunduh dokumen rahasia ini.');
+    //     }
+
+    //     // Bersihkan nama file dari karakter berbahaya (Directory Traversal Attack)
+    //     $cleanFilename = basename($filename);
+    //     $filePath      = WRITEPATH . 'uploads/klarifikasi_judol/' . $cleanFilename;
+
+    //     if (file_exists($filePath)) {
+    //         // Gunakan fungsi bawaan CI4 untuk memaksa browser mengunduh file
+    //         return $this->response->download($filePath, null);
+    //     } else {
+    //         return exit('⚠️ File tidak ditemukan di dalam brankas server.');
+    //     }
+    // }
+    // ========================================================
+    // 🚀 FUNGSI PREVIEW DOKUMEN DARI BRANKAS (WRITEPATH)
+    // ========================================================
     public function download_dokumen($filename)
     {
-        $roleId = session()->get('role_id');
+        // 1. Tentukan lokasi asli file di dalam brankas (writable)
+        $filepath = WRITEPATH . 'uploads/klarifikasi_judol/' . $filename;
 
-        // 🛡️ VALIDASI HAK AKSES KETAT
-        if ($roleId >= 5) {
-            return exit('🚫 AKSES DITOLAK: Anda tidak memiliki wewenang untuk mengunduh dokumen rahasia ini.');
+        // 2. Keamanan: Pastikan file ada
+        if (!file_exists($filepath)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Dokumen tidak ditemukan.");
         }
 
-        // Bersihkan nama file dari karakter berbahaya (Directory Traversal Attack)
-        $cleanFilename = basename($filename);
-        $filePath      = WRITEPATH . 'uploads/klarifikasi_judol/' . $cleanFilename;
-
-        if (file_exists($filePath)) {
-            // Gunakan fungsi bawaan CI4 untuk memaksa browser mengunduh file
-            return $this->response->download($filePath, null);
-        } else {
-            return exit('⚠️ File tidak ditemukan di dalam brankas server.');
+        // 3. Deteksi tipe file (MIME-Type) secara otomatis
+        $mime = mime_content_type($filepath);
+        if (!$mime) {
+            $ext = strtolower(pathinfo($filepath, PATHINFO_EXTENSION));
+            $mimeMap = [
+                'pdf'  => 'application/pdf',
+                'jpg'  => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png'  => 'image/png'
+            ];
+            $mime = $mimeMap[$ext] ?? 'application/octet-stream';
         }
+
+        // 4. 🚀 KUNCI SAKTI: Paksa header 'inline' agar browser merender PDF/Gambar di dalam iFrame, BUKAN mendownloadnya
+        return $this->response
+            ->setContentType($mime)
+            ->setHeader('Content-Disposition', 'inline; filename="' . $filename . '"')
+            ->setBody(file_get_contents($filepath));
     }
 }

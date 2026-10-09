@@ -987,6 +987,47 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
             }
         });
     }
+
+    // ========================================================
+    // 🚀 FUNGSI LIGHTBOX (PREVIEW) PDF & GAMBAR VIA SWEETALERT
+    // ========================================================
+    $(document).on('click', '.btn-preview', function() {
+        let url = $(this).data('url');
+        let tipe = $(this).data('tipe');
+
+        // 📱 Deteksi Otomatis: Layar HP (< 768px) atau Desktop
+        let isMobile = window.innerWidth < 768;
+
+        if (tipe === 'image') {
+            Swal.fire({
+                imageUrl: url,
+                imageAlt: 'Preview Dokumen',
+                showConfirmButton: false,
+                showCloseButton: true,
+                width: isMobile ? '98%' : 'auto', // 🚀 Penuh di HP, Auto di Desktop
+                padding: isMobile ? '0.5em' : '1.25em',
+                background: 'transparent',
+                backdrop: 'rgba(0,0,0,0.85)',
+                customClass: {
+                    closeButton: 'btn btn-light rounded-circle shadow border-0 m-2'
+                }
+            });
+        } else if (tipe === 'pdf') {
+            Swal.fire({
+                // 🚀 Tinggi kanvas menyesuaikan layar (85vh di HP agar tombol close tidak tertutup)
+                html: `<iframe src="${url}" style="width:100%; height:${isMobile ? '85vh' : '80vh'}; border:none; border-radius:8px; background: white;"></iframe>`,
+                showConfirmButton: false,
+                showCloseButton: true,
+                width: isMobile ? '98%' : '80%', // 🚀 Melebar 98% khusus di layar HP
+                padding: isMobile ? '0' : '1.25em', // 🚀 Hilangkan padding di HP agar PDF luas
+                background: 'transparent',
+                backdrop: 'rgba(0,0,0,0.85)',
+                customClass: {
+                    closeButton: 'btn btn-light rounded-circle shadow border-0 m-2'
+                }
+            });
+        }
+    });
 </script>
 
 <?= $this->endSection() ?>
