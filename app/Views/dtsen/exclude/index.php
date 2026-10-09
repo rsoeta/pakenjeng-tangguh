@@ -998,14 +998,13 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
         let isMobile = window.innerWidth < 768;
 
         if (tipe === 'image') {
-            // 🖼️ GAMBAR: Tampil normal
+            // 🖼️ GAMBAR: Tampil sebagai Lightbox murni (Fit to Screen tanpa luber)
             Swal.fire({
-                imageUrl: url,
-                imageAlt: 'Preview Dokumen',
+                html: `<img src="${url}" alt="Preview Dokumen" style="max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 8px;">`,
                 showConfirmButton: false,
                 showCloseButton: true,
                 width: isMobile ? '98%' : 'auto',
-                padding: isMobile ? '0.5em' : '1.25em',
+                padding: isMobile ? '0.5em' : '0', // Hilangkan padding di desktop agar rapi
                 background: 'transparent',
                 backdrop: 'rgba(0,0,0,0.85)',
                 customClass: {
@@ -1015,8 +1014,7 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
         } else if (tipe === 'pdf') {
             // 📄 PDF: RENDER MENGGUNAKAN PDF.JS (ANTI-DOWNLOAD ANDROID)
             Swal.fire({
-                // Buat kontainer bergulir (scroll) dengan animasi loading
-                html: `<div id="pdf-container" style="width: 100%; height: ${isMobile ? '85vh' : '80vh'}; overflow-y: auto; overflow-x: hidden; background: #333; border-radius: 8px; text-align: center; padding: 10px;">
+                html: `<div id="pdf-container" style="width: 100%; height: ${isMobile ? '85vh' : '80vh'}; overflow-y: auto; overflow-x: hidden; background: #333; border-radius: 8px; text-align: center; padding: 20px 0; display: flex; flex-direction: column; align-items: center;">
                            <div id="pdf-loader" class="text-white mt-5">
                                <i class="fas fa-spinner fa-spin fa-2x mb-2"></i><br>Meracik Dokumen PDF...
                            </div>
@@ -1031,27 +1029,37 @@ $watermarkStr = $namaUser . ' - ' . date('d/m/Y');
                     closeButton: 'btn btn-light rounded-circle shadow border-0 m-2'
                 },
                 didOpen: () => {
-                    // Eksekusi PDF.js setelah modal terbuka
                     let container = document.getElementById('pdf-container');
                     let loadingTask = pdfjsLib.getDocument(url);
 
                     loadingTask.promise.then(function(pdf) {
-                        document.getElementById('pdf-loader').style.display = 'none'; // Matikan animasi loading
+                        document.getElementById('pdf-loader').style.display = 'none';
 
-                        // Looping untuk merender semua halaman jika PDF lebih dari 1 halaman
+                        // Jika 1 halaman, taruh persis di tengah
+                        if (pdf.numPages === 1) {
+                            container.style.justifyContent = 'center';
+                        }
+
+                        // Looping untuk merender semua halaman
                         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
                             pdf.getPage(pageNum).then(function(page) {
-                                // Skala diperbesar agar resolusi kanvas tidak pecah di HP
                                 let viewport = page.getViewport({
                                     scale: isMobile ? 1.5 : 2.0
                                 });
 
-                                // Buat kanvas baru untuk setiap halaman
                                 let canvas = document.createElement('canvas');
-                                canvas.style.marginBottom = '10px';
-                                canvas.style.maxWidth = '100%'; // Pastikan gambar tidak melebar keluar batas
-                                canvas.style.height = 'auto'; // Proporsi tetap terjaga
+
+                                // 🚀 KUNCI SAKTI: Semua halaman (baik 1 atau 100 lembar) dipaksa Fit-to-Height!
+                                canvas.style.maxWidth = '100%';
+                                canvas.style.maxHeight = isMobile ? '80vh' : '75vh'; // 👈 Mengunci tinggi agar 1 halaman tampil utuh di layar
+                                canvas.style.width = 'auto';
+                                canvas.style.height = 'auto';
+                                canvas.style.objectFit = 'contain';
+                                canvas.style.marginBottom = '25px'; // Jarak pemisah antar halaman saat di-scroll
+                                canvas.style.flexShrink = '0'; // 👈 Cegah kanvas jadi gepeng akibat efek Flexbox
+
                                 canvas.style.borderRadius = '4px';
+                                canvas.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
                                 container.appendChild(canvas);
 
                                 let context = canvas.getContext('2d');
