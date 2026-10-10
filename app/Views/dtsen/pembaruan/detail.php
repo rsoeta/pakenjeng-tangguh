@@ -673,6 +673,20 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
             });
         }
     });
+
+    // ========================================================
+    // 🚀 SENTINEL UX: CEGAT KLIK PADA TOMBOL TERKUNCI
+    // ========================================================
+    $(document).on('click', '.btn-terkunci', function(e) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'warning',
+            title: 'Akses Terkunci!',
+            text: 'Status dokumen ini sudah dikunci (Bukan Draft / Submitted). Silakan simpan ulang via Gerbang Utama (Tab Keluarga) terlebih dahulu untuk membuka akses pembaruan.',
+            confirmButtonColor: '#d33',
+            confirmButtonText: '<i class="fas fa-key"></i> Mengerti'
+        });
+    });
 </script>
 
 <?= $this->endSection(); ?>

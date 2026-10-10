@@ -81,14 +81,16 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 <h6 class="fw-bold text-primary mb-1"><i class="fas fa-info-circle me-1"></i> Pengisian Selesai?</h6>
                 <span class="text-muted small">Jika seluruh tab (Keluarga, Rumah, Foto, Aset, Anggota) telah diisi dengan lengkap, klik tombol di samping untuk mengecek status akhir usulan.</span>
             </div>
-            <!-- 🚀 BUG FIX: Panggil cekKelengkapanAnggota() sebelum reload -->
-            <!-- <button type="button" class="btn btn-primary px-4 rounded-pill px-4 shadow-sm" onclick="if(typeof window.cekKelengkapanAnggota === 'function' && window.cekKelengkapanAnggota()) { window.location.reload(); }">
-                <i class="fas fa-clipboard-check me-2"></i> Cek Status Kelengkapan Usulan
-            </button> -->
             <!-- 🚀 BUG FIX & UPGRADE: Hapus onclick inline, ganti dengan ID pemicu -->
-            <button type="button" id="btnTriggerSimpanGlobal" class="btn btn-primary px-4 rounded-pill px-4 shadow-sm">
-                <i class="fas fa-clipboard-check me-2"></i> Cek Status Kelengkapan Usulan
-            </button>
+            <?php if (in_array(strtolower($usulan['status'] ?? ''), ['draft', 'submitted'])): ?>
+                <button type="button" id="btnTriggerSimpanGlobal" class="btn btn-primary px-4 rounded-pill shadow-sm">
+                    <i class="fas fa-clipboard-check me-2"></i> Cek Status Kelengkapan Usulan
+                </button>
+            <?php else: ?>
+                <button type="button" class="btn btn-secondary px-4 rounded-pill shadow-sm btn-terkunci">
+                    <i class="fas fa-lock me-2"></i> Terkunci
+                </button>
+            <?php endif; ?>
         </div>
     </div>
 <?php endif; ?>

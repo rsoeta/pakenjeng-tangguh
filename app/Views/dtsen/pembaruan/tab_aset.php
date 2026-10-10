@@ -225,9 +225,15 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
 
     <?php if ($editable): ?>
         <div class="text-end mt-4">
-            <button type="button" id="btnSimpanAset" class="btn btn-success rounded-pill px-4 shadow-sm">
-                <i class="fas fa-save"></i> Simpan Perubahan
-            </button>
+            <?php if (in_array(strtolower($usulan['status'] ?? ''), ['draft', 'submitted'])): ?>
+                <button type="button" id="btnSimpanAset" class="btn btn-success rounded-pill px-4 shadow-sm">
+                    <i class="fas fa-save me-1"></i> Simpan Perubahan
+                </button>
+            <?php else: ?>
+                <button type="button" class="btn btn-secondary rounded-pill px-4 shadow-sm btn-terkunci">
+                    <i class="fas fa-lock me-1"></i> Terkunci
+                </button>
+            <?php endif; ?>
         </div>
     <?php else: ?>
         <div class="alert alert-warning small mt-3">
