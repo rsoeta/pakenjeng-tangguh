@@ -222,29 +222,37 @@ $(document).ready(function () {
         if (!jenjang || !ijazah) return;
 
         const levelJenjang = jenjangLevel[jenjang] ?? 0;
-        const levelIjazah = jenjangLevel[ijazah] ?? 0;
+        // 🚀 KOREKSI: Tambahkan fallback -1 khusus untuk "Tidak Punya Ijazah SD"
+        const levelIjazah = ijazah === "Tidak Punya Ijazah SD" ? -1 : (jenjangLevel[ijazah] ?? 0);
 
         // Aturan 1: Masih sekolah → ijazah harus tepat 1 tingkat di bawah jenjang (Tidak Boleh Lompat Jauh!)
         if (ps === "Masih Sekolah") {
-            // Anak SD/MI/Sederajat (Level 0) wajar jika belum punya ijazah SD
+            // Anak SD/MI/Sederajat (Level 0) wajar jika belum punya ijazah SD (Level -1)
             if (levelJenjang === 0) {
-                if (levelIjazah !== 0) {
+                // 🚀 KOREKSI: Level Ijazah harus -1 (Tidak Punya Ijazah SD)
+                if (levelIjazah !== -1) {
                     $('#ijazah_tertinggi').addClass('is-invalid');
-                    $('#fb_ijazah').html('<i class="fas fa-exclamation-circle"></i> Anak usia SD/Sederajat belum memiliki ijazah. Silakan pilih "Tidak Punya Ijazah SD".');
+                    $('#fb_ijazah').html('<i class="fas fa-exclamation-circle"></i> Anak usia SD/Sederajat belum lulus, silakan pilih "Tidak Punya Ijazah SD".');
                     return;
                 }
             } else {
                 // Jika SMP, SMA, Kuliah (Level > 0), Ijazahnya WAJIB tepat 1 level di bawah jenjang saat ini
                 if (levelIjazah !== (levelJenjang - 1)) {
                     $('#ijazah_tertinggi').addClass('is-invalid');
-                    $('#fb_ijazah').html(`<i class="fas fa-exclamation-circle"></i> Jika masih sekolah jenjang ${jenjang}, Ijazah wajib 1 tingkat di bawahnya.`);
+                    
+                    // 🚀 PESAN ERROR LEBIH SPESIFIK JIKA Ijazahnya "Tidak Punya Ijazah SD"
+                    if(levelIjazah === -1) {
+                         $('#fb_ijazah').html(`<i class="fas fa-exclamation-circle"></i> Tidak logis! Sedang menempuh ${jenjang}, tidak mungkin belum lulus SD.`);
+                    } else {
+                         $('#fb_ijazah').html(`<i class="fas fa-exclamation-circle"></i> Jika masih sekolah jenjang ${jenjang}, Ijazah wajib setingkat di bawahnya.`);
+                    }
                     return;
                 }
             }
         }
 
         // Aturan 2: Tidak sekolah lagi → ijazah harus ≤ jenjang
-        if (ps === "Tidak Bersekolah Lagi") {
+        if (ps === "Tidak Bersekolah Lagi" || ps === "Belum Masuk TK/Kelompok Bermain" || ps === "Sedang TK/Kelompok Bermain") {
             if (levelIjazah > levelJenjang) {
                 $('#ijazah_tertinggi').addClass('is-invalid');
                 $('#fb_ijazah').html('<i class="fas fa-exclamation-circle"></i> Ijazah tidak boleh lebih tinggi dari jenjang pendidikan terakhir yang pernah diduduki.');
@@ -257,6 +265,11 @@ $(document).ready(function () {
             if (levelIjazah !== levelJenjang || ijazah === "Tidak Punya Ijazah SD") {
                 $('#ijazah_tertinggi').addClass('is-invalid');
                 $('#fb_ijazah').html(`<i class="fas fa-exclamation-circle"></i> Karena kelas "Tamat & Lulus", Ijazah WAJIB setara dengan jenjang ${jenjang}.`);
+            } 
+            // 🚀 TAMBAHAN BARU: Cek nama persisnya! (Cegah Jenjang SMK tapi Ijazah SMA)
+            else if (ijazah !== jenjang) {
+                $('#ijazah_tertinggi').addClass('is-invalid');
+                $('#fb_ijazah').html(`<i class="fas fa-exclamation-circle"></i> Jenjang yang ditamatkan adalah ${jenjang}, maka Ijazah WAJIB ${jenjang} (bukan ${ijazah}).`);
             }
         }
     }
