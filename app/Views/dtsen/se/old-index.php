@@ -557,6 +557,61 @@
             ]
         });
 
+        // ==============================================================
+        // 🎛️ SMART FILTER HANDLER (SATU PINTU & BERSIH)
+        // ==============================================================
+
+        // 1. Tangkap perubahan pada RT, Status, dan Desil
+        $('#filterRT, #filterStatus, #filterDesil').on('change', function() {
+            filterKeluarga.rt = $('#filterRT').val() || '';
+            filterKeluarga.status = $('#filterStatus').val() || '';
+            filterKeluarga.desil = $('#filterDesil').val() || '';
+
+            console.log('🔄 Filter Diklik:', filterKeluarga); // Cek di Inspect Element -> Console
+            tableKeluarga.ajax.reload(null, false);
+        });
+
+        // 2. Tangkap perubahan KHUSUS RW
+        $('#filterRW').on('change', function() {
+            const rw = $(this).val();
+            const $rt = $('#filterRT');
+
+            // Set state filter
+            filterKeluarga.rw = rw || '';
+            filterKeluarga.rt = '';
+
+            console.log('🔄 Filter RW Diklik:', filterKeluarga); // Cek di Inspect Element -> Console
+
+            $rt.prop('disabled', !rw).empty().append('<option value="">Semua RT</option>');
+            tableKeluarga.ajax.reload(null, false);
+
+            if (rw) {
+                $rt.append('<option value="" disabled>Memuat...</option>');
+                $.getJSON(`/dtsen-se/list-rt/${rw}`, function(res) {
+                    $rt.empty().append('<option value="">Semua RT</option>');
+                    if (res.data) {
+                        res.data.forEach(rt => {
+                            $rt.append(`<option value="${rt}">RT ${rt}</option>`);
+                        });
+                    }
+                });
+            }
+        });
+
+        // 3. Tombol Reset Sapu Jagat
+        $('#btnResetFilter').on('click', function() {
+            $('#filterRW, #filterStatus, #filterDesil').val('');
+            $('#filterRT').prop('disabled', true).empty().append('<option value="">Semua RT</option>');
+
+            filterKeluarga.rw = '';
+            filterKeluarga.rt = '';
+            filterKeluarga.status = '';
+            filterKeluarga.desil = '';
+
+            console.log('🔄 Filter di-Reset:', filterKeluarga);
+            tableKeluarga.ajax.reload(null, false);
+        });
+
         // ========================= 🚨 INITIALIZE TABLE PEMULIHAN =========================
         let tablePemulihan;
         if ($('#tablePemulihan').length) {
@@ -809,39 +864,39 @@
          * ====================================================== */
 
         // Helper: ambil nilai filter (null jika kosong)
-        function getFilterValue(selector) {
-            const v = $(selector).val();
-            return (v === '' || v === null) ? null : v;
-        }
+        // function getFilterValue(selector) {
+        //     const v = $(selector).val();
+        //     return (v === '' || v === null) ? null : v;
+        // }
 
-        // Inject filter ke AJAX DataTables
-        function applyTableKeluargaFilter() {
-            tableKeluarga.ajax.reload();
-        }
+        // // Inject filter ke AJAX DataTables
+        // function applyTableKeluargaFilter() {
+        //     tableKeluarga.ajax.reload();
+        // }
 
-        // Bind auto-submit on change
-        $(document).on('change', `
-            #filterWilayah,
-            #filterRW,
-            #filterRT,
-            #filterStatus,
-            #filterDesil
-        `, function() {
-            applyTableKeluargaFilter();
-        });
+        // // Bind auto-submit on change
+        // $(document).on('change', `
+        //     #filterWilayah,
+        //     #filterRW,
+        //     #filterRT,
+        //     #filterStatus,
+        //     #filterDesil
+        // `, function() {
+        //     applyTableKeluargaFilter();
+        // });
 
-        // Reset filter
-        $(document).on('click', '#btnResetFilter', function() {
-            $('#filterWilayah').val('');
-            $('#filterRW').val('');
-            $('#filterRT').val('');
-            $('#filterStatus').val('');
-            $('#filterDesil').val('');
+        // // Reset filter
+        // $(document).on('click', '#btnResetFilter', function() {
+        //     $('#filterWilayah').val('');
+        //     $('#filterRW').val('');
+        //     $('#filterRT').val('');
+        //     $('#filterStatus').val('');
+        //     $('#filterDesil').val('');
 
-            applyTableKeluargaFilter();
-        });
+        //     applyTableKeluargaFilter();
+        // });
 
-        $('#filterRW').on('change', () => tableKeluarga.ajax.reload());
+        // $('#filterRW').on('change', () => tableKeluarga.ajax.reload());
         $('#btnTambahKeluarga').on('click', () => window.location.href = '/pembaruan-keluarga/tambah');
         $('#btnReloadKeluarga').on('click', () => {
             tableKeluarga.ajax.reload(null, false);
