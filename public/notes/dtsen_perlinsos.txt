@@ -21,3 +21,4 @@ CREATE TABLE `dtsen_perlinsos_akses` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `nik_petugas` (`nik_petugas`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+

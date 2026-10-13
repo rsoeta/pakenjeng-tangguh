@@ -268,11 +268,27 @@
                             <div class="col-8">
                                 <select class="form-control" name="status_salur" id="status_salur" required>
                                     <option value="">-- Pilih --</option>
-                                    <option value="Sukses Salur">Sukses Salur</option>
-                                    <option value="Saldo Kosong">Saldo Kosong</option>
-                                    <option value="KKS Rusak/Hilang">KKS Rusak/Hilang</option>
-                                    <option value="KPM Meninggal">KPM Meninggal</option>
-                                    <option value="Pindah/Tidak Ditemukan">Pindah</option>
+
+                                    <!-- Opsi PM Sudah Transaksi -->
+                                    <option value="Sukses Salur">✅ Transaksi (Sukses Salur)</option>
+
+                                    <!-- Opsi PM Tidak Transaksi (Sesuai SIKS-NG) -->
+                                    <optgroup label="Tidak Transaksi / Gagal">
+                                        <option value="Saldo Kosong">Saldo Kosong (Tambahan Lapangan)</option>
+                                        <option value="Tidak Transaksi (Meninggal Dunia)">Tidak Transaksi (Meninggal Dunia)</option>
+                                        <option value="Tidak Transaksi (Pindah)">Tidak Transaksi (Pindah)</option>
+                                        <option value="Tidak Transaksi (Tidak Ditemukan)">Tidak Transaksi (Tidak Ditemukan)</option>
+                                        <option value="Tidak Transaksi (Tidak Layak/Menolak Bantuan)">Tidak Transaksi (Tidak Layak/Menolak Bantuan)</option>
+                                        <option value="Tidak Transaksi (Tidak Mengetahui Sebagai Penerima Bansos)">Tidak Transaksi (Tidak Mengetahui Sebagai Penerima Bansos)</option>
+                                        <option value="Tidak Transaksi (KKS Rusak/Hilang)">Tidak Transaksi (KKS Rusak/Hilang)</option>
+                                        <option value="Tidak Transaksi (KKS Lupa Pin/Terblokir)">Tidak Transaksi (KKS Lupa Pin/Terblokir)</option>
+                                        <option value="Tidak Transaksi (Belum Memiliki Kartu)">Tidak Transaksi (Belum Memiliki Kartu)</option>
+                                        <option value="Tidak Transaksi (KPM Graduasi PKH/PENA)">Tidak Transaksi (KPM Graduasi PKH/PENA)</option>
+                                        <option value="Tidak Transaksi (Warga Binaan Pemasyarakatan)">Tidak Transaksi (Warga Binaan Pemasyarakatan)</option>
+                                        <option value="Tidak Transaksi (KKS tidak dalam penguasaan sendiri)">Tidak Transaksi (KKS tidak dalam penguasaan sendiri)</option>
+                                        <option value="Saldo Terblokir">Saldo Terblokir</option>
+                                        <option value="KPM bedridden/tidak mampu mencairkan">KPM bedridden/tidak mampu mencairkan</option>
+                                    </optgroup>
                                 </select>
                             </div>
                         </div>
@@ -708,6 +724,36 @@
             });
         }
 
+        // ==========================================
+        // 🚦 LOGIKA STATUS SALUR (SUKSES VS GAGAL)
+        // ==========================================
+        $('#status_salur').on('change', function() {
+            var status = $(this).val();
+            var isPentri = (roleId >= 4);
+
+            if (status && status !== 'Sukses Salur') {
+                // JIKA GAGAL SALUR / TIDAK TRANSAKSI
+                $('#nominal_cair').val('0').prop('readonly', true);
+                $('.foto-card-container').hide(); // Sembunyikan area foto
+
+                if (isPentri) {
+                    $('#foto_kpm_kks, #foto_bukti_transaksi').prop('required', false);
+                }
+            } else {
+                // JIKA SUKSES SALUR ATAU BELUM MEMILIH
+                $('#nominal_cair').prop('readonly', false);
+                if (status === 'Sukses Salur' && $('#nominal_cair').val() === '0') {
+                    $('#nominal_cair').val(''); // Kosongkan agar pentri mengisi
+                }
+
+                $('.foto-card-container').show(); // Tampilkan area foto
+
+                if (isPentri) {
+                    $('#foto_kpm_kks, #foto_bukti_transaksi').prop('required', true);
+                }
+            }
+        });
+
         // Pastikan variabel roleId sudah dideklarasikan di awal script JS
         var roleId = <?= session()->get('role_id') ?>;
 
@@ -748,7 +794,7 @@
                         $('#lng').val(d.longitude);
 
                         $('#nominal_cair').val(new Intl.NumberFormat('id-ID').format(d.nominal_cair));
-                        $("select[name='status_salur']").val(d.status_salur);
+                        $("select[name='status_salur']").val(d.status_salur).trigger('change'); // 🚀 Memicu logika sembunyikan foto
 
                         // 🚀 PERBAIKAN: Bersihkan & Set Tahap Salur
                         if (d.tahap_salur) {
@@ -818,6 +864,7 @@
         // ========================================================
         $('[data-bs-target="#offcanvasMaster"]').on('click', function() {
             $('#formBansosKKS')[0].reset();
+            $('#status_salur').trigger('change'); // 🚀 Kembalikan form ke mode default
             $('#id_dokumentasi').val('');
             $('.offcanvas-title').html('<i class="fas fa-plus-circle text-primary mr-2"></i> Tambah Data Baru');
 
@@ -873,17 +920,22 @@
             }
 
             if (!isDraftAdmin) {
-                var isFotoKpmKosong = ($('#foto_kpm_kks').val() === '' && $('#prev_kpm').attr('src').includes('no-image.svg'));
-                var isFotoBuktiKosong = ($('#foto_bukti_transaksi').val() === '' && $('#prev_bukti').attr('src').includes('no-image.svg'));
+                var isSuksesSalur = (statusSalur === 'Sukses Salur');
 
-                if (isFotoKpmKosong || isFotoBuktiKosong) {
-                    Swal.fire('Peringatan', 'Kedua foto wajib diunggah untuk kelengkapan dokumentasi!', 'warning');
-                    return false;
-                }
+                // 🚀 JIKA SUKSES SALUR, WAJIB FOTO DAN NOMINAL
+                if (isSuksesSalur) {
+                    var isFotoKpmKosong = ($('#foto_kpm_kks').val() === '' && $('#prev_kpm').attr('src').includes('no-image.svg'));
+                    var isFotoBuktiKosong = ($('#foto_bukti_transaksi').val() === '' && $('#prev_bukti').attr('src').includes('no-image.svg'));
 
-                if ($('#nominal_cair').val() === '') {
-                    Swal.fire('Peringatan', 'Nominal Cair wajib diisi!', 'warning');
-                    return false;
+                    if (isFotoKpmKosong || isFotoBuktiKosong) {
+                        Swal.fire('Peringatan', 'Kedua foto wajib diunggah untuk kelengkapan dokumentasi sukses salur!', 'warning');
+                        return false;
+                    }
+
+                    if ($('#nominal_cair').val() === '' || $('#nominal_cair').val() === '0') {
+                        Swal.fire('Peringatan', 'Nominal Cair wajib diisi untuk Sukses Salur!', 'warning');
+                        return false;
+                    }
                 }
             }
 

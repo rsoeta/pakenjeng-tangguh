@@ -159,21 +159,25 @@ class BansosKKS extends BaseController
                 // JIKA MASIH DRAFT (PR DARI ADMIN BENERAN KOSONG)
                 $fotoPath = base_url('assets/img/no-image.svg');
 
-                // 🚀 PERBAIKAN: Tampilkan nominal jika Admin sudah mengisinya (lebih dari 0)
                 $nominal = ($row['nominal_cair'] > 0)
                     ? 'Rp ' . number_format($row['nominal_cair'], 0, ',', '.')
                     : '<span class="text-muted"><i class="fas fa-minus"></i></span>';
 
-                $badgeStatus = '<span class="badge bg-warning text-dark p-2 mr-1 shadow-sm"><i class="fas fa-clock"></i> Draft/Menunggu Foto</span>';
+                $badgeStatus = '<span class="badge bg-warning text-dark p-2 shadow-sm"><i class="fas fa-clock"></i> Draft/Menunggu Foto</span>';
             } else {
-                // JIKA SUDAH LENGKAP (DIDOKUMENTASIKAN PENTRI ATAU DATA LAMA)
+                // JIKA SUDAH LENGKAP ATAU STATUS GAGAL SALUR
                 $fotoPath = !empty($row['foto_kpm_kks']) ? base_url('uploads/bansos/' . $row['foto_kpm_kks']) : base_url('assets/img/no-image.svg');
                 $nominal = 'Rp ' . number_format($row['nominal_cair'], 0, ',', '.');
 
-                $status_cek = strtolower(trim($row['status_salur']));
+                $statusAsli = trim($row['status_salur'] ?? '');
+                $status_cek = strtolower($statusAsli);
+
+                // 🚀 SABUK PENGAMAN: Jika di database terlanjur kosong, tampilkan teks default
+                $teksStatus = !empty($statusAsli) ? esc($statusAsli) : 'Tidak Transaksi / Gagal Salur';
+
                 $badgeStatus = ($status_cek == 'sukses salur')
-                    ? '<span class="badge bg-success p-2 mr-1 shadow-sm"><i class="fas fa-check-circle"></i> Sukses Salur</span>'
-                    : '<span class="badge bg-danger p-2 mr-1 shadow-sm"><i class="fas fa-times-circle"></i> ' . esc($row['status_salur']) . '</span>';
+                    ? '<span class="badge bg-success p-2 shadow-sm"><i class="fas fa-check-circle"></i> Sukses Salur</span>'
+                    : '<span class="badge bg-danger p-2 shadow-sm text-wrap text-left" style="max-width: 250px; line-height: 1.4;"><i class="fas fa-times-circle"></i> ' . $teksStatus . '</span>';
             }
 
             $colFoto = '<a href="' . $fotoPath . '" data-lightbox="gallery-kpm" data-title="Foto KPM: ' . esc($row['nama_kpm']) . '"><img src="' . $fotoPath . '" class="rounded shadow-sm" style="width: 70px; height: 90px; object-fit: cover; border: 2px solid #fff; cursor: pointer;" title="Klik untuk memperbesar"></a>';
@@ -182,29 +186,32 @@ class BansosKKS extends BaseController
             $kksMasked = $maskNumber($row['nomor_kks'], 'nokk');
 
             // 🚀 3. INDIKATOR GEMBOK VISUAL
-            $badgeLock = $isLocked ? '<span class="badge bg-danger p-2 ml-1 shadow-sm" title="Data Telah Diverifikasi & Dikunci"><i class="fas fa-lock"></i></span>' : '';
+            $badgeLock = $isLocked ? '<span class="badge bg-danger p-2 shadow-sm" title="Data Telah Diverifikasi & Dikunci"><i class="fas fa-lock"></i></span>' : '';
 
+            // 🚀 PERBAIKAN 2: Hapus d-none d-md-block! Gunakan d-flex flex-wrap agar badge otomatis rapi di layar HP maupun Desktop
             $colDetail = '
-            <div class="row align-items-center">
+            <div class="row">
                 <span style="display: none;">' . esc($row['nik_kpm']) . ' ' . esc($row['nomor_kks']) . '</span>
 
-                <div class="col-md-6 mb-2 mb-md-0">
+                <div class="col-md-6">
                     <span class="fw-bold text-dark d-block" style="font-size:1.1rem;">' . esc($row['nama_kpm']) . '</span>
                     <div class="text-muted small mt-1 d-flex align-items-center"><i class="fas fa-id-card mr-2"></i> ' . $nikMasked . '</div>
+                    <div class="small text-muted mt-1"><i class="fas fa-map-marker-alt text-danger mr-1"></i> ' . esc($row['alamat'] ?? '-') . ' RT' . ($row['rt'] ?? '00') . '/RW' . ($row['rw'] ?? '00') . '</div>
                 </div>
-                <div class="col-md-6 d-none d-md-block text-md-right border-left">
-                    <div class="mb-1">
-                        <span class="badge bg-primary p-2 mr-1 shadow-sm">' . esc($row['jenis_bansos']) . '</span>
+                
+                <!-- Pembatas garis horizontal khusus di HP -->
+                <div class="col-12 d-md-none"><hr class="my-2 border-light"></div>
+
+                <div class="col-md-6 text-md-right">
+                    <div class="mb-1 d-flex flex-wrap align-items-center justify-content-start justify-content-md-end" style="gap: 5px;">
+                        <span class="badge bg-primary p-2 shadow-sm">' . esc($row['jenis_bansos']) . '</span>
                         ' . $badgeStatus . '
                         <span class="badge bg-success p-2 shadow-sm">' . $nominal . '</span>
                         ' . $badgeLock . ' 
                     </div>
-                    <div class="small text-muted mt-1 d-flex align-items-center justify-content-md-end">
+                    <div class="small text-muted mt-2 d-flex align-items-center justify-content-start justify-content-md-end">
                          <i class="fas fa-credit-card mr-2"></i> ' . $kksMasked . '
                     </div>
-                </div>
-                <div class="col-12 mt-1">
-                    <small class="text-muted"><i class="fas fa-map-marker-alt text-danger mr-1"></i> ' . esc($row['alamat'] ?? '-') . ' RT' . ($row['rt'] ?? '00') . '/RW' . ($row['rw'] ?? '00') . '</small>
                 </div>
             </div>';
 
@@ -380,35 +387,38 @@ class BansosKKS extends BaseController
 
             // 2. LOGIKA FILE FOTO & NOMINAL (Draft vs Selesai)
             if (!$isDraft) {
-                // === MODE LENGKAPI / FULL SUBMIT (Wajib Foto) ===
+                // === MODE LENGKAPI / FULL SUBMIT ===
                 $fotoKpm   = $this->request->getFile('foto_kpm_kks');
                 $fotoBukti = $this->request->getFile('foto_bukti_transaksi');
                 $uploadPath = FCPATH . 'uploads/bansos/';
                 if (!is_dir($uploadPath)) mkdir($uploadPath, 0777, true);
 
+                // 🚀 Tentukan apakah ini mode sukses atau gagal
+                $isSukses = ($post['status_salur'] === 'Sukses Salur');
+
                 // -- Proses Foto KPM --
                 if ($fotoKpm && $fotoKpm->isValid()) {
                     $namaFotoKpm = "KPM_{$nik}_{$kks}_{$timestamp}.jpg";
                     $this->_applyWatermark($fotoKpm, $uploadPath . $namaFotoKpm, $post);
-                } elseif (!$id && empty($oldData['foto_kpm_kks'])) {
-                    // Wajib jika insert data baru yang bukan draft
-                    return $this->response->setJSON(['status' => 'error', 'message' => 'Foto KPM & KKS wajib diunggah!']);
+                } elseif (!$id && empty($oldData['foto_kpm_kks']) && $isSukses) {
+                    // Wajib jika Sukses Salur
+                    return $this->response->setJSON(['status' => 'error', 'message' => 'Foto KPM & KKS wajib diunggah untuk transaksi sukses!']);
                 }
 
                 // -- Proses Foto Bukti --
                 if ($fotoBukti && $fotoBukti->isValid()) {
                     $namaFotoBukti = "STRUK_{$nik}_{$kks}_{$timestamp}.jpg";
                     $this->_applyWatermark($fotoBukti, $uploadPath . $namaFotoBukti, $post);
-                } elseif (!$id && empty($oldData['foto_bukti_transaksi'])) {
-                    return $this->response->setJSON(['status' => 'error', 'message' => 'Foto Struk/Uang wajib diunggah!']);
+                } elseif (!$id && empty($oldData['foto_bukti_transaksi']) && $isSukses) {
+                    return $this->response->setJSON(['status' => 'error', 'message' => 'Foto Struk/Uang wajib diunggah untuk transaksi sukses!']);
                 }
 
-                $nominalCair = (int) str_replace('.', '', $post['nominal_cair'] ?? 0);
+                // 🚀 JIKA GAGAL, PAKSA NOMINAL JADI 0
+                $nominalCair = $isSukses ? (int) str_replace('.', '', $post['nominal_cair'] ?? 0) : 0;
                 $statusSalur = $post['status_salur'];
-                $statusKelengkapan = 1; // Selesai
+                $statusKelengkapan = 1; // Selesai dilaporkan (baik sukses maupun gagal dianggap tuntas)
             } else {
                 // === MODE DRAFT / TUGAS ADMIN (Bypass Foto) ===
-                // 🚀 PERBAIKAN: Ambil nominal dari inputan Admin, jangan di-nol-kan!
                 $nominalCair = (int) str_replace('.', '', $post['nominal_cair'] ?? 0);
                 $statusSalur = null;
                 $statusKelengkapan = 0; // Masih PR/Draft

@@ -9,3 +9,5 @@ ADD `status_kelengkapan` tinyint(1) DEFAULT 0 COMMENT '0: Draft/PR dari Admin, 1
 UPDATE `dtsen_bansos_kks` 
 SET `status_kelengkapan` = 1 
 WHERE `status_salur` IS NOT NULL;
+
+ALTER TABLE `dtsen_bansos_kks` MODIFY COLUMN `status_salur` VARCHAR(150) NULL DEFAULT NULL;
