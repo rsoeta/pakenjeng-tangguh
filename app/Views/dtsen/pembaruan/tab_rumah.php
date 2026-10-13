@@ -883,11 +883,8 @@ $se   = $payload['sosial_ekonomi'] ?? [];
             else $(this).removeClass('is-invalid border-danger');
         });
 
-        // 🚀 SINKRONISASI PENGELUARAN DENGAN SISTEM DELTA (AKUMULASI PINTAR ALA EXCEL)
-        // 1. Rekam nilai asli saat halaman pertama kali diload agar tidak merusak data lama
-        $('#pengeluaran_listrik, #pengeluaran_pulsa, #pengeluaran_internet').each(function() {
-            $(this).data('prev-val', getInt(this));
-        });
+        // 🚀 VALIDASI PENGELUARAN RUTIN BPS 
+        // (Sistem akumulasi otomatis dimatikan agar PENTRI mengisi data real manual)
 
         $('#pengeluaran_listrik, #pengeluaran_pulsa, #pengeluaran_internet').on('input change', function(e) {
             const currentVal = getInt(this);
@@ -905,28 +902,7 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                 $(this).removeClass('is-invalid border-danger').addClass('border-primary');
             }
 
-            // 2. Tambahkan SELISIH (Delta) hanya jika user benar-benar mengetik manual
-            if (e.originalEvent) {
-                const prevVal = $(this).data('prev-val') || 0;
-                const delta = currentVal - prevVal; // Hitung penambahan/pengurangannya saja
-
-                if (delta !== 0) {
-                    const currentNonMakan = getInt('#pengeluaran_non_makan_bulanan');
-                    const newNonMakan = currentNonMakan + delta;
-
-                    // Tembakkan hasil rumus ke kolom Bukan Makanan
-                    if (newNonMakan > 0) {
-                        $('#pengeluaran_non_makan_bulanan').val(new Intl.NumberFormat('id-ID').format(newNonMakan));
-                    } else {
-                        $('#pengeluaran_non_makan_bulanan').val('');
-                    }
-
-                    // Simpan angka terakhir sebagai patokan untuk ketikan selanjutnya
-                    $(this).data('prev-val', currentVal);
-                }
-            }
-
-            // Panggil validasi diri sendiri untuk kolom Bukan Makanan
+            // Panggil validasi diri sendiri untuk kolom Bukan Makanan agar batas minimal tetap terjaga
             $('#pengeluaran_non_makan_bulanan').trigger('change');
         });
 
@@ -934,12 +910,15 @@ $se   = $payload['sosial_ekonomi'] ?? [];
             const listrik = getInt('#pengeluaran_listrik');
             const pulsa = getInt('#pengeluaran_pulsa');
             const internet = getInt('#pengeluaran_internet');
+
             const minNonMakan = listrik + pulsa + internet;
             const nonMakanBln = getInt(this);
 
-            if (nonMakanBln > 0 && nonMakanBln < minNonMakan) {
+            // 🚀 PERBAIKAN MUTLAK: Cabut syarat > 0.
+            // Pokoknya kalau angka di kolom ini KURANG DARI total Listrik+Pulsa+Net (termasuk jika 0/kosong), langsung MERAHKAN!
+            if (nonMakanBln < minNonMakan) {
                 $(this).addClass('is-invalid border-danger').removeClass('border-primary');
-                $('#feedback_non_makan').html(`<i class="fas fa-exclamation-circle"></i> Tidak boleh lebih kecil dari Rp ${new Intl.NumberFormat('id-ID').format(minNonMakan)}`);
+                $('#feedback_non_makan').html(`<i class="fas fa-exclamation-circle"></i> Minimal harus Rp ${new Intl.NumberFormat('id-ID').format(minNonMakan)} (Listrik+Pulsa+Net)`);
             } else {
                 $(this).removeClass('is-invalid border-danger').addClass('border-primary');
             }

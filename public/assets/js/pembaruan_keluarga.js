@@ -768,101 +768,6 @@ $(document).ready(function () {
     }
 
     /* ======================================================
-     🌍 Inisialisasi Select2 Wilayah AJAX Berantai
-    ======================================================= */
-    // function initSelect2Wilayah() {
-    //     const select2Base = {
-    //         theme: 'bootstrap-5',
-    //         width: '100%',
-    //         placeholder: 'Pilih...',
-    //         allowClear: true,
-    //         ajax: {
-    //             delay: 250,
-    //             dataType: 'json',
-    //             processResults: data => ({ results: data.map(item => ({ id: item.id, text: item.name })) })
-    //         }
-    //     };
-
-    //     // Helper: buat select2 dengan opsi, optional dropdownParent
-    //     function attachSelect2(selector, ajaxUrl, dropdownParentEl = null, transportFn = null) {
-    //         const cfg = $.extend(true, {}, select2Base);
-    //         if (ajaxUrl) cfg.ajax = $.extend({}, cfg.ajax, { url: ajaxUrl });
-    //         if (transportFn) cfg.ajax.transport = transportFn;
-    //         if (dropdownParentEl && dropdownParentEl.length) cfg.dropdownParent = dropdownParentEl;
-    //         $(selector).select2(cfg);
-    //     }
-
-    //     // 🚀 OBAT PENCARIAN MACET: Beritahu Select2 bahwa induknya adalah formDataKeluarga
-    //     const mainParent = $('#formDataKeluarga').length ? $('#formDataKeluarga') : null;
-
-    //     // Provinsi
-    //     attachSelect2('#rumah_provinsi, #provinsi', baseUrl + '/api/villages/provinces', mainParent);
-
-    //     // Kabupaten (bergantung prov)
-    //     attachSelect2('#rumah_regency, #kabupaten', null, mainParent, function(params, success, failure) {
-    //         const provID = $('#rumah_provinsi').val() || $('#provinsi').val();
-    //         if (!provID) return success([]);
-    //         $.ajax({ url: baseUrl + '/api/villages/regencies/' + provID, dataType: 'json', success, error: failure });
-    //     });
-
-    //     // Kecamatan
-    //     attachSelect2('#rumah_district, #kecamatan', null, mainParent, function(params, success, failure) {
-    //         const kabID = $('#rumah_regency').val() || $('#kabupaten').val();
-    //         if (!kabID) return success([]);
-    //         $.ajax({ url: baseUrl + '/api/villages/districts/' + kabID, dataType: 'json', success, error: failure });
-    //     });
-
-    //     // Desa
-    //     attachSelect2('#rumah_village, #desa', null, mainParent, function(params, success, failure) {
-    //         const kecID = $('#rumah_district').val() || $('#kecamatan').val();
-    //         if (!kecID) return success([]);
-    //         $.ajax({ url: baseUrl + '/api/villages/villages/' + kecID, dataType: 'json', success, error: failure });
-    //     });
-
-    //     // ---- IMPORTANT: re-initialize selects that are *inside modal* with dropdownParent to ensure dropdown appears above modal ----
-    //     if ($modal.length) {
-    //         ['#provinsi', '#kabupaten', '#kecamatan', '#desa'].forEach(sel => {
-    //             // destroy existing select2 (if initialized), then re-init with dropdownParent
-    //             if ($(sel).data('select2')) $(sel).select2('destroy');
-    //         });
-
-    //         // attach with dropdownParent = modal
-    //         attachSelect2('#provinsi', baseUrl + '/api/villages/provinces', $modal);
-    //         attachSelect2('#kabupaten', null, $modal, function(params, success, failure) {
-    //             const provID = $('#provinsi').val();
-    //             if (!provID) return success([]);
-    //             $.ajax({ url: baseUrl + '/api/villages/regencies/' + provID, dataType: 'json', success, error: failure });
-    //         });
-    //         attachSelect2('#kecamatan', null, $modal, function(params, success, failure) {
-    //             const kabID = $('#kabupaten').val();
-    //             if (!kabID) return success([]);
-    //             $.ajax({ url: baseUrl + '/api/villages/districts/' + kabID, dataType: 'json', success, error: failure });
-    //         });
-    //         attachSelect2('#desa', null, $modal, function(params, success, failure) {
-    //             const kecID = $('#kecamatan').val();
-    //             if (!kecID) return success([]);
-    //             $.ajax({ url: baseUrl + '/api/villages/villages/' + kecID, dataType: 'json', success, error: failure });
-    //         });
-    //     }
-
-    //     // Reset dependensi saat ganti
-    //     $('#rumah_provinsi, #provinsi').on('change', function () {
-    //         // 🚀 CEGAH PENGHAPUSAN SAAT SEDANG PREFILL
-    //         if (window.isPrefillingWilayah) return; 
-    //         $('#rumah_regency, #kabupaten, #rumah_district, #kecamatan, #rumah_village, #desa').val(null).trigger('change');
-    //     });
-    //     $('#rumah_regency, #kabupaten').on('change', function () {
-    //         if (window.isPrefillingWilayah) return; 
-    //         $('#rumah_district, #kecamatan, #rumah_village, #desa').val(null).trigger('change');
-    //     });
-    //     $('#rumah_district, #kecamatan').on('change', function () {
-    //         if (window.isPrefillingWilayah) return; 
-    //         $('#rumah_village, #desa').val(null).trigger('change');
-    //     });
-    // }
-
-
-    /* ======================================================
     📤 Submit Data Form
     ======================================================= */
 
@@ -945,12 +850,12 @@ $(document).ready(function () {
         const sumber = $('#sumber').val();
 
         Swal.fire({
-            title: 'Apakah Anda Yakin?',
-            html: 'Dengan menekan tombol <b>Ya</b>, data yang telah terinput sebelumnya akan ditimpa/hilang.<br><br><small class="text-danger"><i>*Perhatian khusus bagi data yang telah berstatus Verified.</i></small>',
-            icon: 'warning',
+            title: 'Simpan Identitas Keluarga?',
+            html: 'Perubahan pada data identitas dan wilayah keluarga akan disimpan.<br><br><small class="text-success fw-bold"><i class="fas fa-shield-alt"></i> Jangan khawatir, data Kondisi Rumah, Sosial Ekonomi, dan Anggota Keluarga sebelumnya TIDAK akan hilang.</small>',
+            icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
+            confirmButtonColor: '#198754',
+            cancelButtonColor: '#6c757d',
             confirmButtonText: '<i class="fas fa-save"></i> Ya, Simpan Data!',
             cancelButtonText: 'Batal',
             reverseButtons: true
