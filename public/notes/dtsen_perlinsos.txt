@@ -1,0 +1,23 @@
+CREATE TABLE `dtsen_perlinsos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nik` varchar(16) NOT NULL,
+  `id_kk` int(11) NOT NULL,
+  `status_rekap` enum('terdaftar') DEFAULT 'terdaftar',
+  `created_by` varchar(20) DEFAULT NULL, -- NIK Pentri
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nik_unique` (`nik`) -- Mencegah PENTRI input NIK yang sama 2x
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `dtsen_perlinsos_akses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nik_petugas` varchar(20) NOT NULL,
+  `file_bukti` varchar(255) NOT NULL,
+  `status` enum('pending','approved','rejected') DEFAULT 'pending',
+  `catatan` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `updated_by` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nik_petugas` (`nik_petugas`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

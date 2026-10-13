@@ -31,45 +31,6 @@ class BansosKKS extends BaseController
         // 👇 UBAH BARIS INI SESUAIKAN DENGAN NAMA FOLDER BARU ANDA 👇
         return view('dtsen/bansos_kks/v_bansos_kks', $data);
     }
-    // public function index()
-    // {
-    //     $user = session()->get();
-    //     $kodeDesa = session()->get('kode_desa') ?? ($user['kode_desa'] ?? '');
-
-    //     // 🚀 AMBIL DATA PROGRES PETUGAS ENTRI (ROLE 4)
-    //     $builder = $this->db->table('dtsen_bansos_kks b')
-    //         ->select('u.fullname, 
-    //                   SUM(CASE WHEN b.is_locked = 1 THEN 1 ELSE 0 END) as terkunci, 
-    //                   SUM(CASE WHEN b.is_locked = 0 THEN 1 ELSE 0 END) as belum_terkunci')
-    //         ->join('dtks_users u', 'u.id = b.created_by', 'inner')
-    //         ->where('u.role_id', 4);
-
-    //     if (!empty($kodeDesa)) {
-    //         $builder->where('u.kode_desa', $kodeDesa);
-    //     }
-
-    //     $chartDataRaw = $builder->groupBy('u.id, u.fullname')->get()->getResultArray();
-
-    //     $chartCategories = [];
-    //     $chartTerkunci   = [];
-    //     $chartBelum      = [];
-
-    //     foreach ($chartDataRaw as $row) {
-    //         $chartCategories[] = ucwords(strtolower($row['fullname']));
-    //         $chartTerkunci[]   = (int)$row['terkunci'];
-    //         $chartBelum[]      = (int)$row['belum_terkunci'];
-    //     }
-
-    //     $data = [
-    //         'title'           => 'Dokumentasi Bansos',
-    //         'user'            => $user,
-    //         'chartCategories' => json_encode($chartCategories),
-    //         'chartTerkunci'   => json_encode($chartTerkunci),
-    //         'chartBelum'      => json_encode($chartBelum),
-    //     ];
-
-    //     return view('dtsen/bansos_kks/v_bansos_kks', $data);
-    // }
 
     public function datatable()
     {
@@ -303,7 +264,7 @@ class BansosKKS extends BaseController
             ->groupStart()
             ->like('a.nik', $searchTerm)
             ->orLike('m.no_kks', $searchTerm)
-            ->orLike('a.nama', $searchTerm)
+            // ->orLike('a.nama', $searchTerm)
             ->groupEnd()
             // 🛡️ KUNCI UTAMA: GroupBy NIK agar tidak muncul ganda jika ada data join yang double
             ->groupBy('a.nik')

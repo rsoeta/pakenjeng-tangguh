@@ -650,6 +650,23 @@ $routes->group('analisis-desil', ['filter' => ['authfilterdtks', 'menufilterdtks
 	$routes->post('datatable', 'Dtsen\AnalisisDesil::datatable');
 });
 
+// REKAPITULASI PERLINSOS
+$routes->group('perlinsos', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
+	$routes->get('/', 'Dtsen\Perlinsos::index');
+	$routes->post('data', 'Dtsen\Perlinsos::getData'); // Untuk DataTables
+	$routes->post('save', 'Dtsen\Perlinsos::save'); // Simpan via NIK
+	$routes->post('delete/(:num)', 'Dtsen\Perlinsos::delete/$1');
+	$routes->get('search-art', 'Dtsen\Perlinsos::searchArt'); // Pencarian Select2
+	$routes->get('chart-capaian', 'Dtsen\Perlinsos::getChartCapaian'); // 🚀 API untuk Grafik Pentri
+	$routes->get('filter-options', 'Dtsen\Perlinsos::getFilterOptions'); //dan 
+	$routes->get('rt-by-rw/(:any)', 'Dtsen\Perlinsos::getRTByRW/$1');
+
+	// API GATEKEEPER
+	$routes->post('upload-bukti', 'Dtsen\Perlinsos::uploadBukti');
+	$routes->post('data-akses', 'Dtsen\Perlinsos::getDataAkses');
+	$routes->post('verify-akses', 'Dtsen\Perlinsos::verifyAkses');
+});
+
 // USULAN
 $routes->get('usulan', 'Dtks\Usulan22::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('tmbUsul', 'Dtks\Usulan22::save', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
