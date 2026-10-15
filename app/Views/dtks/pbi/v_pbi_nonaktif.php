@@ -90,6 +90,43 @@
 <script>
     var table;
 
+    // =========================================================================
+    // 🚀 KONFIGURASI MODULAR SWEETALERT2 (RESPONSIVE & AUTO-CLOSE)
+    // =========================================================================
+    const SwalSuccess = Swal.mixin({
+        icon: 'success',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        width: '22rem',
+        padding: '1.25rem',
+        customClass: {
+            popup: 'swal-sm rounded-4 shadow',
+            title: 'fs-5 fw-bold',
+            htmlContainer: 'fs-6'
+        }
+    });
+
+    const SwalToast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        customClass: {
+            popup: 'swal-sm rounded-3 shadow-sm'
+        }
+    });
+
+    // Fungsi Global Pemanggil Alert Sukses
+    function showSuccess(message, title = 'Berhasil!') {
+        SwalSuccess.fire({
+            title: title,
+            text: message
+        });
+    }
+
     $(document).ready(function() {
         table = $('#tablePbiNonAktif').DataTable({
             "processing": true,
@@ -101,7 +138,7 @@
                 "data": function(d) {
                     d.rw = $('#filter_rw').val();
                     d.rt = $('#filter_rt').val();
-                    d.alasan = $('#filter_alasan').val(); // 🔥 Tambahkan baris ini
+                    d.alasan = $('#filter_alasan').val();
                 }
             },
             "dom": '<"row align-items-center"<"col-md-6"l><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
@@ -140,11 +177,7 @@
             ]
         });
 
-        $('#filter_rw, #filter_rt').on('change', function() {
-            table.ajax.reload(null, false);
-        });
-
-        // 🔥 Tambahkan #filter_alasan ke dalam selector
+        // 🔥 Gabungkan semua filter ke dalam satu listener (menghapus duplikasi listener sebelumnya)
         $('#filter_rw, #filter_rt, #filter_alasan').on('change', function() {
             table.ajax.reload(null, false);
         });
@@ -169,17 +202,11 @@
         });
 
         let oldLength = table.page.len();
-
-        // Tarik semua data tanpa limit
         table.page.len(-1).draw();
 
         table.one('draw', function() {
-            // Trigger ekspor otomatis
             table.button('.btn-excel-hidden').trigger();
-
-            // Kembalikan ke limit awal
             table.page.len(oldLength).draw();
-
             Swal.close();
         });
     }
@@ -209,14 +236,8 @@
                     success: function(res) {
                         if (res.status) {
                             table.ajax.reload(null, false);
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                text: res.message,
-                                customClass: {
-                                    popup: 'swal-sm'
-                                }
-                            });
+                            // 🚀 Panggil fungsi modular auto-close
+                            showSuccess(res.message);
                         }
                     }
                 });
@@ -224,19 +245,11 @@
         });
     }
 
-    // 📋 Fungsi Salin Teks (NIK / KK) dengan Toast SweetAlert2 yang diperkecil
+    // 📋 Fungsi Salin Teks (NIK / KK) dengan Toast SweetAlert2 Otomatis
     window.copyText = function(text) {
         navigator.clipboard.writeText(text).then(function() {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'success',
-                title: text + ' disalin!',
-                showConfirmButton: false,
-                timer: 1500,
-                customClass: {
-                    popup: 'swal-sm' // Ukuran mini agar nyaman di HP
-                }
+            SwalToast.fire({
+                title: text + ' disalin!'
             });
         }).catch(function(err) {
             console.error('Gagal menyalin text: ', err);

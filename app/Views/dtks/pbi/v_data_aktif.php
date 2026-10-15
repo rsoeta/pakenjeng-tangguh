@@ -95,6 +95,48 @@
 <script>
     var table;
 
+    // =========================================================================
+    // 🚀 KONFIGURASI MODULAR SWEETALERT2 (RESPONSIVE & AUTO-CLOSE)
+    // =========================================================================
+    const SwalSuccess = Swal.mixin({
+        icon: 'success',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        width: '22rem',
+        padding: '1.25rem',
+        customClass: {
+            popup: 'swal-sm rounded-4 shadow',
+            title: 'fs-5 fw-bold',
+            htmlContainer: 'fs-6'
+        }
+    });
+
+    const SwalToast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        customClass: {
+            popup: 'swal-sm rounded-3 shadow-sm'
+        }
+    });
+
+    // Fungsi Global Pemanggil Alert Sukses (Mendukung Teks & HTML)
+    function showSuccess(message, title = 'Berhasil!', isHtml = false) {
+        let config = {
+            title: title
+        };
+        if (isHtml) {
+            config.html = message;
+        } else {
+            config.text = message;
+        }
+        SwalSuccess.fire(config);
+    }
+
     $(document).ready(function() {
         // 🚀 Inisialisasi DataTables dengan "responsive": true
         table = $('#tablePbiAktif').DataTable({
@@ -102,20 +144,17 @@
             "serverSide": true,
             "responsive": true, // MANTRA WAJIB MOBILE
             "ajax": {
-                // 🚀 Hapus 'dtks/' karena kita sudah pakai Route Group '/pbi/data/datatable'
                 "url": "<?= site_url('pbi/data/datatable') ?>",
                 "type": "POST",
                 "data": function(d) {
                     d.rw = $('#filter_rw').val();
                     d.rt = $('#filter_rt').val();
-                    // d.csrf_test_name = $('meta[name="csrf-token"]').attr('content'); // Uncomment jika pakai CSRF CI4
                 }
             },
-            // 🚀 Hapus 'B' dari dom agar tombol aslinya tidak tampil merusak layout
             "dom": '<"row align-items-center"<"col-md-6"l><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
             "buttons": [{
                 extend: 'excelHtml5',
-                className: 'd-none btn-excel-hidden', // 🚀 Sembunyikan pakai d-none
+                className: 'd-none btn-excel-hidden',
                 title: 'Master Data PBI-JKN Aktif',
                 exportOptions: {
                     columns: [0, 1, 2, 3, 4, 5],
@@ -158,19 +197,11 @@
         table.ajax.reload(null, false);
     }
 
-    // 📋 Fungsi Salin Teks (NIK / KK) dengan Toast SweetAlert2 yang diperkecil
+    // 📋 Fungsi Salin Teks (NIK / KK) dengan Toast SweetAlert2 Otomatis
     window.copyText = function(text) {
         navigator.clipboard.writeText(text).then(function() {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'success',
-                title: text + ' disalin!',
-                showConfirmButton: false,
-                timer: 1500,
-                customClass: {
-                    popup: 'swal-sm' // Ukuran mini agar nyaman di HP
-                }
+            SwalToast.fire({
+                title: text + ' disalin!'
             });
         }).catch(function(err) {
             console.error('Gagal menyalin text: ', err);
@@ -213,7 +244,7 @@
                         Swal.showValidationMessage('Detail alasan lainnya tidak boleh kosong!');
                         return false;
                     }
-                    alasan = alasanLain; // Timpa variabel alasan dengan isi text area
+                    alasan = alasanLain;
                 }
 
                 return {
@@ -222,7 +253,6 @@
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                // Eksekusi AJAX (Murni bukan simulasi lagi)
                 $.ajax({
                     url: '<?= site_url('pbi/data/proses_nonaktif') ?>',
                     type: 'POST',
@@ -233,14 +263,8 @@
                     success: function(res) {
                         if (res.status) {
                             table.ajax.reload(null, false);
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                text: 'Data dipindahkan ke menu Non-Aktif.',
-                                customClass: {
-                                    popup: 'swal-sm'
-                                }
-                            });
+                            // 🚀 Panggil fungsi modular auto-close
+                            showSuccess('Data dipindahkan ke menu Non-Aktif.');
                         }
                     }
                 });
@@ -256,7 +280,7 @@
             txtLainnya.focus();
         } else {
             txtLainnya.classList.add('d-none');
-            txtLainnya.value = ''; // Kosongkan isian jika opsi lain dipilih
+            txtLainnya.value = '';
         }
     }
 
@@ -292,14 +316,8 @@
                 fileInput.value = ""; // Reset input
                 if (response.status) {
                     table.ajax.reload(null, false);
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Import Selesai!',
-                        html: response.message,
-                        customClass: {
-                            popup: 'swal-sm'
-                        }
-                    });
+                    // 🚀 Panggil fungsi modular auto-close dengan parameter HTML = true
+                    showSuccess(response.message, 'Import Selesai!', true);
                 } else {
                     Swal.fire({
                         icon: 'error',
@@ -327,7 +345,6 @@
 
     // 🚀 Fungsi Pemicu Export Excel (Full Data Server-Side Workaround)
     function exportExcelLuar() {
-        // Tampilkan loading agar user tahu sistem sedang menarik seluruh data
         Swal.fire({
             title: 'Menyiapkan Data...',
             text: 'Membaca seluruh data dari server untuk diekspor.',
@@ -340,22 +357,12 @@
             }
         });
 
-        // 1. Simpan limit paginasi saat ini (misal: 10)
         let oldLength = table.page.len();
-
-        // 2. Ubah limit menjadi -1 (tampilkan SEMUA data) lalu muat ulang tabel
         table.page.len(-1).draw();
 
-        // 3. Dengarkan event 'draw' (saat tabel selesai dimuat) SEKALI SAJA menggunakan .one()
         table.one('draw', function() {
-
-            // 4. Setelah semua data ter-render di tabel, otomatis klik tombol Excel tersembunyi
             table.button('.btn-excel-hidden').trigger();
-
-            // 5. Kembalikan limit paginasi ke semula lalu muat ulang tabel
             table.page.len(oldLength).draw();
-
-            // 6. Tutup loading SweetAlert2
             Swal.close();
         });
     }
@@ -376,7 +383,7 @@
             cancelButtonText: 'Batal',
             showLoaderOnConfirm: true,
             customClass: {
-                popup: 'swal-sm' // Ukuran mini untuk mobile
+                popup: 'swal-sm'
             },
             preConfirm: (nik) => {
                 if (!nik || nik.length !== 16) {
@@ -404,7 +411,6 @@
             if (result.isConfirmed) {
                 let w = result.value;
 
-                // 🚀 Buka Form Lanjutan dengan tambahan Jenis Kepesertaan
                 Swal.fire({
                     title: 'Lengkapi Data BPJS',
                     html: `
@@ -414,7 +420,6 @@
                             Alamat: ${w.kampung} RT ${w.rt} / RW ${w.rw}
                         </div>
                         
-                        <!-- 🎯 DROPDOWN JENIS KEPESERTAAN -->
                         <label class="small text-muted float-start fw-bold">Jenis Kepesertaan <span class="text-danger">*</span></label>
                         <select id="jenis_kepesertaan_manual" class="form-select form-select-sm mb-2 shadow-sm border-primary">
                             <option value="PBI APBN">PBI APBN (Pusat)</option>
@@ -445,14 +450,13 @@
                             rt: w.rt,
                             rw: w.rw,
                             pbi_id: w.pbi_id,
-                            jenis_kepesertaan: document.getElementById('jenis_kepesertaan_manual').value, // 👈 Tangkap valuenya
+                            jenis_kepesertaan: document.getElementById('jenis_kepesertaan_manual').value,
                             no_kis: document.getElementById('kis_manual').value,
                             faskes_tk1: document.getElementById('faskes_manual').value
                         }
                     }
                 }).then((res) => {
                     if (res.isConfirmed) {
-                        // Tembak data ke Controller simpan_manual
                         $.ajax({
                             url: '<?= site_url('pbi/data/simpan_manual') ?>',
                             type: 'POST',
@@ -460,16 +464,9 @@
                             success: function(r) {
                                 if (r.status) {
                                     table.ajax.reload(null, false);
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Berhasil!',
-                                        text: r.message,
-                                        customClass: {
-                                            popup: 'swal-sm'
-                                        }
-                                    });
+                                    // 🚀 Panggil fungsi modular auto-close
+                                    showSuccess(r.message);
                                 } else {
-                                    // 🚨 TANGKAP ERROR JIKA GAGAL SIMPAN
                                     Swal.fire({
                                         icon: 'error',
                                         title: 'Gagal Menyimpan!',
@@ -481,7 +478,6 @@
                                 }
                             },
                             error: function() {
-                                // 🚨 TANGKAP ERROR 500 / JARINGAN
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Koneksi Terputus!',
@@ -501,7 +497,6 @@
     // 🚀 Fungsi Edit PBI (Memanfaatkan endpoint simpan_manual yang sudah ada)
     function editPbi(id, nik, id_art, no_kk, nama, kampung, rt, rw, no_kis, jenis_kepesertaan, faskes_tk1) {
 
-        // Cek nilai awal dropdown
         let isLainnya = (jenis_kepesertaan !== 'PBI APBN' && jenis_kepesertaan !== 'PBI APBD' && jenis_kepesertaan !== 'PBPU / MANDIRI' && jenis_kepesertaan !== '');
 
         Swal.fire({
@@ -537,7 +532,7 @@
             },
             preConfirm: () => {
                 return {
-                    pbi_id: id, // 👈 Kunci utama agar Controller tahu ini mode UPDATE
+                    pbi_id: id,
                     nik: nik,
                     id_art: id_art,
                     no_kk: no_kk,
@@ -552,7 +547,6 @@
             }
         }).then((res) => {
             if (res.isConfirmed) {
-                // Tembak data ke Controller simpan_manual yang sama persis
                 $.ajax({
                     url: '<?= site_url('pbi/data/simpan_manual') ?>',
                     type: 'POST',
@@ -560,14 +554,8 @@
                     success: function(r) {
                         if (r.status) {
                             table.ajax.reload(null, false);
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                text: 'Data kepesertaan berhasil diperbarui.',
-                                customClass: {
-                                    popup: 'swal-sm'
-                                }
-                            });
+                            // 🚀 Panggil fungsi modular auto-close
+                            showSuccess('Data kepesertaan berhasil diperbarui.');
                         } else {
                             Swal.fire({
                                 icon: 'error',
