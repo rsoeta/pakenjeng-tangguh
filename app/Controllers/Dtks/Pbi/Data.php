@@ -430,4 +430,219 @@ class Data extends BaseController
             'message' => 'Data PBI berhasil dinonaktifkan.'
         ]);
     }
+
+    // =========================================================================
+    // 📥 IMPORT EXCEL KHUSUS DATA NON-AKTIF DARI SIKS-NG
+    // Format Kolom: A:No | B:NIK | C:No KK | D:Nama | E:Prov | F:Kab | G:Kec | H:Desa | I:Alamat | J:Alasan
+    // =========================================================================
+    public function import_nonaktif()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setJSON(['status' => false, 'message' => 'Akses tidak diizinkan']);
+        }
+
+        // 🔐 Proteksi Role & Kepemilikan Wilayah (Hanya Role 1, 2, 3 / Admin & Operator Desa)
+        $userInfo = $this->AuthModel->getUserId();
+        $roleId   = (int) ($userInfo['role_id'] ?? session()->get('role_id') ?? 99);
+        $kodeDesa = $userInfo['kode_desa'] ?? session()->get('kode_desa');
+        $userId   = $userInfo['id_user'] ?? session()->get('id_user') ?? session()->get('id') ?? 1;
+
+        if ($roleId >= 4 || empty($kodeDesa)) {
+            return $this->response->setStatusCode(403)->setJSON([
+                'status'  => false,
+                'message' => 'Akses ditolak! Anda tidak memiliki wewenang untuk mengimpor data.'
+            ]);
+        }
+
+        // 🛡️ Validasi File Upload Ketat (Ekstensi, MIME Type, & Ukuran Maks 5MB)
+        $file = $this->request->getFile('file_excel');
+        if (!$file || !$file->isValid() || $file->hasMoved()) {
+            return $this->response->setJSON(['status' => false, 'message' => 'File Excel tidak valid atau rusak.']);
+        }
+
+        $ext = strtolower($file->getClientExtension());
+        if (!in_array($ext, ['xls', 'xlsx'])) {
+            return $this->response->setJSON(['status' => false, 'message' => 'Format file harus .xls atau .xlsx!']);
+        }
+
+        if ($file->getSizeByUnit('mb') > 5) {
+            return $this->response->setJSON(['status' => false, 'message' => 'Ukuran file maksimal 5 MB!']);
+        }
+
+        $db      = \Config\Database::connect();
+        $periode = date('Y-m');
+        $today   = date('Y-m-d');
+        $now     = date('Y-m-d H:i:s');
+
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getTempName());
+            $sheet       = $spreadsheet->getActiveSheet()->toArray();
+
+            if (count($sheet) <= 1) {
+                return $this->response->setJSON(['status' => false, 'message' => 'File Excel kosong atau hanya berisi header.']);
+            }
+
+            // 1️⃣ OPTIMASI: Cache Data Warga (ART) khusus di Desa pengguna yang login
+            $artData = $db->table('dtsen_art a')
+                ->select('a.nik, a.id_art, k.no_kk, k.alamat as kampung_db, rt.rt, rt.rw')
+                ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left')
+                ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left')
+                ->where('rt.kode_desa', $kodeDesa)
+                ->where('a.deleted_at', null)
+                ->get()->getResultArray();
+
+            $mapArt = [];
+            foreach ($artData as $art) {
+                $mapArt[$art['nik']] = $art;
+            }
+
+            // 2️⃣ OPTIMASI & KEAMANAN OBJECT-LEVEL: Cache Data PBI Existing milik Desa ini (Ambil ID, NIK, & Status)
+            $pbiData = $db->table('pbi_master_data')
+                ->select('id, nik, status_kepesertaan')
+                ->where('kode_desa', $kodeDesa)
+                ->get()->getResultArray();
+
+            $mapPbi = [];
+            foreach ($pbiData as $p) {
+                $mapPbi[$p['nik']] = $p; // Simpan id dan status_kepesertaan
+            }
+
+            $dataInsert  = [];
+            $dataUpdate  = [];
+            $nikList     = [];
+            $jmlSkip     = 0; // Penghitung data yang sudah Non-Aktif sebelumnya
+
+            for ($i = 1; $i < count($sheet); $i++) {
+                $row = $sheet[$i];
+
+                // Bersihkan NIK & No KK dari karakter non-angka (antisipasi tanda petik/spasi dari Excel)
+                $nik  = preg_replace('/\D/', '', trim((string)($row[1] ?? '')));
+                $noKk = preg_replace('/\D/', '', trim((string)($row[2] ?? '')));
+                $nama = strtoupper(trim(strip_tags((string)($row[3] ?? ''))));
+
+                // Validasi NIK wajib 16 digit dan belum diproses di baris sebelumnya
+                if (strlen($nik) !== 16 || empty($nama) || in_array($nik, $nikList)) {
+                    continue;
+                }
+                $nikList[] = $nik;
+
+                // 🧠 AMBIL DATA DARI CACHE DATABASE DTSEN
+                $dbArt = $mapArt[$nik] ?? null;
+                $idArt = $dbArt['id_art'] ?? null;
+
+                // Jika No KK di Excel kosong/tidak valid, gunakan No KK dari DTSEN
+                if (strlen($noKk) !== 16 && !empty($dbArt['no_kk'])) {
+                    $noKk = $dbArt['no_kk'];
+                }
+
+                // Prioritaskan RT/RW dari Database SINDEN
+                $rt = !empty($dbArt['rt']) ? str_pad((int)$dbArt['rt'], 3, '0', STR_PAD_LEFT) : '000';
+                $rw = !empty($dbArt['rw']) ? str_pad((int)$dbArt['rw'], 3, '0', STR_PAD_LEFT) : '000';
+
+                // 🎯 EKSTRAK ALAMAT (Kolom I / Indeks 8) & REGEX SEBAGAI CADANGAN
+                $alamatMentah = trim(strip_tags((string)($row[8] ?? '')));
+                $kampung      = !empty($alamatMentah) ? $alamatMentah : ($dbArt['kampung_db'] ?? '-');
+
+                if ($rt === '000' && preg_match('/RT[\.\s\/:]*0*(\d+)/i', $alamatMentah, $matchesRt)) {
+                    $rt = str_pad((int)$matchesRt[1], 3, '0', STR_PAD_LEFT);
+                }
+                if ($rw === '000' && preg_match('/RW[\.\s\/:]*0*(\d+)/i', $alamatMentah, $matchesRw)) {
+                    $rw = str_pad((int)$matchesRw[1], 3, '0', STR_PAD_LEFT);
+                }
+
+                // 🚦 EKSTRAK ALASAN NON-AKTIF (Kolom J / Indeks 9)
+                $alasanMentah   = strtoupper(trim(strip_tags((string)($row[9] ?? ''))));
+                $alasanNonAktif = !empty($alasanMentah) ? $alasanMentah : 'DINONAKTIFKAN PUSAT (SIKS-NG)';
+
+                if (isset($mapPbi[$nik])) {
+                    // 🛡️ JIKA SUDAH NON-AKTIF SEBELUMNYA (MISAL DARI MANUAL), LANGSUNG SKIP!
+                    if ($mapPbi[$nik]['status_kepesertaan'] === 'Non-Aktif') {
+                        $jmlSkip++;
+                        continue;
+                    }
+
+                    // 🔄 JIKA MASIH AKTIF -> UPDATE MENJADI NON-AKTIF BERDASARKAN ID
+                    $dataUpdate[] = [
+                        'id'                       => $mapPbi[$nik]['id'],
+                        'id_art'                   => $idArt,
+                        'no_kk'                    => $noKk,
+                        'nama'                     => $nama,
+                        'kampung'                  => $kampung,
+                        'rt'                       => $rt,
+                        'rw'                       => $rw,
+                        'status_kepesertaan'       => 'Non-Aktif',
+                        'alasan_nonaktif'          => $alasanNonAktif,
+                        'tanggal_nonaktif'         => $today,
+                        'dinonaktifkan_oleh'       => $userId,
+                        'periode_sinkron_terakhir' => $periode,
+                        'updated_by'               => $userId,
+                        'updated_at'               => $now
+                    ];
+                } else {
+                    // ➕ JIKA BELUM ADA DI PBI MASTER DATA -> INSERT LANGSUNG SEBAGAI ARSIP NON-AKTIF
+                    $dataInsert[] = [
+                        'nik'                      => $nik,
+                        'id_art'                   => $idArt,
+                        'no_kk'                    => $noKk,
+                        'nama'                     => $nama,
+                        'jenis_kepesertaan'        => 'PBI APBN',
+                        'kampung'                  => $kampung,
+                        'rt'                       => $rt,
+                        'rw'                       => $rw,
+                        'kode_desa'                => $kodeDesa,
+                        'status_kepesertaan'       => 'Non-Aktif',
+                        'alasan_nonaktif'          => $alasanNonAktif,
+                        'tanggal_nonaktif'         => $today,
+                        'dinonaktifkan_oleh'       => $userId,
+                        'periode_sinkron_terakhir' => $periode,
+                        'created_by'               => $userId,
+                        'created_at'               => $now,
+                        'updated_at'               => $now
+                    ];
+                }
+            }
+
+            if (empty($dataInsert) && empty($dataUpdate)) {
+                $msgKosong = ($jmlSkip > 0)
+                    ? "Seluruh data dalam file Excel (<b>{$jmlSkip}</b> warga) sudah berstatus Non-Aktif sebelumnya."
+                    : "Tidak ada baris data valid yang dapat diimpor. Pastikan NIK terdiri dari 16 digit angka di Kolom B.";
+
+                return $this->response->setJSON([
+                    'status'  => ($jmlSkip > 0), // Tetap anggap sukses (hijau) jika memang sudah non-aktif semua
+                    'message' => $msgKosong
+                ]);
+            }
+
+            $db->transBegin();
+
+            if (!empty($dataInsert)) {
+                $this->pbiModel->insertBatch($dataInsert);
+            }
+            if (!empty($dataUpdate)) {
+                // Gunakan 'id' sebagai constraint key agar update akurat pada record milik desa ini
+                $this->pbiModel->updateBatch($dataUpdate, 'id');
+            }
+
+            $db->transCommit();
+
+            $jmlInsert  = count($dataInsert);
+            $jmlUpdate  = count($dataUpdate);
+            $totalBaris = $jmlInsert + $jmlUpdate;
+            $infoSkip   = ($jmlSkip > 0) ? ", {$jmlSkip} Dilewati/Sudah Non-Aktif" : "";
+
+            return $this->response->setJSON([
+                'status'  => true,
+                'message' => "<b>{$totalBaris}</b> data Non-Aktif berhasil diproses!<br><small>({$jmlUpdate} Dinonaktifkan, {$jmlInsert} Arsip Baru{$infoSkip})</small>"
+            ]);
+        } catch (\Throwable $e) {
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+            }
+            log_message('error', '[PBI import_nonaktif] Error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Terjadi kesalahan saat memproses file Excel. Pastikan format kolom sudah sesuai standar SIKS-NG.'
+            ]);
+        }
+    }
 }

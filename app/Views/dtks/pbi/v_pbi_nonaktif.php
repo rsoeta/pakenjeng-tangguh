@@ -54,6 +54,16 @@
 
                         <!-- Tombol Aksi -->
                         <div class="col-12 col-md-4 d-flex align-items-end justify-content-md-end mt-2 mt-md-0 gap-2 flex-wrap">
+                            <?php if (session()->get('role_id') < 4): ?>
+                                <!-- Form Hidden untuk Upload Excel Non-Aktif -->
+                                <input type="file" id="fileExcelNonAktif" class="d-none" accept=".xls,.xlsx" onchange="uploadExcelNonAktif()">
+
+                                <!-- Tombol Import Non-Aktif (Dilengkapi Panduan Format) -->
+                                <button class="btn btn-sm btn-danger shadow-sm" onclick="konfirmasiImportNonAktif()" title="Import Data Non-Aktif dari SIKS-NG">
+                                    <i class="fas fa-file-import me-1"></i> Import Non-Aktif
+                                </button>
+                            <?php endif; ?>
+
                             <button class="btn btn-sm btn-success shadow-sm" onclick="exportExcelLuar()">
                                 <i class="fas fa-file-excel me-1"></i> Export Data
                             </button>
@@ -119,12 +129,17 @@
         }
     });
 
-    // Fungsi Global Pemanggil Alert Sukses
-    function showSuccess(message, title = 'Berhasil!') {
-        SwalSuccess.fire({
-            title: title,
-            text: message
-        });
+    // Fungsi Global Pemanggil Alert Sukses (Mendukung Teks & HTML)
+    function showSuccess(message, title = 'Berhasil!', isHtml = false) {
+        let config = {
+            title: title
+        };
+        if (isHtml) {
+            config.html = message;
+        } else {
+            config.text = message;
+        }
+        SwalSuccess.fire(config);
     }
 
     $(document).ready(function() {
@@ -208,6 +223,101 @@
             table.button('.btn-excel-hidden').trigger();
             table.page.len(oldLength).draw();
             Swal.close();
+        });
+    }
+
+    // 📋 Tampilkan Panduan Format Kolom SIKS-NG Sebelum Pilih File
+    function konfirmasiImportNonAktif() {
+        Swal.fire({
+            title: 'Import PBI Non-Aktif (SIKS-NG)',
+            html: `
+                <div class="text-start small bg-light p-2 rounded border border-danger mb-2">
+                    <b class="text-danger"><i class="fas fa-info-circle me-1"></i> Urutan Kolom Excel (Mulai Baris 2):</b>
+                    <ol class="mb-0 ps-3 mt-1" style="line-height: 1.4;">
+                        <li><b>A:</b> No</li>
+                        <li><b>B:</b> NIK <span class="text-danger fw-bold">(Wajib 16 Digit)</span></li>
+                        <li><b>C:</b> No KK</li>
+                        <li><b>D:</b> Nama</li>
+                        <li><b>E - H:</b> Provinsi, Kab/Kota, Kec, Desa</li>
+                        <li><b>I:</b> Alamat</li>
+                        <li><b>J:</b> Alasan Non-Aktif</li>
+                    </ol>
+                </div>
+                <small class="text-muted">Data PBI Aktif yang NIK-nya tercantum di dalam file ini akan otomatis dipindahkan ke <b>Non-Aktif</b>.</small>
+            `,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-folder-open me-1"></i> Pilih File Excel',
+            cancelButtonText: 'Batal',
+            customClass: {
+                popup: 'swal-sm rounded-4'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('fileExcelNonAktif').click();
+            }
+        });
+    }
+
+    // 🚀 Eksekusi Upload Excel Non-Aktif via AJAX
+    function uploadExcelNonAktif() {
+        let fileInput = document.getElementById('fileExcelNonAktif');
+        let file = fileInput.files[0];
+
+        if (!file) return;
+
+        let formData = new FormData();
+        formData.append('file_excel', file);
+
+        Swal.fire({
+            title: 'Memproses Data Non-Aktif...',
+            text: 'Mohon tunggu, sistem sedang mencocokkan NIK dan menonaktifkan kepesertaan.',
+            allowOutsideClick: false,
+            customClass: {
+                popup: 'swal-sm rounded-4'
+            },
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        $.ajax({
+            url: '<?= site_url('pbi/data/import_nonaktif') ?>',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: function(response) {
+                fileInput.value = ""; // Reset input file
+                if (response.status) {
+                    table.ajax.reload(null, false);
+                    // 🚀 Panggil fungsi modular auto-close (2 detik, tanpa tombol OK)
+                    showSuccess(response.message, 'Import Selesai!', true);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Import',
+                        text: response.message,
+                        customClass: {
+                            popup: 'swal-sm rounded-4'
+                        }
+                    });
+                }
+            },
+            error: function() {
+                fileInput.value = "";
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error Server',
+                    text: 'Terjadi kesalahan jaringan atau format file tidak didukung.',
+                    customClass: {
+                        popup: 'swal-sm rounded-4'
+                    }
+                });
+            }
         });
     }
 

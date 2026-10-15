@@ -552,6 +552,9 @@ $routes->group('pbi', ['filter' => ['authfilterdtks', 'globalview', 'menufilterd
 		$routes->post('import_excel', 'Dtks\Pbi\Data::import_excel');
 		$routes->post('cek_nik', 'Dtks\Pbi\Data::cek_nik');
 		$routes->post('simpan_manual', 'Dtks\Pbi\Data::simpan_manual');
+		$routes->post('import_nonaktif', 'Dtks\Pbi\Data::import_nonaktif');
+		// Atau jika berada di dalam group('pbi'):
+		// $routes->post('data/import_nonaktif', 'Dtks\Pbi\Data::import_nonaktif');
 	});
 
 	// 📝 2. VERIVALI PBI (Legacy: VervalPbi)
