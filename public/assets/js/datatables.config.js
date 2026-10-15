@@ -28,7 +28,7 @@ $.extend(true, $.fn.dataTable.defaults, {
     autoWidth: false,
     scrollX: false,
     paging: true,
-    pageLength: 5,
+    pageLength: 10,
     order: [],
     language: {
         emptyTable: "Belum ada data.",
