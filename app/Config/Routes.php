@@ -660,7 +660,11 @@ $routes->group('perlinsos', ['filter' => ['authfilterdtks', 'globalview', 'menuf
 	$routes->get('/', 'Dtsen\Perlinsos::index');
 	$routes->post('data', 'Dtsen\Perlinsos::getData'); // Untuk DataTables
 	$routes->post('save', 'Dtsen\Perlinsos::save'); // Simpan via NIK
+	// ... route lainnya ...
 	$routes->post('delete/(:num)', 'Dtsen\Perlinsos::delete/$1');
+
+	// 🚀 ROUTE BARU: Validasi per baris data oleh Operator
+	$routes->post('verify-data/(:num)', 'Dtsen\Perlinsos::verifyData/$1');
 	$routes->get('search-art', 'Dtsen\Perlinsos::searchArt'); // Pencarian Select2
 	$routes->get('chart-capaian', 'Dtsen\Perlinsos::getChartCapaian'); // 🚀 API untuk Grafik Pentri
 	$routes->get('filter-options', 'Dtsen\Perlinsos::getFilterOptions'); //dan 

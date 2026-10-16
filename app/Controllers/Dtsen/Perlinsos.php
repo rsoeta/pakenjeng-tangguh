@@ -209,15 +209,88 @@ class Perlinsos extends Controller
         return $this->response->setJSON(['petugas' => $petugas, 'rw' => $rw]);
     }
 
+    // // ========================================================
+    // // 🚀 3. CHART CAPAIAN VS TARGET (EXPERT MODE)
+    // // ========================================================
+    // public function getChartCapaian()
+    // {
+    //     // 🚀 TAMBAHAN: Ambil kode desa dari session
+    //     $kodeDesa = session()->get('kode_desa');
+
+    //     // 1. Ambil petugas yang HANYA berstatus aktif
+    //     $users = $this->db->table('dtks_users')
+    //         ->select('nik, fullname, wilayah_tugas')
+    //         ->where('role_id', 4) // Hanya PENTRI
+    //         ->where('status', 1)
+    //         ->get()->getResultArray();
+
+    //     $categories = [];
+    //     $seriesCapaian = [];
+    //     $seriesTarget = [];
+
+    //     foreach ($users as $u) {
+    //         $nikPetugas = $u['nik'];
+    //         $namaPendek = explode(' ', trim($u['fullname']))[0];
+
+    //         // 🎯 Hitung Capaian (Telah Diinput)
+    //         $capaian = $this->db->table('dtsen_perlinsos')->where('created_by', $nikPetugas)->countAllResults();
+
+    //         // 🎯 Hitung Target KK sesuai wilayah_tugas
+    //         $target = 0;
+    //         $wilayahTugas = trim($u['wilayah_tugas']);
+
+    //         if (!empty($wilayahTugas)) {
+    //             $b_kk = $this->db->table('dtsen_kk kk')
+    //                 ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
+    //                 ->where('kk.deleted_at IS NULL')
+    //                 // 🚀 KUNCI SAKTI: Filter wajib agar tidak nyasar ke desa lain
+    //                 ->where('rt.kode_desa', $kodeDesa);
+
+    //             $wilayahPairs = [];
+    //             foreach (explode('|', $wilayahTugas) as $block) {
+    //                 [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
+    //                 foreach (explode(',', $rtList) as $rt) {
+    //                     if (trim($rw) !== '' && trim($rt) !== '') {
+    //                         $wilayahPairs[] = ['rw' => trim($rw), 'rt' => trim($rt)];
+    //                     }
+    //                 }
+    //             }
+
+    //             if (!empty($wilayahPairs)) {
+    //                 $b_kk->groupStart();
+    //                 foreach ($wilayahPairs as $pair) {
+    //                     $b_kk->orGroupStart()
+    //                         ->where('rt.rw', $pair['rw'])
+    //                         ->where('rt.rt', $pair['rt'])
+    //                         ->groupEnd();
+    //                 }
+    //                 $b_kk->groupEnd();
+    //                 $target = $b_kk->countAllResults();
+    //             }
+    //         }
+
+    //         if ($target > 0 || $capaian > 0) {
+    //             $categories[] = $namaPendek;
+    //             $seriesCapaian[] = $capaian;
+    //             $seriesTarget[] = $target;
+    //         }
+    //     }
+
+    //     return $this->response->setJSON([
+    //         'categories' => $categories,
+    //         'series'     => [
+    //             ['name' => 'Tercapai', 'data' => $seriesCapaian],
+    //             ['name' => 'Target KK', 'data' => $seriesTarget]
+    //         ]
+    //     ]);
+    // }
     // ========================================================
     // 🚀 3. CHART CAPAIAN VS TARGET (EXPERT MODE)
     // ========================================================
     public function getChartCapaian()
     {
-        // 🚀 TAMBAHAN: Ambil kode desa dari session
         $kodeDesa = session()->get('kode_desa');
 
-        // 1. Ambil petugas yang HANYA berstatus aktif
         $users = $this->db->table('dtks_users')
             ->select('nik, fullname, wilayah_tugas')
             ->where('role_id', 4) // Hanya PENTRI
@@ -226,16 +299,14 @@ class Perlinsos extends Controller
 
         $categories = [];
         $seriesCapaian = [];
-        $seriesTarget = [];
+        $seriesSisa = []; // 🚀 Ubah seriesTarget menjadi seriesSisa
 
         foreach ($users as $u) {
             $nikPetugas = $u['nik'];
             $namaPendek = explode(' ', trim($u['fullname']))[0];
 
-            // 🎯 Hitung Capaian (Telah Diinput)
             $capaian = $this->db->table('dtsen_perlinsos')->where('created_by', $nikPetugas)->countAllResults();
 
-            // 🎯 Hitung Target KK sesuai wilayah_tugas
             $target = 0;
             $wilayahTugas = trim($u['wilayah_tugas']);
 
@@ -243,7 +314,6 @@ class Perlinsos extends Controller
                 $b_kk = $this->db->table('dtsen_kk kk')
                     ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
                     ->where('kk.deleted_at IS NULL')
-                    // 🚀 KUNCI SAKTI: Filter wajib agar tidak nyasar ke desa lain
                     ->where('rt.kode_desa', $kodeDesa);
 
                 $wilayahPairs = [];
@@ -272,7 +342,8 @@ class Perlinsos extends Controller
             if ($target > 0 || $capaian > 0) {
                 $categories[] = $namaPendek;
                 $seriesCapaian[] = $capaian;
-                $seriesTarget[] = $target;
+                // 🚀 Hitung sisa target agar tidak bocor ke negatif
+                $seriesSisa[] = max(0, $target - $capaian);
             }
         }
 
@@ -280,7 +351,7 @@ class Perlinsos extends Controller
             'categories' => $categories,
             'series'     => [
                 ['name' => 'Tercapai', 'data' => $seriesCapaian],
-                ['name' => 'Target KK', 'data' => $seriesTarget]
+                ['name' => 'Belum Tercapai', 'data' => $seriesSisa]
             ]
         ]);
     }
@@ -318,12 +389,12 @@ class Perlinsos extends Controller
 
         $builder = $this->db->table('dtsen_perlinsos p')
             ->select('
-                p.id, p.nik, p.created_at, 
-                a.nama as nama_kpm, 
+                p.id, p.nik, p.created_at, p.status, 
+                a.nama as nama_kpm,
                 u.fullname as petugas, 
                 k.no_kk, k.kepala_keluarga,
                 k.alamat, r.rt, r.rw
-            ') // 🚀 TAMBAHAN: Tarik alamat, rt, dan rw
+            ') // 🚀 Pastikan p.status ikut di-select
             ->join('dtsen_art a', 'a.nik = p.nik AND a.deleted_at IS NULL', 'left')
             ->join('dtsen_kk k', 'k.id_kk = p.id_kk AND k.deleted_at IS NULL', 'left')
             ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
@@ -344,9 +415,41 @@ class Perlinsos extends Controller
         return $this->response->setJSON(['data' => $builder->get()->getResultArray()]);
     }
 
-    // 🚀 HAPUS DATA
+    // // 🚀 HAPUS DATA
+    // public function delete($id)
+    // {
+    //     $this->db->table('dtsen_perlinsos')->where('id', $id)->delete();
+    //     return $this->response->setJSON(['success' => true, 'message' => 'Rekapitulasi dibatalkan.']);
+    // }
+
+    // 🚀 VALIDASI DATA OLEH OPERATOR (KUNCI SINKRONISASI)
+    public function verifyData($id)
+    {
+        if (session()->get('role_id') > 3) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Hanya Operator/Admin yang dapat memvalidasi sinkronisasi data.']);
+        }
+
+        $this->db->table('dtsen_perlinsos')->where('id', $id)->update([
+            'status'     => 'tersinkron',
+            // 'updated_at' => date('Y-m-d H:i:s') // Aktifkan jika ada kolom updated_at
+        ]);
+
+        return $this->response->setJSON(['success' => true, 'message' => 'Data berhasil divalidasi dan dikunci.']);
+    }
+
+    // 🚀 HAPUS DATA (DENGAN PROTEKSI STATUS SINKRON)
     public function delete($id)
     {
+        // 🔒 Gatekeeper Backend: Cek apakah data sudah divalidasi (Tersinkron)
+        $data = $this->db->table('dtsen_perlinsos')->where('id', $id)->get()->getRowArray();
+
+        if ($data && ($data['status'] ?? '') === 'tersinkron') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Akses Ditolak! Data ini sudah divalidasi (sinkron dengan SIKS-NG) dan dikunci permanen.'
+            ]);
+        }
+
         $this->db->table('dtsen_perlinsos')->where('id', $id)->delete();
         return $this->response->setJSON(['success' => true, 'message' => 'Rekapitulasi dibatalkan.']);
     }

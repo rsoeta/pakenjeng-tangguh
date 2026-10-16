@@ -188,10 +188,14 @@ $(document).ready(function () {
                     title="Tahan/Arahkan kursor untuk melihat utuh">${masked}</span>`;
     }
 
-function initDataTable() {
+    function initDataTable() {
+
+        // Daftar label untuk tampilan Card di Mobile
+        const labelsDraft = ['No', 'NIK / No. KK', 'Nama', 'Program', 'Status', 'Tanggal Dibuat', 'Dibuat Oleh', 'Aksi'];
+        const labelsVerified = ['No', 'NIK / No. KK', 'Nama', 'Program', 'Status', 'Tanggal Diverifikasi', 'Verifikator'];
 
         /* ============================================================
-        📊 DATATABLE — DRAFT (3 KOLOM KONSOLIDASI)
+        📊 DATATABLE — DRAFT
         ============================================================ */
 
         tableDraft = $('#tableUsulanBansosDraft').DataTable({
@@ -205,144 +209,134 @@ function initDataTable() {
                 dataSrc: json => json.data || []
             },
 
-            // Di dalam tableDraft = $('#tableUsulanBansosDraft').DataTable({ ...
             pageLength: 10,
-            responsive: false,
+            responsive: false, // 🚀 Matikan collapse agar CSS Card bekerja di HP
             autoWidth: false,
-            columnDefs: [], // 🚀 KUNCI PENYELAMAT: Timpa/kosongkan columnDefs global dari datatables.config.js!
+            columnDefs: [], // 🚀 Kunci mencegah error targets parameter 3
 
             columns: [
-                // 1️⃣ KOLOM 1: NOMOR
                 {
                     data: null,
                     title: 'No',
-                    width: '5%',
-                    className: 'text-center',
-                    render: (d, t, r, m) => `<span class="badge bg-light text-secondary border">${m.row + 1}</span>`
+                    width: '40px',
+                    className: 'text-center align-middle',
+                    render: (d, t, r, m) => `<span class="badge bg-light text-dark border">${m.row + 1}</span>`
                 },
-
-                // 2️⃣ KOLOM 2: PESERTA & IDENTITAS (NAMA + NIK + KK)
                 {
                     data: null,
-                    title: 'Peserta & Identitas',
-                    width: '45%',
+                    title: 'NIK / No. KK',
+                    className: 'align-middle',
                     render: function (data, type, row) {
-                        let nama = row.nama ? row.nama : '-';
-                        let nik  = row.nik ? row.nik : '-';
+                        let nik = row.nik ? row.nik : '-';
                         let noKk = row.no_kk ? row.no_kk : '-';
 
-                        // Pastikan pencarian (Search Box) & Sorting tetap membaca teks utuh
-                        if (type === 'filter' || type === 'sort') {
-                            return `${nama} ${nik} ${noKk}`;
-                        }
+                        if (type === 'filter' || type === 'sort') return nik + ' ' + noKk;
 
                         let maskedNik = maskNumberJS(nik);
-                        let maskedKk  = maskNumberJS(noKk);
+                        let maskedKk = maskNumberJS(noKk);
 
+                        // 🚀 PERBAIKAN: d-flex align-items-center agar tombol berdampingan
+                        // gap-3 untuk jarak antar NIK & KK dalam 1 baris
                         return `
-                        <div class="d-flex flex-column w-100">
-                            <!-- Baris Nama -->
-                            <div class="cell-flex-container mb-1">
-                                <span class="fw-bold text-dark nama-text" style="font-size: 0.92rem; line-height: 1.2;">${nama}</span>
-                                <button type="button" class="btn btn-outline-primary btn-sm btnCopyNama btn-copy-mini" data-nama="${nama}" title="Salin Nama">
+                        <div class="d-flex flex-wrap align-items-center gap-3 w-100" style="font-size: 0.85rem;">
+                            <div class="d-flex align-items-center">
+                                <small class="text-muted me-1">NIK:</small>
+                                <span class="fw-bold nik-text me-1">${maskedNik}</span>
+                                <button type="button" class="btn btn-outline-primary btn-sm btnCopyNIK py-0 px-1" data-nik="${nik}" title="Salin NIK">
                                     <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
                                 </button>
                             </div>
-
-                            <!-- Kotak NIK & KK -->
-                            <div class="cell-identity-box">
-                                <div class="d-flex justify-content-between align-items-center mb-1 border-bottom pb-1">
-                                    <div class="text-truncate">
-                                        <small class="text-muted me-1">NIK:</small>
-                                        <span class="fw-bold text-dark nik-text">${maskedNik}</span>
-                                    </div>
-                                    <button type="button" class="btn btn-outline-primary btn-sm btnCopyNIK btn-copy-mini" data-nik="${nik}" title="Salin NIK">
-                                        <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
-                                    </button>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="text-truncate">
-                                        <small class="text-muted me-1">KK:</small>
-                                        <span class="fw-bold text-info nik-text">${maskedKk}</span>
-                                    </div>
-                                    <button type="button" class="btn btn-outline-info btn-sm btnCopyNIK btn-copy-mini" data-nik="${noKk}" title="Salin No. KK">
-                                        <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
-                                    </button>
-                                </div>
+                            <div class="d-flex align-items-center">
+                                <small class="text-muted me-1">KK:</small>
+                                <span class="fw-bold text-info nik-text me-1">${maskedKk}</span>
+                                <button type="button" class="btn btn-outline-info btn-sm btnCopyNIK py-0 px-1" data-nik="${noKk}" title="Salin No. KK">
+                                    <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
+                                </button>
                             </div>
                         </div>
                         `;
                     }
                 },
-
-                // 3️⃣ KOLOM 3: DETAIL USULAN & AKSI (PROGRAM + STATUS + PENGUSUL + TGL + TOMBOL)
+                {
+                    data: 'nama',
+                    title: 'Nama',
+                    className: 'text-md-nowrap align-middle',
+                    render: nama => `
+                        <!-- 🚀 PERBAIKAN: Tombol copy menempel di samping nama -->
+                        <div class="d-flex align-items-center gap-2 w-100">
+                            <span class="fw-bold text-dark nama-text text-start">${nama || '-'}</span>
+                            <button type="button" class="btn btn-outline-primary btn-sm btnCopyNama py-0 px-1 flex-shrink-0" data-nama="${nama || ''}" title="Salin Nama">
+                                <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
+                            </button>
+                        </div>
+                    `
+                },
+                {
+                    data: 'dbj_nama_bansos',
+                    title: 'Program',
+                    className: 'align-middle',
+                    defaultContent: '-',
+                    render: prog => `<span class="fw-semibold text-primary">${prog || '-'}</span>`
+                },
+                {
+                    data: 'status',
+                    title: 'Status',
+                    className: 'align-middle',
+                    render: s => {
+                        const cls = { draft: 'secondary', diverifikasi: 'success' }[s] || 'secondary';
+                        return `<span class="badge bg-${cls}">${(s || 'draft').toUpperCase()}</span>`;
+                    }
+                },
+                {
+                    data: 'created_at',
+                    title: 'Tanggal Dibuat',
+                    className: 'align-middle',
+                    render: d => d ? `<small class="text-muted">${new Date(d).toLocaleString('id-ID')}</small>` : '-'
+                },
                 {
                     data: null,
-                    title: 'Detail Usulan & Aksi',
-                    width: '50%',
+                    title: 'Dibuat Oleh',
+                    className: 'align-middle',
+                    render: (d, t, row) => renderCreatorWithWA(row)
+                },
+                {
+                    data: 'id',
+                    title: 'Aksi',
                     orderable: false,
-                    render: function (data, type, row) {
-                        let program = row.dbj_nama_bansos || '-';
-                        let status  = (row.status || 'draft').toUpperCase();
-                        let cls     = { draft: 'secondary', diverifikasi: 'success' }[row.status] || 'secondary';
-                        let tgl     = row.created_at ? new Date(row.created_at).toLocaleString('id-ID', {
-                            day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                        }) : '-';
-
-                        // Filter pencarian tetap mengenali nama program & pengusul
-                        if (type === 'filter' || type === 'sort') {
-                            return `${program} ${status} ${row.created_by_name || ''}`;
-                        }
-
-                        let creatorHtml = renderCreatorWithWA(row);
-
-                        let btnAksi = `
-                            <button type="button" class="btn btn-danger btn-sm btnHapusUsulan px-2 py-1" data-id="${row.id}">
-                                <i class="fas fa-trash-alt"></i> <span class="d-none d-sm-inline">Hapus</span>
-                            </button>
+                    className: 'align-middle',
+                    render: function (id) {
+                        let btn = `
+                            <div class="d-flex flex-wrap gap-1 justify-content-md-center justify-content-end">
+                                <button type="button" class="btn btn-danger btn-sm btnHapusUsulan" data-id="${id}">
+                                    <i class="fas fa-trash-alt"></i> <span class="d-none d-md-inline">Hapus</span>
+                                </button>
                         `;
 
                         if (userRole <= 3) {
-                            btnAksi += `
-                                <button type="button" class="btn btn-success btn-sm btnVerifikasiUsulan px-2 py-1" data-id="${row.id}">
-                                    <i class="fas fa-check-circle"></i> <span class="d-none d-sm-inline">Verify</span>
+                            btn += `
+                                <button type="button" class="btn btn-success btn-sm btnVerifikasiUsulan" data-id="${id}">
+                                    <i class="fas fa-check-circle"></i> <span class="d-none d-md-inline">Verify</span>
                                 </button>
-                                <button type="button" class="btn btn-warning btn-sm btnTolakUsulan px-2 py-1" data-id="${row.id}">
-                                    <i class="fas fa-times-circle"></i> <span class="d-none d-sm-inline">Tolak</span>
+                                <button type="button" class="btn btn-warning btn-sm btnTolakUsulan" data-id="${id}">
+                                    <i class="fas fa-times-circle"></i> <span class="d-none d-md-inline">Tolak</span>
                                 </button>
                             `;
                         }
-
-                        return `
-                        <div class="d-flex flex-column justify-content-between h-100 w-100" style="font-size: 0.85rem;">
-                            <!-- Baris Atas: Program & Status -->
-                            <div class="cell-flex-container border-bottom pb-1 mb-1">
-                                <span class="fw-bold text-primary"><i class="fas fa-hand-holding-heart me-1"></i>${program}</span>
-                                <span class="badge bg-${cls}">${status}</span>
-                            </div>
-
-                            <!-- Baris Tengah: Pengusul & Waktu -->
-                            <div class="mb-2 text-muted" style="font-size: 0.78rem; line-height: 1.35;">
-                                <div><i class="fas fa-user-edit me-1"></i>Oleh: <span class="text-dark fw-semibold">${creatorHtml}</span></div>
-                                <div><i class="far fa-clock me-1"></i>${tgl}</div>
-                            </div>
-
-                            <!-- Baris Bawah: Tombol Aksi -->
-                            <div class="d-flex flex-wrap gap-1 justify-content-end mt-auto pt-1 border-top">
-                                ${btnAksi}
-                            </div>
-                        </div>
-                        `;
+                        btn += `</div>`;
+                        return btn;
                     }
                 }
             ],
-            createdRow: row => $(row).find('td').css('text-align', 'left'),
+            createdRow: function (row) {
+                $(row).find('td').each(function (idx) {$(this).attr('data-label', labelsDraft[idx] || '');
+                });
+            },
             headerCallback: thead => $(thead).find('th').css('text-align', 'center')
         });
 
 
         /* ============================================================
-        📊 DATATABLE — VERIFIED (3 KOLOM KONSOLIDASI)
+        📊 DATATABLE — VERIFIED
         ============================================================ */
 
         tableVerified = $('#tableUsulanBansosVerified').DataTable({
@@ -356,108 +350,101 @@ function initDataTable() {
                 dataSrc: json => json.data || []
             },
 
-            // Di dalam tableVerified = $('#tableUsulanBansosVerified').DataTable({ ...
             pageLength: 10,
-            responsive: false,
+            responsive: false, // 🚀 Matikan collapse agar CSS Card bekerja di HP
             autoWidth: false,
-            columnDefs: [], // 🚀 KUNCI PENYELAMAT: Timpa/kosongkan columnDefs global dari datatables.config.js!
+            columnDefs: [], // 🚀 Kunci mencegah error targets parameter 3
 
             columns: [
-                // 1️⃣ KOLOM 1: NOMOR
                 {
                     data: null,
                     title: 'No',
-                    width: '5%',
-                    className: 'text-center',
-                    render: (d, t, r, m) => `<span class="badge bg-light text-secondary border">${m.row + 1}</span>`
+                    width: '40px',
+                    className: 'text-center align-middle',
+                    render: (d, t, r, m) => `<span class="badge bg-light text-dark border">${m.row + 1}</span>`
                 },
-
-                // 2️⃣ KOLOM 2: PESERTA & IDENTITAS (NAMA + NIK + KK)
                 {
                     data: null,
-                    title: 'Peserta & Identitas',
-                    width: '48%',
+                    title: 'NIK / No. KK',
+                    className: 'align-middle',
                     render: function (data, type, row) {
-                        let nama = row.nama ? row.nama : '-';
-                        let nik  = row.nik ? row.nik : '-';
+                        let nik = row.nik ? row.nik : '-';
                         let noKk = row.no_kk ? row.no_kk : '-';
 
-                        if (type === 'filter' || type === 'sort') {
-                            return `${nama} ${nik} ${noKk}`;
-                        }
+                        if (type === 'filter' || type === 'sort') return nik + ' ' + noKk;
 
                         let maskedNik = maskNumberJS(nik);
-                        let maskedKk  = maskNumberJS(noKk);
+                        let maskedKk = maskNumberJS(noKk);
 
+                        // 🚀 PERBAIKAN: d-flex align-items-center agar tombol berdampingan
+                        // gap-3 untuk jarak antar NIK & KK dalam 1 baris
                         return `
-                        <div class="d-flex flex-column w-100">
-                            <div class="cell-flex-container mb-1">
-                                <span class="fw-bold text-dark nama-text" style="font-size: 0.92rem; line-height: 1.2;">${nama}</span>
-                                <button type="button" class="btn btn-outline-primary btn-sm btnCopyNama btn-copy-mini" data-nama="${nama}" title="Salin Nama">
+                        <div class="d-flex flex-wrap align-items-center gap-3 w-100" style="font-size: 0.85rem;">
+                            <div class="d-flex align-items-center">
+                                <small class="text-muted me-1">NIK:</small>
+                                <span class="fw-bold nik-text me-1">${maskedNik}</span>
+                                <button type="button" class="btn btn-outline-primary btn-sm btnCopyNIK py-0 px-1" data-nik="${nik}" title="Salin NIK">
                                     <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
                                 </button>
                             </div>
-
-                            <div class="cell-identity-box">
-                                <div class="d-flex justify-content-between align-items-center mb-1 border-bottom pb-1">
-                                    <div class="text-truncate">
-                                        <small class="text-muted me-1">NIK:</small>
-                                        <span class="fw-bold text-dark nik-text">${maskedNik}</span>
-                                    </div>
-                                    <button type="button" class="btn btn-outline-primary btn-sm btnCopyNIK btn-copy-mini" data-nik="${nik}" title="Salin NIK">
-                                        <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
-                                    </button>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="text-truncate">
-                                        <small class="text-muted me-1">KK:</small>
-                                        <span class="fw-bold text-info nik-text">${maskedKk}</span>
-                                    </div>
-                                    <button type="button" class="btn btn-outline-info btn-sm btnCopyNIK btn-copy-mini" data-nik="${noKk}" title="Salin No. KK">
-                                        <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
-                                    </button>
-                                </div>
+                            <div class="d-flex align-items-center">
+                                <small class="text-muted me-1">KK:</small>
+                                <span class="fw-bold text-info nik-text me-1">${maskedKk}</span>
+                                <button type="button" class="btn btn-outline-info btn-sm btnCopyNIK py-0 px-1" data-nik="${noKk}" title="Salin No. KK">
+                                    <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
+                                </button>
                             </div>
                         </div>
                         `;
                     }
                 },
-
-                // 3️⃣ KOLOM 3: DETAIL VERIFIKASI (PROGRAM + STATUS + VERIFIKATOR + TGL)
                 {
-                    data: null,
-                    title: 'Detail Verifikasi',
-                    width: '47%',
-                    render: function (data, type, row) {
-                        let program     = row.dbj_nama_bansos || '-';
-                        let status      = (row.status || '').toUpperCase();
-                        let cls         = { diverifikasi: 'success', ditolak: 'danger' }[row.status] || 'secondary';
-                        let verifikator = row.updated_by_name || '-';
-                        let tgl         = row.updated_at ? new Date(row.updated_at).toLocaleString('id-ID', {
-                            day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                        }) : '-';
-
-                        if (type === 'filter' || type === 'sort') {
-                            return `${program} ${status} ${verifikator}`;
-                        }
-
-                        return `
-                        <div class="d-flex flex-column justify-content-between h-100 w-100" style="font-size: 0.85rem;">
-                            <div class="cell-flex-container border-bottom pb-1 mb-1">
-                                <span class="fw-bold text-success"><i class="fas fa-hand-holding-heart me-1"></i>${program}</span>
-                                <span class="badge bg-${cls}">${status}</span>
-                            </div>
-
-                            <div class="text-muted" style="font-size: 0.78rem; line-height: 1.4;">
-                                <div><i class="fas fa-user-check me-1 text-success"></i>Verifikator: <span class="text-dark fw-semibold">${verifikator}</span></div>
-                                <div><i class="far fa-calendar-check me-1"></i>${tgl}</div>
-                            </div>
+                    data: 'nama',
+                    title: 'Nama',
+                    className: 'text-md-nowrap align-middle',
+                    render: nama => `
+                        <!-- 🚀 PERBAIKAN: Tombol copy menempel di samping nama -->
+                        <div class="d-flex align-items-center gap-2 w-100">
+                            <span class="fw-bold text-dark nama-text text-start">${nama || '-'}</span>
+                            <button type="button" class="btn btn-outline-primary btn-sm btnCopyNama py-0 px-1 flex-shrink-0" data-nama="${nama || ''}" title="Salin Nama">
+                                <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
+                            </button>
                         </div>
-                        `;
+                    `
+                },
+                {
+                    data: 'dbj_nama_bansos',
+                    title: 'Program',
+                    className: 'align-middle',
+                    defaultContent: '-',
+                    render: prog => `<span class="fw-semibold text-success">${prog || '-'}</span>`
+                },
+                {
+                    data: 'status',
+                    title: 'Status',
+                    className: 'align-middle',
+                    render: s => {
+                        const cls = { diverifikasi: 'success', ditolak: 'danger' }[s] || 'secondary';
+                        return `<span class="badge bg-${cls}">${(s || '').toUpperCase()}</span>`;
                     }
+                },
+                {
+                    data: 'updated_at',
+                    title: 'Tanggal Diverifikasi',
+                    className: 'align-middle',
+                    render: d => d ? `<small class="text-muted">${new Date(d).toLocaleString('id-ID')}</small>` : '-'
+                },
+                {
+                    data: 'updated_by_name',
+                    title: 'Verifikator',
+                    className: 'align-middle',
+                    defaultContent: '-'
                 }
             ],
-            createdRow: row => $(row).find('td').css('text-align', 'left'),
+            createdRow: function (row) {
+                $(row).find('td').each(function (idx) {$(this).attr('data-label', labelsVerified[idx] || '');
+                });
+            },
             headerCallback: thead => $(thead).find('th').css('text-align', 'center')
         });
 

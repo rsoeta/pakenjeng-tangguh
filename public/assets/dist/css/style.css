@@ -42,54 +42,45 @@
   font-display: swap;
 }
 
+/* =================================================================
+   🚀 GLOBAL RESET & ROOT FONT SIZING (RESPONSIVE)
+   ================================================================= */
 * {
-    /* font-family: 'Encode Sans Semi Condensed', sans-serif; */
-    /* font-family: 'Hind Siliguri', sans-serif;
-    font-size:13px; */
-
     font-family: 'Ubuntu', sans-serif;
-    /* font-family: 'Lato', sans-serif; */
-    /* font-family: 'Poppins', sans-serif; */
-    /* font-family: 'Quicksand', sans-serif; */
-     /* font-family: 'Open Sans', sans-serif; */
-     /* font-family: 'Optima', sans-serif; */
-     /* font-family: 'Abadi', sans-serif; */
-     /* font-family: 'Nanum Gothic', sans-serif; */
-    /* font-family: 'Oxygen', sans-serif; */
-    /* font-family: 'Bona Nova', serif; */
-    /* font-family: 'Titillium Web', sans-serif; */
-    /* font-family: 'Edu VIC WA NT Beginner', cursive; */
-    /* font-family: 'Finlandica', sans-serif; */
-    /* font-family: 'Overpass', sans-serif; */
-    /* font-family: 'Saira Condensed', sans-serif; */
-    /* font-family: 'Cuprum', sans-serif; */
-    /* font-size: 15px; */
-    /* font-size: 14px; */
-    /* font-size: 13px; */
-    /* font-size: 12px; */
-    font-size: 11px;
-    /* font-size: 10px; */
-    /* background-color: codetblue; */
-    text-decoration: none;
-}
-a{
-    text-decoration: none;
-}
-a:link {
     text-decoration: none;
 }
 
-a:visited {
-    text-decoration: none;
+/* 💻 Memaksa Root Ukuran Font (Desktop: 12px)
+   1rem = 12px (Bawaan browser biasanya 16px, kita kecilkan menjadi 75%) */
+html {
+    font-size: 75% !important; /* 12px / 16px = 0.75 */
 }
 
-a:hover {
+body {
+    font-size: 1rem !important; /* Mengikuti root (12px) */
+}
+
+/* 📱 Memaksa Root Ukuran Font (Mobile: 10px)
+   1rem = 10px (10px / 16px = 0.625) */
+@media (max-width: 768px) {
+    html {
+        font-size: 62.5% !important; 
+    }
+    body {
+        font-size: 1rem !important; /* Mengikuti root (10px) */
+    }
+}
+
+a {
+    text-decoration: none;
+}
+a:link, a:visited {
+    text-decoration: none;
+}
+a:hover, a:active {
     text-decoration: underline;
 }
-
-a:active {
-    text-decoration: underline;
-}
+/* ================================================================= */
 
 .content-wrapper{
     padding-top: 50px;
@@ -101,6 +92,7 @@ a:active {
     display: inline-block;
     
 }
+
 .kotak
 {
     text-align: center;
@@ -128,12 +120,6 @@ a:active {
     justify-content: center; 
     align-items: center;
 }
-/* #float{
-    position: fixed;
-    top: 3em;
-    right: 2em;
-    z-index: 100;
-} */
 
 footer
 {

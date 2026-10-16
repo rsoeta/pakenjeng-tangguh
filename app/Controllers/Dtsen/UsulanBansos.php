@@ -703,7 +703,8 @@ class UsulanBansos extends Controller
            1️⃣ Validasi ART & Kepemilikan Wilayah Desa
            ===================================================== */
         $artBuilder = $db->table('dtsen_art')
-            ->select('dtsen_art.*, dtsen_rt.kode_desa')
+            // 🚀 PERBAIKAN: Tambahkan dtsen_kk.no_kk di sini agar Nomor KK ikut terbawa
+            ->select('dtsen_art.*, dtsen_kk.no_kk, dtsen_rt.kode_desa')
             ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk', 'left')
             ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
             ->where('dtsen_art.nik', $nik)
@@ -805,20 +806,61 @@ class UsulanBansos extends Controller
             }
         }
 
-        /* =====================================================
-           6️⃣ Cek Duplikasi Bulan Berjalan
-           ===================================================== */
-        $cekDuplikat = $db->table('dtsen_usulan_bansos')
-            ->where('nik', $nik)
-            ->where('MONTH(created_at)', date('m'))
-            ->where('YEAR(created_at)', date('Y'))
-            ->countAllResults();
+        // /* =====================================================
+        //    6️⃣ Cek Duplikasi Bulan Berjalan
+        //    ===================================================== */
+        // $cekDuplikat = $db->table('dtsen_usulan_bansos')
+        //     ->where('nik', $nik)
+        //     ->where('MONTH(created_at)', date('m'))
+        //     ->where('YEAR(created_at)', date('Y'))
+        //     ->countAllResults();
 
-        if ($cekDuplikat > 0) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Usulan untuk NIK ini sudah pernah dibuat pada bulan ini.'
-            ]);
+        // if ($cekDuplikat > 0) {
+        //     return $this->response->setJSON([
+        //         'success' => false,
+        //         'message' => 'Usulan untuk NIK ini sudah pernah dibuat pada bulan ini.'
+        //     ]);
+        // }
+        /* =====================================================
+           4️⃣ 🚀 CEK DUPLIKASI & PEMBATASAN KELUARGA (BERBASIS NO KK)
+           - PKH / Sembako (Non-PBI): Maksimal 1 usulan per No. KK per bulan!
+           - PBI-JK: Pengecualian, boleh multiple dalam 1 KK.
+           ===================================================== */
+        $idKk = $art['id_kk'];
+        $noKk = $art['no_kk'] ?? '-';
+
+        // Ambil daftar usulan pada KK yang sama di bulan & tahun berjalan
+        $builderCekKk = $db->table('dtsen_usulan_bansos us')
+            ->select('us.id, us.nik, us.program_bansos, dbj.dbj_nama_bansos')
+            ->join('dtsen_art a', 'a.nik = us.nik', 'left')
+            // 🚀 INI BARIS PENYELAMATNYA: Join tabel bansos agar alias 'dbj' dikenali database
+            ->join('dtks_bansos_jenis dbj', 'dbj.dbj_id = us.program_bansos', 'left')
+            ->where('a.id_kk', $idKk)
+            ->where('MONTH(us.created_at)', date('m'))
+            ->where('YEAR(us.created_at)', date('Y'));
+
+        $usulanExistingKk = $builderCekKk->get()->getResultArray();
+
+        foreach ($usulanExistingKk as $existing) {
+            // Jika NIK yang diusulkan persis sama (duplikasi individu langsung)
+            if ($existing['nik'] === $nik) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Usulan untuk NIK ini sudah pernah dibuat pada bulan ini.'
+                ]);
+            }
+
+            // Jika program yang ingin diajukan saat ini BUKAN PBI, 
+            // DAN di KK ini sudah ada usulan non-PBI (PKH/Sembako) pada bulan ini -> TOLAK!
+            $existingNamaProg = strtoupper(trim($existing['dbj_nama_bansos'] ?? ''));
+            $existingIsPbi    = ($existing['program_bansos'] === 5 || strpos($existingNamaProg, 'PBI') !== false);
+
+            if (!$isProgramPbi && !$existingIsPbi) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => "Pengajuan ditolak! Dalam 1 Keluarga (No. KK: {$noKk}) pada bulan ini sudah terdapat usulan bansos reguler ({$existing['dbj_nama_bansos']}). Setiap KK hanya diperbolehkan 1 usulan PKH/Sembako per periode."
+                ]);
+            }
         }
 
         /* =====================================================

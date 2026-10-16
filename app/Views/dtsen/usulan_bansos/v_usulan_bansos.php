@@ -177,38 +177,108 @@
     }
 
     /* =================================================================
-       📊 ALTERNATIF 2: MULTI-ROW CELL CONSOLIDATION (COMPACT & FLUID)
+       📱 MOBILE-FIRST STACKED CARD TABLE (SUPER COMPACT)
        ================================================================= */
+    /* Pastikan di desktop text sejajar tengah (vertikal) */
     #tableUsulanBansosDraft td,
     #tableUsulanBansosVerified td {
-        vertical-align: top !important;
-        padding: 0.6rem 0.5rem !important;
-        white-space: normal !important;
+        vertical-align: middle !important;
     }
 
-    .cell-flex-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.4rem;
-        align-items: center;
-        justify-content: space-between;
-    }
+    @media (max-width: 767.98px) {
 
-    .cell-identity-box {
-        background-color: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 0.4rem;
-        padding: 0.35rem 0.5rem;
-        font-size: 0.82rem;
-    }
+        /* Sembunyikan header tabel */
+        #tableUsulanBansosDraft thead,
+        #tableUsulanBansosVerified thead {
+            display: none !important;
+        }
 
-    .btn-copy-mini {
-        min-width: 28px;
-        min-height: 28px;
-        padding: 0.1rem 0.35rem;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+        /* Ubah baris (TR) menjadi Card padat */
+        #tableUsulanBansosDraft tbody tr,
+        #tableUsulanBansosVerified tbody tr {
+            display: block;
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-left: 4px solid #0d6efd;
+            border-radius: 0.5rem;
+            margin-bottom: 0.6rem;
+            padding: 0.6rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+            position: relative;
+        }
+
+        #tableUsulanBansosVerified tbody tr {
+            border-left-color: #198754;
+        }
+
+        /* Matikan display flex default pada sel agar bisa dikustomisasi */
+        #tableUsulanBansosDraft tbody td,
+        #tableUsulanBansosVerified tbody td {
+            display: block;
+            border: none !important;
+            padding: 0 !important;
+            width: 100% !important;
+            text-align: left !important;
+        }
+
+        /* Sembunyikan label (data-label) palsu yang bikin tinggi */
+        #tableUsulanBansosDraft tbody td::before,
+        #tableUsulanBansosVerified tbody td::before {
+            display: none !important;
+        }
+
+        /* 1. Baris Pertama (Atas): Nama & Badge Program */
+        #tableUsulanBansosDraft tbody td:nth-child(3),
+        #tableUsulanBansosVerified tbody td:nth-child(3) {
+            margin-bottom: 0.4rem;
+        }
+
+        /* 2. Baris Kedua (Tengah): Kotak NIK & KK */
+        #tableUsulanBansosDraft tbody td:nth-child(2),
+        #tableUsulanBansosVerified tbody td:nth-child(2) {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef !important;
+            border-radius: 0.4rem;
+
+            /* 🚀 PERBAIKAN: Sisi kanan dilebarkan 2.5rem agar jadi area aman Nomor Urut */
+            padding: 0.35rem 2.5rem 0.35rem 0.5rem !important;
+            margin-bottom: 0.5rem;
+        }
+
+        /* 3. Baris Ketiga (Bawah): Status & Info Tambahan */
+        #tableUsulanBansosDraft tbody td:nth-child(4),
+        #tableUsulanBansosVerified tbody td:nth-child(4),
+        #tableUsulanBansosDraft tbody td:nth-child(5),
+        #tableUsulanBansosVerified tbody td:nth-child(5),
+        #tableUsulanBansosDraft tbody td:nth-child(6),
+        #tableUsulanBansosVerified tbody td:nth-child(6),
+        #tableUsulanBansosDraft tbody td:nth-child(7),
+        #tableUsulanBansosVerified tbody td:nth-child(7) {
+            display: inline-block;
+            width: auto !important;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.2rem;
+        }
+
+        /* 4. Baris Keempat (Paling Bawah): Tombol Aksi */
+        #tableUsulanBansosDraft tbody td:last-child,
+        #tableUsulanBansosVerified tbody td:last-child {
+            display: block;
+            border-top: 1px dashed #dee2e6 !important;
+            padding-top: 0.5rem !important;
+            margin-top: 0.3rem;
+            text-align: right !important;
+        }
+
+        /* Posisikan Nomor Urut (Kolom 1) di pojok kanan atas mutlak */
+        #tableUsulanBansosDraft tbody td:first-child,
+        #tableUsulanBansosVerified tbody td:first-child {
+            position: absolute;
+            top: 0.6rem;
+            right: 0.6rem;
+            width: auto !important;
+        }
     }
 </style>
 

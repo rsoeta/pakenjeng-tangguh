@@ -231,15 +231,15 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                                         <thead class="bg-light text-center">
                                             <tr>
                                                 <th>No</th>
-                                                <th>Waktu Rekap</th>
-                                                <th>No. KK</th>
                                                 <th>Kepala Keluarga</th>
+                                                <th>No. KK</th>
                                                 <th>NIK KPM</th>
                                                 <th>Nama KPM</th>
                                                 <th>Alamat Lengkap</th>
                                                 <?php if (!$isPentri): ?>
                                                     <th>Petugas</th>
                                                 <?php endif; ?>
+                                                <th>Waktu Rekap</th>
                                                 <th>Aksi</th>
                                             </tr>
                                         </thead>
@@ -546,15 +546,32 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                 },
                 responsive: true,
                 pageLength: 10,
-                columns: [{
+
+                // 🚀 PERBAIKAN 2A: Gunakan drawCallback agar nomor selalu dihitung ulang dari 1 sesuai halaman aktif
+                drawCallback: function(settings) {
+                    let api = this.api();
+                    let startIndex = api.context[0]._iDisplayStart;
+                    api.column(0, {
+                        page: 'current'
+                    }).nodes().each(function(cell, i) {
+                        // Bungkus dengan span agar aman dari ikon toggle panah DataTables
+                        cell.innerHTML = '<span class="fw-bold text-secondary">' + (startIndex + i + 1) + '</span>';
+                    });
+                },
+
+                columns: [
+                    // 🚀 PERBAIKAN 2B: Matikan fungsi render m.row dan orderable
+                    {
                         data: null,
-                        render: (d, t, r, m) => m.row + 1,
-                        // className: 'text-center'
+                        orderable: false,
+                        searchable: false,
+                        render: function() {
+                            return ''; // Biarkan kosong, akan diisi otomatis oleh drawCallback di atas
+                        }
                     },
                     {
-                        data: 'created_at',
-                        // className: 'text-center',
-                        render: d => d ? d.substring(0, 16) : '-'
+                        data: 'kepala_keluarga',
+                        className: 'text-start text-capitalize'
                     },
                     {
                         data: 'no_kk',
@@ -569,10 +586,7 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                         </div>`;
                         }
                     },
-                    {
-                        data: 'kepala_keluarga',
-                        className: 'text-start text-capitalize'
-                    },
+
                     {
                         data: 'nik',
                         className: 'text-nowrap',
@@ -601,16 +615,38 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                             return (alamat + rt + rw) || '-';
                         }
                     },
+                    {
+                        data: 'created_at',
+                        // className: 'text-center',
+                        render: d => d ? d.substring(0, 16) : '-'
+                    },
+
                     ...(roleId <= 3 ? [{
                         data: 'petugas',
                         className: 'text-start'
                     }] : []),
                     {
                         data: 'id',
-                        // className: 'text-center',
                         orderable: false,
-                        render: function(id) {
-                            return `<button class="btn btn-outline-danger btn-sm rounded-circle shadow-sm btnHapus" data-id="${id}" title="Hapus Data"><i class="fas fa-trash"></i></button>`;
+                        render: function(id, type, row) {
+                            let status = row.status || 'draft'; // Anggap 'draft' jika kosong
+
+                            // 🔒 Jika sudah divalidasi, tampilkan gembok untuk SEMUA ROLE
+                            if (status === 'tersinkron') {
+                                return `<button class="btn btn-outline-secondary btn-sm rounded-circle shadow-sm" disabled title="Terkunci (Telah Sinkron dengan SIKS-NG)"><i class="fas fa-lock"></i></button>`;
+                            }
+
+                            let btn = '';
+
+                            // 🚀 Jika Operator (Role <= 3), munculkan tombol Validasi
+                            if (roleId <= 3) {
+                                btn += `<button class="btn btn-outline-success btn-sm rounded-circle shadow-sm btnVerifyData me-1" data-id="${id}" title="Validasi (Tandai Sudah Sinkron)"><i class="fas fa-check-double"></i></button>`;
+                            }
+
+                            // 🗑️ Tombol Hapus (Milik PENTRI & Operator selama belum digembok)
+                            btn += `<button class="btn btn-outline-danger btn-sm rounded-circle shadow-sm btnHapus" data-id="${id}" title="Hapus Data"><i class="fas fa-trash"></i></button>`;
+
+                            return btn;
                         }
                     }
                 ],
@@ -654,32 +690,53 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                 tablePerlinsos.ajax.reload(null, false);
             });
 
-            // 4️⃣ INITIALIZE APEXCHARTS
+            // 4️⃣ INITIALIZE APEXCHARTS (STACKED BAR DENGAN PERSENTASE + RESPONSIVE MOBILE)
             var chartOptions = {
                 series: [],
                 chart: {
                     type: 'bar',
-                    height: 350,
+                    height: 380, // Sedikit ditambah untuk ruang desktop
+                    stacked: true,
                     toolbar: {
                         show: false
                     }
                 },
                 plotOptions: {
                     bar: {
-                        horizontal: false,
-                        columnWidth: '55%',
-                        endingShape: 'rounded',
+                        horizontal: false, // Default Desktop: Vertikal
+                        columnWidth: '45%',
+                        borderRadius: 3,
                         dataLabels: {
-                            position: 'top'
+                            position: 'center'
                         }
                     }
                 },
                 dataLabels: {
                     enabled: true,
-                    style: {
-                        colors: ['#333']
+                    formatter: function(val, opts) {
+                        if (val === 0) return '';
+
+                        let tercapai = opts.w.globals.series[0][opts.dataPointIndex];
+                        let sisa = opts.w.globals.series[1][opts.dataPointIndex];
+                        let totalTarget = tercapai + sisa;
+                        let persen = totalTarget > 0 ? Math.round((val / totalTarget) * 100) : 0;
+
+                        return val + ' (' + persen + '%)';
                     },
-                    offsetY: -20
+                    style: {
+                        fontSize: '11px',
+                        fontWeight: 'bold',
+                        colors: ['#ffffff'] // Tetap putih
+                    },
+                    // 🚀 PERBAIKAN 1: Tambahkan efek bayangan tebal agar teks tidak menyatu dengan background putih
+                    dropShadow: {
+                        enabled: true,
+                        top: 1,
+                        left: 1,
+                        blur: 2,
+                        color: '#000000',
+                        opacity: 0.85
+                    }
                 },
                 stroke: {
                     show: true,
@@ -689,12 +746,13 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                 xaxis: {
                     categories: []
                 },
-                colors: ['#0d6efd', '#ffc107'],
+                colors: ['#198754', '#dc3545'], // Hijau & Merah
                 fill: {
                     opacity: 1
                 },
                 legend: {
-                    position: 'top'
+                    position: 'top',
+                    horizontalAlign: 'center'
                 },
                 tooltip: {
                     y: {
@@ -702,7 +760,35 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                             return val + " KPM"
                         }
                     }
-                }
+                },
+                // 🚀 KUNCI SAKTI: OVERRIDE KHUSUS UNTUK LAYAR MOBILE
+                responsive: [{
+                    breakpoint: 768, // Aktif ketika lebar layar 768px ke bawah
+                    options: {
+                        chart: {
+                            // Tinggikan kanvas agar belasan nama petugas tidak saling tindih
+                            height: 600
+                        },
+                        plotOptions: {
+                            bar: {
+                                horizontal: true, // Berubah jadi batang menyamping
+                                barHeight: '70%', // Ketebalan batang proporsional
+                                borderRadius: 3
+                            }
+                        },
+                        xaxis: {
+                            // Sembunyikan label sumbu X bawah di HP agar lebih lega
+                            labels: {
+                                show: false
+                            }
+                        },
+                        dataLabels: {
+                            style: {
+                                fontSize: '10px' // Perkecil sedikit font agar muat di batang
+                            }
+                        }
+                    }
+                }]
             };
 
             var chart = new ApexCharts(document.querySelector("#chartCapaian"), chartOptions);
@@ -803,6 +889,38 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                         toast: true,
                         position: 'top'
                     });
+                });
+            });
+
+            // 🚀 7️⃣ LOGIKA VALIDASI SINKRONISASI (KHUSUS OPERATOR)
+            $(document).on('click', '.btnVerifyData', function() {
+                let id = $(this).data('id');
+                Swal.fire({
+                    title: 'Validasi Sinkronisasi?',
+                    text: "Tindakan ini akan mengunci data secara permanen sebagai tanda bahwa data SINDEN dan SIKS-NG sudah sinkron.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#198754',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-check-double me-1"></i> Ya, Validasi!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.post('/perlinsos/verify-data/' + id, function(res) {
+                            if (res.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Tervalidasi!',
+                                    text: res.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+                                tablePerlinsos.ajax.reload(null, false);
+                                loadChart(); // Opsional jika status validasi memengaruhi chart
+                            } else {
+                                Swal.fire('Gagal', res.message, 'error');
+                            }
+                        }, 'json');
+                    }
                 });
             });
         }

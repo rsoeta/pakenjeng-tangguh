@@ -21,7 +21,7 @@
         background-color: #007bff;
         border: none;
         color: white;
-        font-size: 20px;
+        /* font-size: 20px; */
         cursor: pointer;
         display: flex;
         align-items: center;
