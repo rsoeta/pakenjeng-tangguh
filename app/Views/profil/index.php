@@ -109,11 +109,6 @@
                                 </li>
                                 <?php if ($user_login['role_id'] <= 3): ?>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="custom-tabs-three-general-tab" data-toggle="pill"
-                                            href="#custom-tabs-three-general" role="tab" aria-controls="custom-tabs-three-general" aria-selected="false">
-                                            <strong><i class="fas fa-cog mr-1"></i> General</strong></a>
-                                    </li>
-                                    <li class="nav-item">
                                         <a class="nav-link" id="custom-tabs-three-profile-tab" data-toggle="pill"
                                             href="#custom-tabs-three-profile" role="tab" aria-controls="custom-tabs-three-profile" aria-selected="false">
                                             <strong><i class="fas fa-landmark"></i> Lembaga</strong></a>
@@ -254,82 +249,6 @@
                                     </div>
                                 </div>
                                 <?php if ($user_login['role_id'] <= 3): ?>
-                                    <div class="tab-pane fade" id="custom-tabs-three-general" role="tabpanel" aria-labelledby="custom-tab-three-general">
-                                        <!-- Usulan Akses -->
-                                        <div class="card">
-                                            <form id="updateForm" method="post" action="">
-                                                <div class="card-header">
-                                                    <h5><strong>Usulan Akses</strong></h1>
-                                                </div>
-                                                <div class="card-body">
-                                                    <?php foreach ($deadline as $dl) { ?>
-                                                        <div class="row">
-                                                            <div class="col-4 col-sm-3">
-                                                                <strong><i class="fa fa-user mr-1"></i> Hak-Akses</strong>
-                                                                <select class="form-control" name="dd_role[]">
-                                                                    <?php foreach ($statusRole as $s) { ?>
-                                                                        <option <?= $dl['dd_role'] == $s['id_role'] ? 'selected' : ''; ?> value="<?= $s['id_role']; ?>"><?= $s['nm_role']; ?></option>
-                                                                    <?php } ?>
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-4 col-sm-3">
-                                                                <input type="hidden" name="dd_id[]" id="" value="<?= $dl['dd_id']; ?>">
-                                                                <strong><i class="fa fa-calendar-alt mr-1"></i> Start Date</strong>
-                                                                <input type="datetime-local" name="dd_waktu_start[]" id="" class="form-control" value="<?= $dl['dd_waktu_start']; ?>">
-                                                            </div>
-                                                            <div class="col-4 col-sm-3">
-                                                                <strong><i class="fa fa-calendar-alt mr-1"></i> End Date</strong>
-                                                                <input type="datetime-local" name="dd_waktu_end[]" id="" class="form-control" value="<?= $dl['dd_waktu_end']; ?>">
-                                                            </div>
-
-                                                        </div>
-                                                    <?php } ?>
-                                                    <div class="row">
-                                                        <div class="col-12 col-md-9 col-sm-9 text-right mt-2">
-                                                            <button type="submit" class="btn btn-success btnGenUpdate"><i class="fa fa-check-double"></i> Update</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </div>
-                                        <!-- General Akses -->
-                                        <div class="card">
-                                            <form id="updateFormGen" method="post" action="">
-                                                <div class="card-header">
-                                                    <h5><strong>General Akses</strong></h1>
-                                                </div>
-                                                <div class="card-body">
-                                                    <?php foreach ($deadline_general as $dlg) { ?>
-                                                        <div class="row">
-                                                            <div class="col-4 col-sm-3">
-                                                                <strong><i class="fa fa-user mr-1"></i> Hak-Akses</strong>
-                                                                <select class="form-control" name="dd_role[]">
-                                                                    <?php foreach ($statusRole as $s) { ?>
-                                                                        <option <?= $dlg['dd_role'] == $s['id_role'] ? 'selected' : ''; ?> value="<?= $s['id_role']; ?>"><?= $s['nm_role']; ?></option>
-                                                                    <?php } ?>
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-4 col-sm-3">
-                                                                <input type="hidden" name="dd_id[]" id="" value="<?= $dlg['dd_id']; ?>">
-                                                                <strong><i class="fa fa-calendar-alt mr-1"></i> Start Date</strong>
-                                                                <input type="datetime-local" name="dd_waktu_start[]" id="" class="form-control" value="<?= $dlg['dd_waktu_start']; ?>">
-                                                            </div>
-                                                            <div class="col-4 col-sm-3">
-                                                                <strong><i class="fa fa-calendar-alt mr-1"></i> End Date</strong>
-                                                                <input type="datetime-local" name="dd_waktu_end[]" id="" class="form-control" value="<?= $dlg['dd_waktu_end']; ?>">
-                                                            </div>
-
-                                                        </div>
-                                                    <?php } ?>
-                                                    <div class="row">
-                                                        <div class="col-12 col-md-9 col-sm-9 text-right mt-2">
-                                                            <button type="submit" class="btn btn-warning btnGenUpdate"><i class="fa fa-check-circle"></i> Update</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
                                     <div class="tab-pane fade" id="custom-tabs-three-profile" role="tabpanel" aria-labelledby="custom-tabs-three-profile-tab">
                                         <div class="col-12 col-md-4 col-lg-4 col-4">
                                             <form id="lembaga_form" method="POST" enctype="multipart/form-data">
@@ -565,33 +484,6 @@
                     $elt.attr('disabled', true);
                 }, 500);
 
-            });
-        });
-
-
-        $('#updateForm').on('submit', function(e) {
-            e.preventDefault(); // Mencegah formulir dikirimkan secara default
-
-            var formData = $(this).serialize(); // Mengambil data formulir
-
-            $.ajax({
-                url: '/updateBatch', // Ganti dengan URL yang sesuai dengan controller dan method Anda
-                type: 'POST',
-                data: formData,
-                success: function(response) {
-                    // Tanggapan dari server setelah proses update berhasil
-                    // console.log(response);
-                    // Tampilkan SweetAlert sukses
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Sukses',
-                        text: 'Update deadline usulan berhasil!',
-                    });
-                },
-                error: function(xhr, status, error) {
-                    // Penanganan kesalahan jika terjadi
-                    console.error(xhr.responseText);
-                }
             });
         });
 

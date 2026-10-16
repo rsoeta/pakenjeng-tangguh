@@ -180,6 +180,8 @@ $routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview', 'm
 	$routes->get('rt-by-rw/(:any)', 'Dtsen\UsulanBansos::getRTByRW/$1');
 
 	$routes->get('data-filter', 'Dtsen\UsulanBansos::getDataByFilter');
+	$routes->get('get-list-alasan-pbi', 'Dtsen\UsulanBansos::getListAlasanPbi');
+	$routes->post('proses-sanggah-pbi', 'Dtsen\UsulanBansos::prosesSanggahPbi');
 });
 
 // MASTER KKS

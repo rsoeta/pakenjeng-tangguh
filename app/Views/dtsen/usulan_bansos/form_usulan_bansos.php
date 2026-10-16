@@ -32,9 +32,9 @@
                         <?php endif; ?>
                     </div>
 
-                    <!-- 1️⃣ Pilih individu dari ART -->
-                    <div class="form-group">
-                        <label for="nik_peserta">Pilih Individu (Kepala Keluarga / Istri)</label>
+                    <!-- 1️⃣ Pilih individu dari ART (Hanya via NIK) -->
+                    <div class="form-group mb-3">
+                        <label for="nik_peserta" class="form-label fw-bold">Pilih Individu (Ketik NIK)</label>
                         <select id="nik_peserta" name="nik_peserta" class="form-control" style="width: 100%;"></select>
                         <input type="hidden" id="hidden_shdk" name="shdk">
                         <input type="hidden" id="hidden_nik" name="nik">

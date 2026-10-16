@@ -21,8 +21,7 @@ $.extend(true, $.fn.dataTable.defaults, {
         { className: 'dtr-control text-center', orderable: false, targets: 0, responsivePriority: 1 }, // Tombol + (Collapse)
         { targets: 1, responsivePriority: 2 }, // No
         { targets: 2, responsivePriority: 1 }, // NIK / Kolom Utama 1
-        { targets: 3, responsivePriority: 1 }, // Nama / Kolom Utama 2
-        // 🚀 HAPUS target 4, 5, 6, 7 agar tidak memicu error di tabel yang jumlah kolomnya sedikit
+        // 🚀 HAPUS targets: 3 agar tidak error pada tabel 3-kolom (Konsolidasi)
         { targets: -1, orderable: false, responsivePriority: 1 } // Kolom Aksi (Selalu paling kanan)
     ],
     autoWidth: false,

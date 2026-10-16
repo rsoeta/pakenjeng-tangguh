@@ -102,54 +102,454 @@ class UsulanBansos extends Controller
             'user_login'      => $userData,
             'wilayah_aktif'   => $wilayahAktif, // ✅ GANTI INI
             'statusRole'      => $this->GenModel->getStatusRole(),
+            // 🚀 SUNTIKAN DATA DEADLINE UNTUK OFFCANVAS PENGATURAN AKSES
+            'deadline'         => $this->GenModel->getDeadline(),
+            'deadline_general' => $this->GenModel->getDeadlinePpks(),
         ];
 
-        return view('dtsen/usulan_bansos/index', $data);
+        return view('dtsen/usulan_bansos/v_usulan_bansos', $data);
     }
 
+    // /**
+    //  * 🔍 Cari individu berdasarkan NIK/Nama
+    //  * 🔐 Dibatasi wilayah_tugas user login (multi RW–RT)
+    //  * 🛡️ Anti Data Ganda & Bypass Soft Delete
+    //  */
+    // public function searchArt()
+    // {
+    //     $term = trim($this->request->getGet('q'));
+    //     $user = $this->AuthModel->getUserId();
+    //     $wilayahTugas = trim($user['wilayah_tugas'] ?? '');
+
+    //     $builder = $this->artModel
+    //         ->select("
+    //         dtsen_art.nik,
+    //         dtsen_art.nama,
+    //         dtsen_art.hubungan_keluarga AS shdk,
+    //         (SELECT jenis_shdk FROM tb_shdk WHERE id = dtsen_art.hubungan_keluarga) AS shdk_nama,
+    //         dtsen_rt.rw,
+    //         dtsen_rt.rt
+    //     ")
+    //         // 🚀 PERBAIKAN 1: Pastikan KK yang ditarik adalah KK yang masih aktif
+    //         ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk AND dtsen_kk.deleted_at IS NULL', 'left')
+    //         ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
+
+    //         // 🚀 PERBAIKAN 2: Gunakan sintaks string statis agar Query Builder mutlak membaca IS NULL
+    //         ->where('dtsen_art.deleted_at IS NULL')
+    //         ->groupStart()
+    //         ->like('dtsen_art.nik', $term)
+    //         // ->orLike('dtsen_art.nama', $term)
+    //         ->groupEnd()
+
+    //         // 🚀 PERBAIKAN 3: Kunci mutlak NIK agar tidak ada nama yang sama muncul dua kali
+    //         ->groupBy('dtsen_art.nik')
+    //         ->limit(10);
+
+    //     /* =====================================================
+    //    🔐 PARSE wilayah_tugas → pasangan RW–RT (KUNCI)
+    //    ===================================================== */
+    //     if (!empty($wilayahTugas)) {
+
+    //         $wilayahPairs = [];
+
+    //         // contoh: 001:005,007|004:002
+    //         $blocks = explode('|', $wilayahTugas);
+
+    //         foreach ($blocks as $block) {
+    //             [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
+    //             $rw = trim($rw);
+
+    //             foreach (explode(',', $rtList) as $rt) {
+    //                 $rt = trim($rt);
+    //                 if ($rw !== '' && $rt !== '') {
+    //                     $wilayahPairs[] = [
+    //                         'rw' => $rw,
+    //                         'rt' => $rt
+    //                     ];
+    //                 }
+    //             }
+    //         }
+
+    //         if (!empty($wilayahPairs)) {
+    //             $builder->groupStart();
+    //             foreach ($wilayahPairs as $pair) {
+    //                 $builder->orGroupStart()
+    //                     ->where('dtsen_rt.rw', $pair['rw'])
+    //                     ->where('dtsen_rt.rt', $pair['rt'])
+    //                     ->groupEnd();
+    //             }
+    //             $builder->groupEnd();
+    //         }
+    //     }
+
+    //     $rows = $builder->get()->getResultArray();
+
+    //     /* =====================================================
+    //    🎯 Format JSON sesuai standar Select2
+    //    ===================================================== */
+    //     $results = array_map(function ($row) {
+    //         return [
+    //             'id'         => $row['nik'],
+    //             'text'       => $row['nik'] . ' - ' . strtoupper($row['nama']),
+    //             'nik'        => $row['nik'],
+    //             'nama'       => $row['nama'],
+    //             'shdk'       => (int) ($row['shdk'] ?? 0),
+    //             'shdk_nama'  => $row['shdk_nama'] ?? '-',
+    //             'rw'         => $row['rw'] ?? '',
+    //             'rt'         => $row['rt'] ?? ''
+    //         ];
+    //     }, $rows);
+
+    //     return $this->response->setJSON([
+    //         'results' => $results
+    //     ]);
+    // }
+
+    // /**
+    //  * 🔎 Cek kategori desil berdasarkan NIK → id_kk
+    //  * 🔐 Terproteksi dari pengambilan KK yang sudah dihapus (Soft Delete)
+    //  * Log detail setiap langkah agar mudah dilacak di writable/logs/
+    //  */
+    // public function checkDesil()
+    // {
+    //     $nik = $this->request->getGet('nik');
+
+    //     // 🔹 Log request awal
+    //     log_message('info', "[checkDesil] Request diterima. NIK: {$nik}");
+
+    //     if (!$nik) {
+    //         log_message('warning', '[checkDesil] Parameter NIK kosong.');
+    //         return $this->response->setJSON([
+    //             'success' => false,
+    //             'message' => 'Parameter NIK tidak diberikan.'
+    //         ]);
+    //     }
+
+    //     try {
+    //         // 1️⃣ Ambil id_kk dari dtsen_art dan pastikan KK-nya berstatus AKTIF
+    //         $art = $this->artModel
+    //             ->select('dtsen_art.id_kk')
+    //             // 🚀 PERBAIKAN: Join ke dtsen_kk untuk mengecek status hapusnya
+    //             ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk', 'left')
+    //             ->where('dtsen_art.nik', $nik)
+    //             // 🚀 KUNCI UTAMA: Pastikan baik Individu maupun KK-nya tidak berstatus terhapus
+    //             ->where('dtsen_art.deleted_at IS NULL')
+    //             ->where('dtsen_kk.deleted_at IS NULL')
+    //             ->orderBy('dtsen_art.id_art', 'DESC') // Opsional: Ambil data paling baru jika ada ganda
+    //             ->first();
+
+    //         log_message('info', '[checkDesil] Hasil query ART (Hanya KK Aktif): ' . json_encode($art));
+
+    //         if (!$art || empty($art['id_kk'])) {
+    //             log_message('warning', "[checkDesil] Tidak ditemukan ART aktif untuk NIK {$nik}");
+    //             return $this->response->setJSON([
+    //                 'success' => false,
+    //                 'message' => 'Data individu tidak ditemukan atau KK sudah tidak aktif.'
+    //             ]);
+    //         }
+
+    //         // 2️⃣ Ambil kategori_desil dari dtsen_se berdasarkan id_kk yang valid/aktif
+    //         $se = $this->seModel
+    //             ->select('kategori_desil')
+    //             ->where('id_kk', $art['id_kk'])
+    //             ->first();
+
+    //         log_message('info', "[checkDesil] Query SE untuk id_kk={$art['id_kk']} hasil: " . json_encode($se));
+
+    //         // 3️⃣ Validasi hasil query
+    //         if ($se && isset($se['kategori_desil'])) {
+    //             $desil = $se['kategori_desil'];
+    //             log_message('info', "[checkDesil] Ditemukan kategori_desil={$desil} untuk NIK {$nik}");
+
+    //             return $this->response->setJSON([
+    //                 'success' => true,
+    //                 'kategori_desil' => $desil
+    //             ]);
+    //         }
+
+    //         // 4️⃣ Jika tidak ditemukan
+    //         log_message('warning', "[checkDesil] Data desil tidak ditemukan untuk id_kk={$art['id_kk']} (NIK {$nik})");
+    //         return $this->response->setJSON([
+    //             'success' => false,
+    //             'message' => 'Data desil tidak tersedia untuk KK ini.'
+    //         ]);
+    //     } catch (\Throwable $e) {
+    //         // 5️⃣ Tangani error fatal
+    //         log_message('error', "[checkDesil] ERROR: {$e->getMessage()} | Trace: {$e->getTraceAsString()}");
+    //         return $this->response->setStatusCode(500)->setJSON([
+    //             'success' => false,
+    //             'message' => 'Terjadi kesalahan server: ' . $e->getMessage()
+    //         ]);
+    //     }
+    // }
+
+    // /**
+    //  * 💾 Simpan usulan bansos baru
+    //  * 🔐 Dilengkapi validasi SHDK–DESIL–PROGRAM
+    //  */
+    // public function save()
+    // {
+    //     $request = service('request');
+
+    //     $nik      = $request->getPost('nik_peserta');
+    //     $program  = (int) $request->getPost('program_bansos');
+    //     $catatan  = $request->getPost('catatan');
+
+    //     $db = db_connect();
+
+    //     /* =====================================================
+    //    1️⃣ Validasi ART (Terproteksi dari KK yang terhapus)
+    //    ===================================================== */
+    //     $art = $db->table('dtsen_art')
+    //         ->select('dtsen_art.*') // Ambil semua data ART
+    //         ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk', 'left') // 🚀 Gabungkan dengan tabel KK
+    //         ->where('dtsen_art.nik', $nik)
+    //         ->where('dtsen_art.deleted_at IS NULL')
+    //         ->where('dtsen_kk.deleted_at IS NULL') // 🚀 KUNCI: Pastikan KK masih aktif
+    //         ->orderBy('dtsen_art.id_art', 'DESC') // Ambil data ter-update
+    //         ->get()
+    //         ->getRowArray();
+
+    //     if (!$art) {
+    //         return $this->response->setJSON([
+    //             'success' => false,
+    //             'message' => 'Data individu tidak ditemukan atau KK sudah tidak aktif.'
+    //         ]);
+    //     }
+
+    //     /* =====================================================
+    //    2️⃣ Validasi DESIL & PROGRAM BANSOS (Aturan Kemensos)
+    //    ===================================================== */
+    //     $se = $db->table('dtsen_se')
+    //         ->where('id_kk', $art['id_kk'])
+    //         ->get()
+    //         ->getRowArray();
+
+    //     $desil = (int) ($se['kategori_desil'] ?? 0);
+
+    //     // 🔴 Tolak jika Desil 0 atau lebih dari 5 (misal: 6, 7, dst)
+    //     if ($desil <= 0 || $desil > 5) {
+    //         return $this->response->setJSON([
+    //             'success' => false,
+    //             'message' => "Kategori Desil {$desil} tidak memenuhi syarat kelayakan usulan bansos."
+    //         ]);
+    //     }
+
+    //     // 🔵 Aturan Khusus Desil 5: HANYA BOLEH PBI-JK
+    //     // Asumsi nilai opsi/value untuk PBI di database dbj_id adalah 5
+    //     if ($desil === 5 && $program !== 5) {
+    //         return $this->response->setJSON([
+    //             'success' => false,
+    //             'message' => 'Desil 5 HANYA diperbolehkan untuk program PBI-JK.'
+    //         ]);
+    //     }
+
+    //     /* =====================================================
+    //    3️⃣ VALIDASI SHDK × DESIL × PROGRAM (KUNCI)
+    //    ===================================================== */
+    //     $shdk = (int) ($art['hubungan_keluarga'] ?? 0);
+
+    //     // SHDK selain KK & Istri → hanya PBI
+    //     if ($shdk !== 1 && $shdk !== 3) {
+    //         if ($program !== 5) {
+    //             return $this->response->setJSON([
+    //                 'success' => false,
+    //                 'message' => 'Program hanya diperbolehkan PBI untuk individu ini.'
+    //             ]);
+    //         }
+    //     }
+
+    //     /* =====================================================
+    //    4️⃣ Cek Duplikasi Bulan Berjalan
+    //    ===================================================== */
+    //     $cekDuplikat = $db->table('dtsen_usulan_bansos')
+    //         ->where('nik', $nik)
+    //         ->where('MONTH(created_at)', date('m'))
+    //         ->where('YEAR(created_at)', date('Y'))
+    //         ->countAllResults();
+
+    //     if ($cekDuplikat > 0) {
+    //         return $this->response->setJSON([
+    //             'success' => false,
+    //             'message' => 'Usulan untuk NIK ini sudah pernah dibuat bulan ini.'
+    //         ]);
+    //     }
+
+    //     /* =====================================================
+    //    5️⃣ Simpan Data
+    //    ===================================================== */
+    //     $this->DtsenUsulanBansosModel->insert([
+    //         'id_kk'          => $art['id_kk'],
+    //         'nik'            => $nik,
+    //         'program_bansos' => $program,
+    //         'catatan'        => $catatan,
+    //         'status'         => 'draft',
+    //         'created_at'     => date('Y-m-d H:i:s'),
+    //         'created_by'     => session()->get('nik') ?? 'system',
+    //     ]);
+
+    //     /* =====================================================
+    //    6️⃣ Update Flag ART
+    //    ===================================================== */
+    //     $db->table('dtsen_art')
+    //         ->where('id_art', $art['id_art'])
+    //         ->update([
+    //             'usulan_status'    => 'draft',
+    //             'is_usulan_bansos' => 1
+    //         ]);
+
+    //     return $this->response->setJSON([
+    //         'success' => true,
+    //         'message' => 'Usulan bansos berhasil disimpan!'
+    //     ]);
+    // }
     /**
      * 🔍 Cari individu berdasarkan NIK/Nama
-     * 🔐 Dibatasi wilayah_tugas user login (multi RW–RT)
-     * 🛡️ Anti Data Ganda & Bypass Soft Delete
+     * 🔐 Dibatasi wilayah_tugas user login (multi RW–RT) & Kode Desa
+     * 🛡️ Anti Data Ganda, Bypass Soft Delete, & Info Status PBI Aktif
+     */
+    // public function searchArt()
+    // {
+    //     $term = trim((string) $this->request->getGet('q'));
+    //     $user = $this->AuthModel->getUserId();
+    //     $kodeDesa = $user['kode_desa'] ?? session()->get('kode_desa');
+    //     $wilayahTugas = trim($user['wilayah_tugas'] ?? '');
+
+    //     $builder = $this->artModel
+    //         ->select("
+    //             dtsen_art.nik,
+    //             dtsen_art.nama,
+    //             dtsen_art.hubungan_keluarga AS shdk,
+    //             (SELECT jenis_shdk FROM tb_shdk WHERE id = dtsen_art.hubungan_keluarga) AS shdk_nama,
+    //             dtsen_rt.rw,
+    //             dtsen_rt.rt,
+    //             pbi.status_kepesertaan AS pbi_status,
+    //             pbi.jenis_kepesertaan AS pbi_jenis
+    //         ")
+    //         ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk AND dtsen_kk.deleted_at IS NULL', 'left')
+    //         ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
+    //         // 🚀 INTEGRASI PBI: Cek apakah NIK ini berstatus Aktif di pbi_master_data
+    //         ->join('pbi_master_data pbi', "pbi.nik = dtsen_art.nik AND pbi.status_kepesertaan = 'Aktif'", 'left')
+    //         ->where('dtsen_art.deleted_at IS NULL')
+    //         ->where('dtsen_kk.deleted_at IS NULL');
+
+    //     // 🔐 Kunci kepemilikan data level desa
+    //     if (!empty($kodeDesa)) {
+    //         $builder->where('dtsen_rt.kode_desa', $kodeDesa);
+    //     }
+
+    //     $builder->groupStart()
+    //         ->like('dtsen_art.nik', $term)
+    //         ->groupEnd()
+    //         ->groupBy('dtsen_art.nik')
+    //         ->limit(10);
+
+    //     /* =====================================================
+    //        🔐 PARSE wilayah_tugas → pasangan RW–RT (KUNCI)
+    //        ===================================================== */
+    //     if (!empty($wilayahTugas)) {
+    //         $wilayahPairs = [];
+    //         $blocks = explode('|', $wilayahTugas);
+
+    //         foreach ($blocks as $block) {
+    //             [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
+    //             $rw = trim($rw);
+
+    //             foreach (explode(',', $rtList) as $rt) {
+    //                 $rt = trim($rt);
+    //                 if ($rw !== '' && $rt !== '') {
+    //                     $wilayahPairs[] = [
+    //                         'rw' => $rw,
+    //                         'rt' => $rt
+    //                     ];
+    //                 }
+    //             }
+    //         }
+
+    //         if (!empty($wilayahPairs)) {
+    //             $builder->groupStart();
+    //             foreach ($wilayahPairs as $pair) {
+    //                 $builder->orGroupStart()
+    //                     ->where('dtsen_rt.rw', $pair['rw'])
+    //                     ->where('dtsen_rt.rt', $pair['rt'])
+    //                     ->groupEnd();
+    //             }
+    //             $builder->groupEnd();
+    //         }
+    //     }
+
+    //     $rows = $builder->get()->getResultArray();
+
+    //     $results = array_map(function ($row) {
+    //         $isPbiAktif = (strtoupper(trim($row['pbi_status'] ?? '')) === 'AKTIF');
+    //         return [
+    //             'id'           => $row['nik'],
+    //             'text'         => $row['nik'] . ' - ' . strtoupper($row['nama']),
+    //             'nik'          => $row['nik'],
+    //             'nama'         => $row['nama'],
+    //             'shdk'         => (int) ($row['shdk'] ?? 0),
+    //             'shdk_nama'    => $row['shdk_nama'] ?? '-',
+    //             'rw'           => $row['rw'] ?? '',
+    //             'rt'           => $row['rt'] ?? '',
+    //             'is_pbi_aktif' => $isPbiAktif,
+    //             'pbi_jenis'    => $row['pbi_jenis'] ?? 'PBI-JKN'
+    //         ];
+    //     }, $rows);
+
+    //     return $this->response->setJSON([
+    //         'results' => $results
+    //     ]);
+    // }
+    /**
+     * 🔍 Cari individu berdasarkan NIK
+     * 🔐 Dibatasi wilayah_tugas user login (multi RW–RT) & Kode Desa
+     * 🛡️ Anti Data Ganda, Bypass Soft Delete, & Info Status PBI Aktif
      */
     public function searchArt()
     {
-        $term = trim($this->request->getGet('q'));
+        // Bersihkan input agar murni hanya mengeksekusi angka NIK
+        $term = preg_replace('/\D/', '', trim((string) $this->request->getGet('q')));
+        if (strlen($term) < 3) {
+            return $this->response->setJSON(['results' => []]);
+        }
+
         $user = $this->AuthModel->getUserId();
+        $kodeDesa = $user['kode_desa'] ?? session()->get('kode_desa');
         $wilayahTugas = trim($user['wilayah_tugas'] ?? '');
 
         $builder = $this->artModel
             ->select("
-            dtsen_art.nik,
-            dtsen_art.nama,
-            dtsen_art.hubungan_keluarga AS shdk,
-            (SELECT jenis_shdk FROM tb_shdk WHERE id = dtsen_art.hubungan_keluarga) AS shdk_nama,
-            dtsen_rt.rw,
-            dtsen_rt.rt
-        ")
-            // 🚀 PERBAIKAN 1: Pastikan KK yang ditarik adalah KK yang masih aktif
+                dtsen_art.nik,
+                dtsen_art.nama,
+                dtsen_art.hubungan_keluarga AS shdk,
+                (SELECT jenis_shdk FROM tb_shdk WHERE id = dtsen_art.hubungan_keluarga) AS shdk_nama,
+                dtsen_rt.rw,
+                dtsen_rt.rt,
+                pbi.status_kepesertaan AS pbi_status,
+                pbi.jenis_kepesertaan AS pbi_jenis
+            ")
             ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk AND dtsen_kk.deleted_at IS NULL', 'left')
             ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
-
-            // 🚀 PERBAIKAN 2: Gunakan sintaks string statis agar Query Builder mutlak membaca IS NULL
+            // 🚀 INTEGRASI PBI: Cek apakah NIK ini berstatus Aktif di pbi_master_data
+            ->join('pbi_master_data pbi', "pbi.nik = dtsen_art.nik AND pbi.status_kepesertaan = 'Aktif'", 'left')
             ->where('dtsen_art.deleted_at IS NULL')
-            ->groupStart()
-            ->like('dtsen_art.nik', $term)
-            // ->orLike('dtsen_art.nama', $term)
-            ->groupEnd()
+            ->where('dtsen_kk.deleted_at IS NULL');
 
-            // 🚀 PERBAIKAN 3: Kunci mutlak NIK agar tidak ada nama yang sama muncul dua kali
+        // 🔐 Kunci kepemilikan data level desa
+        if (!empty($kodeDesa)) {
+            $builder->where('dtsen_rt.kode_desa', $kodeDesa);
+        }
+
+        // 🎯 Pencarian murni berdasarkan NIK
+        $builder->like('dtsen_art.nik', $term)
             ->groupBy('dtsen_art.nik')
             ->limit(10);
 
         /* =====================================================
-       🔐 PARSE wilayah_tugas → pasangan RW–RT (KUNCI)
-       ===================================================== */
+           🔐 PARSE wilayah_tugas → pasangan RW–RT (KUNCI)
+           ===================================================== */
         if (!empty($wilayahTugas)) {
-
             $wilayahPairs = [];
-
-            // contoh: 001:005,007|004:002
             $blocks = explode('|', $wilayahTugas);
 
             foreach ($blocks as $block) {
@@ -181,19 +581,19 @@ class UsulanBansos extends Controller
 
         $rows = $builder->get()->getResultArray();
 
-        /* =====================================================
-       🎯 Format JSON sesuai standar Select2
-       ===================================================== */
         $results = array_map(function ($row) {
+            $isPbiAktif = (strtoupper(trim($row['pbi_status'] ?? '')) === 'AKTIF');
             return [
-                'id'         => $row['nik'],
-                'text'       => $row['nik'] . ' - ' . strtoupper($row['nama']),
-                'nik'        => $row['nik'],
-                'nama'       => $row['nama'],
-                'shdk'       => (int) ($row['shdk'] ?? 0),
-                'shdk_nama'  => $row['shdk_nama'] ?? '-',
-                'rw'         => $row['rw'] ?? '',
-                'rt'         => $row['rt'] ?? ''
+                'id'           => $row['nik'],
+                'text'         => $row['nik'] . ' - ' . strtoupper($row['nama']),
+                'nik'          => $row['nik'],
+                'nama'         => $row['nama'],
+                'shdk'         => (int) ($row['shdk'] ?? 0),
+                'shdk_nama'    => $row['shdk_nama'] ?? '-',
+                'rw'           => $row['rw'] ?? '',
+                'rt'           => $row['rt'] ?? '',
+                'is_pbi_aktif' => $isPbiAktif,
+                'pbi_jenis'    => $row['pbi_jenis'] ?? 'PBI-JKN'
             ];
         }, $rows);
 
@@ -203,19 +603,15 @@ class UsulanBansos extends Controller
     }
 
     /**
-     * 🔎 Cek kategori desil berdasarkan NIK → id_kk
-     * 🔐 Terproteksi dari pengambilan KK yang sudah dihapus (Soft Delete)
-     * Log detail setiap langkah agar mudah dilacak di writable/logs/
+     * 🔎 Cek kategori desil & Status PBI Aktif berdasarkan NIK
+     * 🔐 Terproteksi kepemilikan wilayah desa & Soft Delete KK
      */
     public function checkDesil()
     {
-        $nik = $this->request->getGet('nik');
-
-        // 🔹 Log request awal
-        log_message('info', "[checkDesil] Request diterima. NIK: {$nik}");
+        $nik = trim((string) $this->request->getGet('nik'));
+        $kodeDesa = session()->get('kode_desa');
 
         if (!$nik) {
-            log_message('warning', '[checkDesil] Parameter NIK kosong.');
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Parameter NIK tidak diberikan.'
@@ -223,100 +619,157 @@ class UsulanBansos extends Controller
         }
 
         try {
-            // 1️⃣ Ambil id_kk dari dtsen_art dan pastikan KK-nya berstatus AKTIF
-            $art = $this->artModel
-                ->select('dtsen_art.id_kk')
-                // 🚀 PERBAIKAN: Join ke dtsen_kk untuk mengecek status hapusnya
+            // 1️⃣ Ambil id_kk dari dtsen_art dan pastikan KK-nya berstatus AKTIF & sesuai Desa
+            $artBuilder = $this->artModel
+                ->select('dtsen_art.id_kk, dtsen_rt.kode_desa')
                 ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk', 'left')
+                ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
                 ->where('dtsen_art.nik', $nik)
-                // 🚀 KUNCI UTAMA: Pastikan baik Individu maupun KK-nya tidak berstatus terhapus
                 ->where('dtsen_art.deleted_at IS NULL')
-                ->where('dtsen_kk.deleted_at IS NULL')
-                ->orderBy('dtsen_art.id_art', 'DESC') // Opsional: Ambil data paling baru jika ada ganda
-                ->first();
+                ->where('dtsen_kk.deleted_at IS NULL');
 
-            log_message('info', '[checkDesil] Hasil query ART (Hanya KK Aktif): ' . json_encode($art));
+            if (!empty($kodeDesa)) {
+                $artBuilder->where('dtsen_rt.kode_desa', $kodeDesa);
+            }
+
+            $art = $artBuilder->orderBy('dtsen_art.id_art', 'DESC')->first();
 
             if (!$art || empty($art['id_kk'])) {
-                log_message('warning', "[checkDesil] Tidak ditemukan ART aktif untuk NIK {$nik}");
                 return $this->response->setJSON([
                     'success' => false,
-                    'message' => 'Data individu tidak ditemukan atau KK sudah tidak aktif.'
+                    'message' => 'Data individu tidak ditemukan di wilayah Anda atau KK sudah tidak aktif.'
                 ]);
             }
 
-            // 2️⃣ Ambil kategori_desil dari dtsen_se berdasarkan id_kk yang valid/aktif
+            // 2️⃣ Ambil kategori_desil dari dtsen_se
             $se = $this->seModel
                 ->select('kategori_desil')
                 ->where('id_kk', $art['id_kk'])
                 ->first();
 
-            log_message('info', "[checkDesil] Query SE untuk id_kk={$art['id_kk']} hasil: " . json_encode($se));
+            // 3️⃣ 🚀 CEK STATUS KEPESERTAAN DI PBI MASTER DATA
+            $pbiBuilder = $this->db->table('pbi_master_data')
+                ->select('id, no_kis, jenis_kepesertaan, status_kepesertaan')
+                ->where('nik', $nik)
+                ->where('status_kepesertaan', 'Aktif');
 
-            // 3️⃣ Validasi hasil query
+            if (!empty($kodeDesa)) {
+                $pbiBuilder->where('kode_desa', $kodeDesa);
+            }
+
+            $pbiAktif = $pbiBuilder->get()->getRowArray();
+
             if ($se && isset($se['kategori_desil'])) {
-                $desil = $se['kategori_desil'];
-                log_message('info', "[checkDesil] Ditemukan kategori_desil={$desil} untuk NIK {$nik}");
-
                 return $this->response->setJSON([
-                    'success' => true,
-                    'kategori_desil' => $desil
+                    'success'        => true,
+                    'kategori_desil' => (int) $se['kategori_desil'],
+                    'is_pbi_aktif'   => !empty($pbiAktif),
+                    'pbi_info'       => $pbiAktif ? [
+                        'no_kis'            => $pbiAktif['no_kis'] ?? '-',
+                        'jenis_kepesertaan' => $pbiAktif['jenis_kepesertaan'] ?? 'PBI-JKN'
+                    ] : null
                 ]);
             }
 
-            // 4️⃣ Jika tidak ditemukan
-            log_message('warning', "[checkDesil] Data desil tidak ditemukan untuk id_kk={$art['id_kk']} (NIK {$nik})");
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Data desil tidak tersedia untuk KK ini.'
             ]);
         } catch (\Throwable $e) {
-            // 5️⃣ Tangani error fatal
-            log_message('error', "[checkDesil] ERROR: {$e->getMessage()} | Trace: {$e->getTraceAsString()}");
+            log_message('error', "[checkDesil] ERROR: {$e->getMessage()}");
             return $this->response->setStatusCode(500)->setJSON([
                 'success' => false,
-                'message' => 'Terjadi kesalahan server: ' . $e->getMessage()
+                'message' => 'Terjadi kesalahan server saat memeriksa kelayakan.'
             ]);
         }
     }
 
     /**
      * 💾 Simpan usulan bansos baru
-     * 🔐 Dilengkapi validasi SHDK–DESIL–PROGRAM
+     * 🔐 Dilengkapi validasi SHDK – DESIL – PROGRAM – MASTER PBI AKTIF
      */
     public function save()
     {
         $request = service('request');
 
-        $nik      = $request->getPost('nik_peserta');
-        $program  = (int) $request->getPost('program_bansos');
-        $catatan  = $request->getPost('catatan');
+        $nik     = preg_replace('/\D/', '', trim((string) $request->getPost('nik_peserta')));
+        $program = (int) $request->getPost('program_bansos');
+        $catatan = trim(strip_tags((string) $request->getPost('catatan')));
 
+        $kodeDesa = session()->get('kode_desa');
         $db = db_connect();
 
         /* =====================================================
-       1️⃣ Validasi ART (Terproteksi dari KK yang terhapus)
-       ===================================================== */
-        $art = $db->table('dtsen_art')
-            ->select('dtsen_art.*') // Ambil semua data ART
-            ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk', 'left') // 🚀 Gabungkan dengan tabel KK
+           1️⃣ Validasi ART & Kepemilikan Wilayah Desa
+           ===================================================== */
+        $artBuilder = $db->table('dtsen_art')
+            ->select('dtsen_art.*, dtsen_rt.kode_desa')
+            ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk', 'left')
+            ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
             ->where('dtsen_art.nik', $nik)
             ->where('dtsen_art.deleted_at IS NULL')
-            ->where('dtsen_kk.deleted_at IS NULL') // 🚀 KUNCI: Pastikan KK masih aktif
-            ->orderBy('dtsen_art.id_art', 'DESC') // Ambil data ter-update
-            ->get()
-            ->getRowArray();
+            ->where('dtsen_kk.deleted_at IS NULL');
+
+        if (!empty($kodeDesa)) {
+            $artBuilder->where('dtsen_rt.kode_desa', $kodeDesa);
+        }
+
+        $art = $artBuilder->orderBy('dtsen_art.id_art', 'DESC')->get()->getRowArray();
 
         if (!$art) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Data individu tidak ditemukan atau KK sudah tidak aktif.'
+                'message' => 'Data individu tidak ditemukan atau di luar wilayah kerja Anda.'
             ]);
         }
 
         /* =====================================================
-       2️⃣ Validasi DESIL & PROGRAM BANSOS (Aturan Kemensos)
-       ===================================================== */
+           2️⃣ Cek Nama Program yang Dipilih (Deteksi Apakah PBI)
+           ===================================================== */
+        $rowProgram = $db->table('dtks_bansos_jenis')
+            ->select('dbj_id, dbj_nama_bansos')
+            ->where('dbj_id', $program)
+            ->get()
+            ->getRowArray();
+
+        if (!$rowProgram) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Program bantuan sosial tidak valid.'
+            ]);
+        }
+
+        // Deteksi apakah program ini adalah PBI (baik berdasarkan ID = 5 maupun teks 'PBI')
+        $namaProgramUpper = strtoupper(trim($rowProgram['dbj_nama_bansos'] ?? ''));
+        $isProgramPbi = ($program === 5 || strpos($namaProgramUpper, 'PBI') !== false);
+
+        /* =====================================================
+           3️⃣ 🚀 GATEKEEPER PBI AKTIF: Tolak jika sudah PBI Aktif!
+           ===================================================== */
+        if ($isProgramPbi) {
+            $cekPbiBuilder = $db->table('pbi_master_data')
+                ->select('id, jenis_kepesertaan, no_kis')
+                ->where('nik', $nik)
+                ->where('status_kepesertaan', 'Aktif');
+
+            if (!empty($kodeDesa)) {
+                $cekPbiBuilder->where('kode_desa', $kodeDesa);
+            }
+
+            $sudahPbiAktif = $cekPbiBuilder->get()->getRowArray();
+
+            if ($sudahPbiAktif) {
+                $jenisPbi = $sudahPbiAktif['jenis_kepesertaan'] ?: 'PBI-JKN';
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => "Pengajuan ditolak! Warga dengan NIK {$nik} sudah terdaftar sebagai peserta {$jenisPbi} AKTIF."
+                ]);
+            }
+        }
+
+        /* =====================================================
+           4️⃣ Validasi DESIL & PROGRAM BANSOS (Aturan Kemensos)
+           ===================================================== */
         $se = $db->table('dtsen_se')
             ->where('id_kk', $art['id_kk'])
             ->get()
@@ -324,7 +777,6 @@ class UsulanBansos extends Controller
 
         $desil = (int) ($se['kategori_desil'] ?? 0);
 
-        // 🔴 Tolak jika Desil 0 atau lebih dari 5 (misal: 6, 7, dst)
         if ($desil <= 0 || $desil > 5) {
             return $this->response->setJSON([
                 'success' => false,
@@ -332,9 +784,7 @@ class UsulanBansos extends Controller
             ]);
         }
 
-        // 🔵 Aturan Khusus Desil 5: HANYA BOLEH PBI-JK
-        // Asumsi nilai opsi/value untuk PBI di database dbj_id adalah 5
-        if ($desil === 5 && $program !== 5) {
+        if ($desil === 5 && !$isProgramPbi) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Desil 5 HANYA diperbolehkan untuk program PBI-JK.'
@@ -342,23 +792,22 @@ class UsulanBansos extends Controller
         }
 
         /* =====================================================
-       3️⃣ VALIDASI SHDK × DESIL × PROGRAM (KUNCI)
-       ===================================================== */
+           5️⃣ VALIDASI SHDK × DESIL × PROGRAM
+           ===================================================== */
         $shdk = (int) ($art['hubungan_keluarga'] ?? 0);
 
-        // SHDK selain KK & Istri → hanya PBI
         if ($shdk !== 1 && $shdk !== 3) {
-            if ($program !== 5) {
+            if (!$isProgramPbi) {
                 return $this->response->setJSON([
                     'success' => false,
-                    'message' => 'Program hanya diperbolehkan PBI untuk individu ini.'
+                    'message' => 'Anggota keluarga selain Kepala Keluarga & Istri hanya diperbolehkan untuk usulan PBI.'
                 ]);
             }
         }
 
         /* =====================================================
-       4️⃣ Cek Duplikasi Bulan Berjalan
-       ===================================================== */
+           6️⃣ Cek Duplikasi Bulan Berjalan
+           ===================================================== */
         $cekDuplikat = $db->table('dtsen_usulan_bansos')
             ->where('nik', $nik)
             ->where('MONTH(created_at)', date('m'))
@@ -368,13 +817,13 @@ class UsulanBansos extends Controller
         if ($cekDuplikat > 0) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Usulan untuk NIK ini sudah pernah dibuat bulan ini.'
+                'message' => 'Usulan untuk NIK ini sudah pernah dibuat pada bulan ini.'
             ]);
         }
 
         /* =====================================================
-       5️⃣ Simpan Data
-       ===================================================== */
+           7️⃣ Simpan Data & Update Flag ART
+           ===================================================== */
         $this->DtsenUsulanBansosModel->insert([
             'id_kk'          => $art['id_kk'],
             'nik'            => $nik,
@@ -385,9 +834,6 @@ class UsulanBansos extends Controller
             'created_by'     => session()->get('nik') ?? 'system',
         ]);
 
-        /* =====================================================
-       6️⃣ Update Flag ART
-       ===================================================== */
         $db->table('dtsen_art')
             ->where('id_art', $art['id_art'])
             ->update([
@@ -810,6 +1256,130 @@ class UsulanBansos extends Controller
 
             return $this->response->setJSON([
                 'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * 📋 API: Ambil daftar unik alasan non-aktif dari pbi_master_data untuk dropdown sanggah
+     */
+    public function getListAlasanPbi()
+    {
+        try {
+            $kodeDesa = session()->get('kode_desa');
+            $db = \Config\Database::connect();
+
+            $builder = $db->table('pbi_master_data')
+                ->select('alasan_nonaktif')
+                ->where('alasan_nonaktif IS NOT NULL')
+                ->where('alasan_nonaktif !=', '')
+                ->groupBy('alasan_nonaktif')
+                ->orderBy('alasan_nonaktif', 'ASC');
+
+            if (!empty($kodeDesa)) {
+                $builder->where('kode_desa', $kodeDesa);
+            }
+
+            $list = $builder->get()->getResultArray();
+
+            if (empty($list)) {
+                $list = [
+                    ['alasan_nonaktif' => 'MENINGGAL DUNIA'],
+                    ['alasan_nonaktif' => 'PINDAH DOMISILI'],
+                    ['alasan_nonaktif' => 'MAMPU / TIDAK LAYAK'],
+                    ['alasan_nonaktif' => 'GANDA / SUDAH MENERIMA BANTUAN LAIN'],
+                    ['alasan_nonaktif' => 'TIDAK DITEMUKAN / TIDAK DIKENAL']
+                ];
+            }
+
+            return $this->response->setJSON(['status' => true, 'data' => $list]);
+        } catch (\Throwable $e) {
+            return $this->response->setJSON(['status' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * 🚀 API: Eksekusi Sanggah Status PBI Aktif (Ubah jadi Non-Aktif & Simpan Bukti)
+     */
+    public function prosesSanggahPbi()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setJSON(['status' => false, 'message' => 'Akses ditolak']);
+        }
+
+        $nik    = preg_replace('/\D/', '', trim((string) $this->request->getPost('nik')));
+        $alasan = trim(strip_tags((string) $this->request->getPost('alasan')));
+        $file   = $this->request->getFile('bukti_foto');
+        $userId = session()->get('id_user') ?? session()->get('id') ?? 1;
+        $kodeDesa = session()->get('kode_desa');
+
+        if (strlen($nik) !== 16 || empty($alasan)) {
+            return $this->response->setJSON(['status' => false, 'message' => 'NIK atau Alasan Sanggahan tidak valid!']);
+        }
+
+        if (!$file || !$file->isValid() || $file->hasMoved()) {
+            return $this->response->setJSON(['status' => false, 'message' => 'File bukti screenshot wajib diunggah dengan benar!']);
+        }
+
+        // Validasi ekstensi file gambar
+        $ext = strtolower($file->getClientExtension());
+        if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+            return $this->response->setJSON(['status' => false, 'message' => 'Format file bukti harus berupa gambar (JPG, PNG, WEBP)!']);
+        }
+
+        $db = \Config\Database::connect();
+        $db->transBegin();
+
+        try {
+            // Cek apakah data PBI Aktifnya ada
+            $pbiRowBuilder = $db->table('pbi_master_data')
+                ->where('nik', $nik)
+                ->where('status_kepesertaan', 'Aktif');
+
+            if (!empty($kodeDesa)) {
+                $pbiRowBuilder->where('kode_desa', $kodeDesa);
+            }
+            $pbiRow = $pbiRowBuilder->get()->getRowArray();
+
+            if (!$pbiRow) {
+                return $this->response->setJSON(['status' => false, 'message' => 'Data PBI Aktif untuk NIK tersebut tidak ditemukan di wilayah Anda.']);
+            }
+
+            // Simpan file bukti screenshot ke folder /writable/uploads/sanggah_pbi/ atau /public/data/sanggah_pbi/
+            $uploadDir = FCPATH . 'data/sanggah_pbi/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            $newName = 'sanggah_' . $nik . '_' . time() . '.' . $ext;
+            $file->move($uploadDir, $newName);
+            $pathFileDb = 'data/sanggah_pbi/' . $newName;
+
+            // Update status pbi_master_data menjadi Non-Aktif
+            $db->table('pbi_master_data')
+                ->where('id', $pbiRow['id'])
+                ->update([
+                    'status_kepesertaan' => 'Non-Aktif',
+                    'alasan_nonaktif'    => 'SANGGAH PENTRI: ' . $alasan,
+                    'tanggal_nonaktif'   => date('Y-m-d'),
+                    'dinonaktifkan_oleh' => $userId,
+                    'updated_at'         => date('Y-m-d H:i:s')
+                ]);
+
+            // Catat log sanggahan (opsional, jika ingin tabel riwayat sanggah terpisah, atau cukup di log_message)
+            log_message('info', "[SANGGAH PBI] NIK {$nik} disanggah dan dinonaktifkan oleh User ID {$userId}. Alasan: {$alasan}. Bukti: {$pathFileDb}");
+
+            $db->transCommit();
+
+            return $this->response->setJSON([
+                'status'  => true,
+                'message' => 'Sanggahan berhasil diproses! Status PBI warga telah diubah menjadi Non-Aktif. Silakan pilih kembali program bansos untuk diusulkan.'
+            ]);
+        } catch (\Throwable $e) {
+            $db->transRollback();
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Gagal memproses sanggahan: ' . $e->getMessage()
             ]);
         }
     }
