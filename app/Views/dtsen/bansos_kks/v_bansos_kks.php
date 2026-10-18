@@ -2,6 +2,68 @@
 
 <?= $this->section('content'); ?>
 
+<!-- 🚀 CSS RESPONSIVE KHUSUS UPLOAD FOTO (BERDASARKAN CONTAINER) -->
+<style>
+    /* 1. Default (HP/Mobile) - Ringkas & Padat */
+    .preview-foto-kpm {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+    }
+
+    .upload-btn-responsive {
+        height: 25px;
+    }
+
+    .upload-btn-responsive .custom-file-input,
+    .upload-btn-responsive .custom-file-label {
+        height: 25px;
+        /* padding: 8px 10px; */
+        line-height: 20px;
+        font-size: 0.75rem;
+    }
+
+    /* 2. Layar Lebar (Tablet/Laptop) - Card Gagah & Proporsional */
+    @media (min-width: 768px) {
+        .foto-card-container {
+            max-height: 400px;
+            min-height: 200px;
+            /* 🚀 PENAMPUNG DIPAKSA TINGGI DI LAPTOP */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .foto-card-body {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .preview-foto-kpm {
+            flex-grow: 1;
+            /* 🚀 Foto melar otomatis mengisi sisa ruang Card */
+            /* height: auto; */
+            height: 100%;
+            min-height: 200px;
+        }
+
+        .upload-btn-responsive {
+            height: 25px;
+            /* margin-top: 15px; */
+            /* Jarak antara foto dan tombol */
+        }
+
+        .upload-btn-responsive .custom-file-input,
+        .upload-btn-responsive .custom-file-label {
+            height: 25px;
+            /* padding: 10px 15px; */
+            line-height: 23px;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+
 <div class="content-wrapper mt-1">
     <div class="content-header">
         <div class="container-fluid">
@@ -210,10 +272,7 @@
                                         <input type="radio" name="jenis_bansos" value="PKH" required> PKH
                                     </label>
                                     <label class="btn btn-outline-primary flex-fill">
-                                        <input type="radio" name="jenis_bansos" value="SEMBAKO"> SMBK
-                                    </label>
-                                    <label class="btn btn-outline-primary flex-fill">
-                                        <input type="radio" name="jenis_bansos" value="PKH + SEMBAKO"> MIX
+                                        <input type="radio" name="jenis_bansos" value="SEMBAKO"> SEMBAKO
                                     </label>
                                 </div>
                             </div>
@@ -295,66 +354,6 @@
                     </div>
                 </div>
 
-                <!-- 🚀 CSS RESPONSIVE KHUSUS UPLOAD FOTO (BERDASARKAN CONTAINER) -->
-                <style>
-                    /* 1. Default (HP/Mobile) - Ringkas & Padat */
-                    .preview-foto-kpm {
-                        width: 100%;
-                        height: 150px;
-                        object-fit: cover;
-                    }
-
-                    .upload-btn-responsive {
-                        height: 25px;
-                    }
-
-                    .upload-btn-responsive .custom-file-input,
-                    .upload-btn-responsive .custom-file-label {
-                        height: 25px;
-                        /* padding: 8px 10px; */
-                        line-height: 20px;
-                        font-size: 0.75rem;
-                    }
-
-                    /* 2. Layar Lebar (Tablet/Laptop) - Card Gagah & Proporsional */
-                    @media (min-width: 768px) {
-                        .foto-card-container {
-                            max-height: 400px;
-                            min-height: 200px;
-                            /* 🚀 PENAMPUNG DIPAKSA TINGGI DI LAPTOP */
-                            display: flex;
-                            flex-direction: column;
-                        }
-
-                        .foto-card-body {
-                            display: flex;
-                            flex-direction: column;
-                            flex-grow: 1;
-                        }
-
-                        .preview-foto-kpm {
-                            flex-grow: 1;
-                            /* 🚀 Foto melar otomatis mengisi sisa ruang Card */
-                            /* height: auto; */
-                            height: 100%;
-                            min-height: 200px;
-                        }
-
-                        .upload-btn-responsive {
-                            height: 25px;
-                            /* margin-top: 15px; */
-                            /* Jarak antara foto dan tombol */
-                        }
-
-                        .upload-btn-responsive .custom-file-input,
-                        .upload-btn-responsive .custom-file-label {
-                            height: 25px;
-                            /* padding: 10px 15px; */
-                            line-height: 23px;
-                            font-size: 0.9rem;
-                        }
-                    }
-                </style>
 
                 <div class="row g-3">
                     <div class="col-6">
@@ -416,9 +415,11 @@
                 <?= csrf_field(); ?>
                 <div class="modal-body bg-light">
                     <div class="alert alert-warning small py-2 border-warning shadow-sm">
-                        <i class="fas fa-info-circle"></i> <b>Format Kolom Excel (Mulai Baris 2):</b><br>
-                        A. NIK KPM &nbsp; | &nbsp; B. NAMA KPM &nbsp; | &nbsp; C. NOMOR KKS<br>
-                        D. JENIS BANSOS &nbsp; | &nbsp; E. TAHAP SALUR &nbsp; | &nbsp; F. NOMINAL CAIR
+                        <i class="fas fa-info-circle"></i> <b>Format Kolom Excel SIKS-NG (Mulai Baris 2):</b><br>
+                        A. PERIODE &nbsp; | &nbsp; B. NIK &nbsp; | &nbsp; C. NAMA KPM<br>
+                        O. NOMOR KARTU (KKS) &nbsp; | &nbsp; P. NOMINAL
+                        <hr class="my-1 border-warning">
+                        <i>Sistem otomatis membaca kolom berdasarkan file asli unduhan dari SIKS-NG.</i>
                     </div>
                     <div class="form-group mb-0">
                         <label class="fw-bold small">Pilih File Excel (.xls / .xlsx)</label>
@@ -439,6 +440,35 @@
 
 <script>
     $(document).ready(function() {
+
+        // ==========================================
+        // 🚀 PENANGKAP FLASHDATA (NOTIFIKASI IMPORT/EXPORT)
+        // ==========================================
+        <?php if (session()->getFlashdata('success')) : ?>
+            Swal.fire({
+                icon: 'success',
+                title: 'Impor Selesai!',
+                text: '<?= session()->getFlashdata('success'); ?>',
+                showConfirmButton: false,
+                timer: 3500, // Dibuat agak lama (3.5 detik) agar teks rekap jumlah data terbaca
+                timerProgressBar: true,
+                customClass: {
+                    popup: 'rounded-4 shadow-lg'
+                }
+            });
+        <?php endif; ?>
+
+        <?php if (session()->getFlashdata('error')) : ?>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops! Terjadi Kesalahan',
+                text: '<?= session()->getFlashdata('error'); ?>',
+                customClass: {
+                    popup: 'rounded-4 shadow-lg'
+                }
+            });
+        <?php endif; ?>
+
         // --- DATA TABLES ---
         var tableDokumentasi = $('#tableDokumentasi').DataTable({
             "processing": true,

@@ -355,9 +355,13 @@ class BansosKKS extends BaseController
             $builderCek = $this->db->table('dtsen_bansos_kks')
                 ->where('nik_kpm', $nik)
                 ->where('tahap_salur', $tahap_salur_final)
-                ->where('jenis_bansos', $jenisBansos);
+                ->groupStart()
+                ->where('jenis_bansos', $jenisBansos)
+                // 🚀 TAMBAHAN: Cegah dobel jika KPM sudah terlanjur punya data MIX legacy
+                ->orWhere('jenis_bansos', 'PKH + SEMBAKO')
+                ->groupEnd();
 
-            // Jika sedang proses UPDATE, kecualikan ID yang sedang diedit agar tidak terdeteksi sebagai duplikat
+            // Jika sedang proses UPDATE, kecualikan ID yang sedang diedit
             if ($id) {
                 $builderCek->where('id !=', $id);
             }
@@ -836,6 +840,83 @@ class BansosKKS extends BaseController
     // ========================================================
     // 📥 IMPORT EXCEL TUGAS DARI SIKS-NG (KHUSUS ADMIN)
     // ========================================================
+    // public function importTugasExcel()
+    // {
+    //     if (session()->get('role_id') > 3) {
+    //         return redirect()->to('/bansos-kks')->with('error', 'Akses ditolak!');
+    //     }
+
+    //     $file = $this->request->getFile('file_excel');
+    //     if (!$file || !$file->isValid()) {
+    //         return redirect()->to('/bansos-kks')->with('error', 'Pilih file Excel yang valid!');
+    //     }
+
+    //     try {
+    //         $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getTempName());
+    //         $sheet = $spreadsheet->getActiveSheet();
+    //         $rows = $sheet->toArray();
+
+    //         $insertData = [];
+    //         $jumlahDouble = 0; // Menghitung berapa data yang di-skip karena duplikat
+
+    //         foreach ($rows as $index => $row) {
+    //             if ($index == 0) continue; // Skip header di Baris 1
+
+    //             $nik = trim($row[0] ?? '');
+    //             if (empty($nik)) continue;
+
+    //             $jenisBansos = trim($row[3] ?? 'SEMBAKO');
+    //             $tahapSalur  = trim($row[4] ?? 'Tahap 2 Tahun ' . date('Y'));
+
+    //             // 🛡️ RADAR ANTI-DOUBLE: Cek apakah NIK + Bansos + Tahap ini sudah ada di database?
+    //             $cekDouble = $this->db->table('dtsen_bansos_kks')
+    //                 ->where('nik_kpm', $nik)
+    //                 ->where('jenis_bansos', $jenisBansos)
+    //                 ->where('tahap_salur', $tahapSalur)
+    //                 ->countAllResults();
+
+    //             if ($cekDouble > 0) {
+    //                 $jumlahDouble++;
+    //                 continue; // 🚀 SKIP baris ini, jangan dimasukkan ke array insert
+    //             }
+
+    //             // Bersihkan format titik, koma, atau "Rp" dari Excel
+    //             $rawNominal = trim($row[5] ?? '0');
+    //             $nominalCair = (int) preg_replace('/\D/', '', $rawNominal);
+
+    //             $insertData[] = [
+    //                 'nik_kpm'            => $nik,
+    //                 'nama_kpm'           => trim($row[1] ?? ''),
+    //                 'nomor_kks'          => trim($row[2] ?? ''),
+    //                 'jenis_bansos'       => $jenisBansos,
+    //                 'tahap_salur'        => $tahapSalur,
+    //                 'nominal_cair'       => $nominalCair,
+    //                 'status_kelengkapan' => 0,
+    //                 'status_salur'       => null,
+    //                 'created_by'         => session()->get('id'),
+    //                 'created_at'         => date('Y-m-d H:i:s'),
+    //                 'updated_at'         => date('Y-m-d H:i:s')
+    //             ];
+    //         }
+
+    //         if (!empty($insertData)) {
+    //             $this->db->table('dtsen_bansos_kks')->insertBatch($insertData);
+    //         }
+
+    //         // Pesan sukses yang informatif
+    //         $pesanSukses = count($insertData) . ' Data Tugas Dokumentasi berhasil diimpor!';
+    //         if ($jumlahDouble > 0) {
+    //             $pesanSukses .= ' (Mengabaikan ' . $jumlahDouble . ' data duplikat/sudah ada).';
+    //         }
+
+    //         return redirect()->to('/bansos-kks')->with('success', $pesanSukses);
+    //     } catch (\Exception $e) {
+    //         return redirect()->to('/bansos-kks')->with('error', 'Gagal memproses file: ' . $e->getMessage());
+    //     }
+    // }
+    // ========================================================
+    // 📥 IMPORT EXCEL TUGAS DARI SIKS-NG (KHUSUS ADMIN)
+    // ========================================================
     public function importTugasExcel()
     {
         if (session()->get('role_id') > 3) {
@@ -853,39 +934,80 @@ class BansosKKS extends BaseController
             $rows = $sheet->toArray();
 
             $insertData = [];
-            $jumlahDouble = 0; // Menghitung berapa data yang di-skip karena duplikat
+            $jumlahDouble = 0;
 
             foreach ($rows as $index => $row) {
                 if ($index == 0) continue; // Skip header di Baris 1
 
-                $nik = trim($row[0] ?? '');
-                if (empty($nik)) continue;
+                // Kolom A (0) = PERIODE (Misal: "SEMBAKO JUL - SEPT 2026")
+                $periodeRaw = strtoupper(trim($row[0] ?? ''));
 
-                $jenisBansos = trim($row[3] ?? 'SEMBAKO');
-                $tahapSalur  = trim($row[4] ?? 'Tahap 2 Tahun ' . date('Y'));
+                // Kolom B (1) = NIK
+                $nik = trim($row[1] ?? '');
 
-                // 🛡️ RADAR ANTI-DOUBLE: Cek apakah NIK + Bansos + Tahap ini sudah ada di database?
+                if (empty($nik) || empty($periodeRaw)) continue;
+
+                // 🚀 1. EKSTRAKSI JENIS BANSOS DARI KOLOM PERIODE
+                $jenisBansos = 'SEMBAKO'; // Default
+                if (strpos($periodeRaw, 'PKH') !== false) {
+                    $jenisBansos = 'PKH';
+                }
+
+                // 🚀 2. KONVERSI PERIODE SIKS-NG KE FORMAT SINDEN (Tahap X Tahun YYYY)
+                // Cari Tahun (4 digit angka)
+                preg_match('/\d{4}/', $periodeRaw, $matches);
+                $tahun = $matches[0] ?? date('Y');
+
+                // Tentukan Tahap berdasarkan rentang bulan
+                $tahap = 'Tahap 1'; // Default
+                if (preg_match('/TAHAP\s*(\d+)/', $periodeRaw, $matchTahap)) {
+                    $tahap = 'Tahap ' . $matchTahap[1];
+                } elseif (preg_match('/JAN|FEB|MAR/', $periodeRaw)) {
+                    $tahap = 'Tahap 1';
+                } elseif (preg_match('/APR|MEI|JUN/', $periodeRaw)) {
+                    $tahap = 'Tahap 2';
+                } elseif (preg_match('/JUL|AGS|AGU|SEP/', $periodeRaw)) {
+                    $tahap = 'Tahap 3';
+                } elseif (preg_match('/OKT|NOV|DES/', $periodeRaw)) {
+                    $tahap = 'Tahap 4';
+                }
+
+                // Hasil Akhir: "Tahap 3 Tahun 2026"
+                $tahapSalurFinal = $tahap . ' Tahun ' . $tahun;
+
+                // Kolom O (14) = NOMOR KARTU. Jika kosong, fallback ke Kolom N (13) NOMOR REKENING
+                $noKks = trim($row[14] ?? '');
+                if (empty($noKks) || $noKks === '-') {
+                    $noKks = trim($row[13] ?? '');
+                }
+                if (empty($noKks)) $noKks = '-';
+
+                // Kolom P (15) = NOMINAL
+                $rawNominal = trim($row[15] ?? '0');
+                $nominalCair = (int) preg_replace('/\D/', '', $rawNominal);
+
+                // 🛡️ RADAR ANTI-DOUBLE
                 $cekDouble = $this->db->table('dtsen_bansos_kks')
                     ->where('nik_kpm', $nik)
+                    ->where('tahap_salur', $tahapSalurFinal) // Gunakan format yang sudah dikonversi
+                    ->groupStart()
                     ->where('jenis_bansos', $jenisBansos)
-                    ->where('tahap_salur', $tahapSalur)
+                    ->orWhere('jenis_bansos', 'PKH + SEMBAKO')
+                    ->groupEnd()
                     ->countAllResults();
 
                 if ($cekDouble > 0) {
                     $jumlahDouble++;
-                    continue; // 🚀 SKIP baris ini, jangan dimasukkan ke array insert
+                    continue;
                 }
-
-                // Bersihkan format titik, koma, atau "Rp" dari Excel
-                $rawNominal = trim($row[5] ?? '0');
-                $nominalCair = (int) preg_replace('/\D/', '', $rawNominal);
 
                 $insertData[] = [
                     'nik_kpm'            => $nik,
-                    'nama_kpm'           => trim($row[1] ?? ''),
-                    'nomor_kks'          => trim($row[2] ?? ''),
+                    // Kolom C (2) = NAMA
+                    'nama_kpm'           => trim($row[2] ?? ''),
+                    'nomor_kks'          => $noKks,
                     'jenis_bansos'       => $jenisBansos,
-                    'tahap_salur'        => $tahapSalur,
+                    'tahap_salur'        => $tahapSalurFinal, // Simpan format SINDEN
                     'nominal_cair'       => $nominalCair,
                     'status_kelengkapan' => 0,
                     'status_salur'       => null,
@@ -899,10 +1021,9 @@ class BansosKKS extends BaseController
                 $this->db->table('dtsen_bansos_kks')->insertBatch($insertData);
             }
 
-            // Pesan sukses yang informatif
             $pesanSukses = count($insertData) . ' Data Tugas Dokumentasi berhasil diimpor!';
             if ($jumlahDouble > 0) {
-                $pesanSukses .= ' (Mengabaikan ' . $jumlahDouble . ' data duplikat/sudah ada).';
+                $pesanSukses .= ' (Mengabaikan ' . $jumlahDouble . ' data duplikat/sudah ada sebelumnya).';
             }
 
             return redirect()->to('/bansos-kks')->with('success', $pesanSukses);
