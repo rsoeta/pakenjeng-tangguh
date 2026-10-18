@@ -188,11 +188,273 @@ $(document).ready(function () {
                     title="Tahan/Arahkan kursor untuk melihat utuh">${masked}</span>`;
     }
 
+    // function initDataTable() {
+
+    //     // Daftar label untuk tampilan Card di Mobile
+    //     const labelsDraft = ['No', 'NIK / No. KK', 'Nama', 'Program', 'Status', 'Tanggal Dibuat', 'Dibuat Oleh', 'Aksi'];
+    //     const labelsVerified = ['No', 'NIK / No. KK', 'Nama', 'Program', 'Status', 'Tanggal Diverifikasi', 'Verifikator'];
+
+    //     /* ============================================================
+    //     📊 DATATABLE — DRAFT
+    //     ============================================================ */
+
+    //     tableDraft = $('#tableUsulanBansosDraft').DataTable({
+    //         ajax: {
+    //             url: '/usulan-bansos/data',
+    //             type: 'GET',
+    //             dataType: 'json',
+    //             data: function (d) {
+    //                 return Object.assign(d, getFilterParams('draft'));
+    //             },
+    //             dataSrc: json => json.data || []
+    //         },
+
+    //         pageLength: 10,
+    //         responsive: false, // 🚀 Matikan collapse agar CSS Card bekerja di HP
+    //         autoWidth: false,
+    //         columnDefs: [], // 🚀 Kunci mencegah error targets parameter 3
+
+    //         columns: [
+    //             {
+    //                 data: null,
+    //                 title: 'No',
+    //                 width: '40px',
+    //                 className: 'text-center align-middle',
+    //                 render: (d, t, r, m) => `<span class="badge bg-light text-dark border">${m.row + 1}</span>`
+    //             },
+    //             {
+    //                 data: null,
+    //                 title: 'NIK / No. KK',
+    //                 className: 'align-middle',
+    //                 render: function (data, type, row) {
+    //                     let nik = row.nik ? row.nik : '-';
+    //                     let noKk = row.no_kk ? row.no_kk : '-';
+
+    //                     if (type === 'filter' || type === 'sort') return nik + ' ' + noKk;
+
+    //                     let maskedNik = maskNumberJS(nik);
+    //                     let maskedKk = maskNumberJS(noKk);
+
+    //                     // 🚀 PERBAIKAN: d-flex align-items-center agar tombol berdampingan
+    //                     // gap-3 untuk jarak antar NIK & KK dalam 1 baris
+    //                     return `
+    //                     <div class="d-flex flex-wrap align-items-center gap-3 w-100" style="font-size: 0.85rem;">
+    //                         <div class="d-flex align-items-center">
+    //                             <small class="text-muted me-1">NIK:</small>
+    //                             <span class="fw-bold nik-text me-1">${maskedNik}</span>
+    //                             <button type="button" class="btn btn-outline-primary btn-sm btnCopyNIK py-0 px-1" data-nik="${nik}" title="Salin NIK">
+    //                                 <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
+    //                             </button>
+    //                         </div>
+    //                         <div class="d-flex align-items-center">
+    //                             <small class="text-muted me-1">KK:</small>
+    //                             <span class="fw-bold text-info nik-text me-1">${maskedKk}</span>
+    //                             <button type="button" class="btn btn-outline-info btn-sm btnCopyNIK py-0 px-1" data-nik="${noKk}" title="Salin No. KK">
+    //                                 <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
+    //                             </button>
+    //                         </div>
+    //                     </div>
+    //                     `;
+    //                 }
+    //             },
+    //             {
+    //                 data: 'nama',
+    //                 title: 'Nama',
+    //                 className: 'text-md-nowrap align-middle',
+    //                 render: nama => `
+    //                     <!-- 🚀 PERBAIKAN: Tombol copy menempel di samping nama -->
+    //                     <div class="d-flex align-items-center gap-2 w-100">
+    //                         <span class="fw-bold text-dark nama-text text-start">${nama || '-'}</span>
+    //                         <button type="button" class="btn btn-outline-primary btn-sm btnCopyNama py-0 px-1 flex-shrink-0" data-nama="${nama || ''}" title="Salin Nama">
+    //                             <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
+    //                         </button>
+    //                     </div>
+    //                 `
+    //             },
+    //             {
+    //                 data: 'dbj_nama_bansos',
+    //                 title: 'Program',
+    //                 className: 'align-middle',
+    //                 defaultContent: '-',
+    //                 render: prog => `<span class="fw-semibold text-primary">${prog || '-'}</span>`
+    //             },
+    //             {
+    //                 data: 'status',
+    //                 title: 'Status',
+    //                 className: 'align-middle',
+    //                 render: s => {
+    //                     const cls = { draft: 'secondary', diverifikasi: 'success' }[s] || 'secondary';
+    //                     return `<span class="badge bg-${cls}">${(s || 'draft').toUpperCase()}</span>`;
+    //                 }
+    //             },
+    //             {
+    //                 data: 'created_at',
+    //                 title: 'Tanggal Dibuat',
+    //                 className: 'align-middle',
+    //                 render: d => d ? `<small class="text-muted">${new Date(d).toLocaleString('id-ID')}</small>` : '-'
+    //             },
+    //             {
+    //                 data: null,
+    //                 title: 'Dibuat Oleh',
+    //                 className: 'align-middle',
+    //                 render: (d, t, row) => renderCreatorWithWA(row)
+    //             },
+    //             {
+    //                 data: 'id',
+    //                 title: 'Aksi',
+    //                 orderable: false,
+    //                 className: 'align-middle',
+    //                 render: function (id) {
+    //                     let btn = `
+    //                         <div class="d-flex flex-wrap gap-1 justify-content-md-center justify-content-end">
+    //                             <button type="button" class="btn btn-danger btn-sm btnHapusUsulan" data-id="${id}">
+    //                                 <i class="fas fa-trash-alt"></i> <span class="d-none d-md-inline">Hapus</span>
+    //                             </button>
+    //                     `;
+
+    //                     if (userRole <= 3) {
+    //                         btn += `
+    //                             <button type="button" class="btn btn-success btn-sm btnVerifikasiUsulan" data-id="${id}">
+    //                                 <i class="fas fa-check-circle"></i> <span class="d-none d-md-inline">Verify</span>
+    //                             </button>
+    //                             <button type="button" class="btn btn-warning btn-sm btnTolakUsulan" data-id="${id}">
+    //                                 <i class="fas fa-times-circle"></i> <span class="d-none d-md-inline">Tolak</span>
+    //                             </button>
+    //                         `;
+    //                     }
+    //                     btn += `</div>`;
+    //                     return btn;
+    //                 }
+    //             }
+    //         ],
+    //         createdRow: function (row) {
+    //             $(row).find('td').each(function (idx) {$(this).attr('data-label', labelsDraft[idx] || '');
+    //             });
+    //         },
+    //         headerCallback: thead => $(thead).find('th').css('text-align', 'center')
+    //     });
+
+
+    //     /* ============================================================
+    //     📊 DATATABLE — VERIFIED
+    //     ============================================================ */
+
+    //     tableVerified = $('#tableUsulanBansosVerified').DataTable({
+    //         ajax: {
+    //             url: '/usulan-bansos/data',
+    //             type: 'GET',
+    //             dataType: 'json',
+    //             data: function (d) {
+    //                 return Object.assign(d, getFilterParams('diverifikasi'));
+    //             },
+    //             dataSrc: json => json.data || []
+    //         },
+
+    //         pageLength: 10,
+    //         responsive: false, // 🚀 Matikan collapse agar CSS Card bekerja di HP
+    //         autoWidth: false,
+    //         columnDefs: [], // 🚀 Kunci mencegah error targets parameter 3
+
+    //         columns: [
+    //             {
+    //                 data: null,
+    //                 title: 'No',
+    //                 width: '40px',
+    //                 className: 'text-center align-middle',
+    //                 render: (d, t, r, m) => `<span class="badge bg-light text-dark border">${m.row + 1}</span>`
+    //             },
+    //             {
+    //                 data: null,
+    //                 title: 'NIK / No. KK',
+    //                 className: 'align-middle',
+    //                 render: function (data, type, row) {
+    //                     let nik = row.nik ? row.nik : '-';
+    //                     let noKk = row.no_kk ? row.no_kk : '-';
+
+    //                     if (type === 'filter' || type === 'sort') return nik + ' ' + noKk;
+
+    //                     let maskedNik = maskNumberJS(nik);
+    //                     let maskedKk = maskNumberJS(noKk);
+
+    //                     // 🚀 PERBAIKAN: d-flex align-items-center agar tombol berdampingan
+    //                     // gap-3 untuk jarak antar NIK & KK dalam 1 baris
+    //                     return `
+    //                     <div class="d-flex flex-wrap align-items-center gap-3 w-100" style="font-size: 0.85rem;">
+    //                         <div class="d-flex align-items-center">
+    //                             <small class="text-muted me-1">NIK:</small>
+    //                             <span class="fw-bold nik-text me-1">${maskedNik}</span>
+    //                             <button type="button" class="btn btn-outline-primary btn-sm btnCopyNIK py-0 px-1" data-nik="${nik}" title="Salin NIK">
+    //                                 <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
+    //                             </button>
+    //                         </div>
+    //                         <div class="d-flex align-items-center">
+    //                             <small class="text-muted me-1">KK:</small>
+    //                             <span class="fw-bold text-info nik-text me-1">${maskedKk}</span>
+    //                             <button type="button" class="btn btn-outline-info btn-sm btnCopyNIK py-0 px-1" data-nik="${noKk}" title="Salin No. KK">
+    //                                 <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
+    //                             </button>
+    //                         </div>
+    //                     </div>
+    //                     `;
+    //                 }
+    //             },
+    //             {
+    //                 data: 'nama',
+    //                 title: 'Nama',
+    //                 className: 'text-md-nowrap align-middle',
+    //                 render: nama => `
+    //                     <!-- 🚀 PERBAIKAN: Tombol copy menempel di samping nama -->
+    //                     <div class="d-flex align-items-center gap-2 w-100">
+    //                         <span class="fw-bold text-dark nama-text text-start">${nama || '-'}</span>
+    //                         <button type="button" class="btn btn-outline-primary btn-sm btnCopyNama py-0 px-1 flex-shrink-0" data-nama="${nama || ''}" title="Salin Nama">
+    //                             <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
+    //                         </button>
+    //                     </div>
+    //                 `
+    //             },
+    //             {
+    //                 data: 'dbj_nama_bansos',
+    //                 title: 'Program',
+    //                 className: 'align-middle',
+    //                 defaultContent: '-',
+    //                 render: prog => `<span class="fw-semibold text-success">${prog || '-'}</span>`
+    //             },
+    //             {
+    //                 data: 'status',
+    //                 title: 'Status',
+    //                 className: 'align-middle',
+    //                 render: s => {
+    //                     const cls = { diverifikasi: 'success', ditolak: 'danger' }[s] || 'secondary';
+    //                     return `<span class="badge bg-${cls}">${(s || '').toUpperCase()}</span>`;
+    //                 }
+    //             },
+    //             {
+    //                 data: 'updated_at',
+    //                 title: 'Tanggal Diverifikasi',
+    //                 className: 'align-middle',
+    //                 render: d => d ? `<small class="text-muted">${new Date(d).toLocaleString('id-ID')}</small>` : '-'
+    //             },
+    //             {
+    //                 data: 'updated_by_name',
+    //                 title: 'Verifikator',
+    //                 className: 'align-middle',
+    //                 defaultContent: '-'
+    //             }
+    //         ],
+    //         createdRow: function (row) {
+    //             $(row).find('td').each(function (idx) {$(this).attr('data-label', labelsVerified[idx] || '');
+    //             });
+    //         },
+    //         headerCallback: thead => $(thead).find('th').css('text-align', 'center')
+    //     });
+
+    // }
+
     function initDataTable() {
 
-        // Daftar label untuk tampilan Card di Mobile
-        const labelsDraft = ['No', 'NIK / No. KK', 'Nama', 'Program', 'Status', 'Tanggal Dibuat', 'Dibuat Oleh', 'Aksi'];
-        const labelsVerified = ['No', 'NIK / No. KK', 'Nama', 'Program', 'Status', 'Tanggal Diverifikasi', 'Verifikator'];
+        // 🚀 PERBAIKAN LABEL MOBILE: Sesuaikan dengan kolom baru (total 6 kolom)
+        const labelsDraft = ['No', 'NIK / No. KK', 'Nama', 'Program', 'Alamat Lengkap', 'Aksi'];
+        const labelsVerified = ['No', 'NIK / No. KK', 'Nama', 'Program', 'Alamat Lengkap', 'Aksi'];
 
         /* ============================================================
         📊 DATATABLE — DRAFT
@@ -208,11 +470,10 @@ $(document).ready(function () {
                 },
                 dataSrc: json => json.data || []
             },
-
             pageLength: 10,
-            responsive: false, // 🚀 Matikan collapse agar CSS Card bekerja di HP
+            responsive: false, // Matikan collapse agar CSS Card bekerja di HP
             autoWidth: false,
-            columnDefs: [], // 🚀 Kunci mencegah error targets parameter 3
+            columnDefs: [], // Kunci mencegah error targets parameter
 
             columns: [
                 {
@@ -235,23 +496,17 @@ $(document).ready(function () {
                         let maskedNik = maskNumberJS(nik);
                         let maskedKk = maskNumberJS(noKk);
 
-                        // 🚀 PERBAIKAN: d-flex align-items-center agar tombol berdampingan
-                        // gap-3 untuk jarak antar NIK & KK dalam 1 baris
                         return `
                         <div class="d-flex flex-wrap align-items-center gap-3 w-100" style="font-size: 0.85rem;">
                             <div class="d-flex align-items-center">
                                 <small class="text-muted me-1">NIK:</small>
                                 <span class="fw-bold nik-text me-1">${maskedNik}</span>
-                                <button type="button" class="btn btn-outline-primary btn-sm btnCopyNIK py-0 px-1" data-nik="${nik}" title="Salin NIK">
-                                    <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
-                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm btnCopyNIK py-0 px-1" data-nik="${nik}" title="Salin NIK"><i class="fas fa-copy" style="font-size: 0.7rem;"></i></button>
                             </div>
                             <div class="d-flex align-items-center">
                                 <small class="text-muted me-1">KK:</small>
                                 <span class="fw-bold text-info nik-text me-1">${maskedKk}</span>
-                                <button type="button" class="btn btn-outline-info btn-sm btnCopyNIK py-0 px-1" data-nik="${noKk}" title="Salin No. KK">
-                                    <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
-                                </button>
+                                <button type="button" class="btn btn-outline-info btn-sm btnCopyNIK py-0 px-1" data-nik="${noKk}" title="Salin No. KK"><i class="fas fa-copy" style="font-size: 0.7rem;"></i></button>
                             </div>
                         </div>
                         `;
@@ -262,7 +517,6 @@ $(document).ready(function () {
                     title: 'Nama',
                     className: 'text-md-nowrap align-middle',
                     render: nama => `
-                        <!-- 🚀 PERBAIKAN: Tombol copy menempel di samping nama -->
                         <div class="d-flex align-items-center gap-2 w-100">
                             <span class="fw-bold text-dark nama-text text-start">${nama || '-'}</span>
                             <button type="button" class="btn btn-outline-primary btn-sm btnCopyNama py-0 px-1 flex-shrink-0" data-nama="${nama || ''}" title="Salin Nama">
@@ -278,26 +532,27 @@ $(document).ready(function () {
                     defaultContent: '-',
                     render: prog => `<span class="fw-semibold text-primary">${prog || '-'}</span>`
                 },
-                {
-                    data: 'status',
-                    title: 'Status',
-                    className: 'align-middle',
-                    render: s => {
-                        const cls = { draft: 'secondary', diverifikasi: 'success' }[s] || 'secondary';
-                        return `<span class="badge bg-${cls}">${(s || 'draft').toUpperCase()}</span>`;
-                    }
-                },
-                {
-                    data: 'created_at',
-                    title: 'Tanggal Dibuat',
-                    className: 'align-middle',
-                    render: d => d ? `<small class="text-muted">${new Date(d).toLocaleString('id-ID')}</small>` : '-'
-                },
+                // 🚀 KOLOM BARU: ALAMAT LENGKAP
                 {
                     data: null,
-                    title: 'Dibuat Oleh',
+                    title: 'Alamat Lengkap',
                     className: 'align-middle',
-                    render: (d, t, row) => renderCreatorWithWA(row)
+                    render: function (data, type, row) {
+                        let alamat = row.alamat ? row.alamat : '-';
+                        let rt = row.rt ? String(row.rt).padStart(3, '0') : '000';
+                        let rw = row.rw ? String(row.rw).padStart(3, '0') : '000';
+
+                        if (type === 'filter' || type === 'sort') {
+                            return `${alamat} RT ${rt} RW ${rw}`;
+                        }
+
+                        return `
+                        <div class="d-flex flex-column" style="font-size: 0.85rem; line-height: 1.4;">
+                            <span class="fw-semibold text-dark">${alamat}</span>
+                            <span class="text-muted"><i class="fas fa-map-marker-alt me-1 text-danger"></i>RT ${rt} / RW ${rw}</span>
+                        </div>
+                        `;
+                    }
                 },
                 {
                     data: 'id',
@@ -349,11 +604,10 @@ $(document).ready(function () {
                 },
                 dataSrc: json => json.data || []
             },
-
             pageLength: 10,
-            responsive: false, // 🚀 Matikan collapse agar CSS Card bekerja di HP
+            responsive: false,
             autoWidth: false,
-            columnDefs: [], // 🚀 Kunci mencegah error targets parameter 3
+            columnDefs: [], 
 
             columns: [
                 {
@@ -376,23 +630,17 @@ $(document).ready(function () {
                         let maskedNik = maskNumberJS(nik);
                         let maskedKk = maskNumberJS(noKk);
 
-                        // 🚀 PERBAIKAN: d-flex align-items-center agar tombol berdampingan
-                        // gap-3 untuk jarak antar NIK & KK dalam 1 baris
                         return `
                         <div class="d-flex flex-wrap align-items-center gap-3 w-100" style="font-size: 0.85rem;">
                             <div class="d-flex align-items-center">
                                 <small class="text-muted me-1">NIK:</small>
                                 <span class="fw-bold nik-text me-1">${maskedNik}</span>
-                                <button type="button" class="btn btn-outline-primary btn-sm btnCopyNIK py-0 px-1" data-nik="${nik}" title="Salin NIK">
-                                    <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
-                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm btnCopyNIK py-0 px-1" data-nik="${nik}" title="Salin NIK"><i class="fas fa-copy" style="font-size: 0.7rem;"></i></button>
                             </div>
                             <div class="d-flex align-items-center">
                                 <small class="text-muted me-1">KK:</small>
                                 <span class="fw-bold text-info nik-text me-1">${maskedKk}</span>
-                                <button type="button" class="btn btn-outline-info btn-sm btnCopyNIK py-0 px-1" data-nik="${noKk}" title="Salin No. KK">
-                                    <i class="fas fa-copy" style="font-size: 0.7rem;"></i>
-                                </button>
+                                <button type="button" class="btn btn-outline-info btn-sm btnCopyNIK py-0 px-1" data-nik="${noKk}" title="Salin No. KK"><i class="fas fa-copy" style="font-size: 0.7rem;"></i></button>
                             </div>
                         </div>
                         `;
@@ -403,7 +651,6 @@ $(document).ready(function () {
                     title: 'Nama',
                     className: 'text-md-nowrap align-middle',
                     render: nama => `
-                        <!-- 🚀 PERBAIKAN: Tombol copy menempel di samping nama -->
                         <div class="d-flex align-items-center gap-2 w-100">
                             <span class="fw-bold text-dark nama-text text-start">${nama || '-'}</span>
                             <button type="button" class="btn btn-outline-primary btn-sm btnCopyNama py-0 px-1 flex-shrink-0" data-nama="${nama || ''}" title="Salin Nama">
@@ -419,26 +666,27 @@ $(document).ready(function () {
                     defaultContent: '-',
                     render: prog => `<span class="fw-semibold text-success">${prog || '-'}</span>`
                 },
+                // 🚀 KOLOM BARU: ALAMAT LENGKAP
                 {
-                    data: 'status',
-                    title: 'Status',
+                    data: null,
+                    title: 'Alamat Lengkap',
                     className: 'align-middle',
-                    render: s => {
-                        const cls = { diverifikasi: 'success', ditolak: 'danger' }[s] || 'secondary';
-                        return `<span class="badge bg-${cls}">${(s || '').toUpperCase()}</span>`;
+                    render: function (data, type, row) {
+                        let alamat = row.alamat ? row.alamat : '-';
+                        let rt = row.rt ? String(row.rt).padStart(3, '0') : '000';
+                        let rw = row.rw ? String(row.rw).padStart(3, '0') : '000';
+
+                        if (type === 'filter' || type === 'sort') {
+                            return `${alamat} RT ${rt} RW ${rw}`;
+                        }
+
+                        return `
+                        <div class="d-flex flex-column" style="font-size: 0.85rem; line-height: 1.4;">
+                            <span class="fw-semibold text-dark">${alamat}</span>
+                            <span class="text-muted"><i class="fas fa-map-marker-alt me-1 text-danger"></i>RT ${rt} / RW ${rw}</span>
+                        </div>
+                        `;
                     }
-                },
-                {
-                    data: 'updated_at',
-                    title: 'Tanggal Diverifikasi',
-                    className: 'align-middle',
-                    render: d => d ? `<small class="text-muted">${new Date(d).toLocaleString('id-ID')}</small>` : '-'
-                },
-                {
-                    data: 'updated_by_name',
-                    title: 'Verifikator',
-                    className: 'align-middle',
-                    defaultContent: '-'
                 }
             ],
             createdRow: function (row) {

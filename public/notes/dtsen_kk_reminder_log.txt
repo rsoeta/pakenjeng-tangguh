@@ -1,0 +1,1 @@
+ALTER TABLE dtsen_kk_reminder_log ADD is_ba_printed TINYINT(1) NOT NULL DEFAULT 0 AFTER status;

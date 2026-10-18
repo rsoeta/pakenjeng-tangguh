@@ -36,53 +36,6 @@ class ReminderMonitor extends BaseController
     /**
      * DataTables AJAX list (GET)
      */
-    // public function listAjax()
-    // {
-    //     $request = $this->request;
-    //     $params = $request->getGet();
-
-    //     // basic query
-    //     $builder = $this->db->table('dtsen_kk_reminder_log r')
-    //         ->select('r.id, r.kk_id, r.admin_id, r.due_date, r.status, r.sent_at, kk.no_kk, kk.kepala_keluarga, u.fullname as admin_name, u.nope')
-    //         ->join('dtsen_kk kk', 'kk.id_kk = r.kk_id', 'left')
-    //         ->join('dtks_users u', 'u.id = r.admin_id', 'left');
-
-    //     // filters
-    //     if (!empty($params['status'])) {
-    //         $builder->where('r.status', $params['status']);
-    //     }
-
-    //     if (!empty($params['q'])) {
-    //         $q = trim($params['q']);
-    //         $builder->groupStart()
-    //             ->like('kk.no_kk', $q)
-    //             ->orLike('kk.kepala_keluarga', $q)
-    //             ->orLike('u.fullname', $q)
-    //             ->groupEnd();
-    //     }
-
-    //     // simple pagination for DataTables client-side processing
-    //     $data = $builder->orderBy('r.due_date', 'ASC')->get()->getResultArray();
-
-    //     // format response for DataTables (client-side)
-    //     $rows = [];
-    //     foreach ($data as $r) {
-    //         $rows[] = [
-    //             'id' => $r['id'],
-    //             'no_kk' => $r['no_kk'],
-    //             'nama_kk' => $r['kepala_keluarga'],
-    //             'admin' => $r['admin_name'],
-    //             'nope' => $r['nope'],
-    //             'due_date' => $r['due_date'],
-    //             'status' => $r['status'],
-    //             'sent_at' => $r['sent_at']
-    //         ];
-    //     }
-
-    //     return $this->response->setJSON([
-    //         'data' => $rows
-    //     ]);
-    // }
     public function listAjax()
     {
         $request = $this->request;

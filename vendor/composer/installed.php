@@ -3,7 +3,7 @@
         'name' => 'rsoeta/pakenjeng-tangguh',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'd3bd2a59666a0b29218f27660096f69bcd382127',
+        'reference' => 'f9aaee15d6617071cfc7dfcb2ee856ebffd02e5c',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -121,7 +121,7 @@
         'rsoeta/pakenjeng-tangguh' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'd3bd2a59666a0b29218f27660096f69bcd382127',
+            'reference' => 'f9aaee15d6617071cfc7dfcb2ee856ebffd02e5c',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

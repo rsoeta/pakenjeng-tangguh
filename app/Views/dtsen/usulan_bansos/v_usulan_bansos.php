@@ -318,8 +318,12 @@
                         data-bs-target="#offcanvasGeneralAkses"
                         aria-controls="offcanvasGeneralAkses"
                         title="Pengaturan Jadwal & Batas Waktu Akses">
-                        <i class="fas fa-cog fa-spin-hover"></i>
+                        <i class="fas fa-cog"></i>
                         <span class="d-none d-sm-inline">Pengaturan Akses</span>
+                        <button type="button" class="btn btn-success btn-sm shadow-sm ms-2 btn-touch-target px-3 fw-bold text-white" data-bs-toggle="modal" data-bs-target="#modalCetakBA">
+                            <i class="fas fa-print"></i>
+                            <span class="d-none d-sm-inline">Cetak BA</span>
+                        </button>
                     </button>
                 <?php endif; ?>
 
@@ -422,6 +426,79 @@
 </div>
 
 <?= $this->include('dtsen/usulan_bansos/form_usulan_bansos'); ?>
+<!-- 🖨️ MODAL CETAK BERITA ACARA -->
+<div class="modal fade" id="modalCetakBA" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4 shadow">
+            <div class="modal-header bg-success text-white border-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-file-word me-2"></i>Cetak Berita Acara (Musdes)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formCetakBA" action="<?= base_url('usulan-bansos/cetak-ba') ?>" method="POST" enctype="multipart/form-data">
+                <div class="modal-body p-4 bg-light">
+
+                    <div class="row g-3">
+                        <!-- Pilih Bulan & Tahun Data -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary small">Bulan Usulan <span class="text-danger">*</span></label>
+                            <select name="bulan_data" class="form-select" required>
+                                <?php
+                                $bulanIndo = ['01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April', '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus', '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'];
+                                foreach ($bulanIndo as $num => $nama):
+                                ?>
+                                    <option value="<?= $num ?>" <?= date('m') == $num ? 'selected' : '' ?>><?= $nama ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary small">Tahun Usulan <span class="text-danger">*</span></label>
+                            <input type="number" name="tahun_data" class="form-control" value="<?= date('Y') ?>" required>
+                        </div>
+
+                        <!-- Data Surat -->
+                        <div class="col-12 mt-4">
+                            <h6 class="fw-bold text-dark border-bottom pb-2">Informasi Surat</h6>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold text-secondary small">Nomor Surat <span class="text-danger">*</span></label>
+                            <input type="text" name="nomor_surat" class="form-control" placeholder="Contoh: 145 / 15 / PSL / X / 2026" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary small">Tanggal Musyawarah <span class="text-danger">*</span></label>
+                            <!-- 🚀 Ubah type="date" menjadi type="text" -->
+                            <input type="text" id="tgl_musdes" name="tanggal_musyawarah" class="form-control" placeholder="Pilih Tanggal..." required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary small">Tanggal Tanda Tangan <span class="text-danger">*</span></label>
+                            <!-- 🚀 Tambahkan id="tgl_ttd" -->
+                            <input type="text" id="tgl_ttd" name="tanggal_ttd" class="form-control" placeholder="Contoh: 6 Oktober 2026" required>
+                        </div>
+
+                        <!-- Dokumentasi Foto -->
+                        <div class="col-12 mt-4">
+                            <h6 class="fw-bold text-dark border-bottom pb-2">Dokumentasi (Lampiran III)</h6>
+                            <div class="alert alert-info small py-2"><i class="fas fa-info-circle me-1"></i> Lampirkan 4 foto kegiatan (JPG/PNG).</div>
+                        </div>
+
+                        <?php for ($i = 1; $i <= 4; $i++): ?>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-secondary small">Foto Kegiatan <?= $i ?> <span class="text-danger">*</span></label>
+                                <input type="file" name="foto_kegiatan[]" class="form-control form-control-sm" accept="image/jpeg, image/png">
+                            </div>
+                        <?php endfor; ?>
+
+                    </div>
+                </div>
+                <div class="modal-footer bg-white border-0 justify-content-between">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm" id="btnProsesCetak">
+                        <i class="fas fa-download me-1"></i> Unduh File Word
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <?php if (($user_login['role_id'] ?? session()->get('role_id') ?? 99) <= 3): ?>
     <!-- 🚀 OFFCANVAS PENGATURAN GENERAL & USULAN AKSES -->
@@ -557,6 +634,38 @@
             text: message
         });
     }
+
+    // =========================================================================
+    // 🚀 FLATPICKR: KALENDER HUMANIS & AUTO-FILL TANGGAL TTD
+    // =========================================================================
+    $('#tgl_musdes').flatpickr({
+        locale: "id", // Bahasa Indonesia (Senin, Selasa, dll)
+        altInput: true, // Aktifkan mode input bayangan
+        altFormat: "d-m-Y", // 👁️ Tampilan untuk User (DD-MM-YYYY)
+        dateFormat: "Y-m-d", // ⚙️ Tampilan untuk Backend (YYYY-MM-DD)
+        defaultDate: "today", // Otomatis pilih hari ini
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length > 0) {
+                let d = selectedDates[0];
+                let bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+                let tgl = d.getDate();
+                let bln = bulanIndo[d.getMonth()];
+                let thn = d.getFullYear();
+
+                // Format output otomatis ke form TTD: "19 Oktober 2026"
+                $('#tgl_ttd').val(tgl + ' ' + bln + ' ' + thn);
+            }
+        },
+        onReady: function(selectedDates, dateStr, instance) {
+            // Jalankan juga saat kalender pertama kali dirender
+            if (selectedDates.length > 0) {
+                let d = selectedDates[0];
+                let bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                $('#tgl_ttd').val(d.getDate() + ' ' + bulanIndo[d.getMonth()] + ' ' + d.getFullYear());
+            }
+        }
+    });
 
     $(document).ready(function() {
         // 1. Submit Form Usulan Akses
