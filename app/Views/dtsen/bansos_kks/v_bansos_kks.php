@@ -109,6 +109,25 @@
 
                     <!-- BARIS 1: AREA FILTER DROPDOWN -->
                     <div class="row align-items-end g-2">
+                        <!-- 🚀 Filter Petugas Entri (BARU) -->
+                        <div class="col-6 col-md-2">
+                            <label class="filter-label small fw-bold text-muted mb-1">Petugas Entri</label>
+                            <?php
+                            $isPentri = session()->get('role_id') > 3;
+                            $myId = session()->get('id') ?? session()->get('id_user') ?? session()->get('user_id');
+                            ?>
+                            <select id="filter_petugas" class="form-control form-control-sm border bg-light rounded-pill px-3" <?= $isPentri ? 'disabled' : '' ?>>
+                                <option value="">Semua Petugas</option>
+                                <?php if (isset($petugas_list)): ?>
+                                    <?php foreach ($petugas_list as $p): ?>
+                                        <option value="<?= $p['id'] ?>" <?= ($isPentri && $myId == $p['id']) ? 'selected' : '' ?>>
+                                            <?= esc(ucwords(strtolower($p['fullname']))) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+
                         <!-- Filter RW -->
                         <div class="col-6 col-md-2">
                             <label class="filter-label small fw-bold text-muted mb-1">Wilayah RW</label>
@@ -125,8 +144,8 @@
                             </select>
                         </div>
 
-                        <!-- Filter Tahap Salur -->
-                        <div class="col-6 col-md-3">
+                        <!-- Filter Tahap Salur (Diubah ke col-md-2) -->
+                        <div class="col-6 col-md-2">
                             <label class="filter-label small fw-bold text-muted mb-1">Tahap Salur</label>
                             <select id="filter_tahap" class="form-control form-control-sm border bg-light rounded-pill px-3">
                                 <option value="">Semua Tahap</option>
@@ -147,19 +166,18 @@
                             </select>
                         </div>
 
-                        <!-- Filter Jenis Bansos -->
-                        <div class="col-6 col-md-3">
+                        <!-- Filter Jenis Bansos (Diubah ke col-md-2) -->
+                        <div class="col-6 col-md-2">
                             <label class="filter-label small fw-bold text-muted mb-1">Jenis Bansos</label>
                             <select id="filter_jenis" class="form-control form-control-sm border bg-light rounded-pill px-3">
                                 <option value="">Semua Bansos</option>
                                 <option value="PKH">PKH</option>
                                 <option value="SEMBAKO">SEMBAKO</option>
-                                <option value="PKH + SEMBAKO">MIX (PKH + SEMBAKO)</option>
                             </select>
                         </div>
 
                         <!-- Filter Status Kunci & Kelengkapan -->
-                        <div class="col-12 col-md-2">
+                        <div class="col-6 col-md-2">
                             <label class="filter-label small fw-bold text-muted mb-1">Status Data</label>
                             <select id="filter_locked" class="form-control form-control-sm border bg-light rounded-pill px-3">
                                 <option value="">Semua Status</option>
@@ -333,7 +351,6 @@
 
                                     <!-- Opsi PM Tidak Transaksi (Sesuai SIKS-NG) -->
                                     <optgroup label="Tidak Transaksi / Gagal">
-                                        <option value="Saldo Kosong">Saldo Kosong (Tambahan Lapangan)</option>
                                         <option value="Tidak Transaksi (Meninggal Dunia)">Tidak Transaksi (Meninggal Dunia)</option>
                                         <option value="Tidak Transaksi (Pindah)">Tidak Transaksi (Pindah)</option>
                                         <option value="Tidak Transaksi (Tidak Ditemukan)">Tidak Transaksi (Tidak Ditemukan)</option>
@@ -480,6 +497,7 @@
                 "data": function(d) {
                     d['<?= csrf_token() ?>'] = '<?= csrf_hash() ?>';
                     // 🚀 Kirim parameter filter ke Controller
+                    d.filter_petugas = $('#filter_petugas').val();
                     d.filter_rw = $('#filter_rw').val();
                     d.filter_rt = $('#filter_rt').val();
                     d.filter_tahap = $('#filter_tahap').val();
@@ -509,6 +527,7 @@
                 type: "POST",
                 data: {
                     '<?= csrf_token() ?>': '<?= csrf_hash() ?>',
+                    filter_petugas: $('#filter_petugas').val(),
                     filter_rw: $('#filter_rw').val(),
                     filter_rt: $('#filter_rt').val(),
                     filter_tahap: $('#filter_tahap').val(),
@@ -619,13 +638,14 @@
         });
 
         // 🚀 TRIGGER SAAT DROPDOWN BERUBAH (AUTO-FILTER)
-        $('#filter_rw, #filter_rt, #filter_tahap, #filter_jenis, #filter_locked').on('change', function() {
+        $('#filter_petugas, #filter_rw, #filter_rt, #filter_tahap, #filter_jenis, #filter_locked').on('change', function() {
             tableDokumentasi.ajax.reload();
             loadChartData();
         });
 
         // 🚀 FUNGSI EXPORT EXCEL MENGIKUTI FILTER
         $('#btn_export_excel').click(function() {
+            var petugas = $('#filter_petugas').val();
             var rw = $('#filter_rw').val();
             var rt = $('#filter_rt').val();
             var tahap = $('#filter_tahap').val();
@@ -633,7 +653,7 @@
             var jenis = $('#filter_jenis').val();
 
             // Redirect ke function Controller dengan query parameter
-            var exportUrl = "<?= base_url('bansos-kks/exportExcel') ?>?rw=" + rw + "&rt=" + rt + "&tahap=" + tahap + "&locked=" + locked + "&jenis=" + jenis;
+            var exportUrl = "<?= base_url('bansos-kks/exportExcel') ?>?petugas=" + petugas + "&rw=" + rw + "&rt=" + rt + "&tahap=" + tahap + "&locked=" + locked + "&jenis=" + jenis;
             window.open(exportUrl, '_blank');
         });
 

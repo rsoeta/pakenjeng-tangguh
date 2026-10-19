@@ -22,13 +22,23 @@ class BansosKKS extends BaseController
 
     public function index()
     {
-        // Data dasar untuk view
+        $user = $this->authModel->getUserId();
+        $kodeDesa = session()->get('kode_desa') ?? ($user['kode_desa'] ?? '');
+
+        // 🚀 Ambil daftar petugas entri yang aktif di desa ini
+        $petugasList = $this->db->table('dtks_users')
+            ->select('id, fullname')
+            ->where('kode_desa', $kodeDesa)
+            ->where('role_id >=', 4)
+            ->where('status', 1)
+            ->get()->getResultArray();
+
         $data = [
-            'title' => 'Dokumentasi Bansos',
-            'user'  => session()->get(),
+            'title'        => 'Dokumentasi Bansos',
+            'user'         => session()->get(),
+            'petugas_list' => $petugasList // Bawa data ke dropdown frontend
         ];
 
-        // 👇 UBAH BARIS INI SESUAIKAN DENGAN NAMA FOLDER BARU ANDA 👇
         return view('dtsen/bansos_kks/v_bansos_kks', $data);
     }
 
@@ -39,35 +49,43 @@ class BansosKKS extends BaseController
         $kodeDesa = session()->get('kode_desa') ?? ($user['kode_desa'] ?? '');
 
         // 🚀 TANGKAP REQUEST FILTER DARI VIEW
+        $filterPetugas = $this->request->getPost('filter_petugas'); // 🚀 TANGKAP PETUGAS
         $filterRw = $this->request->getPost('filter_rw');
         $filterRt = $this->request->getPost('filter_rt');
         $filterTahap = $this->request->getPost('filter_tahap');
         $filterLocked = $this->request->getPost('filter_locked');
         $filterJenis = $this->request->getPost('filter_jenis');
 
-        // =======================================================
-        // 🚀 PERBAIKAN QUERY: Kembalikan JOIN demi Keamanan Trait Wilayah
-        // Trait applyWilayahFilter WAJIB membaca kolom rt.kode_desa
-        // =======================================================
         $builder = $this->db->table('dtsen_bansos_kks b')
             ->select('b.*, m.alamat, m.rt, m.rw')
             ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
             ->join('dtsen_art a', 'a.nik = b.nik_kpm', 'left')
             ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left')
-            ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left'); // 🚀 Wajib gunakan alias 'rt'
+            ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left');
 
         // =======================================================
-        // 🔐 TERAPKAN TRAIT WILAYAH FILTER
+        // 🔐 TERAPKAN TRAIT WILAYAH FILTER DENGAN MODE PENYAMARAN
         // =======================================================
+        $wilayahTugas = trim($user['wilayah_tugas'] ?? '');
+        $roleTarget = $roleId;
+
+        // 🚀 Jika Admin (Role <= 3) memfilter Petugas Entri tertentu
+        if ($roleId <= 3 && !empty($filterPetugas)) {
+            $petugas = $this->db->table('dtks_users')->select('wilayah_tugas')->where('id', $filterPetugas)->get()->getRowArray();
+            if ($petugas) {
+                // Admin "meminjam" wilayah kerja petugas tersebut
+                $wilayahTugas = trim($petugas['wilayah_tugas'] ?? '');
+                $roleTarget = 4; // Paksa Trait memotong data layaknya Pentri biasa
+            }
+        }
+
         $filterData = [
             'kode_desa'     => $kodeDesa,
-            'wilayah_tugas' => trim($user['wilayah_tugas'] ?? '')
+            'wilayah_tugas' => $wilayahTugas
         ];
 
-        // 💥 Boom! Gunakan mesin Trait untuk memproses pola wilayah_tugas yang rumit
-        $this->applyWilayahFilter($builder, $filterData, $roleId);
-
-        // ... (Kode ke bawahnya tetap sama persis seperti sebelumnya) ...
+        // 💥 Boom! Gunakan mesin Trait!
+        $this->applyWilayahFilter($builder, $filterData, $roleTarget);
 
         // ==========================================
         // 🔍 FILTER DINAMIS DARI FRONTEND (Manual)
@@ -1198,139 +1216,6 @@ class BansosKKS extends BaseController
     // ========================================================
     // 📊 GET DATA DIAGRAM KINERJA PETUGAS (AJAX + FILTER + MAPPING)
     // ========================================================
-    // public function chartData()
-    // {
-    //     try {
-    //         // 🚀 AMAN: Ambil langsung dari session agar tidak error 'Undefined array key'
-    //         $roleId = session()->get('role_id') ?? 4;
-    //         $userId = session()->get('id') ?? session()->get('id_user') ?? session()->get('user_id') ?? 0;
-    //         $kodeDesa = session()->get('kode_desa') ?? '';
-    //         $wilayahTugasAkun = session()->get('wilayah_tugas') ?? '';
-
-    //         // 1. TANGKAP SEMUA FILTER DARI VIEW
-    //         $filterRw     = $this->request->getPost('filter_rw');
-    //         $filterRt     = $this->request->getPost('filter_rt');
-    //         $filterTahap  = $this->request->getPost('filter_tahap');
-    //         $filterLocked = $this->request->getPost('filter_locked');
-    //         $filterJenis  = $this->request->getPost('filter_jenis');
-
-    //         // 2. AMBIL SEMUA PETUGAS ENTRI DI DESA INI (Role >= 4)
-    //         $petugasList = $this->db->table('dtks_users')
-    //             ->select('id, fullname, wilayah_tugas')
-    //             ->where('kode_desa', $kodeDesa)
-    //             ->where('role_id >=', 4)
-    //             ->where('status', 1)
-    //             ->get()->getResultArray();
-
-    //         // 🚀 Jika Petugas yang login, saring agar dia HANYA melihat performanya sendiri
-    //         if ($roleId >= 4) {
-    //             $petugasList = array_filter($petugasList, function ($p) use ($userId) {
-    //                 return $p['id'] == $userId;
-    //             });
-    //         }
-
-    //         if (empty($petugasList)) {
-    //             return $this->response->setJSON(['categories' => [], 'terkunci' => [], 'belum' => []]);
-    //         }
-
-    //         // 3. AMBIL SEMUA DATA KPM BANSOS
-    //         $builder = $this->db->table('dtsen_bansos_kks b')
-    //             ->select('b.id, b.is_locked, m.rw as m_rw, m.rt as m_rt, rt.rw as rt_rw, rt.rt as rt_rt')
-    //             ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
-    //             ->join('dtsen_art a', 'a.nik = b.nik_kpm', 'left')
-    //             ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left')
-    //             ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left');
-
-    //         // 🔐 TERAPKAN TRAIT WILAYAH FILTER
-    //         $filterData = [
-    //             'kode_desa'     => $kodeDesa,
-    //             'wilayah_tugas' => trim($wilayahTugasAkun)
-    //         ];
-    //         $this->applyWilayahFilter($builder, $filterData, $roleId);
-
-    //         // 🔍 TERAPKAN FILTER DINAMIS
-    //         if (!empty($filterRw)) $builder->where('m.rw', str_pad($filterRw, 3, '0', STR_PAD_LEFT));
-    //         if (!empty($filterRt)) $builder->where('m.rt', str_pad($filterRt, 3, '0', STR_PAD_LEFT));
-    //         if (!empty($filterTahap)) $builder->where('b.tahap_salur', $filterTahap);
-    //         if ($filterLocked !== '' && $filterLocked !== null) $builder->where('b.is_locked', (int)$filterLocked);
-    //         if (!empty($filterJenis)) {
-    //             if ($filterJenis === 'PKH') $builder->whereIn('b.jenis_bansos', ['PKH', 'PKH + SEMBAKO']);
-    //             elseif ($filterJenis === 'SEMBAKO') $builder->whereIn('b.jenis_bansos', ['SEMBAKO', 'PKH + SEMBAKO']);
-    //             else $builder->where('b.jenis_bansos', $filterJenis);
-    //         }
-
-    //         // 🛡️ Optimasi: Hindari duplikat perhitungan akibat join
-    //         $allBansos = $builder->groupBy('b.id')->get()->getResultArray();
-
-    //         $categories = [];
-    //         $terkunci   = [];
-    //         $belum      = [];
-
-    //         // 4. 🚀 LOGIKA PEMETAAN KPM KE PETUGAS BERDASARKAN WILAYAH KERJA
-    //         foreach ($petugasList as $ptg) {
-    //             // 🛡️ Amankan dengan (string) casting untuk hindari error trim(null) di PHP 8
-    //             $wilayahTugas = trim((string)($ptg['wilayah_tugas'] ?? ''));
-    //             if (empty($wilayahTugas)) continue;
-
-    //             $ptgWilayah = [];
-    //             $blocks = explode('|', $wilayahTugas);
-    //             foreach ($blocks as $block) {
-    //                 $parts = explode(':', $block);
-    //                 if (!isset($parts[0]) || trim($parts[0]) === '') continue;
-
-    //                 $rwP = str_pad(trim($parts[0]), 3, '0', STR_PAD_LEFT);
-    //                 $rtClean = [];
-    //                 if (isset($parts[1]) && trim($parts[1]) !== '') {
-    //                     $rtsP = explode(',', $parts[1]);
-    //                     foreach ($rtsP as $rtP) {
-    //                         if (trim($rtP) !== '') $rtClean[] = str_pad(trim($rtP), 3, '0', STR_PAD_LEFT);
-    //                     }
-    //                 }
-    //                 $ptgWilayah[$rwP] = $rtClean;
-    //             }
-
-    //             $countTerkunci = 0;
-    //             $countBelum    = 0;
-
-    //             foreach ($allBansos as $b) {
-    //                 $rwKpm = str_pad(trim((string)($b['m_rw'] ?? $b['rt_rw'] ?? '')), 3, '0', STR_PAD_LEFT);
-    //                 $rtKpm = str_pad(trim((string)($b['m_rt'] ?? $b['rt_rt'] ?? '')), 3, '0', STR_PAD_LEFT);
-
-    //                 if (isset($ptgWilayah[$rwKpm])) {
-    //                     if (empty($ptgWilayah[$rwKpm]) || in_array($rtKpm, $ptgWilayah[$rwKpm])) {
-    //                         if ($b['is_locked'] == 1) {
-    //                             $countTerkunci++;
-    //                         } else {
-    //                             $countBelum++;
-    //                         }
-    //                     }
-    //                 }
-    //             }
-
-    //             if ($countTerkunci > 0 || $countBelum > 0) {
-    //                 $categories[] = ucwords(strtolower($ptg['fullname']));
-    //                 $terkunci[]   = $countTerkunci;
-    //                 $belum[]      = $countBelum;
-    //             }
-    //         }
-
-    //         return $this->response->setJSON([
-    //             'categories' => array_values($categories),
-    //             'terkunci'   => array_values($terkunci),
-    //             'belum'      => array_values($belum)
-    //         ]);
-    //     } catch (\Throwable $e) {
-    //         // 🚀 Jika terjadi error apapun, kembalikan JSON bersih agar halaman tidak macet
-    //         return $this->response->setJSON([
-    //             'categories' => [],
-    //             'terkunci'   => [],
-    //             'belum'      => []
-    //         ]);
-    //     }
-    // }
-    // ========================================================
-    // 📊 GET DATA DIAGRAM KINERJA PETUGAS (AJAX + FILTER + MAPPING)
-    // ========================================================
     public function chartData()
     {
         try {
@@ -1339,6 +1224,7 @@ class BansosKKS extends BaseController
             $kodeDesa = session()->get('kode_desa') ?? '';
             $wilayahTugasAkun = session()->get('wilayah_tugas') ?? '';
 
+            $filterPetugas = $this->request->getPost('filter_petugas');
             $filterRw     = $this->request->getPost('filter_rw');
             $filterRt     = $this->request->getPost('filter_rt');
             $filterTahap  = $this->request->getPost('filter_tahap');
@@ -1356,10 +1242,11 @@ class BansosKKS extends BaseController
                 $petugasList = array_filter($petugasList, function ($p) use ($userId) {
                     return $p['id'] == $userId;
                 });
-            }
-
-            if (empty($petugasList)) {
-                return $this->response->setJSON(['categories' => [], 'tervalidasi' => [], 'menunggu' => [], 'pr' => []]);
+            } elseif (!empty($filterPetugas)) {
+                // 🚀 Jika Admin memfilter 1 Petugas, Diagram HANYA akan me-render 1 tiang Petugas tsb
+                $petugasList = array_filter($petugasList, function ($p) use ($filterPetugas) {
+                    return $p['id'] == $filterPetugas;
+                });
             }
 
             // 🚀 PERBAIKAN: Masukkan b.status_kelengkapan dalam SELECT
