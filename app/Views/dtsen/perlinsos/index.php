@@ -615,16 +615,16 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                             return (alamat + rt + rw) || '-';
                         }
                     },
-                    {
-                        data: 'created_at',
-                        // className: 'text-center',
-                        render: d => d ? d.substring(0, 16) : '-'
-                    },
-
+                    // 🚀 PERBAIKAN: Pindahkan kolom Petugas ke atas Waktu Rekap
                     ...(roleId <= 3 ? [{
                         data: 'petugas',
-                        className: 'text-start'
+                        className: 'text-start text-capitalize'
                     }] : []),
+                    // 🚀 Waktu Rekap digeser ke bawahnya
+                    {
+                        data: 'created_at',
+                        render: d => d ? d.substring(0, 16) : '-'
+                    },
                     {
                         data: 'id',
                         orderable: false,
