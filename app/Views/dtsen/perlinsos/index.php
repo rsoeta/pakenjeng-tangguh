@@ -386,6 +386,12 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                     dataSrc: 'data'
                 },
                 responsive: true,
+                autoWidth: false, // 🚀 FIX 1: Matikan autoWidth agar tidak kacau di tab tersembunyi
+                columnDefs: [{
+                        targets: '_all',
+                        defaultContent: '-'
+                    } // 🚀 FIX 2: Sabuk pengaman mutlak untuk data kosong
+                ],
                 columns: [{
                         data: null,
                         render: (d, t, r, m) => m.row + 1,
@@ -432,6 +438,14 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
                 }
+            });
+
+            // 🚀 FIX 3: Kalkulasi ulang lebar DataTables saat Tab diklik (Wajib untuk Mobile)
+            $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+                $.fn.dataTable.tables({
+                    visible: true,
+                    api: true
+                }).columns.adjust().responsive.recalc();
             });
 
             $('#btnReloadAkses').click(() => tableAkses.ajax.reload());
@@ -495,7 +509,6 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                 });
             });
         }
-
 
         // ==========================================================
         // 📊 JS MODAL UTAMA (JIKA APPROVED / ADMIN)
