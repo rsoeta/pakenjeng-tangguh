@@ -160,6 +160,20 @@ $routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview
 	$routes->post('add-historical-desil', 'Dtsen\PembaruanKeluarga::addHistoricalDesil');
 });
 
+// ASSESSMENT (LAPAD RUHAMA / SLRT GARUT)
+$routes->group('assessment', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
+	$routes->get('/', 'Assessment::index');
+	$routes->post('datatable', 'Assessment::datatable');
+	$routes->get('tambah', 'Assessment::tambah');
+	$routes->get('search-kk', 'Assessment::searchKk');
+	$routes->get('get-kk-detail/(:num)', 'Assessment::getKkDetail/$1');
+	$routes->post('simpan', 'Assessment::simpan');
+	$routes->get('detail/(:num)', 'Assessment::detail/$1');
+	$routes->get('cetak/(:num)', 'Assessment::cetak/$1');
+	$routes->get('export-word/(:num)', 'Assessment::exportWord/$1');
+	$routes->post('hapus/(:num)', 'Assessment::hapus/$1');
+});
+
 // USULAN BANSOS
 $routes->group('usulan-bansos', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
 	$routes->get('/', 'Dtsen\UsulanBansos::index');

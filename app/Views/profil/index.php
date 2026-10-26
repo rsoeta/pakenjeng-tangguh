@@ -252,6 +252,7 @@
                                     <div class="tab-pane fade" id="custom-tabs-three-profile" role="tabpanel" aria-labelledby="custom-tabs-three-profile-tab">
                                         <div class="col-12 col-md-4 col-lg-4 col-4">
                                             <form id="lembaga_form" method="POST" enctype="multipart/form-data">
+                                                <?= csrf_field(); ?>
 
                                                 <?= form_input(['type' => 'hidden', 'name' => 'lp_id', 'class' => 'form-control', 'id' => 'lp_id', 'value' => isset($user_login['lp_id']) ? set_value('lp_id', $user_login['lp_id']) : '']); ?>
                                                 <!-- /.card-header -->
@@ -400,6 +401,8 @@
             // });
             event.preventDefault();
             var form_data = new FormData($('#lembaga_form')[0]);
+            form_data.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+            form_data.append('user_lembaga_id', $('#user_lembaga_id').val());
             var id_user = $('#id_user').val();
             var user_lembaga_id = $('#user_lembaga_id').val();
             var lp_kepala = $('#lp_kepala').val();
@@ -439,6 +442,8 @@
             // });
             event.preventDefault();
             var form_data = new FormData($('#lembaga_form')[0]);
+            form_data.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+            form_data.append('user_lembaga_id', $('#user_lembaga_id').val());
             var id_user = $('#id_user').val();
             var user_lembaga_id = $('#user_lembaga_id').val();
             var lp_kepala = $('#lp_kepala').val();

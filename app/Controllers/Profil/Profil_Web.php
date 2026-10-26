@@ -142,6 +142,12 @@ class Profil_Web extends BaseController
             $user_lembaga_id = $this->request->getPost('user_lembaga_id');
             $lp_kepala = $this->request->getPost('lp_kepala');
             $lp_nip = $this->request->getPost('lp_nip');
+            $lp_puskesos_ketua = $this->request->getPost('lp_puskesos_ketua');
+            $lp_puskesos_hp = $this->request->getPost('lp_puskesos_hp');
+            $lp_supervisor_slrt = $this->request->getPost('lp_supervisor_slrt');
+            $lp_supervisor_niat = $this->request->getPost('lp_supervisor_niat');
+            $lp_camat = $this->request->getPost('lp_camat');
+            $lp_camat_nip = $this->request->getPost('lp_camat_nip');
             $lp_sekretariat = $this->request->getPost('lp_sekretariat');
             $lp_kode_pos = $this->request->getPost('lp_kode_pos');
             $lp_email = $this->request->getPost('lp_email');
@@ -149,20 +155,26 @@ class Profil_Web extends BaseController
         }
 
         $lembagaData = [
-            'lp_kategori' => $user_lembaga_id,
-            'lp_kepala' => $lp_kepala,
-            'lp_nip' => $lp_nip,
-            'lp_sekretariat' => $lp_sekretariat,
-            'lp_kode_pos' => $lp_kode_pos,
-            'lp_email' => $lp_email,
-            'lp_user' => $id_user,
+            'lp_kategori'        => $user_lembaga_id,
+            'lp_kepala'          => $lp_kepala,
+            'lp_nip'             => $lp_nip,
+            'lp_puskesos_ketua'  => $lp_puskesos_ketua,
+            'lp_puskesos_hp'     => $lp_puskesos_hp,
+            'lp_supervisor_slrt' => $lp_supervisor_slrt,
+            'lp_supervisor_niat' => $lp_supervisor_niat,
+            'lp_camat'           => $lp_camat,
+            'lp_camat_nip'       => $lp_camat_nip,
+            'lp_sekretariat'     => $lp_sekretariat,
+            'lp_kode_pos'        => $lp_kode_pos,
+            'lp_email'           => $lp_email,
+            'lp_user'            => $id_user,
             // 'user_image' => $nama_gambar,
         ];
         // var_dump($lembagaData);
 
 
         $data = $this->LembagaModel->submitlembagaData($lembagaData);
-        echo json_encode($data);
+        return $this->response->setJSON($data);
     }
 
     public function update_lembaga()
@@ -172,6 +184,12 @@ class Profil_Web extends BaseController
             $user_lembaga_id = $this->request->getPost('user_lembaga_id');
             $lp_kepala = $this->request->getPost('lp_kepala');
             $lp_nip = $this->request->getPost('lp_nip');
+            $lp_puskesos_ketua = $this->request->getPost('lp_puskesos_ketua');
+            $lp_puskesos_hp = $this->request->getPost('lp_puskesos_hp');
+            $lp_supervisor_slrt = $this->request->getPost('lp_supervisor_slrt');
+            $lp_supervisor_niat = $this->request->getPost('lp_supervisor_niat');
+            $lp_camat = $this->request->getPost('lp_camat');
+            $lp_camat_nip = $this->request->getPost('lp_camat_nip');
             $lp_sekretariat = $this->request->getPost('lp_sekretariat');
             $lp_kode_pos = $this->request->getPost('lp_kode_pos');
             $lp_email = $this->request->getPost('lp_email');
@@ -179,21 +197,27 @@ class Profil_Web extends BaseController
         }
 
         $lembagaData = [
-            'lp_id' => $lp_id,
-            'lp_kategori' => $user_lembaga_id,
-            'lp_kepala' => $lp_kepala,
-            'lp_nip' => $lp_nip,
-            'lp_sekretariat' => $lp_sekretariat,
-            'lp_kode_pos' => $lp_kode_pos,
-            'lp_email' => $lp_email,
-            'lp_user' => $id_user
+            'lp_id'              => $lp_id,
+            'lp_kategori'        => $user_lembaga_id,
+            'lp_kepala'          => $lp_kepala,
+            'lp_nip'             => $lp_nip,
+            'lp_puskesos_ketua'  => $lp_puskesos_ketua,
+            'lp_puskesos_hp'     => $lp_puskesos_hp,
+            'lp_supervisor_slrt' => $lp_supervisor_slrt,
+            'lp_supervisor_niat' => $lp_supervisor_niat,
+            'lp_camat'           => $lp_camat,
+            'lp_camat_nip'       => $lp_camat_nip,
+            'lp_sekretariat'     => $lp_sekretariat,
+            'lp_kode_pos'        => $lp_kode_pos,
+            'lp_email'           => $lp_email,
+            'lp_user'            => $id_user
             // 'user_image' => $nama_gambar,
         ];
         // var_dump($lembagaData);
 
 
         $data = $this->LembagaModel->updatelembagaData($lp_id, $lembagaData);
-        echo json_encode($data);
+        return $this->response->setJSON($data);
     }
 
     public function submit_general()

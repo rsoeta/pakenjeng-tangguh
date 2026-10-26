@@ -45,6 +45,8 @@ yarn-error.log*
 # PUBLIC FOLDER
 # ----------------------------------------------------------------------
 /public/uploads/*
+!/public/uploads/templates/
+!/public/uploads/templates/**
 /public/assets/tmp/*
 /public/data/*
 !/public/index.php
@@ -96,3 +98,6 @@ phpunit.xml.dist
 /public_old/
 /app_old/
 /env_old
+
+# Temporary Office lock files
+~$*

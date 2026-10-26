@@ -194,6 +194,7 @@
                                 <div class="tab-pane fade" id="custom-tabs-three-profile" role="tabpanel" aria-labelledby="custom-tabs-three-profile-tab" <?= $user_login['role_id'] > 3 ? 'hidden' : ''; ?>>
                                     <div class="col-12 col-md-4 col-lg-4 col-4">
                                         <form id="lembaga_form" method="POST" enctype="multipart/form-data">
+                                            <?= csrf_field(); ?>
 
                                             <?= form_input(['type' => 'hidden', 'name' => 'lp_id', 'class' => 'form-control', 'id' => 'lp_id', 'value' => isset($user_login['lp_id']) ? set_value('lp_id', $user_login['lp_id']) : '']); ?>
 
@@ -215,6 +216,37 @@
 
                                             <strong><i class="fas fa-address-book mr-1"></i> NIP</strong>
                                             <?= form_input(['name' => 'lp_nip', 'class' => 'form-control', 'id' => 'lp_nip', 'value' => isset($user_login['lp_nip']) ? set_value('lp_nip', $user_login['lp_nip']) : '']); ?>
+                                            <hr>
+
+                                            <div class="bg-light p-3 rounded mb-3 border">
+                                                <h6 class="text-primary font-weight-bold mb-3"><i class="fas fa-hands-helping mr-1"></i> Pejabat Penandatangan SLRT / LAPAD RUHAMA</h6>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label class="small font-weight-bold">Ketua Puskesos Desa</label>
+                                                        <?= form_input(['name' => 'lp_puskesos_ketua', 'class' => 'form-control form-control-sm mb-2', 'id' => 'lp_puskesos_ketua', 'placeholder' => 'Nama Ketua Puskesos', 'value' => isset($user_login['lp_puskesos_ketua']) ? set_value('lp_puskesos_ketua', $user_login['lp_puskesos_ketua']) : '']); ?>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="small font-weight-bold">No. HP Ketua Puskesos</label>
+                                                        <?= form_input(['name' => 'lp_puskesos_hp', 'class' => 'form-control form-control-sm mb-2', 'id' => 'lp_puskesos_hp', 'placeholder' => '08xxxxxxxxxx', 'value' => isset($user_login['lp_puskesos_hp']) ? set_value('lp_puskesos_hp', $user_login['lp_puskesos_hp']) : '']); ?>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="small font-weight-bold">Supervisor SLRT Kecamatan</label>
+                                                        <?= form_input(['name' => 'lp_supervisor_slrt', 'class' => 'form-control form-control-sm mb-2', 'id' => 'lp_supervisor_slrt', 'placeholder' => 'Nama Supervisor SLRT', 'value' => isset($user_login['lp_supervisor_slrt']) ? set_value('lp_supervisor_slrt', $user_login['lp_supervisor_slrt']) : '']); ?>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="small font-weight-bold">NIAT Supervisor SLRT</label>
+                                                        <?= form_input(['name' => 'lp_supervisor_niat', 'class' => 'form-control form-control-sm mb-2', 'id' => 'lp_supervisor_niat', 'placeholder' => 'Contoh: NIAT. 32.05.33-0183', 'value' => isset($user_login['lp_supervisor_niat']) ? set_value('lp_supervisor_niat', $user_login['lp_supervisor_niat']) : '']); ?>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="small font-weight-bold">Nama Camat</label>
+                                                        <?= form_input(['name' => 'lp_camat', 'class' => 'form-control form-control-sm mb-2', 'id' => 'lp_camat', 'placeholder' => 'Contoh: Camat Pakenjeng', 'value' => isset($user_login['lp_camat']) ? set_value('lp_camat', $user_login['lp_camat']) : '']); ?>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="small font-weight-bold">NIP Camat (Opsional)</label>
+                                                        <?= form_input(['name' => 'lp_camat_nip', 'class' => 'form-control form-control-sm mb-2', 'id' => 'lp_camat_nip', 'placeholder' => 'NIP Camat', 'value' => isset($user_login['lp_camat_nip']) ? set_value('lp_camat_nip', $user_login['lp_camat_nip']) : '']); ?>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <hr>
 
                                             <strong><i class="fas fa-map-marker-alt mr-1"></i> Sekretariat</strong>
@@ -450,10 +482,13 @@
         });
 
         $("#lembagaSubmit").click(function(event) {
-            //     alert('test');
-            // });
             event.preventDefault();
             var form_data = new FormData($('#lembaga_form')[0]);
+
+            // 🛡️ Suntikkan CSRF Token & Lembaga ID
+            form_data.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+            form_data.append('user_lembaga_id', $('#user_lembaga_id').val());
+
             var id_user = $('#id_user').val();
             var user_lembaga_id = $('#user_lembaga_id').val();
             var lp_kepala = $('#lp_kepala').val();
@@ -462,6 +497,10 @@
             var lp_email = $('#lp_email').val();
 
             if (user_lembaga_id != '' || lp_kepala != '' || lp_sekretariat != '' || lp_kode_pos != '') {
+                var btn = $(this);
+                var originalText = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Menyimpan...');
+
                 $.ajax({
                     type: "POST",
                     url: '<?= site_url('submit_web_lembaga'); ?>',
@@ -470,18 +509,21 @@
                     processData: false,
                     contentType: false,
                     success: function(res) {
-                        // alert(res);
                         if (res) {
                             $("#lembagaMsg").show();
-                            $("#lembagaMsg").html('Data berhasil diupdate.');
-                            setTimeout(function() {
-                                $("#lembagaMsg").hide();
-                            }, 2000);
+                            $("#lembagaMsg").html('Data berhasil disimpan.');
                             setTimeout(function() {
                                 location.reload();
-                            }, 2010);
-                            // alert (res)
+                            }, 1500);
+                        } else {
+                            btn.prop('disabled', false).html(originalText);
+                            alert('Gagal menyimpan data.');
                         }
+                    },
+                    error: function(xhr, status, error) {
+                        btn.prop('disabled', false).html(originalText);
+                        console.error("Error Response: ", xhr.responseText);
+                        alert("Terjadi kesalahan saat submit lembaga (Status: " + xhr.status + ").");
                     }
                 });
             } else {
@@ -490,10 +532,13 @@
         });
 
         $("#lembagaUpdate").click(function(event) {
-            //     alert('test');
-            // });
             event.preventDefault();
             var form_data = new FormData($('#lembaga_form')[0]);
+
+            // 🛡️ Suntikkan CSRF Token & Lembaga ID (Solusi 403 Forbidden)
+            form_data.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+            form_data.append('user_lembaga_id', $('#user_lembaga_id').val());
+
             var id_user = $('#id_user').val();
             var user_lembaga_id = $('#user_lembaga_id').val();
             var lp_kepala = $('#lp_kepala').val();
@@ -502,6 +547,10 @@
             var lp_email = $('#lp_email').val();
 
             if (user_lembaga_id != '' || lp_kepala != '' || lp_sekretariat != '' || lp_kode_pos != '') {
+                var btn = $(this);
+                var originalText = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Mengupdate...');
+
                 $.ajax({
                     type: "POST",
                     url: '<?= site_url('update_web_lembaga'); ?>',
@@ -510,58 +559,21 @@
                     processData: false,
                     contentType: false,
                     success: function(res) {
-                        // alert(res);
                         if (res) {
                             $("#lembagaMsg").show();
                             $("#lembagaMsg").html('Data berhasil diupdate.');
                             setTimeout(function() {
-                                $("#lembagaMsg").hide();
-                            }, 2000);
-                            setTimeout(function() {
                                 location.reload();
-                            }, 2010);
-                            // alert (res)
+                            }, 1500);
+                        } else {
+                            btn.prop('disabled', false).html(originalText);
+                            alert('Gagal mengupdate data.');
                         }
-                    }
-                });
-            } else {
-                alert('Isi Profil dengan lengkap!');
-            }
-        });
-
-        $("#lembagaSubmit").click(function(event) {
-            //     alert('test');
-            // });
-            event.preventDefault();
-            var form_data = new FormData($('#lembaga_form')[0]);
-            var id_user = $('#id_user').val();
-            var user_lembaga_id = $('#user_lembaga_id').val();
-            var lp_kepala = $('#lp_kepala').val();
-            var lp_sekretariat = $('#lp_sekretariat').val();
-            var lp_kode_pos = $('#lp_kode_pos').val();
-            var lp_email = $('#lp_email').val();
-
-            if (user_lembaga_id != '' || lp_kepala != '' || lp_sekretariat != '' || lp_kode_pos != '') {
-                $.ajax({
-                    type: "POST",
-                    url: '<?= site_url('submit_web_lembaga'); ?>',
-                    dataType: 'json',
-                    data: form_data,
-                    processData: false,
-                    contentType: false,
-                    success: function(res) {
-                        // alert(res);
-                        if (res) {
-                            $("#lembagaMsg").show();
-                            $("#lembagaMsg").html('Data berhasil diupdate.');
-                            setTimeout(function() {
-                                $("#lembagaMsg").hide();
-                            }, 2000);
-                            setTimeout(function() {
-                                location.reload();
-                            }, 2010);
-                            // alert (res)
-                        }
+                    },
+                    error: function(xhr, status, error) {
+                        btn.prop('disabled', false).html(originalText);
+                        console.error("Error Response: ", xhr.responseText);
+                        alert("Terjadi kesalahan saat update lembaga (Status: " + xhr.status + ").");
                     }
                 });
             } else {
