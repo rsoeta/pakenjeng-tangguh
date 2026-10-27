@@ -64,13 +64,27 @@
                 dataType: 'json',
                 dataSrc: json => json.data || []
             },
+            order: [], // 🚀 Jangan paksa sort di kolom No
+            // 🚀 KUNCI NOMOR URUT AGAR TIDAK TERPENGARUH SORTING KOLOM LAIN
+            drawCallback: function(settings) {
+                var api = this.api();
+                var info = api.page.info();
+                api.column(1, { search: 'applied', order: 'applied' }).nodes().each(function(cell, i) {
+                    cell.innerHTML = info.start + i + 1;
+                });
+            },
             columns: [{
                     data: null,
-                    defaultContent: ''
+                    defaultContent: '',
+                    className: 'control text-center',
+                    orderable: false
                 },
                 {
                     data: null,
-                    render: (d, t, r, m) => m.row + 1
+                    defaultContent: '',
+                    className: 'text-center',
+                    orderable: false,
+                    searchable: false
                 },
                 {
                     data: 'nama_kepala',

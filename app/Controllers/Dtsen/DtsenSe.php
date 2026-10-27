@@ -20,17 +20,39 @@ class DtsenSe extends Controller
     protected $kkModel;
     protected $rtModel;
     protected $genModel;
+    protected $db;
 
     public function __construct()
     {
         $this->kkModel = new DtsenKkModel();
         $this->rtModel = new DtsenRtModel();
         $this->genModel = new GenModel();
+        $this->db = \Config\Database::connect();
     }
 
     // ========================================================
     // 🛠️ FUNGSI BANTUAN (HELPER) UNTUK VIEW
     // ========================================================
+
+    /**
+     * Menghitung bobot tahap salur untuk menentukan tahap terakhir secara akurat
+     */
+    private function getTahapScore(?string $tahapStr): int
+    {
+        if (empty($tahapStr)) {
+            return 0;
+        }
+
+        if (preg_match('/Tahap\s*(\d+)\s*Tahun\s*(\d+)/i', $tahapStr, $m)) {
+            return ((int) $m[2] * 10) + (int) $m[1];
+        }
+
+        if (preg_match('/(\d{4})/', $tahapStr, $m)) {
+            return (int) $m[1] * 10;
+        }
+
+        return 0;
+    }
 
     // Mengecek apakah fitur pemulihan sedang diaktifkan di tb_menu
     private function checkMenuPemulihan()
@@ -155,12 +177,93 @@ class DtsenSe extends Controller
             // 5️⃣ AMBIL DATA
             $dataKeluarga = $this->kkModel->getFilteredData($filter);
 
-            // 6️⃣ TAMBAHKAN FLAG AKSES
+            // 6️⃣ AMBIL MAPPING BANSOS AKTIF TAHAP TERAKHIR DARI DOKUMENTASI BANSOS (dtsen_bansos_kks)
+            $bansosMap = [];
+            $idKkList  = array_column($dataKeluarga, 'id_kk');
+
+            if (!empty($idKkList)) {
+                $chunks = array_chunk($idKkList, 1000);
+                foreach ($chunks as $chunk) {
+                    $bansosQuery = $this->db->table('dtsen_bansos_kks b')
+                        ->select('a.id_kk, b.jenis_bansos, b.tahap_salur, b.status_salur')
+                        ->join('dtsen_art a', 'a.nik = b.nik_kpm AND a.deleted_at IS NULL', 'inner')
+                        ->whereIn('a.id_kk', $chunk)
+                        ->groupStart()
+                            ->where('b.status_salur IS NULL')
+                            ->orWhere('b.status_salur', '')
+                            ->orGroupStart()
+                                ->notLike('b.status_salur', 'Tidak Transaksi', 'after')
+                                ->notLike('b.status_salur', 'Gagal', 'after')
+                            ->groupEnd()
+                        ->groupEnd()
+                        ->get()->getResultArray();
+
+                    foreach ($bansosQuery as $bq) {
+                        $kk = $bq['id_kk'];
+                        $score = $this->getTahapScore($bq['tahap_salur']);
+                        if (!isset($bansosMap[$kk])) {
+                            $bansosMap[$kk] = [
+                                'score' => $score,
+                                'tahap' => $bq['tahap_salur'],
+                                'jenis' => [$bq['jenis_bansos']]
+                            ];
+                        } else {
+                            if ($score > $bansosMap[$kk]['score']) {
+                                $bansosMap[$kk] = [
+                                    'score' => $score,
+                                    'tahap' => $bq['tahap_salur'],
+                                    'jenis' => [$bq['jenis_bansos']]
+                                ];
+                            } elseif ($score === $bansosMap[$kk]['score']) {
+                                $bansosMap[$kk]['jenis'][] = $bq['jenis_bansos'];
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 6.5️⃣ AMBIL DATA STATUS PERLINSOS (dtsen_perlinsos)
+            $perlinsosMap = [];
+            if (!empty($idKkList)) {
+                $chunks = array_chunk($idKkList, 1000);
+                foreach ($chunks as $chunk) {
+                    $perlinsosRows = $this->db->table('dtsen_perlinsos')
+                        ->select('id_kk, status')
+                        ->whereIn('id_kk', $chunk)
+                        ->get()->getResultArray();
+
+                    foreach ($perlinsosRows as $pr) {
+                        $perlinsosMap[$pr['id_kk']] = $pr['status'] ?? 'draft';
+                    }
+                }
+            }
+
+            // 7️⃣ TAMBAHKAN FLAG AKSES, DATA BANSOS & PERLINSOS
             $canInputDesil = ($roleId <= 3);
 
             foreach ($dataKeluarga as &$row) {
                 $row['can_input_desil'] = $canInputDesil;
+
+                // Status Perlinsos
+                $row['perlinsos_status'] = $perlinsosMap[$row['id_kk']] ?? null;
+
+                // Status Bansos Aktif Tahap Terakhir
+                if (isset($bansosMap[$row['id_kk']])) {
+                    $jenisList = array_unique($bansosMap[$row['id_kk']]['jenis']);
+                    if (in_array('PKH', $jenisList) && in_array('SEMBAKO', $jenisList)) {
+                        $row['bansos'] = 'PKH + SEMBAKO';
+                    } elseif (in_array('PKH + SEMBAKO', $jenisList)) {
+                        $row['bansos'] = 'PKH + SEMBAKO';
+                    } else {
+                        $row['bansos'] = implode(', ', $jenisList);
+                    }
+                    $row['bansos_tahap'] = $bansosMap[$row['id_kk']]['tahap'];
+                } else {
+                    $row['bansos'] = '-';
+                    $row['bansos_tahap'] = null;
+                }
             }
+            unset($row);
 
             // Kembalikan parameter draw (jika dikirim oleh DataTables)
             $draw = $this->request->getVar('draw');

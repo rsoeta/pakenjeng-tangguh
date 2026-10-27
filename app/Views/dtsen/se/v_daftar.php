@@ -113,6 +113,7 @@
                                 <th>Wilayah</th>
                                 <th>Status</th> <!-- 🆕 -->
                                 <th>Desil</th>
+                                <th>Bansos</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -193,9 +194,19 @@
             responsive: true,
             pageLength: 10,
             autoWidth: false,
+            order: [], // 🚀 Jangan paksa sort di kolom No
 
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
+            },
+
+            // 🚀 KUNCI NOMOR URUT AGAR TIDAK TERPENGARUH SORTING KOLOM LAIN
+            drawCallback: function(settings) {
+                var api = this.api();
+                var info = api.page.info();
+                api.column(1, { search: 'applied', order: 'applied' }).nodes().each(function(cell, i) {
+                    cell.innerHTML = info.start + i + 1;
+                });
             },
 
             columns: [
@@ -210,8 +221,10 @@
                 // 🔹 No
                 {
                     data: null,
-                    render: (d, t, r, m) => m.row + 1,
-                    className: 'text-center'
+                    defaultContent: '',
+                    className: 'text-center',
+                    orderable: false,
+                    searchable: false
                 },
 
                 // 🔹 Kepala Keluarga
@@ -273,26 +286,54 @@
                 // 🔹 Status
                 {
                     data: 'usulan_status',
-                    className: 'text-start',
+                    className: 'text-start text-nowrap',
                     render: function(status, type, row) {
 
-                        if (!status || status === 'none') {
-                            return `<span class="badge bg-secondary">Belum Ada Pembaruan</span>`;
-                        }
+                        // 1. Status Pembaruan
+                        let pembaruanBadge = '<span class="badge bg-secondary">Belum Ada Pembaruan</span>';
+                        let pembaruanText = 'Belum Ada Pembaruan';
 
-                        // 🚀 SMART BADGE: Gabungkan Draft & Submitted, biarkan kelengkapan data yang menentukan nasibnya!
                         if (status === 'draft' || status === 'submitted') {
                             if (row.is_submitted_ready == 1) {
-                                return `<span class="badge bg-info text-dark">Submitted</span>`;
+                                pembaruanBadge = '<span class="badge bg-info text-dark">Submitted</span>';
+                                pembaruanText = 'Submitted';
+                            } else {
+                                pembaruanBadge = '<span class="badge bg-warning text-dark">Draft</span>';
+                                pembaruanText = 'Draft';
                             }
-                            return `<span class="badge bg-warning text-dark">Draft</span>`;
+                        } else if (status === 'verified' || status === 'diverifikasi') {
+                            pembaruanBadge = '<span class="badge bg-primary">Verified</span>';
+                            pembaruanText = 'Verified';
                         }
 
-                        if (status === 'verified' || status === 'diverifikasi') {
-                            return `<span class="badge bg-primary">Verified</span>`;
+                        // 2. Status Perlinsos
+                        let perlinsosBadge = '<span class="text-muted fw-bold">-</span>';
+                        let perlinsosText = '-';
+
+                        if (row.perlinsos_status) {
+                            if (row.perlinsos_status === 'tersinkron') {
+                                perlinsosBadge = '<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Terverifikasi</span>';
+                                perlinsosText = 'Terverifikasi';
+                            } else {
+                                perlinsosBadge = '<span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Belum Verifikasi</span>';
+                                perlinsosText = 'Belum Verifikasi';
+                            }
                         }
 
-                        return `<span class="badge bg-secondary">Belum Ada Pembaruan</span>`;
+                        if (type === 'filter' || type === 'sort') {
+                            return 'Pembaruan: ' + pembaruanText + ' Perlinsos: ' + perlinsosText;
+                        }
+
+                        return `
+                            <div class="d-flex flex-column" style="gap: 3px;">
+                                <div>
+                                    <span class="small text-muted fw-bold me-1">Pembaruan:</span>${pembaruanBadge}
+                                </div>
+                                <div>
+                                    <span class="small text-muted fw-bold me-1">Perlinsos:</span>${perlinsosBadge}
+                                </div>
+                            </div>
+                        `;
                     }
                 },
 
@@ -314,6 +355,38 @@
                         else if (n <= 5) warna = 'warning';
 
                         return `<span class="badge bg-${warna}">${n}</span>`;
+                    }
+                },
+
+                // 🔹 Bansos (Dokumentasi Bansos Tahap Terakhir)
+                {
+                    data: 'bansos',
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        if (!data || data === '-' || data === '') {
+                            return '<span class="text-muted">-</span>';
+                        }
+
+                        if (type === 'filter') {
+                            return data + (row.bansos_tahap ? ' ' + row.bansos_tahap : '');
+                        }
+
+                        if (type === 'sort') {
+                            return data;
+                        }
+
+                        let tahapTooltip = row.bansos_tahap ? ` title="${row.bansos_tahap}"` : '';
+                        let badgeClass = 'bg-primary';
+
+                        if (data === 'PKH') {
+                            badgeClass = 'bg-success';
+                        } else if (data === 'SEMBAKO') {
+                            badgeClass = 'bg-info text-dark';
+                        } else if (data.indexOf('+') !== -1 || data.indexOf(',') !== -1) {
+                            badgeClass = 'bg-primary';
+                        }
+
+                        return `<span class="badge ${badgeClass} shadow-sm"${tahapTooltip}>${data}</span>`;
                     }
                 },
 
