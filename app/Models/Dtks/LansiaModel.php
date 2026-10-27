@@ -32,32 +32,97 @@ class LansiaModel extends Model
 
 	var $order = ['art.nama' => 'asc'];
 
+	public function __construct()
+	{
+		parent::__construct();
+		$this->ensureLansiaTable();
+	}
+
+	/**
+	 * Pastikan tabel dtsen_lansia otomatis dibuat jika belum ada di database hosting
+	 */
+	public function ensureLansiaTable(): void
+	{
+		try {
+			$this->db->query("
+				CREATE TABLE IF NOT EXISTS `dtsen_lansia` (
+					`id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+					`id_art` INT UNSIGNED NOT NULL,
+					`kategori` ENUM('Lansia', 'Jompo') NOT NULL DEFAULT 'Lansia',
+					`keterangan` VARCHAR(255) NULL,
+					`created_by` VARCHAR(100) NULL,
+					`updated_by` VARCHAR(100) NULL,
+					`created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+					`updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+					UNIQUE KEY `uk_id_art` (`id_art`),
+					INDEX `idx_kategori` (`kategori`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+			");
+		} catch (\Throwable $e) {
+			log_message('warning', 'ensureLansiaTable warning: ' . $e->getMessage());
+		}
+	}
+
 	private function _get_datatables_query(array $filter, int $roleId = 1)
 	{
+		$hasLansiaTable       = $this->db->tableExists('dtsen_lansia');
+		$hasKeadaanRumahTable = $this->db->tableExists('dtsen_keadaan_rumah');
+		$hasPendidikanTable   = $this->db->tableExists('pendidikan_kk');
+
 		$builder = $this->db->table('dtsen_art art');
-		$builder->select("
-			art.id_art,
-			art.id_kk,
-			art.nama,
-			art.nik,
-			art.jenis_kelamin,
-			art.tanggal_lahir,
-			TIMESTAMPDIFF(YEAR, art.tanggal_lahir, CURDATE()) AS usia,
-			COALESCE(pk.pk_nama, art.pendidikan_terakhir, '-') AS pendidikan,
-			COALESCE(NULLIF(rt.alamat, ''), NULLIF(kk.alamat, ''), '-') AS alamat,
-			COALESCE(NULLIF(rt.rt, ''), '000') AS rt,
-			COALESCE(NULLIF(rt.rw, ''), '000') AS rw,
-			rt.kode_desa,
-			COALESCE(NULLIF(kr.kategori_rumah, ''), '-') AS kategori_rumah,
-			COALESCE(NULLIF(kr.status_kepemilikan, ''), NULLIF(rt.kepemilikan_rumah, ''), '-') AS status_kepemilikan,
-			COALESCE(ls.kategori, 'Lansia') AS kategori_lansia,
-			ls.keterangan AS keterangan_lansia
-		");
+
+		$selectFields = [
+			'art.id_art',
+			'art.id_kk',
+			'art.nama',
+			'art.nik',
+			'art.jenis_kelamin',
+			'art.tanggal_lahir',
+			'TIMESTAMPDIFF(YEAR, art.tanggal_lahir, CURDATE()) AS usia',
+			'COALESCE(NULLIF(rt.alamat, \'\'), NULLIF(kk.alamat, \'\'), \'-\') AS alamat',
+			'COALESCE(NULLIF(rt.rt, \'\'), \'000\') AS rt',
+			'COALESCE(NULLIF(rt.rw, \'\'), \'000\') AS rw',
+			'rt.kode_desa',
+		];
+
+		if ($hasPendidikanTable) {
+			$selectFields[] = "COALESCE(pk.pk_nama, art.pendidikan_terakhir, '-') AS pendidikan";
+		} else {
+			$selectFields[] = "COALESCE(art.pendidikan_terakhir, '-') AS pendidikan";
+		}
+
+		if ($hasKeadaanRumahTable) {
+			$selectFields[] = "COALESCE(NULLIF(kr.kategori_rumah, ''), '-') AS kategori_rumah";
+			$selectFields[] = "COALESCE(NULLIF(kr.status_kepemilikan, ''), NULLIF(rt.kepemilikan_rumah, ''), '-') AS status_kepemilikan";
+		} else {
+			$selectFields[] = "'-' AS kategori_rumah";
+			$selectFields[] = "COALESCE(NULLIF(rt.kepemilikan_rumah, ''), '-') AS status_kepemilikan";
+		}
+
+		if ($hasLansiaTable) {
+			$selectFields[] = "COALESCE(ls.kategori, 'Lansia') AS kategori_lansia";
+			$selectFields[] = "ls.keterangan AS keterangan_lansia";
+		} else {
+			$selectFields[] = "'Lansia' AS kategori_lansia";
+			$selectFields[] = "NULL AS keterangan_lansia";
+		}
+
+		$builder->select(implode(",\n\t\t\t", $selectFields));
+
 		$builder->join('dtsen_kk kk', 'kk.id_kk = art.id_kk');
 		$builder->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left');
-		$builder->join('dtsen_keadaan_rumah kr', 'kr.id_kk = kk.id_kk', 'left');
-		$builder->join('pendidikan_kk pk', 'pk.pk_id = art.pendidikan_terakhir', 'left');
-		$builder->join('dtsen_lansia ls', 'ls.id_art = art.id_art', 'left');
+
+		if ($hasKeadaanRumahTable) {
+			$builder->join('dtsen_keadaan_rumah kr', 'kr.id_kk = kk.id_kk', 'left');
+		}
+
+		if ($hasPendidikanTable) {
+			$builder->join('pendidikan_kk pk', 'pk.pk_id = art.pendidikan_terakhir', 'left');
+		}
+
+		if ($hasLansiaTable) {
+			$builder->join('dtsen_lansia ls', 'ls.id_art = art.id_art', 'left');
+		}
 
 		// Hanya lansia (usia > 60 tahun) dan tidak terhapus
 		$builder->where('art.deleted_at IS NULL');
@@ -70,13 +135,17 @@ class LansiaModel extends Model
 		// Filter Kategori (Lansia / Jompo)
 		$kategori = $filter['kategori'] ?? '';
 		if (!empty($kategori)) {
-			if ($kategori === 'Lansia') {
-				$builder->groupStart()
-					->where('ls.kategori', 'Lansia')
-					->orWhere('ls.kategori IS NULL')
-					->groupEnd();
+			if ($hasLansiaTable) {
+				if ($kategori === 'Lansia') {
+					$builder->groupStart()
+						->where('ls.kategori', 'Lansia')
+						->orWhere('ls.kategori IS NULL')
+						->groupEnd();
+				} elseif ($kategori === 'Jompo') {
+					$builder->where('ls.kategori', 'Jompo');
+				}
 			} elseif ($kategori === 'Jompo') {
-				$builder->where('ls.kategori', 'Jompo');
+				$builder->where('1 = 0', null, false);
 			}
 		}
 
@@ -88,9 +157,11 @@ class LansiaModel extends Model
 				->orLike('art.nik', $search)
 				->orLike('kk.no_kk', $search)
 				->orLike('rt.alamat', $search)
-				->orLike('kk.alamat', $search)
-				->orLike('ls.keterangan', $search)
-				->groupEnd();
+				->orLike('kk.alamat', $search);
+			if ($hasLansiaTable) {
+				$builder->orLike('ls.keterangan', $search);
+			}
+			$builder->groupEnd();
 		}
 
 		return $builder;
@@ -159,6 +230,7 @@ class LansiaModel extends Model
 
 	public function save_status_lansia($id_art, $kategori, $keterangan, $username = '')
 	{
+		$this->ensureLansiaTable();
 		$db = \Config\Database::connect();
 		$sql = "
 			INSERT INTO dtsen_lansia (id_art, kategori, keterangan, updated_by)
@@ -172,4 +244,3 @@ class LansiaModel extends Model
 		return $db->query($sql, [$id_art, $kategori, $keterangan, $username]);
 	}
 }
-
