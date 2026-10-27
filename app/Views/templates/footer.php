@@ -221,7 +221,7 @@
     bs5Script.src = "https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js";
     bs5Script.onload = () => {
         window.BS5 = bootstrap;
-        console.log("🔥 Bootstrap 5 loaded in isolated mode!");
+        // console.log("🔥 Bootstrap 5 loaded in isolated mode!");
     };
     document.body.appendChild(bs5Script);
 

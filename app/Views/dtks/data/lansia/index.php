@@ -2,6 +2,29 @@
 
 <?= $this->section('content'); ?>
 
+<style>
+  /* 🏷️ Warna latar Usia konsisten di mode Desktop & Mobile (termasuk saat responsif) */
+  #tbl_lansia .badge-info,
+  #tbl_lansia .badge.bg-info,
+  table.dtr-details .badge-info,
+  table.dtr-details .badge.bg-info,
+  #modal_usia {
+    background-color: #17a2b8 !important;
+    color: #ffffff !important;
+  }
+
+  /* Setarakan baris rincian child row DataTables di mobile agar tidak belang */
+  table.dataTable > tbody > tr.child {
+    background-color: inherit !important;
+  }
+  table.dataTable > tbody > tr.child > td.child {
+    background-color: inherit !important;
+  }
+  table.dataTable > tbody > tr.child table.dtr-details {
+    background-color: transparent !important;
+  }
+</style>
+
 <div class="content-wrapper mt-1">
   <!-- Content Header -->
   <section class="content-header">
@@ -92,16 +115,16 @@
           $desa_id  = $userDesa ?? session()->get('kode_desa') ?? '32.05.33.2006';
           ?>
 
-          <!-- Filter Bar -->
-          <div class="card card-outline card-secondary bg-light p-3 mb-3">
-            <div class="row align-items-end">
-              <div class="col-md-3 col-sm-6 mb-2">
-                <label for="filter_desa" class="small font-weight-bold text-muted mb-1">Desa</label>
+          <!-- Filter Bar (1 Baris di Mode Mobile & Desktop) -->
+          <div class="card card-outline card-secondary bg-light p-2 p-md-3 mb-2 mb-md-3">
+            <div class="form-row align-items-end flex-nowrap">
+              <div class="col-3 col-md-3">
+                <label for="filter_desa" class="small font-weight-bold text-muted mb-1 text-truncate d-block" style="font-size: 0.75rem;">Desa</label>
                 <select <?php if ($roleId >= 3) {
                           echo 'disabled="disabled"';
-                        } ?> class="form-control form-control-sm" name="filter_desa" id="filter_desa">
+                        } ?> class="form-control form-control-sm px-1 px-sm-2" name="filter_desa" id="filter_desa" style="font-size: 0.78rem;">
                   <?php if ($roleId < 3): ?>
-                    <option value="">- Semua Desa -</option>
+                    <option value="">Semua</option>
                   <?php endif; ?>
                   <?php foreach ($desKels as $row) {
                     $rawKd = (string)($row['kode_desa'] ?? $row['KodeDesa']);
@@ -114,28 +137,29 @@
                 </select>
               </div>
 
-              <div class="col-md-3 col-sm-6 mb-2">
-                <label for="filter_rw" class="small font-weight-bold text-muted mb-1">No. RW</label>
-                <select class="form-control form-control-sm" name="filter_rw" id="filter_rw">
-                  <option value="">- Semua RW -</option>
+              <div class="col-3 col-md-3">
+                <label for="filter_rw" class="small font-weight-bold text-muted mb-1 text-truncate d-block" style="font-size: 0.75rem;">No. RW</label>
+                <select class="form-control form-control-sm px-1 px-sm-2" name="filter_rw" id="filter_rw" style="font-size: 0.78rem;">
+                  <option value="">Semua RW</option>
                   <?php foreach ($Rw as $row) { ?>
                     <option value="<?= $row['no_rw']; ?>">RW <?= $row['no_rw']; ?></option>
                   <?php } ?>
                 </select>
               </div>
 
-              <div class="col-md-3 col-sm-6 mb-2">
-                <label for="filter_kategori" class="small font-weight-bold text-muted mb-1">Kategori Status</label>
-                <select class="form-control form-control-sm" name="filter_kategori" id="filter_kategori">
-                  <option value="">- Semua Kategori -</option>
-                  <option value="Lansia">Lansia (Hanya Usia Lanjut)</option>
-                  <option value="Jompo">Jompo (Fisik Renta / Lemah)</option>
+              <div class="col-4 col-md-3">
+                <label for="filter_kategori" class="small font-weight-bold text-muted mb-1 text-truncate d-block" style="font-size: 0.75rem;">Status</label>
+                <select class="form-control form-control-sm px-1 px-sm-2" name="filter_kategori" id="filter_kategori" style="font-size: 0.78rem;">
+                  <option value="">Semua Status</option>
+                  <option value="Lansia">Lansia</option>
+                  <option value="Jompo">Jompo</option>
                 </select>
               </div>
 
-              <div class="col-md-3 col-sm-6 mb-2">
-                <button type="button" id="btnResetFilter" class="btn btn-default btn-sm btn-block">
-                  <i class="fas fa-undo mr-1"></i> Reset Filter
+              <div class="col-2 col-md-3">
+                <label class="small font-weight-bold text-muted mb-1 d-block text-truncate" style="font-size: 0.75rem;">&nbsp;</label>
+                <button type="button" id="btnResetFilter" class="btn btn-default btn-sm btn-block px-1" title="Reset Filter">
+                  <i class="fas fa-undo"></i><span class="d-none d-md-inline ml-1">Reset Filter</span>
                 </button>
               </div>
             </div>
@@ -171,14 +195,14 @@
 </div>
 
 <!-- Modal Pilih Status Kategori (Lansia / Jompo) -->
-<div class="modal fade" id="modalStatus" tabindex="-1" role="dialog" aria-labelledby="modalStatusLabel" aria-hidden="true">
+<div class="modal fade" id="modalStatus" tabindex="-1" role="dialog" aria-labelledby="modalStatusLabel">
   <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
+    <div class="modal-content border-0 shadow">
       <div class="modal-header bg-primary text-white py-2">
         <h5 class="modal-title font-weight-bold" id="modalStatusLabel" style="font-size: 1.1rem;">
           <i class="fas fa-user-tag mr-2"></i>Pilih Status Kategori
         </h5>
-        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+        <button type="button" id="btnCloseStatus" class="close btn-close btn-close-white text-white" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" style="opacity: 0.9;">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -201,7 +225,7 @@
                 </div>
               </div>
               <div class="col-4 text-right">
-                <span class="badge badge-info p-2" id="modal_usia" style="font-size: 0.9rem;">- Thn</span>
+                <span class="badge badge-info bg-info text-white p-2" id="modal_usia" style="font-size: 0.9rem;">- Thn</span>
               </div>
             </div>
           </div>
@@ -245,8 +269,8 @@
           </div>
 
         </div>
-        <div class="modal-footer py-2 d-flex justify-content-between align-items-center">
-          <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Batal</button>
+        <div class="modal-footer py-2 d-flex justify-content-between align-items-center bg-light">
+          <button type="button" id="btnBatalStatus" class="btn btn-secondary btn-sm" data-dismiss="modal" data-bs-dismiss="modal">Batal</button>
           <button type="submit" id="btnSimpanStatus" class="btn btn-primary btn-sm font-weight-bold">
             <i class="fas fa-save mr-1"></i> Simpan Status
           </button>
@@ -288,18 +312,9 @@
         }
       },
       "columnDefs": [{
-          "targets": [0, 10],
-          "orderable": false
-        },
-        {
-          "targets": [0, 1, 4, 5, 6, 9, 10],
-          "className": "text-center align-middle"
-        },
-        {
-          "targets": [2, 3, 7, 8],
-          "className": "align-middle"
-        }
-      ]
+        "targets": [0, 10],
+        "orderable": false
+      }]
     });
 
     // 📋 FUNGSI SALIN KE CLIPBOARD
@@ -391,17 +406,21 @@
       // Masking NIK di Modal
       var nikMasked = '-';
       if (nik && nik !== '-') {
-        nikMasked = (nik.length === 16)
-          ? nik.substring(0, 6) + '******' + nik.substring(12, 16)
-          : ((nik.length > 8) ? nik.substring(0, 8) + '********' : nik);
+        nikMasked = (nik.length === 16) ?
+          nik.substring(0, 6) + '******' + nik.substring(12, 16) :
+          ((nik.length > 8) ? nik.substring(0, 8) + '********' : nik);
       }
 
       $('#modal_nik').text(nikMasked)
         .attr('data-masked', nikMasked)
         .attr('data-full', (nik && nik !== '-') ? nik : '-')
         .off('mouseenter mouseleave')
-        .on('mouseenter', function() { $(this).text($(this).attr('data-full')); })
-        .on('mouseleave', function() { $(this).text($(this).attr('data-masked')); });
+        .on('mouseenter', function() {
+          $(this).text($(this).attr('data-full'));
+        })
+        .on('mouseleave', function() {
+          $(this).text($(this).attr('data-masked'));
+        });
 
       $('#btnCopyModalNik').attr('data-value', (nik && nik !== '-') ? nik : '');
 
@@ -414,7 +433,57 @@
         $('#kat_lansia').prop('checked', true);
       }
 
+      showModalStatus();
+    });
+
+    function showModalStatus() {
+      try {
+        if (window.BS5 && window.BS5.Modal) {
+          var modalEl = document.getElementById('modalStatus');
+          var bsModal = window.BS5.Modal.getOrCreateInstance(modalEl);
+          bsModal.show();
+          return;
+        }
+      } catch (err) {}
       $('#modalStatus').modal('show');
+    }
+
+    function closeModalStatus() {
+      if (document.activeElement) {
+        document.activeElement.blur();
+      }
+      try {
+        if (window.BS5 && window.BS5.Modal) {
+          var modalEl = document.getElementById('modalStatus');
+          var bsModal = window.BS5.Modal.getInstance(modalEl);
+          if (bsModal) {
+            bsModal.hide();
+          }
+        }
+      } catch (err) {}
+      try {
+        $('#modalStatus').modal('hide');
+      } catch (err) {}
+
+      // Sabuk pengaman: bersihkan backdrop jika tersisa
+      setTimeout(function() {
+        if (!$('#modalStatus').hasClass('show')) {
+          $('.modal-backdrop').remove();
+          $('body').removeClass('modal-open').css('padding-right', '');
+        }
+      }, 250);
+    }
+
+    // Event Klik Tombol Close (X) dan Batal
+    $(document).on('click', '#btnCloseStatus, #btnBatalStatus, #modalStatus [data-dismiss="modal"], #modalStatus [data-bs-dismiss="modal"]', function(e) {
+      e.preventDefault();
+      closeModalStatus();
+    });
+
+    $('#modalStatus').on('hidden.bs.modal', function() {
+      if (document.activeElement) {
+        document.activeElement.blur();
+      }
     });
 
     // Submit Form Status via AJAX
@@ -436,7 +505,7 @@
         success: function(res) {
           btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Simpan Status');
           if (res.status === 'success') {
-            $('#modalStatus').modal('hide');
+            closeModalStatus();
             table.draw(false);
             if (typeof Swal !== 'undefined') {
               Swal.fire({
@@ -480,4 +549,3 @@
   });
 </script>
 <?= $this->endSection(); ?>
-

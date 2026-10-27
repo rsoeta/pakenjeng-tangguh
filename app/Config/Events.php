@@ -43,13 +43,8 @@ Events::on('pre_system', function () {
 	 * --------------------------------------------------------------------
 	 * If you delete, they will no longer be collected.
 	 */
-	// if (CI_DEBUG && ! is_cli())
-	// {
-	// 	Events::on('DBQuery', 'CodeIgniter\Debug\Toolbar\Collectors\Database::collect');
-	// 	Services::toolbar()->respond();
-	// }
-	if (false) {
+	if (CI_DEBUG && ! is_cli()) {
 		Events::on('DBQuery', 'CodeIgniter\Debug\Toolbar\Collectors\Database::collect');
-		Services::toolbar()->respond();
+		\Config\Services::toolbar()->respond();
 	}
 });

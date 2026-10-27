@@ -141,6 +141,7 @@
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>if (typeof jQuery !== 'undefined') jQuery.migrateMute = true;</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-migrate/3.3.2/jquery-migrate.min.js"></script>
 
     <!-- AdminLTE (Bootstrap 4 bundle!) -->

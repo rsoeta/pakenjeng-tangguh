@@ -222,16 +222,16 @@ class Lansia extends BaseController
 
                 // RT / RW
                 $rtRw = esc($key->rt ?? '000') . ' / ' . esc($key->rw ?? '000');
-                $row[] = '<span class="badge badge-light border">' . $rtRw . '</span>';
+                $row[] = '<span class="badge badge-light bg-light text-dark border">' . $rtRw . '</span>';
 
                 // Usia
-                $row[] = '<span class="badge badge-info">' . esc($key->usia) . ' Thn</span>';
+                $row[] = '<span class="badge badge-info bg-info text-white">' . esc($key->usia) . ' Thn</span>';
 
                 // Jenis Kelamin
                 if ($key->jenis_kelamin === 'L') {
-                    $row[] = '<span class="badge badge-primary" title="Laki-laki">L</span>';
+                    $row[] = '<span class="badge badge-primary bg-primary text-white" title="Laki-laki">L</span>';
                 } elseif ($key->jenis_kelamin === 'P') {
-                    $row[] = '<span class="badge badge-danger" title="Perempuan">P</span>';
+                    $row[] = '<span class="badge badge-danger bg-danger text-white" title="Perempuan">P</span>';
                 } else {
                     $row[] = '-';
                 }
