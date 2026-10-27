@@ -9,6 +9,11 @@ function nameApp()
     return 'SINDEN';
 }
 
+function ogImageApp()
+{
+    return base_url('assets/logo/sinden-og.png');
+}
+
 function logoApp()
 {
     $filePath = 'assets/logo/SINDEN-logo.png';

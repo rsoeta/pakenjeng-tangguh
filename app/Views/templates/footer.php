@@ -423,6 +423,21 @@
 <!-- 🚀 CONFIG & SHORTCUT DATATABLES GLOBAL -->
 <script src="<?= base_url('assets/js/datatables.config.js'); ?>"></script>
 
+
+<!-- 🚀 PWA SERVICE WORKER REGISTRATION -->
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('<?= base_url('sw.js'); ?>')
+                .then(function(reg) {
+                    // console.log('SW SINDEN Registered:', reg.scope);
+                })
+                .catch(function(err) {
+                    console.warn('[PWA] SW registration warning:', err);
+                });
+        });
+    }
+</script>
 </body>
 
 </html>
