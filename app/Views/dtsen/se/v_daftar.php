@@ -55,6 +55,17 @@
                                             </select>
                                         </div>
 
+                                        <!-- 🛡️ PERLINSOS -->
+                                        <div class="col-auto">
+                                            <label class="form-label small fw-bold mb-1">Perlinsos</label>
+                                            <select class="form-select form-select-sm" id="filterPerlinsos">
+                                                <option value="">Semua</option>
+                                                <option value="terverifikasi">Terverifikasi</option>
+                                                <option value="belum_verifikasi">Belum Verifikasi</option>
+                                                <option value="none">Belum Di-entri</option>
+                                            </select>
+                                        </div>
+
                                         <!-- 📊 DESIL -->
                                         <div class="col-auto">
                                             <label class="form-label small fw-bold mb-1">Desil</label>
@@ -64,6 +75,18 @@
                                                 <?php for ($i = 0; $i <= 10; $i++): ?>
                                                     <option value="<?= $i ?>">Desil <?= $i ?></option>
                                                 <?php endfor; ?>
+                                            </select>
+                                        </div>
+
+                                        <!-- 🎁 BANSOS -->
+                                        <div class="col-auto">
+                                            <label class="form-label small fw-bold mb-1">Bansos</label>
+                                            <select class="form-select form-select-sm" id="filterBansos">
+                                                <option value="">Semua</option>
+                                                <option value="PKH">PKH</option>
+                                                <option value="SEMBAKO">SEMBAKO</option>
+                                                <option value="PKH + SEMBAKO">PKH + SEMBAKO</option>
+                                                <option value="none">Tidak Ada</option>
                                             </select>
                                         </div>
 
@@ -137,7 +160,9 @@
             rw: '',
             rt: '',
             status: '',
-            desil: ''
+            perlinsos: '',
+            desil: '',
+            bansos: ''
         };
 
         function loadRW() {
@@ -444,12 +469,14 @@
         // ==============================================================
 
         // 1. Dengarkan perubahan pada semua filter dari akar dokumen
-        $(document).on('change', '#filterRW, #filterRT, #filterStatus, #filterDesil', function() {
+        $(document).on('change', '#filterRW, #filterRT, #filterStatus, #filterPerlinsos, #filterDesil, #filterBansos', function() {
             // Update parameter filter
             filterKeluarga.rw = $('#filterRW').val() || '';
             filterKeluarga.rt = $('#filterRT').val() || '';
             filterKeluarga.status = $('#filterStatus').val() || '';
+            filterKeluarga.perlinsos = $('#filterPerlinsos').val() || '';
             filterKeluarga.desil = $('#filterDesil').val() || '';
+            filterKeluarga.bansos = $('#filterBansos').val() || '';
 
             console.log('🎯 Minta Data:', filterKeluarga); // Pantau di Inspect Element -> Console
 
@@ -481,14 +508,16 @@
         // 3. Tombol Reset
         $(document).on('click', '#btnResetFilter', function() {
             // Reset UI
-            $('#filterRW, #filterStatus, #filterDesil').val('');
+            $('#filterRW, #filterStatus, #filterPerlinsos, #filterDesil, #filterBansos').val('');
             $('#filterRT').html('<option value="">Semua RT</option>').prop('disabled', true);
 
             // Reset Parameter
             filterKeluarga.rw = '';
             filterKeluarga.rt = '';
             filterKeluarga.status = '';
+            filterKeluarga.perlinsos = '';
             filterKeluarga.desil = '';
+            filterKeluarga.bansos = '';
 
             // Tembak Reload
             $('#tableKeluarga').DataTable().ajax.reload(null, false);

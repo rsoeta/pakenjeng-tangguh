@@ -165,8 +165,10 @@ class DtsenSe extends Controller
                 'wilayah_tugas' => $wilayahTugas,
                 'rw'            => $filterClient['rw']     ?? null,
                 'rt'            => $filterClient['rt']     ?? null,
-                'status'        => $filterClient['status'] ?? null,
-                'desil'         => $filterClient['desil']  ?? null,
+                'status'        => $filterClient['status']    ?? null,
+                'desil'         => $filterClient['desil']     ?? null,
+                'perlinsos'     => $filterClient['perlinsos'] ?? null,
+                'bansos'        => $filterClient['bansos']    ?? null,
             ];
 
             // 4️⃣ FILTER AKSES (ROLE)
@@ -264,6 +266,42 @@ class DtsenSe extends Controller
                 }
             }
             unset($row);
+
+            // 8️⃣ FILTER PERLINSOS & BANSOS (JIKA DIPILIH)
+            $fPerlinsos = $filter['perlinsos'] ?? null;
+            $fBansos    = $filter['bansos'] ?? null;
+
+            if ((!empty($fPerlinsos) && $fPerlinsos !== 'all') || (!empty($fBansos) && $fBansos !== 'all')) {
+                $dataKeluarga = array_values(array_filter($dataKeluarga, function ($row) use ($fPerlinsos, $fBansos) {
+                    // Filter Perlinsos
+                    if (!empty($fPerlinsos) && $fPerlinsos !== 'all') {
+                        $pStatus = $row['perlinsos_status'] ?? null;
+                        if ($fPerlinsos === 'terverifikasi') {
+                            if ($pStatus !== 'tersinkron') return false;
+                        } elseif ($fPerlinsos === 'belum_verifikasi') {
+                            if (empty($pStatus) || $pStatus === 'tersinkron') return false;
+                        } elseif ($fPerlinsos === 'none') {
+                            if (!empty($pStatus)) return false;
+                        }
+                    }
+
+                    // Filter Bansos
+                    if (!empty($fBansos) && $fBansos !== 'all') {
+                        $b = $row['bansos'] ?? '-';
+                        if ($fBansos === 'PKH + SEMBAKO') {
+                            if ($b !== 'PKH + SEMBAKO') return false;
+                        } elseif ($fBansos === 'PKH') {
+                            if (strpos($b, 'PKH') === false) return false;
+                        } elseif ($fBansos === 'SEMBAKO') {
+                            if (strpos($b, 'SEMBAKO') === false) return false;
+                        } elseif ($fBansos === 'none') {
+                            if ($b !== '-' && !empty($b)) return false;
+                        }
+                    }
+
+                    return true;
+                }));
+            }
 
             // Kembalikan parameter draw (jika dikirim oleh DataTables)
             $draw = $this->request->getVar('draw');
