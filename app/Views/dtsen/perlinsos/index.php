@@ -203,12 +203,19 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                                     <!-- 🎛️ FILTER BAR -->
                                     <div class="row g-2 mb-3">
                                         <?php if (!$isPentri): ?>
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <select class="form-select form-select-sm" id="filterPetugas">
                                                     <option value="">Semua Petugas</option>
                                                 </select>
                                             </div>
                                         <?php endif; ?>
+                                        <div class="col-md-auto">
+                                            <select class="form-select form-select-sm" id="filterStatus">
+                                                <option value="">Semua Status</option>
+                                                <option value="belum_verifikasi">Belum Verifikasi</option>
+                                                <option value="terverifikasi">Terverifikasi</option>
+                                            </select>
+                                        </div>
                                         <div class="col-md-auto">
                                             <select class="form-select form-select-sm" id="filterRW">
                                                 <option value="">Semua RW</option>
@@ -240,6 +247,7 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                                                     <th>Petugas</th>
                                                 <?php endif; ?>
                                                 <th>Waktu Rekap</th>
+                                                <th>Status</th>
                                                 <th>Aksi</th>
                                             </tr>
                                         </thead>
@@ -553,8 +561,9 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                     type: 'POST',
                     data: function(d) {
                         d.petugas = $('#filterPetugas').val() || '';
-                        d.rw = $('#filterRW').val() || '';
-                        d.rt = $('#filterRT').val() || '';
+                        d.status  = $('#filterStatus').val() || '';
+                        d.rw      = $('#filterRW').val() || '';
+                        d.rt      = $('#filterRT').val() || '';
                     },
                     dataSrc: 'data'
                 },
@@ -640,6 +649,16 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                         render: d => d ? d.substring(0, 16) : '-'
                     },
                     {
+                        data: 'status',
+                        className: 'text-center',
+                        render: function(s) {
+                            if (s === 'tersinkron') {
+                                return '<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Terverifikasi</span>';
+                            }
+                            return '<span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Belum Verifikasi</span>';
+                        }
+                    },
+                    {
                         data: 'id',
                         orderable: false,
                         render: function(id, type, row) {
@@ -683,7 +702,7 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                 if (res.rw) res.rw.forEach(r => $('#filterRW').append(`<option value="${r.rw}">RW ${r.rw}</option>`));
             });
 
-            $('#filterPetugas, #filterRT').on('change', () => tablePerlinsos.ajax.reload(null, false));
+            $('#filterPetugas, #filterRT, #filterStatus').on('change', () => tablePerlinsos.ajax.reload(null, false));
 
             $('#filterRW').on('change', function() {
                 const rw = $(this).val();
@@ -699,7 +718,7 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
             });
 
             $('#btnResetFilter').on('click', function() {
-                $('#filterPetugas, #filterRW').val('');
+                $('#filterPetugas, #filterRW, #filterStatus').val('');
                 $('#filterRT').html('<option value="">Semua RT</option>').prop('disabled', true);
                 tablePerlinsos.ajax.reload(null, false);
             });

@@ -340,6 +340,7 @@ class Perlinsos extends Controller
         $f_petugas = $this->request->getPost('petugas');
         $f_rw      = $this->request->getPost('rw');
         $f_rt      = $this->request->getPost('rt');
+        $f_status  = $this->request->getPost('status');
 
         $builder = $this->db->table('dtsen_perlinsos p')
             ->select('
@@ -365,6 +366,18 @@ class Perlinsos extends Controller
 
         if (!empty($f_rw)) $builder->where('r.rw', $f_rw);
         if (!empty($f_rt)) $builder->where('r.rt', $f_rt);
+
+        // 🎯 Filter Status Verifikasi
+        if (!empty($f_status)) {
+            if ($f_status === 'terverifikasi') {
+                $builder->where('p.status', 'tersinkron');
+            } elseif ($f_status === 'belum_verifikasi') {
+                $builder->groupStart()
+                    ->where('p.status !=', 'tersinkron')
+                    ->orWhere('p.status IS NULL')
+                    ->groupEnd();
+            }
+        }
 
         return $this->response->setJSON(['data' => $builder->get()->getResultArray()]);
     }
