@@ -967,6 +967,28 @@ class PembaruanKeluarga extends BaseController
                 $db->table('dtsen_usulan_art')->insert($dataArt);
             }
 
+            // 🚀 SINKRONISASI LANGSUNG KE MASTER DATA (dtsen_art)
+            if (!empty($post['nik'])) {
+                $updateMaster = [];
+                if (isset($post['pendidikan_terakhir']) && $post['pendidikan_terakhir'] !== '') {
+                    $updateMaster['pendidikan_terakhir'] = $post['pendidikan_terakhir'];
+                }
+                if (isset($post['pekerjaan']) && $post['pekerjaan'] !== '') {
+                    $updateMaster['pekerjaan'] = $post['pekerjaan'];
+                }
+                if (isset($post['status_kawin']) && $post['status_kawin'] !== '') {
+                    $updateMaster['status_kawin'] = $post['status_kawin'];
+                }
+                if (!empty($updateMaster)) {
+                    $updateMaster['updated_at'] = date('Y-m-d H:i:s');
+                    $updateMaster['updated_by'] = $userId;
+                    $db->table('dtsen_art')
+                        ->where('nik', $post['nik'])
+                        ->where('deleted_at IS NULL')
+                        ->update($updateMaster);
+                }
+            }
+
             return $this->response->setJSON(['status' => 'success', 'message' => 'Data individu berhasil disimpan.']);
         } catch (\Throwable $e) {
             return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
@@ -1220,7 +1242,7 @@ class PembaruanKeluarga extends BaseController
                         'jenis_kelamin'       => $identitas['jenis_kelamin'] ?? null,
                         'tanggal_lahir'       => $identitas['tanggal_lahir'] ?? null,
                         'tempat_lahir'        => $identitas['tempat_lahir'] ?? null,
-                        'pendidikan_terakhir' => $identitas['pendidikan'] ?? null,
+                        'pendidikan_terakhir' => $identitas['pendidikan_terakhir'] ?? $identitas['pendidikan'] ?? null,
                         'pekerjaan'           => $identitas['pekerjaan'] ?? null,
                         'status_kawin'        => $identitas['status_kawin'] ?? null,
                         'foto_identitas'      => $payloadMember['foto'] ?? null,

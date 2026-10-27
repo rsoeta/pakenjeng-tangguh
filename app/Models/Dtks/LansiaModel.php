@@ -68,6 +68,7 @@ class LansiaModel extends Model
 		$hasLansiaTable       = $this->db->tableExists('dtsen_lansia');
 		$hasKeadaanRumahTable = $this->db->tableExists('dtsen_keadaan_rumah');
 		$hasPendidikanTable   = $this->db->tableExists('pendidikan_kk');
+		$hasUsulanArtTable    = $this->db->tableExists('dtsen_usulan_art');
 
 		$builder = $this->db->table('dtsen_art art');
 
@@ -85,10 +86,12 @@ class LansiaModel extends Model
 			'rt.kode_desa',
 		];
 
-		if ($hasPendidikanTable) {
-			$selectFields[] = "COALESCE(pk.pk_nama, art.pendidikan_terakhir, '-') AS pendidikan";
+		if ($hasPendidikanTable && $hasUsulanArtTable) {
+			$selectFields[] = "COALESCE(pk.pk_nama, pk_u.pk_nama, NULLIF(art.pendidikan_terakhir, ''), '-') AS pendidikan";
+		} elseif ($hasPendidikanTable) {
+			$selectFields[] = "COALESCE(pk.pk_nama, NULLIF(art.pendidikan_terakhir, ''), '-') AS pendidikan";
 		} else {
-			$selectFields[] = "COALESCE(art.pendidikan_terakhir, '-') AS pendidikan";
+			$selectFields[] = "COALESCE(NULLIF(art.pendidikan_terakhir, ''), '-') AS pendidikan";
 		}
 
 		if ($hasKeadaanRumahTable) {
@@ -118,6 +121,21 @@ class LansiaModel extends Model
 
 		if ($hasPendidikanTable) {
 			$builder->join('pendidikan_kk pk', 'pk.pk_id = art.pendidikan_terakhir', 'left');
+		}
+
+		if ($hasPendidikanTable && $hasUsulanArtTable) {
+			$subqueryUsulan = '(
+				SELECT ua.nik, JSON_UNQUOTE(JSON_EXTRACT(ua.payload_member, \'$.identitas.pendidikan_terakhir\')) AS usulan_pend_id
+				FROM dtsen_usulan_art ua
+				INNER JOIN (
+					SELECT nik, MAX(id) AS max_id 
+					FROM dtsen_usulan_art 
+					WHERE payload_member IS NOT NULL 
+					GROUP BY nik
+				) latest ON latest.max_id = ua.id
+			) u_pend';
+			$builder->join($subqueryUsulan, 'u_pend.nik = art.nik', 'left', false);
+			$builder->join('pendidikan_kk pk_u', 'pk_u.pk_id = u_pend.usulan_pend_id', 'left');
 		}
 
 		if ($hasLansiaTable) {
