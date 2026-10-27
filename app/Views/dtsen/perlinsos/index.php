@@ -161,9 +161,9 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                                     <form id="formPerlinsos">
                                         <input type="hidden" id="id_kk" name="id_kk">
                                         <div class="mb-3">
-                                            <label class="form-label small fw-bold text-muted">Cari NIK / Nama KPM</label>
+                                            <label class="form-label small fw-bold text-muted">Cari NIK / No. KK</label>
                                             <select class="form-select w-100" id="nik_peserta" name="nik_peserta" required>
-                                                <option value="">Ketik NIK atau Nama...</option>
+                                                <option value="">Ketik NIK / No. KK...</option>
                                             </select>
                                             <div class="form-text text-info small mt-2"><i class="fas fa-info-circle"></i> Pastikan KPM sudah berhasil didaftarkan di aplikasi Perlinsos terlebih dahulu.</div>
                                         </div>
@@ -517,8 +517,9 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
 
             // 1️⃣ INITIALIZE SELECT2 (AJAX PENCARIAN)
             $('#nik_peserta').select2({
-                placeholder: "Ketik NIK atau Nama...",
+                placeholder: "Ketik NIK / No. KK...",
                 allowClear: true,
+                minimumInputLength: 3,
                 ajax: {
                     url: '/perlinsos/search-art',
                     dataType: 'json',
@@ -729,9 +730,12 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                     formatter: function(val, opts) {
                         if (val === 0) return '';
 
-                        let tercapai = opts.w.globals.series[0][opts.dataPointIndex];
-                        let sisa = opts.w.globals.series[1][opts.dataPointIndex];
-                        let totalTarget = tercapai + sisa;
+                        let totalTarget = 0;
+                        if (opts.w && opts.w.globals && opts.w.globals.series) {
+                            for (let s = 0; s < opts.w.globals.series.length; s++) {
+                                totalTarget += (opts.w.globals.series[s][opts.dataPointIndex] || 0);
+                            }
+                        }
                         let persen = totalTarget > 0 ? Math.round((val / totalTarget) * 100) : 0;
 
                         return val + ' (' + persen + '%)';
@@ -759,7 +763,7 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                 xaxis: {
                     categories: []
                 },
-                colors: ['#198754', '#dc3545'], // Hijau & Merah
+                colors: ['#dc3545', '#ffc107', '#198754'], // Merah (Belum Tercapai), Kuning (Belum Verifikasi), Hijau (Terverifikasi)
                 fill: {
                     opacity: 1
                 },

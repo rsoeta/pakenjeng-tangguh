@@ -54,14 +54,19 @@ class Perlinsos extends Controller
     }
 
     /**
-     * 🔍 Cari individu berdasarkan NIK (saja)
-     * 🔐 Dibatasi wilayah_tugas user login (multi RW–RT)
+     * 🔍 Cari individu berdasarkan NIK atau No. KK
+     * 🔐 Dibatasi wilayah_tugas user login (multi RW–RT) & Kode Desa
      * 🛡️ Anti Data Ganda & Bypass Soft Delete
      */
     public function searchArt()
     {
-        $term = trim($this->request->getGet('q'));
+        $term = trim((string) $this->request->getGet('q'));
+        if (strlen($term) < 3) {
+            return $this->response->setJSON(['results' => []]);
+        }
+
         $user = $this->AuthModel->getUserId();
+        $kodeDesa = $user['kode_desa'] ?? session()->get('kode_desa');
         $wilayahTugas = trim($user['wilayah_tugas'] ?? '');
 
         $builder = $this->artModel
@@ -69,6 +74,7 @@ class Perlinsos extends Controller
             dtsen_art.nik,
             dtsen_art.nama,
             dtsen_art.id_kk, 
+            dtsen_kk.no_kk,
             dtsen_art.hubungan_keluarga AS shdk,
             (SELECT jenis_shdk FROM tb_shdk WHERE id = dtsen_art.hubungan_keluarga) AS shdk_nama,
             dtsen_rt.rw,
@@ -80,14 +86,20 @@ class Perlinsos extends Controller
 
             // 🚀 PERBAIKAN 2: Gunakan sintaks string statis agar Query Builder mutlak membaca IS NULL
             ->where('dtsen_art.deleted_at IS NULL')
+            ->where('dtsen_kk.deleted_at IS NULL')
             ->groupStart()
             ->like('dtsen_art.nik', $term)
-            // ->orLike('dtsen_art.nama', $term) // 🔒 DIMATIKAN: Pencarian murni via NIK saja
-            ->groupEnd()
+            ->orLike('dtsen_kk.no_kk', $term)
+            ->groupEnd();
 
-            // 🚀 PERBAIKAN 3: Kunci mutlak NIK agar tidak ada nama yang sama muncul dua kali
-            ->groupBy('dtsen_art.nik')
-            ->limit(10);
+        // 🔐 Kunci kepemilikan data level desa
+        if (!empty($kodeDesa)) {
+            $builder->where('dtsen_rt.kode_desa', $kodeDesa);
+        }
+
+        // 🚀 PERBAIKAN 3: Kunci mutlak NIK agar tidak ada nama yang sama muncul dua kali
+        $builder->groupBy('dtsen_art.nik')
+            ->limit(15);
 
         /* =====================================================
        🔐 PARSE wilayah_tugas → pasangan RW–RT (KUNCI)
@@ -132,11 +144,13 @@ class Perlinsos extends Controller
        🎯 Format JSON sesuai standar Select2 & Form Perlinsos
        ===================================================== */
         $results = array_map(function ($row) {
+            $noKk = !empty($row['no_kk']) ? ' (KK: ' . $row['no_kk'] . ')' : '';
             return [
                 'id'         => $row['nik'],
-                'text'       => $row['nik'] . ' - ' . strtoupper($row['nama']),
+                'text'       => $row['nik'] . ' - ' . strtoupper($row['nama']) . $noKk,
                 'nik'        => $row['nik'],
                 'nama'       => $row['nama'],
+                'no_kk'      => $row['no_kk'] ?? '',
                 'id_kk'      => $row['id_kk'], // 🚀 KUNCI SAKTI: Wajib ada untuk simpan Perlinsos
                 'shdk'       => (int) ($row['shdk'] ?? 0),
                 'shdk_nama'  => $row['shdk_nama'] ?? '-',
@@ -209,81 +223,6 @@ class Perlinsos extends Controller
         return $this->response->setJSON(['petugas' => $petugas, 'rw' => $rw]);
     }
 
-    // // ========================================================
-    // // 🚀 3. CHART CAPAIAN VS TARGET (EXPERT MODE)
-    // // ========================================================
-    // public function getChartCapaian()
-    // {
-    //     // 🚀 TAMBAHAN: Ambil kode desa dari session
-    //     $kodeDesa = session()->get('kode_desa');
-
-    //     // 1. Ambil petugas yang HANYA berstatus aktif
-    //     $users = $this->db->table('dtks_users')
-    //         ->select('nik, fullname, wilayah_tugas')
-    //         ->where('role_id', 4) // Hanya PENTRI
-    //         ->where('status', 1)
-    //         ->get()->getResultArray();
-
-    //     $categories = [];
-    //     $seriesCapaian = [];
-    //     $seriesTarget = [];
-
-    //     foreach ($users as $u) {
-    //         $nikPetugas = $u['nik'];
-    //         $namaPendek = explode(' ', trim($u['fullname']))[0];
-
-    //         // 🎯 Hitung Capaian (Telah Diinput)
-    //         $capaian = $this->db->table('dtsen_perlinsos')->where('created_by', $nikPetugas)->countAllResults();
-
-    //         // 🎯 Hitung Target KK sesuai wilayah_tugas
-    //         $target = 0;
-    //         $wilayahTugas = trim($u['wilayah_tugas']);
-
-    //         if (!empty($wilayahTugas)) {
-    //             $b_kk = $this->db->table('dtsen_kk kk')
-    //                 ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
-    //                 ->where('kk.deleted_at IS NULL')
-    //                 // 🚀 KUNCI SAKTI: Filter wajib agar tidak nyasar ke desa lain
-    //                 ->where('rt.kode_desa', $kodeDesa);
-
-    //             $wilayahPairs = [];
-    //             foreach (explode('|', $wilayahTugas) as $block) {
-    //                 [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
-    //                 foreach (explode(',', $rtList) as $rt) {
-    //                     if (trim($rw) !== '' && trim($rt) !== '') {
-    //                         $wilayahPairs[] = ['rw' => trim($rw), 'rt' => trim($rt)];
-    //                     }
-    //                 }
-    //             }
-
-    //             if (!empty($wilayahPairs)) {
-    //                 $b_kk->groupStart();
-    //                 foreach ($wilayahPairs as $pair) {
-    //                     $b_kk->orGroupStart()
-    //                         ->where('rt.rw', $pair['rw'])
-    //                         ->where('rt.rt', $pair['rt'])
-    //                         ->groupEnd();
-    //                 }
-    //                 $b_kk->groupEnd();
-    //                 $target = $b_kk->countAllResults();
-    //             }
-    //         }
-
-    //         if ($target > 0 || $capaian > 0) {
-    //             $categories[] = $namaPendek;
-    //             $seriesCapaian[] = $capaian;
-    //             $seriesTarget[] = $target;
-    //         }
-    //     }
-
-    //     return $this->response->setJSON([
-    //         'categories' => $categories,
-    //         'series'     => [
-    //             ['name' => 'Tercapai', 'data' => $seriesCapaian],
-    //             ['name' => 'Target KK', 'data' => $seriesTarget]
-    //         ]
-    //     ]);
-    // }
     // ========================================================
     // 🚀 3. CHART CAPAIAN VS TARGET (EXPERT MODE)
     // ========================================================
@@ -298,14 +237,25 @@ class Perlinsos extends Controller
             ->get()->getResultArray();
 
         $categories = [];
-        $seriesCapaian = [];
-        $seriesSisa = []; // 🚀 Ubah seriesTarget menjadi seriesSisa
+        $seriesBelumTercapai = [];
+        $seriesBelumVerifikasi = [];
+        $seriesTerverifikasi = [];
 
         foreach ($users as $u) {
             $nikPetugas = $u['nik'];
             $namaPendek = explode(' ', trim($u['fullname']))[0];
 
+            // 1. Total capaian KPM yang diinput oleh petugas
             $capaian = $this->db->table('dtsen_perlinsos')->where('created_by', $nikPetugas)->countAllResults();
+
+            // 2. Data yang sudah berhasil diverifikasi (tersinkron)
+            $terverifikasi = $this->db->table('dtsen_perlinsos')
+                ->where('created_by', $nikPetugas)
+                ->where('status', 'tersinkron')
+                ->countAllResults();
+
+            // 3. Data yang berhasil direkap tapi belum diverifikasi
+            $belumVerifikasi = max(0, $capaian - $terverifikasi);
 
             $target = 0;
             $wilayahTugas = trim($u['wilayah_tugas']);
@@ -341,17 +291,21 @@ class Perlinsos extends Controller
 
             if ($target > 0 || $capaian > 0) {
                 $categories[] = $namaPendek;
-                $seriesCapaian[] = $capaian;
-                // 🚀 Hitung sisa target agar tidak bocor ke negatif
-                $seriesSisa[] = max(0, $target - $capaian);
+                // 🚀 Tumpukan 1: Belum Tercapai (Merah)
+                $seriesBelumTercapai[] = max(0, $target - $capaian);
+                // 🚀 Tumpukan 2: Belum Diverifikasi (Kuning)
+                $seriesBelumVerifikasi[] = $belumVerifikasi;
+                // 🚀 Tumpukan 3: Terverifikasi (Hijau)
+                $seriesTerverifikasi[] = $terverifikasi;
             }
         }
 
         return $this->response->setJSON([
             'categories' => $categories,
             'series'     => [
-                ['name' => 'Tercapai', 'data' => $seriesCapaian],
-                ['name' => 'Belum Tercapai', 'data' => $seriesSisa]
+                ['name' => 'Belum Tercapai', 'data' => $seriesBelumTercapai],
+                ['name' => 'Belum Verifikasi', 'data' => $seriesBelumVerifikasi],
+                ['name' => 'Terverifikasi', 'data' => $seriesTerverifikasi]
             ]
         ]);
     }
