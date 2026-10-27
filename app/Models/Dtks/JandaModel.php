@@ -1,150 +1,174 @@
 <?php
 
-//CountryModel.php
-
 namespace App\Models\Dtks;
 
 use CodeIgniter\Model;
+use App\Traits\WilayahFilterTrait;
 
 class JandaModel extends Model
 {
+	use WilayahFilterTrait;
 
-	protected $table = 'dtks_janda';
+	protected $table = 'dtsen_art';
+	protected $primaryKey = 'id_art';
+	protected $allowedFields = [
+		'id_kk', 'nik', 'nama', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
+		'status_kawin', 'pendidikan_terakhir', 'pekerjaan', 'disabilitas'
+	];
 
-	protected $primaryKey = 'ID';
+	var $column_order = [
+		null,
+		'art.nik',
+		'art.nama',
+		'alamat',
+		'rt.rw',
+		'usia',
+		'art.jenis_kelamin',
+		'kr.kategori_rumah',
+		'pk.pk_nama',
+		'kategori_lansia',
+		null
+	];
 
-	protected $allowedFields = ['NO', 'NIK', 'NO_KK', 'NAMA', 'TEMPAT_LAHIR', 'TANGGAL_LAHIR', 'ALAMAT', 'RT', 'RW', 'DESA', 'KEC', 'KAB', 'FOTO_KK', 'FOTO_DIRI', 'Created_by', 'Created_at', 'Updated_by', 'Updated_at'];
+	var $order = ['art.nama' => 'asc'];
 
-	var $column_order = array(
-		'ID', 'NO', 'NIK', 'NO_KK', 'NAMA', 'TEMPAT_LAHIR', 'TANGGAL_LAHIR', 'ALAMAT', 'RT', 'RW', 'DESA', 'KEC', 'KAB', 'FOTO_KK', 'FOTO_DIRI', 'Created_by', 'Created_at', 'Updated_by', 'Updated_at'
-	);
-
-	var $order = array('NAMA' => 'asc');
-
-	function get_datatables($desa, $rw, $operator, $keterangan)
+	private function _get_datatables_query(array $filter, int $roleId = 1)
 	{
-		// desa
-		if ($desa == "") {
-			$kondisi_desa = "";
-		} else {
-			$kondisi_desa = " AND DESA = '$desa'";
+		$builder = $this->db->table('dtsen_art art');
+		$builder->select("
+			art.id_art,
+			art.id_kk,
+			art.nama,
+			art.nik,
+			art.jenis_kelamin,
+			art.tanggal_lahir,
+			TIMESTAMPDIFF(YEAR, art.tanggal_lahir, CURDATE()) AS usia,
+			COALESCE(pk.pk_nama, art.pendidikan_terakhir, '-') AS pendidikan,
+			COALESCE(NULLIF(rt.alamat, ''), NULLIF(kk.alamat, ''), '-') AS alamat,
+			COALESCE(NULLIF(rt.rt, ''), '000') AS rt,
+			COALESCE(NULLIF(rt.rw, ''), '000') AS rw,
+			rt.kode_desa,
+			COALESCE(NULLIF(kr.kategori_rumah, ''), '-') AS kategori_rumah,
+			COALESCE(NULLIF(kr.status_kepemilikan, ''), NULLIF(rt.kepemilikan_rumah, ''), '-') AS status_kepemilikan,
+			COALESCE(ls.kategori, 'Lansia') AS kategori_lansia,
+			ls.keterangan AS keterangan_lansia
+		");
+		$builder->join('dtsen_kk kk', 'kk.id_kk = art.id_kk');
+		$builder->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left');
+		$builder->join('dtsen_keadaan_rumah kr', 'kr.id_kk = kk.id_kk', 'left');
+		$builder->join('pendidikan_kk pk', 'pk.pk_id = art.pendidikan_terakhir', 'left');
+		$builder->join('dtsen_lansia ls', 'ls.id_art = art.id_art', 'left');
+
+		// Hanya lansia (usia > 60 tahun) dan tidak terhapus
+		$builder->where('art.deleted_at IS NULL');
+		$builder->where('kk.deleted_at IS NULL');
+		$builder->where('TIMESTAMPDIFF(YEAR, art.tanggal_lahir, CURDATE()) >', 60);
+
+		// 🔐 Terapkan WilayahFilterTrait (Karantina Kode Desa, RW, RT, dan Wilayah Tugas Petugas)
+		$this->applyWilayahFilter($builder, $filter, $roleId);
+
+		// Filter Kategori (Lansia / Jompo)
+		$kategori = $filter['kategori'] ?? '';
+		if (!empty($kategori)) {
+			if ($kategori === 'Lansia') {
+				$builder->groupStart()
+					->where('ls.kategori', 'Lansia')
+					->orWhere('ls.kategori IS NULL')
+					->groupEnd();
+			} elseif ($kategori === 'Jompo') {
+				$builder->where('ls.kategori', 'Jompo');
+			}
 		}
 
-		// rw
-		if ($rw == "") {
-			$kondisi_rw = "";
-		} else {
-			$kondisi_rw = " AND RW = '$rw'";
-		}
-		// status
-		if ($operator == "") {
-			$kondisi_operator = "";
-		} else {
-			$kondisi_operator = " AND Created_by = '$operator'";
-		}
-		// keterangan
-		if ($keterangan == "") {
-			$kondisi_keterangan = "";
-		} else {
-			$kondisi_keterangan = " AND Updated_by = '$keterangan'";
+		// Pencarian
+		$search = $filter['search'] ?? ($_POST['search']['value'] ?? '');
+		if ($search !== '') {
+			$builder->groupStart()
+				->like('art.nama', $search)
+				->orLike('art.nik', $search)
+				->orLike('kk.no_kk', $search)
+				->orLike('rt.alamat', $search)
+				->orLike('kk.alamat', $search)
+				->orLike('ls.keterangan', $search)
+				->groupEnd();
 		}
 
-		// search
-		if ($_POST['search']['value']) {
-			$search = $_POST['search']['value'];
-			$kondisi_search = "(NAMA LIKE '%$search%' OR NO_KK LIKE '%$search%' OR NIK LIKE '%$search%' OR ALAMAT LIKE '%$search%') $kondisi_desa $kondisi_rw $kondisi_operator $kondisi_keterangan";
-		} else {
-			$kondisi_search = "ID != '' $kondisi_desa $kondisi_rw $kondisi_operator $kondisi_keterangan";
-		}
+		return $builder;
+	}
 
-		// order
-		if (isset($_POST['order'])) {
-			$result_order = $this->column_order[$_POST['order']['0']['column']];
-			$result_dir = $_POST['order']['0']['dir'];
+	public function get_datatables(array $filter, int $roleId = 1)
+	{
+		$builder = $this->_get_datatables_query($filter, $roleId);
+
+		if (isset($_POST['order']) && isset($_POST['order']['0']['column'])) {
+			$colIdx = (int)$_POST['order']['0']['column'];
+			$colName = $this->column_order[$colIdx] ?? null;
+			if ($colName) {
+				$dir = $_POST['order']['0']['dir'] ?? 'asc';
+				$builder->orderBy($colName, $dir);
+			} else {
+				$builder->orderBy('art.nama', 'asc');
+			}
 		} else if ($this->order) {
 			$order = $this->order;
-			$result_order = key($order);
-			$result_dir = $order[key($order)];
+			$builder->orderBy(key($order), $order[key($order)]);
 		}
 
-		if ($_POST['length'] != -1);
-		$db = db_connect();
-		$builder = $db->table('dtks_janda');
-		$query = $builder->select('*')
-			->join('tbl_desa', 'tbl_desa.KodeDesa=dtks_janda.DESA')
-			// ->join('tbl_jenkel', 'tbl_jenkel.IdJenKel=dtks_janda.JKAnak')
-			// ->join('pekerjaan_kondisi_pekerjaan', 'pekerjaan_kondisi_pekerjaan.IDKondisi=individu_data.KondisiPekerjaan')
-			// ->join('pendidikan_pend_tinggi', 'pendidikan_pend_tinggi.IDPendidikan=individu_data.PendTertinggi')
-			// ->join('ket_verivali', 'ket_verivali.id_ketvv=individu_data.ket_verivali')
-			->where($kondisi_search)
-			->orderBy($result_order, $result_dir)
-			->limit($_POST['length'], $_POST['start'])
-			->get();
+		$length = isset($_POST['length']) ? (int)$_POST['length'] : 10;
+		$start = isset($_POST['start']) ? (int)$_POST['start'] : 0;
+		if ($length !== -1) {
+			$builder->limit($length, $start);
+		}
 
-		return $query->getResult();
+		return $builder->get()->getResult();
 	}
 
-	function jumlah_semua()
+	public function jumlah_semua(array $filter, int $roleId = 1)
 	{
-		$sQuery = "SELECT COUNT(ID) as jml FROM dtks_janda";
-		$db = db_connect();
-		$query = $db->query($sQuery)->getRow();
+		$builder = $this->db->table('dtsen_art art');
+		$builder->join('dtsen_kk kk', 'kk.id_kk = art.id_kk');
+		$builder->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left');
 
-		return $query;
+		$builder->where('art.deleted_at IS NULL');
+		$builder->where('kk.deleted_at IS NULL');
+		$builder->where('TIMESTAMPDIFF(YEAR, art.tanggal_lahir, CURDATE()) >', 60);
+
+		// Karantina wilayah dasar (kode_desa, wilayah_tugas, level) sesuai hak akses user
+		$filterWilayah = [
+			'kode_desa'     => $filter['kode_desa'] ?? '',
+			'wilayah_tugas' => $filter['wilayah_tugas'] ?? '',
+			'level'         => $filter['level'] ?? ''
+		];
+		$this->applyWilayahFilter($builder, $filterWilayah, $roleId);
+
+		return (object)['jml' => $builder->countAllResults()];
 	}
 
-	function jumlah_filter($desa, $rw, $operator, $keterangan)
+	public function jumlah_filter(array $filter, int $roleId = 1)
 	{
-		// desa
-		if ($desa == "") {
-			$kondisi_desa = "";
-		} else {
-			$kondisi_desa = " AND DESA = '$desa'";
-		}
-
-		// rw
-		if ($rw == "") {
-			$kondisi_rw = "";
-		} else {
-			$kondisi_rw = " AND RW = '$rw'";
-		}
-
-		// operator
-		if ($operator == "") {
-			$kondisi_operator = "";
-		} else {
-			$kondisi_operator = " AND Created_by = '$operator'";
-		}
-
-		// rw
-		if ($keterangan == "") {
-			$kondisi_keterangan = "";
-		} else {
-			$kondisi_keterangan = " AND Updated_by = '$keterangan'";
-		}
-
-		// kondisi search
-		if ($_POST['search']['value']) {
-			$search = $_POST['search']['value'];
-			$kondisi_search = "AND (NAMA LIKE '%$search%' OR NO_KK LIKE '%$search%' OR NIK LIKE '%$search%' OR ALAMAT LIKE '%$search%') $kondisi_desa $kondisi_rw $kondisi_operator $kondisi_keterangan";
-		} else {
-			$kondisi_search = "$kondisi_desa $kondisi_rw $kondisi_operator $kondisi_keterangan";
-		}
-
-		$sQuery = "SELECT COUNT(ID) as jml FROM dtks_janda WHERE ID != '' $kondisi_search";
-		$db = db_connect();
-		$query = $db->query($sQuery)->getRow();
-
-		return $query;
+		$builder = $this->_get_datatables_query($filter, $roleId);
+		return (object)['jml' => $builder->countAllResults()];
 	}
 
-	public function jmlJanda()
+	public function get_export_data(array $filter, int $roleId = 1)
 	{
-		$builder = $this->db->table('dtks_janda');
-		$query = $builder->select("COUNT(ID) as jml, RW");
-		$query = $builder->where("RW GROUP BY RW, RW")->get();
-		$record = $query->getResult();
+		$builder = $this->_get_datatables_query($filter, $roleId);
+		$builder->orderBy('art.nama', 'asc');
+		return $builder->get()->getResultArray();
+	}
 
-		return $record;
+	public function save_status_lansia($id_art, $kategori, $keterangan, $username = '')
+	{
+		$db = \Config\Database::connect();
+		$sql = "
+			INSERT INTO dtsen_lansia (id_art, kategori, keterangan, updated_by)
+			VALUES (?, ?, ?, ?)
+			ON DUPLICATE KEY UPDATE 
+				kategori = VALUES(kategori), 
+				keterangan = VALUES(keterangan), 
+				updated_by = VALUES(updated_by), 
+				updated_at = NOW()
+		";
+		return $db->query($sql, [$id_art, $kategori, $keterangan, $username]);
 	}
 }

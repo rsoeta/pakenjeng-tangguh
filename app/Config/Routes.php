@@ -755,6 +755,28 @@ $routes->post('tbPadanFamantama', 'Dtks\Famantama::tabel_padan', ['filter' => 'a
 $routes->post('exportFamantama', 'Dtks\Famantama::export', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 $routes->post('exportFamantama1', 'Dtks\Famantama::export1', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);
 
+// LANSIA / JOMPO
+$routes->get('lansia-jompo', 'Dtks\Lansia::index', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->post('lansia-jompo/data', 'Dtks\Lansia::data', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->post('lansia-jompo/save_status', 'Dtks\Lansia::save_status', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->get('lansia-jompo/export_excel', 'Dtks\Lansia::export_excel', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->get('lansia', 'Dtks\Lansia::index', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+
+// ALIAS & BACKWARD COMPATIBILITY
+$routes->get('janda_data', 'Dtks\Janda::index', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->get('janda', 'Dtks\Janda::index', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->get('dtks/janda', 'Dtks\Janda::index', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->get('janda_data/export_excel', 'Dtks\Lansia::export_excel', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->get('dtks/janda_data/export_excel', 'Dtks\Lansia::export_excel', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->post('dtks/janda_data', 'Dtks\Lansia::data', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->post('janda_data', 'Dtks\Lansia::data', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->post('janda_data/save_status', 'Dtks\Lansia::save_status', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->post('dtks/janda_data/save_status', 'Dtks\Lansia::save_status', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->match(['GET', 'POST'], 'dtks/tambahjanda', 'Dtks\Janda::tambah', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->match(['GET', 'POST'], 'janda/tambah', 'Dtks\Janda::tambah', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->post('dtks/janda/action', 'Dtks\Janda::action', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->post('janda/action', 'Dtks\Janda::action', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+
 // WILAYAH
 $routes->post('action', 'Dtks\Wil::action', ['filter' => 'authfilterdtks']);
 
