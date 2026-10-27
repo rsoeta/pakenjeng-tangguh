@@ -204,7 +204,8 @@
                                 return '<span class="badge bg-secondary opacity-75"><i class="fas fa-hourglass-half"></i> Menunggu Admin</span>';
                             }
 
-                            let btnManual = `<a href="/pembaruan-keluarga/detail/${row.id_kk}" class="btn btn-outline-dark btn-sm me-1"><i class="fas fa-users-cog"></i> Manual</a>`;
+                            let encId = row.id_kk_encoded || row.id_kk;
+                            let btnManual = `<a href="/pembaruan-keluarga/detail/${encId}" class="btn btn-outline-dark btn-sm me-1"><i class="fas fa-users-cog"></i> Manual</a>`;
                             let btnAuto = (row.rt && row.rw) ? `<button class="btn btn-warning btn-sm btnTriggerAutoFix" data-idrt="${row.id_rt}" data-rt="${row.rt}" data-rw="${row.rw}"><i class="fas fa-magic"></i> Auto-Fix</button>` : '';
 
                             return btnManual + btnAuto;

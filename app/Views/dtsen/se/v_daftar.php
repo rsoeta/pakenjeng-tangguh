@@ -439,8 +439,9 @@
                             `;
                         }
 
+                        const detailId = row.id_kk_encoded || row.id_kk;
                         return `
-                            <a href="/pembaruan-keluarga/detail/${row.id_kk}" 
+                            <a href="/pembaruan-keluarga/detail/${detailId}" 
                             class="btn btn-outline-dark btn-sm me-1">
                                 <i class="fas fa-users-cog"></i>
                             </a>

@@ -244,6 +244,7 @@ class DtsenSe extends Controller
             $canInputDesil = ($roleId <= 3);
 
             foreach ($dataKeluarga as &$row) {
+                $row['id_kk_encoded']   = encode_id($row['id_kk']);
                 $row['can_input_desil'] = $canInputDesil;
 
                 // Status Perlinsos

@@ -11,6 +11,7 @@ use CodeIgniter\API\ResponseTrait;
 class PembaruanKeluarga extends BaseController
 {
     use ResponseTrait;
+    use \App\Traits\WilayahFilterTrait;
 
     protected $db;
     protected $genModel;
@@ -28,8 +29,21 @@ class PembaruanKeluarga extends BaseController
         return redirect()->to('/dtsen-se');
     }
 
-    public function detail($id_kk)
+    public function detail($id_param)
     {
+        // 🔒 AUTO-REDIRECT: Jika parameter masih berupa numerik mentah (misal /detail/6681),
+        // paksa redirect 302 ke URL hash token agar URL di address bar terenkripsi
+        // dan mencegah user mengetik/menebak-nebak ID numerik lain.
+        if (is_numeric($id_param)) {
+            return redirect()->to(base_url('pembaruan-keluarga/detail/' . encode_id($id_param)));
+        }
+
+        // 🔓 DEKRIPSI TOKEN ID
+        $id_kk = decode_id($id_param);
+        if (empty($id_kk) || !is_numeric($id_kk)) {
+            return redirect()->to(base_url('dtsen-se'))->with('error', 'Tautan tidak valid atau data keluarga tidak ditemukan.');
+        }
+
         try {
             $db = \Config\Database::connect();
             $genModel = new \App\Models\GenModel();
@@ -45,16 +59,37 @@ class PembaruanKeluarga extends BaseController
                 ->getRowArray() ?? [];
 
             if (empty($kkData)) {
-                throw new \Exception("Data KK tidak ditemukan untuk id_kk={$id_kk}");
+                return redirect()->to(base_url('dtsen-se'))->with('error', 'Data keluarga tidak ditemukan.');
             }
-
-            $seData = $db->table('dtsen_se')->select('kategori_desil')->where('id_kk', $id_kk)->orderBy('id_se', 'DESC')->get()->getRowArray();
-            $kategoriDesil = $seData['kategori_desil'] ?? null;
 
             $rtData = [];
             if (!empty($kkData['id_rt'])) {
                 $rtData = $db->table('dtsen_rt')->where('id_rt', $kkData['id_rt'])->get()->getRowArray() ?? [];
             }
+
+            // 🛡️ SERVER-SIDE AUTHORIZATION GUARD (ANTI-IDOR)
+            $session = session();
+            $authModel = new \App\Models\Dtks\AuthModel();
+            $userInfo = $authModel->getUserId();
+            $userData = array_merge([
+                'nama'          => $session->get('fullname') ?? '-',
+                'username'      => $session->get('username') ?? '-',
+                'kode_desa'     => $session->get('kode_desa') ?? '',
+                'role_id'       => (int)($session->get('role_id') ?? 99),
+                'level'         => $session->get('level') ?? '',
+                'wilayah_tugas' => $session->get('wilayah_tugas') ?? '',
+            ], is_array($userInfo) ? $userInfo : []);
+
+            $recordKodeDesa = $rtData['kode_desa'] ?? ($kkData['kode_desa'] ?? null);
+            $recordRw       = $rtData['rw'] ?? ($kkData['rw'] ?? null);
+            $recordRt       = $rtData['rt'] ?? ($kkData['rt'] ?? null);
+
+            if (!self::isRecordAllowed($userData, (int)$userData['role_id'], $recordKodeDesa, $recordRw, $recordRt)) {
+                return redirect()->to(base_url('dtsen-se'))->with('error', 'Akses ditolak: Data keluarga ini berada di luar wilayah tugas Anda.');
+            }
+
+            $seData = $db->table('dtsen_se')->select('kategori_desil')->where('id_kk', $id_kk)->orderBy('id_se', 'DESC')->get()->getRowArray();
+            $kategoriDesil = $seData['kategori_desil'] ?? null;
 
             $usulan = $db->table('dtsen_usulan')
                 ->where('dtsen_kk_id', $id_kk)
@@ -1475,7 +1510,7 @@ class PembaruanKeluarga extends BaseController
             }
 
             // Jika id_kk ada, arahkan ke detail yang sama seperti tombol pembaruan keluarga
-            return redirect()->to('/pembaruan-keluarga/detail/' . $id_kk);
+            return redirect()->to('/pembaruan-keluarga/detail/' . encode_id($id_kk));
         } catch (\Throwable $e) {
             log_message('error', '❌ lanjutkan() error: ' . $e->getMessage());
             return redirect()->back()->with('message', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -1581,7 +1616,7 @@ class PembaruanKeluarga extends BaseController
             return $this->response->setJSON([
                 'status'   => 'success',
                 'message'  => 'Draft keluarga baru berhasil dibuat.',
-                'redirect' => base_url("pembaruan-keluarga/detail/{$insertId}")
+                'redirect' => base_url('pembaruan-keluarga/detail/' . encode_id($insertId))
             ]);
         } catch (\Throwable $e) {
             log_message('error', '❌ [store] ' . $e->getMessage());
@@ -1760,7 +1795,7 @@ class PembaruanKeluarga extends BaseController
         }
     }
 
-    private function parseWilayahTugas(?string $wilayahTugas): array
+    private function parseWilayahTugasList(?string $wilayahTugas): array
     {
         $result = [];
 
@@ -1840,7 +1875,7 @@ class PembaruanKeluarga extends BaseController
             }
 
             if (!empty($wilayahTugas) && $roleId >= 4) {
-                $parsed = $this->parseWilayahTugas($wilayahTugas);
+                $parsed = $this->parseWilayahTugasList($wilayahTugas);
                 $builder->groupStart();
                 foreach ($parsed as $group) {
                     $builder->orGroupStart()->where('r.rw', $group['rw']);
@@ -1916,7 +1951,7 @@ class PembaruanKeluarga extends BaseController
             }
 
             if (!empty($wilayahTugas) && $roleId >= 4) {
-                $parsed = $this->parseWilayahTugas($wilayahTugas);
+                $parsed = $this->parseWilayahTugasList($wilayahTugas);
                 $builder->groupStart();
                 foreach ($parsed as $group) {
                     $builder->orGroupStart()->where('r.rw', $group['rw']);

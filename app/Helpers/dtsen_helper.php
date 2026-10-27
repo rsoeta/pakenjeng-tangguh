@@ -204,3 +204,56 @@ if (!function_exists('getPeriodeDesil')) {
 //         ];
 //     }
 // }
+
+/**
+ * 🔒 Enkripsi ID integer menjadi token URL-Safe yang tidak dapat ditebak
+ */
+if (!function_exists('encode_id')) {
+    function encode_id($id): string
+    {
+        if (!is_numeric($id) || (int)$id <= 0) {
+            return '';
+        }
+        $secret = 'SINDEN_SECRET_SALT_2026';
+        $iv  = substr(hash('sha256', $secret . 'IV'), 0, 16);
+        $key = substr(hash('sha256', $secret . 'KEY'), 0, 16);
+        $encrypted = openssl_encrypt((string)(int)$id, 'AES-128-CBC', $key, OPENSSL_RAW_DATA, $iv);
+        return rtrim(strtr(base64_encode($encrypted), '+/', '-_'), '=');
+    }
+}
+
+/**
+ * 🔓 Dekripsi token URL-Safe menjadi ID integer asli (mendukung backward-compatibility angka numerik)
+ */
+if (!function_exists('decode_id')) {
+    function decode_id($str): ?int
+    {
+        if (empty($str)) {
+            return null;
+        }
+        if (is_numeric($str)) {
+            return (int)$str;
+        }
+
+        $b64 = strtr((string)$str, '-_', '+/');
+        $pad = strlen($b64) % 4;
+        if ($pad) {
+            $b64 .= str_repeat('=', 4 - $pad);
+        }
+        $raw = base64_decode($b64, true);
+        if (!$raw) {
+            return null;
+        }
+
+        $secret = 'SINDEN_SECRET_SALT_2026';
+        $iv  = substr(hash('sha256', $secret . 'IV'), 0, 16);
+        $key = substr(hash('sha256', $secret . 'KEY'), 0, 16);
+        $decrypted = openssl_decrypt($raw, 'AES-128-CBC', $key, OPENSSL_RAW_DATA, $iv);
+
+        if ($decrypted === false || !is_numeric($decrypted) || (int)$decrypted <= 0) {
+            return null;
+        }
+
+        return (int)$decrypted;
+    }
+}

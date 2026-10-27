@@ -35,6 +35,12 @@
                 </a>
             <?php endif; ?>
 
+            <a href="<?= base_url('dtsen/keadaan-rumah') ?>"
+                class="btn btn-sm <?= ($segment ?? '') == 'keadaan_rumah' ? 'btn-success disabled' : 'btn-outline-success bg-white' ?>"
+                title="Kelola Tempat Tinggal / Keadaan Rumah">
+                🏡 Keadaan Rumah
+            </a>
+
         </div>
     </div>
 </div>

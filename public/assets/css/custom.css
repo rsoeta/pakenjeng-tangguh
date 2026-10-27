@@ -381,25 +381,31 @@ body.dark-mode .swal2-input:focus {
   border-radius: 12px !important;
 }
 
-/* 🔧 Perbaiki jarak antara navbar dan konten utama */
+/* 🔧 Perbaiki jarak antara navbar dan konten utama (Menghilangkan jarak jomplang) */
+.layout-navbar-fixed .wrapper .content-wrapper,
 .content-wrapper {
-  padding-top: 0.75rem !important; /* default biasanya 1.5rem–2rem */
+  margin-top: 0 !important;
+  padding-top: 0.25rem !important;
+  transition: padding-top 0.3s ease;
 }
 
-/* Jika pakai .content-header di dashboard, perkecil juga */
+/* Header konten */
 .content-header {
-  margin-bottom: 0.5rem !important;
-  padding-top: 0 !important;
+  margin-bottom: 0.25rem !important;
+  padding-top: 0.25rem !important;
   padding-bottom: 0.25rem !important;
 }
 
 /* Untuk perangkat mobile (lebar < 768px), kurangi lebih jauh */
 @media (max-width: 768px) {
+  .layout-navbar-fixed .wrapper .content-wrapper,
   .content-wrapper {
-    padding-top: 0.5rem !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
   }
   .content-header {
     margin-bottom: 0.25rem !important;
+    padding-top: 0.25rem !important;
   }
 }
 
@@ -413,25 +419,3 @@ body.dark-mode .swal2-input:focus {
 .content > .container-fluid {
   padding-top: 0.5rem !important;
 }
-
-/* 🌿 Default compact layout */
-.content-wrapper {
-  padding-top: 0.75rem !important;
-  transition: padding-top 0.3s ease;
-}
-
-/* Header konten */
-.content-header {
-  margin-bottom: 0.5rem !important;
-  padding-top: 0 !important;
-  padding-bottom: 0.25rem !important;
-}
-
-/* Mobile default fallback */
-@media (max-width: 768px) {
-  .content-wrapper {
-    padding-top: 0.5rem !important;
-  }
-}
-
-

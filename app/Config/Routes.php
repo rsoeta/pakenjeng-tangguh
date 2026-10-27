@@ -131,7 +131,7 @@ $routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview
 	$routes->post('tabel_data', 'Dtsen\DtsenSe::tabel_data');
 	$routes->post('autofix_rt_rw', 'Dtsen\DtsenSe::autofix_rt_rw');
 
-	$routes->get('detail/(:num)', 'Dtsen\PembaruanKeluarga::detail/$1');
+	$routes->get('detail/(:segment)', 'Dtsen\PembaruanKeluarga::detail/$1');
 	$routes->get('tambah', 'Dtsen\PembaruanKeluarga::tambah');  // 🆕 Form tambah keluarga baru
 	$routes->post('tambah', 'Dtsen\PembaruanKeluarga::store');  // 🆕 Simpan draft baru hasil input
 	$routes->post('save-keluarga', 'Dtsen\PembaruanKeluarga::saveKeluarga');
@@ -251,7 +251,7 @@ $routes->group('sensus-ekonomi', ['filter' => ['authfilterdtks', 'menufilterdtks
 	$routes->post('cariKk', 'Dtsen\SensusEkonomi::cariKk');
 
 	// 🚀 BYPASS ROUTE: Menembak fungsi detail tanpa harus masuk menu pembaruan-keluarga
-	$routes->get('detail/(:num)', 'Dtsen\PembaruanKeluarga::detail/$1');
+	$routes->get('detail/(:segment)', 'Dtsen\PembaruanKeluarga::detail/$1');
 	// 🚀 BYPASS AJAX: Mengizinkan Role 6 (Petugas SE) mengambil data tanpa terblokir Menu Filter
 	$routes->get('get-anggota-list/(:num)', 'Dtsen\PembaruanKeluarga::getAnggotaList/$1');
 	$routes->get('get-anggota-detail/(:num)', 'Dtsen\PembaruanKeluarga::getAnggotaDetail/$1');
@@ -691,6 +691,22 @@ $routes->group('perlinsos', ['filter' => ['authfilterdtks', 'globalview', 'menuf
 	$routes->post('data-akses', 'Dtsen\Perlinsos::getDataAkses');
 	$routes->post('verify-akses', 'Dtsen\Perlinsos::verifyAkses');
 });
+
+// ==========================================
+// 🏡 KEADAAN RUMAH / TEMPAT TINGGAL
+// ==========================================
+$routes->group('dtsen/keadaan-rumah', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
+	$routes->get('/', 'Dtsen\KeadaanRumah::index');
+	$routes->post('data', 'Dtsen\KeadaanRumah::getData');
+	$routes->get('grafik', 'Dtsen\KeadaanRumah::grafik');
+	$routes->get('grafik-data', 'Dtsen\KeadaanRumah::getGrafikData');
+	$routes->post('save', 'Dtsen\KeadaanRumah::save');
+	$routes->post('auto-detect-all', 'Dtsen\KeadaanRumah::autoDetectAll');
+	$routes->get('export-excel', 'Dtsen\KeadaanRumah::exportExcel');
+	$routes->get('rt-by-rw/(:any)', 'Dtsen\KeadaanRumah::getRTByRW/$1');
+});
+$routes->addRedirect('keadaan-rumah', 'dtsen/keadaan-rumah');
+$routes->addRedirect('keadaan-rumah/grafik', 'dtsen/keadaan-rumah/grafik');
 
 // USULAN
 $routes->get('usulan', 'Dtks\Usulan22::index', ['filter' => 'authfilterdtks', 'filter' => 'menufilterdtks']);

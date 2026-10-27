@@ -188,7 +188,7 @@ class AnalisisDesil extends BaseController
                 }
 
                 // 🚀 RACIK TOMBOL MENUJU DETAIL KELUARGA
-                $urlDetail = base_url('pembaruan-keluarga/detail/' . $row['id_kk']);
+                $urlDetail = base_url('pembaruan-keluarga/detail/' . encode_id($row['id_kk']));
                 $btnAksi = '<a href="' . $urlDetail . '" class="btn btn-sm btn-info shadow-sm font-weight-bold" target="_blank" title="Lihat Profil Keluarga"><i class="fas fa-external-link-alt mr-1"></i> Detail</a>';
 
                 $data[] = [
