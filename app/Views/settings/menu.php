@@ -137,7 +137,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal-footer bg-light" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                            <div class="modal-footer bg-light d-flex justify-content-between align-items-center" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
                                 <button type="button" class="btn btn-secondary btn-sm shadow-sm" data-dismiss="modal">Batal</button>
                                 <button type="submit" id="btnSubmitMenu" class="btn btn-success btn-sm shadow-sm px-3"><i class="fas fa-save"></i> Simpan Menu</button>
                             </div>

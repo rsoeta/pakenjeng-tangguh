@@ -56,6 +56,10 @@ yarn-error.log*
 !public/data/**
 public/data/*
 public/error_log
+php.ini
+public/php.ini
+.user.ini
+public/.user.ini
 
 # ----------------------------------------------------------------------
 # LARAGON / LOCAL TOOLS

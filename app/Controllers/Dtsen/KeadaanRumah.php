@@ -81,13 +81,20 @@ class KeadaanRumah extends BaseController
         ];
         $summary = $this->keadaanModel->getGrafikSummary($filterSummary, $roleId);
 
+        $initKategori = trim((string)($this->request->getGet('kategori') ?? ''));
+        $initRw       = trim((string)($this->request->getGet('rw') ?? ''));
+        $initRt       = trim((string)($this->request->getGet('rt') ?? ''));
+
         $data = [
-            'title'      => 'Tempat Tinggal / Keadaan Rumah',
-            'namaApp'    => nameApp(),
-            'user_login' => $userData,
-            'list_rw'    => $listRw,
-            'summary'    => $summary,
-            'segment'    => 'tabel'
+            'title'         => 'Tempat Tinggal / Keadaan Rumah',
+            'namaApp'       => nameApp(),
+            'user_login'    => $userData,
+            'list_rw'       => $listRw,
+            'summary'       => $summary,
+            'init_kategori' => $initKategori,
+            'init_rw'       => $initRw,
+            'init_rt'       => $initRt,
+            'segment'       => 'tabel'
         ];
 
         return view('dtsen/keadaan_rumah/index', $data);

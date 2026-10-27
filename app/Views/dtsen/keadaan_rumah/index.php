@@ -1,3 +1,8 @@
+<?php
+$init_kategori = $init_kategori ?? (request()->getGet('kategori') ?? '');
+$init_rw       = $init_rw ?? (request()->getGet('rw') ?? '');
+$init_rt       = $init_rt ?? (request()->getGet('rt') ?? '');
+?>
 <?= $this->extend('templates/index'); ?>
 <?= $this->section('content'); ?>
 
@@ -102,7 +107,7 @@
         </div>
 
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card card-stat shadow-sm border-permanen bg-white h-100 p-2">
+            <div class="card card-stat shadow-sm border-permanen bg-white h-100 p-2 btn-stat-filter" data-kategori="Permanen" style="cursor: pointer;" title="Filter Permanen">
                 <div class="d-flex align-items-center">
                     <div class="stat-icon text-white me-2" style="background-color: #169B88;">
                         <i class="fas fa-building"></i>
@@ -116,7 +121,7 @@
         </div>
 
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card card-stat shadow-sm border-semi bg-white h-100 p-2">
+            <div class="card card-stat shadow-sm border-semi bg-white h-100 p-2 btn-stat-filter" data-kategori="Semi Permanen" style="cursor: pointer;" title="Filter Semi Permanen">
                 <div class="d-flex align-items-center">
                     <div class="stat-icon text-white me-2" style="background-color: #3D82A9;">
                         <i class="fas fa-home"></i>
@@ -130,7 +135,7 @@
         </div>
 
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card card-stat shadow-sm border-panggung bg-white h-100 p-2">
+            <div class="card card-stat shadow-sm border-panggung bg-white h-100 p-2 btn-stat-filter" data-kategori="Panggung" style="cursor: pointer;" title="Filter Panggung">
                 <div class="d-flex align-items-center">
                     <div class="stat-icon text-white me-2" style="background-color: #9EAF22;">
                         <i class="fas fa-campground"></i>
@@ -144,7 +149,7 @@
         </div>
 
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card card-stat shadow-sm border-numpang bg-white h-100 p-2">
+            <div class="card card-stat shadow-sm border-numpang bg-white h-100 p-2 btn-stat-filter" data-kategori="Numpang" style="cursor: pointer;" title="Filter Numpang">
                 <div class="d-flex align-items-center">
                     <div class="stat-icon text-white me-2" style="background-color: #D84F2A;">
                         <i class="fas fa-user-friends"></i>
@@ -158,7 +163,7 @@
         </div>
 
         <div class="col-6 col-md-4 col-lg-2">
-            <div class="card card-stat shadow-sm border-belum bg-white h-100 p-2">
+            <div class="card card-stat shadow-sm border-belum bg-white h-100 p-2 btn-stat-filter" data-kategori="belum_dinilai" style="cursor: pointer;" title="Filter Belum Dinilai">
                 <div class="d-flex align-items-center">
                     <div class="stat-icon text-white me-2" style="background-color: #F59100;">
                         <i class="fas fa-question-circle"></i>
@@ -184,7 +189,7 @@
                     <select class="form-select form-select-sm" id="filter_rw">
                         <option value="all"><?= ($user_login['role_id'] ?? 0) >= 4 ? 'Semua RW Tugas' : 'Semua RW' ?></option>
                         <?php foreach ($list_rw as $rw): ?>
-                            <option value="<?= esc($rw) ?>">RW <?= esc($rw) ?></option>
+                            <option value="<?= esc($rw) ?>" <?= ($init_rw == $rw) ? 'selected' : '' ?>>RW <?= esc($rw) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -192,7 +197,7 @@
                 <!-- Filter RT -->
                 <div class="col-md-2 col-sm-6">
                     <label class="form-label small fw-bold mb-1">Filter RT</label>
-                    <select class="form-select form-select-sm" id="filter_rt" disabled>
+                    <select class="form-select form-select-sm" id="filter_rt" <?= empty($init_rw) ? 'disabled' : '' ?>>
                         <option value="all"><?= ($user_login['role_id'] ?? 0) >= 4 ? 'Semua RT Tugas' : 'Semua RT' ?></option>
                     </select>
                 </div>
@@ -201,12 +206,12 @@
                 <div class="col-md-3 col-sm-6">
                     <label class="form-label small fw-bold mb-1">Kategori Keadaan Rumah</label>
                     <select class="form-select form-select-sm" id="filter_kategori">
-                        <option value="all">Semua Kategori</option>
-                        <option value="Permanen">Permanen</option>
-                        <option value="Semi Permanen">Semi Permanen</option>
-                        <option value="Panggung">Panggung</option>
-                        <option value="Numpang">Numpang</option>
-                        <option value="belum_dinilai">Belum Dinilai</option>
+                        <option value="all" <?= (empty($init_kategori) || $init_kategori === 'all') ? 'selected' : '' ?>>Semua Kategori</option>
+                        <option value="Permanen" <?= ($init_kategori === 'Permanen') ? 'selected' : '' ?>>Permanen</option>
+                        <option value="Semi Permanen" <?= ($init_kategori === 'Semi Permanen') ? 'selected' : '' ?>>Semi Permanen</option>
+                        <option value="Panggung" <?= ($init_kategori === 'Panggung') ? 'selected' : '' ?>>Panggung</option>
+                        <option value="Numpang" <?= ($init_kategori === 'Numpang') ? 'selected' : '' ?>>Numpang</option>
+                        <option value="belum_dinilai" <?= ($init_kategori === 'belum_dinilai') ? 'selected' : '' ?>>Belum Dinilai</option>
                     </select>
                 </div>
 
@@ -378,7 +383,88 @@
 </div>
 
 <script>
-    $(document).ready(function() {
+        // ==========================================
+    // 🛡️ SENSOR DATA SENSITIF (NO. KK)
+    // ==========================================
+    function maskNumberJS(number) {
+        if (!number || number === '-' || number === 'NOKKS') return number || '-';
+
+        let numStr = number.toString().trim();
+        if (numStr.length <= 8) return numStr;
+
+        let masked = numStr.substring(0, 8) + '*'.repeat(numStr.length - 8);
+
+        return `<span class="fw-bold text-primary" style="cursor:pointer;" 
+                  onmouseenter="this.innerText='${numStr}'" 
+                  onmouseleave="this.innerText='${masked}'" 
+                  ontouchstart="this.innerText='${numStr}'" 
+                  ontouchend="this.innerText='${masked}'" 
+                  title="Tahan/Arahkan kursor untuk melihat utuh">${masked}</span>`;
+    }
+
+    // ==========================================
+    // 📋 SALIN NO KK KE CLIPBOARD
+    // ==========================================
+    $(document).on('click', '.btnCopyNoKK', function(e) {
+        e.preventDefault();
+        const value = $(this).data('value');
+        if (!value) return;
+
+        navigator.clipboard.writeText(value).then(() => {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Tersalin',
+                    text: 'No. KK ' + value + ' berhasil disalin ke clipboard',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top'
+                });
+            } else {
+                alert('No. KK ' + value + ' berhasil disalin ke clipboard');
+            }
+        }).catch(() => {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire('Gagal', 'Tidak dapat menyalin No. KK', 'error');
+            } else {
+                alert('Gagal menyalin No. KK');
+            }
+        });
+    });
+
+        $(document).ready(function() {
+        // Klik card summary langsung filter tabel
+        $(document).on('click', '.btn-stat-filter', function() {
+            const kat = $(this).data('kategori');
+            $('#filter_kategori').val(kat).trigger('change');
+        });
+
+        // Tangkap parameter query dari URL jika ada
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlKat = urlParams.get('kategori') || '<?= esc($init_kategori ?? '') ?>';
+        const urlRw  = urlParams.get('rw') || '<?= esc($init_rw ?? '') ?>';
+        const urlRt  = urlParams.get('rt') || '<?= esc($init_rt ?? '') ?>';
+
+        if (urlKat) {
+            $('#filter_kategori').val(urlKat);
+        }
+
+        if (urlRw && urlRw !== 'all') {
+            $('#filter_rw').val(urlRw);
+            const $rt = $('#filter_rt');
+            const defaultRtText = '<?= ($user_login['role_id'] ?? 0) >= 4 ? 'Semua RT Tugas' : 'Semua RT' ?>';
+            $.getJSON('<?= base_url('dtsen/keadaan-rumah/rt-by-rw') ?>/' + encodeURIComponent(urlRw), function(res) {
+                $rt.empty().append('<option value="all">' + defaultRtText + '</option>');
+                if (res && res.length > 0) {
+                    res.forEach(item => {
+                        const isSel = (item.rt == urlRt) ? 'selected' : '';
+                        $rt.append(`<option value="${item.rt}" ${isSel}>RT ${item.rt}</option>`);
+                    });
+                    $rt.prop('disabled', false);
+                }
+            });
+        }
         // ==========================================
         // 1. INISIALISASI DATATABLES
         // ==========================================
@@ -409,9 +495,29 @@
                 {
                     data: 'kepala_keluarga'
                 },
-                {
+                                {
                     data: 'no_kk',
-                    className: 'text-center font-monospace'
+                    className: 'text-center font-monospace text-nowrap',
+                    render: function(data, type, row) {
+                        if (type === 'filter' || type === 'sort') {
+                            return data;
+                        }
+
+                        let maskedData = maskNumberJS(data);
+
+                        return `
+                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                <span class="fw-semibold">${maskedData}</span>
+                                <button 
+                                    type="button" 
+                                    class="btn btn-outline-secondary btn-xs btnCopyNoKK py-0 px-1" 
+                                    data-value="${data}" 
+                                    title="Salin No KK">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
                 },
                 {
                     data: 'alamat'
@@ -621,7 +727,8 @@
             const btn = $(this);
             $('#edit_id_kk').val(btn.data('id'));
             $('#txtNamaKK').text(btn.data('nama'));
-            $('#txtNoKK').text(btn.data('kk'));
+            const kkVal = btn.data('kk') || '';
+            $('#txtNoKK').html(maskNumberJS(kkVal) + ` <button type="button" class="btn btn-outline-secondary btn-xs btnCopyNoKK py-0 px-1 ms-1" data-value="${kkVal}" title="Salin No KK"><i class="fas fa-copy"></i></button>`);
             $('#edit_status_kepemilikan').val(btn.data('pemilikan'));
             $('#edit_jenis_lantai').val(btn.data('lantai'));
             $('#edit_jenis_dinding').val(btn.data('dinding'));

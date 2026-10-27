@@ -148,55 +148,56 @@
             <?php endif; ?>
 
             <!-- ========================================== -->
-            <!-- 5 WEDGE SLICES DI TENGAH                   -->
-            <!-- Center: (500, 280), Radius: 125, Gap: 6   -->
+            <!-- 5 WEDGE SLICES DI TENGAH (DINAMIS SESUAI PERSENTASE DATA) -->
+            <!-- Center: (500, 280), Radius: 135, Gap: 6 -->
             <!-- ========================================== -->
 
-            <!-- 01: TEAL (#169B88) - TOP-LEFT -->
-            <g class="pie-slice" id="slice01" onclick="filterAndGo('Permanen')">
-                <path d="M 494 274 L 494 145 A 130 130 0 0 0 376 230 Z" fill="#169B88" />
-                <text x="446" y="215" text-anchor="middle" font-size="28" font-family="Georgia, serif" font-weight="bold" fill="#ffffff">01</text>
+            <!-- 01: TEAL (#169B88) - PERMANEN -->
+            <g class="pie-slice" id="slice01" onclick="filterAndGo('Permanen')" style="cursor: pointer;">
+                <path id="pathSlice01" d="M 494 274 L 494 145 A 130 130 0 0 0 376 230 Z" fill="#169B88" />
+                <text id="textSlice01" x="446" y="215" text-anchor="middle" font-size="28" font-family="Georgia, serif" font-weight="bold" fill="#ffffff">01</text>
             </g>
 
-            <!-- 02: BLUE (#3D82A9) - TOP-RIGHT -->
-            <g class="pie-slice" id="slice02" onclick="filterAndGo('Semi Permanen')">
-                <path d="M 506 274 L 506 145 A 130 130 0 0 1 624 230 Z" fill="#3D82A9" />
-                <text x="554" y="215" text-anchor="middle" font-size="28" font-family="Georgia, serif" font-weight="bold" fill="#ffffff">02</text>
+            <!-- 02: BLUE (#3D82A9) - SEMI PERMANEN -->
+            <g class="pie-slice" id="slice02" onclick="filterAndGo('Semi Permanen')" style="cursor: pointer;">
+                <path id="pathSlice02" d="M 506 274 L 506 145 A 130 130 0 0 1 624 230 Z" fill="#3D82A9" />
+                <text id="textSlice02" x="554" y="215" text-anchor="middle" font-size="28" font-family="Georgia, serif" font-weight="bold" fill="#ffffff">02</text>
             </g>
 
-            <!-- 03: OLIVE GREEN (#9EAF22) - BOTTOM-RIGHT -->
-            <g class="pie-slice" id="slice03" onclick="filterAndGo('Panggung')">
-                <path d="M 506 284 L 626 238 A 130 130 0 0 1 546 408 Z" fill="#9EAF22" />
-                <text x="568" y="325" text-anchor="middle" font-size="28" font-family="Georgia, serif" font-weight="bold" fill="#ffffff">03</text>
+            <!-- 03: OLIVE GREEN (#9EAF22) - PANGGUNG -->
+            <g class="pie-slice" id="slice03" onclick="filterAndGo('Panggung')" style="cursor: pointer;">
+                <path id="pathSlice03" d="M 506 284 L 626 238 A 130 130 0 0 1 546 408 Z" fill="#9EAF22" />
+                <text id="textSlice03" x="568" y="325" text-anchor="middle" font-size="28" font-family="Georgia, serif" font-weight="bold" fill="#ffffff">03</text>
             </g>
 
-            <!-- 04: RED-ORANGE (#D84F2A) - BOTTOM-LEFT -->
-            <g class="pie-slice" id="slice04" onclick="filterAndGo('Numpang')">
-                <path d="M 498 288 L 536 414 A 130 130 0 0 1 426 396 Z" fill="#D84F2A" />
-                <text x="484" y="375" text-anchor="middle" font-size="28" font-family="Georgia, serif" font-weight="bold" fill="#ffffff">04</text>
+            <!-- 04: RED-ORANGE (#D84F2A) - NUMPANG -->
+            <g class="pie-slice" id="slice04" onclick="filterAndGo('Numpang')" style="cursor: pointer;">
+                <path id="pathSlice04" d="M 498 288 L 536 414 A 130 130 0 0 1 426 396 Z" fill="#D84F2A" />
+                <text id="textSlice04" x="484" y="375" text-anchor="middle" font-size="28" font-family="Georgia, serif" font-weight="bold" fill="#ffffff">04</text>
             </g>
 
-            <!-- 05: WARM ORANGE (#F59100) - MIDDLE-LEFT -->
-            <g class="pie-slice" id="slice05" onclick="filterAndGo('belum_dinilai')">
-                <path d="M 492 282 L 420 388 A 130 130 0 0 1 370 238 Z" fill="#F59100" />
-                <text x="420" y="315" text-anchor="middle" font-size="28" font-family="Georgia, serif" font-weight="bold" fill="#ffffff">05</text>
+            <!-- 05: WARM ORANGE (#F59100) - BELUM DINILAI -->
+            <g class="pie-slice" id="slice05" onclick="filterAndGo('belum_dinilai')" style="cursor: pointer;">
+                <path id="pathSlice05" d="M 492 282 L 420 388 A 130 130 0 0 1 370 238 Z" fill="#F59100" />
+                <text id="textSlice05" x="420" y="315" text-anchor="middle" font-size="28" font-family="Georgia, serif" font-weight="bold" fill="#ffffff">05</text>
             </g>
 
             <!-- ======================================================== -->
-            <!-- CONNECTOR LINES & CALLOUTS IDENTIK GAMBAR                -->
+            <!-- CONNECTOR LINES & CALLOUTS RELEVAN DENGAN IKON BARU      -->
             <!-- ======================================================== -->
 
             <!-- ========================================== -->
             <!-- CALLOUT 01 (TOP-LEFT) - TEAL #169B88       -->
+            <!-- IKON: RUMAH TEMBOK KOKOH PERMANEN          -->
             <!-- ========================================== -->
             <g class="callout-group" id="callout01">
                 <!-- Connector Line -->
-                <polyline points="414,160 414,152 135,152" fill="none" stroke="#169B88" stroke-width="2" />
+                <polyline id="poly01" points="414,160 414,152 135,152" fill="none" stroke="#169B88" stroke-width="2" />
                 <!-- Circular Icon Badge -->
                 <circle cx="106" cy="152" r="28" fill="#169B88" filter="url(#shadow)" />
-                <!-- Icon Briefcase / Building (SVG Path) -->
-                <g transform="translate(94, 140) scale(0.048)" fill="#ffffff">
-                    <path d="M128 0C92.7 0 64 28.7 64 64v32H16C7.2 96 0 103.2 0 112v256c0 8.8 7.2 16 16 16h480c8.8 0 16-7.2 16-16V112c0-8.8-7.2-16-16-16h-48V64c0-35.3-28.7-64-64-64H128zm32 64h192v32H160V64zm-96 96h384v64H64v-64zm0 128h384v128H64V288z" />
+                <!-- Icon: Rumah Kokoh Tembok Bertingkat / Cerobong -->
+                <g transform="translate(92, 138) scale(0.052)" fill="#ffffff">
+                    <path d="M543.8 287.6c17 0 32-14 32-31.2 0-8.9-3.7-17.5-10.2-23.7L297.4 6.7c-4.7-4.5-11-7-17.5-7s-12.8 2.5-17.5 7L5.8 232.7c-6.5 6.2-10.2 14.8-10.2 23.7 0 17.2 15 31.2 32 31.2 8.4 0 16.4-3.4 22.4-9.4L64 265.1V448c0 35.3 28.7 64 64 64h96c17.7 0 32-14.3 32-32V384h48v96c0 17.7 14.3 32 32 32h96c35.3 0 64-28.7 64-64V265.1l14 13.1c6 6 14 9.4 22.4 9.4zM416 96V56c0-4.4 3.6-8 8-8h32c4.4 0 8 3.6 8 8v80l-48-40z"/>
                 </g>
                 <!-- Title & Text -->
                 <text x="160" y="142" font-size="16" font-family="Georgia, serif" font-weight="bold" fill="#111827">Permanen</text>
@@ -209,15 +210,16 @@
 
             <!-- ========================================== -->
             <!-- CALLOUT 05 (MIDDLE-LEFT) - ORANGE #F59100  -->
+            <!-- IKON: PAPAN SURVEI SENSUS BERTANDA TANYA   -->
             <!-- ========================================== -->
             <g class="callout-group" id="callout05">
                 <!-- Connector Line -->
-                <polyline points="370,285 135,285" fill="none" stroke="#F59100" stroke-width="2" />
+                <polyline id="poly05" points="370,285 135,285" fill="none" stroke="#F59100" stroke-width="2" />
                 <!-- Circular Icon Badge -->
                 <circle cx="106" cy="285" r="28" fill="#F59100" filter="url(#shadow)" />
-                <!-- Icon Paper Plane (SVG Path) -->
-                <g transform="translate(93, 272) scale(0.052)" fill="#ffffff">
-                    <path d="M16.1 260.2c-22.6 12.9-20.5 47.3 3.6 57.3L160 376v104a31.9 31.9 0 0 0 54.4 22.6l64.3-64.3 124.6 74.8c21.2 12.7 48.7 1.4 54.6-22.5L511.4 29.5c6-24.1-17.7-44.5-40.9-35.3L16.1 260.2zM432 96L213.3 314.7 186.7 288 432 96z" />
+                <!-- Icon: Clipboard Question / Belum Dinilai -->
+                <g transform="translate(93, 270) scale(0.06)" fill="#ffffff">
+                    <path d="M96 0C60.7 0 32 28.7 32 64V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H96zM208 48a16 16 0 1 1 32 0 16 16 0 1 1 -32 0zm32 128c35.3 0 64 28.7 64 64c0 23.7-12.9 44.4-32 55.4V304c0 8.8-7.2 16-16 16s-16-7.2-16-16V288c0-17.7 14.3-32 32-32c17.7 0 32-14.3 32-32s-14.3-32-32-32s-32 14.3-32 32c0 8.8-7.2 16-16 16s-16-7.2-16-16c0-35.3 28.7-64 64-64zm0 192a20 20 0 1 1 0 40 20 20 0 1 1 0-40z"/>
                 </g>
                 <!-- Title & Text -->
                 <text x="160" y="275" font-size="16" font-family="Georgia, serif" font-weight="bold" fill="#111827">Belum Dinilai</text>
@@ -230,15 +232,16 @@
 
             <!-- ========================================== -->
             <!-- CALLOUT 04 (BOTTOM-LEFT) - CORAL #D84F2A   -->
+            <!-- IKON: BANYAK ORANG DI BAWAH SATU ATAP      -->
             <!-- ========================================== -->
             <g class="callout-group" id="callout04">
                 <!-- Connector Line -->
-                <polyline points="496,400 496,432 135,432" fill="none" stroke="#D84F2A" stroke-width="2" />
+                <polyline id="poly04" points="496,400 496,432 135,432" fill="none" stroke="#D84F2A" stroke-width="2" />
                 <!-- Circular Icon Badge -->
                 <circle cx="106" cy="432" r="28" fill="#D84F2A" filter="url(#shadow)" />
-                <!-- Icon Bar Chart (SVG Path) -->
-                <g transform="translate(94, 420) scale(0.048)" fill="#ffffff">
-                    <path d="M64 480c-17.7 0-32-14.3-32-32V320c0-17.7 14.3-32 32-32s32 14.3 32 32v128c0 17.7-14.3 32-32 32zm128 0c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32s32 14.3 32 32v288c0 17.7-14.3 32-32 32zm128 0c-17.7 0-32-14.3-32-32V32c0-17.7 14.3-32 32-32s32 14.3 32 32v416c0 17.7-14.3 32-32 32zm128 0c-17.7 0-32-14.3-32-32V224c0-17.7 14.3-32 32-32s32 14.3 32 32v224c0 17.7-14.3 32-32 32z" />
+                <!-- Icon: People Roof (Menumpang Keluarga / Tinggal Bersama) -->
+                <g transform="translate(89, 417) scale(0.054)" fill="#ffffff">
+                    <path d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V42.7L22.2 165.7c-13.8 8.6-18 26.8-9.4 40.5s26.8 18 40.5 9.4L256 94.6l202.7 121c13.7 8.6 31.9 4.4 40.5-9.4s4.4-31.9-9.4-40.5L320 42.7V32zM64 288c17.7 0 32-14.3 32-32s-14.3-32-32-32-32 14.3-32 32 14.3 32 32 32zm0 32c-26.5 0-48 21.5-48 48v80c0 8.8 7.2 16 16 16h64c8.8 0 16-7.2 16-16V368c0-26.5-21.5-48-48-48zm128-64c17.7 0 32-14.3 32-32s-14.3-32-32-32-32 14.3-32 32 14.3 32 32 32zm-32 80c0-26.5 21.5-48 48-48h32c26.5 0 48 21.5 48 48v128c0 8.8-7.2 16-16 16H176c-8.8 0-16-7.2-16-16V368zm192-80c17.7 0 32-14.3 32-32s-14.3-32-32-32-32 14.3-32 32 14.3 32 32 32zm-16 64c-26.5 0-48 21.5-48 48v80c0 8.8 7.2 16 16 16h64c8.8 0 16-7.2 16-16V400c0-26.5-21.5-48-48-48z"/>
                 </g>
                 <!-- Title & Text -->
                 <text x="160" y="422" font-size="16" font-family="Georgia, serif" font-weight="bold" fill="#111827">Numpang</text>
@@ -251,15 +254,16 @@
 
             <!-- ========================================== -->
             <!-- CALLOUT 02 (TOP-RIGHT) - BLUE #3D82A9      -->
+            <!-- IKON: BATA & SENDOK SEMEN PERTUKANGAN      -->
             <!-- ========================================== -->
             <g class="callout-group" id="callout02">
                 <!-- Connector Line -->
-                <polyline points="586,160 586,152 865,152" fill="none" stroke="#3D82A9" stroke-width="2" />
+                <polyline id="poly02" points="586,160 586,152 865,152" fill="none" stroke="#3D82A9" stroke-width="2" />
                 <!-- Circular Icon Badge -->
                 <circle cx="894" cy="152" r="28" fill="#3D82A9" filter="url(#shadow)" />
-                <!-- Icon Cog / Gear (SVG Path) -->
-                <g transform="translate(881, 139) scale(0.05)" fill="#ffffff">
-                    <path d="M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6l-43.3 119.2c-3.2 8.7-11.8 14.3-21.2 13.5l-58-4.8c-12 9.5-25.5 17.3-40.1 23.1l-14.8 56.4c-2.4 9-10.4 15.3-19.8 15.3H198.8c-9.4 0-17.4-6.3-19.8-15.3l-14.8-56.4c-14.6-5.8-28.1-13.6-40.1-23.1l-58 4.8c-9.4 .8-18-4.8-21.2-13.5L1.5 305.4c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C50.1 233.1 49.5 224.6 49.5 216s.6-17.1 1.7-25.4L7.9 151.2C1 145-1.7 135.3 1.5 126.6L44.8 7.4C48-1.3 56.6-6.9 66-6.1l58 4.8c12-9.5 25.5-17.3 40.1-23.1l14.8-56.4c2.4-9 10.4-15.3 19.8-15.3h114.4c9.4 0 17.4 6.3 19.8 15.3l14.8 56.4c14.6 5.8 28.1 13.6 40.1 23.1l58-4.8c9.4-.8 18 4.8 21.2 13.5l43.3 119.2zM256 160a96 96 0 1 0 0 192 96 96 0 1 0 0-192z" />
+                <!-- Icon: Trowel Bricks / Konstruksi Campuran & Perbaikan -->
+                <g transform="translate(880, 138) scale(0.054)" fill="#ffffff">
+                    <path d="M416 0C400 0 384.8 8.4 376.1 22.1L288 160.8V96c0-17.7-14.3-32-32-32H32C14.3 64 0 78.3 0 96v96c0 17.7 14.3 32 32 32h224c17.7 0 32-14.3 32-32v-1.1l77.9 123.5c11.6 18.4 32.1 29.6 54.1 29.6c35.3 0 64-28.7 64-64c0-8.5-1.7-16.7-4.7-24.1l-64-160C440.6 7.4 429 0 416 0zM32 288c-17.7 0-32 14.3-32 32v96c0 17.7 14.3 32 32 32h160c17.7 0 32-14.3 32-32V320c0-17.7-14.3-32-32-32H32zm224 0c-17.7 0-32 14.3-32 32v96c0 17.7 14.3 32 32 32h224c17.7 0 32-14.3 32-32V320c0-17.7-14.3-32-32-32H256z"/>
                 </g>
                 <!-- Title & Text (Right-aligned feel) -->
                 <text x="630" y="142" font-size="16" font-family="Georgia, serif" font-weight="bold" fill="#111827">Semi Permanen</text>
@@ -272,15 +276,32 @@
 
             <!-- ========================================== -->
             <!-- CALLOUT 03 (BOTTOM-RIGHT) - OLIVE #9EAF22  -->
+            <!-- IKON: RUMAH PANGGUNG BERTIANG KOLONG       -->
             <!-- ========================================== -->
             <g class="callout-group" id="callout03">
                 <!-- Connector Line -->
-                <polyline points="586,400 586,432 865,432" fill="none" stroke="#9EAF22" stroke-width="2" />
+                <polyline id="poly03" points="586,400 586,432 865,432" fill="none" stroke="#9EAF22" stroke-width="2" />
                 <!-- Circular Icon Badge -->
                 <circle cx="894" cy="432" r="28" fill="#9EAF22" filter="url(#shadow)" />
-                <!-- Icon Target / Bullseye (SVG Path) -->
-                <g transform="translate(881, 419) scale(0.05)" fill="#ffffff">
-                    <path d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208zm0-352c-79.5 0-144 64.5-144 144s64.5 144 144 144 144-64.5 144-144-64.5-144-144-144zm0 224c-44.1 0-80-35.9-80-80s35.9-80 80-80 80 35.9 80 80-35.9 80-80 80z" />
+                <!-- Icon: Rumah Panggung Bertiang Kolong Khas Nusantara -->
+                <g transform="translate(879, 417)" fill="#ffffff">
+                    <!-- Atap Rumah Tradisional Panggung -->
+                    <path d="M15 2 L1 12 L3.5 13 L15 4.5 L26.5 13 L29 12 Z" />
+                    <!-- Dinding Kayu Atas -->
+                    <rect x="5" y="10" width="20" height="8" rx="0.5" />
+                    <!-- Pintu & Jendela -->
+                    <rect x="12.5" y="11" width="5" height="7" fill="#9EAF22" rx="0.3" />
+                    <rect x="7" y="11.5" width="3.5" height="3.5" fill="#9EAF22" rx="0.3" />
+                    <rect x="19.5" y="11.5" width="3.5" height="3.5" fill="#9EAF22" rx="0.3" />
+                    <!-- Lantai Panggung Kayu Tebal -->
+                    <rect x="3" y="18" width="24" height="2.5" rx="0.6" />
+                    <!-- 4 Tiang Kolong Rumah Panggung -->
+                    <rect x="5.5" y="20.5" width="2" height="8.5" rx="0.4" />
+                    <rect x="11" y="20.5" width="2" height="8.5" rx="0.4" />
+                    <rect x="17" y="20.5" width="2" height="8.5" rx="0.4" />
+                    <rect x="22.5" y="20.5" width="2" height="8.5" rx="0.4" />
+                    <!-- Garis Tanah / Dasar -->
+                    <line x1="2" y1="29.5" x2="28" y2="29.5" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
                 </g>
                 <!-- Title & Text -->
                 <text x="630" y="422" font-size="16" font-family="Georgia, serif" font-weight="bold" fill="#111827">Panggung</text>
@@ -342,6 +363,111 @@
             loadGrafikData();
         });
 
+                const initialStats = <?= json_encode($stats) ?>;
+
+        // ==============================================================
+        // 🥧 FUNGSI RENDER POTONGAN PIE DIAGRAM SECARA DINAMIS & MATEMATIS
+        // ==============================================================
+        function renderPieGraph(data) {
+            if (!data) return;
+
+            const total = Number(data.total) || 0;
+            const order = [
+                { id: '02', key: 'semi_permanen' },
+                { id: '03', key: 'panggung' },
+                { id: '04', key: 'numpang' },
+                { id: '05', key: 'belum_dinilai' },
+                { id: '01', key: 'permanen' }
+            ];
+
+            const cx0 = 500;
+            const cy0 = 280;
+            const R   = 135;
+            const gap = 6; // Jarak detached potongan ke arah sudut tengah
+
+            let currentAngle = -Math.PI / 2; // Mulai dari puncak jam 12 (-90 deg)
+
+            order.forEach(item => {
+                const catData = data[item.key] || { count: 0, percent: 0 };
+                const count = Number(catData.count) || 0;
+                const fraction = (total > 0) ? (count / total) : 0;
+                const delta = fraction * 2 * Math.PI;
+
+                const startAngle = currentAngle;
+                const endAngle   = currentAngle + delta;
+                const midAngle   = startAngle + delta / 2;
+                currentAngle     = endAngle;
+
+                const $slice = $(`#slice${item.id}`);
+                const $path  = $(`#pathSlice${item.id}`);
+                const $text  = $(`#textSlice${item.id}`);
+                const $poly  = $(`#poly${item.id}`);
+
+                if (fraction <= 0) {
+                    $slice.hide();
+                    $poly.css('opacity', '0.15');
+                    return;
+                }
+
+                $slice.show();
+                $poly.css('opacity', '1');
+
+                const cx = cx0 + gap * Math.cos(midAngle);
+                const cy = cy0 + gap * Math.sin(midAngle);
+
+                const x1 = cx + R * Math.cos(startAngle);
+                const y1 = cy + R * Math.sin(startAngle);
+                const x2 = cx + R * Math.cos(endAngle);
+                const y2 = cy + R * Math.sin(endAngle);
+
+                const largeArc = delta > Math.PI ? 1 : 0;
+                const pathD = `M ${cx.toFixed(1)} ${cy.toFixed(1)} L ${x1.toFixed(1)} ${y1.toFixed(1)} A ${R} ${R} 0 ${largeArc} 1 ${x2.toFixed(1)} ${y2.toFixed(1)} Z`;
+
+                $path.attr('d', pathD);
+
+                // Posisi teks nomor ("01", "02", ...)
+                const rText = fraction < 0.08 ? R * 0.72 : R * 0.62;
+                const tx = cx + rText * Math.cos(midAngle);
+                const ty = cy + rText * Math.sin(midAngle) + 9;
+                const fontSize = fraction < 0.04 ? 14 : (fraction < 0.08 ? 18 : (fraction < 0.15 ? 22 : 26));
+
+                $text.attr('x', tx.toFixed(1))
+                     .attr('y', ty.toFixed(1))
+                     .attr('font-size', fontSize);
+
+                // Posisi garis penghubung (connector line) dari tepi luar busur
+                const edgeX = cx + (R + 4) * Math.cos(midAngle);
+                const edgeY = cy + (R + 4) * Math.sin(midAngle);
+
+                let polyPoints = '';
+                if (item.id === '01') {
+                    // Callout 01 (Kiri Atas): target (135, 152)
+                    const bendX = Math.min(Math.max(edgeX - 10, 180), 414);
+                    polyPoints = `${edgeX.toFixed(1)},${edgeY.toFixed(1)} ${bendX.toFixed(1)},152 135,152`;
+                } else if (item.id === '02') {
+                    // Callout 02 (Kanan Atas): target (865, 152)
+                    const bendX = Math.max(Math.min(edgeX + 10, 820), 586);
+                    polyPoints = `${edgeX.toFixed(1)},${edgeY.toFixed(1)} ${bendX.toFixed(1)},152 865,152`;
+                } else if (item.id === '03') {
+                    // Callout 03 (Kanan Bawah): target (865, 432)
+                    const bendX = Math.max(Math.min(edgeX + 10, 820), 586);
+                    polyPoints = `${edgeX.toFixed(1)},${edgeY.toFixed(1)} ${bendX.toFixed(1)},432 865,432`;
+                } else if (item.id === '04') {
+                    // Callout 04 (Kiri Bawah): target (135, 432)
+                    const bendX = Math.min(Math.max(edgeX - 10, 180), 496);
+                    polyPoints = `${edgeX.toFixed(1)},${edgeY.toFixed(1)} ${bendX.toFixed(1)},432 135,432`;
+                } else if (item.id === '05') {
+                    // Callout 05 (Kiri Tengah): target (135, 285)
+                    const bendX = Math.min(Math.max(edgeX - 15, 180), 370);
+                    polyPoints = `${edgeX.toFixed(1)},${edgeY.toFixed(1)} ${bendX.toFixed(1)},285 135,285`;
+                }
+
+                if (polyPoints) {
+                    $poly.attr('points', polyPoints);
+                }
+            });
+        }
+
         function loadGrafikData() {
             const rw = $('#filter_rw').val();
             const rt = $('#filter_rt').val();
@@ -358,9 +484,15 @@
                     $('#txtCount03').text(`${Number(data.panggung.count).toLocaleString('id-ID')} KK (${data.panggung.percent}%)`);
                     $('#txtCount04').text(`${Number(data.numpang.count).toLocaleString('id-ID')} KK (${data.numpang.percent}%)`);
                     $('#txtCount05').text(`${Number(data.belum_dinilai.count).toLocaleString('id-ID')} KK (${data.belum_dinilai.percent}%)`);
+
+                    // 🚀 HIDUPKAN POTONGAN DIAGRAM SECARA DINAMIS
+                    renderPieGraph(data);
                 }
             });
         }
+
+        // Inisialisasi awal potongan diagram pie sesuai data pertama kali
+        renderPieGraph(initialStats);
 
         // Unduh sebagai PNG
         $('#btnDownloadSvg').on('click', function() {

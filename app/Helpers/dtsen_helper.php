@@ -188,23 +188,6 @@ if (!function_exists('getPeriodeDesil')) {
     }
 }
 
-// if (!function_exists('getPeriodeDesil')) {
-//     function getPeriodeDesil($date = null)
-//     {
-//         $date = $date ?? date('Y-m-d');
-
-//         $tahun = (int) date('Y', strtotime($date));
-//         $triwulan = getTriwulanFromDate($date);
-//         $label = "TW{$triwulan} {$tahun}";
-
-//         return [
-//             'tahun' => $tahun,
-//             'triwulan' => $triwulan,
-//             'label' => $label
-//         ];
-//     }
-// }
-
 /**
  * 🔒 Enkripsi ID integer menjadi token URL-Safe yang tidak dapat ditebak
  */

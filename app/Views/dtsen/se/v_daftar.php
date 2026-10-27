@@ -214,8 +214,6 @@
                 dataSrc: 'data'
             },
 
-            // ... (lanjutkan opsi responsive, columns, dst milik Jenderal di bawah ini seperti biasa)
-
             responsive: true,
             pageLength: 10,
             autoWidth: false,
@@ -229,7 +227,10 @@
             drawCallback: function(settings) {
                 var api = this.api();
                 var info = api.page.info();
-                api.column(1, { search: 'applied', order: 'applied' }).nodes().each(function(cell, i) {
+                api.column(1, {
+                    search: 'applied',
+                    order: 'applied'
+                }).nodes().each(function(cell, i) {
                     cell.innerHTML = info.start + i + 1;
                 });
             },
