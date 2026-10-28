@@ -54,9 +54,12 @@ class Inactive extends BaseController
             $builderAlasan->groupEnd();
         }
 
+        $roleId = (int) ($userInfo['role_id'] ?? session()->get('role_id') ?? 99);
+
         $data = [
             'title'      => 'Data PBI-JKN (Non-Aktif)',
-            'listAlasan' => $builderAlasan->get()->getResultArray()
+            'listAlasan' => $builderAlasan->get()->getResultArray(),
+            'roleId'     => $roleId
         ];
         return view('dtks/pbi/v_pbi_nonaktif', $data);
     }
@@ -142,6 +145,7 @@ class Inactive extends BaseController
 
         // 🚀 Tangkap role_id user yang sedang login
         $roleId = (int) ($userInfo['role_id'] ?? session()->get('role_id') ?? 99);
+        $canRollback = ($roleId < 4);
 
         $data = [];
         $no = $start + 1;
@@ -150,7 +154,7 @@ class Inactive extends BaseController
             $btnAksi = '-'; // Default kosong untuk role >= 4
 
             // 🔐 Hanya role 1, 2, 3 yang boleh melihat tombol Rollback
-            if ($roleId < 4) {
+            if ($canRollback) {
                 $btnAksi = '
                     <button type="button" class="btn btn-sm btn-outline-success shadow-sm" onclick="kembalikanAktif(\'' . $row['id'] . '\', \'' . esc($row['nama']) . '\')" title="Kembalikan jadi Aktif">
                         <i class="fas fa-undo"></i> Rollback
@@ -164,35 +168,110 @@ class Inactive extends BaseController
             // 🚀 MODIFIKASI: Menambahkan tombol salin (copyText) untuk NIK
             $namaDanNik = '<b>' . esc($row['nama']) . '</b><br><small class="text-muted">NIK: ' . $row['nik'] . ' <a href="javascript:void(0)" onclick="copyText(\'' . $row['nik'] . '\')" class="text-primary ms-1" title="Salin NIK"><i class="far fa-copy"></i></a></small>';
 
-            $data[] = [
-                $no++,
-                $namaDanNik,
-                esc($row['alasan_nonaktif'] ?? '-'),
-                '<span class="badge bg-danger"><i class="fas fa-calendar-times"></i> ' . $tglNonAktif . '</span>',
-                $alamat,
-                $btnAksi
-            ];
+            $rowData = [];
+            if ($canRollback) {
+                $rowData[] = '<input type="checkbox" class="form-check-input row-checkbox m-0" value="' . $row['id'] . '" style="cursor: pointer; width: 1.15rem; height: 1.15rem;">';
+            }
+            $rowData[] = $no++;
+            $rowData[] = $namaDanNik;
+            $rowData[] = esc($row['alasan_nonaktif'] ?? '-');
+            $rowData[] = '<span class="badge bg-danger"><i class="fas fa-calendar-times"></i> ' . $tglNonAktif . '</span>';
+            $rowData[] = $alamat;
+            $rowData[] = $btnAksi;
+
+            $data[] = $rowData;
         }
 
         return $this->response->setJSON(['draw' => $draw, 'recordsTotal' => $recordsTotal, 'recordsFiltered' => $recordsFiltered, 'data' => $data]);
     }
 
-    // ... (Fungsi restore_aktif biarkan utuh) ...
-
-    // 🚀 Endpoint untuk Rollback (Membatalkan Non-Aktif)[cite: 3]
+    // 🚀 Endpoint untuk Rollback Tunggal (Membatalkan Non-Aktif)
     public function restore_aktif()
     {
         if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
 
-        $id = $this->request->getPost('id');
+        $userInfo = $this->AuthModel->getUserId();
+        $roleId = (int) ($userInfo['role_id'] ?? session()->get('role_id') ?? 99);
+        if ($roleId >= 4) {
+            return $this->response->setJSON(['status' => false, 'message' => 'Anda tidak memiliki hak akses untuk melakukan aksi ini.']);
+        }
 
-        $this->pbiModel->update($id, [
+        $id = $this->request->getPost('id');
+        if (empty($id)) {
+            return $this->response->setJSON(['status' => false, 'message' => 'ID data tidak ditemukan.']);
+        }
+
+        $kodeDesa = $userInfo['kode_desa'] ?? session()->get('kode_desa');
+
+        $builder = $this->pbiModel->builder()->where('id', $id)->where('status_kepesertaan', 'Non-Aktif');
+        if (!empty($kodeDesa)) {
+            $builder->where('kode_desa', $kodeDesa);
+        }
+
+        $builder->update([
             'status_kepesertaan' => 'Aktif',
             'alasan_nonaktif'    => null,
             'tanggal_nonaktif'   => null,
-            'updated_by'         => session()->get('id')
+            'dinonaktifkan_oleh' => null,
+            'updated_by'         => session()->get('id') ?? ($userInfo['id'] ?? null),
+            'updated_at'         => date('Y-m-d H:i:s')
         ]);
 
         return $this->response->setJSON(['status' => true, 'message' => 'Data berhasil dikembalikan ke daftar PBI Aktif.']);
+    }
+
+    // 🚀 Endpoint untuk Rollback Massal (Bulk Rollback)
+    public function restore_bulk()
+    {
+        if (!$this->request->isAJAX()) return exit('Tidak diizinkan');
+
+        $userInfo = $this->AuthModel->getUserId();
+        $roleId = (int) ($userInfo['role_id'] ?? session()->get('role_id') ?? 99);
+        if ($roleId >= 4) {
+            return $this->response->setJSON(['status' => false, 'message' => 'Anda tidak memiliki hak akses untuk melakukan aksi ini.']);
+        }
+
+        $ids = $this->request->getPost('ids');
+        if (empty($ids) || !is_array($ids)) {
+            return $this->response->setJSON(['status' => false, 'message' => 'Tidak ada data yang dipilih untuk di-rollback.']);
+        }
+
+        $ids = array_filter(array_map('intval', $ids));
+        if (empty($ids)) {
+            return $this->response->setJSON(['status' => false, 'message' => 'ID data tidak valid.']);
+        }
+
+        $kodeDesa = $userInfo['kode_desa'] ?? session()->get('kode_desa');
+
+        $builder = $this->pbiModel->builder()
+            ->whereIn('id', $ids)
+            ->where('status_kepesertaan', 'Non-Aktif');
+
+        if (!empty($kodeDesa)) {
+            $builder->where('kode_desa', $kodeDesa);
+        }
+
+        $builder->update([
+            'status_kepesertaan' => 'Aktif',
+            'alasan_nonaktif'    => null,
+            'tanggal_nonaktif'   => null,
+            'dinonaktifkan_oleh' => null,
+            'updated_by'         => session()->get('id') ?? ($userInfo['id'] ?? null),
+            'updated_at'         => date('Y-m-d H:i:s')
+        ]);
+
+        $affected = $this->pbiModel->db->affectedRows();
+
+        if ($affected > 0) {
+            return $this->response->setJSON([
+                'status'  => true,
+                'message' => "Sebanyak {$affected} data berhasil dikembalikan ke daftar PBI Aktif."
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Tidak ada data yang berhasil di-rollback.'
+            ]);
+        }
     }
 }

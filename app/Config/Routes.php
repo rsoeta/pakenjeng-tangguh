@@ -598,6 +598,8 @@ $routes->group('pbi', ['filter' => ['authfilterdtks', 'globalview', 'menufilterd
 		$routes->get('/', 'Dtks\Pbi\Inactive::pbi_nonaktif');
 		$routes->post('tabel', 'Dtks\Pbi\Inactive::tb_pbi_nonaktif');
 		$routes->post('restore', 'Dtks\Pbi\Inactive::restore_aktif');
+		$routes->post('restore_bulk', 'Dtks\Pbi\Inactive::restore_bulk');
+		$routes->post('rollback_bulk', 'Dtks\Pbi\Inactive::restore_bulk');
 		$routes->post('get-data', 'Dtks\Pbi\Inactive::get_data_pbi');
 
 		$routes->get('form-tambah', 'Dtks\Pbi\Inactive::formTmbNA');

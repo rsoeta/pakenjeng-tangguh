@@ -2,6 +2,11 @@
 
 <?= $this->section('content') ?>
 
+<?php
+$userRole = (int) ($roleId ?? session()->get('role_id') ?? 99);
+$canRollback = ($userRole < 4);
+?>
+
 <div class="content-wrapper mt-1">
     <div class="content-header">
         <div class="container-fluid py-4">
@@ -54,9 +59,14 @@
 
                         <!-- Tombol Aksi -->
                         <div class="col-12 col-md-4 d-flex align-items-end justify-content-md-end mt-2 mt-md-0 gap-2 flex-wrap">
-                            <?php if (session()->get('role_id') < 4): ?>
+                            <?php if ($canRollback): ?>
                                 <!-- Form Hidden untuk Upload Excel Non-Aktif -->
                                 <input type="file" id="fileExcelNonAktif" class="d-none" accept=".xls,.xlsx" onchange="uploadExcelNonAktif()">
+
+                                <!-- Tombol Rollback Bulk di Action Bar -->
+                                <button type="button" id="btnBulkRollbackTop" class="btn btn-sm btn-outline-danger shadow-sm d-none" onclick="bulkRollback()" title="Rollback Data Terpilih">
+                                    <i class="fas fa-undo me-1"></i> Rollback (<span class="selectedCountBadge">0</span>)
+                                </button>
 
                                 <!-- Tombol Import Non-Aktif (Dilengkapi Panduan Format) -->
                                 <button class="btn btn-sm btn-danger shadow-sm" onclick="konfirmasiImportNonAktif()" title="Import Data Non-Aktif dari SIKS-NG">
@@ -78,9 +88,37 @@
             <!-- 🗄️ TABEL MASTER DATA -->
             <div class="card shadow-sm">
                 <div class="card-body">
+                    <?php if ($canRollback): ?>
+                        <!-- ⚡ FLOATING / INLINE BULK ACTION BAR -->
+                        <div id="bulkActionBar" class="alert alert-light border border-danger py-2 px-3 mb-3 d-none align-items-center justify-content-between shadow-sm rounded-3">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-danger p-2 me-2 rounded-circle">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                                <div>
+                                    <span class="fw-bold text-dark"><span class="selectedCountText">0</span> data dipilih</span>
+                                    <small class="text-muted d-block d-sm-inline ms-sm-1">(pilih data untuk rollback sekaligus)</small>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary shadow-sm" onclick="clearSelection()">
+                                    <i class="fas fa-times me-1"></i> Batal Pilih
+                                </button>
+                                <button type="button" class="btn btn-sm btn-success shadow-sm fw-bold" onclick="bulkRollback()">
+                                    <i class="fas fa-undo me-1"></i> Rollback Terpilih (<span class="selectedCountBadge">0</span>)
+                                </button>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
                     <table id="tablePbiNonAktif" class="table table-striped table-hover table-bordered w-100" style="font-size: 0.9rem;">
-                        <thead class="table-danger text-center">
+                        <thead class="table-danger text-center align-middle">
                             <tr>
+                                <?php if ($canRollback): ?>
+                                    <th width="3%" class="text-center align-middle" style="vertical-align: middle;">
+                                        <input type="checkbox" id="checkAll" class="form-check-input m-0" style="cursor: pointer; width: 1.15rem; height: 1.15rem;" title="Pilih Semua di Halaman Ini">
+                                    </th>
+                                <?php endif; ?>
                                 <th width="5%">No</th>
                                 <th width="20%">Nama & NIK</th>
                                 <th width="30%">Alasan Non-Aktif</th>
@@ -99,6 +137,8 @@
 
 <script>
     var table;
+    const canRollback = <?= json_encode($canRollback) ?>;
+    let selectedIds = new Set();
 
     // =========================================================================
     // 🚀 KONFIGURASI MODULAR SWEETALERT2 (RESPONSIVE & AUTO-CLOSE)
@@ -147,6 +187,7 @@
             "processing": true,
             "serverSide": true,
             "responsive": true,
+            "order": [], // Pertahankan urutan dari server (tanggal_nonaktif DESC)
             "ajax": {
                 "url": "<?= site_url('pbi/nonaktif/tabel') ?>",
                 "type": "POST",
@@ -162,7 +203,7 @@
                 className: 'd-none btn-excel-hidden',
                 title: 'Arsip PBI-JKN Non-Aktif',
                 exportOptions: {
-                    columns: [0, 1, 2, 3, 4], // Tanpa aksi
+                    columns: canRollback ? [1, 2, 3, 4, 5] : [0, 1, 2, 3, 4], // Tanpa checkbox dan tanpa kolom aksi
                     format: {
                         body: function(data, row, column, node) {
                             if (typeof data === 'string') {
@@ -177,28 +218,127 @@
                     }
                 }
             }],
-            "columnDefs": [{
+            "columnDefs": canRollback ? [{
+                    "orderable": false,
+                    "searchable": false,
                     "className": "text-center align-middle",
-                    "targets": [0, 3, 5]
+                    "targets": [0, 6] // Checkbox dan Aksi
+                },
+                {
+                    "className": "text-center align-middle",
+                    "targets": [1, 4] // No dan Tanggal
                 },
                 {
                     "className": "align-middle",
-                    "targets": [1, 2, 4]
+                    "targets": [2, 3, 5] // Nama & NIK, Alasan, Alamat
+                }
+            ] : [{
+                    "orderable": false,
+                    "targets": [5] // Aksi
                 },
                 {
-                    "orderable": false,
-                    "targets": [5]
+                    "className": "align-middle",
+                    "targets": [1, 2, 4] // Nama & NIK, Alasan, Alamat
                 }
-            ]
+            ],
+            "drawCallback": function(settings) {
+                if (canRollback) {
+                    $('.row-checkbox').each(function() {
+                        let val = String($(this).val());
+                        if (selectedIds.has(val)) {
+                            $(this).prop('checked', true);
+                        }
+                    });
+                    syncCheckAllState();
+                }
+            }
         });
 
-        // 🔥 Gabungkan semua filter ke dalam satu listener (menghapus duplikasi listener sebelumnya)
+        // 🔥 Gabungkan semua filter ke dalam satu listener
         $('#filter_rw, #filter_rt, #filter_alasan').on('change', function() {
+            clearSelection();
             table.ajax.reload(null, false);
         });
+
+        if (canRollback) {
+            // Event listener Pilih Semua di halaman aktif
+            $('#checkAll').on('change', function() {
+                let isChecked = $(this).is(':checked');
+                $('.row-checkbox').each(function() {
+                    $(this).prop('checked', isChecked);
+                    let val = String($(this).val());
+                    if (isChecked) {
+                        selectedIds.add(val);
+                    } else {
+                        selectedIds.delete(val);
+                    }
+                });
+                updateSelectionUI();
+            });
+
+            // Event listener checkbox baris
+            $(document).on('change', '.row-checkbox', function() {
+                let val = String($(this).val());
+                if ($(this).is(':checked')) {
+                    selectedIds.add(val);
+                } else {
+                    selectedIds.delete(val);
+                }
+                syncCheckAllState();
+                updateSelectionUI();
+            });
+
+            // Klik pada sel checkbox kolom 0 untuk toggle checkbox
+            $('#tablePbiNonAktif tbody').on('click', 'td:first-child', function(e) {
+                if (!$(e.target).is(':checkbox')) {
+                    let chk = $(this).find('.row-checkbox');
+                    if (chk.length) {
+                        chk.prop('checked', !chk.prop('checked')).trigger('change');
+                    }
+                }
+            });
+        }
     });
 
+    // 🔄 Sinkronisasi Status Checkbox 'Pilih Semua'
+    function syncCheckAllState() {
+        if (!canRollback) return;
+        let totalVisible = $('.row-checkbox').length;
+        let totalChecked = $('.row-checkbox:checked').length;
+        if (totalVisible > 0 && totalVisible === totalChecked) {
+            $('#checkAll').prop('checked', true).prop('indeterminate', false);
+        } else if (totalChecked > 0) {
+            $('#checkAll').prop('checked', false).prop('indeterminate', true);
+        } else {
+            $('#checkAll').prop('checked', false).prop('indeterminate', false);
+        }
+    }
+
+    // 📊 Perbarui Tampilan Counter & Bar Rollback Bulk
+    function updateSelectionUI() {
+        let count = selectedIds.size;
+        $('.selectedCountBadge').text(count);
+        $('.selectedCountText').text(count);
+
+        if (count > 0) {
+            $('#bulkActionBar').removeClass('d-none').addClass('d-flex');
+            $('#btnBulkRollbackTop').removeClass('d-none');
+        } else {
+            $('#bulkActionBar').addClass('d-none').removeClass('d-flex');
+            $('#btnBulkRollbackTop').addClass('d-none');
+        }
+    }
+
+    // ❌ Batalkan Semua Pilihan
+    function clearSelection() {
+        selectedIds.clear();
+        $('.row-checkbox').prop('checked', false);
+        $('#checkAll').prop('checked', false).prop('indeterminate', false);
+        updateSelectionUI();
+    }
+
     function reloadTable() {
+        clearSelection();
         table.ajax.reload(null, false);
     }
 
@@ -321,7 +461,7 @@
         });
     }
 
-    // 🔄 Fungsi Membatalkan Penonaktifan (Rollback)
+    // 🔄 Fungsi Membatalkan Penonaktifan Tunggal (Rollback)
     function kembalikanAktif(id, nama) {
         Swal.fire({
             title: 'Batalkan Non-Aktif?',
@@ -330,10 +470,10 @@
             showCancelButton: true,
             confirmButtonColor: '#198754',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Ya, Kembalikan',
+            confirmButtonText: '<i class="fas fa-undo me-1"></i> Ya, Kembalikan',
             cancelButtonText: 'Batal',
             customClass: {
-                popup: 'swal-sm'
+                popup: 'swal-sm rounded-4'
             }
         }).then((result) => {
             if (result.isConfirmed) {
@@ -343,12 +483,117 @@
                     data: {
                         id: id
                     },
+                    dataType: 'json',
                     success: function(res) {
                         if (res.status) {
+                            if (typeof selectedIds !== 'undefined' && selectedIds.has(String(id))) {
+                                selectedIds.delete(String(id));
+                                updateSelectionUI();
+                            }
                             table.ajax.reload(null, false);
                             // 🚀 Panggil fungsi modular auto-close
                             showSuccess(res.message);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: res.message || 'Terjadi kesalahan saat memulihkan data.',
+                                customClass: {
+                                    popup: 'swal-sm rounded-4'
+                                }
+                            });
                         }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error Server',
+                            text: 'Terjadi kesalahan jaringan atau server.',
+                            customClass: {
+                                popup: 'swal-sm rounded-4'
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    // ⚡ Fungsi Membatalkan Penonaktifan Massal (Bulk Rollback)
+    function bulkRollback() {
+        if (!canRollback) return;
+
+        let ids = Array.from(selectedIds);
+        if (ids.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Perhatian',
+                text: 'Silakan pilih setidaknya satu data yang ingin dikembalikan.',
+                customClass: {
+                    popup: 'swal-sm rounded-4'
+                }
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Rollback ' + ids.length + ' Data Terpilih?',
+            html: `Sebanyak <b>${ids.length}</b> data PBI Non-Aktif akan dikembalikan ke status <b>Aktif</b>.<br><small class="text-muted">Apakah Anda yakin ingin melanjutkan?</small>`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#198754',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-undo me-1"></i> Ya, Rollback Semua',
+            cancelButtonText: 'Batal',
+            customClass: {
+                popup: 'swal-sm rounded-4'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Memproses Rollback...',
+                    text: 'Mohon tunggu, sistem sedang memperbarui status kepesertaan...',
+                    allowOutsideClick: false,
+                    customClass: {
+                        popup: 'swal-sm rounded-4'
+                    },
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                $.ajax({
+                    url: '<?= site_url('pbi/nonaktif/restore_bulk') ?>',
+                    type: 'POST',
+                    data: {
+                        ids: ids
+                    },
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.status) {
+                            clearSelection();
+                            table.ajax.reload(null, false);
+                            showSuccess(res.message, 'Rollback Berhasil!', false);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal Rollback',
+                                text: res.message,
+                                customClass: {
+                                    popup: 'swal-sm rounded-4'
+                                }
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error Server',
+                            text: 'Terjadi kesalahan sistem saat memproses rollback massal.',
+                            customClass: {
+                                popup: 'swal-sm rounded-4'
+                            }
+                        });
                     }
                 });
             }
