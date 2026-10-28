@@ -3,6 +3,14 @@
 <?= $this->section('content'); ?>
 
 <style>
+  /* 🔠 Header dan data tabel seluruhnya Kapital */
+  #tbl_lansia thead th,
+  #tbl_lansia tbody td,
+  table.dtr-details th,
+  table.dtr-details td {
+    text-transform: uppercase;
+  }
+
   /* 🏷️ Warna latar Usia konsisten di mode Desktop & Mobile (termasuk saat responsif) */
   #tbl_lansia .badge-info,
   #tbl_lansia .badge.bg-info,
@@ -170,17 +178,17 @@
             <table id="tbl_lansia" class="table table-bordered table-striped table-hover compact w-100" style="font-size: 0.9rem;">
               <thead class="bg-light text-center">
                 <tr role="row">
-                  <th style="width: 3%;">No</th>
+                  <th style="width: 3%;">NO</th>
                   <th style="width: 14%;">NIK</th>
-                  <th style="width: 15%;">Nama</th>
-                  <th style="width: 14%;">Alamat</th>
-                  <th style="width: 7%;">Rt/Rw</th>
-                  <th style="width: 6%;">Usia</th>
+                  <th style="width: 15%;">NAMA</th>
+                  <th style="width: 14%;">ALAMAT</th>
+                  <th style="width: 7%;">RT/RW</th>
+                  <th style="width: 6%;">USIA</th>
                   <th style="width: 5%;">JK</th>
-                  <th style="width: 14%;">Tempat Tinggal / Keadaan Rumah</th>
-                  <th style="width: 10%;">Pendidikan Terakhir</th>
-                  <th style="width: 8%;">Keterangan</th>
-                  <th style="width: 4%;">Aksi</th>
+                  <th style="width: 14%;">TEMPAT TINGGAL / KEADAAN RUMAH</th>
+                  <th style="width: 10%;">PENDIDIKAN TERAKHIR</th>
+                  <th style="width: 8%;">KETERANGAN</th>
+                  <th style="width: 4%;">AKSI</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -427,7 +435,7 @@
       $('#modal_usia').text(usia + ' Thn');
       $('#modal_keterangan').val(keterangan || '');
 
-      if (kategori === 'Jompo') {
+      if (String(kategori).toUpperCase() === 'JOMPO') {
         $('#kat_jompo').prop('checked', true);
       } else {
         $('#kat_lansia').prop('checked', true);

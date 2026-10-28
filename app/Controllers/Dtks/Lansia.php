@@ -41,16 +41,7 @@ class Lansia extends BaseController
             return '-';
         }
 
-        $title = mb_convert_case(mb_strtolower($str, 'UTF-8'), MB_CASE_TITLE, 'UTF-8');
-
-        // Pastikan singkatan umum alamat tetap huruf besar
-        $uppercaseWords = ['RT', 'RW', 'KAV', 'BTN', 'BKN', 'NO'];
-        foreach ($uppercaseWords as $word) {
-            $pattern = '/(?<=^|[\s\/(),.-])' . preg_quote($word, '/') . '(?=$|[\s\/(),.-])/i';
-            $title = preg_replace($pattern, $word, $title);
-        }
-
-        return $title;
+        return mb_strtoupper($str, 'UTF-8');
     }
 
     private function formatPendidikan(?string $str): string
@@ -60,25 +51,7 @@ class Lansia extends BaseController
             return '-';
         }
 
-        $title = mb_convert_case(mb_strtolower($str, 'UTF-8'), MB_CASE_TITLE, 'UTF-8');
-
-        // Akronim dan singkatan jenjang pendidikan yang tetap berhuruf kapital (SD/SMP/SMA/SMK/SLTP/SLTA/dsb.)
-        $uppercaseWords = [
-            'SD', 'SMP', 'SMA', 'SMK',
-            'SLTP', 'SLTA',
-            'MI', 'MTS', 'MA', 'MAK',
-            'TK', 'PAUD',
-            'D1', 'D2', 'D3', 'D4',
-            'S1', 'S2', 'S3',
-            'I', 'II', 'III', 'IV'
-        ];
-
-        foreach ($uppercaseWords as $word) {
-            $pattern = '/(?<=^|[\s\/(),.-])' . preg_quote($word, '/') . '(?=$|[\s\/(),.-])/i';
-            $title = preg_replace($pattern, $word, $title);
-        }
-
-        return $title;
+        return mb_strtoupper($str, 'UTF-8');
     }
 
     private function getUserContext(): array
@@ -215,7 +188,7 @@ class Lansia extends BaseController
                 $row[] = $nikCol;
 
                 // Nama
-                $row[] = '<strong>' . esc($key->nama) . '</strong>';
+                $row[] = '<strong>' . esc(mb_strtoupper($key->nama, 'UTF-8')) . '</strong>';
 
                 // Alamat (Capitalize Each Word)
                 $row[] = esc($this->formatAlamat($key->alamat));
@@ -225,13 +198,13 @@ class Lansia extends BaseController
                 $row[] = '<span class="badge badge-light bg-light text-dark border">' . $rtRw . '</span>';
 
                 // Usia
-                $row[] = '<span class="badge badge-info bg-info text-white">' . esc($key->usia) . ' Thn</span>';
+                $row[] = '<span class="badge badge-info bg-info text-white">' . esc($key->usia) . ' THN</span>';
 
                 // Jenis Kelamin
                 if ($key->jenis_kelamin === 'L') {
-                    $row[] = '<span class="badge badge-primary bg-primary text-white" title="Laki-laki">L</span>';
+                    $row[] = '<span class="badge badge-primary bg-primary text-white" title="LAKI-LAKI">L</span>';
                 } elseif ($key->jenis_kelamin === 'P') {
-                    $row[] = '<span class="badge badge-danger bg-danger text-white" title="Perempuan">P</span>';
+                    $row[] = '<span class="badge badge-danger bg-danger text-white" title="PEREMPUAN">P</span>';
                 } else {
                     $row[] = '-';
                 }
@@ -248,20 +221,20 @@ class Lansia extends BaseController
                 } else {
                     $rumahText = '-';
                 }
-                $row[] = esc($rumahText);
+                $row[] = esc(mb_strtoupper($rumahText, 'UTF-8'));
 
                 // Pendidikan Terakhir (Capitalize Each Word dengan SD/SMP/SMA kapital)
                 $row[] = esc($this->formatPendidikan($key->pendidikan));
 
                 // Kategori & Keterangan
-                $kat = $key->kategori_lansia === 'Jompo' ? 'Jompo' : 'Lansia';
-                if ($kat === 'Jompo') {
-                    $katBadge = '<span class="badge badge-warning text-dark px-2 py-1"><i class="fas fa-wheelchair mr-1"></i>Jompo</span>';
+                $kat = (strtoupper($key->kategori_lansia ?? '') === 'JOMPO') ? 'JOMPO' : 'LANSIA';
+                if ($kat === 'JOMPO') {
+                    $katBadge = '<span class="badge badge-warning text-dark px-2 py-1"><i class="fas fa-wheelchair mr-1"></i>JOMPO</span>';
                 } else {
-                    $katBadge = '<span class="badge badge-success px-2 py-1"><i class="fas fa-user-check mr-1"></i>Lansia</span>';
+                    $katBadge = '<span class="badge badge-success px-2 py-1"><i class="fas fa-user-check mr-1"></i>LANSIA</span>';
                 }
                 if (!empty($key->keterangan_lansia)) {
-                    $katBadge .= '<div class="small text-muted font-italic mt-1"><i class="fas fa-info-circle mr-1 text-xs"></i>' . esc($key->keterangan_lansia) . '</div>';
+                    $katBadge .= '<div class="small text-muted font-italic mt-1"><i class="fas fa-info-circle mr-1 text-xs"></i>' . esc(mb_strtoupper($key->keterangan_lansia, 'UTF-8')) . '</div>';
                 }
                 $row[] = $katBadge;
 
@@ -273,8 +246,8 @@ class Lansia extends BaseController
                     'data-usia="' . esc($key->usia, 'attr') . '" ' .
                     'data-kategori="' . esc($kat, 'attr') . '" ' .
                     'data-keterangan="' . esc($key->keterangan_lansia ?? '', 'attr') . '" ' .
-                    'title="Pilih Kategori Status">' .
-                    '<i class="fas fa-user-edit mr-1"></i>Pilih Status</button>';
+                    'title="PILIH STATUS">' .
+                    '<i class="fas fa-user-edit mr-1"></i>PILIH STATUS</button>';
                 $row[] = $btnAksi;
 
                 $data[] = $row;
@@ -397,16 +370,16 @@ class Lansia extends BaseController
             // Header Tabel Kolom (Baris 5) Sesuai Permintaan User:
             // No | NIK | Nama | Alamat | Rt/Rw | Usia (Tahun) | Jenis Kelamin | Tempat Tinggal/Keadaan Rumah | Pendidikan Terakhir | Keterangan
             $headers = [
-                'A5' => 'No',
+                'A5' => 'NO',
                 'B5' => 'NIK',
-                'C5' => 'Nama',
-                'D5' => 'Alamat',
-                'E5' => 'Rt/Rw',
-                'F5' => 'Usia (Tahun)',
-                'G5' => 'Jenis Kelamin',
-                'H5' => 'Tempat Tinggal/Keadaan Rumah',
-                'I5' => 'Pendidikan Terakhir',
-                'J5' => 'Keterangan'
+                'C5' => 'NAMA',
+                'D5' => 'ALAMAT',
+                'E5' => 'RT/RW',
+                'F5' => 'USIA (TAHUN)',
+                'G5' => 'JENIS KELAMIN',
+                'H5' => 'TEMPAT TINGGAL / KEADAAN RUMAH',
+                'I5' => 'PENDIDIKAN TERAKHIR',
+                'J5' => 'KETERANGAN'
             ];
 
             foreach ($headers as $cell => $val) {
@@ -449,10 +422,10 @@ class Lansia extends BaseController
                 }
 
                 // Jenis Kelamin
-                $jk = ($item['jenis_kelamin'] === 'L') ? 'Laki-laki' : (($item['jenis_kelamin'] === 'P') ? 'Perempuan' : '-');
+                $jk = ($item['jenis_kelamin'] === 'L') ? 'LAKI-LAKI' : (($item['jenis_kelamin'] === 'P') ? 'PEREMPUAN' : '-');
 
                 // Keterangan
-                $kat = $item['kategori_lansia'] ?? 'Lansia';
+                $kat = (strtoupper($item['kategori_lansia'] ?? '') === 'JOMPO') ? 'JOMPO' : 'LANSIA';
                 $ket = $kat;
                 if (!empty($item['keterangan_lansia'])) {
                     $ket .= ' (' . $item['keterangan_lansia'] . ')';
@@ -462,14 +435,14 @@ class Lansia extends BaseController
 
                 $sheet->setCellValue('A' . $rowNum, $no);
                 $sheet->setCellValueExplicit('B' . $rowNum, trim((string)($item['nik'] ?? '')), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-                $sheet->setCellValue('C' . $rowNum, strtoupper($item['nama']));
+                $sheet->setCellValue('C' . $rowNum, mb_strtoupper((string)$item['nama'], 'UTF-8'));
                 $sheet->setCellValue('D' . $rowNum, $this->formatAlamat($item['alamat']));
                 $sheet->setCellValueExplicit('E' . $rowNum, $rtRw, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                 $sheet->setCellValue('F' . $rowNum, (int)$item['usia']);
                 $sheet->setCellValue('G' . $rowNum, $jk);
-                $sheet->setCellValue('H' . $rowNum, $rumahText);
+                $sheet->setCellValue('H' . $rowNum, mb_strtoupper($rumahText, 'UTF-8'));
                 $sheet->setCellValue('I' . $rowNum, $this->formatPendidikan($item['pendidikan']));
-                $sheet->setCellValue('J' . $rowNum, $ket);
+                $sheet->setCellValue('J' . $rowNum, mb_strtoupper($ket, 'UTF-8'));
 
                 $rowNum++;
                 $no++;
