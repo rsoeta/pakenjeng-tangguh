@@ -2105,38 +2105,65 @@ class PembaruanKeluarga extends BaseController
         $db = \Config\Database::connect();
 
         try {
+            $session = session();
+            $roleId = (int) ($session->get('role_id') ?? 99);
+            if ($roleId > 3) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Akses ditolak. Anda tidak memiliki izin untuk melakukan sinkronisasi global.'
+                ]);
+            }
 
             // ==============================
             // 1️⃣ COOLDOWN CHECK (1 menit)
             // ==============================
-
             $lastSync = $db->table('dtsen_desil_sync_log')
                 ->orderBy('created_at', 'DESC')
                 ->get()
                 ->getRowArray();
 
-            if ($lastSync) {
+            if ($lastSync && !empty($lastSync['created_at'])) {
                 $lastTime = strtotime($lastSync['created_at']);
-                if ((time() - $lastTime) < 60) {
+                $elapsed  = time() - $lastTime;
+                if ($elapsed < 60) {
+                    $remaining = 60 - $elapsed;
                     return $this->response->setJSON([
-                        'status' => 'blocked',
-                        'message' => 'Sync baru saja dilakukan. Tunggu 1 menit.'
+                        'status'            => 'cooldown',
+                        'remaining_seconds' => $remaining,
+                        'message'           => 'Sinkronisasi baru saja dilakukan. Tunggu ' . $remaining . ' detik lagi.'
                     ]);
                 }
             }
 
-            $periode = getPeriodeDesil();
+            // ==============================
+            // 2️⃣ VALIDASI TAHUN & TRIWULAN (WAJIB DARI USER)
+            // ==============================
+            $tahun       = (int) $this->request->getPost('tahun');
+            $triwulanRaw = $this->request->getPost('triwulan');
+            $triwulan    = is_numeric($triwulanRaw) ? (float) $triwulanRaw : 0;
+
+            if ($tahun < 2020 || $tahun > 2099 || $triwulan <= 0 || $triwulan > 4.9) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Tahun atau Periode Triwulan tidak valid. Silakan tentukan periode rilis resmi yang benar.'
+                ]);
+            }
+
+            $twDisplay = ($triwulan == (int)$triwulan) ? (int)$triwulan : $triwulan;
+            $periode = [
+                'tahun'    => $tahun,
+                'triwulan' => $triwulan,
+                'label'    => "TW{$twDisplay} {$tahun}"
+            ];
 
             // ==============================
-            // 2️⃣ TOTAL KK
+            // 3️⃣ TOTAL KK
             // ==============================
-
-            $totalKK = $db->table('dtsen_kk')->countAllResults();
+            $totalKK = $db->table('dtsen_kk')->where('deleted_at', null)->countAllResults();
 
             // ==============================
-            // 3️⃣ SUBQUERY LAST HISTORY
+            // 4️⃣ SUBQUERY LAST HISTORY
             // ==============================
-
             $subQuery = "
             SELECT h1.id_kk, h1.desil
             FROM dtsen_desil_history h1
@@ -2150,9 +2177,8 @@ class PembaruanKeluarga extends BaseController
         ";
 
             // ==============================
-            // 4️⃣ AMBIL YANG BERUBAH
+            // 5️⃣ AMBIL YANG BERUBAH
             // ==============================
-
             $changedData = $db->query("
             SELECT se.id_kk, se.kategori_desil
             FROM dtsen_se se
@@ -2163,76 +2189,90 @@ class PembaruanKeluarga extends BaseController
         ")->getResultArray();
 
             $totalBerubah = count($changedData);
-            $totalTidakBerubah = $totalKK - $totalBerubah;
+            $totalTidakBerubah = max(0, $totalKK - $totalBerubah);
 
             // ==============================
-            // 5️⃣ TRANSACTION INSERT
+            // 6️⃣ CEK DATA EKSISTING PERIODE INI (MENCEGAH DUPLIKASI)
             // ==============================
+            $existingRows = $db->table('dtsen_desil_history')
+                ->select('id, id_kk')
+                ->where('tahun', $periode['tahun'])
+                ->where('triwulan', $periode['triwulan'])
+                ->get()
+                ->getResultArray();
+            $existingMap = array_column($existingRows, 'id', 'id_kk');
 
+            $userId = $session->get('id_user') ?? $session->get('id') ?? 0;
+            $now    = date('Y-m-d H:i:s');
+
+            // ==============================
+            // 7️⃣ TRANSACTION INSERT / UPDATE
+            // ==============================
             $db->transStart();
 
             foreach ($changedData as $row) {
-                $db->table('dtsen_desil_history')->insert([
-                    'id_kk'        => $row['id_kk'],
-                    'desil'        => (int) $row['kategori_desil'],
-                    'tahun'        => $periode['tahun'],
-                    'triwulan'     => $periode['triwulan'],
-                    'periode_label' => $periode['label'],
-                    'created_by'   => session()->get('id')
-                ]);
-            }
+                $idKk  = $row['id_kk'];
+                $desil = (int) $row['kategori_desil'];
 
-            // Insert log aktivitas
-            $db->table('dtsen_desil_sync_log')->insert([
-                'total_keluarga'       => $totalKK,
-                'total_berubah'        => $totalBerubah,
-                'total_tidak_berubah'  => $totalTidakBerubah,
-                'tahun'                => $periode['tahun'],
-                'triwulan'             => $periode['triwulan'],
-                'created_by'           => session()->get('id')
-            ]);
-
-            $db->transComplete();
-
-            // 🔒 COOLDOWN CHECK
-            $lastSync = cache('desil_global_last_sync');
-
-            if ($lastSync) {
-
-                $elapsed = time() - $lastSync;
-                $cooldown = 60; // 1 menit
-
-                if ($elapsed < $cooldown) {
-
-                    $remaining = $cooldown - $elapsed;
-
-                    return $this->response->setJSON([
-                        'status' => 'cooldown',
-                        'message' => 'Sinkronisasi global masih dalam masa cooldown.',
-                        'remaining_seconds' => $remaining
+                if (isset($existingMap[$idKk])) {
+                    $db->table('dtsen_desil_history')
+                        ->where('id', $existingMap[$idKk])
+                        ->update([
+                            'desil'         => $desil,
+                            'periode_label' => $periode['label'],
+                            'source'        => 'sync',
+                            'created_at'    => $now,
+                            'created_by'    => $userId
+                        ]);
+                } else {
+                    $db->table('dtsen_desil_history')->insert([
+                        'id_kk'         => $idKk,
+                        'desil'         => $desil,
+                        'tahun'         => $periode['tahun'],
+                        'triwulan'      => $periode['triwulan'],
+                        'periode_label' => $periode['label'],
+                        'source'        => 'sync',
+                        'created_at'    => $now,
+                        'created_by'    => $userId
                     ]);
                 }
             }
 
-            // ===== PROSES SYNC DI SINI =====
+            // Insert log aktivitas
+            $db->table('dtsen_desil_sync_log')->insert([
+                'total_keluarga'      => $totalKK,
+                'total_berubah'       => $totalBerubah,
+                'total_tidak_berubah' => $totalTidakBerubah,
+                'tahun'               => $periode['tahun'],
+                'triwulan'            => $periode['triwulan'],
+                'created_at'          => $now,
+                'created_by'          => $userId
+            ]);
 
-            // setelah selesai
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Gagal menyimpan data sinkronisasi ke database.'
+                ]);
+            }
+
             cache()->save('desil_global_last_sync', time(), 60);
 
             return $this->response->setJSON([
-                'status' => 'success',
-                'total'  => $totalKK,
-                'changed' => $totalBerubah,
+                'status'    => 'success',
+                'total'     => $totalKK,
+                'changed'   => $totalBerubah,
                 'unchanged' => $totalTidakBerubah,
-                'periode' => $periode['label']
+                'periode'   => $periode['label']
             ]);
         } catch (\Throwable $e) {
-
             log_message('error', '❌ [syncDesilGlobal] ' . $e->getMessage());
 
             return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Terjadi kesalahan saat sync global.'
+                'status'  => 'error',
+                'message' => 'Terjadi kesalahan saat sync global: ' . $e->getMessage()
             ]);
         }
     }

@@ -102,20 +102,23 @@
 
                                 <!-- ================= ACTION BUTTON ================= -->
                                 <div class="col-lg-auto ms-lg-auto">
-                                    <div class="btn-group w-100" role="group">
+                                    <div class="d-flex flex-wrap gap-2 justify-content-end align-items-center">
                                         <!-- batasi akses hanya untuk role_id <4 -->
                                         <?php if ($role_id < 4): ?>
                                             <button id="btnSyncGlobal"
-                                                class="btn btn-success btn-sm shadow-sm">
-                                                <i class="fas fa-sync-alt me-1"></i> Sync Desil Nasional
+                                                class="btn btn-outline-success btn-sm shadow-sm"
+                                                title="Sinkronisasi seluruh desil nasional dengan histori SINDEN berdasarkan periode rilis resmi">
+                                                <i class="fas fa-cloud-download-alt me-1"></i> Sync Desil Nasional
                                             </button>
                                         <?php endif; ?>
-                                        <button id="btnReloadKeluarga" class="btn btn-outline-info btn-sm">
-                                            <i class="fas fa-sync-alt"></i> Muat Ulang
-                                        </button>
-                                        <button id="btnTambahKeluarga" class="btn btn-primary btn-sm">
-                                            <i class="fas fa-user-plus"></i> Tambah Keluarga
-                                        </button>
+                                        <div class="btn-group" role="group">
+                                            <button id="btnReloadKeluarga" class="btn btn-outline-info btn-sm">
+                                                <i class="fas fa-sync-alt"></i> Muat Ulang
+                                            </button>
+                                            <button id="btnTambahKeluarga" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-user-plus"></i> Tambah Keluarga
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -711,32 +714,115 @@
         if (!btn) return;
 
         btn.addEventListener("click", function() {
+            const currentYear = new Date().getFullYear();
+            let yearOptions = '';
+            for (let y = currentYear; y >= 2024; y--) {
+                yearOptions += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
+            }
 
             Swal.fire({
-                title: 'Sinkronisasi Global?',
-                text: 'Proses ini akan membandingkan seluruh desil nasional dengan histori SINDEN.',
+                title: 'Sync Desil Nasional',
+                html: `
+                    <div class="text-start small">
+                        <div class="alert alert-info py-2 px-3 mb-3 small">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Pilih <b>Tahun</b> dan <b>Triwulan Rilis Resmi Kemensos</b> yang akan dicatat sebagai histori untuk setiap keluarga.
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-muted small mb-1">Tahun Rilis Kemensos:</label>
+                            <select id="swalSyncTahun" class="form-select form-select-sm">
+                                ${yearOptions}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-muted small mb-1">Periode Triwulan:</label>
+                            <select id="swalSyncTriwulan" class="form-select form-select-sm">
+                                <option value="1">Triwulan 1 (TW1)</option>
+                                <option value="2">Triwulan 2 (TW2)</option>
+                                <option value="3" selected>Triwulan 3 (TW3)</option>
+                                <option value="4">Triwulan 4 (TW4)</option>
+                            </select>
+                            <input type="text" id="swalSyncTriwulanCustom" class="form-control form-control-sm mt-2 d-none" placeholder="Contoh: 3.1" inputmode="decimal">
+                            <div class="form-check mt-1">
+                                <input class="form-check-input" type="checkbox" id="swalCustomTwCheck">
+                                <label class="form-check-label text-muted" for="swalCustomTwCheck" style="font-size: 0.78rem;">
+                                    Gunakan triwulan desimal/revisi (misal: 3.1)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="alert alert-warning py-2 px-3 mb-0 small">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            <b>Peringatan:</b> Sistem akan membandingkan desil nasional seluruh KK dan mencatat perubahannya ke periode yang Anda tentukan.
+                        </div>
+                    </div>
+                `,
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Ya, Sinkronkan',
-                cancelButtonText: 'Batal'
+                confirmButtonText: '<i class="fas fa-sync-alt me-1"></i> Mulai Sinkronisasi',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#6c757d',
+                focusConfirm: false,
+                didOpen: () => {
+                    const check = document.getElementById('swalCustomTwCheck');
+                    const select = document.getElementById('swalSyncTriwulan');
+                    const customInput = document.getElementById('swalSyncTriwulanCustom');
+                    if (check && select && customInput) {
+                        check.addEventListener('change', function() {
+                            if (this.checked) {
+                                select.classList.add('d-none');
+                                customInput.classList.remove('d-none');
+                                customInput.focus();
+                            } else {
+                                select.classList.remove('d-none');
+                                customInput.classList.add('d-none');
+                            }
+                        });
+                    }
+                },
+                preConfirm: () => {
+                    const tahun = document.getElementById('swalSyncTahun').value;
+                    const isCustom = document.getElementById('swalCustomTwCheck').checked;
+                    let triwulan = isCustom 
+                        ? document.getElementById('swalSyncTriwulanCustom').value.trim() 
+                        : document.getElementById('swalSyncTriwulan').value;
+
+                    if (!tahun) {
+                        Swal.showValidationMessage('Tahun harus dipilih.');
+                        return false;
+                    }
+                    if (!triwulan || isNaN(triwulan) || parseFloat(triwulan) <= 0 || parseFloat(triwulan) > 4.9) {
+                        Swal.showValidationMessage('Periode triwulan tidak valid (harus angka 1 - 4.9).');
+                        return false;
+                    }
+
+                    return { tahun: tahun, triwulan: triwulan };
+                }
             }).then((result) => {
 
-                if (!result.isConfirmed) return;
+                if (!result.isConfirmed || !result.value) return;
+
+                const { tahun, triwulan } = result.value;
 
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sync berjalan...';
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Sync berjalan...';
+
+                const formData = new FormData();
+                formData.append('tahun', tahun);
+                formData.append('triwulan', triwulan);
 
                 fetch('/pembaruan-keluarga/sync-desil-global', {
                         method: 'POST',
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest'
-                        }
+                        },
+                        body: formData
                     })
                     .then(res => res.json())
                     .then(res => {
 
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Sync Desil Nasional';
+                        btn.innerHTML = '<i class="fas fa-cloud-download-alt me-1"></i> Sync Desil Nasional';
 
                         if (res.status === 'cooldown') {
 
@@ -778,13 +864,17 @@
                                 title: 'Sinkronisasi Selesai',
                                 html: `
                                 <div class="text-start small">
-                                    <b>Periode:</b> ${res.periode}<br>
+                                    <b>Periode Target:</b> ${res.periode}<br>
                                     <b>Total KK dicek:</b> ${res.total}<br>
-                                    <b>Berubah:</b> <span class="text-danger">${res.changed}</span><br>
+                                    <b>Berubah & Dicatat:</b> <span class="text-danger fw-bold">${res.changed}</span><br>
                                     <b>Tidak berubah:</b> <span class="text-success">${res.unchanged}</span>
                                 </div>
                                 `
                             });
+
+                            if ($.fn.DataTable.isDataTable('#tableKeluarga')) {
+                                $('#tableKeluarga').DataTable().ajax.reload(null, false);
+                            }
 
                         } else {
 
@@ -799,7 +889,7 @@
                     .catch(err => {
 
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Sync Desil Nasional';
+                        btn.innerHTML = '<i class="fas fa-cloud-download-alt me-1"></i> Sync Desil Nasional';
 
                         Swal.fire(
                             'Error',
