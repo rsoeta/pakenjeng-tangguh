@@ -153,11 +153,11 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
             </div>
 
             <ul class="nav nav-tabs" id="pembaruanTabs" role="tablist">
-                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabKeluarga" role="tab">Data Keluarga</a></li>
-                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabRumah" role="tab">Rumah</a></li>
-                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabFoto" role="tab">Foto</a></li>
-                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabAset" role="tab">Aset</a></li>
-                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-anggota" role="tab">Anggota</a></li>
+                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" data-toggle="tab" href="#tabKeluarga" role="tab">Data Keluarga</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-toggle="tab" href="#tabRumah" role="tab">Rumah</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-toggle="tab" href="#tabFoto" role="tab">Foto</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-toggle="tab" href="#tabAset" role="tab">Aset</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-toggle="tab" href="#tab-anggota" role="tab">Anggota</a></li>
             </ul>
 
 
@@ -313,7 +313,7 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
     const isTambahMode = "<?= $sumber === 'baru' ? 'true' : 'false' ?>";
     const payload = <?= json_encode($payload ?? []) ?>;
 
-    // 🚀 FUNGSI GLOBAL: PINDAH KE TAB BERIKUTNYA SECARA OTOMATIS
+    // 🚀 FUNGSI GLOBAL: PINDAH KE TAB BERIKUTNYA SECARA OTOMATIS (BULLETPROOF UNTUK HOSTING & LOCAL)
     window.pindahTabSelanjutnya = function(currentTabSelector) {
         const tabSequence = ['#tabKeluarga', '#tabRumah', '#tabFoto', '#tabAset', '#tab-anggota'];
 
@@ -336,14 +336,63 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
             const nextTabTrigger = document.querySelector(`#pembaruanTabs a[href="${nextHash}"]`);
 
             if (nextTabTrigger) {
-                if (typeof bootstrap !== 'undefined' && bootstrap.Tab) {
-                    const tabInstance = bootstrap.Tab.getOrCreateInstance ? bootstrap.Tab.getOrCreateInstance(nextTabTrigger) : new bootstrap.Tab(nextTabTrigger);
-                    tabInstance.show();
-                } else if (typeof $ !== 'undefined') {
-                    $(nextTabTrigger).tab('show');
+                // 1. Simulasikan klik langsung (berfungsi di semua browser & framework)
+                try {
+                    nextTabTrigger.click();
+                } catch (e) {
+                    console.warn('Click trigger error:', e);
                 }
 
-                // Scroll halus ke arah tab navigasi
+                // 2. Coba via Bootstrap 5 API (window.BS5 atau window.bootstrap)
+                try {
+                    const bsObj = window.BS5 || window.bootstrap;
+                    if (bsObj && bsObj.Tab) {
+                        const tabInstance = (typeof bsObj.Tab.getOrCreateInstance === 'function')
+                            ? bsObj.Tab.getOrCreateInstance(nextTabTrigger)
+                            : new bsObj.Tab(nextTabTrigger);
+                        tabInstance.show();
+                    }
+                } catch (e) {
+                    console.warn('Bootstrap Tab show error:', e);
+                }
+
+                // 3. Coba via jQuery / Bootstrap 4 API
+                try {
+                    if (typeof $ !== 'undefined' && $.fn && typeof $.fn.tab === 'function') {
+                        $(nextTabTrigger).tab('show');
+                    }
+                } catch (e) {
+                    console.warn('jQuery tab show error:', e);
+                }
+
+                // 4. FAIL-SAFE TINGKAT TINGGI: Langsung aktifkan class CSS di DOM
+                try {
+                    document.querySelectorAll('#pembaruanTabs .nav-link').forEach(link => {
+                        link.classList.remove('active');
+                        link.setAttribute('aria-selected', 'false');
+                    });
+                    nextTabTrigger.classList.add('active');
+                    nextTabTrigger.setAttribute('aria-selected', 'true');
+
+                    document.querySelectorAll('.tab-content > .tab-pane').forEach(pane => {
+                        pane.classList.remove('show', 'active');
+                    });
+                    const targetPane = document.querySelector(nextHash);
+                    if (targetPane) {
+                        targetPane.classList.add('show', 'active');
+                    }
+                } catch (e) {
+                    console.error('Direct DOM tab switch error:', e);
+                }
+
+                // 5. Perbarui URL hash tanpa jump
+                try {
+                    if (history.replaceState) {
+                        history.replaceState(null, null, nextHash);
+                    }
+                } catch (e) {}
+
+                // 6. Scroll halus ke bar navigasi tab
                 const tabsNav = document.getElementById('pembaruanTabs');
                 if (tabsNav) {
                     tabsNav.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -352,7 +401,7 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
         }
     };
 </script>
-<script src="<?= base_url('assets/js/pembaruan_keluarga.js'); ?>"></script>
+<script src="<?= base_url('assets/js/pembaruan_keluarga.js'); ?>?v=<?= file_exists(FCPATH . 'assets/js/pembaruan_keluarga.js') ? filemtime(FCPATH . 'assets/js/pembaruan_keluarga.js') : time() ?>"></script>
 
 <script>
 
@@ -412,11 +461,20 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
         const hash = window.location.hash;
         if (hash) {
             const targetHash = (hash.toLowerCase() === '#tabanggota') ? '#tab-anggota' : hash;
-            const tabTrigger = document.querySelector(`[href="${targetHash}"], [data-bs-target="${targetHash}"]`);
+            const tabTrigger = document.querySelector(`#pembaruanTabs a[href="${targetHash}"], #pembaruanTabs [data-bs-target="${targetHash}"]`);
             if (tabTrigger) {
-                const tab = bootstrap.Tab.getOrCreateInstance ? bootstrap.Tab.getOrCreateInstance(tabTrigger) : new bootstrap.Tab(tabTrigger);
-                tab.show();
-
+                try {
+                    tabTrigger.click();
+                } catch (e) {}
+                try {
+                    const bsObj = window.BS5 || window.bootstrap;
+                    if (bsObj && bsObj.Tab) {
+                        const tab = (typeof bsObj.Tab.getOrCreateInstance === 'function')
+                            ? bsObj.Tab.getOrCreateInstance(tabTrigger)
+                            : new bsObj.Tab(tabTrigger);
+                        tab.show();
+                    }
+                } catch (e) {}
                 const targetSection = document.querySelector(targetHash);
                 if (targetSection) {
                     setTimeout(() => {

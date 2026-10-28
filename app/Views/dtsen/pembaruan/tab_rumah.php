@@ -1131,7 +1131,7 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                 didOpen: () => Swal.showLoading()
             });
 
-            fetch('/pembaruan-keluarga/save-rumah', {
+            fetch('<?= base_url('pembaruan-keluarga/save-rumah') ?>', {
                 method: 'POST',
                 credentials: 'same-origin',
                 body: formData
