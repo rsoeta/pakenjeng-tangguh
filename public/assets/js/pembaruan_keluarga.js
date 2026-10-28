@@ -895,6 +895,19 @@ $(document).ready(function () {
 
                             $('#sumber').val('utama');
 
+                            // 🚀 Buka gembok tombol di semua tab secara real-time & sinkronkan ID Usulan
+                            if (res.usulan_id) {
+                                $('input[name="dtsen_usulan_id"]').val(res.usulan_id);
+                                $('#btnApply').attr('data-usulan-id', res.usulan_id);
+                            }
+                            $('.btn-terkunci').addClass('d-none');
+                            $('#btnSimpanRumah, #btnUploadFoto, #btnSimpanAset, #btnTambahAnggota, #btnTriggerSimpanGlobal').removeClass('d-none');
+
+                            const badgeEl = $('#badgeUsulanStatus');
+                            if (badgeEl.length && (badgeEl.text().trim() === 'Belum Ada Pembaruan' || badgeEl.text().trim() === 'Verified')) {
+                                badgeEl.removeClass('bg-secondary bg-primary').addClass('bg-warning text-dark').text('Draft');
+                            }
+
                             if (window.isTriggerFromAnggota) {
                                 window.isTriggerFromAnggota = false;
                                 setTimeout(() => location.reload(), 1000);

@@ -520,18 +520,16 @@ $se   = $payload['sosial_ekonomi'] ?? [];
         </div>
 
         <?php if ($editable): ?>
+            <?php $isUsulanEditable = $isUsulanEditable ?? ($editable && in_array(strtolower(trim($usulan['status'] ?? '')), ['draft', 'submitted'])); ?>
             <div class="text-end mt-4">
-                <?php if (in_array(strtolower($usulan['status'] ?? ''), ['draft', 'submitted'])): ?>
-                    <!-- 🟢 Tombol Aktif -->
-                    <button type="button" id="btnSimpanRumah" class="btn btn-success rounded-pill px-4 shadow-sm">
-                        <i class="fas fa-save me-1"></i> Simpan Data Rumah & SosEk
-                    </button>
-                <?php else: ?>
-                    <!-- 🔴 Tombol Terkunci -->
-                    <button type="button" class="btn btn-secondary rounded-pill px-4 shadow-sm btn-terkunci">
-                        <i class="fas fa-lock me-1"></i> Terkunci
-                    </button>
-                <?php endif; ?>
+                <!-- 🟢 Tombol Aktif -->
+                <button type="button" id="btnSimpanRumah" class="btn btn-success rounded-pill px-4 shadow-sm <?= $isUsulanEditable ? '' : 'd-none' ?>">
+                    <i class="fas fa-save me-1"></i> Simpan Data Rumah & SosEk
+                </button>
+                <!-- 🔴 Tombol Terkunci -->
+                <button type="button" class="btn btn-secondary rounded-pill px-4 shadow-sm btn-terkunci <?= $isUsulanEditable ? 'd-none' : '' ?>">
+                    <i class="fas fa-lock me-1"></i> Terkunci
+                </button>
             </div>
         <?php endif; ?>
 
@@ -1092,7 +1090,7 @@ $se   = $payload['sosial_ekonomi'] ?? [];
         setTimeout(checkKelengkapanRumah, 250);
 
         // ============ SUBMIT HANDLER ============
-        $('#btnSimpanRumah').on('click', function() {
+        $(document).on('click', '#btnSimpanRumah', function() {
             const missing = checkKelengkapanRumah();
             if (missing.length) {
                 Swal.fire({

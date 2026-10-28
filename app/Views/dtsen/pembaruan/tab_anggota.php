@@ -47,17 +47,15 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h5 class="fw-bold mb-0">👨‍👩‍👧 Daftar Anggota Keluarga</h5>
     <?php if ($editable): ?>
+        <?php $isUsulanEditable = $isUsulanEditable ?? ($editable && in_array(strtolower(trim($usulan['status'] ?? '')), ['draft', 'submitted'])); ?>
         <div class="btn-group shadow-sm">
             <!-- 🚀 LOGIKA KUNCI TOMBOL TAMBAH ANGGOTA -->
-            <?php if (in_array(strtolower($usulan['status'] ?? ''), ['draft', 'submitted'])): ?>
-                <button id="btnTambahAnggota" class="btn btn-success btn-sm">
-                    <i class="fas fa-user-plus me-1"></i> Tambah Anggota
-                </button>
-            <?php else: ?>
-                <button type="button" class="btn btn-secondary btn-sm btn-terkunci" title="Usulan Terkunci">
-                    <i class="fas fa-lock me-1"></i> Tambah Anggota
-                </button>
-            <?php endif; ?>
+            <button id="btnTambahAnggota" class="btn btn-success btn-sm <?= $isUsulanEditable ? '' : 'd-none' ?>">
+                <i class="fas fa-user-plus me-1"></i> Tambah Anggota
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm btn-terkunci <?= $isUsulanEditable ? 'd-none' : '' ?>" title="Usulan Terkunci">
+                <i class="fas fa-lock me-1"></i> Tambah Anggota
+            </button>
 
             <button id="btnReloadAnggota" class="btn btn-outline-primary btn-sm">
                 <i class="fas fa-sync-alt me-1"></i> Muat Ulang
@@ -90,15 +88,13 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 <span class="text-muted small">Jika seluruh tab (Keluarga, Rumah, Foto, Aset, Anggota) telah diisi dengan lengkap, klik tombol di samping untuk mengecek status akhir usulan.</span>
             </div>
             <!-- 🚀 BUG FIX & UPGRADE: Hapus onclick inline, ganti dengan ID pemicu -->
-            <?php if (in_array(strtolower($usulan['status'] ?? ''), ['draft', 'submitted'])): ?>
-                <button type="button" id="btnTriggerSimpanGlobal" class="btn btn-primary px-4 rounded-pill shadow-sm">
-                    <i class="fas fa-clipboard-check me-2"></i> Cek Status Kelengkapan Usulan
-                </button>
-            <?php else: ?>
-                <button type="button" class="btn btn-secondary px-4 rounded-pill shadow-sm btn-terkunci">
-                    <i class="fas fa-lock me-2"></i> Terkunci
-                </button>
-            <?php endif; ?>
+            <?php $isUsulanEditable = $isUsulanEditable ?? ($editable && in_array(strtolower(trim($usulan['status'] ?? '')), ['draft', 'submitted'])); ?>
+            <button type="button" id="btnTriggerSimpanGlobal" class="btn btn-primary px-4 rounded-pill shadow-sm <?= $isUsulanEditable ? '' : 'd-none' ?>">
+                <i class="fas fa-clipboard-check me-2"></i> Cek Status Kelengkapan Usulan
+            </button>
+            <button type="button" class="btn btn-secondary px-4 rounded-pill shadow-sm btn-terkunci <?= $isUsulanEditable ? 'd-none' : '' ?>">
+                <i class="fas fa-lock me-2"></i> Terkunci
+            </button>
         </div>
     </div>
 <?php endif; ?>

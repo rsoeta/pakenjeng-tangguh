@@ -224,16 +224,14 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
     </form>
 
     <?php if ($editable): ?>
+        <?php $isUsulanEditable = $isUsulanEditable ?? ($editable && in_array(strtolower(trim($usulan['status'] ?? '')), ['draft', 'submitted'])); ?>
         <div class="text-end mt-4">
-            <?php if (in_array(strtolower($usulan['status'] ?? ''), ['draft', 'submitted'])): ?>
-                <button type="button" id="btnSimpanAset" class="btn btn-success rounded-pill px-4 shadow-sm">
-                    <i class="fas fa-save me-1"></i> Simpan Perubahan
-                </button>
-            <?php else: ?>
-                <button type="button" class="btn btn-secondary rounded-pill px-4 shadow-sm btn-terkunci">
-                    <i class="fas fa-lock me-1"></i> Terkunci
-                </button>
-            <?php endif; ?>
+            <button type="button" id="btnSimpanAset" class="btn btn-success rounded-pill px-4 shadow-sm <?= $isUsulanEditable ? '' : 'd-none' ?>">
+                <i class="fas fa-save me-1"></i> Simpan Perubahan
+            </button>
+            <button type="button" class="btn btn-secondary rounded-pill px-4 shadow-sm btn-terkunci <?= $isUsulanEditable ? 'd-none' : '' ?>">
+                <i class="fas fa-lock me-1"></i> Terkunci
+            </button>
         </div>
     <?php else: ?>
         <div class="alert alert-warning small mt-3">
@@ -388,7 +386,7 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
         // ====================================================
         // 💾 EVENT SIMPAN ASET (Dengan Gatekeeper BPS)
         // ====================================================
-        $('#btnSimpanAset').on('click', function(e) {
+        $(document).on('click', '#btnSimpanAset', function(e) {
             e.preventDefault();
 
             // 1️⃣ GATEKEEPER 1: Cek Standar Nilai Lahan BPS

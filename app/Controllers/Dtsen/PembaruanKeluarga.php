@@ -354,7 +354,7 @@ class PembaruanKeluarga extends BaseController
                     'created_at'   => date('Y-m-d H:i:s')
                 ]);
 
-                return $this->response->setJSON(['status' => 'success', 'message' => 'Keluarga baru berhasil dibuat.', 'id_kk' => $idKk]);
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Keluarga baru berhasil dibuat.', 'id_kk' => $idKk, 'usulan_id' => $newUsulanId ?? null, 'usulan_status' => 'draft']);
             }
 
             // 🟢 MODE PEMBARUAN / DRAFT
@@ -553,7 +553,8 @@ class PembaruanKeluarga extends BaseController
                 }
             }
 
-            return $this->response->setJSON(['status' => 'success', 'message' => 'Data keluarga berhasil disimpan.', 'id_kk' => $idKk]);
+            $activeUsulanId = $newUsulanId ?? ($usulanAktif['id'] ?? null);
+            return $this->response->setJSON(['status' => 'success', 'message' => 'Data keluarga berhasil disimpan.', 'id_kk' => $idKk, 'usulan_id' => $activeUsulanId, 'usulan_status' => 'draft']);
         } catch (\Throwable $e) {
             return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
         }

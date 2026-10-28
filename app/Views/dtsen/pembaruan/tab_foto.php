@@ -95,16 +95,14 @@ $foto = $payload['foto'] ?? [];
         </div>
 
         <?php if ($editable): ?>
+            <?php $isUsulanEditable = $isUsulanEditable ?? ($editable && in_array(strtolower(trim($usulan['status'] ?? '')), ['draft', 'submitted'])); ?>
             <div class="mt-3 text-end">
-                <?php if (in_array(strtolower($usulan['status'] ?? ''), ['draft', 'submitted'])): ?>
-                    <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm">
-                        <i class="fas fa-upload me-1"></i> Upload Semua Foto
-                    </button>
-                <?php else: ?>
-                    <button type="button" class="btn btn-secondary rounded-pill px-4 shadow-sm btn-terkunci">
-                        <i class="fas fa-lock me-1"></i> Terkunci
-                    </button>
-                <?php endif; ?>
+                <button type="submit" id="btnUploadFoto" class="btn btn-success rounded-pill px-4 shadow-sm <?= $isUsulanEditable ? '' : 'd-none' ?>">
+                    <i class="fas fa-upload me-1"></i> Upload Semua Foto
+                </button>
+                <button type="button" class="btn btn-secondary rounded-pill px-4 shadow-sm btn-terkunci <?= $isUsulanEditable ? 'd-none' : '' ?>">
+                    <i class="fas fa-lock me-1"></i> Terkunci
+                </button>
             </div>
         <?php endif; ?>
     </form>
