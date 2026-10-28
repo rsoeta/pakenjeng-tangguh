@@ -12,9 +12,21 @@ $.extend(true, $.fn.dataTable.defaults, {
         details: {
             type: 'column',
             target: 0,
-            renderer: $.fn.dataTable.Responsive.renderer.tableAll({
-                tableClass: 'table table-sm table-borderless mb-0'
-            })
+            renderer: function (api, rowIdx, columns) {
+                var data = $.map(columns, function (col) {
+                    // 🚀 Sembunyikan kolom kontrol, kolom tanpa judul, atau kolom bertanda 'never' (seperti kolom pencarian tersembunyi)
+                    if (col.columnIndex === 0 || !col.title || col.title.trim() === '' || (col.className && col.className.indexOf('never') !== -1)) {
+                        return '';
+                    }
+                    // 🚀 Bersihkan class text-center agar di tampilan mobile (child row) tidak berantakan/rata tengah
+                    return '<tr data-dt-row="' + col.rowIndex + '" data-dt-column="' + col.columnIndex + '">' +
+                        '<td class="fw-bold text-muted small text-start align-top" style="width: 130px; white-space: nowrap;">' + col.title + ':</td> ' +
+                        '<td class="text-start align-middle">' + col.data + '</td>' +
+                        '</tr>';
+                }).join('');
+
+                return data ? $('<table class="table table-sm table-borderless mb-0 dtr-details" width="100%"/>').append(data) : false;
+            }
         }
     },
     columnDefs: [

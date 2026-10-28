@@ -251,7 +251,6 @@
                 {
                     data: null,
                     defaultContent: '',
-                    className: 'text-center',
                     orderable: false,
                     searchable: false
                 },
@@ -390,7 +389,6 @@
                 // 🔹 Bansos (Dokumentasi Bansos Tahap Terakhir)
                 {
                     data: 'bansos',
-                    className: 'text-center',
                     render: function(data, type, row) {
                         if (!data || data === '-' || data === '') {
                             return '<span class="text-muted">-</span>';
@@ -462,9 +460,17 @@
                 // 🔹 Kolom Pencarian Tersembunyi (Anggota Keluarga)
                 {
                     data: 'anggota_search',
-                    visible: false, // 🚀 Sembunyikan dari tampilan tabel
-                    searchable: true, // 🚀 Tapi tetap dilacak oleh fitur Search
-                    defaultContent: ''
+                    visible: false, // 🚀 Sembunyikan dari tampilan tabel utama
+                    searchable: true, // 🚀 Tetap dilacak oleh fitur Search DataTables
+                    className: 'never', // 🚀 DataTables Responsive: jangan pernah tampilkan di child row
+                    defaultContent: '',
+                    render: function(data, type) {
+                        // Hanya berikan data saat DataTables melakukan filtering/searching
+                        if (type === 'filter') {
+                            return data || '';
+                        }
+                        return '';
+                    }
                 }
             ]
         });
@@ -783,9 +789,9 @@
                 preConfirm: () => {
                     const tahun = document.getElementById('swalSyncTahun').value;
                     const isCustom = document.getElementById('swalCustomTwCheck').checked;
-                    let triwulan = isCustom 
-                        ? document.getElementById('swalSyncTriwulanCustom').value.trim() 
-                        : document.getElementById('swalSyncTriwulan').value;
+                    let triwulan = isCustom ?
+                        document.getElementById('swalSyncTriwulanCustom').value.trim() :
+                        document.getElementById('swalSyncTriwulan').value;
 
                     if (!tahun) {
                         Swal.showValidationMessage('Tahun harus dipilih.');
@@ -796,13 +802,19 @@
                         return false;
                     }
 
-                    return { tahun: tahun, triwulan: triwulan };
+                    return {
+                        tahun: tahun,
+                        triwulan: triwulan
+                    };
                 }
             }).then((result) => {
 
                 if (!result.isConfirmed || !result.value) return;
 
-                const { tahun, triwulan } = result.value;
+                const {
+                    tahun,
+                    triwulan
+                } = result.value;
 
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Sync berjalan...';

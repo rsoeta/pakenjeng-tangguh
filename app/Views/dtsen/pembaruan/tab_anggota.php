@@ -1444,6 +1444,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
         // 🚀 TRIGGER SIMPAN GLOBAL DARI TAB ANGGOTA
         // ========================================================
         $(document).on('click', '#btnTriggerSimpanGlobal', function() {
+            window.isTriggerFromAnggota = true;
 
             // 1. Cek dulu apakah seluruh data anggota sudah bebas dari tanda seru merah
             if (typeof window.cekKelengkapanAnggota === 'function' && window.cekKelengkapanAnggota()) {

@@ -463,6 +463,13 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                             content: 'fs-6'
                         }
                     });
+
+                    // 🚀 Otomatis berpindah ke Tab Selanjutnya (Tab Anggota) setelah alert sukses
+                    setTimeout(() => {
+                        if (typeof window.pindahTabSelanjutnya === 'function') {
+                            window.pindahTabSelanjutnya('#tabAset');
+                        }
+                    }, 1200);
                 } else {
                     Swal.fire({
                         icon: 'error',

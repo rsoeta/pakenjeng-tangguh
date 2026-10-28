@@ -888,13 +888,25 @@ $(document).ready(function () {
 
                             if (sumber === 'baru' && res.id_kk) {
                                 setTimeout(() => {
-                                    window.location.href = `${baseUrl}/pembaruan-keluarga/detail/${res.id_kk}`;
+                                    window.location.href = `${baseUrl}/pembaruan-keluarga/detail/${res.id_kk}#tabRumah`;
                                 }, 1200);
                                 return;
                             }
 
                             $('#sumber').val('utama');
-                            setTimeout(() => location.reload(), 1000);
+
+                            if (window.isTriggerFromAnggota) {
+                                window.isTriggerFromAnggota = false;
+                                setTimeout(() => location.reload(), 1000);
+                                return;
+                            }
+
+                            // 🚀 Otomatis berpindah ke Tab Selanjutnya (Tab Rumah) setelah alert sukses
+                            setTimeout(() => {
+                                if (typeof window.pindahTabSelanjutnya === 'function') {
+                                    window.pindahTabSelanjutnya('#tabKeluarga');
+                                }
+                            }, 1200);
 
                         } else {
                             Swal.fire({ icon: 'error', title: 'Gagal', text: res.message || 'Tidak dapat menyimpan data.' });

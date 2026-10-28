@@ -1144,6 +1144,13 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                         timer: 1500,
                         showConfirmButton: false
                     });
+
+                    // 🚀 Otomatis berpindah ke Tab Selanjutnya (Tab Foto) setelah alert sukses
+                    setTimeout(() => {
+                        if (typeof window.pindahTabSelanjutnya === 'function') {
+                            window.pindahTabSelanjutnya('#tabRumah');
+                        }
+                    }, 1200);
                 } else {
                     Swal.fire('Gagal', res.message, 'error');
                 }

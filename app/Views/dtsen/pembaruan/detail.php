@@ -308,12 +308,53 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
 <?= $this->include('dtsen/se/modal_input_desil') ?>
 
 <script src="/assets/vendor/browser-image-compression.js"></script>
-<script src="<?= base_url('assets/js/pembaruan_keluarga.js'); ?>"></script>
-
 <script>
     window.baseUrl = "<?= rtrim(base_url(), '/') ?>";
     const isTambahMode = "<?= $sumber === 'baru' ? 'true' : 'false' ?>";
     const payload = <?= json_encode($payload ?? []) ?>;
+
+    // 🚀 FUNGSI GLOBAL: PINDAH KE TAB BERIKUTNYA SECARA OTOMATIS
+    window.pindahTabSelanjutnya = function(currentTabSelector) {
+        const tabSequence = ['#tabKeluarga', '#tabRumah', '#tabFoto', '#tabAset', '#tab-anggota'];
+
+        let currentIndex = -1;
+        if (currentTabSelector) {
+            const hash = currentTabSelector.startsWith('#') ? currentTabSelector : '#' + currentTabSelector;
+            currentIndex = tabSequence.indexOf(hash);
+        }
+
+        if (currentIndex === -1) {
+            const activeLink = document.querySelector('#pembaruanTabs .nav-link.active');
+            if (activeLink) {
+                const activeHash = activeLink.getAttribute('href');
+                currentIndex = tabSequence.indexOf(activeHash);
+            }
+        }
+
+        if (currentIndex !== -1 && currentIndex < tabSequence.length - 1) {
+            const nextHash = tabSequence[currentIndex + 1];
+            const nextTabTrigger = document.querySelector(`#pembaruanTabs a[href="${nextHash}"]`);
+
+            if (nextTabTrigger) {
+                if (typeof bootstrap !== 'undefined' && bootstrap.Tab) {
+                    const tabInstance = bootstrap.Tab.getOrCreateInstance ? bootstrap.Tab.getOrCreateInstance(nextTabTrigger) : new bootstrap.Tab(nextTabTrigger);
+                    tabInstance.show();
+                } else if (typeof $ !== 'undefined') {
+                    $(nextTabTrigger).tab('show');
+                }
+
+                // Scroll halus ke arah tab navigasi
+                const tabsNav = document.getElementById('pembaruanTabs');
+                if (tabsNav) {
+                    tabsNav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+    };
+</script>
+<script src="<?= base_url('assets/js/pembaruan_keluarga.js'); ?>"></script>
+
+<script>
 
     // Auto Uppercase
     document.addEventListener('input', function(e) {
@@ -368,27 +409,24 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
     });
 
     document.addEventListener('DOMContentLoaded', () => {
-        const hash = window.location.hash.toLowerCase();
-        if (hash === '#tab-anggota' || hash === '#tabanggota') {
-            const interval = setInterval(() => {
-                const tabTrigger = document.querySelector('[href="#tab-anggota"], [data-bs-target="#tab-anggota"]');
-                if (tabTrigger) {
-                    clearInterval(interval);
-                    const tab = new bootstrap.Tab(tabTrigger);
-                    tab.show();
+        const hash = window.location.hash;
+        if (hash) {
+            const targetHash = (hash.toLowerCase() === '#tabanggota') ? '#tab-anggota' : hash;
+            const tabTrigger = document.querySelector(`[href="${targetHash}"], [data-bs-target="${targetHash}"]`);
+            if (tabTrigger) {
+                const tab = bootstrap.Tab.getOrCreateInstance ? bootstrap.Tab.getOrCreateInstance(tabTrigger) : new bootstrap.Tab(tabTrigger);
+                tab.show();
 
-                    const targetSection = document.querySelector('#tab-anggota');
-                    if (targetSection) {
-                        setTimeout(() => {
-                            targetSection.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'start'
-                            });
-                        }, 400);
-                    }
-                    history.replaceState(null, null, ' ');
+                const targetSection = document.querySelector(targetHash);
+                if (targetSection) {
+                    setTimeout(() => {
+                        targetSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }, 400);
                 }
-            }, 300);
+            }
         }
     });
 

@@ -143,6 +143,13 @@ $foto = $payload['foto'] ?? [];
                         timer: 1500,
                         showConfirmButton: false
                     });
+
+                    // 🚀 Otomatis berpindah ke Tab Selanjutnya (Tab Aset) setelah alert sukses
+                    setTimeout(() => {
+                        if (typeof window.pindahTabSelanjutnya === 'function') {
+                            window.pindahTabSelanjutnya('#tabFoto');
+                        }
+                    }, 1200);
                 } else {
                     Swal.fire('Gagal!', res.message, 'error');
                 }
