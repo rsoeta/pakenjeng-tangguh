@@ -375,8 +375,12 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
                     nextTabTrigger.classList.add('active');
                     nextTabTrigger.setAttribute('aria-selected', 'true');
 
-                    document.querySelectorAll('.tab-content > .tab-pane').forEach(pane => {
-                        pane.classList.remove('show', 'active');
+                    // ⚠️ HANYA nonaktifkan tab pane survey utama (JANGAN gunakan selector global agar tidak merusak modal)
+                    tabSequence.forEach(hash => {
+                        const pane = document.querySelector(hash);
+                        if (pane) {
+                            pane.classList.remove('show', 'active');
+                        }
                     });
                     const targetPane = document.querySelector(nextHash);
                     if (targetPane) {

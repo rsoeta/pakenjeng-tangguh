@@ -52,28 +52,28 @@ $editable = ($roleId <= 4);
                     <div class="sticky-top bg-white pt-3 px-3 border-bottom" style="z-index: 1020;">
                         <ul class="nav nav-tabs border-0" id="tabAnggotaTabs" role="tablist">
                             <li class="nav-item">
-                                <a href="javascript:void(0)" class="nav-link active" id="tab-identitas-tab" data-bs-toggle="tab"
-                                    data-bs-target="#tab-identitas" role="tab" aria-controls="tab-identitas"
+                                <a href="#tab-identitas" class="nav-link active" id="tab-identitas-tab" data-bs-toggle="tab" data-toggle="tab"
+                                    data-bs-target="#tab-identitas" data-target="#tab-identitas" role="tab" aria-controls="tab-identitas"
                                     aria-selected="true" style="display:block !important; text-decoration:none;">
                                     📋 Data Pokok Individu <span class="badge bg-secondary ms-1" id="badgeIdentitas">⚠️</span>
                                 </a>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <a href="javascript:void(0)" class="nav-link" id="tab-pendidikan-tab" data-bs-toggle="tab"
-                                    data-bs-target="#tab-pendidikan" role="tab" style="display:block !important; text-decoration:none;">
+                                <a href="#tab-pendidikan" class="nav-link" id="tab-pendidikan-tab" data-bs-toggle="tab" data-toggle="tab"
+                                    data-bs-target="#tab-pendidikan" data-target="#tab-pendidikan" role="tab" style="display:block !important; text-decoration:none;">
                                     🎓 Pendidikan <span class="badge bg-secondary ms-1" id="badgePendidikan">⚠️</span>
                                 </a>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <a href="javascript:void(0)" class="nav-link" id="tab-kerja-tab" data-bs-toggle="tab"
-                                    data-bs-target="#tab-kerja" role="tab" style="display:block !important; text-decoration:none;">
+                                <a href="#tab-kerja" class="nav-link" id="tab-kerja-tab" data-bs-toggle="tab" data-toggle="tab"
+                                    data-bs-target="#tab-kerja" data-target="#tab-kerja" role="tab" style="display:block !important; text-decoration:none;">
                                     💼 Tenaga Kerja <span class="badge bg-secondary ms-1" id="badgeKerja">⚠️</span>
                                 </a>
                             </li>
                             <!-- 🚀 TAB KEPEMILIKAN USAHA SUDAH DIHAPUS SESUAI INSTRUKSI -->
                             <li class="nav-item" role="presentation">
-                                <a href="javascript:void(0)" class="nav-link" id="tab-kesehatan-tab" data-bs-toggle="tab"
-                                    data-bs-target="#tab-kesehatan" role="tab" style="display:block !important; text-decoration:none;">
+                                <a href="#tab-kesehatan" class="nav-link" id="tab-kesehatan-tab" data-bs-toggle="tab" data-toggle="tab"
+                                    data-bs-target="#tab-kesehatan" data-target="#tab-kesehatan" role="tab" style="display:block !important; text-decoration:none;">
                                     ❤️ Kesehatan <span class="badge bg-secondary ms-1" id="badgeKesehatan">⚠️</span>
                                 </a>
                             </li>
@@ -804,6 +804,14 @@ $editable = ($roleId <= 4);
     // ==============================================================
     $(document).ready(function() {
         // Kita pasang event saat Modal selesai terbuka agar lebar Select2 dirender dengan sempurna
+        // 🚀 RESET TAB KE IDENTITAS SETIAP KALI MODAL ANGGOTA DIBUKA
+        $('#modalAnggota').on('show.bs.modal', function() {
+            $('#tabAnggotaTabs .nav-link').removeClass('active').attr('aria-selected', 'false');
+            $('#tab-identitas-tab').addClass('active').attr('aria-selected', 'true');
+            $('#modalAnggota .tab-content > .tab-pane').removeClass('show active');
+            $('#tab-identitas').addClass('show active');
+        });
+
         $('#modalAnggota').on('shown.bs.modal', function() {
             $('#lapangan_usaha').select2({
                 dropdownParent: $('#modalAnggota'), // ⚠️ Wajib agar search box tidak terhalang (bug z-index modal)
