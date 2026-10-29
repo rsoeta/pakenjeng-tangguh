@@ -274,58 +274,41 @@ class BansosKKS extends BaseController
     // ========================================================
     public function cari_nik_ajax()
     {
-        $searchTerm = trim($this->request->getPost('searchTerm'));
+        $searchTerm = trim((string)$this->request->getPost('searchTerm'));
 
-        // 1. Ambil wilayah_tugas dari user yang sedang login
+        // 1. Ambil info akun & role yang sedang login
         $user = $this->authModel->getUserId();
-        $wilayahTugas = trim($user['wilayah_tugas'] ?? '');
+        $roleId = session()->get('role_id') ?? ($user['role_id'] ?? 4);
 
         // 2. Build Query Utama (Join ART -> KK -> RT)
+        // 🛡️ Abaikan NIK (ART) dan KK yang telah di-soft-delete (deleted_at IS NOT NULL)
         $builder = $this->db->table('dtsen_master_kks m')
             ->select('a.nik, a.nama as nama_kpm, m.no_kks')
-            ->join('dtsen_art a', 'a.nik = m.nik') // Validasi dengan penduduk aktif
-            ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left') // Ambil ID RT dari KK
+            ->join('dtsen_art a', 'a.nik = m.nik AND a.deleted_at IS NULL') // Validasi penduduk aktif
+            ->join('dtsen_kk k', 'k.id_kk = a.id_kk AND k.deleted_at IS NULL') // Validasi KK aktif
             ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left') // Ambil data RW & RT
-            ->groupStart()
-            ->like('a.nik', $searchTerm)
-            ->orLike('m.no_kks', $searchTerm)
-            // ->orLike('a.nama', $searchTerm)
-            ->groupEnd()
-            // 🛡️ KUNCI UTAMA: GroupBy NIK agar tidak muncul ganda jika ada data join yang double
-            ->groupBy('a.nik')
-            ->limit(15);
+            ->where('a.deleted_at IS NULL')
+            ->where('k.deleted_at IS NULL');
 
-        // 3. 🔐 PARSE wilayah_tugas → pasangan RW–RT (KUNCI VISIBILITAS)
-        if (!empty($wilayahTugas)) {
-            $wilayahPairs = [];
-            $blocks = explode('|', $wilayahTugas);
-
-            foreach ($blocks as $block) {
-                [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
-                $rw = trim($rw);
-
-                foreach (explode(',', $rtList) as $rt) {
-                    $rt = trim($rt);
-                    if ($rw !== '' && $rt !== '') {
-                        $wilayahPairs[] = ['rw' => $rw, 'rt' => $rt];
-                    }
-                }
-            }
-
-            // 4. Terapkan Filter Wilayah agar petugas hanya bisa mencari warga di wilayahnya
-            if (!empty($wilayahPairs)) {
-                $builder->groupStart();
-                foreach ($wilayahPairs as $pair) {
-                    $builder->orGroupStart()
-                        ->where('r.rw', $pair['rw'])
-                        ->where('r.rt', $pair['rt'])
-                        ->groupEnd();
-                }
-                $builder->groupEnd();
-            }
+        if (!empty($searchTerm)) {
+            $builder->groupStart()
+                ->like('a.nik', $searchTerm)
+                ->orLike('m.no_kks', $searchTerm)
+                // ->orLike('a.nama', $searchTerm)
+                ->groupEnd();
         }
 
-        // 5. Eksekusi Query dan Format Hasil untuk Select2
+        // 🛡️ KUNCI UTAMA: GroupBy NIK agar tidak muncul ganda jika ada data join yang double
+        $builder->groupBy('a.nik')
+            ->limit(15);
+
+        // 3. 🔐 Terapkan Filter Wilayah Tugas via Trait
+        $filterData = [
+            'wilayah_tugas' => trim($user['wilayah_tugas'] ?? '')
+        ];
+        $this->applyWilayahFilter($builder, $filterData, $roleId);
+
+        // 4. Eksekusi Query dan Format Hasil untuk Select2
         $query = $builder->get()->getResultArray();
 
         $data = [];

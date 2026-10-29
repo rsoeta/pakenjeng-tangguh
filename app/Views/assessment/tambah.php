@@ -110,11 +110,31 @@
                                     <!-- Biodata Sasaran Terpilih -->
                                     <div id="bioSasaran" class="card bg-light border p-2 mb-3 d-none">
                                         <table class="table table-sm table-borderless m-0 text-sm">
-                                            <tr><td width="35%">Nama Lengkap</td><td width="5%">:</td><td id="s_nama" class="font-weight-bold">-</td></tr>
-                                            <tr><td>NIK</td><td>:</td><td id="s_nik">-</td></tr>
-                                            <tr><td>Tempat, Tgl Lahir</td><td>:</td><td id="s_ttl">-</td></tr>
-                                            <tr><td>Status Kawin</td><td>:</td><td id="s_kawin">-</td></tr>
-                                            <tr><td>Pekerjaan</td><td>:</td><td id="s_pekerjaan">-</td></tr>
+                                            <tr>
+                                                <td width="35%">Nama Lengkap</td>
+                                                <td width="5%">:</td>
+                                                <td id="s_nama" class="font-weight-bold">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td>NIK</td>
+                                                <td>:</td>
+                                                <td id="s_nik">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Tempat, Tgl Lahir</td>
+                                                <td>:</td>
+                                                <td id="s_ttl">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Status Kawin</td>
+                                                <td>:</td>
+                                                <td id="s_kawin">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Pekerjaan</td>
+                                                <td>:</td>
+                                                <td id="s_pekerjaan">-</td>
+                                            </tr>
                                         </table>
                                     </div>
                                 </div>
@@ -133,9 +153,21 @@
                                     <!-- Biodata Pembuat Pernyataan -->
                                     <div id="bioPernyataan" class="card bg-light border p-2 mb-3 d-none">
                                         <table class="table table-sm table-borderless m-0 text-sm">
-                                            <tr><td width="35%">Nama</td><td width="5%">:</td><td id="p_nama" class="font-weight-bold">-</td></tr>
-                                            <tr><td>NIK</td><td>:</td><td id="p_nik">-</td></tr>
-                                            <tr><td>Hubungan di KK</td><td>:</td><td id="p_shdk">-</td></tr>
+                                            <tr>
+                                                <td width="35%">Nama</td>
+                                                <td width="5%">:</td>
+                                                <td id="p_nama" class="font-weight-bold">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td>NIK</td>
+                                                <td>:</td>
+                                                <td id="p_nik">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Hubungan di KK</td>
+                                                <td>:</td>
+                                                <td id="p_shdk">-</td>
+                                            </tr>
                                         </table>
                                         <div class="form-group mt-2 mb-1">
                                             <label class="small font-weight-bold text-dark">No. HP / WA Pembuat Pernyataan:</label>
@@ -231,7 +263,7 @@
 
                                     <div class="form-group">
                                         <label class="font-weight-bold">Permasalahan Sosial Ekonomi Lainnya:</label>
-                                        <textarea name="permasalahan_tambahan" id="permasalahan_tambahan" class="form-control form-control-sm" rows="3" placeholder="Contoh: Keluarga Miskin/Tidak Mampu, Tidak memiliki BPJS APBN KIS, Penghasilan buruh tidak mencukupi untuk rawat inap"></textarea>
+                                        <textarea name="permasalahan_tambahan" id="permasalahan_tambahan" class="form-control form-control-sm" rows="3" placeholder="Contoh: Keluarga Miskin/Tidak Mampu, Penghasilan buruh tidak mencukupi untuk rawat inap"></textarea>
                                     </div>
                                 </div>
 
@@ -421,317 +453,328 @@
 </div>
 
 <script>
-$(document).ready(function() {
-    var rawArtList = [];
+    $(document).ready(function() {
+        var rawArtList = [];
 
-    // Select2 Autocomplete untuk Pencarian KK
-    $('#searchKkSelect').select2({
-        theme: 'bootstrap4',
-        placeholder: 'Ketik minimal 3 digit No KK, NIK, atau Nama Kepala Keluarga...',
-        minimumInputLength: 3,
-        ajax: {
-            url: '<?= base_url('assessment/search-kk'); ?>',
-            dataType: 'json',
-            delay: 300,
-            data: function(params) {
-                return { q: params.term };
-            },
-            processResults: function(data) {
-                return { results: data.results };
-            },
-            cache: true
-        }
-    });
-
-    // Inisialisasi Select2 untuk Dropdown Riwayat Penyakit & Permohonan Bantuan
-    $('#pilih_riwayat_penyakit, #pilih_permohonan_bantuan').select2({
-        theme: 'bootstrap4',
-        width: '100%'
-    });
-
-    // Otomatis isi textarea saat Riwayat Penyakit dipilih dari dropdown
-    $('#pilih_riwayat_penyakit').on('change', function() {
-        var val = $(this).val();
-        if (val) {
-            $('#riwayat_penyakit').val(val);
-        }
-    });
-
-    // Otomatis isi textarea saat Permohonan Bantuan dipilih dari dropdown
-    $('#pilih_permohonan_bantuan').on('change', function() {
-        var val = $(this).val();
-        if (val) {
-            $('#permohonan_bantuan').val(val);
-        }
-    });
-
-    // Event ketika KK Dipilih
-    $('#searchKkSelect').on('select2:select', function(e) {
-        var id_kk = e.params.data.id;
-        $('#id_kk').val(id_kk);
-
-        // Load detail KK via AJAX
-        Swal.fire({
-            title: 'Memuat data keluarga...',
-            text: 'Menyinkronkan data DTSEN, susunan ART, foto, dan desil',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
+        // Select2 Autocomplete untuk Pencarian KK
+        $('#searchKkSelect').select2({
+            theme: 'bootstrap4',
+            placeholder: 'Ketik minimal 3 digit No KK, NIK, atau Nama Kepala Keluarga...',
+            minimumInputLength: 3,
+            ajax: {
+                url: '<?= base_url('assessment/search-kk'); ?>',
+                dataType: 'json',
+                delay: 300,
+                data: function(params) {
+                    return {
+                        q: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            }
         });
 
-        $.ajax({
-            url: '<?= base_url('assessment/get-kk-detail'); ?>/' + id_kk,
-            type: 'GET',
-            dataType: 'json',
-            success: function(res) {
-                Swal.close();
-                if (res.status && res.kk) {
-                    var kk = res.kk;
-                    rawArtList = res.art;
+        // Inisialisasi Select2 untuk Dropdown Riwayat Penyakit & Permohonan Bantuan
+        $('#pilih_riwayat_penyakit, #pilih_permohonan_bantuan').select2({
+            theme: 'bootstrap4',
+            width: '100%'
+        });
 
-                    // 1. Tampilkan Panel Preview Keluarga
-                    $('#prevNoKk').text(kk.no_kk);
-                    $('#prevKepalaKeluarga').text(kk.kepala_keluarga);
-                    $('#prevDesil').text(kk.kategori_desil ? 'Desil ' + kk.kategori_desil : 'Non-Desil');
-                    
-                    var alamatLengkap = (kk.alamat || '-') + ' RT ' + (kk.rt || '000') + ' / RW ' + (kk.rw || '000') + ', Desa ' + (kk.nama_desa || '-') + ', Kec. ' + (kk.nama_kecamatan || '-') + ', Kab. ' + (kk.nama_kabupaten || 'Garut');
-                    $('#prevAlamat').text(alamatLengkap);
-                    $('#prevBansos').text(kk.program_bansos || 'Belum Ada Bansos');
-                    $('#panelKeluarga').removeClass('d-none');
-                    $('#panelInstrumen').removeClass('d-none');
+        // Otomatis isi textarea saat Riwayat Penyakit dipilih dari dropdown
+        $('#pilih_riwayat_penyakit').on('change', function() {
+            var val = $(this).val();
+            if (val) {
+                $('#riwayat_penyakit').val(val);
+            }
+        });
 
-                    // 2. Populate Dropdown Sasaran & Pembuat Pernyataan
-                    var optSasaran = '<option value="">-- Pilih Anggota Keluarga yang Mengalami Masalah --</option>';
-                    var optPernyataan = '<option value="">-- Pilih Kepala Keluarga / Pasien / Pasangan --</option>';
+        // Otomatis isi textarea saat Permohonan Bantuan dipilih dari dropdown
+        $('#pilih_permohonan_bantuan').on('change', function() {
+            var val = $(this).val();
+            if (val) {
+                $('#permohonan_bantuan').val(val);
+            }
+        });
 
-                    var tbodyHtml = '';
-                    var defaultPembuat = '';
+        // Event ketika KK Dipilih
+        $('#searchKkSelect').on('select2:select', function(e) {
+            var id_kk = e.params.data.id;
+            $('#id_kk').val(id_kk);
 
-                    res.art.forEach(function(a, idx) {
-                        var label = a.nama + ' (' + (a.nama_shdk || 'ART') + ' | ' + a.umur + ' | NIK: ' + a.nik + ')';
-                        optSasaran += '<option value="' + a.nik + '">' + label + '</option>';
-                        optPernyataan += '<option value="' + a.nik + '">' + label + '</option>';
+            // Load detail KK via AJAX
+            Swal.fire({
+                title: 'Memuat data keluarga...',
+                text: 'Menyinkronkan data DTSEN, susunan ART, foto, dan desil',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
-                        // Pilih Kepala Keluarga atau Istri sebagai default pembuat pernyataan
-                        if (!defaultPembuat && (a.hubungan_keluarga == 1 || a.hubungan_keluarga == 3)) {
-                            defaultPembuat = a.nik;
+            $.ajax({
+                url: '<?= base_url('assessment/get-kk-detail'); ?>/' + id_kk,
+                type: 'GET',
+                dataType: 'json',
+                success: function(res) {
+                    Swal.close();
+                    if (res.status && res.kk) {
+                        var kk = res.kk;
+                        rawArtList = res.art;
+
+                        // 1. Tampilkan Panel Preview Keluarga
+                        $('#prevNoKk').text(kk.no_kk);
+                        $('#prevKepalaKeluarga').text(kk.kepala_keluarga);
+                        $('#prevDesil').text(kk.kategori_desil ? 'Desil ' + kk.kategori_desil : 'Non-Desil');
+
+                        var alamatLengkap = (kk.alamat || '-') + ' RT ' + (kk.rt || '000') + ' / RW ' + (kk.rw || '000') + ', Desa ' + (kk.nama_desa || '-') + ', Kec. ' + (kk.nama_kecamatan || '-') + ', Kab. ' + (kk.nama_kabupaten || 'Garut');
+                        $('#prevAlamat').text(alamatLengkap);
+                        $('#prevBansos').text(kk.program_bansos || 'Belum Ada Bansos');
+                        $('#panelKeluarga').removeClass('d-none');
+                        $('#panelInstrumen').removeClass('d-none');
+
+                        // 2. Populate Dropdown Sasaran & Pembuat Pernyataan
+                        var optSasaran = '<option value="">-- Pilih Anggota Keluarga yang Mengalami Masalah --</option>';
+                        var optPernyataan = '<option value="">-- Pilih Kepala Keluarga / Pasien / Pasangan --</option>';
+
+                        var tbodyHtml = '';
+                        var defaultPembuat = '';
+
+                        res.art.forEach(function(a, idx) {
+                            var label = a.nama + ' (' + (a.nama_shdk || 'ART') + ' | ' + a.umur + ' | NIK: ' + a.nik + ')';
+                            optSasaran += '<option value="' + a.nik + '">' + label + '</option>';
+                            optPernyataan += '<option value="' + a.nik + '">' + label + '</option>';
+
+                            // Pilih Kepala Keluarga atau Istri sebagai default pembuat pernyataan
+                            if (!defaultPembuat && (a.hubungan_keluarga == 1 || a.hubungan_keluarga == 3)) {
+                                defaultPembuat = a.nik;
+                            }
+
+                            // Render Tabel Bagian III (Susunan Keluarga)
+                            tbodyHtml += '<tr>';
+                            tbodyHtml += '<td class="text-center">' + (idx + 1) + '</td>';
+                            tbodyHtml += '<td><strong>' + a.nama + '</strong><br><small class="text-muted">NIK: ' + a.nik + '</small></td>';
+                            tbodyHtml += '<td class="text-center">' + (a.nama_shdk || '-') + '</td>';
+                            tbodyHtml += '<td class="text-center font-weight-bold">' + a.umur + '</td>';
+                            tbodyHtml += '<td>' + (a.nama_pekerjaan || 'Belum/Tidak Bekerja') + '</td>';
+                            tbodyHtml += '<td class="text-center">' + (a.hubungan_keluarga == 1 ? '< 1 Juta' : '-') + '</td>';
+                            tbodyHtml += '</tr>';
+                        });
+
+                        $('#nik_sasaran').html(optSasaran);
+                        $('#nik_pembuat_pernyataan').html(optPernyataan);
+                        if (defaultPembuat) {
+                            $('#nik_pembuat_pernyataan').val(defaultPembuat).trigger('change');
                         }
 
-                        // Render Tabel Bagian III (Susunan Keluarga)
-                        tbodyHtml += '<tr>';
-                        tbodyHtml += '<td class="text-center">' + (idx + 1) + '</td>';
-                        tbodyHtml += '<td><strong>' + a.nama + '</strong><br><small class="text-muted">NIK: ' + a.nik + '</small></td>';
-                        tbodyHtml += '<td class="text-center">' + (a.nama_shdk || '-') + '</td>';
-                        tbodyHtml += '<td class="text-center font-weight-bold">' + a.umur + '</td>';
-                        tbodyHtml += '<td>' + (a.nama_pekerjaan || 'Belum/Tidak Bekerja') + '</td>';
-                        tbodyHtml += '<td class="text-center">' + (a.hubungan_keluarga == 1 ? '< 1 Juta' : '-') + '</td>';
-                        tbodyHtml += '</tr>';
-                    });
+                        $('#tbodyArt').html(tbodyHtml);
 
-                    $('#nik_sasaran').html(optSasaran);
-                    $('#nik_pembuat_pernyataan').html(optPernyataan);
-                    if (defaultPembuat) {
-                        $('#nik_pembuat_pernyataan').val(defaultPembuat).trigger('change');
-                    }
-
-                    $('#tbodyArt').html(tbodyHtml);
-
-                    // 3. Tampilkan Foto Rumah & MCK dari DTSEN
-                    if (kk.foto_rumah) {
-                        $('#imgFotoDepan').attr('src', '<?= base_url(); ?>/' + kk.foto_rumah).removeClass('d-none');
-                        $('#noFotoDepan').addClass('d-none');
-                        $('#badgeFotoDepan').removeClass('badge-light border badge-warning badge-primary').addClass('badge-success').html('<i class="fas fa-check"></i> Siap Cetak (DTSEN)');
-                        $('#foto_depan').next('.custom-file-label').html('Ganti foto dari galeri...');
-                    } else {
-                        $('#imgFotoDepan').addClass('d-none');
-                        $('#noFotoDepan').removeClass('d-none');
-                        $('#badgeFotoDepan').removeClass('badge-success badge-primary').addClass('badge-warning').html('<i class="fas fa-exclamation-triangle"></i> Belum ada di DTSEN - Silakan Unggah');
-                        $('#foto_depan').next('.custom-file-label').html('Pilih foto dari galeri...');
-                    }
-
-                    if (kk.foto_rumah_dalam) {
-                        $('#imgFotoDalam').attr('src', '<?= base_url(); ?>/' + kk.foto_rumah_dalam).removeClass('d-none');
-                        $('#noFotoDalam').addClass('d-none');
-                        $('#badgeFotoDalam').removeClass('badge-light border badge-warning badge-primary').addClass('badge-success').html('<i class="fas fa-check"></i> Siap Cetak (DTSEN)');
-                        $('#foto_dalam').next('.custom-file-label').html('Ganti foto dari galeri...');
-                    } else {
-                        $('#imgFotoDalam').addClass('d-none');
-                        $('#noFotoDalam').removeClass('d-none');
-                        $('#badgeFotoDalam').removeClass('badge-success badge-primary').addClass('badge-warning').html('<i class="fas fa-exclamation-triangle"></i> Belum ada di DTSEN - Silakan Unggah');
-                        $('#foto_dalam').next('.custom-file-label').html('Pilih foto dari galeri...');
-                    }
-
-                    if (kk.foto_kamar_mandi) {
-                        $('#imgFotoMck').attr('src', '<?= base_url(); ?>/' + kk.foto_kamar_mandi).removeClass('d-none');
-                        $('#noFotoMck').addClass('d-none');
-                        $('#badgeFotoMck').removeClass('badge-light border badge-warning badge-primary').addClass('badge-success').html('<i class="fas fa-check"></i> Siap Cetak (DTSEN)');
-                        $('#foto_kamar_mandi').next('.custom-file-label').html('Ganti foto dari galeri...');
-                    } else {
-                        $('#imgFotoMck').addClass('d-none');
-                        $('#noFotoMck').removeClass('d-none');
-                        $('#badgeFotoMck').removeClass('badge-success badge-primary').addClass('badge-warning').html('<i class="fas fa-exclamation-triangle"></i> Belum ada di DTSEN - Silakan Unggah');
-                        $('#foto_kamar_mandi').next('.custom-file-label').html('Pilih foto dari galeri...');
-                    }
-                } else {
-                    Swal.fire('Gagal!', 'Tidak dapat memuat detail keluarga.', 'error');
-                }
-            },
-            error: function() {
-                Swal.close();
-                Swal.fire('Error!', 'Gagal menghubungi server.', 'error');
-            }
-        });
-    });
-
-    // Ketika Sasaran Pasien Dipilih
-    $('#nik_sasaran').on('change', function() {
-        var nik = $(this).val();
-        if (!nik) {
-            $('#bioSasaran').addClass('d-none');
-            return;
-        }
-
-        var found = rawArtList.find(function(a) { return a.nik == nik; });
-        if (found) {
-            $('#s_nama').text(found.nama);
-            $('#s_nik').text(found.nik);
-            $('#s_ttl').text((found.tempat_lahir || 'Garut') + ', ' + (found.tanggal_lahir || '-'));
-            $('#s_kawin').text(found.nama_status_kawin || 'Belum Kawin');
-            $('#s_pekerjaan').text(found.nama_pekerjaan || 'Belum/Tidak Bekerja');
-            $('#bioSasaran').removeClass('d-none');
-        }
-    });
-
-    // Ketika Pembuat Pernyataan Dipilih
-    $('#nik_pembuat_pernyataan').on('change', function() {
-        var nik = $(this).val();
-        if (!nik) {
-            $('#bioPernyataan').addClass('d-none');
-            return;
-        }
-
-        var found = rawArtList.find(function(a) { return a.nik == nik; });
-        if (found) {
-            $('#p_nama').text(found.nama);
-            $('#p_nik').text(found.nik);
-            $('#p_shdk').text(found.nama_shdk || 'Kepala Keluarga');
-            if (found.no_hp) {
-                $('#pembuat_pernyataan_hp').val(found.no_hp);
-            }
-            $('#bioPernyataan').removeClass('d-none');
-        }
-    });
-
-    // Helper Handler Preview Gambar untuk 4 Pilar Foto
-    function bindImagePreview(inputId, imgId, placeholderId, badgeId) {
-        $('#' + inputId).on('change', function(e) {
-            var file = e.target.files[0];
-            if (file) {
-                var reader = new FileReader();
-                reader.onload = function(evt) {
-                    $('#' + imgId).attr('src', evt.target.result).removeClass('d-none');
-                    $('#' + placeholderId).addClass('d-none');
-                    if (badgeId) {
-                        $('#' + badgeId).removeClass('badge-light border badge-success badge-warning').addClass('badge-primary').html('<i class="fas fa-upload mr-1"></i>Unggahan Baru (Galeri)');
-                    }
-                };
-                reader.readAsDataURL(file);
-                $(this).next('.custom-file-label').html(file.name);
-            }
-        });
-    }
-
-    bindImagePreview('foto_pasien', 'prevFotoPasien', 'placeholderPasien', null);
-    bindImagePreview('foto_depan', 'imgFotoDepan', 'noFotoDepan', 'badgeFotoDepan');
-    bindImagePreview('foto_dalam', 'imgFotoDalam', 'noFotoDalam', 'badgeFotoDalam');
-    bindImagePreview('foto_kamar_mandi', 'imgFotoMck', 'noFotoMck', 'badgeFotoMck');
-
-    // Checkbox Preset Masalah & Permohonan
-    $('.chk-preset').on('change', function() {
-        var targetId = $(this).data('target');
-        var val = $(this).val();
-        var currentText = $('#' + targetId).val().trim();
-
-        if ($(this).is(':checked')) {
-            if (currentText.length > 0) {
-                $('#' + targetId).val(currentText + '\n' + val);
-            } else {
-                $('#' + targetId).val(val);
-            }
-        }
-    });
-
-    // Submit Form via AJAX
-    $('#formAssessment').on('submit', function(e) {
-        e.preventDefault();
-
-        if (!$('#id_kk').val()) {
-            Swal.fire('Perhatian', 'Silakan cari dan pilih keluarga sasaran terlebih dahulu!', 'warning');
-            return;
-        }
-
-        if (!$('#nik_sasaran').val()) {
-            Swal.fire('Perhatian', 'Silakan pilih sasaran pasien / PMKS!', 'warning');
-            return;
-        }
-
-        var formData = new FormData(this);
-
-        Swal.fire({
-            title: 'Menyimpan Berkas Asesmen...',
-            text: 'Memproses kompresi dan watermark GPS foto pasien',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
-        });
-
-        $('#btnSubmit').prop('disabled', true);
-
-        $.ajax({
-            url: '<?= base_url('assessment/simpan'); ?>',
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            dataType: 'json',
-            success: function(res) {
-                $('#btnSubmit').prop('disabled', false);
-                if (res.status) {
-                    Swal.fire({
-                        title: 'Berhasil Disimpan!',
-                        text: res.message,
-                        icon: 'success',
-                        showDenyButton: true,
-                        showCancelButton: true,
-                        confirmButtonText: '<i class="fas fa-file-word mr-1"></i> Unduh Word (.docx)',
-                        denyButtonText: '<i class="fas fa-print mr-1"></i> Cetak Web',
-                        cancelButtonText: '<i class="fas fa-list mr-1"></i> Daftar Asesmen',
-                        confirmButtonColor: '#28a745',
-                        denyButtonColor: '#17a2b8',
-                        cancelButtonColor: '#6c757d'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = res.word_url;
-                            setTimeout(function() {
-                                window.location.href = res.redirect_url;
-                            }, 1200);
-                        } else if (result.isDenied) {
-                            window.open(res.cetak_url, '_blank');
-                            window.location.href = res.redirect_url;
+                        // 3. Tampilkan Foto Rumah & MCK dari DTSEN
+                        if (kk.foto_rumah) {
+                            $('#imgFotoDepan').attr('src', '<?= base_url(); ?>/' + kk.foto_rumah).removeClass('d-none');
+                            $('#noFotoDepan').addClass('d-none');
+                            $('#badgeFotoDepan').removeClass('badge-light border badge-warning badge-primary').addClass('badge-success').html('<i class="fas fa-check"></i> Siap Cetak (DTSEN)');
+                            $('#foto_depan').next('.custom-file-label').html('Ganti foto dari galeri...');
                         } else {
-                            window.location.href = res.redirect_url;
+                            $('#imgFotoDepan').addClass('d-none');
+                            $('#noFotoDepan').removeClass('d-none');
+                            $('#badgeFotoDepan').removeClass('badge-success badge-primary').addClass('badge-warning').html('<i class="fas fa-exclamation-triangle"></i> Belum ada di DTSEN - Silakan Unggah');
+                            $('#foto_depan').next('.custom-file-label').html('Pilih foto dari galeri...');
                         }
-                    });
-                } else {
-                    Swal.fire('Gagal!', res.message, 'error');
+
+                        if (kk.foto_rumah_dalam) {
+                            $('#imgFotoDalam').attr('src', '<?= base_url(); ?>/' + kk.foto_rumah_dalam).removeClass('d-none');
+                            $('#noFotoDalam').addClass('d-none');
+                            $('#badgeFotoDalam').removeClass('badge-light border badge-warning badge-primary').addClass('badge-success').html('<i class="fas fa-check"></i> Siap Cetak (DTSEN)');
+                            $('#foto_dalam').next('.custom-file-label').html('Ganti foto dari galeri...');
+                        } else {
+                            $('#imgFotoDalam').addClass('d-none');
+                            $('#noFotoDalam').removeClass('d-none');
+                            $('#badgeFotoDalam').removeClass('badge-success badge-primary').addClass('badge-warning').html('<i class="fas fa-exclamation-triangle"></i> Belum ada di DTSEN - Silakan Unggah');
+                            $('#foto_dalam').next('.custom-file-label').html('Pilih foto dari galeri...');
+                        }
+
+                        if (kk.foto_kamar_mandi) {
+                            $('#imgFotoMck').attr('src', '<?= base_url(); ?>/' + kk.foto_kamar_mandi).removeClass('d-none');
+                            $('#noFotoMck').addClass('d-none');
+                            $('#badgeFotoMck').removeClass('badge-light border badge-warning badge-primary').addClass('badge-success').html('<i class="fas fa-check"></i> Siap Cetak (DTSEN)');
+                            $('#foto_kamar_mandi').next('.custom-file-label').html('Ganti foto dari galeri...');
+                        } else {
+                            $('#imgFotoMck').addClass('d-none');
+                            $('#noFotoMck').removeClass('d-none');
+                            $('#badgeFotoMck').removeClass('badge-success badge-primary').addClass('badge-warning').html('<i class="fas fa-exclamation-triangle"></i> Belum ada di DTSEN - Silakan Unggah');
+                            $('#foto_kamar_mandi').next('.custom-file-label').html('Pilih foto dari galeri...');
+                        }
+                    } else {
+                        Swal.fire('Gagal!', 'Tidak dapat memuat detail keluarga.', 'error');
+                    }
+                },
+                error: function() {
+                    Swal.close();
+                    Swal.fire('Error!', 'Gagal menghubungi server.', 'error');
                 }
-            },
-            error: function() {
-                $('#btnSubmit').prop('disabled', false);
-                Swal.fire('Error!', 'Terjadi kesalahan sistem saat menyimpan data.', 'error');
+            });
+        });
+
+        // Ketika Sasaran Pasien Dipilih
+        $('#nik_sasaran').on('change', function() {
+            var nik = $(this).val();
+            if (!nik) {
+                $('#bioSasaran').addClass('d-none');
+                return;
+            }
+
+            var found = rawArtList.find(function(a) {
+                return a.nik == nik;
+            });
+            if (found) {
+                $('#s_nama').text(found.nama);
+                $('#s_nik').text(found.nik);
+                $('#s_ttl').text((found.tempat_lahir || 'Garut') + ', ' + (found.tanggal_lahir || '-'));
+                $('#s_kawin').text(found.nama_status_kawin || 'Belum Kawin');
+                $('#s_pekerjaan').text(found.nama_pekerjaan || 'Belum/Tidak Bekerja');
+                $('#bioSasaran').removeClass('d-none');
             }
         });
+
+        // Ketika Pembuat Pernyataan Dipilih
+        $('#nik_pembuat_pernyataan').on('change', function() {
+            var nik = $(this).val();
+            if (!nik) {
+                $('#bioPernyataan').addClass('d-none');
+                return;
+            }
+
+            var found = rawArtList.find(function(a) {
+                return a.nik == nik;
+            });
+            if (found) {
+                $('#p_nama').text(found.nama);
+                $('#p_nik').text(found.nik);
+                $('#p_shdk').text(found.nama_shdk || 'Kepala Keluarga');
+                if (found.no_hp) {
+                    $('#pembuat_pernyataan_hp').val(found.no_hp);
+                }
+                $('#bioPernyataan').removeClass('d-none');
+            }
+        });
+
+        // Helper Handler Preview Gambar untuk 4 Pilar Foto
+        function bindImagePreview(inputId, imgId, placeholderId, badgeId) {
+            $('#' + inputId).on('change', function(e) {
+                var file = e.target.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(evt) {
+                        $('#' + imgId).attr('src', evt.target.result).removeClass('d-none');
+                        $('#' + placeholderId).addClass('d-none');
+                        if (badgeId) {
+                            $('#' + badgeId).removeClass('badge-light border badge-success badge-warning').addClass('badge-primary').html('<i class="fas fa-upload mr-1"></i>Unggahan Baru (Galeri)');
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                    $(this).next('.custom-file-label').html(file.name);
+                }
+            });
+        }
+
+        bindImagePreview('foto_pasien', 'prevFotoPasien', 'placeholderPasien', null);
+        bindImagePreview('foto_depan', 'imgFotoDepan', 'noFotoDepan', 'badgeFotoDepan');
+        bindImagePreview('foto_dalam', 'imgFotoDalam', 'noFotoDalam', 'badgeFotoDalam');
+        bindImagePreview('foto_kamar_mandi', 'imgFotoMck', 'noFotoMck', 'badgeFotoMck');
+
+        // Checkbox Preset Masalah & Permohonan
+        $('.chk-preset').on('change', function() {
+            var targetId = $(this).data('target');
+            var val = $(this).val();
+            var currentText = $('#' + targetId).val().trim();
+
+            if ($(this).is(':checked')) {
+                if (currentText.length > 0) {
+                    $('#' + targetId).val(currentText + '\n' + val);
+                } else {
+                    $('#' + targetId).val(val);
+                }
+            }
+        });
+
+        // Submit Form via AJAX
+        $('#formAssessment').on('submit', function(e) {
+            e.preventDefault();
+
+            if (!$('#id_kk').val()) {
+                Swal.fire('Perhatian', 'Silakan cari dan pilih keluarga sasaran terlebih dahulu!', 'warning');
+                return;
+            }
+
+            if (!$('#nik_sasaran').val()) {
+                Swal.fire('Perhatian', 'Silakan pilih sasaran pasien / PMKS!', 'warning');
+                return;
+            }
+
+            var formData = new FormData(this);
+
+            Swal.fire({
+                title: 'Menyimpan Berkas Asesmen...',
+                text: 'Memproses kompresi dan watermark GPS foto pasien',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $('#btnSubmit').prop('disabled', true);
+
+            $.ajax({
+                url: '<?= base_url('assessment/simpan'); ?>',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                dataType: 'json',
+                success: function(res) {
+                    $('#btnSubmit').prop('disabled', false);
+                    if (res.status) {
+                        Swal.fire({
+                            title: 'Berhasil Disimpan!',
+                            text: res.message,
+                            icon: 'success',
+                            showDenyButton: true,
+                            showCancelButton: true,
+                            confirmButtonText: '<i class="fas fa-file-word mr-1"></i> Unduh Word (.docx)',
+                            denyButtonText: '<i class="fas fa-print mr-1"></i> Cetak Web',
+                            cancelButtonText: '<i class="fas fa-list mr-1"></i> Daftar Asesmen',
+                            confirmButtonColor: '#28a745',
+                            denyButtonColor: '#17a2b8',
+                            cancelButtonColor: '#6c757d'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = res.word_url;
+                                setTimeout(function() {
+                                    window.location.href = res.redirect_url;
+                                }, 1200);
+                            } else if (result.isDenied) {
+                                window.open(res.cetak_url, '_blank');
+                                window.location.href = res.redirect_url;
+                            } else {
+                                window.location.href = res.redirect_url;
+                            }
+                        });
+                    } else {
+                        Swal.fire('Gagal!', res.message, 'error');
+                    }
+                },
+                error: function() {
+                    $('#btnSubmit').prop('disabled', false);
+                    Swal.fire('Error!', 'Terjadi kesalahan sistem saat menyimpan data.', 'error');
+                }
+            });
+        });
     });
-});
 </script>
 
 <?= $this->endSection() ?>
-

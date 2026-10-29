@@ -693,6 +693,46 @@ class Assessment extends BaseController
             // - word/media/image8.jpeg (rId14) : FOTO 4 - FOTO WC / KAMAR MANDI
             $zip = new \ZipArchive();
             if ($zip->open($outputPath) === true) {
+                // Pastikan integritas relasi foto MCK / Sanitasi (rId14 -> image8.jpeg)
+                $docXml  = $zip->getFromName('word/document.xml');
+                $relsXml = $zip->getFromName('word/_rels/document.xml.rels');
+                $modifiedDoc  = false;
+                $modifiedRels = false;
+
+                // 1. Jika di word/document.xml foto MCK masih merujuk ke rId10 (Rumah Dalam), pisahkan ke rId14
+                if ($docXml !== false) {
+                    $firstRid10 = strpos($docXml, 'r:embed="rId10"');
+                    if ($firstRid10 !== false) {
+                        $secondRid10 = strpos($docXml, 'r:embed="rId10"', $firstRid10 + 15);
+                        if ($secondRid10 !== false) {
+                            $docXml = substr_replace($docXml, 'r:embed="rId14"', $secondRid10, strlen('r:embed="rId10"'));
+                            $modifiedDoc = true;
+                        }
+                    }
+                }
+
+                // 2. Jika di document.xml.rels belum ada rId14 untuk image8.jpeg, daftarkan relasinya
+                if ($relsXml !== false && strpos($relsXml, 'rId14') === false) {
+                    $relTag = '<Relationship Id="rId14" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/image8.jpeg"/>';
+                    $relsXml = str_replace('</Relationships>', $relTag . '</Relationships>', $relsXml);
+                    $modifiedRels = true;
+                }
+
+                if ($modifiedDoc) {
+                    $zip->addFromString('word/document.xml', $docXml);
+                }
+                if ($modifiedRels) {
+                    $zip->addFromString('word/_rels/document.xml.rels', $relsXml);
+                }
+
+                // 3. Pastikan image8.jpeg ada sebagai default fallback jika belum ada
+                if ($zip->getFromName('word/media/image8.jpeg') === false) {
+                    $img6 = $zip->getFromName('word/media/image6.jpeg');
+                    if ($img6 !== false) {
+                        $zip->addFromString('word/media/image8.jpeg', $img6);
+                    }
+                }
+
                 // 1. Foto Pasien / Sasaran (image4.jpeg)
                 if (!empty($asesmen['foto_pasien']) && file_exists(FCPATH . $asesmen['foto_pasien'])) {
                     $this->injectDocxImage($zip, FCPATH . $asesmen['foto_pasien'], 'word/media/image4.jpeg');
@@ -711,7 +751,7 @@ class Assessment extends BaseController
                 }
 
                 // 4. Foto WC / Kamar Mandi (image8.jpeg)
-                $fotoMck = $asesmen['foto_kamar_mandi'] ?: ($asesmen['rt_foto_mck'] ?? $asesmen['rt_foto_kamar_mandi'] ?? null);
+                $fotoMck = $asesmen['foto_kamar_mandi'] ?: ($asesmen['rt_foto_mck'] ?? $asesmen['rt_foto_kamar_mandi'] ?? $asesmen['foto_mck'] ?? null);
                 if (!empty($fotoMck) && file_exists(FCPATH . $fotoMck)) {
                     $this->injectDocxImage($zip, FCPATH . $fotoMck, 'word/media/image8.jpeg');
                 }
