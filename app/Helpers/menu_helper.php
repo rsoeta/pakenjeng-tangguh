@@ -89,6 +89,11 @@ function menu_child_child_child($parent_id)
 
 function menu_is_active(string $menuUrl)
 {
+    $menuUrl = trim($menuUrl);
+    if ($menuUrl === '' || $menuUrl === '#') {
+        return false;
+    }
+
     $request = \Config\Services::request();
 
     $seg1 = strtolower($request->getUri()->getSegment(1));
@@ -113,6 +118,10 @@ function menu_is_open(array $children)
 {
     foreach ($children as $child) {
         if (menu_is_active($child['tm_url'])) {
+            return true;
+        }
+        $subChildren = menu_child($child['tm_id']);
+        if (!empty($subChildren) && menu_is_open($subChildren)) {
             return true;
         }
     }

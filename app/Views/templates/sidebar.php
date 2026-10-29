@@ -73,7 +73,7 @@ $menus = menu()
                             </a>
 
                             <?php if ($hasChild) : ?>
-                                <ul class="nav nav-treeview nav-second-level">
+                                <ul class="nav nav-treeview nav-second-level" style="display: <?= $isMenuOpen ? 'block' : 'none'; ?>;">
 
                                     <?php foreach ($children as $child) : ?>
 
@@ -102,7 +102,7 @@ $menus = menu()
                                             </a>
 
                                             <?php if ($hasChild2) : ?>
-                                                <ul class="nav nav-treeview nav-third-level">
+                                                <ul class="nav nav-treeview nav-third-level" style="display: <?= $isOpen2 ? 'block' : 'none'; ?>;">
 
                                                     <?php foreach ($child2 as $child_lvl2) : ?>
 

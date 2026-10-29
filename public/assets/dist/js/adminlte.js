@@ -2587,7 +2587,7 @@
     var _proto = Treeview.prototype;
 
     _proto.init = function init() {
-      $__default['default']("" + SELECTOR_LI + SELECTOR_OPEN + " " + SELECTOR_TREEVIEW_MENU).css('display', 'block');
+      $__default['default']("" + SELECTOR_LI + SELECTOR_OPEN + " > " + SELECTOR_TREEVIEW_MENU).css('display', 'block');
 
       this._setupListeners();
     };
