@@ -9,7 +9,7 @@ $uri = $request->getUri()->getSegment(1);
 $menus = menu()
 ?>
 
-<aside class="main-sidebar sidebar-sinden elevation-4">
+<aside class="main-sidebar sidebar-sinden elevation-4" style="background: linear-gradient(180deg, #135d54 0%, #2EC4B6 100%);">
 
     <!-- 🚀 Semua elemen dimasukkan ke dalam div.sidebar agar ikut ter-scroll dan tidak mengambang -->
     <div class="sidebar">
@@ -22,14 +22,14 @@ $menus = menu()
             </a>
             <div class="d-flex flex-column mt-2 text-center">
                 <!-- nameApp() dihapus, sisa titleApp() -->
-                <span class="text-muted" style="font-size: 0.75rem; line-height: 1.3;">
+                <span class="text-light" style="font-size: 0.75rem; line-height: 1.3;">
                     <?= titleApp(); ?>
                 </span>
             </div>
         </div>
 
         <div class="px-3 mb-2 mt-2">
-            <span class="text-uppercase text-muted text-xs font-weight-bold">Menu Utama</span>
+            <span class="text-uppercase text-light text-xs font-weight-bold">Menu Utama</span>
         </div>
 
         <nav class="mt-2">

@@ -44,7 +44,7 @@
 
     <!-- PWA & Mobile Web App Meta Tags -->
     <link rel="manifest" href="<?= base_url('manifest.json'); ?>">
-    <meta name="theme-color" content="#2ecc71">
+    <meta name="theme-color" content="#2EC4B6">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -87,9 +87,29 @@
 
     <style>
         /* 🚀 STYLING UI PREMIUM SINDEN */
+        :root {
+            --green: #2EC4B6;
+        }
+
+        .navbar-sinden {
+            background: #2EC4B6 !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .sidebar-sinden {
+            background: linear-gradient(180deg, #135d54 0%, #2EC4B6 100%) !important;
+        }
+
+        body.dark-mode .sidebar-sinden {
+            background: linear-gradient(180deg, #0b3d2e 0%, #154360 100%) !important;
+        }
+
+        /* 🚀 STYLING UI PREMIUM SINDEN */
         .content-wrapper {
             min-height: 100vh !important;
             background-color: #f4f6f9;
+            padding-top: 1.5rem !important;
         }
 
         /* Tombol Melayang (Floating Action Button) */
@@ -160,7 +180,9 @@
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>if (typeof jQuery !== 'undefined') jQuery.migrateMute = true;</script>
+    <script>
+        if (typeof jQuery !== 'undefined') jQuery.migrateMute = true;
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-migrate/3.3.2/jquery-migrate.min.js"></script>
 
     <!-- AdminLTE (Bootstrap 4 bundle!) -->

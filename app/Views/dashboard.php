@@ -179,7 +179,7 @@ $roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
     }
 </style>
 
-<div class="content-wrapper mt-1 p-4">
+<div class="content-wrapper mt-3 p-4">
     <div class="hero-banner">
         <h2>✨ Assalamualaikum, Selamat <?= Salam(); ?>,</h2>
         <h2><?= ucwords(strtolower(session()->get('fullname'))); ?></h2>
