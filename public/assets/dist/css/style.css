@@ -50,24 +50,24 @@
     text-decoration: none;
 }
 
-/* 💻 Memaksa Root Ukuran Font (Desktop: 12px)
-   1rem = 12px (Bawaan browser biasanya 16px, kita kecilkan menjadi 75%) */
+/* 💻 Memaksa Root Ukuran Font (Desktop: 13px)
+   1rem = 13px (Bawaan browser 16px, disesuaikan menjadi 81.25%) */
 html {
-    font-size: 75% !important; /* 12px / 16px = 0.75 */
+    font-size: 81.25% !important; /* 13px / 16px = 0.8125 */
 }
 
 body {
-    font-size: 1rem !important; /* Mengikuti root (12px) */
+    font-size: 1rem !important; /* Mengikuti root (13px) */
 }
 
-/* 📱 Memaksa Root Ukuran Font (Mobile: 10px)
-   1rem = 10px (10px / 16px = 0.625) */
+/* 📱 Memaksa Root Ukuran Font (Mobile: 11px)
+   1rem = 11px (11px / 16px = 0.6875) */
 @media (max-width: 768px) {
     html {
-        font-size: 62.5% !important; 
+        font-size: 68.75% !important; /* 11px / 16px = 0.6875 */ 
     }
     body {
-        font-size: 1rem !important; /* Mengikuti root (10px) */
+        font-size: 1rem !important; /* Mengikuti root (11px) */
     }
 }
 
