@@ -431,18 +431,22 @@ class MasterKKS extends BaseController
     // ========================================================
     public function search_penduduk()
     {
-        $search = $this->request->getPost('searchTerm');
+        $search = trim((string)$this->request->getPost('searchTerm'));
         $user   = $this->authModel->getUserId();
 
         // Ambil Role dan Kode Desa dari Session / Data User
         $roleId   = session()->get('role_id') ?? $user['role_id'] ?? 4;
         $kodeDesa = session()->get('kode_desa') ?? $user['kode_desa'] ?? '';
 
-        // 1. Triple Join: ART -> KK -> RT
+        // 1. Triple Join: ART -> KK -> RT (Abaikan data ART & KK yang telah di-soft-delete)
         $builder = $this->db->table('dtsen_art art')
             ->select('art.nik, art.nama, kk.alamat, rt.rt, rt.rw')
-            ->join('dtsen_kk kk', 'kk.id_kk = art.id_kk', 'left')
-            ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left');
+            ->join('dtsen_kk kk', 'kk.id_kk = art.id_kk AND kk.deleted_at IS NULL')
+            ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
+            ->where('art.deleted_at IS NULL')
+            ->where('kk.deleted_at IS NULL')
+            ->where("art.nik != ''")
+            ->where('art.nik IS NOT NULL');
 
         // 2. Kunci wilayah otomatis + KUNCI KODE DESA 🔐
         $filterData = [
@@ -459,7 +463,12 @@ class MasterKKS extends BaseController
                 ->groupEnd();
         }
 
-        $query = $builder->limit(20)->get()->getResultArray();
+        // 🛡️ Cegah duplikat NIK & ambil rekaman penduduk terbaru
+        $builder->groupBy('art.nik')
+            ->orderBy('art.id_art', 'DESC')
+            ->limit(20);
+
+        $query = $builder->get()->getResultArray();
 
         // 4. Susun Format Kembalian untuk Select2
         $data = [];
