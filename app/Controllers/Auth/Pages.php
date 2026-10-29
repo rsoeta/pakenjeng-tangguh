@@ -110,20 +110,16 @@ class Pages extends BaseController
 
         // =======================================================
         // 🚀 PENGHITUNGAN DRAFT & SUBMITTED (SMART COUNT)
-        // Kita gunakan getFilteredData agar logika isPayloadLengkap() ikut berjalan!
+        // Menggunakan DtsenDraftModel agar 100% konsisten dengan tabel Pembaruan Keluarga
         // =======================================================
-
-        // 1. Ambil data dengan filter DRAFT
-        $filterDraft = $filter;
-        $filterDraft['status'] = 'draft';
-        $dataDraft = $kkModel->getFilteredData($filterDraft);
-        $totalDraft = count($dataDraft); // Hitung array hasil saringannya
-
-        // 2. Ambil data dengan filter SUBMITTED
-        $filterSubmitted = $filter;
-        $filterSubmitted['status'] = 'submitted';
-        $dataSubmitted = $kkModel->getFilteredData($filterSubmitted);
-        $totalSubmitted = count($dataSubmitted); // Hitung array hasil saringannya
+        $countsUsulan = $this->DtsenDraftModel->getCountsByRole($roleId, [
+            'kode_desa'     => $kodeDesa,
+            'wilayah_tugas' => $wilayahTugas,
+            'rw'            => ($roleId >= 4 ? $rwUser : null),
+            'level'         => $rwUser,
+        ]);
+        $totalDraft     = $countsUsulan['draft'];
+        $totalSubmitted = $countsUsulan['submitted'];
 
         // =======================================================
 

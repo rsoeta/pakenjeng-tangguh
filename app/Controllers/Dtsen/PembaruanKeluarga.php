@@ -1989,17 +1989,16 @@ class PembaruanKeluarga extends BaseController
             return $result;
         }
 
-        $rwGroups = explode('|', $wilayahTugas); // contoh: 002:003,004|005:001,002
-
-        foreach ($rwGroups as $group) {
-            [$rw, $rtList] = array_pad(explode(':', trim($group)), 2, '');
-            if ($rw === '') continue;
-
-            $rts = $rtList ? array_map('trim', explode(',', $rtList)) : [];
+        $map = self::parseWilayahTugasMap($wilayahTugas);
+        foreach ($map as $rw => $rtList) {
+            $rwNorm = is_numeric($rw) ? str_pad($rw, 3, '0', STR_PAD_LEFT) : $rw;
+            $rtsNorm = array_map(function ($rt) {
+                return is_numeric($rt) ? str_pad($rt, 3, '0', STR_PAD_LEFT) : $rt;
+            }, $rtList);
 
             $result[] = [
-                'rw' => $rw,
-                'rt' => $rts
+                'rw' => $rwNorm,
+                'rt' => $rtsNorm
             ];
         }
 
@@ -2054,21 +2053,33 @@ class PembaruanKeluarga extends BaseController
                 ->join('dtsen_se se', 'se.id_kk = us.dtsen_kk_id', 'left')
                 ->join('dtsen_rt r', 'r.id_rt = kk.id_rt', 'left')
                 ->join('dtks_users u', ' (u.id = us.created_by OR u.nik = us.created_by) ', 'left', false)
-                ->whereIn('us.status', ['draft', 'submitted']); // 🚀 AMBIL KEDUANYA UNTUK DISORTIR CERDAS
+                ->whereIn('us.status', ['draft', 'submitted']) // 🚀 AMBIL KEDUANYA UNTUK DISORTIR CERDAS
+                // 🛡️ Abaikan KK yang sudah di-soft-delete
+                ->groupStart()
+                    ->where('kk.deleted_at', null)
+                    ->orWhere('kk.deleted_at', '0000-00-00 00:00:00')
+                    ->orWhere('us.dtsen_kk_id', null)
+                ->groupEnd();
 
             if (!empty($kodeDesa)) {
                 $builder->where('r.kode_desa', $kodeDesa);
             }
 
-            if (!empty($wilayahTugas) && $roleId >= 4) {
+            if ($roleId >= 4) {
                 $parsed = $this->parseWilayahTugasList($wilayahTugas);
-                $builder->groupStart();
-                foreach ($parsed as $group) {
-                    $builder->orGroupStart()->where('r.rw', $group['rw']);
-                    if (!empty($group['rt'])) $builder->whereIn('r.rt', $group['rt']);
+                if (!empty($parsed)) {
+                    $builder->groupStart();
+                    foreach ($parsed as $group) {
+                        $builder->orGroupStart()->where('r.rw', $group['rw']);
+                        if (!empty($group['rt'])) $builder->whereIn('r.rt', $group['rt']);
+                        $builder->groupEnd();
+                    }
                     $builder->groupEnd();
+                } elseif (!empty($session->get('level'))) {
+                    $rwUser = $session->get('level');
+                    $rwNorm = is_numeric($rwUser) ? str_pad($rwUser, 3, '0', STR_PAD_LEFT) : $rwUser;
+                    $builder->where('r.rw', $rwNorm);
                 }
-                $builder->groupEnd();
             }
 
             $builder->orderBy('us.updated_at', 'ASC');
@@ -2130,21 +2141,33 @@ class PembaruanKeluarga extends BaseController
                 ->join('dtsen_se se', 'se.id_kk = u.dtsen_kk_id', 'left')
                 ->join('dtsen_rt r', 'r.id_rt = kk.id_rt', 'left')
                 ->whereIn('u.status', ['draft', 'submitted']) // 🚀 KITA SAPU BERSIH JSON QUERY LAMA
-                ->where('JSON_LENGTH(u.payload) >', 0);
+                ->where('JSON_LENGTH(u.payload) >', 0)
+                // 🛡️ Abaikan KK yang sudah di-soft-delete
+                ->groupStart()
+                    ->where('kk.deleted_at', null)
+                    ->orWhere('kk.deleted_at', '0000-00-00 00:00:00')
+                    ->orWhere('u.dtsen_kk_id', null)
+                ->groupEnd();
 
             if (!empty($kodeDesa)) {
                 $builder->where('r.kode_desa', $kodeDesa);
             }
 
-            if (!empty($wilayahTugas) && $roleId >= 4) {
+            if ($roleId >= 4) {
                 $parsed = $this->parseWilayahTugasList($wilayahTugas);
-                $builder->groupStart();
-                foreach ($parsed as $group) {
-                    $builder->orGroupStart()->where('r.rw', $group['rw']);
-                    if (!empty($group['rt'])) $builder->whereIn('r.rt', $group['rt']);
+                if (!empty($parsed)) {
+                    $builder->groupStart();
+                    foreach ($parsed as $group) {
+                        $builder->orGroupStart()->where('r.rw', $group['rw']);
+                        if (!empty($group['rt'])) $builder->whereIn('r.rt', $group['rt']);
+                        $builder->groupEnd();
+                    }
                     $builder->groupEnd();
+                } elseif (!empty($session->get('level'))) {
+                    $rwUser = $session->get('level');
+                    $rwNorm = is_numeric($rwUser) ? str_pad($rwUser, 3, '0', STR_PAD_LEFT) : $rwUser;
+                    $builder->where('r.rw', $rwNorm);
                 }
-                $builder->groupEnd();
             }
 
             $builder->orderBy('u.updated_at', 'ASC');

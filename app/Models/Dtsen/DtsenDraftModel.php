@@ -29,66 +29,73 @@ class DtsenDraftModel extends Model
     protected $useTimestamps = true;
 
     /**
-     * Hitung jumlah draft sesuai wilayah user.
+     * Hitung total draft dan submitted yang konsisten 100% dengan tabel Pembaruan Keluarga
+     *
+     * @param int $roleId
+     * @param array $filter ['kode_desa', 'wilayah_tugas', 'rw', 'level']
+     * @return array ['draft' => int, 'submitted' => int]
      */
-    public function countDraftByUser(int $userRole, array $filter = [])
+    public function getCountsByRole(int $roleId, array $filter = []): array
     {
-        $builder = $this->db->table('dtsen_usulan u')
-            ->select('COUNT(DISTINCT u.id) AS total')
-            ->join('dtsen_kk kk', 'kk.id_kk = u.dtsen_kk_id', 'left')
-            ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
-            ->where('u.status', 'draft');
+        $kodeDesa     = $filter['kode_desa'] ?? null;
+        $wilayahTugas = $filter['wilayah_tugas'] ?? null;
+        $rwUser       = $filter['rw'] ?? $filter['level'] ?? null;
 
-        $this->applyWilayahFilter($builder, $filter, $userRole);
+        $kkModel = new \App\Models\Dtsen\DtsenKkModel();
 
-        $row = $builder->get()->getRowArray();
-        return (int) ($row['total'] ?? 0);
-    }
-
-    /**
-     * Hitung jumlah data SUBMITTED (draft lengkap).
-     */
-    public function countSubmittedByUser(int $userRole, array $filter = [])
-    {
-        $builder = $this->db->table('dtsen_usulan u')
-            ->select('COUNT(DISTINCT u.id) AS total')
-            ->join('dtsen_kk kk', 'kk.id_kk = u.dtsen_kk_id', 'left')
+        $builder = $this->db->table('dtsen_usulan us')
+            ->select("us.id, us.status, us.payload")
+            ->join('dtsen_kk kk', 'kk.id_kk = us.dtsen_kk_id', 'left')
             ->join('dtsen_rt r', 'r.id_rt = kk.id_rt', 'left')
+            ->whereIn('us.status', ['draft', 'submitted'])
+            // 🛡️ Abaikan KK yang telah di-soft-delete
+            ->groupStart()
+                ->where('kk.deleted_at', null)
+                ->orWhere('kk.deleted_at', '0000-00-00 00:00:00')
+                ->orWhere('us.dtsen_kk_id', null)
+            ->groupEnd();
 
-            // status masih draft (submitted = draft yang lengkap)
-            ->where('u.status', 'draft')
+        if (!empty($kodeDesa)) {
+            $builder->where('r.kode_desa', $kodeDesa);
+        }
 
-            // Perumahan wajib lengkap
-            ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.no_kk')) <> ''")
-            ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.kepala_keluarga')) <> ''")
-            ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.perumahan.alamat')) <> ''")
+        if ($roleId >= 4) {
+            $map = !empty($wilayahTugas) ? self::parseWilayahTugasMap($wilayahTugas) : [];
+            if (!empty($map)) {
+                $builder->groupStart();
+                foreach ($map as $rw => $rtList) {
+                    $rwNorm = is_numeric($rw) ? str_pad($rw, 3, '0', STR_PAD_LEFT) : $rw;
+                    $builder->orGroupStart()->where('r.rw', $rwNorm);
+                    if (!empty($rtList)) {
+                        $rtNorms = array_map(fn($rt) => is_numeric($rt) ? str_pad($rt, 3, '0', STR_PAD_LEFT) : $rt, $rtList);
+                        $builder->whereIn('r.rt', $rtNorms);
+                    }
+                    $builder->groupEnd();
+                }
+                $builder->groupEnd();
+            } elseif (!empty($rwUser)) {
+                $rwNorm = is_numeric($rwUser) ? str_pad($rwUser, 3, '0', STR_PAD_LEFT) : $rwUser;
+                $builder->where('r.rw', $rwNorm);
+            }
+        }
 
-            ->where("JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.kondisi')) >", 0)
-            ->where("JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.wilayah')) >", 0)
-            ->where("JSON_LENGTH(JSON_EXTRACT(u.payload, '$.perumahan.sanitasi')) >", 0)
+        $rows = $builder->get()->getResultArray();
 
-            // Foto wajib lengkap
-            ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.ktp_kk')) <> ''")
-            ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.dalam')) <> ''")
-            ->where("JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.depan')) <> ''")
+        $totalDraft = 0;
+        $totalSubmitted = 0;
 
-            // ART wajib lengkap
-            ->where("EXISTS (
-                SELECT 1 FROM dtsen_usulan_art a
-                WHERE a.dtsen_usulan_id = u.id
-                AND JSON_LENGTH(a.payload_member) > 0
-                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, '$.identitas.nik')) <> ''
-                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, '$.identitas.nama')) <> ''
-                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, '$.identitas.jenis_kelamin')) <> ''
-                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, '$.pendidikan.jenjang_pendidikan')) <> ''
-                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, '$.kesehatan.penyakit_kronis')) <> ''
-                AND JSON_UNQUOTE(JSON_EXTRACT(a.payload_member, '$.tenaga_kerja.pendapatan')) <> ''
-            )", null, false);
+        foreach ($rows as $r) {
+            $payload = json_decode($r['payload'] ?? '{}', true) ?? [];
+            if ($kkModel->isPayloadLengkap($payload)) {
+                $totalSubmitted++;
+            } else {
+                $totalDraft++;
+            }
+        }
 
-        // APPLY FILTER WILAYAH
-        $this->applyWilayahFilter($builder, $filter, $userRole);
-
-        $row = $builder->get()->getRowArray();
-        return (int)($row['total'] ?? 0);
+        return [
+            'draft'     => $totalDraft,
+            'submitted' => $totalSubmitted,
+        ];
     }
 }

@@ -250,9 +250,13 @@ class DtsenKkModel extends Model
                 $payload = json_decode($u['payload'], true);
                 $p = $payload['perumahan'] ?? [];
 
-                // 🔥 OVERRIDE RW/RT
-                if (!empty($p['rw'])) $row['rw'] = $p['rw'];
-                if (!empty($p['rt'])) $row['rt'] = $p['rt'];
+                // 🔥 OVERRIDE RW/RT (Normalkan ke format standar 3 digit jika numerik)
+                if (!empty($p['rw'])) {
+                    $row['rw'] = is_numeric($p['rw']) ? str_pad($p['rw'], 3, '0', STR_PAD_LEFT) : $p['rw'];
+                }
+                if (!empty($p['rt'])) {
+                    $row['rt'] = is_numeric($p['rt']) ? str_pad($p['rt'], 3, '0', STR_PAD_LEFT) : $p['rt'];
+                }
 
                 // 🔥 TAMBAHKAN INI (FIX ALAMAT)
                 if (!empty($p['alamat'])) $row['alamat'] = $p['alamat'] ?? $row['alamat'];
@@ -278,16 +282,20 @@ class DtsenKkModel extends Model
          */
         $keluarga = array_values(array_filter($keluarga, function ($row) use ($filter) {
 
-            // RW: Gunakan isset dan !== '' agar 0 (jika ada RW 0) tidak dianggap kosong
+            // RW: Gunakan isset dan !== '' agar 0 (jika ada RW 0) tidak dianggap kosong (Normalkan 3 digit)
             if (isset($filter['rw']) && $filter['rw'] !== '' && $filter['rw'] !== 'all') {
-                if ((string)$row['rw'] !== (string)$filter['rw']) {
+                $filterRw = is_numeric($filter['rw']) ? str_pad($filter['rw'], 3, '0', STR_PAD_LEFT) : (string)$filter['rw'];
+                $rowRw = is_numeric($row['rw']) ? str_pad($row['rw'], 3, '0', STR_PAD_LEFT) : (string)$row['rw'];
+                if ($rowRw !== $filterRw) {
                     return false;
                 }
             }
 
-            // RT
+            // RT: Normalkan 3 digit
             if (isset($filter['rt']) && $filter['rt'] !== '' && $filter['rt'] !== 'all') {
-                if ((string)$row['rt'] !== (string)$filter['rt']) {
+                $filterRt = is_numeric($filter['rt']) ? str_pad($filter['rt'], 3, '0', STR_PAD_LEFT) : (string)$filter['rt'];
+                $rowRt = is_numeric($row['rt']) ? str_pad($row['rt'], 3, '0', STR_PAD_LEFT) : (string)$row['rt'];
+                if ($rowRt !== $filterRt) {
                     return false;
                 }
             }
