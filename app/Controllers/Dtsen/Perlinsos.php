@@ -218,6 +218,10 @@ class Perlinsos extends Controller
             ->groupBy('p.created_by')
             ->get()->getResult();
 
+        foreach ($petugas as $p) {
+            $p->fullname = $this->formatNamaPetugas($p->fullname);
+        }
+
         $rw = $this->db->table('dtsen_rt')->select('rw')->where('kode_desa', $kodeDesa)->where('rw IS NOT NULL')->groupBy('rw')->get()->getResult();
 
         return $this->response->setJSON(['petugas' => $petugas, 'rw' => $rw]);
@@ -243,7 +247,7 @@ class Perlinsos extends Controller
 
         foreach ($users as $u) {
             $nikPetugas = $u['nik'];
-            $namaPendek = explode(' ', trim($u['fullname']))[0];
+            $namaPendek = $this->formatNamaPetugas($u['fullname']);
 
             // 1. Total capaian KPM yang diinput oleh petugas
             $capaian = $this->db->table('dtsen_perlinsos')->where('created_by', $nikPetugas)->countAllResults();
@@ -379,7 +383,14 @@ class Perlinsos extends Controller
             }
         }
 
-        return $this->response->setJSON(['data' => $builder->get()->getResultArray()]);
+        $data = $builder->get()->getResultArray();
+        foreach ($data as &$row) {
+            if (!empty($row['petugas'])) {
+                $row['petugas'] = $this->formatNamaPetugas($row['petugas']);
+            }
+        }
+
+        return $this->response->setJSON(['data' => $data]);
     }
 
     // // 🚀 HAPUS DATA
@@ -487,7 +498,14 @@ class Perlinsos extends Controller
             ->orderBy("FIELD(a.status, 'pending', 'rejected', 'approved')")
             ->orderBy('a.created_at', 'DESC');
 
-        return $this->response->setJSON(['data' => $builder->get()->getResultArray()]);
+        $data = $builder->get()->getResultArray();
+        foreach ($data as &$row) {
+            if (!empty($row['fullname'])) {
+                $row['fullname'] = $this->formatNamaPetugas($row['fullname']);
+            }
+        }
+
+        return $this->response->setJSON(['data' => $data]);
     }
 
     // 3. Fungsi Admin Eksekusi Setuju/Tolak
@@ -508,5 +526,22 @@ class Perlinsos extends Controller
         ]);
 
         return $this->response->setJSON(['success' => true, 'message' => 'Status akses berhasil diperbarui.']);
+    }
+
+    /**
+     * 🚀 Helper: Format nama / label petugas menjadi maksimal 2 kata (Title Case)
+     */
+    private function formatNamaPetugas(?string $fullname): string
+    {
+        if (empty($fullname)) {
+            return '-';
+        }
+
+        $words = preg_split('/\s+/', trim($fullname), -1, PREG_SPLIT_NO_EMPTY);
+        if (empty($words)) {
+            return '-';
+        }
+
+        return ucwords(strtolower(implode(' ', array_slice($words, 0, 2))));
     }
 }

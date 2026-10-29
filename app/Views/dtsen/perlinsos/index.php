@@ -641,7 +641,8 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                     // 🚀 PERBAIKAN: Pindahkan kolom Petugas ke atas Waktu Rekap
                     ...(roleId <= 3 ? [{
                         data: 'petugas',
-                        className: 'text-start text-capitalize'
+                        className: 'text-start text-uppercase',
+                        render: d => d ? d.toUpperCase() : '-'
                     }] : []),
                     // 🚀 Waktu Rekap digeser ke bawahnya
                     {
@@ -780,7 +781,15 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                     colors: ['transparent']
                 },
                 xaxis: {
-                    categories: []
+                    categories: [],
+                    labels: {
+                        rotate: -45,
+                        rotateAlways: false,
+                        style: {
+                            fontSize: '11px',
+                            fontWeight: 600
+                        }
+                    }
                 },
                 colors: ['#dc3545', '#ffc107', '#198754'], // Merah (Belum Tercapai), Kuning (Belum Verifikasi), Hijau (Terverifikasi)
                 fill: {
@@ -816,6 +825,14 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                             // Sembunyikan label sumbu X bawah di HP agar lebih lega
                             labels: {
                                 show: false
+                            }
+                        },
+                        yaxis: {
+                            labels: {
+                                style: {
+                                    fontSize: '11px',
+                                    fontWeight: 600
+                                }
                             }
                         },
                         dataLabels: {
