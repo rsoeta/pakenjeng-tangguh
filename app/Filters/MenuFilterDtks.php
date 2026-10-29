@@ -43,7 +43,8 @@ class MenuFilterDtks implements FilterInterface
                 'bansos-kks',
                 'usulan-bansos',
                 'dokumentasi',
-                'dtsen-se'
+                'dtsen-se',
+                'bansos'
             ];
 
             if (in_array($seg1, $restrictedPrefixes) && $roleId > 4) {

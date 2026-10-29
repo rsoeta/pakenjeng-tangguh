@@ -92,7 +92,13 @@ function menu_is_active(string $menuUrl)
     $request = \Config\Services::request();
 
     $seg1 = strtolower($request->getUri()->getSegment(1));
-    $seg2 = strtolower($request->getUri()->getSegment(2));
+    $seg2 = $request->getUri()->getTotalSegments() > 1 ? strtolower($request->getUri()->getSegment(2)) : '';
+    $fullPath = trim($seg1 . '/' . $seg2, '/');
+
+    // 1. Exact match untuk format multi-segmen (contoh: bansos/rekapitulasi, pbi/data)
+    if ($fullPath === strtolower($menuUrl)) {
+        return true;
+    }
 
     // Auto detect modul DTSEN (menggunakan prefix /dtsen/)
     if ($seg1 === 'dtsen') {

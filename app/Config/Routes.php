@@ -213,6 +213,20 @@ $routes->group('master-kks', ['filter' => 'authfilterdtks', 'menufilterdtks'], f
 	$routes->post('delete', 'Dtsen\MasterKKS::delete');
 });
 
+// ==========================================
+// 📦 MODUL BANSOS - REKAPITULASI
+// ==========================================
+$routes->group('bansos', ['filter' => ['authfilterdtks', 'menufilterdtks']], function ($routes) {
+	$routes->get('/', 'Dtsen\RekapitulasiBansos::index');
+	$routes->get('rekapitulasi', 'Dtsen\RekapitulasiBansos::index');
+	$routes->post('chart-data', 'Dtsen\RekapitulasiBansos::chartData');
+	$routes->post('datatable-bnba', 'Dtsen\RekapitulasiBansos::datatableBnba');
+	$routes->get('get-rw', 'Dtsen\RekapitulasiBansos::get_rw_ajax');
+	$routes->get('get-rt', 'Dtsen\RekapitulasiBansos::get_rt_ajax');
+	$routes->get('detail-bnba/(:num)', 'Dtsen\RekapitulasiBansos::detailBnba/$1');
+	$routes->get('export-excel', 'Dtsen\RekapitulasiBansos::exportExcel');
+});
+
 // DOKUMENTASI BANSOS KKS
 $routes->group('bansos-kks', ['filter' => 'authfilterdtks', 'menufilterdtks'], function ($routes) {
 	$routes->get('/', 'Dtsen\BansosKKS::index');
