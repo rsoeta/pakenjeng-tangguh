@@ -286,17 +286,15 @@ class DtsenSe extends Controller
                         }
                     }
 
-                    // Filter Bansos
+                    // Filter Bansos (Identik / Eksklusif)
                     if (!empty($fBansos) && $fBansos !== 'all') {
-                        $b = $row['bansos'] ?? '-';
-                        if ($fBansos === 'PKH + SEMBAKO') {
-                            if ($b !== 'PKH + SEMBAKO') return false;
-                        } elseif ($fBansos === 'PKH') {
-                            if (strpos($b, 'PKH') === false) return false;
-                        } elseif ($fBansos === 'SEMBAKO') {
-                            if (strpos($b, 'SEMBAKO') === false) return false;
-                        } elseif ($fBansos === 'none') {
-                            if ($b !== '-' && !empty($b)) return false;
+                        $b = strtoupper(trim((string)($row['bansos'] ?? '-')));
+                        $targetBansos = strtoupper(trim((string)$fBansos));
+
+                        if ($targetBansos === 'NONE') {
+                            if ($b !== '-' && $b !== '') return false;
+                        } else {
+                            if ($b !== $targetBansos) return false;
                         }
                     }
 
