@@ -449,18 +449,19 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Makan per <u>Minggu</u> (Rp)</label>
-                        <div class="input-group">
+                        <label class="form-label">Makan per <u>Minggu</u> (Rp) <span class="text-danger">*</span></label>
+                        <div class="input-group has-validation">
                             <input type="text" name="pengeluaran_makan_mingguan" id="pengeluaran_makan_mingguan" class="form-control rupiah" value="<?= esc($se['pengeluaran_makan_mingguan'] ?? '') ?>" <?= $readonly ?> placeholder="0">
                             <!-- 🚀 TOMBOL KALKULATOR MAKAN MINGGUAN -->
-                            <button class="btn btn-outline-info" type="button" onclick="bukaKalkulator('mingguan_makan', '#pengeluaran_makan_mingguan')" <?= $readonly ?> title="Hitung Makan Mingguan"><i class="fas fa-calculator"></i></button>
+                            <button class="btn btn-outline-info btn-calc" type="button" data-target="#pengeluaran_makan_mingguan" data-title="Kalkulator Makan Mingguan" title="Hitung Makan Mingguan" <?= $readonly ?>><i class="fas fa-calculator"></i></button>
                             <button class="btn btn-outline-secondary btn-copy-input" type="button" data-target="#pengeluaran_makan_mingguan" title="Salin Makan Mingguan"><i class="fas fa-copy"></i></button>
+                            <div id="feedback_makan_mingguan" class="invalid-feedback small fw-bold"></div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Bukan Makanan Rutin per <u>Bulan</u> (Rp)</label>
+                        <label class="form-label">Bukan Makanan Rutin per <u>Bulan</u> (Rp) <span class="text-danger">*</span></label>
                         <div class="input-group has-validation">
-                            <input type="text" name="pengeluaran_non_makan_bulanan" id="pengeluaran_non_makan_bulanan" class="form-control rupiah border-danger" value="<?= esc($se['pengeluaran_non_makan_bulanan'] ?? '') ?>" <?= $readonly ?> placeholder="Listrik + Pulsa + Internet">
+                            <input type="text" name="pengeluaran_non_makan_bulanan" id="pengeluaran_non_makan_bulanan" class="form-control rupiah" value="<?= esc($se['pengeluaran_non_makan_bulanan'] ?? '') ?>" <?= $readonly ?> placeholder="Listrik + Pulsa + Internet">
 
                             <!-- 🚀 TOMBOL KALKULATOR -->
                             <button class="btn btn-outline-info btn-calc" type="button" data-target="#pengeluaran_non_makan_bulanan" data-title="Kalkulator Rutin Bulanan" title="Hitung Akumulasi Bulanan" <?= $readonly ?>><i class="fas fa-calculator"></i></button>
@@ -473,7 +474,7 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">Bukan Makanan Rutin <u>Tahunan</u> (Rp)</label>
+                        <label class="form-label">Bukan Makanan Rutin <u>Tahunan</u> (Rp) <span class="text-danger">*</span></label>
                         <!-- 🚀 TAMBAHKAN has-validation -->
                         <div class="input-group has-validation">
                             <input type="text" name="pengeluaran_non_makan_tahunan" id="pengeluaran_non_makan_tahunan" class="form-control rupiah" value="<?= esc($se['pengeluaran_non_makan_tahunan'] ?? '') ?>" <?= $readonly ?> placeholder="0">
@@ -869,6 +870,17 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                 Swal.fire('Peringatan!', 'Perkiraan harga sewa tidak boleh kosong atau di bawah Rp 50.000', 'warning');
                 return false;
             }
+
+            const okMakan = validateMakanMingguan();
+            const okBulanan = validateNonMakanBulanan();
+            const okTahunan = validateNonMakanTahunan();
+
+            if (!okMakan || !okBulanan || !okTahunan || $('#formRumahFull .is-invalid').length > 0) {
+                e.preventDefault();
+                $('#formRumahFull .is-invalid').first().focus();
+                Swal.fire('Peringatan!', 'Nominal pengeluaran makan mingguan, bukan makanan bulanan, atau bukan makanan tahunan belum rasional. Mohon isi data riil keluarga.', 'warning');
+                return false;
+            }
         });
 
         // Panggil fungsi ini sekali saat halaman baru dibuka (berjaga-jaga jika data lamanya salah)
@@ -882,7 +894,85 @@ $se   = $payload['sosial_ekonomi'] ?? [];
         });
 
         // 🚀 VALIDASI PENGELUARAN RUTIN BPS 
-        // (Sistem akumulasi otomatis dimatikan agar PENTRI mengisi data real manual)
+        function validateMakanMingguan() {
+            const val = getInt('#pengeluaran_makan_mingguan');
+            const $el = $('#pengeluaran_makan_mingguan');
+            const $fb = $('#feedback_makan_mingguan');
+
+            if (val === 0) {
+                $el.addClass('is-invalid border-danger').removeClass('border-primary');
+                $fb.html('<i class="fas fa-exclamation-circle"></i> Wajib diisi nominal pengeluaran makan keluarga per minggu.');
+                return false;
+            } else if (val <= 19999) {
+                $el.addClass('is-invalid border-danger').removeClass('border-primary');
+                $fb.html('<i class="fas fa-exclamation-circle"></i> Nominal tidak rasional untuk konsumsi makan keluarga selama 1 minggu.');
+                return false;
+            } else {
+                $el.removeClass('is-invalid border-danger').addClass('border-primary');
+                $fb.empty();
+                return true;
+            }
+        }
+
+        function validateNonMakanBulanan() {
+            const val = getInt('#pengeluaran_non_makan_bulanan');
+            const $el = $('#pengeluaran_non_makan_bulanan');
+            const $fb = $('#feedback_non_makan');
+
+            const listrik = getInt('#pengeluaran_listrik');
+            const pulsa = getInt('#pengeluaran_pulsa');
+            const internet = getInt('#pengeluaran_internet');
+            const minAkumulasi = listrik + pulsa + internet;
+
+            if (val === 0) {
+                $el.addClass('is-invalid border-danger').removeClass('border-primary');
+                $fb.html('<i class="fas fa-exclamation-circle"></i> Wajib diisi nominal pengeluaran rutin bukan makanan per bulan.');
+                return false;
+            } else if (val <= 19999) {
+                $el.addClass('is-invalid border-danger').removeClass('border-primary');
+                $fb.html('<i class="fas fa-exclamation-circle"></i> Nominal tidak rasional untuk pengeluaran rutin bukan makanan per bulan.');
+                return false;
+            } else if (val < minAkumulasi) {
+                $el.addClass('is-invalid border-danger').removeClass('border-primary');
+                $fb.html(`<i class="fas fa-exclamation-circle"></i> Minimal harus Rp ${new Intl.NumberFormat('id-ID').format(minAkumulasi)} (Listrik+Pulsa+Net)`);
+                return false;
+            } else {
+                $el.removeClass('is-invalid border-danger').addClass('border-primary');
+                $fb.empty();
+                return true;
+            }
+        }
+
+        function validateNonMakanTahunan() {
+            const tahunan = getInt('#pengeluaran_non_makan_tahunan');
+            const bulanan = getInt('#pengeluaran_non_makan_bulanan');
+            const $inputTahunan = $('#pengeluaran_non_makan_tahunan');
+            const $feedback = $('#feedback_tahunan');
+
+            if (tahunan === 0) {
+                $inputTahunan.addClass('is-invalid border-danger').removeClass('border-primary');
+                $feedback.html('<i class="fas fa-exclamation-circle"></i> Wajib diisi nominal pengeluaran bukan makanan tahunan.');
+                return false;
+            } else if (tahunan <= 19999) {
+                $inputTahunan.addClass('is-invalid border-danger').removeClass('border-primary');
+                $feedback.html('<i class="fas fa-exclamation-circle"></i> Nominal tidak rasional untuk pengeluaran bukan makanan selama 1 tahun.');
+                return false;
+            } else if (bulanan > 0 && tahunan === bulanan) {
+                // 🚀 ATURAN 1: Mencegah Copy-Paste Buta (Tahunan == Bulanan)
+                $inputTahunan.addClass('is-invalid border-danger').removeClass('border-primary');
+                $feedback.html('<i class="fas fa-exclamation-triangle"></i> Nominal sama persis dengan bulanan. Pengeluaran tahunan adalah item terpisah (Pakaian, PBB, STNK), BUKAN rekap bulanan!');
+                return false;
+            } else if (bulanan > 0 && tahunan === (bulanan * 12)) {
+                // 🚀 ATURAN 2: Mencegah Asumsi "Bulanan x 12" (Salah Kaprah Konsep BPS)
+                $inputTahunan.addClass('is-invalid border-danger').removeClass('border-primary');
+                $feedback.html('<i class="fas fa-exclamation-triangle"></i> Terdeteksi pengisian instan (Bulanan x 12). Pengeluaran Tahunan BPS berisi komponen berbeda (Servis, Uang Gedung, Cat Rumah), BUKAN akumulasi 12 bulan pengeluaran harian!');
+                return false;
+            } else {
+                $inputTahunan.removeClass('is-invalid border-danger').addClass('border-primary');
+                $feedback.empty();
+                return true;
+            }
+        }
 
         $('#pengeluaran_listrik, #pengeluaran_pulsa, #pengeluaran_internet').on('input change', function(e) {
             const currentVal = getInt(this);
@@ -900,55 +990,25 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                 $(this).removeClass('is-invalid border-danger').addClass('border-primary');
             }
 
-            // Panggil validasi diri sendiri untuk kolom Bukan Makanan agar batas minimal tetap terjaga
-            $('#pengeluaran_non_makan_bulanan').trigger('change');
+            validateNonMakanBulanan();
+            validateNonMakanTahunan();
+            checkKelengkapanRumah();
+        });
+
+        $('#pengeluaran_makan_mingguan').on('input change', function() {
+            validateMakanMingguan();
+            checkKelengkapanRumah();
         });
 
         $('#pengeluaran_non_makan_bulanan').on('input change', function() {
-            const listrik = getInt('#pengeluaran_listrik');
-            const pulsa = getInt('#pengeluaran_pulsa');
-            const internet = getInt('#pengeluaran_internet');
-
-            const minNonMakan = listrik + pulsa + internet;
-            const nonMakanBln = getInt(this);
-
-            // 🚀 PERBAIKAN MUTLAK: Cabut syarat > 0.
-            // Pokoknya kalau angka di kolom ini KURANG DARI total Listrik+Pulsa+Net (termasuk jika 0/kosong), langsung MERAHKAN!
-            if (nonMakanBln < minNonMakan) {
-                $(this).addClass('is-invalid border-danger').removeClass('border-primary');
-                $('#feedback_non_makan').html(`<i class="fas fa-exclamation-circle"></i> Minimal harus Rp ${new Intl.NumberFormat('id-ID').format(minNonMakan)} (Listrik+Pulsa+Net)`);
-            } else {
-                $(this).removeClass('is-invalid border-danger').addClass('border-primary');
-            }
+            validateNonMakanBulanan();
+            validateNonMakanTahunan();
+            checkKelengkapanRumah();
         });
 
-        // ==========================================================
-        // 🚀 SATPAM ANTI-MALAS: VALIDASI NON-MAKANAN TAHUNAN (STANDAR BPS)
-        // ==========================================================
-        $('#pengeluaran_non_makan_tahunan, #pengeluaran_non_makan_bulanan').on('input change', function() {
-            const bulanan = getInt('#pengeluaran_non_makan_bulanan');
-            const tahunan = getInt('#pengeluaran_non_makan_tahunan');
-            const $inputTahunan = $('#pengeluaran_non_makan_tahunan');
-            const $feedback = $('#feedback_tahunan');
-
-            if (tahunan > 0 && bulanan > 0) {
-                // 🚀 ATURAN 1: Mencegah Copy-Paste Buta (Tahunan == Bulanan)
-                if (tahunan === bulanan) {
-                    $inputTahunan.addClass('is-invalid border-danger').removeClass('border-primary');
-                    $feedback.html(`<i class="fas fa-exclamation-triangle"></i> Nominal sama persis dengan bulanan. Pengeluaran tahunan adalah item terpisah (Pakaian, PBB, STNK), BUKAN rekap bulanan!`);
-                }
-                // 🚀 ATURAN 2: Mencegah Asumsi "Bulanan x 12" (Salah Kaprah Konsep BPS)
-                else if (tahunan === (bulanan * 12)) {
-                    $inputTahunan.addClass('is-invalid border-danger').removeClass('border-primary');
-                    $feedback.html(`<i class="fas fa-exclamation-triangle"></i> Terdeteksi pengisian instan (Bulanan x 12). Pengeluaran Tahunan BPS berisi komponen berbeda (Servis, Uang Gedung, Cat Rumah), BUKAN akumulasi 12 bulan pengeluaran harian!`);
-                }
-                // Jika lolos (angkanya unik dan wajar)
-                else {
-                    $inputTahunan.removeClass('is-invalid border-danger').addClass('border-primary');
-                }
-            } else {
-                $inputTahunan.removeClass('is-invalid border-danger').removeClass('border-primary');
-            }
+        $('#pengeluaran_non_makan_tahunan').on('input change', function() {
+            validateNonMakanTahunan();
+            checkKelengkapanRumah();
         });
 
         // ==========================================
@@ -965,7 +1025,11 @@ $se   = $payload['sosial_ekonomi'] ?? [];
 
         // Panggil trigger awal untuk merender error jika ada data lama yang kurang tepat dari database
         setTimeout(() => {
-            $('#luas_lantai, #pengeluaran_listrik, #pengeluaran_pulsa, #pengeluaran_internet, #pengeluaran_non_makan_bulanan').trigger('change');
+            $('#luas_lantai, #pengeluaran_listrik, #pengeluaran_pulsa, #pengeluaran_internet, #pengeluaran_makan_mingguan, #pengeluaran_non_makan_bulanan, #pengeluaran_non_makan_tahunan').trigger('change');
+            validateMakanMingguan();
+            validateNonMakanBulanan();
+            validateNonMakanTahunan();
+            checkKelengkapanRumah();
         }, 500);
 
         // ============ KELENGKAPAN CHECK ============
@@ -1065,6 +1129,17 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                 });
             }
 
+            // 🚀 VALIDASI WAJIB: PENGELUARAN SOSIAL EKONOMI (LEBIH DARI BELASAN RIBU)
+            if (getInt('#pengeluaran_makan_mingguan') <= 19999 || $('#pengeluaran_makan_mingguan').hasClass('is-invalid')) {
+                missing.push('#pengeluaran_makan_mingguan');
+            }
+            if (getInt('#pengeluaran_non_makan_bulanan') <= 19999 || $('#pengeluaran_non_makan_bulanan').hasClass('is-invalid')) {
+                missing.push('#pengeluaran_non_makan_bulanan');
+            }
+            if (getInt('#pengeluaran_non_makan_tahunan') <= 19999 || $('#pengeluaran_non_makan_tahunan').hasClass('is-invalid')) {
+                missing.push('#pengeluaran_non_makan_tahunan');
+            }
+
             const badge = $('#badgeRumah');
             if (missing.length === 0) {
                 badge.removeClass('bg-danger bg-secondary').addClass('bg-success').text('Lengkap');
@@ -1075,7 +1150,7 @@ $se   = $payload['sosial_ekonomi'] ?? [];
         }
 
         // Jalankan pengecekan real-time
-        requiredSelects.concat(['#jumlah_meteran_listrik']).forEach(s => {
+        requiredSelects.concat(['#jumlah_meteran_listrik', '#pengeluaran_makan_mingguan', '#pengeluaran_non_makan_bulanan', '#pengeluaran_non_makan_tahunan']).forEach(s => {
             $(document).on('change input', s, checkKelengkapanRumah);
         });
 
@@ -1089,14 +1164,23 @@ $se   = $payload['sosial_ekonomi'] ?? [];
 
         setTimeout(checkKelengkapanRumah, 250);
 
+        // Fallback kompatibilitas kalkulator jika dipanggil langsung
+        window.bukaKalkulator = function(type, target) {
+            $(`.btn-calc[data-target="${target}"]`).trigger('click');
+        };
+
         // ============ SUBMIT HANDLER ============
         $(document).on('click', '#btnSimpanRumah', function() {
+            validateMakanMingguan();
+            validateNonMakanBulanan();
+            validateNonMakanTahunan();
+
             const missing = checkKelengkapanRumah();
             if (missing.length) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Isian Belum Lengkap',
-                    text: 'Silakan isi kolom-kolom yang masih kosong.',
+                    text: 'Silakan isi kolom-kolom yang masih kosong atau belum memenuhi standar.',
                     confirmButtonText: 'OK'
                 });
                 return;

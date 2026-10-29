@@ -1147,6 +1147,10 @@ $(document).ready(function () {
             addCalcRow('Listrik');
             addCalcRow('Pulsa / Kuota');
             addCalcRow('Air / PDAM');
+        } else if (target === '#pengeluaran_makan_mingguan') {
+            addCalcRow('Beras / Pokok');
+            addCalcRow('Lauk Pauk');
+            addCalcRow('Sayur & Bumbu');
         } else {
             addCalcRow('Pakaian / Sandang');
             addCalcRow('Pendidikan');
@@ -1207,8 +1211,8 @@ $(document).ready(function () {
     
         if (totalRaw > 0) {
             $(target).val(formatRupiahCalc(totalRaw.toString()));
-            // Trigger event change jika ada validasi lain yang memantau form utama
-            $(target).trigger('change'); 
+            // Trigger event input dan change agar validasi form langsung berjalan
+            $(target).trigger('input').trigger('change'); 
         }
         
         $('#modalKalkulator').modal('hide');

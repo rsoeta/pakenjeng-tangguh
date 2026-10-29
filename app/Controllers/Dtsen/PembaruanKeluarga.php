@@ -572,6 +572,21 @@ class PembaruanKeluarga extends BaseController
             $usulanId = $post['dtsen_usulan_id'] ?? null;
             if (!$usulanId) return $this->response->setJSON(['status' => 'error', 'message' => 'ID usulan tidak ditemukan.']);
 
+            // 🚀 VALIDASI SERVER-SIDE: PENGELUARAN WAJIB LEBIH DARI BELASAN RIBU
+            $makanMingguan   = (int) preg_replace('/\D/', '', $post['pengeluaran_makan_mingguan'] ?? '0');
+            $nonMakanBulanan = (int) preg_replace('/\D/', '', $post['pengeluaran_non_makan_bulanan'] ?? '0');
+            $nonMakanTahunan = (int) preg_replace('/\D/', '', $post['pengeluaran_non_makan_tahunan'] ?? '0');
+
+            if ($makanMingguan <= 19999) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Nominal pengeluaran makan per minggu belum rasional. Mohon isi sesuai kondisi riil keluarga.']);
+            }
+            if ($nonMakanBulanan <= 19999) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Nominal pengeluaran bukan makanan rutin bulanan belum rasional. Mohon isi sesuai kondisi riil keluarga.']);
+            }
+            if ($nonMakanTahunan <= 19999) {
+                return $this->response->setJSON(['status' => 'error', 'message' => 'Nominal pengeluaran bukan makanan tahunan belum rasional. Mohon isi sesuai kondisi riil keluarga.']);
+            }
+
             $this->db->transBegin();
 
             $usulanRow = $this->db->table('dtsen_usulan')->select('id, payload, status, dtsen_kk_id')->where('id', $usulanId)->get()->getRowArray();
