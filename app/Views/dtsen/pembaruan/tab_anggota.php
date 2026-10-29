@@ -300,10 +300,26 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             $('#jenjang_pendidikan, #kelas_tertinggi, #ijazah_tertinggi, #lapangan_usaha, #status_pekerjaan').addClass('required');
 
             let isAllTabsValid = true; // 🚀 Master Kunci Tombol Simpan
+            let statusKeberadaan = $('#status_keberadaan').val();
+            let isTinggalBersama = (statusKeberadaan === '1');
 
             tabs.forEach(tabId => {
                 let valid = true;
                 const $tab = $(tabId);
+
+                // 🚀 Jika ART meninggal/pindah/pisah (bukan tinggal bersama), abaikan tab di luar Tab Identitas!
+                if (!isTinggalBersama && tabId !== "#tab-identitas") {
+                    $tab.find('.is-invalid').removeClass('is-invalid');
+                    const badgeMap = {
+                        "#tab-pendidikan": "#badgePendidikan",
+                        "#tab-kerja": "#badgeKerja",
+                        "#tab-kesehatan": "#badgeKesehatan"
+                    };
+                    if (badgeMap[tabId]) {
+                        $(badgeMap[tabId]).text("🟢");
+                    }
+                    return;
+                }
 
                 // 1. Cek elemen .required normal
                 $tab.find('.required:not(:disabled)').each(function() {
@@ -319,6 +335,28 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         }
                     }
                 });
+
+                // 1.5 🚀 Cek spesifik Alamat Pindah jika status 3 atau 4 pada Tab Identitas
+                if (tabId === "#tab-identitas") {
+                    if (statusKeberadaan === '3') {
+                        $('.alamat-wajib-dn:visible').each(function() {
+                            if (!$(this).val() || String($(this).val()).trim() === '') {
+                                $(this).addClass('is-invalid');
+                                valid = false;
+                            } else {
+                                $(this).removeClass('is-invalid');
+                            }
+                        });
+                    } else if (statusKeberadaan === '4') {
+                        let neg = $('input[name="negara_tujuan"]').val();
+                        if (!neg || String(neg).trim() === '') {
+                            $('input[name="negara_tujuan"]').addClass('is-invalid');
+                            valid = false;
+                        } else {
+                            $('input[name="negara_tujuan"]').removeClass('is-invalid');
+                        }
+                    }
+                }
 
                 // 2. 🚀 CEK SPESIFIK RADIO BUTTON REKENING (Khusus Tab Kerja)
                 if (tabId === "#tab-kerja") {
@@ -340,6 +378,17 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         // Jika anak Balita (disabled) -> AMAN
                         $('#rek_usaha').removeClass('is-invalid');
                         $rekContainer.removeClass('border-danger').addClass('border-primary');
+                    }
+
+                    // Cek lapangan usaha lainnya
+                    if ($('#lapangan_usaha').val() === 'Lainnya') {
+                        let $lain = $('#lapangan_usaha_lainnya');
+                        if (!$lain.val() || String($lain.val()).trim() === '') {
+                            $lain.addClass('is-invalid');
+                            valid = false;
+                        } else {
+                            $lain.removeClass('is-invalid');
+                        }
                     }
                 }
 
@@ -1153,6 +1202,316 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                       title="Tahan/Arahkan kursor untuk melihat utuh">${masked}</span>`;
         }
 
+        // ========================================================
+        // 🛡️ FUNGSI BANTUAN: CEK KELENGKAPAN ANGGOTA (AKURASI TINGGI)
+        // Meniru 100% kriteria validasi 4 Tab pada modal_anggota.php
+        // ========================================================
+        window.isAnggotaLengkap = function(row) {
+            if (!row) return false;
+
+            // 1. Jika backend sudah mengevaluasi status kelengkapan
+            if (typeof row.is_lengkap === 'boolean') {
+                return row.is_lengkap;
+            }
+
+            // 2. Evaluasi mandiri di frontend (fallback)
+            let p = row.payload_member_parsed || null;
+            if (!p) {
+                if (typeof row.payload_member === 'string' && row.payload_member.trim() !== '') {
+                    try {
+                        p = JSON.parse(row.payload_member);
+                    } catch (e) {
+                        p = null;
+                    }
+                } else if (typeof row.payload_member === 'object' && row.payload_member !== null) {
+                    p = row.payload_member;
+                }
+            }
+
+            // Jika belum punya payload usulan sama sekali -> belum lengkap
+            if (!p || Object.keys(p).length === 0) {
+                return false;
+            }
+
+            let idn = p.identitas || {};
+            let pend = p.pendidikan || {};
+            let ker = p.tenaga_kerja || {};
+            let kes = p.kesehatan || {};
+
+            let status = (row.status_keberadaan || idn.status_keberadaan || '').toString().trim();
+            let statusMap = {
+                'Tinggal Bersama Keluarga': '1',
+                'Meninggal': '2',
+                'Tidak Tinggal Bersama Keluarga/Pindah Ke Wilayah Lain': '3',
+                'Tidak Tinggal Bersama Keluarga/Pindah Ke Luar Negeri': '4',
+                'Sudah pisah kartu keluarga': '5',
+                'Tidak Ditemukan': '6',
+                'Tidak Ditemukan atau Tidak Dikenal': '6',
+                'Belum Ditentukan': ''
+            };
+            let statusCode = statusMap[status] || status;
+
+            // Status 2 (Meninggal), 5 (Pisah KK), 6 (Hilang/Tidak Ditemukan) dibebaskan
+            if (['2', '5', '6'].includes(statusCode)) {
+                return true;
+            }
+
+            if (!statusCode || statusCode === '') {
+                return false;
+            }
+
+            // Tab 1: Identitas
+            let nik = (idn.nik || row.nik || '').toString().trim();
+            let nama = (idn.nama || row.nama || '').toString().trim();
+            let tglLahir = (idn.tanggal_lahir || row.tanggal_lahir || '').toString().trim();
+            let gender = (idn.jenis_kelamin || row.jenis_kelamin || '').toString().trim();
+            let ibu = (idn.ibu_kandung || row.ibu_kandung || '').toString().trim();
+
+            if (!nama || nik.length !== 16 || !tglLahir || !gender || !ibu) {
+                return false;
+            }
+
+            if (statusCode === '3') {
+                if (!idn.provinsi_tujuan || !idn.kabupaten_tujuan || !idn.kecamatan_tujuan || !idn.desa_tujuan) {
+                    return false;
+                }
+                return true;
+            } else if (statusCode === '4') {
+                if (!idn.negara_tujuan) {
+                    return false;
+                }
+                return true;
+            } else {
+                let prov = idn.provinsi || row.provinsi;
+                let kab = idn.kabupaten || row.kabupaten;
+                let kec = idn.kecamatan || row.kecamatan;
+                let des = idn.desa || row.desa;
+                if (!prov || !kab || !kec || !des) {
+                    return false;
+                }
+            }
+
+            // Tab 2: Pendidikan
+            let part = (pend.partisipasi_sekolah || row.partisipasi_sekolah || '').toString().trim();
+            if (!part || part === 'Belum Ditentukan') {
+                return false;
+            }
+            if (part !== 'Belum Pernah Sekolah') {
+                if (!pend.jenjang_pendidikan || !pend.kelas_tertinggi || !pend.ijazah_tertinggi ||
+                    pend.kelas_tertinggi === 'Belum Ditentukan' || pend.ijazah_tertinggi === 'Belum Ditentukan') {
+                    return false;
+                }
+            }
+
+            // Hitung usia
+            let usia = 0;
+            if (tglLahir) {
+                let parts = tglLahir.split('-');
+                let dob;
+                if (parts.length === 3) {
+                    if (parts[0].length === 4) {
+                        dob = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                    } else if (parts[2].length === 4) {
+                        dob = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+                    }
+                }
+                if (dob && !isNaN(dob.getTime())) {
+                    let today = new Date();
+                    usia = today.getFullYear() - dob.getFullYear();
+                    if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) {
+                        usia--;
+                    }
+                }
+            }
+
+            // Tab 3: Tenaga Kerja (jika usia > 5 tahun)
+            if (usia > 5) {
+                let rek = (ker.rekening_aktif || row.rekening_aktif || '').toString().trim();
+                if (!rek) {
+                    return false;
+                }
+
+                let lap = (ker.lapangan_usaha || row.lapangan_usaha || '').toString().trim();
+                if (!lap || lap === 'Belum Ditentukan') {
+                    return false;
+                }
+
+                if (lap === 'Lainnya') {
+                    let lapLain = (ker.lapangan_usaha_lainnya || row.lapangan_usaha_lainnya || '').toString().trim();
+                    if (!lapLain) {
+                        return false;
+                    }
+                }
+
+                if (lap !== 'Tidak Bekerja') {
+                    let stKerja = (ker.status_pekerjaan || row.status_pekerjaan || '').toString().trim();
+                    if (!stKerja || stKerja === 'Belum Ditentukan') {
+                        return false;
+                    }
+                }
+            }
+
+            // Tab 4: Kesehatan
+            if (gender === 'P') {
+                let stHamil = (kes.status_hamil || row.status_hamil || '').toString().trim();
+                if (!stHamil) {
+                    return false;
+                }
+            }
+
+            return true;
+        };
+
+        // ========================================================
+        // 🛡️ FUNGSI BANTUAN: CEK KELENGKAPAN ANGGOTA (AKURASI TINGGI)
+        // Meniru 100% kriteria validasi 4 Tab pada modal_anggota.php
+        // ========================================================
+        window.isAnggotaLengkap = function(row) {
+            if (!row) return false;
+
+            // 1. Jika backend sudah mengevaluasi status kelengkapan
+            if (typeof row.is_lengkap === 'boolean') {
+                return row.is_lengkap;
+            }
+
+            // 2. Evaluasi mandiri di frontend (fallback)
+            let p = row.payload_member_parsed || null;
+            if (!p) {
+                if (typeof row.payload_member === 'string' && row.payload_member.trim() !== '') {
+                    try {
+                        p = JSON.parse(row.payload_member);
+                    } catch (e) {
+                        p = null;
+                    }
+                } else if (typeof row.payload_member === 'object' && row.payload_member !== null) {
+                    p = row.payload_member;
+                }
+            }
+
+            // Jika belum punya payload usulan sama sekali -> belum lengkap
+            if (!p || Object.keys(p).length === 0) {
+                return false;
+            }
+
+            let idn = p.identitas || {};
+            let pend = p.pendidikan || {};
+            let ker = p.tenaga_kerja || {};
+            let kes = p.kesehatan || {};
+
+            let status = (row.status_keberadaan || idn.status_keberadaan || '').toString().trim();
+            let statusMap = {
+                'Tinggal Bersama Keluarga': '1',
+                'Meninggal': '2',
+                'Tidak Tinggal Bersama Keluarga/Pindah Ke Wilayah Lain': '3',
+                'Tidak Tinggal Bersama Keluarga/Pindah Ke Luar Negeri': '4',
+                'Sudah pisah kartu keluarga': '5',
+                'Tidak Ditemukan': '6',
+                'Tidak Ditemukan atau Tidak Dikenal': '6',
+                'Belum Ditentukan': ''
+            };
+            let statusCode = statusMap[status] || status;
+
+            // Status 2 (Meninggal), 5 (Pisah KK), 6 (Hilang/Tidak Ditemukan) dibebaskan
+            if (['2', '5', '6'].includes(statusCode)) {
+                return true;
+            }
+
+            if (!statusCode || statusCode === '') {
+                return false;
+            }
+
+            // Tab 1: Identitas
+            let nik = (idn.nik || row.nik || '').toString().trim();
+            let nama = (idn.nama || row.nama || '').toString().trim();
+            let tglLahir = (idn.tanggal_lahir || row.tanggal_lahir || '').toString().trim();
+            let gender = (idn.jenis_kelamin || row.jenis_kelamin || '').toString().trim();
+
+            if (!nama || nik.length !== 16 || !tglLahir || !gender) {
+                return false;
+            }
+
+            if (statusCode === '3') {
+                if (!idn.provinsi_tujuan || !idn.kabupaten_tujuan || !idn.kecamatan_tujuan || !idn.desa_tujuan) {
+                    return false;
+                }
+            } else if (statusCode === '4') {
+                if (!idn.negara_tujuan) {
+                    return false;
+                }
+            } else {
+                let prov = idn.provinsi || row.provinsi;
+                let kab = idn.kabupaten || row.kabupaten;
+                let kec = idn.kecamatan || row.kecamatan;
+                let des = idn.desa || row.desa;
+                if (!prov || !kab || !kec || !des) {
+                    return false;
+                }
+            }
+
+            // Tab 2: Pendidikan
+            let part = (pend.partisipasi_sekolah || row.partisipasi_sekolah || '').toString().trim();
+            if (!part || part === 'Belum Ditentukan') {
+                return false;
+            }
+            if (part !== 'Belum Pernah Sekolah') {
+                if (!pend.jenjang_pendidikan || !pend.kelas_tertinggi || !pend.ijazah_tertinggi ||
+                    pend.kelas_tertinggi === 'Belum Ditentukan' || pend.ijazah_tertinggi === 'Belum Ditentukan') {
+                    return false;
+                }
+            }
+
+            // Hitung usia
+            let usia = 0;
+            if (tglLahir) {
+                let parts = tglLahir.split('-');
+                let dob;
+                if (parts.length === 3) {
+                    if (parts[0].length === 4) {
+                        dob = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                    } else if (parts[2].length === 4) {
+                        dob = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+                    }
+                }
+                if (dob && !isNaN(dob.getTime())) {
+                    let today = new Date();
+                    usia = today.getFullYear() - dob.getFullYear();
+                    if (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate())) {
+                        usia--;
+                    }
+                }
+            }
+
+            // Tab 3: Tenaga Kerja (jika usia > 5 tahun)
+            if (usia > 5) {
+                let rek = (ker.rekening_aktif || row.rekening_aktif || '').toString().trim();
+                if (!rek) {
+                    return false;
+                }
+
+                let lap = (ker.lapangan_usaha || row.lapangan_usaha || '').toString().trim();
+                if (!lap || lap === 'Belum Ditentukan') {
+                    return false;
+                }
+
+                if (lap !== 'Tidak Bekerja') {
+                    let stKerja = (ker.status_pekerjaan || row.status_pekerjaan || '').toString().trim();
+                    if (!stKerja || stKerja === 'Belum Ditentukan') {
+                        return false;
+                    }
+                }
+            }
+
+            // Tab 4: Kesehatan
+            if (gender === 'P') {
+                let stHamil = (kes.status_hamil || row.status_hamil || '').toString().trim();
+                if (!stHamil) {
+                    return false;
+                }
+            }
+
+            return true;
+        };
+
         let tableAnggota;
 
         function initTableAnggota() {
@@ -1236,16 +1595,14 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         className: 'text-nowrap text-start fw-bold',
                         render: function(data, type, row) {
                             let nama = data || '-';
+                            if (type === 'filter' || type === 'sort') return nama;
 
-                            // 🚀 SMART CHECK: Abaikan peringatan jika statusnya Meninggal (2), Pisah KK (5), atau Hilang (6)
-                            let status = (row.status_keberadaan !== null && row.status_keberadaan !== undefined) ? String(row.status_keberadaan).trim() : '';
-                            let isMeninggalAtauHilang = ['2', '5', '6'].includes(status);
-
-                            // Lengkap jika: Wilayah terisi, ATAU statusnya memang membebaskan pengisian wilayah
-                            let isLengkap = isMeninggalAtauHilang || (row.provinsi && row.kabupaten && row.kecamatan && row.desa);
+                            // 🚀 SMART CHECK: Mendeteksi kelengkapan 4 tab sesuai modal_anggota.php
+                            let isLengkap = isAnggotaLengkap(row);
 
                             if (!isLengkap && type === 'display') {
-                                return `${nama} <span class="badge bg-danger rounded-circle ms-2 shadow-sm" title="Data belum lengkap!" style="width: 14px; height: 14px; padding: 0; display: inline-flex; align-items: center; justify-content: center; animation: pulse 2s infinite; vertical-align: middle;"><i class="fas fa-exclamation" style="font-size: 8px;"></i></span>`;
+                                let alasan = row.incomplete_reason ? ` (${row.incomplete_reason})` : '';
+                                return `<span class="badge bg-danger rounded-circle me-2 shadow-sm" title="Data belum lengkap, ada tab bertanda ⚠️ pada modal edit${alasan}" style="width: 15px; height: 15px; padding: 0; display: inline-flex; align-items: center; justify-content: center; animation: pulse 2s infinite; vertical-align: middle;"><i class="fas fa-exclamation" style="font-size: 8px;"></i></span><span>${nama}</span>`;
                             }
                             return nama;
                         }
@@ -1473,19 +1830,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
 
             table.rows().every(function() {
                 let data = this.data();
-
-                // 🚀 SMART CHECK: Sama seperti kolom nama, konversi aman.
-                let status = (data.status_keberadaan !== null && data.status_keberadaan !== undefined) ? String(data.status_keberadaan).trim() : '';
-                let isMeninggalAtauHilang = ['2', '5', '6'].includes(status);
-
-                let isLengkap = isMeninggalAtauHilang || (
-                    data.provinsi && String(data.provinsi).trim() !== '' &&
-                    data.kabupaten && String(data.kabupaten).trim() !== '' &&
-                    data.kecamatan && String(data.kecamatan).trim() !== '' &&
-                    data.desa && String(data.desa).trim() !== ''
-                );
-
-                if (!isLengkap) {
+                if (!isAnggotaLengkap(data)) {
                     adaYangBelumLengkap = true;
                 }
             });
@@ -1494,9 +1839,9 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                 Swal.fire({
                     icon: 'warning',
                     title: 'Data Anggota Belum Lengkap!',
-                    html: 'Masih ada anggota keluarga dengan tanda <span class="badge bg-danger rounded-circle p-1 mx-1"><i class="fas fa-exclamation" style="font-size: 10px;"></i></span><br><br>Silakan klik tombol <b><i class="fas fa-edit text-primary"></i> Edit</b> pada anggota tersebut dan lengkapi data yang masih kosong.',
+                    html: 'Masih ada anggota keluarga dengan tanda <span class="badge bg-danger rounded-circle p-1 mx-1"><i class="fas fa-exclamation" style="font-size: 10px;"></i></span> di depan namanya.<br><br>Silakan klik tombol <b><i class="fas fa-edit text-primary"></i> Edit</b> pada anggota tersebut dan lengkapi tab yang masih bertanda <b>⚠️</b>.',
                     confirmButtonText: 'Mengerti',
-                    width: '350px',
+                    width: '380px',
                     customClass: {
                         title: 'fs-5',
                         content: 'fs-6'

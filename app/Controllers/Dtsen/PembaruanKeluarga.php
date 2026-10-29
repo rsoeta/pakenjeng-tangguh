@@ -1727,6 +1727,9 @@ class PembaruanKeluarga extends BaseController
             foreach ($anggotaUtama as &$row) {
                 $pkKey = $row['pekerjaan'] ?? '';
                 $row['pekerjaan_label'] = $pekerjaanMap[$pkKey] ?? $row['pekerjaan'] ?? '-';
+                $row['is_lengkap'] = false;
+                $row['incomplete_reason'] = 'Data anggota belum diperbarui dalam usulan ini';
+                $row['payload_member_parsed'] = null;
             }
             unset($row);
 
@@ -1782,6 +1785,12 @@ class PembaruanKeluarga extends BaseController
                 $row['kecamatan'] = $identitas['kecamatan'] ?? null;
                 $row['desa']      = $identitas['desa'] ?? null;
 
+                // 🚀 EVALUASI KELENGKAPAN ANGGOTA SESUAI TAB MODAL EDIT
+                $eval = $this->evaluateMemberCompleteness($payload, $row);
+                $row['is_lengkap'] = $eval['is_lengkap'];
+                $row['incomplete_reason'] = $eval['reason'];
+                $row['payload_member_parsed'] = $payload;
+
                 $gabungan[$row['nik']] = $row;
             }
 
@@ -1831,6 +1840,145 @@ class PembaruanKeluarga extends BaseController
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ]);
         }
+    }
+
+    /**
+     * 🛡️ Evaluasi Kelengkapan Data Anggota Keluarga sesuai Kriteria Modal Anggota
+     */
+    private function evaluateMemberCompleteness($payload, $row = []): array
+    {
+        if (empty($payload) || !is_array($payload)) {
+            return ['is_lengkap' => false, 'reason' => 'Data anggota belum diisi'];
+        }
+
+        $identitas = $payload['identitas'] ?? [];
+        $pendidikan = $payload['pendidikan'] ?? [];
+        $kerja = $payload['tenaga_kerja'] ?? [];
+        $kesehatan = $payload['kesehatan'] ?? [];
+
+        $statusKeberadaan = trim((string)($identitas['status_keberadaan'] ?? $row['status_keberadaan'] ?? ''));
+        $statusMap = [
+            'Tinggal Bersama Keluarga' => '1',
+            'Meninggal' => '2',
+            'Tidak Tinggal Bersama Keluarga/Pindah Ke Wilayah Lain' => '3',
+            'Tidak Tinggal Bersama Keluarga/Pindah Ke Luar Negeri' => '4',
+            'Sudah pisah kartu keluarga' => '5',
+            'Tidak Ditemukan' => '6',
+            'Tidak Ditemukan atau Tidak Dikenal' => '6',
+            'Belum Ditentukan' => ''
+        ];
+        $statusCode = $statusMap[$statusKeberadaan] ?? $statusKeberadaan;
+
+        // Status 2 (Meninggal), 5 (Pisah KK), 6 (Hilang/Tidak Ditemukan) dibebaskan dari pengisian tab lain
+        if (in_array($statusCode, ['2', '5', '6'])) {
+            return ['is_lengkap' => true, 'reason' => 'Status khusus (Meninggal/Pisah/Hilang)'];
+        }
+
+        if (empty($statusCode)) {
+            return ['is_lengkap' => false, 'reason' => 'Status keberadaan belum dipilih'];
+        }
+
+        // Tab 1: Identitas
+        $nik = trim((string)($identitas['nik'] ?? $row['nik'] ?? ''));
+        $nama = trim((string)($identitas['nama'] ?? $row['nama'] ?? ''));
+        $tglLahir = trim((string)($identitas['tanggal_lahir'] ?? $row['tanggal_lahir'] ?? ''));
+        $gender = trim((string)($identitas['jenis_kelamin'] ?? $row['jenis_kelamin'] ?? ''));
+
+        if (empty($nama) || strlen($nik) !== 16 || empty($tglLahir) || empty($gender)) {
+            return ['is_lengkap' => false, 'reason' => 'Data identitas dasar (Nama/NIK/Tgl Lahir/JK) belum lengkap'];
+        }
+
+        $ibu = trim((string)($identitas['ibu_kandung'] ?? $row['ibu_kandung'] ?? ''));
+        if (empty($ibu)) {
+            return ['is_lengkap' => false, 'reason' => 'Nama ibu kandung belum diisi'];
+        }
+
+        if ($statusCode === '3') {
+            if (empty($identitas['provinsi_tujuan']) || empty($identitas['kabupaten_tujuan']) || empty($identitas['kecamatan_tujuan']) || empty($identitas['desa_tujuan'])) {
+                return ['is_lengkap' => false, 'reason' => 'Wilayah tujuan pindah belum lengkap'];
+            }
+            return ['is_lengkap' => true, 'reason' => 'Lengkap (Pindah Wilayah Lain)'];
+        } elseif ($statusCode === '4') {
+            if (empty($identitas['negara_tujuan'])) {
+                return ['is_lengkap' => false, 'reason' => 'Negara tujuan pindah belum diisi'];
+            }
+            return ['is_lengkap' => true, 'reason' => 'Lengkap (Pindah Luar Negeri)'];
+        } else {
+            $prov = $identitas['provinsi'] ?? $row['provinsi'] ?? '';
+            $kab  = $identitas['kabupaten'] ?? $row['kabupaten'] ?? '';
+            $kec  = $identitas['kecamatan'] ?? $row['kecamatan'] ?? '';
+            $desa = $identitas['desa'] ?? $row['desa'] ?? '';
+            if (empty($prov) || empty($kab) || empty($kec) || empty($desa)) {
+                return ['is_lengkap' => false, 'reason' => 'Wilayah domisili belum lengkap'];
+            }
+        }
+
+        // Tab 2: Pendidikan
+        $partisipasi = trim((string)($pendidikan['partisipasi_sekolah'] ?? ''));
+        if (empty($partisipasi) || $partisipasi === 'Belum Ditentukan') {
+            return ['is_lengkap' => false, 'reason' => 'Partisipasi sekolah belum diisi'];
+        }
+        if ($partisipasi !== 'Belum Pernah Sekolah') {
+            $jenjang = trim((string)($pendidikan['jenjang_pendidikan'] ?? ''));
+            $kelas = trim((string)($pendidikan['kelas_tertinggi'] ?? ''));
+            $ijazah = trim((string)($pendidikan['ijazah_tertinggi'] ?? ''));
+            if (empty($jenjang) || empty($kelas) || empty($ijazah) || $kelas === 'Belum Ditentukan' || $ijazah === 'Belum Ditentukan') {
+                return ['is_lengkap' => false, 'reason' => 'Jenjang/Kelas/Ijazah pendidikan belum lengkap'];
+            }
+        }
+
+        // Hitung Umur
+        $dob = strtotime($tglLahir);
+        $usia = 0;
+        if ($dob) {
+            $dobY = (int)date('Y', $dob);
+            $dobM = (int)date('m', $dob);
+            $dobD = (int)date('d', $dob);
+            $curY = (int)date('Y');
+            $curM = (int)date('m');
+            $curD = (int)date('d');
+            $usia = $curY - $dobY;
+            if ($curM < $dobM || ($curM === $dobM && $curD < $dobD)) {
+                $usia--;
+            }
+        }
+
+        // Tab 3: Tenaga Kerja (Usia > 5 tahun)
+        if ($usia > 5) {
+            $rekening = trim((string)($kerja['rekening_aktif'] ?? ''));
+            if (empty($rekening)) {
+                return ['is_lengkap' => false, 'reason' => 'Kepemilikan rekening belum dipilih'];
+            }
+
+            $lapanganUsaha = trim((string)($kerja['lapangan_usaha'] ?? ''));
+            if (empty($lapanganUsaha) || $lapanganUsaha === 'Belum Ditentukan') {
+                return ['is_lengkap' => false, 'reason' => 'Lapangan usaha belum diisi'];
+            }
+
+            if ($lapanganUsaha === 'Lainnya') {
+                $lapLainnya = trim((string)($kerja['lapangan_usaha_lainnya'] ?? ''));
+                if (empty($lapLainnya)) {
+                    return ['is_lengkap' => false, 'reason' => 'Profesi spesifik belum diisi (Lainnya)'];
+                }
+            }
+
+            if ($lapanganUsaha !== 'Tidak Bekerja') {
+                $statusKerja = trim((string)($kerja['status_pekerjaan'] ?? ''));
+                if (empty($statusKerja) || $statusKerja === 'Belum Ditentukan') {
+                    return ['is_lengkap' => false, 'reason' => 'Status kedudukan pekerjaan belum dipilih'];
+                }
+            }
+        }
+
+        // Tab 4: Kesehatan
+        if ($gender === 'P') {
+            $statusHamil = trim((string)($kesehatan['status_hamil'] ?? ''));
+            if (empty($statusHamil)) {
+                return ['is_lengkap' => false, 'reason' => 'Status hamil belum dipilih'];
+            }
+        }
+
+        return ['is_lengkap' => true, 'reason' => 'Lengkap'];
     }
 
     private function parseWilayahTugasList(?string $wilayahTugas): array
