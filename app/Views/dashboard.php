@@ -10,18 +10,22 @@ $roleId = session()->get('role_id') ?? ($user['role_id'] ?? 99);
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
+    :root {
+        --green: #2EC4B6;
+    }
+
     body {
         background: linear-gradient(135deg, #f8fbff, #e0f7fa);
         font-family: 'Poppins', sans-serif;
     }
 
     .hero-banner {
-        background: linear-gradient(90deg, #4facfe, #00f2fe);
+        background: linear-gradient(90deg, #1d8a7e 0%, var(--green) 100%);
         color: #fff;
         padding: 2rem;
         border-radius: 15px;
         text-align: center;
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 15px rgba(46, 196, 182, 0.25);
     }
 
     .hero-banner h2 {

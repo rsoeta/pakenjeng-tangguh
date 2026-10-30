@@ -15,12 +15,12 @@ $menus = menu()
     <div class="sidebar">
 
         <!-- AREA LOGO & TITLE -->
-        <div class="mt-3 pb-3 mb-3 border-bottom border-secondary text-center">
-            <a href="/pages" class="d-block mb-2 text-decoration-none text-center">
+        <div class="mt-1 border-bottom border-secondary text-center">
+            <a href="/pages" class="d-block text-decoration-none text-center">
                 <!-- Class brand-image dibuang agar logo tidak dipaksa mengecil oleh bawaan AdminLTE -->
                 <img src="<?= logoApp(); ?>" alt="Logo SINDEN" style="max-height: 40px; opacity: .9;">
             </a>
-            <div class="d-flex flex-column mt-2 text-center">
+            <div class="mb-2 d-flex flex-column text-center">
                 <!-- nameApp() dihapus, sisa titleApp() -->
                 <span class="text-light" style="font-size: 0.75rem; line-height: 1.3;">
                     <?= titleApp(); ?>
@@ -28,7 +28,7 @@ $menus = menu()
             </div>
         </div>
 
-        <div class="px-3 mb-2 mt-2">
+        <div class="px-3 mb-2">
             <span class="text-uppercase text-light text-xs font-weight-bold">Menu Utama</span>
         </div>
 
