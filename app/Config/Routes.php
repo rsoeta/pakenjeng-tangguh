@@ -111,6 +111,10 @@ $routes->group('dtsen-se', ['filter' => ['authfilterdtks', 'globalview', 'menufi
 	$routes->post('tabel_arsip', 'Dtsen\DtsenSe::tabel_arsip');
 	$routes->get('arsip-anggota', 'Dtsen\DtsenSe::arsipAnggota');
 	$routes->post('restore-art', 'Dtsen\DtsenSe::restoreArt');
+	$routes->match(['get', 'post'], 'arsip-terpadu', 'Dtsen\DtsenSe::arsipTerpadu');
+	$routes->match(['get', 'post'], 'arsip-keluarga-detail', 'Dtsen\DtsenSe::detailKeluargaArsip');
+	$routes->post('restore-sekeluarga', 'Dtsen\DtsenSe::restoreSekeluarga');
+	$routes->post('restore-bulk', 'Dtsen\DtsenSe::restoreBulk');
 	$routes->get('list-rw', 'Dtsen\DtsenSe::listRW');
 	$routes->get('list-rt/(:segment)', 'Dtsen\DtsenSe::listRT/$1');
 	// Gunakan rute POST khusus untuk data tabel (AJAX)
@@ -127,6 +131,10 @@ $routes->group('pembaruan-keluarga', ['filter' => ['authfilterdtks', 'globalview
 	$routes->get('submitted', 'Dtsen\DtsenSe::submitted'); // Halaman Submitted
 	$routes->get('pemulihan', 'Dtsen\DtsenSe::pemulihan'); // Halaman Pemulihan
 	$routes->get('arsip', 'Dtsen\DtsenSe::arsip'); // Halaman Arsip
+	$routes->match(['get', 'post'], 'arsip-terpadu', 'Dtsen\DtsenSe::arsipTerpadu');
+	$routes->match(['get', 'post'], 'arsip-keluarga-detail', 'Dtsen\DtsenSe::detailKeluargaArsip');
+	$routes->post('restore-sekeluarga', 'Dtsen\DtsenSe::restoreSekeluarga');
+	$routes->post('restore-bulk', 'Dtsen\DtsenSe::restoreBulk');
 	// 📡 Routing Data AJAX
 	$routes->post('tabel_data', 'Dtsen\DtsenSe::tabel_data');
 	$routes->post('autofix_rt_rw', 'Dtsen\DtsenSe::autofix_rt_rw');
