@@ -104,11 +104,89 @@ class Lansia extends BaseController
             $rwList = $rwBuilder->orderBy('rw', 'asc')->get()->getResultArray();
         }
 
+        // Daftar RT & Pemetaan RW -> RT (mengikuti karantina wilayah tugas jika role_id >= 4)
+        $rwRtMap = [];
+        $rtSet   = [];
+        if ($roleId >= 4) {
+            $parsedMap = self::parseWilayahTugasMap($wilayahTugas);
+            if (!empty($parsedMap)) {
+                foreach ($parsedMap as $rwKey => $rts) {
+                    if (!empty($rts)) {
+                        $rwRtMap[$rwKey] = $rts;
+                        foreach ($rts as $r) {
+                            $rtSet[$r] = true;
+                        }
+                    } else {
+                        $rwVars = self::getWilayahVariants($rwKey);
+                        $rtRows = $db->table('dtsen_rt')
+                            ->select('rt')
+                            ->distinct()
+                            ->whereIn('rw', $rwVars)
+                            ->where('rt !=', '')
+                            ->where('rt !=', '000')
+                            ->where('kode_desa', $kodeDesa)
+                            ->orderBy('rt', 'asc')
+                            ->get()->getResultArray();
+                        $rwRtMap[$rwKey] = array_column($rtRows, 'rt');
+                        foreach ($rwRtMap[$rwKey] as $r) {
+                            $rtSet[$r] = true;
+                        }
+                    }
+                }
+            } else {
+                foreach ($rwList as $rRow) {
+                    $rwKey  = $rRow['no_rw'];
+                    $rwVars = self::getWilayahVariants($rwKey);
+                    $rtRows = $db->table('dtsen_rt')
+                        ->select('rt')
+                        ->distinct()
+                        ->whereIn('rw', $rwVars)
+                        ->where('rt !=', '')
+                        ->where('rt !=', '000')
+                        ->where('kode_desa', $kodeDesa)
+                        ->orderBy('rt', 'asc')
+                        ->get()->getResultArray();
+                    $rwRtMap[$rwKey] = array_column($rtRows, 'rt');
+                    foreach ($rwRtMap[$rwKey] as $r) {
+                        $rtSet[$r] = true;
+                    }
+                }
+            }
+        } else {
+            $rtBuilder = $db->table('dtsen_rt')
+                ->select('rw, rt')
+                ->distinct()
+                ->where('rt !=', '')
+                ->where('rt !=', '000');
+
+            if (!empty($kodeDesa)) {
+                $rtBuilder->where('kode_desa', $kodeDesa);
+            }
+
+            $rtRows = $rtBuilder->orderBy('rw', 'asc')->orderBy('rt', 'asc')->get()->getResultArray();
+            foreach ($rtRows as $rRow) {
+                $rwKey = (string)$rRow['rw'];
+                $rtVal = (string)$rRow['rt'];
+                if ($rwKey !== '' && $rwKey !== '000') {
+                    $rwRtMap[$rwKey][] = $rtVal;
+                }
+                $rtSet[$rtVal] = true;
+            }
+        }
+
+        $rtKeys = array_keys($rtSet);
+        sort($rtKeys);
+        $rtList = array_map(function ($rt) {
+            return ['no_rt' => $rt];
+        }, $rtKeys);
+
         $data = [
             'title'     => 'Data Lansia / Jompo',
             'title2'    => 'Data Lansia & Jompo DTSEN',
             'desKels'   => $desKels->orderBy('nama_desa', 'asc')->findAll(),
             'Rw'        => $rwList,
+            'Rt'        => $rtList,
+            'rwRtMap'   => $rwRtMap,
             'userDesa'  => $kodeDesa,
             'userRole'  => $roleId
         ];
@@ -135,13 +213,17 @@ class Lansia extends BaseController
             $searchVal = is_array($rawSearch) ? ($rawSearch['value'] ?? '') : (is_string($rawSearch) ? $rawSearch : '');
 
             $filter = [
-                'kode_desa'     => $kodeDesa,
-                'rw'            => $this->request->getPost('rw'),
-                'kategori'      => $this->request->getPost('kategori'),
-                'search'        => trim((string)$searchVal),
-                'wilayah_tugas' => $user['wilayah_tugas'],
-                'level'         => $user['level'],
-                'role_id'       => $roleId
+                'kode_desa'      => $kodeDesa,
+                'rw'             => $this->request->getPost('rw'),
+                'rt'             => $this->request->getPost('rt'),
+                'jk'             => $this->request->getPost('jk'),
+                'tempat_tinggal' => $this->request->getPost('tempat_tinggal'),
+                'keadaan_rumah'  => $this->request->getPost('keadaan_rumah'),
+                'kategori'       => $this->request->getPost('kategori'),
+                'search'         => trim((string)$searchVal),
+                'wilayah_tugas'  => $user['wilayah_tugas'],
+                'level'          => $user['level'],
+                'role_id'        => $roleId
             ];
 
             $model = new LansiaModel();
@@ -211,6 +293,9 @@ class Lansia extends BaseController
 
                 // Tempat Tinggal / Keadaan Rumah
                 $statusRumah   = (!empty($key->status_kepemilikan) && $key->status_kepemilikan !== '-') ? $key->status_kepemilikan : '';
+                if ($statusRumah === '1') {
+                    $statusRumah = 'Milik Sendiri';
+                }
                 $kategoriRumah = (!empty($key->kategori_rumah) && $key->kategori_rumah !== '-') ? $key->kategori_rumah : '';
                 if ($statusRumah && $kategoriRumah) {
                     $rumahText = $statusRumah . ' / ' . $kategoriRumah;
@@ -1044,13 +1129,17 @@ class Lansia extends BaseController
             }
 
             $filter = [
-                'kode_desa'     => $kodeDesa,
-                'rw'            => $this->request->getGet('rw'),
-                'kategori'      => $this->request->getGet('kategori'),
-                'search'        => trim((string)($this->request->getGet('search') ?? '')),
-                'wilayah_tugas' => $user['wilayah_tugas'],
-                'level'         => $user['level'],
-                'role_id'       => $roleId
+                'kode_desa'      => $kodeDesa,
+                'rw'             => $this->request->getGet('rw'),
+                'rt'             => $this->request->getGet('rt'),
+                'jk'             => $this->request->getGet('jk'),
+                'tempat_tinggal' => $this->request->getGet('tempat_tinggal'),
+                'keadaan_rumah'  => $this->request->getGet('keadaan_rumah'),
+                'kategori'       => $this->request->getGet('kategori'),
+                'search'         => trim((string)($this->request->getGet('search') ?? '')),
+                'wilayah_tugas'  => $user['wilayah_tugas'],
+                'level'          => $user['level'],
+                'role_id'        => $roleId
             ];
 
             $model = new LansiaModel();
@@ -1118,6 +1207,9 @@ class Lansia extends BaseController
             foreach ($data as $item) {
                 // Tempat tinggal / keadaan rumah
                 $statusRumah   = (!empty($item['status_kepemilikan']) && $item['status_kepemilikan'] !== '-') ? $item['status_kepemilikan'] : '';
+                if ($statusRumah === '1') {
+                    $statusRumah = 'Milik Sendiri';
+                }
                 $kategoriRumah = (!empty($item['kategori_rumah']) && $item['kategori_rumah'] !== '-') ? $item['kategori_rumah'] : '';
                 if ($statusRumah && $kategoriRumah) {
                     $rumahText = $statusRumah . ' / ' . $kategoriRumah;

@@ -123,10 +123,11 @@
           $desa_id  = $userDesa ?? session()->get('kode_desa') ?? '32.05.33.2006';
           ?>
 
-          <!-- Filter Bar (1 Baris di Mode Mobile & Desktop) -->
+          <!-- Filter Bar (Responsif Mobile & Desktop) -->
           <div class="card card-outline card-secondary bg-light p-2 p-md-3 mb-2 mb-md-3">
-            <div class="form-row align-items-end flex-nowrap">
-              <div class="col-3 col-md-3">
+            <div class="form-row align-items-end">
+              <!-- 1. Desa -->
+              <div class="col-3 col-lg mb-1 mb-lg-0">
                 <label for="filter_desa" class="small font-weight-bold text-muted mb-1 text-truncate d-block" style="font-size: 0.75rem;">Desa</label>
                 <select <?php if ($roleId >= 3) {
                           echo 'disabled="disabled"';
@@ -145,7 +146,8 @@
                 </select>
               </div>
 
-              <div class="col-3 col-md-3">
+              <!-- 2. No. RW -->
+              <div class="col-3 col-lg mb-1 mb-lg-0">
                 <label for="filter_rw" class="small font-weight-bold text-muted mb-1 text-truncate d-block" style="font-size: 0.75rem;">No. RW</label>
                 <select class="form-control form-control-sm px-1 px-sm-2" name="filter_rw" id="filter_rw" style="font-size: 0.78rem;">
                   <option value="">Semua RW</option>
@@ -155,7 +157,58 @@
                 </select>
               </div>
 
-              <div class="col-4 col-md-3">
+              <!-- 3. No. RT -->
+              <div class="col-3 col-lg mb-1 mb-lg-0">
+                <label for="filter_rt" class="small font-weight-bold text-muted mb-1 text-truncate d-block" style="font-size: 0.75rem;">No. RT</label>
+                <select class="form-control form-control-sm px-1 px-sm-2" name="filter_rt" id="filter_rt" style="font-size: 0.78rem;">
+                  <option value="">Semua RT</option>
+                  <?php if (!empty($Rt)) {
+                    foreach ($Rt as $row) { ?>
+                      <option value="<?= $row['no_rt']; ?>">RT <?= $row['no_rt']; ?></option>
+                  <?php }
+                  } ?>
+                </select>
+              </div>
+
+              <!-- 4. Jenis Kelamin -->
+              <div class="col-3 col-lg mb-1 mb-lg-0">
+                <label for="filter_jk" class="small font-weight-bold text-muted mb-1 text-truncate d-block" style="font-size: 0.75rem;">Jenis Kelamin</label>
+                <select class="form-control form-control-sm px-1 px-sm-2" name="filter_jk" id="filter_jk" style="font-size: 0.78rem;">
+                  <option value="">Semua JK</option>
+                  <option value="L">Laki-laki (L)</option>
+                  <option value="P">Perempuan (P)</option>
+                </select>
+              </div>
+
+              <!-- 5. Tempat Tinggal -->
+              <div class="col-3 col-lg mb-1 mb-lg-0">
+                <label for="filter_tempat_tinggal" class="small font-weight-bold text-muted mb-1 text-truncate d-block" style="font-size: 0.75rem;">Tempat Tinggal</label>
+                <select class="form-control form-control-sm px-1 px-sm-2" name="filter_tempat_tinggal" id="filter_tempat_tinggal" style="font-size: 0.78rem;">
+                  <option value="">Semua</option>
+                  <option value="Milik Sendiri">Milik Sendiri</option>
+                  <option value="Bebas Sewa">Bebas Sewa</option>
+                  <option value="Kontrak">Kontrak</option>
+                  <option value="Sewa">Sewa</option>
+                  <option value="Lainnya">Lainnya</option>
+                  <option value="Belum Diisi">Belum Diisi</option>
+                </select>
+              </div>
+
+              <!-- 6. Keadaan Rumah -->
+              <div class="col-3 col-lg mb-1 mb-lg-0">
+                <label for="filter_keadaan_rumah" class="small font-weight-bold text-muted mb-1 text-truncate d-block" style="font-size: 0.75rem;">Keadaan Rumah</label>
+                <select class="form-control form-control-sm px-1 px-sm-2" name="filter_keadaan_rumah" id="filter_keadaan_rumah" style="font-size: 0.78rem;">
+                  <option value="">Semua</option>
+                  <option value="Permanen">Permanen</option>
+                  <option value="Semi Permanen">Semi Permanen</option>
+                  <option value="Panggung">Panggung</option>
+                  <option value="Numpang">Numpang</option>
+                  <option value="Belum Dinilai">Belum Dinilai</option>
+                </select>
+              </div>
+
+              <!-- 7. Status -->
+              <div class="col-4 col-lg mb-1 mb-lg-0">
                 <label for="filter_kategori" class="small font-weight-bold text-muted mb-1 text-truncate d-block" style="font-size: 0.75rem;">Status</label>
                 <select class="form-control form-control-sm px-1 px-sm-2" name="filter_kategori" id="filter_kategori" style="font-size: 0.78rem;">
                   <option value="">Semua Status</option>
@@ -164,10 +217,11 @@
                 </select>
               </div>
 
-              <div class="col-2 col-md-3">
+              <!-- 8. Reset Filter -->
+              <div class="col-2 col-lg mb-1 mb-lg-0">
                 <label class="small font-weight-bold text-muted mb-1 d-block text-truncate" style="font-size: 0.75rem;">&nbsp;</label>
                 <button type="button" id="btnResetFilter" class="btn btn-default btn-sm btn-block px-1" title="Reset Filter">
-                  <i class="fas fa-undo"></i><span class="d-none d-md-inline ml-1">Reset Filter</span>
+                  <i class="fas fa-undo"></i><span class="d-none d-xl-inline ml-1">Reset</span>
                 </button>
               </div>
             </div>
@@ -302,6 +356,34 @@
 <script>
   $(document).ready(function() {
     var defaultDesa = '<?= $desa_id; ?>';
+    var rwRtMap = <?= json_encode($rwRtMap ?? []); ?>;
+    var allRtList = <?= json_encode(!empty($Rt) ? array_column($Rt, 'no_rt') : []); ?>;
+
+    function updateRtDropdown(selectedRw) {
+      var $rtSelect = $('#filter_rt');
+      var currentRt = $rtSelect.val();
+      var rtOptions = [];
+
+      if (selectedRw && rwRtMap[selectedRw] && rwRtMap[selectedRw].length > 0) {
+        rtOptions = rwRtMap[selectedRw];
+      } else {
+        rtOptions = allRtList;
+      }
+
+      $rtSelect.empty().append('<option value="">Semua RT</option>');
+      $.each(rtOptions, function(_, rtVal) {
+        $rtSelect.append($('<option>', {
+          value: rtVal,
+          text: 'RT ' + rtVal
+        }));
+      });
+
+      if (currentRt && $.inArray(String(currentRt), rtOptions) !== -1) {
+        $rtSelect.val(currentRt);
+      } else {
+        $rtSelect.val('');
+      }
+    }
 
     var table = $('#tbl_lansia').DataTable({
       'order': [],
@@ -318,6 +400,10 @@
           data.csrf_test_name = $('input[name=csrf_test_name]').val() || (window.CSRF ? window.CSRF.value : '');
           data.desa = $('#filter_desa').val() || defaultDesa;
           data.rw = $('#filter_rw').val();
+          data.rt = $('#filter_rt').val();
+          data.jk = $('#filter_jk').val();
+          data.tempat_tinggal = $('#filter_tempat_tinggal').val();
+          data.keadaan_rumah = $('#filter_keadaan_rumah').val();
           data.kategori = $('#filter_kategori').val();
         },
         "dataSrc": function(response) {
@@ -400,12 +486,22 @@
     });
 
     // Event Trigger Filter
-    $('#filter_desa, #filter_rw, #filter_kategori').change(function() {
+    $('#filter_rw').change(function() {
+      updateRtDropdown($(this).val());
+      table.draw();
+    });
+
+    $('#filter_desa, #filter_rt, #filter_jk, #filter_tempat_tinggal, #filter_keadaan_rumah, #filter_kategori').change(function() {
       table.draw();
     });
 
     $('#btnResetFilter').click(function() {
       $('#filter_rw').val('');
+      updateRtDropdown('');
+      $('#filter_rt').val('');
+      $('#filter_jk').val('');
+      $('#filter_tempat_tinggal').val('');
+      $('#filter_keadaan_rumah').val('');
       $('#filter_kategori').val('');
       table.search('').draw();
     });
@@ -647,12 +743,20 @@
       e.preventDefault();
       var desa = encodeURIComponent($('#filter_desa').val() || defaultDesa);
       var rw = encodeURIComponent($('#filter_rw').val() || '');
+      var rt = encodeURIComponent($('#filter_rt').val() || '');
+      var jk = encodeURIComponent($('#filter_jk').val() || '');
+      var tempatTinggal = encodeURIComponent($('#filter_tempat_tinggal').val() || '');
+      var keadaanRumah = encodeURIComponent($('#filter_keadaan_rumah').val() || '');
       var kategori = encodeURIComponent($('#filter_kategori').val() || '');
       var search = encodeURIComponent(table.search() || '');
 
       var exportUrl = "<?= site_url('lansia-jompo/export_excel'); ?>?" +
         "desa=" + desa +
         "&rw=" + rw +
+        "&rt=" + rt +
+        "&jk=" + jk +
+        "&tempat_tinggal=" + tempatTinggal +
+        "&keadaan_rumah=" + keadaanRumah +
         "&kategori=" + kategori +
         "&search=" + search;
 

@@ -150,6 +150,45 @@ class LansiaModel extends Model
 		// 🔐 Terapkan WilayahFilterTrait (Karantina Kode Desa, RW, RT, dan Wilayah Tugas Petugas)
 		$this->applyWilayahFilter($builder, $filter, $roleId);
 
+		// Filter Jenis Kelamin (L / P)
+		$jk = trim((string)($filter['jk'] ?? ''));
+		if ($jk !== '' && in_array($jk, ['L', 'P'], true)) {
+			$builder->where('art.jenis_kelamin', $jk);
+		}
+
+		// Filter Tempat Tinggal (Status Kepemilikan Rumah)
+		$tempatTinggal = trim((string)($filter['tempat_tinggal'] ?? ''));
+		if ($tempatTinggal !== '') {
+			$exprTempat = $hasKeadaanRumahTable
+				? "COALESCE(NULLIF(kr.status_kepemilikan, ''), NULLIF(rt.kepemilikan_rumah, ''), '-')"
+				: "COALESCE(NULLIF(rt.kepemilikan_rumah, ''), '-')";
+			if ($tempatTinggal === 'Belum Diisi') {
+				$builder->where("$exprTempat = '-'", null, false);
+			} elseif ($tempatTinggal === 'Milik Sendiri') {
+				$builder->where("$exprTempat IN ('Milik Sendiri', '1')", null, false);
+			} else {
+				$escapedTempat = $this->db->escape($tempatTinggal);
+				$builder->where("$exprTempat = $escapedTempat", null, false);
+			}
+		}
+
+		// Filter Keadaan Rumah (Kategori Rumah: Permanen / Semi Permanen / Panggung / Numpang / Belum Dinilai)
+		$keadaanRumah = trim((string)($filter['keadaan_rumah'] ?? ''));
+		if ($keadaanRumah !== '') {
+			if ($hasKeadaanRumahTable) {
+				if ($keadaanRumah === 'Belum Dinilai') {
+					$builder->groupStart()
+						->where('kr.kategori_rumah IS NULL')
+						->orWhere('kr.kategori_rumah', '')
+						->groupEnd();
+				} else {
+					$builder->where('kr.kategori_rumah', $keadaanRumah);
+				}
+			} elseif ($keadaanRumah !== 'Belum Dinilai') {
+				$builder->where('1 = 0', null, false);
+			}
+		}
+
 		// Filter Kategori (Lansia / Jompo)
 		$kategori = $filter['kategori'] ?? '';
 		if (!empty($kategori)) {
