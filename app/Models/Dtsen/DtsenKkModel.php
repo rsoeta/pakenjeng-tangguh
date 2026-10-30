@@ -397,10 +397,22 @@ class DtsenKkModel extends Model
         // 3. 🚀 SENSOR BARU: Pengecekan 4 Pilar Foto (Termasuk Kamar Mandi / WC)
         // Kita gunakan fallback ('mck' atau 'kamar_mandi') untuk berjaga-jaga nama key-nya
         $foto = $payload['foto'] ?? [];
-        $isFotoLengkap = !empty($foto['ktp_kk'])
-            && !empty($foto['depan'])
-            && !empty($foto['dalam'])
-            && (!empty($foto['mck']) || !empty($foto['kamar_mandi']));
+        $fasilitasBab = $payload['perumahan']['sanitasi']['fasilitas_bab'] ?? '';
+        $wcVal = $foto['kamar_mandi'] ?? ($foto['mck'] ?? '');
+
+        $isWcValid = false;
+        if (!empty($wcVal) && !str_contains($wcVal, 'noimage.png')) {
+            if (str_contains($wcVal, 'image_not_available.jpg')) {
+                $isWcValid = ($fasilitasBab === 'Tidak ada fasilitas');
+            } else {
+                $isWcValid = true;
+            }
+        }
+
+        $isFotoLengkap = !empty($foto['ktp_kk']) && !str_contains($foto['ktp_kk'], 'noimage.png')
+            && !empty($foto['depan']) && !str_contains($foto['depan'], 'noimage.png')
+            && !empty($foto['dalam']) && !str_contains($foto['dalam'], 'noimage.png')
+            && $isWcValid;
 
         // Harus memenuhi KETIGA syarat utama barulah sah menjadi Submitted
         return $isDasarLengkap && $isKondisiLengkap && $isFotoLengkap;

@@ -801,7 +801,7 @@ class PembaruanKeluarga extends BaseController
             $wilayahFull   = "Desa {$namaDesa}, Kec. {$namaKecamatan}, Kab. {$namaKabupaten}, Prov. {$namaProvinsi}";
 
             // ==========================================
-            // 🚀 MAPPING FOTO
+            // 🚀 MAPPING & VALIDASI KELENGKAPAN 4 FOTO
             // ==========================================
             $fotoFields = [
                 'foto_ktp'         => ['path' => 'foto_identitas/',   'key' => 'ktp_kk'],
@@ -811,6 +811,58 @@ class PembaruanKeluarga extends BaseController
             ];
 
             $fotoGabungan = $payloadLama['foto'];
+
+            $postBab = trim((string)($this->request->getPost('fasilitas_bab') ?? ''));
+            $fasilitasBab = $postBab !== '' ? $postBab : trim((string)($payloadLama['perumahan']['sanitasi']['fasilitas_bab'] ?? ''));
+            $isTidakAdaBab = ($fasilitasBab === 'Tidak ada fasilitas');
+
+            $fileKtp = $this->request->getFile('foto_ktp');
+            $hasNewKtp = ($fileKtp && $fileKtp->isValid() && !$fileKtp->hasMoved());
+            $hasOldKtp = (!empty($fotoGabungan['ktp_kk']) && !str_contains($fotoGabungan['ktp_kk'], 'noimage.png'));
+
+            $fileDepan = $this->request->getFile('foto_depan');
+            $hasNewDepan = ($fileDepan && $fileDepan->isValid() && !$fileDepan->hasMoved());
+            $hasOldDepan = (!empty($fotoGabungan['depan']) && !str_contains($fotoGabungan['depan'], 'noimage.png'));
+
+            $fileDalam = $this->request->getFile('foto_dalam');
+            $hasNewDalam = ($fileDalam && $fileDalam->isValid() && !$fileDalam->hasMoved());
+            $hasOldDalam = (!empty($fotoGabungan['dalam']) && !str_contains($fotoGabungan['dalam'], 'noimage.png'));
+
+            $fileWc = $this->request->getFile('foto_kamar_mandi');
+            $hasNewWc = ($fileWc && $fileWc->isValid() && !$fileWc->hasMoved());
+            $oldWc = $fotoGabungan['kamar_mandi'] ?? ($fotoGabungan['mck'] ?? '');
+            $hasOldRealWc = (!empty($oldWc) && !str_contains($oldWc, 'noimage.png') && !str_contains($oldWc, 'image_not_available.jpg'));
+
+            $missingErrors = [];
+            if (!$hasNewKtp && !$hasOldKtp) {
+                $missingErrors[] = 'Foto KTP / KK';
+            }
+            if (!$hasNewDepan && !$hasOldDepan) {
+                $missingErrors[] = 'Foto Rumah Tampak Depan';
+            }
+            if (!$hasNewDalam && !$hasOldDalam) {
+                $missingErrors[] = 'Foto Ruang Tamu / Dalam';
+            }
+
+            if (!$hasNewWc && !$hasOldRealWc) {
+                if (!$isTidakAdaBab) {
+                    $missingErrors[] = 'Foto Kamar Mandi / WC';
+                } else {
+                    // 🚀 Khusus "Tidak ada fasilitas": boleh diganti dengan public\assets\images\image_not_available.jpg
+                    $fotoGabungan['kamar_mandi'] = 'assets/images/image_not_available.jpg';
+                }
+            }
+
+            if (!empty($missingErrors)) {
+                $pesanError = 'Upload gagal! Foto berikut masih kosong dan wajib diisi: ' . implode(', ', $missingErrors) . '.';
+                if (!$isTidakAdaBab && in_array('Foto Kamar Mandi / WC', $missingErrors)) {
+                    $pesanError .= ' (Foto Kamar Mandi/WC wajib diunggah karena Kepemilikan Fasilitas BAB di Tab Rumah tidak bernilai "Tidak ada fasilitas")';
+                }
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => $pesanError
+                ]);
+            }
 
             foreach ($fotoFields as $field => $opt) {
                 $file = $this->request->getFile($field);
@@ -863,7 +915,11 @@ class PembaruanKeluarga extends BaseController
                 'updated_at' => date('Y-m-d H:i:s')
             ]);
 
-            return $this->response->setJSON(['status' => 'success', 'message' => 'Data foto berhasil disimpan dan diberi watermark!']);
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Data foto berhasil disimpan dan diberi watermark!',
+                'data'    => ['foto' => $fotoGabungan]
+            ]);
         } catch (\Throwable $e) {
             log_message('error', '❌ saveFoto() error: ' . $e->getMessage());
             return $this->response->setJSON(['status' => 'error', 'message' => $e->getMessage()]);
