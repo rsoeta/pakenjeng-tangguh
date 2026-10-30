@@ -37,7 +37,7 @@
 
     <!-- PWA & Mobile Web App Meta Tags -->
     <link rel="manifest" href="<?= base_url('manifest.json'); ?>">
-    <meta name="theme-color" content="#2ecc71">
+    <meta name="theme-color" content="#2EC4B6">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -81,7 +81,7 @@
 
 </head>
 
-<body class="hold-transition login-page dark-mode">
+<body class="hold-transition login-page">
 
     <?= $this->renderSection('content'); ?>
 
