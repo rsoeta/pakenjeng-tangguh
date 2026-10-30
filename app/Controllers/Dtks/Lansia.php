@@ -441,12 +441,16 @@ class Lansia extends BaseController
         $s = preg_replace('/\b(\d+)\s*bln\b/', '$1 bulan', $s);
         $s = preg_replace('/\b(\d+)\s*hr\b/', '$1 hari', $s);
 
-        // 2. Normalisasi kata ulang dengan angka "2" (contoh: sakit2an -> sakit-sakitan, sehari2 -> sehari-hari)
+        // 2. Normalisasi kata ulang dengan angka "2"
+        // Untuk kata berawalan se-/ber-/ter- (contoh: sehari2 -> sehari-hari, berkali2 -> berkali-kali, bertahun2 -> bertahun-tahun)
+        $s = preg_replace('/\b(se|ber|ter)(hari|kali|tahun|bulan|minggu|jam|jalan|turut|angsur|ulang)2(an|nya)?\b/', '$1$2-$2$3', $s);
+        // Untuk kata dasar ulang (contoh: sakit2an -> sakit-sakitan, paru2 -> paru-paru, rata2 -> rata-rata)
         $s = preg_replace('/\b([a-z]{3,})2(an|nya)?\b/', '$1-$1$2', $s);
 
         // Normalisasi kata ulang yang ditulis terpisah tanpa tanda hubung
+        $s = preg_replace('/\b(se|ber|ter)(hari|kali|tahun|bulan|minggu|turut|ulang)\s+\2(nya|an)?\b/', '$1$2-$2$3', $s);
         $reduplications = [
-            'sehari', 'paru', 'anak', 'orang', 'rata', 'kadang', 'hati',
+            'paru', 'anak', 'orang', 'rata', 'kadang', 'hati',
             'masing', 'sendiri', 'laki', 'tiba', 'pelan', 'jalan', 'ragu'
         ];
         foreach ($reduplications as $rw) {
@@ -727,7 +731,6 @@ class Lansia extends BaseController
             'budeg' => 'tuli',
             'budek' => 'tuli',
             'pkun' => 'pikun',
-            'pikun' => 'demensia (pikun)',
             'stress' => 'stres',
             'migren' => 'migrain',
             'oprasi' => 'operasi',
@@ -767,7 +770,6 @@ class Lansia extends BaseController
             'dduk' => 'duduk',
             'tdur' => 'tidur',
             'mkan' => 'makan',
-            'maka' => 'makan',
             'mndi' => 'mandi',
             'bcara' => 'bicara',
             'ngomong' => 'berbicara',
@@ -844,7 +846,10 @@ class Lansia extends BaseController
             'kesulitan', 'fungsi', 'usia', 'lanjut', 'faktor', 'sulit', 'aktif', 'produktif',
             'normal', 'stabil', 'kesehatan', 'ingatan', 'pikiran', 'tenaga', 'pekerjaan',
             'penghasilan', 'pendapatan', 'kebutuhan', 'tanggungan', 'pemerintah', 'layak',
-            'menerima', 'mendapatkan', 'kehidupan', 'keseharian', 'beliau', 'orang'
+            'menerima', 'mendapatkan', 'kehidupan', 'keseharian', 'beliau', 'orang',
+            'daya', 'berdaya', 'upaya', 'berupaya', 'kemampuan', 'ketidakberdayaan',
+            'keterbatasan', 'ketergantungan', 'keseimbangan', 'kemandirian',
+            'tepat', 'tanggal', 'tunggal', 'tingkat', 'tinggali', 'ditinggali', 'panggung'
         ];
 
         $resolveWord = function (string $word) use ($directMap, $standardVocab): ?string {
@@ -854,37 +859,47 @@ class Lansia extends BaseController
             if (in_array($word, $standardVocab, true)) {
                 return $word;
             }
-            if (strlen($word) < 4) {
+            if (strlen($word) < 5) {
                 return null;
             }
+
+            // 1. Jika kata benda berimbuhan pe-/ke-...-a kehilangan huruf 'n' di akhir (contoh: penghasila -> penghasilan, kesehata -> kesehatan)
+            if (preg_match('/^(?:pe|ke)[a-z]{4,}a$/', $word) && in_array($word . 'n', $standardVocab, true)) {
+                return $word . 'n';
+            }
+
+            // 2. Deteksi apakah kata memiliki indikasi kuat typo struktural:
+            //    - Huruf kembar berurutan selain 'ngg' yang valid (contoh: kkdisi, bantuaan, sangaat, tergaggu)
+            //    - Gugus konsonan tidak lazim (contoh: kndisi, pnyakit, brjalan, pemerintanh)
+            $hasDoubleLetter = (bool)preg_match('/([a-fh-z])\1|(?<!n)gg/', $word);
+            $hasWeirdCluster = (bool)preg_match('/^(?:[^aiueo]{2,})|(?:[^aiueo]{4,})|(?:nh|(?<!n)gk|knd|pny|brj|mnd|snd|klg|tngg|bnt|tngk)/', $word);
+
             $bestWord = null;
             $bestDist = 99;
             foreach ($standardVocab as $vocab) {
-                $lenDiff = abs(strlen($word) - strlen($vocab));
-                if ($lenDiff > 1) {
+                if (strlen($vocab) < 5) {
                     continue;
                 }
-                $firstSame = ($word[0] === $vocab[0])
-                    || (($word[0] === 'p' || $word[0] === 'f') && ($vocab[0] === 'p' || $vocab[0] === 'f'));
-                if (!$firstSame) {
+                $lenDiff = abs(strlen($word) - strlen($vocab));
+                if ($lenDiff > 1 || $word[0] !== $vocab[0]) {
                     continue;
                 }
                 $dist = levenshtein($word, $vocab);
-                if ($dist === 1) {
-                    if (substr($word, -1) !== substr($vocab, -1) && substr($word, 0, 3) !== substr($vocab, 0, 3)) {
-                        continue;
-                    }
-                } elseif ($dist === 2 && strlen($vocab) >= 7) {
-                    if (substr($word, -1) !== substr($vocab, -1)) {
-                        continue;
-                    }
-                } else {
-                    continue;
+
+                // A. Transposisi 2 huruf bersebelahan (contoh: knodisi -> kondisi, mendaptakan -> mendapatkan)
+                if ($lenDiff === 0 && $dist === 2 && count_chars($word, 1) === count_chars($vocab, 1)) {
+                    return $vocab;
                 }
 
-                if ($dist < $bestDist) {
-                    $bestDist = $dist;
-                    $bestWord = $vocab;
+                // B. Kurang/lebih 1 huruf ($lenDiff === 1) atau huruf kembar typo ($dist === 1), HANYA jika ada indikasi typo struktural
+                if ($dist === 1 && ($hasDoubleLetter || ($lenDiff === 1 && $hasWeirdCluster))) {
+                    if (substr($word, -1) === 'i' && substr($vocab, -1) !== 'i') {
+                        continue;
+                    }
+                    if ($dist < $bestDist) {
+                        $bestDist = $dist;
+                        $bestWord = $vocab;
+                    }
                 }
             }
             return $bestWord;
@@ -912,8 +927,8 @@ class Lansia extends BaseController
                             $tok = $resBase . 'nya';
                         }
                     }
-                    // Cek jika berawalan "ber-", "ter-", "se-", "di-"
-                    if (preg_match('/^(ber|ter|se|di)([a-z]{4,})$/', $tok, $m)) {
+                    // Cek jika berawalan "ber-", "ter-", "se-", "di-" HANYA untuk kata dasar >= 5 huruf atau yang ada di $directMap
+                    if (preg_match('/^(ber|ter|se|di)([a-z]{5,})$/', $tok, $m)) {
                         $resBase = $resolveWord($m[2]);
                         if ($resBase !== null) {
                             $tok = $m[1] . $resBase;
