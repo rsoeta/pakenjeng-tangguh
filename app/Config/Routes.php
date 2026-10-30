@@ -775,6 +775,7 @@ $routes->post('exportFamantama1', 'Dtks\Famantama::export1', ['filter' => 'authf
 $routes->get('lansia-jompo', 'Dtks\Lansia::index', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
 $routes->post('lansia-jompo/data', 'Dtks\Lansia::data', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
 $routes->post('lansia-jompo/save_status', 'Dtks\Lansia::save_status', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
+$routes->post('lansia-jompo/copyedit', 'Dtks\Lansia::copyedit', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
 $routes->get('lansia-jompo/export_excel', 'Dtks\Lansia::export_excel', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
 $routes->get('lansia', 'Dtks\Lansia::index', ['filter' => ['authfilterdtks', 'menufilterdtks']]);
 

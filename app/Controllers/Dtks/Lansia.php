@@ -321,6 +321,346 @@ class Lansia extends BaseController
         }
     }
 
+    /**
+     * Endpoint AJAX Copyediting untuk memperbaiki ejaan (typo), tanda baca,
+     * kapitalisasi, pemilihan kata baku, dan struktur kalimat efektif.
+     */
+    public function copyedit()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid request']);
+        }
+
+        try {
+            $rawText = trim((string)$this->request->getPost('text'));
+            if ($rawText === '' || $rawText === '-') {
+                return $this->response->setJSON([
+                    'status'    => 'error',
+                    'message'   => 'Teks keterangan masih kosong.',
+                    'csrf_name' => csrf_token(),
+                    'csrf_hash' => csrf_hash()
+                ]);
+            }
+
+            // 1. Coba gunakan AI API (jika GEMINI_API_KEY diset di .env)
+            $result = $this->tryExternalAiCopyedit($rawText);
+
+            // 2. Jika tidak ada API key atau jaringan gagal, gunakan mesin Smart Indonesian Copyediting lokal
+            if (empty($result)) {
+                $result = $this->smartCopyeditIndonesia($rawText);
+            }
+
+            return $this->response->setJSON([
+                'status'    => 'success',
+                'original'  => $rawText,
+                'result'    => $result,
+                'csrf_name' => csrf_token(),
+                'csrf_hash' => csrf_hash()
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', '[Lansia::copyedit] ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status'    => 'error',
+                'message'   => 'Gagal memperbaiki teks: ' . $e->getMessage(),
+                'csrf_name' => csrf_token(),
+                'csrf_hash' => csrf_hash()
+            ]);
+        }
+    }
+
+    /**
+     * Opsional: Panggil Gemini API jika GEMINI_API_KEY tersedia di .env
+     */
+    private function tryExternalAiCopyedit(string $text): ?string
+    {
+        $apiKey = trim((string)(getenv('GEMINI_API_KEY') ?: ($_ENV['GEMINI_API_KEY'] ?? '')));
+        if ($apiKey === '' || !function_exists('curl_init')) {
+            return null;
+        }
+
+        $prompt = "Lakukan copyediting bahasa Indonesia yang baik, benar (EYD/KBBI), ringkas, dan efektif untuk catatan kondisi lansia/jompo berikut. "
+            . "Perbaiki semua kesalahan ejaan (typo), tanda baca, kapitalisasi (gunakan Sentence case, bukan huruf kapital semua), pemilihan kata yang salah, dan struktur kalimat yang rancu tanpa mengubah makna aslinya. "
+            . "Berikan HANYA kalimat hasil perbaikannya saja tanpa tanda kutip dan tanpa penjelasan tambahan:\n\n"
+            . $text;
+
+        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . urlencode($apiKey);
+        $payload = json_encode([
+            'contents' => [
+                ['parts' => [['text' => $prompt]]]
+            ],
+            'generationConfig' => [
+                'temperature' => 0.2,
+                'maxOutputTokens' => 250,
+            ]
+        ]);
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+            CURLOPT_POSTFIELDS     => $payload,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 5,
+            CURLOPT_CONNECTTIMEOUT => 3,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
+        $resp = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($code === 200 && $resp) {
+            $json = json_decode($resp, true);
+            $out  = trim((string)($json['candidates'][0]['content']['parts'][0]['text'] ?? ''));
+            $out  = trim($out, " \t\n\r\0\x0B\"'");
+            if ($out !== '') {
+                return $out;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Mesin Copyediting Bahasa Indonesia Cerdas (Kamus Typo + Fuzzy Matching Levenshtein + Restrukturisasi Kalimat Efektif)
+     */
+    private function smartCopyeditIndonesia(string $text): string
+    {
+        $text = trim($text);
+        if ($text === '' || $text === '-') {
+            return $text;
+        }
+
+        // 1. Normalisasi awal: huruf kecil semua, rapikan spasi berlebih
+        $s = mb_strtolower($text, 'UTF-8');
+        $s = preg_replace('/\s+/', ' ', $s);
+
+        // 2. Kamus koreksi typo langsung & kata tidak baku (spesifik konteks sosial/kesehatan lansia)
+        $directMap = [
+            'puya' => 'punya',
+            'pnya' => 'punya',
+            'pny' => 'punya',
+            'mpunyai' => 'mempunyai',
+            'peyakit' => 'penyakit',
+            'pnyakit' => 'penyakit',
+            'penyaket' => 'penyakit',
+            'pnykt' => 'penyakit',
+            'untik' => 'untuk',
+            'untk' => 'untuk',
+            'utk' => 'untuk',
+            'tuk' => 'untuk',
+            'kkdisi' => 'kondisi',
+            'kndisi' => 'kondisi',
+            'kondsi' => 'kondisi',
+            'kndsi' => 'kondisi',
+            'kodisi' => 'kondisi',
+            'pisik' => 'fisik',
+            'psik' => 'fisik',
+            'fisikna' => 'fisiknya',
+            'pisikna' => 'fisiknya',
+            'bueat' => 'buat',
+            'bwt' => 'buat',
+            'berjln' => 'berjalan',
+            'brjalan' => 'berjalan',
+            'berjlan' => 'berjalan',
+            'jln' => 'jalan',
+            'aga' => 'agak',
+            'agk' => 'agak',
+            'rada' => 'agak',
+            'penagan' => 'penanganan',
+            'penaganan' => 'penanganan',
+            'pnanganan' => 'penanganan',
+            'penangan' => 'penanganan',
+            'husus' => 'khusus',
+            'kusus' => 'khusus',
+            'khusu' => 'khusus',
+            'khuss' => 'khusus',
+            'jga' => 'juga',
+            'jg' => 'juga',
+            'jd' => 'jadi',
+            'jdi' => 'jadi',
+            'hrs' => 'harus',
+            'hrus' => 'harus',
+            'krn' => 'karena',
+            'karna' => 'karena',
+            'kerna' => 'karena',
+            'yg' => 'yang',
+            'dgn' => 'dengan',
+            'dg' => 'dengan',
+            'sm' => 'sama',
+            'sdh' => 'sudah',
+            'udh' => 'sudah',
+            'udah' => 'sudah',
+            'blm' => 'belum',
+            'blom' => 'belum',
+            'tdk' => 'tidak',
+            'tak' => 'tidak',
+            'gak' => 'tidak',
+            'ga' => 'tidak',
+            'nggak' => 'tidak',
+            'enggak' => 'tidak',
+            'bs' => 'bisa',
+            'bsa' => 'bisa',
+            'msh' => 'masih',
+            'msih' => 'masih',
+            'sgt' => 'sangat',
+            'bgt' => 'sekali',
+            'banget' => 'sekali',
+            'dlm' => 'dalam',
+            'pd' => 'pada',
+            'dr' => 'dari',
+            'kpd' => 'kepada',
+            'tp' => 'tetapi',
+            'tapi' => 'tetapi',
+            'kl' => 'kalau',
+            'kalo' => 'kalau',
+            'klu' => 'kalau',
+            'sbg' => 'sebagai',
+            'spt' => 'seperti',
+            'aktipitas' => 'aktivitas',
+            'aktifitas' => 'aktivitas',
+            'aktvts' => 'aktivitas',
+            'struk' => 'stroke',
+            'strok' => 'stroke',
+            'setruk' => 'stroke',
+            'syaraf' => 'saraf',
+            'sarap' => 'saraf',
+            'rematik' => 'reumatik',
+            'reumatik' => 'reumatik',
+            'asamurat' => 'asam urat',
+            'darahtinggi' => 'hipertensi',
+            'diabet' => 'diabetes',
+            'pikun' => 'demensia (pikun)',
+            'ngurus' => 'mengurus',
+            'ngurusin' => 'mengurus',
+            'ngebantu' => 'membantu',
+            'susah' => 'sulit',
+        ];
+
+        // Kosakata baku referensi untuk fuzzy matching Levenshtein (typo 1-2 huruf)
+        $standardVocab = [
+            'menderita', 'penyakit', 'asam', 'urat', 'sehingga', 'untuk', 'kondisi', 'fisik',
+            'berjalan', 'agak', 'sulit', 'harus', 'penanganan', 'khusus', 'juga', 'lansia',
+            'jompo', 'sehat', 'bugar', 'lemah', 'renta', 'lumpuh', 'stroke', 'diabetes',
+            'hipertensi', 'katarak', 'rabun', 'tuli', 'pendengaran', 'penglihatan', 'terganggu',
+            'kurang', 'jelas', 'tinggal', 'sendiri', 'sendirian', 'keluarga', 'bantuan',
+            'aktivitas', 'mandiri', 'tempat', 'tidur', 'tongkat', 'kursi', 'roda', 'sakit',
+            'menahun', 'kronis', 'parah', 'butuh', 'membutuhkan', 'memerlukan', 'perawatan',
+            'medis', 'rutin', 'kontrol', 'dokter', 'puskesmas', 'bekerja', 'serabutan',
+            'ringan', 'berat', 'bicara', 'mengurus', 'merawat', 'pendamping', 'kesulitan',
+            'gangguan', 'fungsi', 'tubuh', 'menurun', 'usia', 'lanjut', 'faktor'
+        ];
+
+        $tokens = preg_split('/(\s+|[,.!?;:\/()-])/', $s, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        foreach ($tokens as &$tok) {
+            if (preg_match('/^[a-z0-9]+$/', $tok)) {
+                if (isset($directMap[$tok])) {
+                    $tok = $directMap[$tok];
+                } elseif (strlen($tok) >= 5 && !in_array($tok, $standardVocab, true)) {
+                    $bestWord = null;
+                    $bestDist = 99;
+                    foreach ($standardVocab as $vocab) {
+                        if (abs(strlen($tok) - strlen($vocab)) > 2) {
+                            continue;
+                        }
+                        if ($tok[0] !== $vocab[0] && substr($tok, 0, 2) !== substr($vocab, 0, 2)) {
+                            continue;
+                        }
+                        $dist = levenshtein($tok, $vocab);
+                        $maxAllowed = (strlen($vocab) >= 7) ? 2 : 1;
+                        if ($dist <= $maxAllowed && $dist < $bestDist) {
+                            $bestDist = $dist;
+                            $bestWord = $vocab;
+                        }
+                    }
+                    if ($bestWord !== null) {
+                        $tok = $bestWord;
+                    }
+                }
+            }
+        }
+        unset($tok);
+
+        $s = implode('', $tokens);
+
+        // 3. Perbaikan gabungan imbuhan "di " yang seharusnya serangkai pada kata kerja pasif
+        $passiveVerbs = ['bantu', 'rawat', 'urus', 'dampingi', 'papah', 'gendong', 'bawa', 'periksa', 'obati', 'tangani', 'pantau', 'awasi'];
+        foreach ($passiveVerbs as $v) {
+            $s = preg_replace('/\bdi\s+' . $v . '\b/', 'di' . $v, $s);
+        }
+
+        // 4. Transformasi Frasa & Struktur Kalimat Efektif (Copyediting Sintaksis)
+        $phraseRules = [
+            '/^(?:punya|mempunyai|memiliki|ada)\s+penyakit\b/' => 'menderita penyakit',
+            '/\b(?:punya|mempunyai)\s+penyakit\b/' => 'menderita penyakit',
+            '/^(?:kena|terkena)\s+penyakit\b/' => 'menderita penyakit',
+            '/^(?:kena|terkena)\s+(stroke|diabetes|hipertensi|katarak|asam urat|reumatik|lumpuh)\b/' => 'menderita $1',
+
+            // Struktur rancu "jadi untuk kondisi fisik buat berjalan agak sulit"
+            '/\bjadi\s+untuk\s+kondisi\s+fisik\s+(?:buat|untuk)\s+berjalan\s+(?:agak|cukup)?\s*sulit\b/' => 'sehingga kondisi fisik cukup sulit untuk berjalan',
+            '/\buntuk\s+kondisi\s+fisik\s+(?:buat|untuk)\s+berjalan\s+(?:agak|cukup)?\s*sulit\b/' => 'kondisi fisik cukup sulit untuk berjalan',
+            '/\bkondisi\s+fisik\s+(?:buat|untuk)\s+berjalan\s+(?:agak|cukup)?\s*sulit\b/' => 'kondisi fisik cukup sulit untuk berjalan',
+            '/\b(?:buat|untuk)\s+berjalan\s+(?:agak|cukup)\s+sulit\b/' => 'cukup sulit untuk berjalan',
+            '/\b(?:buat|untuk)\s+berjalan\s+sulit\b/' => 'sulit untuk berjalan',
+            '/\b(?:agak|cukup)\s+sulit\s+(?:buat|untuk)\s+berjalan\b/' => 'cukup sulit untuk berjalan',
+
+            // Kata "buat" non-baku sebelum kata kerja -> "untuk"
+            '/\bbuat\s+(berjalan|bergerak|beraktivitas|berdiri|duduk|melihat|mendengar|bicara|berbicara|makan|bekerja)\b/' => 'untuk $1',
+
+            // Pengulangan kata penghubung "jadi ... jadi ..." & klausa penanganan khusus
+            '/\bjadi\s+harus\s+ada\s+penanganan\s+khusus\s+juga\b/' => 'dan memerlukan penanganan khusus',
+            '/\bjadi\s+harus\s+ada\s+penanganan\s+khusus\b/' => 'serta memerlukan penanganan khusus',
+            '/\bharus\s+ada\s+penanganan\s+khusus\s+juga\b/' => 'memerlukan penanganan khusus',
+            '/\bharus\s+ada\s+penanganan\s+khusus\b/' => 'memerlukan penanganan khusus',
+            '/\bbutuh\s+penanganan\s+khusus\b/' => 'memerlukan penanganan khusus',
+
+            // Frasa umum lainnya pada keterangan lansia/jompo
+            '/\btidak\s+bisa\s+(?:jalan|berjalan)\s+sendiri\b/' => 'tidak dapat berjalan secara mandiri',
+            '/\btidak\s+bisa\s+beraktivitas\s+sendiri\b/' => 'tidak dapat beraktivitas secara mandiri',
+            '/\bharus\s+dibantu\b/' => 'sehingga perlu dibantu',
+            '/\bmasih\s+bisa\s+kerja\b/' => 'masih dapat bekerja',
+            '/\btidak\s+ada\s+yang\s+mengurus\b/' => 'tanpa pendamping yang mengurus',
+            '/\b(?:sering\s+)?sakit[\s-]+sakitan\b/' => 'sering sakit-sakitan',
+            '/\baktivitas\s+di\s+tempat\s+tidur\s+saja\b/' => 'hanya dapat beraktivitas di tempat tidur',
+        ];
+
+        foreach ($phraseRules as $pattern => $replacement) {
+            $s = preg_replace($pattern, $replacement, $s);
+        }
+
+        // Ubah kata penghubung "jadi" di tengah kalimat menjadi "sehingga" / "dan"
+        $jadiCount = 0;
+        $s = preg_replace_callback('/\bjadi\b/', function () use (&$jadiCount) {
+            $jadiCount++;
+            return ($jadiCount === 1) ? 'sehingga' : 'dan';
+        }, $s);
+
+        // Hapus kata "juga" yang menggantung di akhir kalimat jika sudah efektif
+        $s = preg_replace('/\b(memerlukan|membutuhkan)\s+([^,.]+?)\s+juga$/', '$1 $2', $s);
+
+        // Rapikan spasi di sekitar tanda baca
+        $s = preg_replace('/\s+([,.!?;:])/', '$1', $s);
+        $s = preg_replace('/([,.!?;:])(?=[a-zA-Z])/', '$1 ', $s);
+        $s = preg_replace('/\s+/', ' ', trim($s));
+
+        // Kapitalisasi huruf pertama pada setiap kalimat (Sentence case)
+        $s = preg_replace_callback('/(?:^|[.!?]\s+)([a-z])/', function ($m) {
+            return mb_strtoupper($m[0], 'UTF-8');
+        }, $s);
+
+        // Pastikan singkatan medis/umum tetap kapital bila ada
+        $acronyms = ['tbc' => 'TBC', 'hiv' => 'HIV', 'bpjs' => 'BPJS', 'rt' => 'RT', 'rw' => 'RW', 'odgj' => 'ODGJ'];
+        foreach ($acronyms as $low => $up) {
+            $s = preg_replace('/\b' . $low . '\b/i', $up, $s);
+        }
+
+        // Tambahkan titik di akhir kalimat jika belum ada tanda baca akhir
+        if (!preg_match('/[.!?]$/', $s)) {
+            $s .= '.';
+        }
+
+        return $s;
+    }
+
     public function export_excel()
     {
         try {

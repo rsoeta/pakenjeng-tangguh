@@ -272,8 +272,19 @@
 
           <!-- Keterangan Tambahan -->
           <div class="form-group mb-1">
-            <label for="modal_keterangan" class="font-weight-bold small text-dark">Keterangan Tambahan (Opsional):</label>
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label for="modal_keterangan" class="font-weight-bold small text-dark mb-0">Keterangan Tambahan (Opsional):</label>
+              <div>
+                <button type="button" id="btnUndoCopyedit" class="btn btn-xs btn-outline-secondary py-0 px-2 mr-1 d-none" title="Kembalikan teks sebelum diperbaiki">
+                  <i class="fas fa-undo-alt mr-1"></i>Undo
+                </button>
+                <button type="button" id="btnAiCopyedit" class="btn btn-xs btn-outline-info py-0 px-2 font-weight-bold" title="Perbaiki typo, tanda baca, kapitalisasi, dan kalimat secara otomatis">
+                  <i class="fas fa-magic mr-1"></i>Perbaiki Ejaan (AI)
+                </button>
+              </div>
+            </div>
             <textarea class="form-control form-control-sm" name="keterangan" id="modal_keterangan" rows="2" placeholder="Contoh: Kondisi bugar / Sulit beraktivitas mandiri / Stroke..."></textarea>
+            <small id="copyeditFeedback" class="form-text text-info d-none mt-1"></small>
           </div>
 
         </div>
@@ -433,7 +444,9 @@
       $('#btnCopyModalNik').attr('data-value', (nik && nik !== '-') ? nik : '');
 
       $('#modal_usia').text(usia + ' Thn');
-      $('#modal_keterangan').val(keterangan || '');
+      $('#modal_keterangan').val(keterangan || '').removeData('prev-text');
+      $('#btnUndoCopyedit').addClass('d-none');
+      $('#copyeditFeedback').addClass('d-none').text('');
 
       if (String(kategori).toUpperCase() === 'JOMPO') {
         $('#kat_jompo').prop('checked', true);
@@ -442,6 +455,98 @@
       }
 
       showModalStatus();
+    });
+
+    // ✨ Event Tombol AI Copyediting pada Keterangan Tambahan
+    $('#btnAiCopyedit').click(function(e) {
+      e.preventDefault();
+      var $textarea = $('#modal_keterangan');
+      var rawText = $.trim($textarea.val());
+
+      if (!rawText || rawText === '-') {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'info',
+            title: 'Keterangan Kosong',
+            text: 'Silakan ketik keterangan terlebih dahulu sebelum memperbaiki ejaan.',
+            timer: 1800,
+            showConfirmButton: false
+          });
+        } else {
+          alert('Silakan ketik keterangan terlebih dahulu.');
+        }
+        $textarea.focus();
+        return;
+      }
+
+      var $btn = $(this);
+      var originalHtml = $btn.html();
+      $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Memperbaiki...');
+      $('#copyeditFeedback').removeClass('d-none text-danger text-success').addClass('text-info').html('<i class="fas fa-sparkles mr-1"></i>Sedang menyunting ejaan & struktur kalimat...');
+
+      var csrfName = window.CSRF ? window.CSRF.name : 'csrf_test_name';
+      var csrfVal = window.CSRF ? window.CSRF.value : $('input[name=csrf_test_name]').val();
+      var payload = {
+        text: rawText
+      };
+      payload[csrfName] = csrfVal;
+
+      $.ajax({
+        url: "<?= site_url('lansia-jompo/copyedit'); ?>",
+        type: "POST",
+        data: payload,
+        dataType: "json",
+        success: function(res) {
+          $btn.prop('disabled', false).html(originalHtml);
+          if (res.csrf_hash) {
+            $('input[name=csrf_test_name]').val(res.csrf_hash);
+            if (window.CSRF) {
+              window.CSRF.value = res.csrf_hash;
+            }
+          }
+
+          if (res.status === 'success' && res.result) {
+            if (res.result !== rawText) {
+              $textarea.data('prev-text', rawText);
+              $textarea.val(res.result);
+              $('#btnUndoCopyedit').removeClass('d-none');
+              $('#copyeditFeedback')
+                .removeClass('d-none text-info text-danger')
+                .addClass('text-success')
+                .html('<i class="fas fa-check-circle mr-1"></i>Ejaan, kapitalisasi, dan struktur kalimat berhasil diperbaiki.');
+            } else {
+              $('#copyeditFeedback')
+                .removeClass('d-none text-info text-danger')
+                .addClass('text-success')
+                .html('<i class="fas fa-check-circle mr-1"></i>Kalimat sudah rapi dan efektif.');
+            }
+          } else {
+            $('#copyeditFeedback')
+              .removeClass('d-none text-info text-success')
+              .addClass('text-danger')
+              .text(res.message || 'Gagal memperbaiki teks.');
+          }
+        },
+        error: function() {
+          $btn.prop('disabled', false).html(originalHtml);
+          $('#copyeditFeedback')
+            .removeClass('d-none text-info text-success')
+            .addClass('text-danger')
+            .text('Gagal menghubungi server untuk menyunting teks.');
+        }
+      });
+    });
+
+    // ↺ Event Tombol Undo Copyediting
+    $('#btnUndoCopyedit').click(function(e) {
+      e.preventDefault();
+      var $textarea = $('#modal_keterangan');
+      var prev = $textarea.data('prev-text');
+      if (typeof prev !== 'undefined') {
+        $textarea.val(prev).removeData('prev-text');
+      }
+      $(this).addClass('d-none');
+      $('#copyeditFeedback').addClass('d-none').text('');
     });
 
     function showModalStatus() {
