@@ -9,9 +9,12 @@ use CodeIgniter\HTTP\IncomingRequest;
 use App\Models\Dtsen\DtsenKkModel;
 use App\Models\Dtsen\DtsenRtModel;
 use App\Models\GenModel;
+use App\Traits\WilayahFilterTrait;
 
 class DtsenSe extends Controller
 {
+    use WilayahFilterTrait; // 🔐 Mesin karantina wilayah (role_id >= 4) + mode penyamaran admin
+
     /**
      * @var IncomingRequest
      */
@@ -83,7 +86,77 @@ class DtsenSe extends Controller
             'role_id'        => $session->get('role_id'),
             'dataRW'         => $this->genModel->getRWByDesa($kodeDesa),
             'menu_pemulihan' => $this->checkMenuPemulihan(),
+            'petugas_list'   => $this->getPetugasEntriList($kodeDesa),
         ];
+    }
+
+    /**
+     * 👥 Daftar Petugas Entri aktif (role_id >= 4) di desa yang sedang login
+     */
+    private function getPetugasEntriList($kodeDesa): array
+    {
+        if (empty($kodeDesa)) {
+            return [];
+        }
+
+        return $this->db->table('dtks_users')
+            ->select('id, fullname, wilayah_tugas, level, role_id')
+            ->where('kode_desa', $kodeDesa)
+            ->where('role_id >=', 4)
+            ->where('status', 1)
+            ->orderBy('fullname', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * 🔐 Tentukan lingkup wilayah efektif (konsep WilayahFilterTrait)
+     * - role_id >= 4  : SELALU dikarantina ke wilayah tugas akun sendiri (parameter petugas diabaikan)
+     * - role_id <= 3  : bebas, KECUALI memilih Petugas Entri tertentu → "meminjam" wilayah tugas
+     *                   petugas tsb dan role dipaksa >= 4 agar data terpotong layaknya petugas itu.
+     *
+     * @return array{wilayah_tugas:string, level:string, role_id:int}
+     */
+    private function resolveWilayahScope($petugasId = null): array
+    {
+        $session  = session();
+        $roleId   = (int) $session->get('role_id');
+        $kodeDesa = $session->get('kode_desa');
+
+        $scope = [
+            'wilayah_tugas' => trim((string) $session->get('wilayah_tugas')),
+            'level'         => trim((string) $session->get('level')),
+            'role_id'       => $roleId,
+        ];
+
+        if ($roleId <= 3 && !empty($petugasId)) {
+            $petugas = $this->db->table('dtks_users')
+                ->select('wilayah_tugas, level, role_id')
+                ->where('id', $petugasId)
+                ->where('kode_desa', $kodeDesa)
+                ->where('role_id >=', 4)
+                ->get()
+                ->getRowArray();
+
+            if ($petugas) {
+                $scope = [
+                    'wilayah_tugas' => trim((string) ($petugas['wilayah_tugas'] ?? '')),
+                    'level'         => trim((string) ($petugas['level'] ?? '')),
+                    'role_id'       => max(4, (int) $petugas['role_id']),
+                ];
+            }
+        }
+
+        return $scope;
+    }
+
+    /**
+     * Normalisasi nomor wilayah ke format 3 digit (001) jika numerik
+     */
+    private function padWilayah($val): string
+    {
+        $val = trim((string) $val);
+        return is_numeric($val) ? str_pad((string) (int) $val, 3, '0', STR_PAD_LEFT) : $val;
     }
 
     // ========================================================
@@ -148,9 +221,7 @@ class DtsenSe extends Controller
 
             // 1️⃣ DATA SESSION
             $kodeDesa     = $session->get('kode_desa');
-            $roleId       = (int) $session->get('role_id');
-            $rwUser       = $session->get('level');
-            $wilayahTugas = $session->get('wilayah_tugas');
+            $roleId       = (int) $session->get('role_id'); // Role asli login (untuk hak aksi, bukan lingkup data)
 
             // 2️⃣ FILTER DARI FRONTEND (Gunakan getVar untuk menangkap data POST dari DataTables)
             $filterClient = $this->request->getVar('filter') ?? [];
@@ -160,9 +231,17 @@ class DtsenSe extends Controller
                 $filterClient = json_decode($filterClient, true) ?? [];
             }
 
+            // 3️⃣ LINGKUP WILAYAH (WilayahFilterTrait + mode penyamaran Petugas Entri)
+            $scope = $this->resolveWilayahScope($filterClient['petugas'] ?? null);
+
+            // 4️⃣ FILTER AKSES (ROLE)
+            // RW/RT dropdown tetap murni filter manual UI; karantina wilayah petugas
+            // ditangani oleh wilayah_tugas / level + role_id di model (tidak lagi menimpa filter RW).
             $filter = [
                 'kode_desa'     => $kodeDesa,
-                'wilayah_tugas' => $wilayahTugas,
+                'wilayah_tugas' => $scope['wilayah_tugas'],
+                'level'         => $scope['level'],
+                'role_id'       => $scope['role_id'],
                 'rw'            => $filterClient['rw']     ?? null,
                 'rt'            => $filterClient['rt']     ?? null,
                 'status'        => $filterClient['status']    ?? null,
@@ -170,11 +249,6 @@ class DtsenSe extends Controller
                 'perlinsos'     => $filterClient['perlinsos'] ?? null,
                 'bansos'        => $filterClient['bansos']    ?? null,
             ];
-
-            // 4️⃣ FILTER AKSES (ROLE)
-            if ($roleId >= 4) {
-                $filter['rw'] = $rwUser;
-            }
 
             // 5️⃣ AMBIL DATA
             $dataKeluarga = $this->kkModel->getFilteredData($filter);
@@ -1692,10 +1766,24 @@ class DtsenSe extends Controller
     }
 
     // app/Controllers/Dtsen/DtsenSe.php
+    // 🔐 Daftar RW mengikuti WilayahFilterTrait:
+    //    - role_id >= 4                     → hanya RW wilayah tugas sendiri
+    //    - role_id <= 3 + ?petugas=<id>     → hanya RW wilayah tugas petugas tsb
+    //    - role_id <= 3 tanpa petugas        → seluruh RW desa
     public function listRW()
     {
         $session  = session();
         $kodeDesa = $session->get('kode_desa');
+
+        $scope = $this->resolveWilayahScope($this->request->getGet('petugas'));
+
+        if ($scope['role_id'] >= 4) {
+            $allowedRw = self::getAllowedRwList($scope['wilayah_tugas'], $scope['level']);
+            $data = array_values(array_unique(array_map(fn($rw) => $this->padWilayah($rw), $allowedRw)));
+            sort($data);
+
+            return $this->response->setJSON(['data' => $data]);
+        }
 
         $db = \Config\Database::connect();
 
@@ -1717,14 +1805,32 @@ class DtsenSe extends Controller
         $session  = session();
         $kodeDesa = $session->get('kode_desa');
 
+        $scope = $this->resolveWilayahScope($this->request->getGet('petugas'));
+
+        if ($scope['role_id'] >= 4) {
+            // RW harus termasuk wilayah tugas
+            $allowedRw = array_map(fn($r) => $this->padWilayah($r), self::getAllowedRwList($scope['wilayah_tugas'], $scope['level']));
+            if (!in_array($this->padWilayah($rw), $allowedRw, true)) {
+                return $this->response->setJSON(['data' => []]);
+            }
+
+            // RT spesifik yang ditugaskan (kosong = seluruh RT di RW tsb)
+            $allowedRt = self::getAllowedRtList($scope['wilayah_tugas'], (string) $rw, $scope['level']);
+            if (!empty($allowedRt)) {
+                $data = array_values(array_unique(array_map(fn($rt) => $this->padWilayah($rt), $allowedRt)));
+                sort($data);
+
+                return $this->response->setJSON(['data' => $data]);
+            }
+        }
+
         $db = \Config\Database::connect();
 
         $rows = $db->table('tb_rt')
             ->select('no_rt')
-            ->where([
-                'kode_desa' => $kodeDesa,
-                'no_rw'     => $rw
-            ])
+            ->distinct()
+            ->where('kode_desa', $kodeDesa)
+            ->whereIn('no_rw', self::getWilayahVariants($rw) ?: [$rw])
             ->orderBy('no_rt', 'ASC')
             ->get()
             ->getResultArray();

@@ -100,7 +100,7 @@ $init_rt       = $init_rt ?? (request()->getGet('rt') ?? '');
                     </div>
                     <div>
                         <div class="text-muted small">Total KK</div>
-                        <div class="fs-5 fw-bold text-dark" id="statTotal"><?= number_format($summary['total']) ?></div>
+                        <div class="fs-5 fw-bold text-dark" id="statTotal"><?= number_format($summary['total'], 0, ',', '.') ?></div>
                     </div>
                 </div>
             </div>
@@ -114,7 +114,7 @@ $init_rt       = $init_rt ?? (request()->getGet('rt') ?? '');
                     </div>
                     <div>
                         <div class="text-muted small">Permanen</div>
-                        <div class="fs-5 fw-bold" style="color: #169B88;" id="statPermanen"><?= number_format($summary['permanen']['count']) ?> <span class="small fw-normal text-muted">(<?= $summary['permanen']['percent'] ?>%)</span></div>
+                        <div class="fs-5 fw-bold" style="color: #169B88;" id="statPermanen"><?= number_format($summary['permanen']['count'], 0, ',', '.') ?> <span class="small fw-normal text-muted">(<?= $summary['permanen']['percent'] ?>%)</span></div>
                     </div>
                 </div>
             </div>
@@ -128,7 +128,7 @@ $init_rt       = $init_rt ?? (request()->getGet('rt') ?? '');
                     </div>
                     <div>
                         <div class="text-muted small">Semi Perm.</div>
-                        <div class="fs-5 fw-bold" style="color: #3D82A9;" id="statSemi"><?= number_format($summary['semi_permanen']['count']) ?> <span class="small fw-normal text-muted">(<?= $summary['semi_permanen']['percent'] ?>%)</span></div>
+                        <div class="fs-5 fw-bold" style="color: #3D82A9;" id="statSemi"><?= number_format($summary['semi_permanen']['count'], 0, ',', '.') ?> <span class="small fw-normal text-muted">(<?= $summary['semi_permanen']['percent'] ?>%)</span></div>
                     </div>
                 </div>
             </div>
@@ -142,7 +142,7 @@ $init_rt       = $init_rt ?? (request()->getGet('rt') ?? '');
                     </div>
                     <div>
                         <div class="text-muted small">Panggung</div>
-                        <div class="fs-5 fw-bold" style="color: #9EAF22;" id="statPanggung"><?= number_format($summary['panggung']['count']) ?> <span class="small fw-normal text-muted">(<?= $summary['panggung']['percent'] ?>%)</span></div>
+                        <div class="fs-5 fw-bold" style="color: #9EAF22;" id="statPanggung"><?= number_format($summary['panggung']['count'], 0, ',', '.') ?> <span class="small fw-normal text-muted">(<?= $summary['panggung']['percent'] ?>%)</span></div>
                     </div>
                 </div>
             </div>
@@ -156,7 +156,7 @@ $init_rt       = $init_rt ?? (request()->getGet('rt') ?? '');
                     </div>
                     <div>
                         <div class="text-muted small">Numpang</div>
-                        <div class="fs-5 fw-bold" style="color: #D84F2A;" id="statNumpang"><?= number_format($summary['numpang']['count']) ?> <span class="small fw-normal text-muted">(<?= $summary['numpang']['percent'] ?>%)</span></div>
+                        <div class="fs-5 fw-bold" style="color: #D84F2A;" id="statNumpang"><?= number_format($summary['numpang']['count'], 0, ',', '.') ?> <span class="small fw-normal text-muted">(<?= $summary['numpang']['percent'] ?>%)</span></div>
                     </div>
                 </div>
             </div>
@@ -170,7 +170,7 @@ $init_rt       = $init_rt ?? (request()->getGet('rt') ?? '');
                     </div>
                     <div>
                         <div class="text-muted small">Belum Dinilai</div>
-                        <div class="fs-5 fw-bold" style="color: #F59100;" id="statBelum"><?= number_format($summary['belum_dinilai']['count']) ?> <span class="small fw-normal text-muted">(<?= $summary['belum_dinilai']['percent'] ?>%)</span></div>
+                        <div class="fs-5 fw-bold" style="color: #F59100;" id="statBelum"><?= number_format($summary['belum_dinilai']['count'], 0, ',', '.') ?> <span class="small fw-normal text-muted">(<?= $summary['belum_dinilai']['percent'] ?>%)</span></div>
                     </div>
                 </div>
             </div>
@@ -490,7 +490,8 @@ $init_rt       = $init_rt ?? (request()->getGet('rt') ?? '');
             columns: [{
                     data: 'no',
                     orderable: false,
-                    className: 'text-center'
+                    className: 'text-center',
+                    render: (d, type) => (type === 'display' ? formatRibuanID(d) : d)
                 },
                 {
                     data: 'kepala_keluarga'

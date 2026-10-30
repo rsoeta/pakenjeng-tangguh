@@ -203,6 +203,18 @@ class DtsenKkModel extends Model
             $builder->groupEnd();
         }
 
+        // 🔐 Karantina tambahan WilayahFilterTrait (hanya aktif jika pemanggil mengirim 'role_id')
+        //    - wilayah_tugas kosong tapi 'level' (RW) ada → kunci ke RW level tsb
+        //    - wilayah_tugas & level kosong untuk role >= 4 → kunci aman (tidak ada data)
+        $roleTarget = isset($filter['role_id']) ? (int) $filter['role_id'] : null;
+        if ($roleTarget !== null && $roleTarget >= 4 && empty($filter['wilayah_tugas'])) {
+            $levelUser = trim((string) ($filter['level'] ?? ''));
+            if ($levelUser === '') {
+                return [];
+            }
+            $builder->whereIn('rt.rw', self::getWilayahVariants($levelUser));
+        }
+
         $keluarga = $builder->orderBy('kk.no_kk', 'ASC')->get()->getResultArray();
         if (empty($keluarga)) return [];
 
@@ -280,7 +292,26 @@ class DtsenKkModel extends Model
          * 3.5️⃣ FILTER RW / RT / DESIL (BARU)
          * ======================================================
          */
-        $keluarga = array_values(array_filter($keluarga, function ($row) use ($filter) {
+        $keluarga = array_values(array_filter($keluarga, function ($row) use ($filter, $roleTarget) {
+
+            // 🔐 Karantina wilayah setelah override RW/RT dari payload usulan (WilayahFilterTrait)
+            // Mencegah KK yang dipindah via usulan ke luar wilayah tugas tetap tampil ke petugas.
+            if ($roleTarget !== null && $roleTarget >= 4) {
+                $allowed = self::isRecordAllowed(
+                    [
+                        'kode_desa'     => $filter['kode_desa'] ?? '',
+                        'wilayah_tugas' => $filter['wilayah_tugas'] ?? '',
+                        'level'         => $filter['level'] ?? '',
+                    ],
+                    $roleTarget,
+                    null,
+                    (string) ($row['rw'] ?? ''),
+                    (string) ($row['rt'] ?? '')
+                );
+                if (!$allowed) {
+                    return false;
+                }
+            }
 
             // RW: Gunakan isset dan !== '' agar 0 (jika ada RW 0) tidak dianggap kosong (Normalkan 3 digit)
             if (isset($filter['rw']) && $filter['rw'] !== '' && $filter['rw'] !== 'all') {

@@ -19,12 +19,28 @@
                                 <div class="col-lg">
                                     <div class="row g-2 align-items-end" id="filterBarKeluarga">
 
-                                        <!-- 🔐 AKSES -->
+                                        <!-- 👤 PETUGAS ENTRI (WilayahFilterTrait) -->
+                                        <?php
+                                        $isPetugas   = ((int) ($role_id ?? 0)) >= 4;
+                                        $myId        = session()->get('id');
+                                        $myName      = session()->get('fullname') ?? 'Saya';
+                                        $petugasList = $petugas_list ?? [];
+                                        ?>
                                         <div class="col-auto">
-                                            <label class="form-label small fw-bold mb-1">Akses</label>
-                                            <div class="form-control form-control-sm bg-light text-nowrap" id="filterAkses">
-                                                Akses Desa Penuh
-                                            </div>
+                                            <label class="form-label small fw-bold mb-1">Petugas Entri</label>
+                                            <select class="form-select form-select-sm" id="filterPetugas"
+                                                <?= $isPetugas ? 'disabled title="Data dikunci sesuai wilayah tugas Anda"' : 'title="Pilih petugas untuk melihat data sesuai wilayah tugasnya"' ?>>
+                                                <?php if ($isPetugas): ?>
+                                                    <option value="<?= esc($myId) ?>" selected><?= esc(ucwords(strtolower($myName))) ?></option>
+                                                <?php else: ?>
+                                                    <option value="">Semua Petugas</option>
+                                                    <?php foreach ($petugasList as $p): ?>
+                                                        <option value="<?= esc($p['id']) ?>" title="<?= esc($p['wilayah_tugas'] ?: ('RW ' . ($p['level'] ?: '-'))) ?>">
+                                                            <?= esc(ucwords(strtolower($p['fullname']))) ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </select>
                                         </div>
 
                                         <!-- RW -->
@@ -160,6 +176,7 @@
         // 🔎 FILTER STATE (GLOBAL)
         // =========================
         const filterKeluarga = {
+            petugas: $('#filterPetugas').val() || '',
             rw: '',
             rt: '',
             status: '',
@@ -168,12 +185,15 @@
             bansos: ''
         };
 
+        // 🔐 Daftar RW mengikuti wilayah tugas (akun petugas / petugas yang dipilih admin)
         function loadRW() {
-            $.getJSON('/dtsen-se/list-rw', function(res) {
+            $.getJSON('/dtsen-se/list-rw', {
+                petugas: $('#filterPetugas').val() || ''
+            }, function(res) {
                 const $rw = $('#filterRW');
                 $rw.empty().append('<option value="">Semua RW</option>');
 
-                res.data.forEach(rw => {
+                (res.data || []).forEach(rw => {
                     $rw.append(`<option value="${rw}">RW ${rw}</option>`);
                 });
             });
@@ -234,7 +254,7 @@
                     search: 'applied',
                     order: 'applied'
                 }).nodes().each(function(cell, i) {
-                    cell.innerHTML = info.start + i + 1;
+                    cell.innerHTML = formatRibuanID(info.start + i + 1);
                 });
             },
 
@@ -479,11 +499,26 @@
         // 🎛️ SMART FILTER HANDLER (ANTI-GAGAL / EVENT DELEGATION)
         // ==============================================================
 
+        // 0. Petugas Entri berubah (khusus Admin/Desa) → reset RW/RT ke wilayah tugas petugas terpilih
+        $(document).on('change', '#filterPetugas', function() {
+            filterKeluarga.petugas = $(this).val() || '';
+            filterKeluarga.rw = '';
+            filterKeluarga.rt = '';
+
+            $('#filterRW').val('');
+            $('#filterRT').html('<option value="">Semua RT</option>').prop('disabled', true);
+
+            loadRW();
+            $('#tableKeluarga').DataTable().ajax.reload(null, true);
+        });
+
         // 1. Dengarkan perubahan pada semua filter dari akar dokumen
         $(document).on('change', '#filterRW, #filterRT, #filterStatus, #filterPerlinsos, #filterDesil, #filterBansos', function() {
             // Update parameter filter
+            filterKeluarga.petugas = $('#filterPetugas').val() || '';
             filterKeluarga.rw = $('#filterRW').val() || '';
             filterKeluarga.rt = $('#filterRT').val() || '';
+            if (this.id === 'filterRW') filterKeluarga.rt = ''; // RT lama tidak berlaku untuk RW baru
             filterKeluarga.status = $('#filterStatus').val() || '';
             filterKeluarga.perlinsos = $('#filterPerlinsos').val() || '';
             filterKeluarga.desil = $('#filterDesil').val() || '';
@@ -505,7 +540,9 @@
 
             if (rw) {
                 $rt.append('<option value="" disabled>Memuat...</option>');
-                $.getJSON('/dtsen-se/list-rt/' + rw, function(res) {
+                $.getJSON('/dtsen-se/list-rt/' + encodeURIComponent(rw), {
+                    petugas: $('#filterPetugas').val() || ''
+                }, function(res) {
                     $rt.html('<option value="">Semua RT</option>');
                     if (res.data) {
                         res.data.forEach(rt => {
@@ -522,7 +559,15 @@
             $('#filterRW, #filterStatus, #filterPerlinsos, #filterDesil, #filterBansos').val('');
             $('#filterRT').html('<option value="">Semua RT</option>').prop('disabled', true);
 
+            // Petugas Entri hanya bisa direset oleh Admin/Desa (untuk petugas: terkunci)
+            const $petugas = $('#filterPetugas');
+            if (!$petugas.prop('disabled') && $petugas.val() !== '') {
+                $petugas.val('');
+                loadRW();
+            }
+
             // Reset Parameter
+            filterKeluarga.petugas = $petugas.val() || '';
             filterKeluarga.rw = '';
             filterKeluarga.rt = '';
             filterKeluarga.status = '';

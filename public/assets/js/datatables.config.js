@@ -7,7 +7,23 @@
  * - Kompatibel dengan Bootstrap 5 & AdminLTE
  */
 
+/**
+ * 🔢 Format angka gaya Indonesia: pemisah ribuan titik (.)
+ * Contoh: 2102 → "2.102"
+ */
+window.formatRibuanID = function (num) {
+    if (num === null || num === undefined || num === '') return '0';
+    var n = Number(num);
+    if (isNaN(n)) return String(num);
+    return n.toLocaleString('id-ID', { maximumFractionDigits: 2 });
+};
+
 $.extend(true, $.fn.dataTable.defaults, {
+    // 🔢 Paksa seluruh angka DataTables (info "Menampilkan 1 sampai 10 dari 2.102", tombol halaman, dll.)
+    // memakai pemisah ribuan titik — tidak tergantung file bahasa (i18n) yang dimuat via language.url
+    formatNumber: function (toFormat) {
+        return window.formatRibuanID(toFormat);
+    },
     responsive: {
         details: {
             type: 'column',
@@ -42,6 +58,8 @@ $.extend(true, $.fn.dataTable.defaults, {
     pageLength: 10,
     order: [],
     language: {
+        decimal: ",",
+        thousands: ".",
         emptyTable: "Belum ada data.",
         search: "Cari:",
         lengthMenu: "Tampilkan _MENU_ data",

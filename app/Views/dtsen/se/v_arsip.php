@@ -558,14 +558,14 @@
                     search: 'applied',
                     order: 'applied'
                 }).nodes().each(function(cell, i) {
-                    cell.innerHTML = info.start + i + 1;
+                    cell.innerHTML = formatRibuanID(info.start + i + 1);
                 });
 
                 // Update counter hasil filter pada tombol "Pilih Semua Filter"
                 const filteredCount = api.rows({
                     filter: 'applied'
                 }).count();
-                $('#filteredTotalCount').text(filteredCount);
+                $('#filteredTotalCount').text(formatRibuanID(filteredCount));
 
                 // Sinkronisasi checkbox pada halaman aktif
                 $('.row-arsip-checkbox').each(function() {
@@ -855,11 +855,11 @@
 
                     // Update Summary Cards & Pill Badges
                     const sum = res.summary || {};
-                    $('#statTotalAll, #pillCountAll').text(sum.total_all || 0);
-                    $('#statTotalKK, #pillCountKK').text(sum.total_kk || 0);
-                    $('#statTotalArt, #pillCountArt').text(sum.total_art || 0);
-                    $('#statArtBreakdown').text(`Master: ${sum.total_art_utama || 0} | Usulan: ${sum.total_art_usulan || 0}`);
-                    $('#statTotalGroups').text(sum.total_kk_groups || 0);
+                    $('#statTotalAll, #pillCountAll').text(formatRibuanID(sum.total_all || 0));
+                    $('#statTotalKK, #pillCountKK').text(formatRibuanID(sum.total_kk || 0));
+                    $('#statTotalArt, #pillCountArt').text(formatRibuanID(sum.total_art || 0));
+                    $('#statArtBreakdown').text(`Master: ${formatRibuanID(sum.total_art_utama || 0)} | Usulan: ${formatRibuanID(sum.total_art_usulan || 0)}`);
+                    $('#statTotalGroups').text(formatRibuanID(sum.total_kk_groups || 0));
 
                     // Populate Dropdown RW jika belum terisi
                     const currentRw = $('#filterArsipRW').val();
@@ -996,9 +996,9 @@
             });
 
             const total = kkCount + artCount;
-            $('#selectedTotalCount, .selectedTotalBadge').text(total);
-            $('#selectedKkCount').text(kkCount);
-            $('#selectedArtCount').text(artCount);
+            $('#selectedTotalCount, .selectedTotalBadge').text(formatRibuanID(total));
+            $('#selectedKkCount').text(formatRibuanID(kkCount));
+            $('#selectedArtCount').text(formatRibuanID(artCount));
 
             if (total > 0) {
                 $('#bulkActionBar').removeClass('d-none');

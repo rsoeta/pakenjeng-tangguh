@@ -70,7 +70,7 @@
                 var api = this.api();
                 var info = api.page.info();
                 api.column(1, { search: 'applied', order: 'applied' }).nodes().each(function(cell, i) {
-                    cell.innerHTML = info.start + i + 1;
+                    cell.innerHTML = formatRibuanID(info.start + i + 1);
                 });
             },
             columns: [{

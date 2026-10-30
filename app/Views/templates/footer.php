@@ -421,7 +421,7 @@
 </script>
 
 <!-- 🚀 CONFIG & SHORTCUT DATATABLES GLOBAL -->
-<script src="<?= base_url('assets/js/datatables.config.js'); ?>"></script>
+<script src="<?= base_url('assets/js/datatables.config.js'); ?>?v=<?= @filemtime(FCPATH . 'assets/js/datatables.config.js') ?: '1'; ?>"></script>
 
 
 <!-- 🚀 PWA SERVICE WORKER REGISTRATION -->

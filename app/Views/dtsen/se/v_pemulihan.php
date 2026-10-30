@@ -144,7 +144,7 @@
                     {
                         data: null,
                         defaultContent: '',
-                        render: (d, t, r, m) => m.row + 1,
+                        render: (d, t, r, m) => (t === 'display' ? formatRibuanID(m.row + 1) : m.row + 1),
                         className: 'text-center'
                     },
                     // Kolom 1: Kepala Keluarga
