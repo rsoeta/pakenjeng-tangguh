@@ -89,7 +89,7 @@ function menu_child_child_child($parent_id)
 
 function menu_is_active(string $menuUrl)
 {
-    $menuUrl = trim($menuUrl);
+    $menuUrl = trim($menuUrl, " \t\n\r\0\x0B/");
     if ($menuUrl === '' || $menuUrl === '#') {
         return false;
     }

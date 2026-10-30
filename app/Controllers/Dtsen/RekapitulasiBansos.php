@@ -26,9 +26,9 @@ class RekapitulasiBansos extends BaseController
     }
 
     /**
-     * Halaman Utama Rekapitulasi Bansos
+     * Mengambil data master untuk filter dropdown (Petugas & Tahap Salur)
      */
-    public function index()
+    protected function getFilterMasterData(): array
     {
         $user = $this->authModel->getUserId();
         $roleId = session()->get('role_id') ?? ($user['role_id'] ?? 4);
@@ -68,20 +68,89 @@ class RekapitulasiBansos extends BaseController
         }
         $allTahapList = array_values(array_unique(array_merge($tahapList, $standarTahap)));
 
-        $data = [
-            'title'        => 'Rekapitulasi Bantuan Sosial',
-            'user'         => session()->get(),
-            'role_id'      => $roleId,
-            'petugas_list' => $petugasList,
-            'tahap_list'   => $allTahapList,
-            'default_tahap'=> $defaultTahap
+        // Resolusi Kode Desa & Nama Desa untuk Batas Wilayah Peta
+        $kodeDesaNorm = trim((string)$kodeDesa);
+        if (strlen($kodeDesaNorm) === 10 && strpos($kodeDesaNorm, '.') === false) {
+            // Format 3205332006 -> 32.05.33.2006
+            $kodeDesaNorm = substr($kodeDesaNorm, 0, 2) . '.' . substr($kodeDesaNorm, 2, 2) . '.' . substr($kodeDesaNorm, 4, 2) . '.' . substr($kodeDesaNorm, 6, 4);
+        }
+
+        if (empty($kodeDesaNorm)) {
+            // Fallback jika superadmin: ambil kode_desa dominan dari penerima bansos
+            $domDesa = $this->db->table('dtsen_bansos_kks b')
+                ->select('rt.kode_desa, COUNT(*) as cnt')
+                ->join('dtsen_art a', 'a.nik = b.nik_kpm AND a.deleted_at IS NULL', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = a.id_kk AND k.deleted_at IS NULL', 'inner')
+                ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'inner')
+                ->where('rt.kode_desa IS NOT NULL')
+                ->where('rt.kode_desa !=', '')
+                ->groupBy('rt.kode_desa')
+                ->orderBy('cnt', 'DESC')
+                ->limit(1)
+                ->get()->getRowArray();
+            $kodeDesaNorm = $domDesa['kode_desa'] ?? '32.05.33.2006';
+        }
+
+        $vilRow = $this->db->table('tb_villages')->select('name')->where('id', $kodeDesaNorm)->get()->getRowArray();
+        $namaDesa = $vilRow['name'] ?? 'PASIRLANGU';
+
+        return [
+            'user'          => session()->get(),
+            'role_id'       => $roleId,
+            'kode_desa'     => $kodeDesaNorm,
+            'nama_desa'     => $namaDesa,
+            'petugas_list'  => $petugasList,
+            'tahap_list'    => $allTahapList,
+            'default_tahap' => $defaultTahap
         ];
+    }
+
+    /**
+     * Validasi apakah koordinat latitude & longitude valid
+     */
+    protected function isValidCoord($lat, $lng): bool
+    {
+        if ($lat === null || $lng === null) return false;
+        $latStr = trim((string)$lat);
+        $lngStr = trim((string)$lng);
+        if ($latStr === '' || $lngStr === '' || !is_numeric($latStr) || !is_numeric($lngStr)) {
+            return false;
+        }
+        $latVal = (float)$latStr;
+        $lngVal = (float)$lngStr;
+        if ($latVal == 0.0 || $lngVal == 0.0) {
+            return false;
+        }
+        return ($latVal >= -90.0 && $latVal <= 90.0 && $lngVal >= -180.0 && $lngVal <= 180.0);
+    }
+
+    /**
+     * Halaman Utama Rekapitulasi Bansos
+     */
+    public function index()
+    {
+        $data = $this->getFilterMasterData();
+        $data['title'] = 'Rekapitulasi Bantuan Sosial';
 
         return view('dtsen/bansos_kks/v_rekapitulasi', $data);
     }
 
     /**
+     * Halaman Mapping Sebaran Bansos di Atas Peta Satelit Desa
+     */
+    public function mapping()
+    {
+        $data = $this->getFilterMasterData();
+        $data['title'] = 'Mapping Sebaran Bantuan Sosial';
+
+        return view('dtsen/bansos_kks/v_mapping_bansos', $data);
+    }
+
+    /**
      * Mengambil dan mengelompokkan data penerima bansos (1 KPM / 1 KK per tahap salur = 1 rekaman)
+     * Dilengkapi resolusi koordinat:
+     * - Prioritas 1: Koordinat rumah dari dtsen_kk (melalui dtsen_rt / dtsen_usulan)
+     * - Prioritas 2: Fallback koordinat dari dtsen_bansos_kks
      *
      * @param array $filters
      * @return array
@@ -97,6 +166,7 @@ class RekapitulasiBansos extends BaseController
         $filterRt      = $filters['filter_rt'] ?? null;
         $filterTahap   = $filters['filter_tahap'] ?? null;
         $filterJenis   = $filters['filter_jenis'] ?? null;
+        $filterStatus  = $filters['filter_status'] ?? null;
 
         $builder = $this->db->table('dtsen_bansos_kks b')
             ->select('b.id, b.nik_kpm, 
@@ -104,10 +174,11 @@ class RekapitulasiBansos extends BaseController
                       b.jenis_bansos, b.nomor_kks, b.tahap_salur, b.nominal_cair, 
                       b.status_salur, b.status_kelengkapan, b.foto_kpm_kks, b.foto_bukti_transaksi, b.latitude, b.longitude, 
                       b.created_by, b.created_at, b.updated_at,
-                      MAX(k.no_kk) as no_kk, MAX(k.kepala_keluarga) as kepala_keluarga,
-                      COALESCE(NULLIF(m.alamat, \'\'), \'-\') as alamat,
-                      COALESCE(NULLIF(m.rw, \'\'), rt.rw, \'-\') as rw,
-                      COALESCE(NULLIF(m.rt, \'\'), rt.rt, \'-\') as rt,
+                      MAX(k.id_kk) as id_kk, MAX(k.no_kk) as no_kk, MAX(k.kepala_keluarga) as kepala_keluarga,
+                      MAX(rt.latitude) as rt_lat, MAX(rt.longitude) as rt_lng,
+                      COALESCE(NULLIF(m.alamat, \'\'), MAX(rt.alamat), MAX(k.alamat), \'-\') as alamat,
+                      COALESCE(NULLIF(m.rw, \'\'), MAX(rt.rw), \'-\') as rw,
+                      COALESCE(NULLIF(m.rt, \'\'), MAX(rt.rt), \'-\') as rt,
                       u.fullname as petugas_nama', false)
             ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
             ->join('dtsen_art a', 'a.nik = b.nik_kpm AND a.deleted_at IS NULL', 'left')
@@ -165,6 +236,100 @@ class RekapitulasiBansos extends BaseController
         $builder->groupBy('b.id');
         $rawRows = $builder->get()->getResultArray();
 
+        // 🚀 RESOLUSI RELASI KELUARGA (dtsen_kk) & KOORDINAT RUMAH (BATCH CEPAT)
+        $unmatchedNiks = [];
+        foreach ($rawRows as $r) {
+            if (empty($r['id_kk']) && !empty($r['nik_kpm'])) {
+                $unmatchedNiks[] = trim((string)$r['nik_kpm']);
+            }
+        }
+        $unmatchedNiks = array_values(array_unique($unmatchedNiks));
+
+        $nikFallbackMap = [];
+        if (!empty($unmatchedNiks)) {
+            // 1. Cek di dtsen_kk.nik_kepala_keluarga
+            $kkByNik = $this->db->table('dtsen_kk k')
+                ->select('k.nik_kepala_keluarga, k.id_kk, k.no_kk, k.kepala_keluarga, rt.latitude as rt_lat, rt.longitude as rt_lng')
+                ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left')
+                ->whereIn('k.nik_kepala_keluarga', $unmatchedNiks)
+                ->where('k.deleted_at', null)
+                ->get()->getResultArray();
+            foreach ($kkByNik as $kr) {
+                $nikKey = trim((string)$kr['nik_kepala_keluarga']);
+                $nikFallbackMap[$nikKey] = [
+                    'id_kk'           => (int)$kr['id_kk'],
+                    'no_kk'           => $kr['no_kk'],
+                    'kepala_keluarga' => $kr['kepala_keluarga'],
+                    'rt_lat'          => $kr['rt_lat'],
+                    'rt_lng'          => $kr['rt_lng'],
+                ];
+            }
+
+            // 2. Cek di dtsen_usulan_art (jika anggota keluarga ada di draft/usulan pembaruan)
+            $uaRows = $this->db->table('dtsen_usulan_art ua')
+                ->select("ua.nik, u.dtsen_kk_id, u.no_kk_target, k.no_kk, k.kepala_keluarga, rt.latitude as rt_lat, rt.longitude as rt_lng, JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.geo.lat')) as u_lat, JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.geo.lng')) as u_lng", false)
+                ->join('dtsen_usulan u', 'u.id = ua.dtsen_usulan_id', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = u.dtsen_kk_id AND k.deleted_at IS NULL', 'left')
+                ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left')
+                ->whereIn('ua.nik', $unmatchedNiks)
+                ->where('ua.deleted_at', null)
+                ->whereIn('u.status', ['draft', 'submitted', 'verified', 'diverifikasi'])
+                ->orderBy('u.id', 'ASC')
+                ->get()->getResultArray();
+            foreach ($uaRows as $uar) {
+                $nikKey = trim((string)$uar['nik']);
+                $nikFallbackMap[$nikKey] = [
+                    'id_kk'           => !empty($uar['dtsen_kk_id']) ? (int)$uar['dtsen_kk_id'] : ($nikFallbackMap[$nikKey]['id_kk'] ?? null),
+                    'no_kk'           => !empty($uar['no_kk']) ? $uar['no_kk'] : (!empty($uar['no_kk_target']) ? $uar['no_kk_target'] : ($nikFallbackMap[$nikKey]['no_kk'] ?? null)),
+                    'kepala_keluarga' => $uar['kepala_keluarga'] ?? ($nikFallbackMap[$nikKey]['kepala_keluarga'] ?? null),
+                    'rt_lat'          => $uar['rt_lat'] ?? ($nikFallbackMap[$nikKey]['rt_lat'] ?? null),
+                    'rt_lng'          => $uar['rt_lng'] ?? ($nikFallbackMap[$nikKey]['rt_lng'] ?? null),
+                    'u_lat'           => $uar['u_lat'] ?? null,
+                    'u_lng'           => $uar['u_lng'] ?? null,
+                ];
+            }
+        }
+
+        $allIdKks = [];
+        foreach ($rawRows as &$r) {
+            $nikKey = trim((string)$r['nik_kpm']);
+            if (empty($r['id_kk']) && isset($nikFallbackMap[$nikKey])) {
+                $fb = $nikFallbackMap[$nikKey];
+                $r['id_kk']           = $fb['id_kk'] ?? null;
+                $r['no_kk']           = !empty($r['no_kk']) ? $r['no_kk'] : ($fb['no_kk'] ?? null);
+                $r['kepala_keluarga'] = !empty($r['kepala_keluarga']) ? $r['kepala_keluarga'] : ($fb['kepala_keluarga'] ?? null);
+                $r['rt_lat']          = !empty($r['rt_lat']) ? $r['rt_lat'] : ($fb['rt_lat'] ?? null);
+                $r['rt_lng']          = !empty($r['rt_lng']) ? $r['rt_lng'] : ($fb['rt_lng'] ?? null);
+                $r['u_lat']           = $fb['u_lat'] ?? null;
+                $r['u_lng']           = $fb['u_lng'] ?? null;
+            }
+            if (!empty($r['id_kk'])) {
+                $allIdKks[] = (int)$r['id_kk'];
+            }
+        }
+        unset($r);
+
+        // Batch query koordinat rumah terbaru dari dtsen_usulan per id_kk
+        $kkGeoMap = [];
+        $allIdKks = array_values(array_unique($allIdKks));
+        if (!empty($allIdKks)) {
+            $usulanGeos = $this->db->table('dtsen_usulan')
+                ->select("dtsen_kk_id, JSON_UNQUOTE(JSON_EXTRACT(payload, '$.geo.lat')) as u_lat, JSON_UNQUOTE(JSON_EXTRACT(payload, '$.geo.lng')) as u_lng", false)
+                ->whereIn('dtsen_kk_id', $allIdKks)
+                ->whereIn('status', ['draft', 'submitted', 'verified', 'diverifikasi'])
+                ->orderBy('id', 'ASC')
+                ->get()->getResultArray();
+            foreach ($usulanGeos as $ug) {
+                $kkId = (int)$ug['dtsen_kk_id'];
+                if ($this->isValidCoord($ug['u_lat'] ?? null, $ug['u_lng'] ?? null)) {
+                    $kkGeoMap[$kkId] = [
+                        'lat' => (float)$ug['u_lat'],
+                        'lng' => (float)$ug['u_lng']
+                    ];
+                }
+            }
+        }
+
         // Pengelompokan 1 KPM / 1 KK per tahap salur
         $grouped = [];
         foreach ($rawRows as $r) {
@@ -180,6 +345,7 @@ class RekapitulasiBansos extends BaseController
                 $grouped[$groupKey] = [
                     'id'              => (int)$r['id'],
                     'ids'             => [],
+                    'id_kk'           => !empty($r['id_kk']) ? (int)$r['id_kk'] : null,
                     'nik_kpm'         => $r['nik_kpm'],
                     'nama_kpm'        => $r['nama_kpm'],
                     'no_kk'           => $r['no_kk'],
@@ -197,8 +363,20 @@ class RekapitulasiBansos extends BaseController
                     'petugas_nama'    => $r['petugas_nama'],
                     'created_at'      => $r['created_at'],
                     'updated_at'      => $r['updated_at'],
+                    'rt_lat'          => $r['rt_lat'] ?? null,
+                    'rt_lng'          => $r['rt_lng'] ?? null,
+                    'u_lat'           => $r['u_lat'] ?? null,
+                    'u_lng'           => $r['u_lng'] ?? null,
                     'entries'         => []
                 ];
+            } else {
+                if (empty($grouped[$groupKey]['id_kk']) && !empty($r['id_kk'])) {
+                    $grouped[$groupKey]['id_kk'] = (int)$r['id_kk'];
+                }
+                if (empty($grouped[$groupKey]['rt_lat']) && !empty($r['rt_lat'])) {
+                    $grouped[$groupKey]['rt_lat'] = $r['rt_lat'];
+                    $grouped[$groupKey]['rt_lng'] = $r['rt_lng'];
+                }
             }
 
             $jb = strtoupper(trim((string)$r['jenis_bansos']));
@@ -215,9 +393,10 @@ class RekapitulasiBansos extends BaseController
             }
         }
 
-        // Tentukan Jenis Bansos Efektif dan Status Penyaluran Keseluruhan
+        // Tentukan Jenis Bansos Efektif, Status Penyaluran, dan Titik Koordinat (Prioritas 1 -> Prioritas 2)
         $result = [];
         $filterJenisUpper = !empty($filterJenis) ? strtoupper(trim($filterJenis)) : null;
+        $filterStatusLower = !empty($filterStatus) ? strtolower(trim($filterStatus)) : null;
 
         foreach ($grouped as $k => $g) {
             $hasPkh = in_array('PKH', $g['programs']);
@@ -236,6 +415,8 @@ class RekapitulasiBansos extends BaseController
             $suksesCount = 0;
             $gagalCount = 0;
             $gagalLabel = '';
+            $fotoKpmThumb = null;
+
             foreach ($g['entries'] as $e) {
                 $st = trim((string)($e['status_salur'] ?? ''));
                 $stLow = strtolower($st);
@@ -245,7 +426,11 @@ class RekapitulasiBansos extends BaseController
                     $gagalCount++;
                     $gagalLabel = $st;
                 }
+                if ($fotoKpmThumb === null && !empty($e['foto_kpm_kks'])) {
+                    $fotoKpmThumb = $e['foto_kpm_kks'];
+                }
             }
+            $g['foto_kpm_kks'] = $fotoKpmThumb;
 
             if ($gagalCount > 0) {
                 $g['status_summary'] = 'gagal';
@@ -259,9 +444,62 @@ class RekapitulasiBansos extends BaseController
             }
 
             // Filter Jenis Bansos
-            if ($filterJenisUpper !== null) {
-                if ($g['jenis_bansos'] !== $filterJenisUpper) {
-                    continue;
+            if ($filterJenisUpper !== null && $g['jenis_bansos'] !== $filterJenisUpper) {
+                continue;
+            }
+
+            // Filter Status Penyaluran (Opsional, digunakan di Mapping)
+            if ($filterStatusLower !== null && $g['status_summary'] !== $filterStatusLower) {
+                continue;
+            }
+
+            // =========================================================================
+            // 🌍 RESOLUSI KOORDINAT PETA
+            // Prioritas 1: Koordinat Rumah dari tabel dtsen_kk (relasi dtsen_rt / dtsen_usulan)
+            // Prioritas 2: Fallback latitude & longitude dari tabel dtsen_bansos_kks
+            // =========================================================================
+            $idKk = !empty($g['id_kk']) ? (int)$g['id_kk'] : null;
+            $rumahLat = null;
+            $rumahLng = null;
+
+            if ($idKk && isset($kkGeoMap[$idKk])) {
+                $rumahLat = $kkGeoMap[$idKk]['lat'];
+                $rumahLng = $kkGeoMap[$idKk]['lng'];
+            } elseif ($this->isValidCoord($g['rt_lat'] ?? null, $g['rt_lng'] ?? null)) {
+                $rumahLat = (float)$g['rt_lat'];
+                $rumahLng = (float)$g['rt_lng'];
+            } elseif ($this->isValidCoord($g['u_lat'] ?? null, $g['u_lng'] ?? null)) {
+                $rumahLat = (float)$g['u_lat'];
+                $rumahLng = (float)$g['u_lng'];
+            }
+
+            if ($this->isValidCoord($rumahLat, $rumahLng)) {
+                $g['latitude']           = (float)$rumahLat;
+                $g['longitude']          = (float)$rumahLng;
+                $g['coord_source']       = 'rumah_kk';
+                $g['coord_source_label'] = 'Titik Lokasi Rumah Warga';
+            } else {
+                // Fallback ke koordinat dokumentasi di dtsen_bansos_kks
+                $bLat = null;
+                $bLng = null;
+                foreach ($g['entries'] as $e) {
+                    if ($this->isValidCoord($e['latitude'] ?? null, $e['longitude'] ?? null)) {
+                        $bLat = (float)$e['latitude'];
+                        $bLng = (float)$e['longitude'];
+                        break;
+                    }
+                }
+
+                if ($this->isValidCoord($bLat, $bLng)) {
+                    $g['latitude']           = $bLat;
+                    $g['longitude']          = $bLng;
+                    $g['coord_source']       = 'bansos_kks';
+                    $g['coord_source_label'] = 'Titik Lokasi Dokumentasi Salur';
+                } else {
+                    $g['latitude']           = null;
+                    $g['longitude']          = null;
+                    $g['coord_source']       = null;
+                    $g['coord_source_label'] = 'Belum Memiliki Titik Lokasi';
                 }
             }
 
@@ -584,6 +822,151 @@ class RekapitulasiBansos extends BaseController
     }
 
     /**
+     * Data Titik Sebaran Bansos untuk Peta Satelit (AJAX POST)
+     * Prioritas 1: Koordinat Rumah (dtsen_kk via dtsen_rt / dtsen_usulan)
+     * Prioritas 2: Fallback Koordinat Dokumentasi Penyaluran (dtsen_bansos_kks)
+     */
+    public function mappingData()
+    {
+        try {
+            $filters = [
+                'filter_petugas' => $this->request->getPost('filter_petugas'),
+                'filter_rw'      => $this->request->getPost('filter_rw'),
+                'filter_rt'      => $this->request->getPost('filter_rt'),
+                'filter_tahap'   => $this->request->getPost('filter_tahap'),
+                'filter_jenis'   => $this->request->getPost('filter_jenis'),
+                'filter_status'  => $this->request->getPost('filter_status')
+            ];
+
+            $groups = $this->getGroupedRecipients($filters);
+            $totalKpm = count($groups);
+
+            $markers = [];
+            $unmapped = [];
+
+            $countMapped = 0;
+            $countUnmapped = 0;
+            $countSourceRumah = 0;
+            $countSourceBansos = 0;
+
+            $countPkh = 0;
+            $countSembako = 0;
+            $countPkhSembako = 0;
+
+            $countSukses = 0;
+            $countBelum = 0;
+            $countGagal = 0;
+
+            foreach ($groups as $g) {
+                $jb = $g['jenis_bansos'];
+                if ($jb === 'PKH') {
+                    $countPkh++;
+                } elseif ($jb === 'SEMBAKO') {
+                    $countSembako++;
+                } else {
+                    $countPkhSembako++;
+                }
+
+                $stSum = $g['status_summary'];
+                if ($stSum === 'sukses') {
+                    $countSukses++;
+                } elseif ($stSum === 'gagal') {
+                    $countGagal++;
+                } else {
+                    $countBelum++;
+                }
+
+                $nikFull = trim((string)($g['nik_kpm'] ?? ''));
+                $nikMasked = strlen($nikFull) > 8
+                    ? substr($nikFull, 0, 8) . str_repeat('*', strlen($nikFull) - 8)
+                    : $nikFull;
+
+                $noKkFull = trim((string)($g['no_kk'] ?? ''));
+                $noKkMasked = (!empty($noKkFull) && strlen($noKkFull) > 8)
+                    ? substr($noKkFull, 0, 8) . str_repeat('*', strlen($noKkFull) - 8)
+                    : ($noKkFull ?: '-');
+
+                $rwFormatted = str_pad(trim((string)($g['rw'] ?? '')), 3, '0', STR_PAD_LEFT);
+                $rtFormatted = str_pad(trim((string)($g['rt'] ?? '')), 3, '0', STR_PAD_LEFT);
+                $nominalVal  = (int)($g['nominal_cair'] ?? 0);
+                $nominalFmt  = $nominalVal > 0 ? ('Rp ' . number_format($nominalVal, 0, ',', '.')) : '-';
+
+                $fotoKpmUrl = !empty($g['foto_kpm_kks'])
+                    ? base_url('uploads/bansos/' . $g['foto_kpm_kks'])
+                    : null;
+
+                $itemData = [
+                    'id'                 => (int)$g['id'],
+                    'id_kk'              => !empty($g['id_kk']) ? (int)$g['id_kk'] : null,
+                    'id_kk_token'        => (!empty($g['id_kk']) && function_exists('encode_id')) ? encode_id($g['id_kk']) : null,
+                    'nama_kpm'           => strtoupper(trim((string)$g['nama_kpm'])),
+                    'nik_kpm'            => $nikFull,
+                    'nik_masked'         => $nikMasked,
+                    'no_kk'              => $noKkFull ?: '-',
+                    'no_kk_masked'       => $noKkMasked,
+                    'kepala_keluarga'    => !empty($g['kepala_keluarga']) ? strtoupper(trim((string)$g['kepala_keluarga'])) : '-',
+                    'alamat'             => !empty($g['alamat']) ? $g['alamat'] : '-',
+                    'rt'                 => $rtFormatted,
+                    'rw'                 => $rwFormatted,
+                    'nomor_kks'          => !empty($g['nomor_kks']) ? $g['nomor_kks'] : '-',
+                    'jenis_bansos'       => $jb,
+                    'tahap_salur'        => $g['tahap_salur'] ?? '-',
+                    'nominal_cair'       => $nominalVal,
+                    'nominal_formatted'  => $nominalFmt,
+                    'status_summary'     => $stSum,
+                    'status_label'       => $g['status_label'],
+                    'petugas_nama'       => !empty($g['petugas_nama']) ? ucwords(strtolower($g['petugas_nama'])) : 'Admin / Sistem',
+                    'foto_kpm_url'       => $fotoKpmUrl,
+                    'latitude'           => $g['latitude'],
+                    'longitude'          => $g['longitude'],
+                    'coord_source'       => $g['coord_source'],
+                    'coord_source_label' => $g['coord_source_label']
+                ];
+
+                if ($g['coord_source'] !== null && $g['latitude'] !== null && $g['longitude'] !== null) {
+                    $countMapped++;
+                    if ($g['coord_source'] === 'rumah_kk') {
+                        $countSourceRumah++;
+                    } else {
+                        $countSourceBansos++;
+                    }
+                    $markers[] = $itemData;
+                } else {
+                    $countUnmapped++;
+                    $unmapped[] = $itemData;
+                }
+            }
+
+            $persenMapped = $totalKpm > 0 ? round(($countMapped / $totalKpm) * 100, 1) : 0;
+
+            return $this->response->setJSON([
+                'status' => true,
+                'summary' => [
+                    'total_kpm'          => $totalKpm,
+                    'total_mapped'       => $countMapped,
+                    'total_unmapped'     => $countUnmapped,
+                    'persen_mapped'      => $persenMapped,
+                    'source_rumah_kk'    => $countSourceRumah,
+                    'source_bansos_kks'  => $countSourceBansos,
+                    'count_pkh'          => $countPkh,
+                    'count_sembako'      => $countSembako,
+                    'count_pkh_sembako'  => $countPkhSembako,
+                    'count_sukses'       => $countSukses,
+                    'count_belum'        => $countBelum,
+                    'count_gagal'        => $countGagal,
+                ],
+                'markers'  => $markers,
+                'unmapped' => $unmapped
+            ]);
+        } catch (\Throwable $e) {
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
      * Mengambil Detail Lengkap 1 Penerima BNBA (AJAX GET)
      */
     public function detailBnba($id)
@@ -592,11 +975,12 @@ class RekapitulasiBansos extends BaseController
             $baseRow = $this->db->table('dtsen_bansos_kks b')
                 ->select('b.*, 
                           COALESCE(NULLIF(b.nama_kpm, \'\'), NULLIF(m.nama_penerima, \'\'), a.nama, \'-\') as nama_kpm,
-                          COALESCE(NULLIF(m.alamat, \'\'), \'-\') as alamat,
+                          COALESCE(NULLIF(m.alamat, \'\'), rt.alamat, k.alamat, \'-\') as alamat,
                           COALESCE(NULLIF(m.rw, \'\'), rt.rw, \'-\') as rw,
                           COALESCE(NULLIF(m.rt, \'\'), rt.rt, \'-\') as rt,
                           m.no_wa, m.status_kks,
-                          k.no_kk, k.kepala_keluarga,
+                          k.id_kk, k.no_kk, k.kepala_keluarga,
+                          rt.latitude as rt_lat, rt.longitude as rt_lng,
                           u.fullname as petugas_nama', false)
                 ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
                 ->join('dtsen_art a', 'a.nik = b.nik_kpm AND a.deleted_at IS NULL', 'left')
@@ -612,6 +996,51 @@ class RekapitulasiBansos extends BaseController
 
             $nik = $baseRow['nik_kpm'];
             $tahap = $baseRow['tahap_salur'];
+
+            // Cari koordinat rumah dari dtsen_kk / dtsen_usulan (Prioritas 1)
+            $idKk = !empty($baseRow['id_kk']) ? (int)$baseRow['id_kk'] : null;
+            $rumahLat = $baseRow['rt_lat'] ?? null;
+            $rumahLng = $baseRow['rt_lng'] ?? null;
+
+            if (!$idKk && !empty($nik)) {
+                $uaRow = $this->db->table('dtsen_usulan_art ua')
+                    ->select("u.dtsen_kk_id, u.no_kk_target, k.no_kk, k.kepala_keluarga, rt.latitude as rt_lat, rt.longitude as rt_lng, JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.geo.lat')) as u_lat, JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.geo.lng')) as u_lng", false)
+                    ->join('dtsen_usulan u', 'u.id = ua.dtsen_usulan_id', 'inner')
+                    ->join('dtsen_kk k', 'k.id_kk = u.dtsen_kk_id AND k.deleted_at IS NULL', 'left')
+                    ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left')
+                    ->where('ua.nik', $nik)
+                    ->where('ua.deleted_at', null)
+                    ->whereIn('u.status', ['draft', 'submitted', 'verified', 'diverifikasi'])
+                    ->orderBy('u.id', 'DESC')
+                    ->get()->getRowArray();
+                if ($uaRow) {
+                    $idKk = !empty($uaRow['dtsen_kk_id']) ? (int)$uaRow['dtsen_kk_id'] : null;
+                    if (empty($baseRow['no_kk'])) {
+                        $baseRow['no_kk'] = $uaRow['no_kk'] ?: $uaRow['no_kk_target'];
+                    }
+                    if (empty($baseRow['kepala_keluarga'])) {
+                        $baseRow['kepala_keluarga'] = $uaRow['kepala_keluarga'];
+                    }
+                    $rumahLat = !empty($uaRow['u_lat']) ? $uaRow['u_lat'] : ($uaRow['rt_lat'] ?? null);
+                    $rumahLng = !empty($uaRow['u_lng']) ? $uaRow['u_lng'] : ($uaRow['rt_lng'] ?? null);
+                }
+            }
+
+            if ($idKk) {
+                $ugRow = $this->db->table('dtsen_usulan')
+                    ->select("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.geo.lat')) as u_lat, JSON_UNQUOTE(JSON_EXTRACT(payload, '$.geo.lng')) as u_lng", false)
+                    ->where('dtsen_kk_id', $idKk)
+                    ->whereIn('status', ['draft', 'submitted', 'verified', 'diverifikasi'])
+                    ->orderBy('id', 'DESC')
+                    ->get()->getResultArray();
+                foreach ($ugRow as $ug) {
+                    if ($this->isValidCoord($ug['u_lat'] ?? null, $ug['u_lng'] ?? null)) {
+                        $rumahLat = $ug['u_lat'];
+                        $rumahLng = $ug['u_lng'];
+                        break;
+                    }
+                }
+            }
 
             // Ambil seluruh bantuan KPM ini pada tahap salur terkait (bisa 1 bansos atau 2 bansos PKH + SEMBAKO)
             $allEntries = $this->db->table('dtsen_bansos_kks b')
@@ -644,8 +1073,22 @@ class RekapitulasiBansos extends BaseController
                     ? base_url('uploads/bansos/' . $entry['foto_bukti_transaksi']) 
                     : base_url('assets/img/no-image.svg');
 
-                $mapsUrl = (!empty($entry['latitude']) && !empty($entry['longitude']))
-                    ? "https://www.google.com/maps?q={$entry['latitude']},{$entry['longitude']}"
+                // Resolusi koordinat: Prioritas 1 Rumah KK -> Prioritas 2 Dokumentasi Bansos KKS
+                $effLat = null;
+                $effLng = null;
+                $coordSourceLabel = null;
+                if ($this->isValidCoord($rumahLat, $rumahLng)) {
+                    $effLat = $rumahLat;
+                    $effLng = $rumahLng;
+                    $coordSourceLabel = 'Koordinat Rumah (DTSEN KK)';
+                } elseif ($this->isValidCoord($entry['latitude'] ?? null, $entry['longitude'] ?? null)) {
+                    $effLat = $entry['latitude'];
+                    $effLng = $entry['longitude'];
+                    $coordSourceLabel = 'Dokumentasi Salur (Bansos KKS)';
+                }
+
+                $mapsUrl = ($effLat !== null && $effLng !== null)
+                    ? "https://www.google.com/maps?q={$effLat},{$effLng}"
                     : null;
 
                 $items[] = [
@@ -659,8 +1102,9 @@ class RekapitulasiBansos extends BaseController
                     'foto_kpm_url'         => $fotoKpmUrl,
                     'foto_bukti_transaksi' => $entry['foto_bukti_transaksi'] ?? null,
                     'foto_struk_url'       => $fotoStrukUrl,
-                    'latitude'             => $entry['latitude'] ?? null,
-                    'longitude'            => $entry['longitude'] ?? null,
+                    'latitude'             => $effLat,
+                    'longitude'            => $effLng,
+                    'coord_source_label'   => $coordSourceLabel,
                     'maps_url'             => $mapsUrl,
                     'petugas_nama'         => $entry['petugas_nama'] ?? 'Admin / Sistem',
                     'created_at'           => $entry['created_at'] ?? '-',
