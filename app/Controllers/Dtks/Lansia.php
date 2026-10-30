@@ -342,13 +342,12 @@ class Lansia extends BaseController
                 ]);
             }
 
-            // 1. Coba gunakan AI API (jika GEMINI_API_KEY diset di .env)
-            $result = $this->tryExternalAiCopyedit($rawText);
+            // 1. Jalankan mesin Smart Indonesian Copyediting (EYD/KBBI, koreksi typo & struktur kalimat efektif)
+            $localResult = $this->smartCopyeditIndonesia($rawText);
 
-            // 2. Jika tidak ada API key atau jaringan gagal, gunakan mesin Smart Indonesian Copyediting lokal
-            if (empty($result)) {
-                $result = $this->smartCopyeditIndonesia($rawText);
-            }
+            // 2. Opsional: Jika GEMINI_API_KEY diset di .env, sempurnakan via Gemini API lalu pastikan tetap baku EYD
+            $aiResult = $this->tryExternalAiCopyedit($localResult);
+            $result   = !empty($aiResult) ? $this->smartCopyeditIndonesia($aiResult) : $localResult;
 
             return $this->response->setJSON([
                 'status'    => 'success',
@@ -421,7 +420,7 @@ class Lansia extends BaseController
     }
 
     /**
-     * Mesin Copyediting Bahasa Indonesia Cerdas (Kamus Typo + Fuzzy Matching Levenshtein + Restrukturisasi Kalimat Efektif)
+     * Mesin Copyediting Bahasa Indonesia Cerdas (EYD/KBBI Berimbuhan + Kamus Typo + Fuzzy Matching Levenshtein + Kalimat Efektif)
      */
     private function smartCopyeditIndonesia(string $text): string
     {
@@ -434,146 +433,491 @@ class Lansia extends BaseController
         $s = mb_strtolower($text, 'UTF-8');
         $s = preg_replace('/\s+/', ' ', $s);
 
-        // 2. Kamus koreksi typo langsung & kata tidak baku (spesifik konteks sosial/kesehatan lansia)
+        // Perbaiki angka 0 yang tertukar dengan huruf o di awal kata (contoh: 0rang -> orang)
+        $s = preg_replace('/\b0([a-z]{3,})\b/', 'o$1', $s);
+
+        // Normalisasi singkatan satuan umur/waktu (contoh: "7 th" / "7 thn" -> "7 tahun", "3 bln" -> "3 bulan")
+        $s = preg_replace('/\b(\d+)\s*(?:thn|th)\b/', '$1 tahun', $s);
+        $s = preg_replace('/\b(\d+)\s*bln\b/', '$1 bulan', $s);
+        $s = preg_replace('/\b(\d+)\s*hr\b/', '$1 hari', $s);
+
+        // 2. Normalisasi kata ulang dengan angka "2" (contoh: sakit2an -> sakit-sakitan, sehari2 -> sehari-hari)
+        $s = preg_replace('/\b([a-z]{3,})2(an|nya)?\b/', '$1-$1$2', $s);
+
+        // Normalisasi kata ulang yang ditulis terpisah tanpa tanda hubung
+        $reduplications = [
+            'sehari', 'paru', 'anak', 'orang', 'rata', 'kadang', 'hati',
+            'masing', 'sendiri', 'laki', 'tiba', 'pelan', 'jalan', 'ragu'
+        ];
+        foreach ($reduplications as $rw) {
+            $s = preg_replace('/\b' . $rw . '\s+' . $rw . '(nya|an)?\b/', $rw . '-' . $rw . '$1', $s);
+        }
+
+        // 3. Perbaikan gabungan imbuhan "di ", "se ", dan akhiran " nya" yang terpisah spasi (sebelum tokenisasi)
+        $passiveVerbs = [
+            'bantu', 'rawat', 'urus', 'dampingi', 'papah', 'gendong', 'bawa', 'periksa',
+            'obati', 'tangani', 'pantau', 'awasi', 'operasi', 'pakai', 'gunakan', 'antar',
+            'jemput', 'suapi', 'mandikan', 'tuntun', 'dorong', 'angkat', 'pijat', 'terapi',
+            'beri', 'berikan', 'tempatkan', 'tempati', 'tinggali', 'biayai', 'tanggung'
+        ];
+        foreach ($passiveVerbs as $v) {
+            $s = preg_replace('/\bdi\s+' . $v . '\b/', 'di' . $v, $s);
+        }
+        $s = preg_replace('/\bdi\s*karna\s*kan\b|\bdi\s*karena\s*kan\b/', 'dikarenakan', $s);
+        $s = preg_replace('/\bse\s+orang\b/', 'seorang', $s);
+        $s = preg_replace('/\borangtua(nya)?\b/', 'orang tua$1', $s);
+        $s = preg_replace('/\brumahtangga(nya)?\b/', 'rumah tangga$1', $s);
+        $s = preg_replace('/\byangtak\b/', 'yang tidak', $s);
+        $s = preg_replace('/\b(?<!di|ke|dari)([a-z]{4,})\s+nya\b/', '$1nya', $s);
+
+        // 4. Normalisasi fonetik EYD/KBBI berimbuhan (p/f/v dan bentuk tidak baku umum)
+        $phoneticPatterns = [
+            '/\b(ber|ke)?akti[pf]itas(nya)?\b/' => '$1aktivitas$2',
+            '/\b(ber|ke)?akti[pf](an|nya)?\b/' => '$1aktif$2',
+            '/\bprodukti[pf]itas(nya)?\b/' => 'produktivitas$1',
+            '/\befekti[pf]itas(nya)?\b/' => 'efektivitas$1',
+            '/\bkreati[pf]itas(nya)?\b/' => 'kreativitas$1',
+            '/\b(produkti|efekti|intensi|pasi|sensiti|kreati|operati|kogniti|degenerati|rehabilitati|alternati|inisiati|positi|negati|kolekti|objekti|subjekti|preventi|kurati|paliati|komunikati|kooperati)p(nya)?\b/' => '$1f$2',
+            '/\b(ber|per)?nafas(an|nya)?\b/' => '$1napas$2',
+            '/\b(ber|mem|pe|pem)?fikir(an|kan|nya)?\b/' => '$1pikir$2',
+            '/\b(mem|pe|pem)?faham(i|an|nya)?\b/' => '$1paham$2',
+            '/\b(?:syaraf|sarap)(nya)?\b/' => 'saraf$1',
+            '/\bmerubah\b/' => 'mengubah',
+            '/\b(ber|di|ter)?(?:robah|obah|rubah)(nya|kan)?\b/' => '$1ubah$2',
+            '/\b(ber|me|di)?praktek(kan|nya)?\b/' => '$1praktik$2',
+            '/\b(be)?resiko(nya)?\b/' => '$1risiko$2',
+            '/\b(?:kwatir|kuatir|kawatir)(nya)?\b/' => 'khawatir$1',
+            '/\bapotik(nya)?\b/' => 'apotek$1',
+            '/\b(meng)?antri(an)?\b/' => '$1antre$2',
+            '/\bmemperihatinkan\b/' => 'memprihatinkan',
+            '/\b(di)?diagnosa(nya)?\b/' => '$1diagnosis$2',
+            '/\b(di)?inpus(nya)?\b/' => '$1infus$2',
+            '/\binpeksi(nya)?\b/' => 'infeksi$1',
+            '/\b(ber)?hutang(nya)?\b/' => '$1utang$2',
+            '/\b(meng|di)?ijin(kan|nya)?\b/' => '$1izin$2',
+            '/\bijasah(nya)?\b/' => 'ijazah$1',
+            '/\bjenasah(nya)?\b/' => 'jenazah$1',
+            '/\bnasehat(i|nya)?\b/' => 'nasihat$1',
+            '/\b(ke)?trampil(an|nya)?\b/' => '$1terampil$2',
+            '/\bsilahkan\b/' => 'silakan',
+            '/\bsekedar(nya)?\b/' => 'sekadar$1',
+            '/\btuna\s+(netra|rungu|wicara|daksa|grahita)\b/' => 'tuna$1',
+        ];
+        foreach ($phoneticPatterns as $pat => $rep) {
+            $s = preg_replace($pat, $rep, $s);
+        }
+
+        // 5. Kamus koreksi typo langsung & kata tidak baku -> baku EYD/KBBI
         $directMap = [
-            'puya' => 'punya',
-            'pnya' => 'punya',
-            'pny' => 'punya',
-            'mpunyai' => 'mempunyai',
-            'peyakit' => 'penyakit',
-            'pnyakit' => 'penyakit',
-            'penyaket' => 'penyakit',
-            'pnykt' => 'penyakit',
-            'untik' => 'untuk',
-            'untk' => 'untuk',
-            'utk' => 'untuk',
-            'tuk' => 'untuk',
-            'kkdisi' => 'kondisi',
-            'kndisi' => 'kondisi',
-            'kondsi' => 'kondisi',
-            'kndsi' => 'kondisi',
-            'kodisi' => 'kondisi',
-            'pisik' => 'fisik',
-            'psik' => 'fisik',
-            'fisikna' => 'fisiknya',
-            'pisikna' => 'fisiknya',
-            'bueat' => 'buat',
-            'bwt' => 'buat',
-            'berjln' => 'berjalan',
-            'brjalan' => 'berjalan',
-            'berjlan' => 'berjalan',
-            'jln' => 'jalan',
+            // Kata keterangan & derajat
+            'sagat' => 'sangat',
+            'sngat' => 'sangat',
+            'sangt' => 'sangat',
+            'sgt' => 'sangat',
+            'snagt' => 'sangat',
+            'sangaat' => 'sangat',
+            'bgt' => 'sekali',
+            'banget' => 'sekali',
+            'bget' => 'sekali',
             'aga' => 'agak',
             'agk' => 'agak',
             'rada' => 'agak',
-            'penagan' => 'penanganan',
-            'penaganan' => 'penanganan',
-            'pnanganan' => 'penanganan',
-            'penangan' => 'penanganan',
-            'husus' => 'khusus',
-            'kusus' => 'khusus',
-            'khusu' => 'khusus',
-            'khuss' => 'khusus',
-            'jga' => 'juga',
-            'jg' => 'juga',
-            'jd' => 'jadi',
-            'jdi' => 'jadi',
-            'hrs' => 'harus',
-            'hrus' => 'harus',
-            'krn' => 'karena',
-            'karna' => 'karena',
-            'kerna' => 'karena',
-            'yg' => 'yang',
-            'dgn' => 'dengan',
-            'dg' => 'dengan',
-            'sm' => 'sama',
+            'ckup' => 'cukup',
+            'ckp' => 'cukup',
+            'cuku' => 'cukup',
+            'kurag' => 'kurang',
+            'kurng' => 'kurang',
+            'krg' => 'kurang',
+            'lbih' => 'lebih',
+            'lbh' => 'lebih',
+            'palig' => 'paling',
+            'plg' => 'paling',
+            'msh' => 'masih',
+            'msih' => 'masih',
+            'masi' => 'masih',
+            'masihh' => 'masih',
             'sdh' => 'sudah',
             'udh' => 'sudah',
             'udah' => 'sudah',
+            'sdah' => 'sudah',
+            'suadh' => 'sudah',
             'blm' => 'belum',
             'blom' => 'belum',
+            'blum' => 'belum',
+            'belom' => 'belum',
+            'slalu' => 'selalu',
+            'sllu' => 'selalu',
+            'serig' => 'sering',
+            'sring' => 'sering',
+            'srng' => 'sering',
+            'jarag' => 'jarang',
+            'jrang' => 'jarang',
+            'jrg' => 'jarang',
+            'kadag' => 'kadang',
+            'kdang' => 'kadang',
+            'kdg' => 'kadang',
+            'hnya' => 'hanya',
+            'cuma' => 'hanya',
+            'cuman' => 'hanya',
+            'cm' => 'hanya',
+            'cma' => 'hanya',
+            'hmpir' => 'hampir',
+            'trus' => 'terus',
+            'trs' => 'terus',
+            'tetep' => 'tetap',
+            'ttp' => 'tetap',
+            'lgsg' => 'langsung',
+            'lagsung' => 'langsung',
+            'memag' => 'memang',
+            'mmg' => 'memang',
+            'skrg' => 'sekarang',
+            'skrang' => 'sekarang',
+            'sekarag' => 'sekarang',
+            'dlu' => 'dahulu',
+
+            // Kata hubung, depan, & negasi
             'tdk' => 'tidak',
             'tak' => 'tidak',
             'gak' => 'tidak',
             'ga' => 'tidak',
             'nggak' => 'tidak',
             'enggak' => 'tidak',
-            'bs' => 'bisa',
-            'bsa' => 'bisa',
-            'msh' => 'masih',
-            'msih' => 'masih',
-            'sgt' => 'sangat',
-            'bgt' => 'sekali',
-            'banget' => 'sekali',
-            'dlm' => 'dalam',
-            'pd' => 'pada',
-            'dr' => 'dari',
-            'kpd' => 'kepada',
+            'kagak' => 'tidak',
+            'tidk' => 'tidak',
+            'tdak' => 'tidak',
+            'bkan' => 'bukan',
+            'bkn' => 'bukan',
+            'yg' => 'yang',
+            'yag' => 'yang',
+            'yng' => 'yang',
+            'dn' => 'dan',
+            'ato' => 'atau',
+            'atw' => 'atau',
             'tp' => 'tetapi',
             'tapi' => 'tetapi',
+            'ttpi' => 'tetapi',
+            'namaun' => 'namun',
+            'nmun' => 'namun',
+            'krn' => 'karena',
+            'karna' => 'karena',
+            'kerna' => 'karena',
+            'krna' => 'karena',
+            'shg' => 'sehingga',
+            'sehinga' => 'sehingga',
+            'shgga' => 'sehingga',
+            'untik' => 'untuk',
+            'untk' => 'untuk',
+            'utk' => 'untuk',
+            'tuk' => 'untuk',
+            'bueat' => 'buat',
+            'bwt' => 'buat',
+            'dgn' => 'dengan',
+            'dg' => 'dengan',
+            'dngn' => 'dengan',
+            'dgan' => 'dengan',
+            'sm' => 'sama',
+            'ama' => 'sama',
+            'tampa' => 'tanpa',
+            'tnpa' => 'tanpa',
+            'dlm' => 'dalam',
+            'dlam' => 'dalam',
+            'dalem' => 'dalam',
+            'pd' => 'pada',
+            'pda' => 'pada',
+            'dr' => 'dari',
+            'dri' => 'dari',
+            'kpd' => 'kepada',
+            'kpda' => 'kepada',
+            'olh' => 'oleh',
+            'sjak' => 'sejak',
+            'ktika' => 'ketika',
+            'wkt' => 'waktu',
+            'wktu' => 'waktu',
             'kl' => 'kalau',
             'kalo' => 'kalau',
             'klu' => 'kalau',
+            'jka' => 'jika',
+            'agr' => 'agar',
+            'biar' => 'agar',
             'sbg' => 'sebagai',
+            'sbgai' => 'sebagai',
             'spt' => 'seperti',
-            'aktipitas' => 'aktivitas',
-            'aktifitas' => 'aktivitas',
-            'aktvts' => 'aktivitas',
+            'sprti' => 'seperti',
+            'kyk' => 'seperti',
+            'kayak' => 'seperti',
+            'jga' => 'juga',
+            'jg' => 'juga',
+            'jd' => 'jadi',
+            'jdi' => 'jadi',
+
+            // Kata kerja bantu & modal
+            'bs' => 'bisa',
+            'bsa' => 'bisa',
+            'dpt' => 'dapat',
+            'dpat' => 'dapat',
+            'hrs' => 'harus',
+            'hrus' => 'harus',
+            'prlu' => 'perlu',
+            'btuh' => 'butuh',
+            'puya' => 'punya',
+            'piya' => 'punya',
+            'pnya' => 'punya',
+            'pny' => 'punya',
+            'mpunyai' => 'mempunyai',
+            'mendaptakan' => 'mendapatkan',
+            'mndapatkan' => 'mendapatkan',
+            'layal' => 'layak',
+            'layk' => 'layak',
+
+            // Kondisi kesehatan, tubuh & lansia (termasuk EYD baku)
+            'kkdisi' => 'kondisi',
+            'kndisi' => 'kondisi',
+            'kondsi' => 'kondisi',
+            'kndsi' => 'kondisi',
+            'kodisi' => 'kondisi',
+            'knodisi' => 'kondisi',
+            'keadan' => 'keadaan',
+            'kadaan' => 'keadaan',
+            'pisik' => 'fisik',
+            'psik' => 'fisik',
+            'fisikna' => 'fisiknya',
+            'pisikna' => 'fisiknya',
+            'pisiknya' => 'fisiknya',
+            'tbuh' => 'tubuh',
+            'bada' => 'badan',
+            'bdn' => 'badan',
+            'shat' => 'sehat',
+            'seht' => 'sehat',
+            'bgar' => 'bugar',
+            'bugr' => 'bugar',
+            'lmah' => 'lemah',
+            'lemes' => 'lemas',
+            'lmas' => 'lemas',
+            'rnta' => 'renta',
+            'ujur' => 'uzur',
+            'jmpo' => 'jompo',
+            'mndiri' => 'mandiri',
+            'sndiri' => 'sendiri',
+            'sndirian' => 'sendirian',
+            'peyakit' => 'penyakit',
+            'pnyakit' => 'penyakit',
+            'penyaket' => 'penyakit',
+            'pnykt' => 'penyakit',
+            'skit' => 'sakit',
+            'skt' => 'sakit',
             'struk' => 'stroke',
             'strok' => 'stroke',
             'setruk' => 'stroke',
-            'syaraf' => 'saraf',
-            'sarap' => 'saraf',
+            'lmpuh' => 'lumpuh',
             'rematik' => 'reumatik',
-            'reumatik' => 'reumatik',
+            'rmatik' => 'reumatik',
             'asamurat' => 'asam urat',
             'darahtinggi' => 'hipertensi',
             'diabet' => 'diabetes',
+            'kolestrol' => 'kolesterol',
+            'kolesterl' => 'kolesterol',
+            'jantug' => 'jantung',
+            'jntung' => 'jantung',
+            'lambug' => 'lambung',
+            'mag' => 'maag',
+            'magh' => 'maag',
+            'tulag' => 'tulang',
+            'katark' => 'katarak',
+            'rabn' => 'rabun',
+            'budeg' => 'tuli',
+            'budek' => 'tuli',
+            'pkun' => 'pikun',
             'pikun' => 'demensia (pikun)',
+            'stress' => 'stres',
+            'migren' => 'migrain',
+            'oprasi' => 'operasi',
+            'pengelihatan' => 'penglihatan',
+            'pelihatan' => 'penglihatan',
+            'pendegaran' => 'pendengaran',
+            'tergaggu' => 'terganggu',
+            'gagguan' => 'gangguan',
+            'pinggag' => 'pinggang',
+            'pggang' => 'pinggang',
+            'puggung' => 'punggung',
+            'pungug' => 'punggung',
+            'tagan' => 'tangan',
+            'tngan' => 'tangan',
+            'sbelah' => 'sebelah',
+            'pegel' => 'pegal',
+            'sesek' => 'sesak',
+            'bengek' => 'asma',
+            'ambeyen' => 'ambeien',
+            'ambein' => 'ambeien',
+
+            // Aktivitas & penanganan
+            'aktipitas' => 'aktivitas',
+            'aktifitas' => 'aktivitas',
+            'aktvts' => 'aktivitas',
+            'beraktipitas' => 'beraktivitas',
+            'beraktifitas' => 'beraktivitas',
+            'braktivitas' => 'beraktivitas',
+            'berjln' => 'berjalan',
+            'brjalan' => 'berjalan',
+            'berjlan' => 'berjalan',
+            'berjala' => 'berjalan',
+            'jln' => 'jalan',
+            'jala' => 'jalan',
+            'brgerak' => 'bergerak',
+            'brdiri' => 'berdiri',
+            'dduk' => 'duduk',
+            'tdur' => 'tidur',
+            'mkan' => 'makan',
+            'maka' => 'makan',
+            'mndi' => 'mandi',
+            'bcara' => 'bicara',
+            'ngomong' => 'berbicara',
+            'bkerja' => 'bekerja',
+            'krja' => 'kerja',
+            'srabutan' => 'serabutan',
             'ngurus' => 'mengurus',
             'ngurusin' => 'mengurus',
+            'mgurus' => 'mengurus',
+            'mrawat' => 'merawat',
             'ngebantu' => 'membantu',
+            'penagan' => 'penanganan',
+            'penaganan' => 'penanganan',
+            'pnanganan' => 'penanganan',
+            'penangan' => 'penanganan',
+            'prawatan' => 'perawatan',
+            'pgobatan' => 'pengobatan',
+            'brobat' => 'berobat',
+            'husus' => 'khusus',
+            'kusus' => 'khusus',
+            'khusu' => 'khusus',
+            'khuss' => 'khusus',
+            'bntuan' => 'bantuan',
+            'bantuaan' => 'bantuan',
+            'batuan' => 'bantuan',
+            'penghasila' => 'penghasilan',
+            'pemerintanh' => 'pemerintah',
+            'mesjid' => 'masjid',
+            'tgkat' => 'tongkat',
+            'tngkat' => 'tongkat',
+            'kursiroda' => 'kursi roda',
+            'kluarga' => 'keluarga',
+            'klg' => 'keluarga',
+            'ank' => 'anak',
+            'ttangga' => 'tetangga',
+            'tggal' => 'tinggal',
+            'tnggal' => 'tinggal',
+            'rmh' => 'rumah',
+            'rmah' => 'rumah',
+            'tmpat' => 'tempat',
+            'tmp' => 'tempat',
             'susah' => 'sulit',
+            'slit' => 'sulit',
         ];
 
-        // Kosakata baku referensi untuk fuzzy matching Levenshtein (typo 1-2 huruf)
+        // Kosakata baku referensi untuk fuzzy matching Levenshtein
         $standardVocab = [
-            'menderita', 'penyakit', 'asam', 'urat', 'sehingga', 'untuk', 'kondisi', 'fisik',
-            'berjalan', 'agak', 'sulit', 'harus', 'penanganan', 'khusus', 'juga', 'lansia',
-            'jompo', 'sehat', 'bugar', 'lemah', 'renta', 'lumpuh', 'stroke', 'diabetes',
-            'hipertensi', 'katarak', 'rabun', 'tuli', 'pendengaran', 'penglihatan', 'terganggu',
-            'kurang', 'jelas', 'tinggal', 'sendiri', 'sendirian', 'keluarga', 'bantuan',
-            'aktivitas', 'mandiri', 'tempat', 'tidur', 'tongkat', 'kursi', 'roda', 'sakit',
-            'menahun', 'kronis', 'parah', 'butuh', 'membutuhkan', 'memerlukan', 'perawatan',
-            'medis', 'rutin', 'kontrol', 'dokter', 'puskesmas', 'bekerja', 'serabutan',
-            'ringan', 'berat', 'bicara', 'mengurus', 'merawat', 'pendamping', 'kesulitan',
-            'gangguan', 'fungsi', 'tubuh', 'menurun', 'usia', 'lanjut', 'faktor'
+            'masih', 'sangat', 'cukup', 'agak', 'kurang', 'lebih', 'paling', 'sudah', 'belum',
+            'selalu', 'sering', 'jarang', 'kadang', 'hanya', 'hampir', 'terus', 'tetap', 'langsung',
+            'memang', 'sekarang', 'dahulu', 'tidak', 'bukan', 'yang', 'atau', 'tetapi', 'namun',
+            'karena', 'sehingga', 'untuk', 'dengan', 'tanpa', 'dalam', 'pada', 'dari', 'kepada',
+            'oleh', 'sejak', 'ketika', 'waktu', 'kalau', 'jika', 'apabila', 'agar', 'supaya',
+            'walaupun', 'meskipun', 'sebagai', 'seperti', 'juga', 'jadi', 'bisa', 'dapat', 'mampu',
+            'harus', 'perlu', 'butuh', 'punya', 'memiliki', 'mempunyai', 'menderita', 'mengalami',
+            'penyakit', 'asam', 'urat', 'kondisi', 'keadaan', 'fisik', 'tubuh', 'badan', 'sehat',
+            'bugar', 'kuat', 'lemah', 'lemas', 'renta', 'uzur', 'lansia', 'jompo', 'mandiri',
+            'sendiri', 'sendirian', 'sakit', 'gejala', 'keluhan', 'kronis', 'menahun', 'kambuh',
+            'parah', 'ringan', 'berat', 'sembuh', 'pulih', 'membaik', 'memburuk', 'menurun',
+            'lumpuh', 'stroke', 'diabetes', 'hipertensi', 'kolesterol', 'jantung', 'lambung',
+            'ginjal', 'saraf', 'tulang', 'sendi', 'nyeri', 'linu', 'pegal', 'kaku', 'bengkak',
+            'katarak', 'rabun', 'buram', 'kabur', 'buta', 'tuli', 'bisu', 'pikun', 'demensia',
+            'stres', 'depresi', 'operasi', 'vertigo', 'pusing', 'batuk', 'demam', 'sesak', 'napas',
+            'bernapas', 'pernapasan', 'kepala', 'mata', 'penglihatan', 'telinga', 'pendengaran',
+            'mulut', 'bicara', 'berbicara', 'tangan', 'kaki', 'lutut', 'pinggang', 'punggung',
+            'dada', 'perut', 'leher', 'sebelah', 'kanan', 'kiri', 'terganggu', 'gangguan', 'jelas',
+            'tinggal', 'keluarga', 'anak', 'cucu', 'suami', 'istri', 'tetangga', 'bantu', 'bantuan',
+            'membantu', 'dibantu', 'rawat', 'merawat', 'dirawat', 'perawatan', 'urus', 'mengurus',
+            'diurus', 'aktivitas', 'beraktivitas', 'kegiatan', 'jalan', 'berjalan', 'gerak',
+            'bergerak', 'berdiri', 'duduk', 'tidur', 'berbaring', 'terbaring', 'makan', 'minum',
+            'mandi', 'kerja', 'bekerja', 'kebun', 'berkebun', 'tani', 'bertani', 'serabutan',
+            'menjaga', 'mendampingi', 'didampingi', 'tempat', 'rumah', 'kamar', 'tongkat', 'kursi',
+            'roda', 'membutuhkan', 'memerlukan', 'penanganan', 'pengobatan', 'berobat', 'medis',
+            'rutin', 'intensif', 'khusus', 'kontrol', 'dokter', 'puskesmas', 'pendamping',
+            'kesulitan', 'fungsi', 'usia', 'lanjut', 'faktor', 'sulit', 'aktif', 'produktif',
+            'normal', 'stabil', 'kesehatan', 'ingatan', 'pikiran', 'tenaga', 'pekerjaan',
+            'penghasilan', 'pendapatan', 'kebutuhan', 'tanggungan', 'pemerintah', 'layak',
+            'menerima', 'mendapatkan', 'kehidupan', 'keseharian', 'beliau', 'orang'
         ];
+
+        $resolveWord = function (string $word) use ($directMap, $standardVocab): ?string {
+            if (isset($directMap[$word])) {
+                return $directMap[$word];
+            }
+            if (in_array($word, $standardVocab, true)) {
+                return $word;
+            }
+            if (strlen($word) < 4) {
+                return null;
+            }
+            $bestWord = null;
+            $bestDist = 99;
+            foreach ($standardVocab as $vocab) {
+                $lenDiff = abs(strlen($word) - strlen($vocab));
+                if ($lenDiff > 1) {
+                    continue;
+                }
+                $firstSame = ($word[0] === $vocab[0])
+                    || (($word[0] === 'p' || $word[0] === 'f') && ($vocab[0] === 'p' || $vocab[0] === 'f'));
+                if (!$firstSame) {
+                    continue;
+                }
+                $dist = levenshtein($word, $vocab);
+                if ($dist === 1) {
+                    if (substr($word, -1) !== substr($vocab, -1) && substr($word, 0, 3) !== substr($vocab, 0, 3)) {
+                        continue;
+                    }
+                } elseif ($dist === 2 && strlen($vocab) >= 7) {
+                    if (substr($word, -1) !== substr($vocab, -1)) {
+                        continue;
+                    }
+                } else {
+                    continue;
+                }
+
+                if ($dist < $bestDist) {
+                    $bestDist = $dist;
+                    $bestWord = $vocab;
+                }
+            }
+            return $bestWord;
+        };
 
         $tokens = preg_split('/(\s+|[,.!?;:\/()-])/', $s, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
         foreach ($tokens as &$tok) {
             if (preg_match('/^[a-z0-9]+$/', $tok)) {
-                if (isset($directMap[$tok])) {
-                    $tok = $directMap[$tok];
-                } elseif (strlen($tok) >= 5 && !in_array($tok, $standardVocab, true)) {
-                    $bestWord = null;
-                    $bestDist = 99;
-                    foreach ($standardVocab as $vocab) {
-                        if (abs(strlen($tok) - strlen($vocab)) > 2) {
-                            continue;
+                $resolved = $resolveWord($tok);
+                if ($resolved !== null) {
+                    $tok = $resolved;
+                } else {
+                    // Cek jika berakhiran "-nya" (contoh: kkdisinya -> kondisinya, peyakitnya -> penyakitnya)
+                    if (strlen($tok) > 6 && substr($tok, -3) === 'nya') {
+                        $base = substr($tok, 0, -3);
+                        $resBase = $resolveWord($base);
+                        if ($resBase !== null) {
+                            $tok = $resBase . 'nya';
                         }
-                        if ($tok[0] !== $vocab[0] && substr($tok, 0, 2) !== substr($vocab, 0, 2)) {
-                            continue;
-                        }
-                        $dist = levenshtein($tok, $vocab);
-                        $maxAllowed = (strlen($vocab) >= 7) ? 2 : 1;
-                        if ($dist <= $maxAllowed && $dist < $bestDist) {
-                            $bestDist = $dist;
-                            $bestWord = $vocab;
+                    } elseif (strlen($tok) > 6 && substr($tok, -2) === 'ya' && substr($tok, -3, 1) === 'n') {
+                        // Contoh: kesehatanya -> kesehatan + nya = kesehatannya
+                        $baseWithN = substr($tok, 0, -2);
+                        $resBase = $resolveWord($baseWithN);
+                        if ($resBase !== null && substr($resBase, -1) === 'n') {
+                            $tok = $resBase . 'nya';
                         }
                     }
-                    if ($bestWord !== null) {
-                        $tok = $bestWord;
+                    // Cek jika berawalan "ber-", "ter-", "se-", "di-"
+                    if (preg_match('/^(ber|ter|se|di)([a-z]{4,})$/', $tok, $m)) {
+                        $resBase = $resolveWord($m[2]);
+                        if ($resBase !== null) {
+                            $tok = $m[1] . $resBase;
+                        }
                     }
                 }
             }
@@ -582,18 +926,13 @@ class Lansia extends BaseController
 
         $s = implode('', $tokens);
 
-        // 3. Perbaikan gabungan imbuhan "di " yang seharusnya serangkai pada kata kerja pasif
-        $passiveVerbs = ['bantu', 'rawat', 'urus', 'dampingi', 'papah', 'gendong', 'bawa', 'periksa', 'obati', 'tangani', 'pantau', 'awasi'];
-        foreach ($passiveVerbs as $v) {
-            $s = preg_replace('/\bdi\s+' . $v . '\b/', 'di' . $v, $s);
-        }
-
-        // 4. Transformasi Frasa & Struktur Kalimat Efektif (Copyediting Sintaksis)
+        // 6. Transformasi Frasa & Struktur Kalimat Efektif (Copyediting Sintaksis)
         $phraseRules = [
             '/^(?:punya|mempunyai|memiliki|ada)\s+penyakit\b/' => 'menderita penyakit',
             '/\b(?:punya|mempunyai)\s+penyakit\b/' => 'menderita penyakit',
             '/^(?:kena|terkena)\s+penyakit\b/' => 'menderita penyakit',
             '/^(?:kena|terkena)\s+(stroke|diabetes|hipertensi|katarak|asam urat|reumatik|lumpuh)\b/' => 'menderita $1',
+            '/^sakit\s+(reumatik|lambung|pinggang|jantung|ginjal|asam urat|stroke|diabetes|hipertensi|katarak|paru-paru|asma|dalam)\b/' => 'menderita sakit $1',
 
             // Struktur rancu "jadi untuk kondisi fisik buat berjalan agak sulit"
             '/\bjadi\s+untuk\s+kondisi\s+fisik\s+(?:buat|untuk)\s+berjalan\s+(?:agak|cukup)?\s*sulit\b/' => 'sehingga kondisi fisik cukup sulit untuk berjalan',
@@ -604,7 +943,10 @@ class Lansia extends BaseController
             '/\b(?:agak|cukup)\s+sulit\s+(?:buat|untuk)\s+berjalan\b/' => 'cukup sulit untuk berjalan',
 
             // Kata "buat" non-baku sebelum kata kerja -> "untuk"
-            '/\bbuat\s+(berjalan|bergerak|beraktivitas|berdiri|duduk|melihat|mendengar|bicara|berbicara|makan|bekerja)\b/' => 'untuk $1',
+            '/\bbuat\s+(berjalan|bergerak|beraktivitas|berdiri|duduk|melihat|mendengar|bicara|berbicara|makan|bekerja|berobat|kebutuhan|hidup)\b/' => 'untuk $1',
+
+            // Pengulangan klausa "masih ... masih bisa/dapat ..." tanpa konjungsi (contoh: "Masih sangat bugar masih bisa beraktivitas")
+            '/\b(masih\s+(?:sangat\s+|cukup\s+)?[a-z]+(?:\s+dan\s+[a-z]+)?)\s+masih\s+(?:bisa|dapat)\b/' => '$1 serta masih dapat',
 
             // Pengulangan kata penghubung "jadi ... jadi ..." & klausa penanganan khusus
             '/\bjadi\s+harus\s+ada\s+penanganan\s+khusus\s+juga\b/' => 'dan memerlukan penanganan khusus',
@@ -614,10 +956,15 @@ class Lansia extends BaseController
             '/\bbutuh\s+penanganan\s+khusus\b/' => 'memerlukan penanganan khusus',
 
             // Frasa umum lainnya pada keterangan lansia/jompo
-            '/\btidak\s+bisa\s+(?:jalan|berjalan)\s+sendiri\b/' => 'tidak dapat berjalan secara mandiri',
-            '/\btidak\s+bisa\s+beraktivitas\s+sendiri\b/' => 'tidak dapat beraktivitas secara mandiri',
+            '/\bsudah\s+tua\s+renta\s+tidak\b/' => 'sudah tua renta, tidak',
+            '/\btidak\s+(?:bisa|dapat)\s+(?:jalan|berjalan)\s+sendiri\b/' => 'tidak dapat berjalan secara mandiri',
+            '/\btidak\s+(?:bisa|dapat)\s+beraktivitas\s+sendiri\b/' => 'tidak dapat beraktivitas secara mandiri',
+            '/\b(masih|tidak|kurang|belum|sudah|hanya)\s+bisa\b/' => '$1 dapat',
+            '/\b(tidak|belum)\s+punya\b/' => '$1 memiliki',
+            '/\bmandiri\s+harus\s+dibantu\b/' => 'mandiri, sehingga perlu dibantu',
             '/\bharus\s+dibantu\b/' => 'sehingga perlu dibantu',
-            '/\bmasih\s+bisa\s+kerja\b/' => 'masih dapat bekerja',
+            '/\bmasih\s+dapat\s+kerja\b/' => 'masih dapat bekerja',
+            '/\bsulit\s+bicara\b/' => 'sulit berbicara',
             '/\btidak\s+ada\s+yang\s+mengurus\b/' => 'tanpa pendamping yang mengurus',
             '/\b(?:sering\s+)?sakit[\s-]+sakitan\b/' => 'sering sakit-sakitan',
             '/\baktivitas\s+di\s+tempat\s+tidur\s+saja\b/' => 'hanya dapat beraktivitas di tempat tidur',
@@ -626,6 +973,9 @@ class Lansia extends BaseController
         foreach ($phraseRules as $pattern => $replacement) {
             $s = preg_replace($pattern, $replacement, $s);
         }
+
+        // Jika masih ada pengulangan "masih ... masih ..." tanpa kata hubung di antaranya
+        $s = preg_replace('/\b(masih\s+[^,.!?;]+?)\s+(?<!dan\s|serta\s|tetapi\s|namun\s)masih\s+/', '$1 dan masih ', $s);
 
         // Ubah kata penghubung "jadi" di tengah kalimat menjadi "sehingga" / "dan"
         $jadiCount = 0;
@@ -648,7 +998,10 @@ class Lansia extends BaseController
         }, $s);
 
         // Pastikan singkatan medis/umum tetap kapital bila ada
-        $acronyms = ['tbc' => 'TBC', 'hiv' => 'HIV', 'bpjs' => 'BPJS', 'rt' => 'RT', 'rw' => 'RW', 'odgj' => 'ODGJ'];
+        $acronyms = [
+            'tbc' => 'TBC', 'hiv' => 'HIV', 'bpjs' => 'BPJS', 'rt' => 'RT', 'rw' => 'RW',
+            'odgj' => 'ODGJ', 'bab' => 'BAB', 'bak' => 'BAK', 'kpm' => 'KPM', 'kk' => 'KK'
+        ];
         foreach ($acronyms as $low => $up) {
             $s = preg_replace('/\b' . $low . '\b/i', $up, $s);
         }
