@@ -3,16 +3,18 @@
 namespace App\Controllers\Dtsen;
 
 use App\Controllers\BaseController;
+use App\Traits\WilayahFilterTrait;
 use Config\Services;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class Pemeriksaan extends BaseController
 {
+    use WilayahFilterTrait;
+
     protected $db;
     protected $request;
     protected $AuthModel;
-    protected $perPageDefault = 10;
 
     public function __construct()
     {
@@ -23,775 +25,786 @@ class Pemeriksaan extends BaseController
 
     public function index()
     {
-        // keamanan: hanya role tertentu
         $user = $this->AuthModel->getUserId();
-        if (!$user) return redirect()->to('/login');
-
-        $data = [
-            'title' => 'Pemeriksaan Data ART & KK',
-            'namaApp' => nameApp()
-        ];
-
-        return view('dtsen/pemeriksaan/index', $data);
-    }
-
-    /**
-     * Server-side list KK (DataTables)
-     */
-    public function listKK()
-    {
-        $post   = $this->request->getPost();
-        $start  = (int)($post['start'] ?? 0);
-        $length = (int)($post['length'] ?? 10);
-        $search = trim($post['search']['value'] ?? '');
-
-        // --- USER & WILAYAH ---
-        $user = $this->AuthModel->getUserId();
-        $wil  = $user['wilayah_tugas'] ?? '';
-        [$rw, $rtList] = $this->parseWilayah($wil);
-
-        // --- BASE QUERY ---
-        $builder = $this->db->table('dtsen_kk kk')
-            ->select("
-            kk.id_kk,
-            kk.no_kk,
-            kk.kepala_keluarga,
-            kk.alamat,
-            kk.jumlah_anggota,
-            kk.kategori_adat,
-            kk.created_at,
-
-            kk.foto_kk,
-            kk.foto_rumah,
-            kk.foto_rumah_dalam,
-
-            b.dbj_nama_bansos AS nama_program
-        ")
-            ->join('dtks_bansos_jenis b', 'b.dbj_id = kk.program_bansos', 'left')
-            ->where('kk.deleted_at', null);
-
-        // --- FILTER WILAYAH ---
-        if ($rw !== '') {
-            $builder->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
-                ->where('rt.rw', $rw)
-                ->where('kk.deleted_at', null);
-            if (!empty($rtList)) {
-                $builder->whereIn('rt.rt', $rtList);
-            }
+        if (!$user) {
+            return redirect()->to('/login');
         }
 
-        // --- SEARCH ---
-        if ($search !== '') {
-            $builder->groupStart()
-                ->like('kk.no_kk', $search)
-                ->orLike('kk.kepala_keluarga', $search)
-                ->orLike('kk.alamat', $search)
-                ->where('kk.deleted_at', null)
-                ->groupEnd();
-        }
-
-        // --- TOTAL RECORDS ---
-        $totalRecords = $builder->countAllResults(false);
-
-        // --- ORDER ---
-        if (!empty($post['order'][0])) {
-            $columns = ['no_kk', 'kepala_keluarga', 'alamat', 'jumlah_anggota', 'created_at'];
-            $colIdx = (int)$post['order'][0]['column'];
-            $colName = $columns[$colIdx] ?? 'created_at';
-            $builder->orderBy("kk.$colName", $post['order'][0]['dir']);
-        } else {
-            $builder->orderBy('kk.created_at', 'DESC');
-        }
-
-        // --- FETCH ---
-        $data = $builder->limit($length, $start)->get()->getResultArray();
-
-        // --- ENRICH ROWS ---
-        foreach ($data as &$r) {
-
-            // COUNT ART
-            $r['art_count'] = (int)$this->db->table('dtsen_art')
-                ->where('id_kk', $r['id_kk'])
-                ->where('deleted_at', null)
-                ->countAllResults();
-
-            // FOTO FLAGS
-            $r['has_foto_kk']         = !empty($r['foto_kk']) ? 1 : 0;
-            $r['has_foto_rumah']      = !empty($r['foto_rumah']) ? 1 : 0;
-            $r['has_foto_rumah_dalam'] = !empty($r['foto_rumah_dalam']) ? 1 : 0;
-        }
-
-        return $this->response->setJSON([
-            'draw' => (int)($post['draw'] ?? 1),
-            'recordsTotal' => $totalRecords,
-            'recordsFiltered' => $totalRecords,
-            'data' => $data
+        return view('dtsen/pemeriksaan/index', [
+            'title' => 'Unified Archive Workspace – Pemeriksaan Data ART & KK',
+            'namaApp' => nameApp(),
+            'userRole' => $user['role_id'] ?? 99,
+            'userWilayah' => $user['wilayah_tugas'] ?? '',
         ]);
     }
 
-    /**
-     * Server-side list ART (DataTables)
-     */
-    public function listART()
+    public function workspaceStats()
     {
-        $post   = $this->request->getPost();
-        $start  = (int)($post['start'] ?? 0);
-        $length = (int)($post['length'] ?? 10);
-        $search = trim($post['search']['value'] ?? '');
-
-        // --- USER & WILAYAH ---
         $user = $this->AuthModel->getUserId();
-        $wil  = $user['wilayah_tugas'] ?? '';
-        [$rw, $rtList] = $this->parseWilayah($wil);
-
-        // --- BASE QUERY ART + JOIN2 ---
-        $builder = $this->db->table('dtsen_art a')
-            ->select("
-            a.id_art,
-            a.id_kk,
-            a.nik,
-            a.nama,
-            a.hubungan_keluarga,
-            a.jenis_kelamin,
-            a.tanggal_lahir,
-            a.status_hamil,
-            a.ibu_kandung,
-            a.created_at,
-
-            kk.no_kk,
-
-            s.jenis_shdk AS shdk_nama,
-            b.dbj_nama_bansos AS nama_program,
-            p.pk_nama AS pendidikan,
-            k.pk_nama AS pekerjaan,
-            d.dj_keterangan AS disabilitas
-        ")
-            ->where('a.deleted_at', null)
-            ->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'left')
-            ->join('tb_shdk s', 's.id = a.hubungan_keluarga', 'left')
-            ->join('dtks_bansos_jenis b', 'b.dbj_id = a.program_bansos', 'left')
-            ->join('pendidikan_kk p', 'p.pk_id = a.pendidikan_terakhir', 'left')
-            ->join('tb_penduduk_pekerjaan k', 'k.pk_id = a.pekerjaan', 'left')
-            ->join('tb_disabil_jenis d', 'd.dj_id = a.disabilitas', 'left')
-            ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left');
-
-
-        // --- FILTER WILAYAH ---
-        if ($rw !== '') {
-            $builder->where('rt.rw', $rw);
-            if (!empty($rtList)) {
-                $builder->whereIn('rt.rt', $rtList);
-            }
+        if (!$user) {
+            return $this->jsonError('Akses ditolak.', 403);
         }
 
-        // --- SEARCH ---
+        $kkActive = $this->kkQuery($user)->where('kk.deleted_at', null)->countAllResults();
+        $kkArchivedQuery = $this->kkQuery($user);
+        $this->applyKkStatus($kkArchivedQuery, 'archive');
+        $kkArchived = $kkArchivedQuery->countAllResults();
+
+        $artActive = $this->artQuery($user)
+            ->where('a.deleted_at', null)
+            ->where('kk.deleted_at', null)
+            ->countAllResults();
+        $artArchived = $this->artQuery($user)
+            ->groupStart()
+            ->where('a.deleted_at IS NOT NULL', null, false)
+            ->orWhere('kk.deleted_at IS NOT NULL', null, false)
+            ->groupEnd()
+            ->countAllResults();
+
+        return $this->response->setJSON([
+            'success' => true,
+            'csrfHash' => csrf_hash(),
+            'data' => [
+                'total_kk' => (int) $kkActive,
+                'total_art' => (int) $artActive,
+                'archived_kk' => (int) $kkArchived,
+                'archived_art' => (int) $artArchived,
+            ],
+        ]);
+    }
+
+    public function listKK()
+    {
+        $user = $this->AuthModel->getUserId();
+        if (!$user) {
+            return $this->dataTableError('Akses ditolak.', 403);
+        }
+
+        $post = $this->request->is('get') ? $this->request->getGet() : $this->request->getPost();
+        $status = ($post['status'] ?? 'active') === 'archive' ? 'archive' : 'active';
+        $start = max(0, (int) ($post['start'] ?? 0));
+        $length = min(100, max(1, (int) ($post['length'] ?? 20)));
+        $search = trim((string) ($post['search']['value'] ?? ''));
+
+        $base = $this->kkQuery($user);
+        $this->applyKkStatus($base, $status);
+        $recordsTotal = (int) $base->countAllResults();
+
+        $query = $this->kkQuery($user);
+        $this->applyKkStatus($query, $status);
         if ($search !== '') {
-            $builder->groupStart()
+            $query->groupStart()
+                ->like('kk.no_kk', $search)
+                ->orLike('kk.kepala_keluarga', $search)
+                ->orLike('kk.alamat', $search)
+                ->groupEnd();
+        }
+        if (($post['missing_photo'] ?? '') === '1' && $status === 'active') {
+            $query->groupStart()
+                ->where('kk.foto_kk', null)
+                ->orWhere('kk.foto_kk', '')
+                ->groupEnd();
+        }
+
+        $recordsFiltered = (int) $query->countAllResults(false);
+        $sortColumns = [
+            0 => 'kk.no_kk',
+            1 => 'kk.kepala_keluarga',
+            2 => 'kk.alamat',
+            3 => 'art_count',
+        ];
+        $order = $post['order'][0] ?? [];
+        $column = (int) ($order['column'] ?? 0);
+        $direction = strtolower((string) ($order['dir'] ?? 'asc')) === 'desc' ? 'DESC' : 'ASC';
+
+        $rows = $query
+            ->select(
+                'kk.id_kk, kk.no_kk, kk.kepala_keluarga, kk.alamat, kk.foto_kk, kk.deleted_at, kk.delete_reason, ' .
+                    '(SELECT COUNT(*) FROM dtsen_art a WHERE a.id_kk = kk.id_kk AND a.deleted_at IS NULL) AS active_art_count, ' .
+                    '(SELECT COUNT(*) FROM dtsen_art all_art WHERE all_art.id_kk = kk.id_kk) AS art_count, ' .
+                    '(SELECT COUNT(*) FROM dtsen_art aa WHERE aa.id_kk = kk.id_kk AND aa.deleted_at IS NOT NULL) AS archived_art_count',
+                false
+            )
+            ->orderBy($sortColumns[$column] ?? 'kk.kepala_keluarga', $direction)
+            ->limit($length, $start)
+            ->get()
+            ->getResultArray();
+
+        return $this->response->setJSON([
+            'draw' => (int) ($post['draw'] ?? 1),
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $rows,
+        ]);
+    }
+
+    public function listART()
+    {
+        $user = $this->AuthModel->getUserId();
+        if (!$user) {
+            return $this->dataTableError('Akses ditolak.', 403);
+        }
+
+        $post = $this->request->is('get') ? $this->request->getGet() : $this->request->getPost();
+        $status = ($post['status'] ?? 'active') === 'archive' ? 'archive' : 'active';
+        $idKk = (int) ($post['id_kk'] ?? 0);
+        $start = max(0, (int) ($post['start'] ?? 0));
+        $length = min(100, max(1, (int) ($post['length'] ?? 100)));
+        $search = trim((string) ($post['search']['value'] ?? ''));
+
+        $base = $this->artQuery($user);
+        $this->applyArtStatus($base, $status);
+        if ($idKk > 0) {
+            $base->where('a.id_kk', $idKk);
+        }
+        $recordsTotal = (int) $base->countAllResults();
+
+        $query = $this->artQuery($user);
+        $this->applyArtStatus($query, $status);
+        if ($idKk > 0) {
+            $query->where('a.id_kk', $idKk);
+        }
+        if ($search !== '') {
+            $query->groupStart()
                 ->like('a.nik', $search)
                 ->orLike('a.nama', $search)
                 ->orLike('kk.no_kk', $search)
                 ->groupEnd();
         }
 
-        // --- TOTAL ---
-        $totalRecords = $builder->countAllResults(false);
+        $recordsFiltered = (int) $query->countAllResults(false);
+        $relationColumn = $this->artRelationColumn();
+        $rows = $query
+            ->select(
+                "a.id_art, a.id_kk, a.nik, a.nama, a.{$relationColumn} AS shdk_value, " .
+                    'a.jenis_kelamin, a.tanggal_lahir, a.pekerjaan, a.deleted_at, a.delete_reason, ' .
+                    'kk.no_kk, kk.deleted_at AS kk_deleted_at, sh.jenis_shdk AS shdk_nama, pekerjaan.pk_nama AS pekerjaan_nama',
+                false
+            )
+            ->join('tb_shdk sh', "sh.id = a.{$relationColumn}", 'left')
+            ->join('tb_penduduk_pekerjaan pekerjaan', 'pekerjaan.pk_id = a.pekerjaan', 'left')
+            ->orderBy('a.nama', 'ASC')
+            ->limit($length, $start)
+            ->get()
+            ->getResultArray();
 
-        // --- ORDER ---
-        if (!empty($post['order'][0])) {
-            $columns = [
-                'nik',
-                'nama',
-                'hubungan_keluarga',
-                'jenis_kelamin',
-                'tanggal_lahir',
-                'pendidikan',
-                'pekerjaan',
-                'disabilitas',
-                'status_hamil',
-                'ibu_kandung',
-                'nama_program',
-                'no_kk',
-                'created_at'
-            ];
-            $colIdx = (int)$post['order'][0]['column'];
-            $colName = $columns[$colIdx] ?? 'created_at';
-
-            // a.xxx atau alias lain
-            if (in_array($colName, ['nama_program', 'pendidikan', 'pekerjaan', 'disabilitas', 'no_kk'])) {
-                $builder->orderBy($colName, $post['order'][0]['dir']);
-            } else {
-                $builder->orderBy("a.$colName", $post['order'][0]['dir']);
-            }
-        } else {
-            $builder->orderBy('a.created_at', 'DESC');
-        }
-
-        // --- FETCH ---
-        $data = $builder->limit($length, $start)->get()->getResultArray();
-
-        // --- ENRICH ROWS ---
-        foreach ($data as &$r) {
-
-            // AGE
-            if (!empty($r['tanggal_lahir'])) {
-                $r['age'] = date_diff(date_create($r['tanggal_lahir']), date_create())->y;
-            } else {
-                $r['age'] = null;
+        foreach ($rows as &$row) {
+            $row['age'] = null;
+            if (!empty($row['tanggal_lahir'])) {
+                try {
+                    $row['age'] = (new \DateTime($row['tanggal_lahir']))->diff(new \DateTime())->y;
+                } catch (\Exception $e) {
+                    $row['age'] = null;
+                }
             }
         }
+        unset($row);
 
         return $this->response->setJSON([
-            'draw' => (int)($post['draw'] ?? 1),
-            'recordsTotal' => $totalRecords,
-            'recordsFiltered' => $totalRecords,
-            'data' => $data
+            'draw' => (int) ($post['draw'] ?? 1),
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $rows,
         ]);
     }
 
-    /**
-     * Export current filtered KK / ART as Excel
-     * example: /dtsen/pemeriksaan/export?type=kk&search=xxx
-     */
+    public function quickSearch()
+    {
+        $user = $this->AuthModel->getUserId();
+        if (!$user) {
+            return $this->jsonError('Akses ditolak.', 403);
+        }
+
+        $search = trim((string) $this->request->getGet('q'));
+        if ($search === '') {
+            return $this->response->setJSON(['success' => true, 'data' => ['kk' => [], 'art' => []]]);
+        }
+
+        $kk = $this->kkQuery($user)
+            ->where('kk.deleted_at', null)
+            ->groupStart()
+            ->like('kk.no_kk', $search)
+            ->orLike('kk.kepala_keluarga', $search)
+            ->orLike('kk.alamat', $search)
+            ->groupEnd()
+            ->select('kk.id_kk, kk.no_kk, kk.kepala_keluarga, kk.alamat')
+            ->limit(8)
+            ->get()
+            ->getResultArray();
+
+        $art = $this->artQuery($user)
+            ->where('a.deleted_at', null)
+            ->where('kk.deleted_at', null)
+            ->groupStart()
+            ->like('a.nik', $search)
+            ->orLike('a.nama', $search)
+            ->orLike('kk.no_kk', $search)
+            ->groupEnd()
+            ->select('a.id_art, a.id_kk, a.nik, a.nama, kk.no_kk, kk.kepala_keluarga')
+            ->limit(8)
+            ->get()
+            ->getResultArray();
+
+        return $this->response->setJSON(['success' => true, 'data' => ['kk' => $kk, 'art' => $art]]);
+    }
+
+    public function archiveKK($id_kk)
+    {
+        $user = $this->AuthModel->getUserId();
+        if (!$user) {
+            return $this->jsonError('Akses ditolak.', 403);
+        }
+
+        $kk = $this->findKkInScope((int) $id_kk, $user);
+        if (!$kk) {
+            return $this->jsonError('Data KK tidak ditemukan atau di luar wilayah tugas.', 404);
+        }
+
+        $action = $this->archiveAction();
+        if (!$action) {
+            return $this->jsonError('Aksi arsip tidak valid.', 400);
+        }
+        $now = date('Y-m-d H:i:s');
+        $update = $action === 'archive'
+            ? ['deleted_at' => $now, 'delete_reason' => $this->archiveReason('KK')]
+            : ['deleted_at' => null, 'delete_reason' => null];
+
+        $this->db->table('dtsen_kk')->where('id_kk', (int) $id_kk)->update($update);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => $action === 'archive' ? 'KK berhasil diarsipkan.' : 'KK berhasil dipulihkan.',
+        ]);
+    }
+
+    public function archiveART($id_art)
+    {
+        $user = $this->AuthModel->getUserId();
+        if (!$user) {
+            return $this->jsonError('Akses ditolak.', 403);
+        }
+
+        $art = $this->findArtInScope((int) $id_art, $user);
+        if (!$art) {
+            return $this->jsonError('Data ART tidak ditemukan atau di luar wilayah tugas.', 404);
+        }
+        if (!empty($art['kk_deleted_at'])) {
+            return $this->jsonError('Pulihkan KK terlebih dahulu untuk mengelola arsip ART.', 409);
+        }
+
+        $action = $this->archiveAction();
+        if (!$action) {
+            return $this->jsonError('Aksi arsip tidak valid.', 400);
+        }
+        $update = $action === 'archive'
+            ? ['deleted_at' => date('Y-m-d H:i:s'), 'delete_reason' => $this->archiveReason('ART')]
+            : ['deleted_at' => null, 'delete_reason' => null];
+
+        $this->db->table('dtsen_art')->where('id_art', (int) $id_art)->update($update);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => $action === 'archive' ? 'ART berhasil diarsipkan.' : 'ART berhasil dipulihkan.',
+        ]);
+    }
+
+    public function bulkArchiveKK()
+    {
+        return $this->bulkArchive('kk');
+    }
+
+    public function bulkArchiveART()
+    {
+        return $this->bulkArchive('art');
+    }
+
+    public function ajaxEditKK($id_kk)
+    {
+        $user = $this->AuthModel->getUserId();
+        $kk = $user ? $this->findKkInScope((int) $id_kk, $user) : null;
+        if (!$user) {
+            return $this->jsonError('Akses ditolak.', 403);
+        }
+        if (!$kk || $kk['deleted_at'] !== null) {
+            return $this->jsonError('Data KK aktif tidak ditemukan.', 404);
+        }
+
+        return $this->response->setJSON(['success' => true, 'data' => $kk]);
+    }
+
+    public function ajaxUpdateKK($id_kk)
+    {
+        $user = $this->AuthModel->getUserId();
+        if (!$user) {
+            return $this->jsonError('Akses ditolak.', 403);
+        }
+        $kk = $this->findKkInScope((int) $id_kk, $user);
+        if (!$kk || $kk['deleted_at'] !== null) {
+            return $this->jsonError('Data KK aktif tidak ditemukan.', 404);
+        }
+
+        $post = $this->request->getPost();
+        $noKk = trim((string) ($post['no_kk'] ?? ''));
+        $head = trim((string) ($post['kepala_keluarga'] ?? ''));
+        if ($noKk === '' || $head === '') {
+            return $this->jsonError('Nomor KK dan kepala keluarga wajib diisi.', 422);
+        }
+
+        $update = [
+            'no_kk' => $noKk,
+            'kepala_keluarga' => $head,
+            'alamat' => trim((string) ($post['alamat'] ?? '')),
+            'program_bansos' => trim((string) ($post['program_bansos'] ?? '')) ?: null,
+            'kategori_adat' => trim((string) ($post['kategori_adat'] ?? 'Tidak')),
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updated_by' => $user['nik'] ?? ($user['username'] ?? 'system'),
+        ];
+        $this->updateExistingFields('dtsen_kk', $update, 'id_kk', (int) $id_kk);
+
+        return $this->response->setJSON(['success' => true, 'message' => 'Data KK berhasil diperbarui.']);
+    }
+
+    public function ajaxEditART($id_art)
+    {
+        $user = $this->AuthModel->getUserId();
+        if (!$user) {
+            return $this->jsonError('Akses ditolak.', 403);
+        }
+        $art = $this->findArtInScope((int) $id_art, $user);
+        if (!$art || $art['deleted_at'] !== null || $art['kk_deleted_at'] !== null) {
+            return $this->jsonError('Data ART aktif tidak ditemukan.', 404);
+        }
+
+        $art['shdk'] = $art[$this->artRelationColumn()] ?? '';
+        return $this->response->setJSON(['success' => true, 'data' => $art]);
+    }
+
+    public function ajaxUpdateART($id_art)
+    {
+        $user = $this->AuthModel->getUserId();
+        if (!$user) {
+            return $this->jsonError('Akses ditolak.', 403);
+        }
+        $art = $this->findArtInScope((int) $id_art, $user);
+        if (!$art || $art['deleted_at'] !== null || $art['kk_deleted_at'] !== null) {
+            return $this->jsonError('Data ART aktif tidak ditemukan.', 404);
+        }
+
+        $post = $this->request->getPost();
+        $name = trim((string) ($post['nama'] ?? ''));
+        $nik = trim((string) ($post['nik'] ?? ''));
+        if ($name === '') {
+            return $this->jsonError('Nama ART wajib diisi.', 422);
+        }
+        if ($nik !== '' && !preg_match('/^\d{16}$/', $nik)) {
+            return $this->jsonError('NIK harus berisi 16 digit atau dikosongkan.', 422);
+        }
+        $nikChanged = $nik !== '' && $nik !== (string) ($art['nik'] ?? '');
+        if ($nikChanged) {
+            if (trim((string) ($post['reason_nik'] ?? '')) === '') {
+                return $this->jsonError('Perubahan NIK harus disertai alasan.', 422);
+            }
+            $auditFields = ['entity', 'entity_id', 'field', 'old_value', 'new_value', 'reason', 'changed_by', 'changed_at'];
+            if (!$this->db->tableExists('dtsen_audit')) {
+                return $this->jsonError('Perubahan NIK dibatalkan karena tabel audit belum tersedia.', 409);
+            }
+            foreach ($auditFields as $field) {
+                if (!$this->db->fieldExists($field, 'dtsen_audit')) {
+                    return $this->jsonError('Perubahan NIK dibatalkan karena struktur audit belum lengkap.', 409);
+                }
+            }
+            $duplicate = $this->db->table('dtsen_art')
+                ->where('nik', $nik)
+                ->where('id_art !=', (int) $id_art)
+                ->where('deleted_at', null)
+                ->countAllResults();
+            if ($duplicate > 0) {
+                return $this->jsonError('NIK sudah digunakan ART lain.', 409);
+            }
+        }
+
+        $relationColumn = $this->artRelationColumn();
+        $update = [
+            'nik' => $nik !== '' ? $nik : null,
+            'nama' => $name,
+            $relationColumn => trim((string) ($post['shdk'] ?? '')) ?: null,
+            'jenis_kelamin' => trim((string) ($post['jenis_kelamin'] ?? '')) ?: null,
+            'tanggal_lahir' => trim((string) ($post['tanggal_lahir'] ?? '')) ?: null,
+            'pendidikan_terakhir' => trim((string) ($post['pendidikan_terakhir'] ?? '')) ?: null,
+            'pekerjaan' => trim((string) ($post['pekerjaan'] ?? '')) ?: null,
+            'disabilitas' => trim((string) ($post['disabilitas'] ?? '')) ?: null,
+            'status_hamil' => ($post['status_hamil'] ?? 'Tidak') === 'Ya' ? 'Ya' : 'Tidak',
+            'ibu_kandung' => trim((string) ($post['ibu_kandung'] ?? '')) ?: null,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updated_by' => $user['nik'] ?? ($user['username'] ?? 'system'),
+        ];
+        $this->db->transBegin();
+        if ($nikChanged) {
+            $this->db->table('dtsen_audit')->insert([
+                'entity' => 'dtsen_art',
+                'entity_id' => (int) $id_art,
+                'field' => 'nik',
+                'old_value' => $art['nik'] ?? null,
+                'new_value' => $nik,
+                'reason' => trim((string) $post['reason_nik']),
+                'changed_by' => $user['nik'] ?? ($user['username'] ?? 'system'),
+                'changed_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+        $this->updateExistingFields('dtsen_art', $update, 'id_art', (int) $id_art);
+        if (!$this->db->transStatus()) {
+            $this->db->transRollback();
+            return $this->jsonError('Perubahan ART gagal disimpan; tidak ada perubahan yang diterapkan.', 500);
+        }
+        $this->db->transCommit();
+
+        return $this->response->setJSON(['success' => true, 'message' => 'Data ART berhasil diperbarui.']);
+    }
+
+    public function lookupShdk()
+    {
+        return $this->lookup('tb_shdk', 'id', 'jenis_shdk');
+    }
+
+    public function lookupPendidikan()
+    {
+        return $this->lookup('pendidikan_kk', 'pk_id', 'pk_nama');
+    }
+
+    public function lookupPekerjaan()
+    {
+        return $this->lookup('tb_penduduk_pekerjaan', 'pk_id', 'pk_nama');
+    }
+
+    public function lookupDisabilitas()
+    {
+        return $this->lookup('tb_disabil_jenis', 'dj_id', 'dj_keterangan');
+    }
+
     public function export()
     {
-        $type = $this->request->getGet('type') ?? 'kk';
-        $search = $this->request->getGet('search') ?? '';
-
-        // apply same wilayah restriction
         $user = $this->AuthModel->getUserId();
-        $wil = $user['wilayah_tugas'] ?? '';
-        [$rw, $rtList] = $this->parseWilayah($wil);
+        if (!$user) {
+            return redirect()->to('/login');
+        }
 
+        $type = $this->request->getGet('type') === 'art' ? 'art' : 'kk';
+        $status = $this->request->getGet('status') === 'archive' ? 'archive' : 'active';
+        $search = trim((string) $this->request->getGet('q'));
+        $idKk = (int) $this->request->getGet('id_kk');
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
         if ($type === 'art') {
-            $sheet->setCellValue('A1', 'NIK');
-            $sheet->setCellValue('B1', 'Nama');
-            $sheet->setCellValue('C1', 'SHDK');
-            $sheet->setCellValue('D1', 'Jenis Kelamin');
-            $sheet->setCellValue('E1', 'Tanggal Lahir');
-            $sheet->setCellValue('F1', 'Umur');
-            $sheet->setCellValue('G1', 'Pendidikan');
-            $sheet->setCellValue('H1', 'Pekerjaan');
-            $sheet->setCellValue('I1', 'Disabilitas');
-            $sheet->setCellValue('J1', 'Status Hamil');
-            $sheet->setCellValue('K1', 'Ibu Kandung');
-            $sheet->setCellValue('L1', 'Program Bansos');
-            $sheet->setCellValue('M1', 'No KK');
-            $sheet->setCellValue('N1', 'Created At');
-
-            $builder = $this->db->table('dtsen_art as a')->select('a.nik,a.nama,a.shdk,a.jenis_kelamin,a.tanggal_lahir,a.pendidikan_terakhir,a.pekerjaan,a.disabilitas,a.status_hamil,a.ibu_kandung,a.program_bansos,kk.no_kk,a.created_at')
-                ->join('dtsen_kk kk', 'kk.id_kk=a.id_kk', 'left')
-                ->join('dtsen_rt rt', 'rt.id_rt=kk.id_rt', 'left');
-
-            if ($rw !== '') {
-                $builder->where('rt.rw', $rw);
-                if (!empty($rtList)) $builder->whereIn('rt.rt', $rtList);
+            $query = $this->artQuery($user);
+            $this->applyArtStatus($query, $status);
+            if ($idKk > 0) {
+                $query->where('a.id_kk', $idKk);
             }
-            if (!empty($search)) $builder->groupStart()->like('a.nik', $search)->orLike('a.nama', $search)->groupEnd();
-
-            $rows = $builder->get()->getResultArray();
-            $i = 2;
-            foreach ($rows as $r) {
-                $age = !empty($r['tanggal_lahir']) ? date_diff(date_create($r['tanggal_lahir']), date_create(date('Y-m-d')))->y : '';
-                $sheet->fromArray([
-                    $r['nik'],
-                    $r['nama'],
-                    $r['shdk'],
-                    $r['jenis_kelamin'],
-                    $r['tanggal_lahir'],
-                    $age,
-                    $r['pendidikan_terakhir'],
-                    $r['pekerjaan'],
-                    $r['disabilitas'],
-                    $r['status_hamil'],
-                    $r['ibu_kandung'],
-                    $r['program_bansos'],
-                    $r['no_kk'],
-                    $r['created_at']
-                ], null, "A{$i}");
-                $i++;
+            if ($search !== '') {
+                $query->groupStart()->like('a.nik', $search)->orLike('a.nama', $search)->groupEnd();
+            }
+            $rows = $query
+                ->select('a.nik, a.nama, a.jenis_kelamin, a.tanggal_lahir, a.pekerjaan, a.pendidikan_terakhir, a.disabilitas, kk.no_kk')
+                ->orderBy('kk.no_kk', 'ASC')
+                ->orderBy('a.nama', 'ASC')
+                ->get()
+                ->getResultArray();
+            $sheet->fromArray(['NIK', 'Nama', 'Jenis Kelamin', 'Tanggal Lahir', 'Pekerjaan', 'Pendidikan', 'Disabilitas', 'No. KK'], null, 'A1');
+            if ($rows) {
+                $sheet->fromArray(array_values($rows), null, 'A2');
             }
         } else {
-            // default KK export
-            $sheet->setCellValue('A1', 'No KK');
-            $sheet->setCellValue('B1', 'Kepala Keluarga');
-            $sheet->setCellValue('C1', 'Alamat');
-            $sheet->setCellValue('D1', 'Jumlah Anggota (field)');
-            $sheet->setCellValue('E1', 'Jumlah ART (actual)');
-            $sheet->setCellValue('F1', 'Foto KK');
-            $sheet->setCellValue('G1', 'Foto Rumah');
-            $sheet->setCellValue('H1', 'Foto Rumah Dalam');
-            $sheet->setCellValue('I1', 'Program Bansos');
-            $sheet->setCellValue('J1', 'Kategori Adat');
-            $sheet->setCellValue('K1', 'Created At');
-
-            $builder = $this->db->table('dtsen_kk as kk')->select('kk.no_kk,kk.kepala_keluarga,kk.alamat,kk.jumlah_anggota,kk.foto_kk,kk.foto_rumah,kk.foto_rumah_dalam,kk.program_bansos,kk.kategori_adat,kk.created_at')
-                ->join('dtsen_rt rt', 'rt.id_rt=kk.id_rt', 'left');
-
-            if ($rw !== '') {
-                $builder->where('rt.rw', $rw);
-                if (!empty($rtList)) $builder->whereIn('rt.rt', $rtList);
+            $query = $this->kkQuery($user);
+            $this->applyKkStatus($query, $status);
+            if ($search !== '') {
+                $query->groupStart()->like('kk.no_kk', $search)->orLike('kk.kepala_keluarga', $search)->orLike('kk.alamat', $search)->groupEnd();
             }
-            if (!empty($search)) $builder->groupStart()->like('kk.no_kk', $search)->orLike('kk.kepala_keluarga', $search)->groupEnd();
-
-            $rows = $builder->get()->getResultArray();
-            $i = 2;
-            foreach ($rows as $r) {
-                $cnt = $this->db->table('dtsen_art')->where('id_kk', $r['id_kk'] ?? 0)->countAllResults();
-                $sheet->fromArray([
-                    $r['no_kk'],
-                    $r['kepala_keluarga'],
-                    $r['alamat'],
-                    $r['jumlah_anggota'],
-                    $cnt,
-                    $r['foto_kk'],
-                    $r['foto_rumah'],
-                    $r['foto_rumah_dalam'],
-                    $r['program_bansos'],
-                    $r['kategori_adat'],
-                    $r['created_at']
-                ], null, "A{$i}");
-                $i++;
+            $rows = $query
+                ->select('kk.no_kk, kk.kepala_keluarga, kk.alamat, kk.jumlah_anggota, kk.foto_kk, kk.program_bansos')
+                ->orderBy('kk.no_kk', 'ASC')
+                ->get()
+                ->getResultArray();
+            $sheet->fromArray(['No. KK', 'Kepala Keluarga', 'Alamat', 'Jumlah Anggota', 'Foto KK', 'Program Bansos'], null, 'A1');
+            if ($rows) {
+                $sheet->fromArray(array_values($rows), null, 'A2');
             }
         }
 
-        // writer
-        $filename = "export_{$type}_" . date('Ymd_His') . ".xlsx";
+        $filename = "pemeriksaan_{$type}_{$status}_" . date('Ymd_His') . '.xlsx';
         $writer = new Xlsx($spreadsheet);
-
-        // send to browser
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         $writer->save('php://output');
         exit;
     }
 
-    /**
-     * helper parse wilayah_tugas: "RW:RT,RT" => [rw, [rt,...]]
-     */
-    protected function parseWilayah($wil)
-    {
-        $rw = '';
-        $rts = [];
-        if (!empty($wil)) {
-            [$rwPart, $rtPart] = array_pad(explode(':', $wil), 2, '');
-            $rw = trim($rwPart);
-            $rts = !empty($rtPart) ? array_map('trim', explode(',', $rtPart)) : [];
-        }
-        return [$rw, $rts];
-    }
-
     public function detailKK($id_kk)
     {
-        // keamanan
         $user = $this->AuthModel->getUserId();
-        if (!$user) return "Akses ditolak";
-
-        // ============================
-        // 1) Ambil DATA KK + JOIN BANSOS + RT
-        // ============================
-        $kk = $this->db->table('dtsen_kk as kk')
+        if (!$user) {
+            return $this->response->setStatusCode(403)->setBody('Akses ditolak.');
+        }
+        $kk = $this->kkQuery($user)
             ->select('kk.*, rt.rw, rt.rt, dbj.dbj_nama_bansos')
-            ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
             ->join('dtks_bansos_jenis dbj', 'dbj.dbj_id = kk.program_bansos', 'left')
-            ->where('kk.id_kk', $id_kk)
-            ->get()->getRowArray();
+            ->where('kk.id_kk', (int) $id_kk)
+            ->get()
+            ->getRowArray();
+        if (!$kk) {
+            return $this->response->setStatusCode(404)->setBody('Data KK tidak ditemukan.');
+        }
 
-        if (!$kk) return "Data KK tidak ditemukan.";
+        $arts = $this->artQuery($user)
+            ->where('a.id_kk', (int) $id_kk)
+            ->where('a.deleted_at', null)
+            ->select('a.*, sh.jenis_shdk, pendidikan.pk_nama AS pendidikan_nama, pekerjaan.pk_nama AS pekerjaan_nama')
+            ->join('tb_shdk sh', 'sh.id = a.' . $this->artRelationColumn(), 'left')
+            ->join('pendidikan_kk pendidikan', 'pendidikan.pk_id = a.pendidikan_terakhir', 'left')
+            ->join('tb_penduduk_pekerjaan pekerjaan', 'pekerjaan.pk_id = a.pekerjaan', 'left')
+            ->orderBy('a.nama', 'ASC')
+            ->get()
+            ->getResultArray();
 
-        // ============================
-        // 2) Ambil DATA ART + JOIN SHDK + Pendidikan + Pekerjaan + Bansos
-        // ============================
-        $arts = $this->db->table('dtsen_art as a')
-            ->select("
-            a.*,
-            sh.jenis_shdk,
-            pk.pk_nama as pendidikan_nama,
-            pj.pk_nama as pekerjaan_nama,
-            dbj.dbj_nama_bansos as bantuan_nama
-        ")
-            ->join('tb_shdk sh', 'sh.id = a.shdk', 'left')
-            ->join('pendidikan_kk pk', 'pk.pk_id = a.pendidikan_terakhir', 'left')
-            ->join('tb_penduduk_pekerjaan pj', 'pj.pk_id = a.pekerjaan', 'left')
-            ->join('dtks_bansos_jenis dbj', 'dbj.dbj_id = a.program_bansos', 'left')
-            ->where('a.id_kk', $id_kk)
-            ->orderBy('a.shdk', 'ASC')
-            ->get()->getResultArray();
-
-        // hitung anggota secara dinamis
-        $jumlahAnggota = $this->db->table('dtsen_art')
-            ->where('id_kk', $id_kk)
-            ->countAllResults();
-
-        // ============================
-        // 3) Kirim ke VIEW
-        // ============================
-        return view('dtsen/pemeriksaan/detail_kk', [
-            'kk'   => $kk,
-            'arts' => $arts,
-            'jumlahAnggota' => $jumlahAnggota
-        ]);
+        return view('dtsen/pemeriksaan/detail_kk', ['kk' => $kk, 'arts' => $arts, 'jumlahAnggota' => count($arts)]);
     }
 
     public function detailART($id_art)
     {
         $user = $this->AuthModel->getUserId();
-        if (!$user) return "Akses ditolak";
+        if (!$user) {
+            return $this->response->setStatusCode(403)->setBody('Akses ditolak.');
+        }
+        $art = $this->artQuery($user)
+            ->select('a.*, kk.no_kk, kk.kepala_keluarga, rt.rw, rt.rt, sh.jenis_shdk, pendidikan.pk_nama AS pendidikan_nama, pekerjaan.pk_nama AS pekerjaan_nama, bansos.dbj_nama_bansos AS bantuan_nama')
+            ->join('tb_shdk sh', 'sh.id = a.' . $this->artRelationColumn(), 'left')
+            ->join('pendidikan_kk pendidikan', 'pendidikan.pk_id = a.pendidikan_terakhir', 'left')
+            ->join('tb_penduduk_pekerjaan pekerjaan', 'pekerjaan.pk_id = a.pekerjaan', 'left')
+            ->join('dtks_bansos_jenis bansos', 'bansos.dbj_id = a.program_bansos', 'left')
+            ->where('a.id_art', (int) $id_art)
+            ->get()
+            ->getRowArray();
+        if (!$art) {
+            return $this->response->setStatusCode(404)->setBody('Data ART tidak ditemukan.');
+        }
 
-        // Ambil data ART dan KK
-        $art = $this->db->table('dtsen_art as a')
-            ->select('a.*, kk.no_kk, kk.kepala_keluarga, rt.rw, rt.rt')
+        return view('dtsen/pemeriksaan/detail_art', ['art' => $art]);
+    }
+
+    protected function kkQuery(array $user)
+    {
+        $builder = $this->db->table('dtsen_kk kk')
+            ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left');
+        return $this->applyWilayahScope($builder, $user);
+    }
+
+    protected function artQuery(array $user)
+    {
+        $builder = $this->db->table('dtsen_art a')
             ->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'left')
-            ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
-            ->where('a.id_art', $id_art)
-            ->get()->getRowArray();
-
-        if (!$art) return "Data ART tidak ditemukan.";
-
-        // ============================================
-        // 🔍 Parse JSON Program Bansos
-        // ============================================
-
-        $rawJson = trim((string) $art['program_bansos']);
-        $json = json_decode($rawJson, true);
-
-        if (!is_array($json)) $json = [];
-
-        // Normalisasi key lowercase
-        $jsonNorm = [];
-        foreach ($json as $k => $v) {
-            $jsonNorm[strtolower(trim($k))] = (int) $v;
-        }
-
-        // Mapping
-        $map = [
-            'pkh'  => 'PKH',
-            'bpnt' => 'BPNT',
-            'bst'  => 'BST',
-            'pbi'  => 'PBI'
-        ];
-
-        $aktif = [];
-        foreach ($map as $kode => $nama) {
-            if (isset($jsonNorm[$kode]) && $jsonNorm[$kode] == 1) {
-                $aktif[] = $nama;
-            }
-        }
-
-        $art['bantuan_nama'] = $aktif ? implode(', ', $aktif) : '-';
-
-        // ============================================
-        // 🔍 Join SHDK, Pendidikan, Pekerjaan
-        // ============================================
-
-        // SHDK
-        $shdk = $this->db->table('tb_shdk')->where('id', $art['shdk'])->get()->getRowArray();
-        $art['jenis_shdk'] = $shdk['jenis_shdk'] ?? '-';
-
-        // Pendidikan
-        $pk = $this->db->table('pendidikan_kk')->where('pk_id', $art['pendidikan_terakhir'])->get()->getRowArray();
-        $art['pendidikan_nama'] = $pk['pk_nama'] ?? '-';
-
-        // Pekerjaan
-        $job = $this->db->table('tb_penduduk_pekerjaan')->where('pk_id', $art['pekerjaan'])->get()->getRowArray();
-        $art['pekerjaan_nama'] = $job['pk_nama'] ?? '-';
-
-        // ============================================
-        return view('dtsen/pemeriksaan/detail_art', [
-            'art' => $art
-        ]);
+            ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left');
+        return $this->applyWilayahScope($builder, $user);
     }
 
-    /**
-     * AJAX: render form edit KK (modal)
-     */
-    public function ajaxEditKK($id_kk)
+    protected function applyWilayahScope($builder, array $user)
     {
-        $user = $this->AuthModel->getUserId();
-        if (!$user) return $this->response->setStatusCode(403)->setBody('Akses ditolak');
-
-        // ambil KK dengan RT/RW untuk validasi wilayah
-        $kk = $this->db->table('dtsen_kk kk')
-            ->select('kk.*, rt.rw, rt.rt')
-            ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
-            ->where('kk.id_kk', (int)$id_kk)
-            ->get()->getRowArray();
-
-        if (!$kk) return $this->response->setStatusCode(404)->setBody('Data KK tidak ditemukan');
-
-        // cek wilayah user (boleh jika admin atau wilayah sesuai)
-        [$rwUser, $rtUser] = $this->parseWilayah($user['wilayah_tugas'] ?? '');
-        if (!empty($rwUser) && $rwUser !== $kk['rw']) {
-            // jika user punya wilayah spesifik dan tidak cocok => tolak
-            return $this->response->setStatusCode(403)->setBody('Akses wilayah tidak diperbolehkan');
+        $roleId = (int) ($user['role_id'] ?? 99);
+        if ($roleId === 1) {
+            return $builder;
         }
 
-        // ambil count actual anggota
-        $arts = $this->db->table('dtsen_art')->where('id_kk', $id_kk)->get()->getResultArray();
+        if ($roleId === 2) {
+            $kodeKecamatan = trim((string) ($user['kode_kec'] ?? ''));
+            if ($kodeKecamatan === '') {
+                return $builder->where('1 = 0', null, false);
+            }
 
-        return view('dtsen/pemeriksaan/edit_kk_modal', [
-            'kk' => $kk,
-            'arts_count' => count($arts)
-        ]);
+            return $builder
+                ->join('tb_villages pemeriksaan_village', 'pemeriksaan_village.id = rt.kode_desa', 'left')
+                ->where('pemeriksaan_village.district_id', $kodeKecamatan);
+        }
+
+        if ($roleId === 3 || $roleId >= 4) {
+            $kodeDesa = trim((string) ($user['kode_desa'] ?? ''));
+            if ($kodeDesa === '') {
+                return $builder->where('1 = 0', null, false);
+            }
+
+            if ($roleId === 3) {
+                return $builder->where('rt.kode_desa', $kodeDesa);
+            }
+
+            $wilayahTugas = trim((string) ($user['wilayah_tugas'] ?? ''));
+            $level = trim((string) ($user['level'] ?? ''));
+            if ($wilayahTugas === '' && $level === '') {
+                return $builder->where('1 = 0', null, false);
+            }
+
+            return $this->applyWilayahFilter($builder, [
+                'kode_desa' => $kodeDesa,
+                'wilayah_tugas' => $wilayahTugas,
+                'level' => $level,
+            ], $roleId);
+        }
+
+        return $builder->where('1 = 0', null, false);
     }
 
-    /**
-     * AJAX: proses update KK (dari modal)
-     */
-    public function ajaxUpdateKK($id_kk)
+    protected function applyKkStatus($builder, string $status): void
     {
-        log_message('error', "===> MASUK ajaxUpdateKK dengan ID: $id_kk");
-
-        try {
-            $user = $this->AuthModel->getUserId();
-            if (!$user) {
-                return $this->response->setJSON(['success' => false, 'message' => 'Akses ditolak'])->setStatusCode(403);
-            }
-
-            $post = $this->request->getPost();
-            $no_kk = trim((string)($post['no_kk'] ?? ''));
-            $kepala = trim((string)($post['kepala_keluarga'] ?? ''));
-            $alamat = trim((string)($post['alamat'] ?? ''));
-            $program = trim((string)($post['program_bansos'] ?? ''));
-            $kategori_adat = trim((string)($post['kategori_adat'] ?? 'Tidak'));
-
-            // ambil KK untuk verifikasi wilayah & existing data
-            $kk = $this->db->table('dtsen_kk kk')
-                ->select('kk.*, rt.rw, rt.rt')
-                ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
-                ->where('kk.id_kk', (int)$id_kk)
-                ->get()->getRowArray();
-
-            if (!$kk) return $this->response->setJSON(['success' => false, 'message' => 'Data KK tidak ditemukan.'])->setStatusCode(404);
-
-            // cek wilayah user
-            [$rwUser, $rtUser] = $this->parseWilayah($user['wilayah_tugas'] ?? '');
-            if (!empty($rwUser) && $rwUser !== $kk['rw']) {
-                return $this->response->setJSON(['success' => false, 'message' => 'Akses wilayah tidak diperbolehkan.'])->setStatusCode(403);
-            }
-
-            // Basic validation
-            if ($no_kk === '' || $kepala === '') {
-                return $this->response->setJSON(['success' => false, 'message' => 'No KK dan Kepala keluarga wajib diisi.']);
-            }
-
-            // update
-            $updateData = [
-                'no_kk' => $no_kk,
-                'kepala_keluarga' => $kepala,
-                'alamat' => $alamat,
-                'program_bansos' => $program,
-                'kategori_adat' => $kategori_adat,
-                'updated_at' => date('Y-m-d H:i:s'),
-                'updated_by' => $user['nik'] ?? ($user['username'] ?? 'system')
-            ];
-
-            $this->db->table('dtsen_kk')->where('id_kk', (int)$id_kk)->update($updateData);
-
-            return $this->response->setJSON(['success' => true, 'message' => 'Data KK berhasil diperbarui.']);
-        } catch (\Throwable $e) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+        if ($status === 'archive') {
+            $builder->groupStart()
+                ->where('kk.deleted_at IS NOT NULL', null, false)
+                ->orWhere(
+                    '(SELECT COUNT(*) FROM dtsen_art aa WHERE aa.id_kk = kk.id_kk AND aa.deleted_at IS NOT NULL) >',
+                    0,
+                    false
+                )
+                ->groupEnd();
+        } else {
+            $builder->where('kk.deleted_at', null);
         }
     }
 
-    /**
-     * AJAX: render form edit ART (modal)
-     */
-    /**
-     * AJAX: render form edit ART (modal)
-     */
-    public function ajaxEditART($id_art)
+    protected function applyArtStatus($builder, string $status): void
+    {
+        if ($status === 'archive') {
+            $builder->groupStart()
+                ->where('a.deleted_at IS NOT NULL', null, false)
+                ->orWhere('kk.deleted_at IS NOT NULL', null, false)
+                ->groupEnd();
+        } else {
+            $builder->where('a.deleted_at', null)->where('kk.deleted_at', null);
+        }
+    }
+
+    protected function findKkInScope(int $id, array $user): ?array
+    {
+        $row = $this->kkQuery($user)
+            ->where('kk.id_kk', $id)
+            ->select('kk.*')
+            ->get()
+            ->getRowArray();
+        return $row ?: null;
+    }
+
+    protected function findArtInScope(int $id, array $user): ?array
+    {
+        $row = $this->artQuery($user)
+            ->where('a.id_art', $id)
+            ->select('a.*, kk.deleted_at AS kk_deleted_at, kk.no_kk, kk.kepala_keluarga')
+            ->get()
+            ->getRowArray();
+        return $row ?: null;
+    }
+
+    protected function artRelationColumn(): string
+    {
+        return $this->db->fieldExists('shdk', 'dtsen_art') ? 'shdk' : 'hubungan_keluarga';
+    }
+
+    protected function archiveAction(): ?string
+    {
+        $action = (string) ($this->request->getPost('action') ?? 'archive');
+        return in_array($action, ['archive', 'restore'], true) ? $action : null;
+    }
+
+    protected function archiveReason(string $entity): string
+    {
+        $reason = trim((string) ($this->request->getPost('reason') ?? ''));
+        return $reason !== '' ? mb_substr($reason, 0, 1000) : "Diarsipkan melalui Workspace Pemeriksaan {$entity}.";
+    }
+
+    protected function bulkArchive(string $entity)
     {
         $user = $this->AuthModel->getUserId();
         if (!$user) {
-            return $this->response->setStatusCode(403)->setBody('Akses ditolak');
+            return $this->jsonError('Akses ditolak.', 403);
+        }
+        $action = $this->archiveAction();
+        $ids = $this->request->getPost('ids') ?? [];
+        if (!$action || !is_array($ids) || !$ids || count($ids) > 100) {
+            return $this->jsonError('Pilihan aksi atau jumlah data tidak valid.', 422);
+        }
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids), static fn($id) => $id > 0)));
+        if (!$ids) {
+            return $this->jsonError('Pilih setidaknya satu data.', 422);
         }
 
-        // --- Ambil data ART + KK + RT untuk validasi wilayah ---
-        $art = $this->db->table('dtsen_art a')
-            ->select('a.*, kk.no_kk, kk.kepala_keluarga, rt.rw, rt.rt')
-            ->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'left')
-            ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
-            ->where('a.id_art', (int)$id_art)
-            ->get()->getRowArray();
-
-        if (!$art) {
-            return $this->response->setStatusCode(404)->setBody('Data ART tidak ditemukan');
+        if ($entity === 'kk') {
+            $builder = $this->kkQuery($user)->whereIn('kk.id_kk', $ids)->select('kk.id_kk');
+            if ($action === 'archive') {
+                $builder->where('kk.deleted_at', null);
+            } else {
+                $builder->where('kk.deleted_at IS NOT NULL', null, false);
+            }
+            $table = 'dtsen_kk';
+            $key = 'id_kk';
+        } else {
+            $builder = $this->artQuery($user)->whereIn('a.id_art', $ids)->select('a.id_art');
+            $builder->where('kk.deleted_at', null);
+            if ($action === 'archive') {
+                $builder->where('a.deleted_at', null);
+            } else {
+                $builder->where('a.deleted_at IS NOT NULL', null, false);
+            }
+            $table = 'dtsen_art';
+            $key = 'id_art';
+        }
+        $allowedIds = array_map('intval', array_column($builder->get()->getResultArray(), $key));
+        if (!$allowedIds) {
+            return $this->jsonError('Tidak ada data yang dapat diproses dalam wilayah tugas.', 403);
         }
 
-        // --- Validasi Wilayah User ---
-        [$rwUser, $rtUser] = $this->parseWilayah($user['wilayah_tugas'] ?? '');
-        if (!empty($rwUser) && $rwUser !== $art['rw']) {
-            return $this->response->setStatusCode(403)->setBody('Akses wilayah tidak diperbolehkan');
-        }
+        $update = $action === 'archive'
+            ? ['deleted_at' => date('Y-m-d H:i:s'), 'delete_reason' => $this->archiveReason(strtoupper($entity))]
+            : ['deleted_at' => null, 'delete_reason' => null];
+        $this->db->table($table)->whereIn($key, $allowedIds)->update($update);
 
-        // ======================================================
-        // LOOKUP OPTIONS (SEMUA DIAMBIL DARI DATABASE)
-        // ======================================================
-
-        // SHDK dari tabel `tb_shdk`
-        $shdk_list = $this->db->table('tb_shdk')
-            ->select('id, jenis_shdk')
-            ->orderBy('id', 'ASC')
-            ->get()->getResultArray();
-
-        // Pendidikan dari `pendidikan_kk`
-        $pendidikan_list = $this->db->table('pendidikan_kk')
-            ->select('pk_id, pk_nama')
-            ->orderBy('pk_id', 'ASC')
-            ->get()->getResultArray();
-
-        // Pekerjaan dari `tb_penduduk_pekerjaan`
-        $pekerjaan_list = $this->db->table('tb_penduduk_pekerjaan')
-            ->select('pk_id, pk_nama')
-            ->orderBy('pk_id', 'ASC')
-            ->get()->getResultArray();
-
-        // Disabilitas dari `tb_disabil_jenis`
-        $disabilitas_list = $this->db->table('tb_disabil_jenis')
-            ->select('dj_id, dj_keterangan')
-            ->orderBy('dj_id', 'ASC')
-            ->get()->getResultArray();
-
-        // ======================================================
-        // KIRIM VIEW MODAL
-        // ======================================================
-
-        return view('dtsen/pemeriksaan/edit_art_modal', [
-            'art' => $art,
-            'shdk_list' => $shdk_list,
-            'pendidikan_list' => $pendidikan_list,
-            'pekerjaan_list' => $pekerjaan_list,
-            'disabilitas_list' => $disabilitas_list
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => count($allowedIds) . ' data berhasil ' . ($action === 'archive' ? 'diarsipkan.' : 'dipulihkan.'),
+            'data' => ['success' => count($allowedIds), 'failed' => count($ids) - count($allowedIds)],
         ]);
     }
 
-    /**
-     * AJAX: proses update ART (dari modal)
-     */
-    public function ajaxUpdateART($id_art)
+    protected function updateExistingFields(string $table, array $data, string $key, int $id): void
     {
-        try {
-            $user = $this->AuthModel->getUserId();
-            if (!$user) {
-                return $this->response->setJSON(['success' => false, 'message' => 'Akses ditolak'])->setStatusCode(403);
-            }
+        $available = array_filter(
+            $data,
+            fn($value, $field) => $this->db->fieldExists($field, $table),
+            ARRAY_FILTER_USE_BOTH
+        );
+        $this->db->table($table)->where($key, $id)->update($available);
+    }
 
-            $post = $this->request->getPost();
-            $newNik = trim((string)($post['nik'] ?? ''));
-            $newNama = trim((string)($post['nama'] ?? ''));
-            $newShdk = $post['shdk'] ?? null;
-            $newJk = trim((string)($post['jenis_kelamin'] ?? ''));
-            $newTgl = trim((string)($post['tanggal_lahir'] ?? ''));
-            $newPendidikan = trim((string)($post['pendidikan_terakhir'] ?? ''));
-            $newPekerjaan = trim((string)($post['pekerjaan'] ?? ''));
-            $newDisabilitas = trim((string)($post['disabilitas'] ?? ''));
-            $newStatusHamil = trim((string)($post['status_hamil'] ?? 'Tidak'));
-            $newIbu = trim((string)($post['ibu_kandung'] ?? ''));
-            $reasonNik = trim((string)($post['reason_nik'] ?? ''));
-
-            // ambil existing ART
-            $art = $this->db->table('dtsen_art a')
-                ->select('a.*, kk.no_kk, rt.rw, rt.rt')
-                ->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'left')
-                ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
-                ->where('a.id_art', (int)$id_art)
-                ->get()->getRowArray();
-
-            if (!$art) return $this->response->setJSON(['success' => false, 'message' => 'Data ART tidak ditemukan.'])->setStatusCode(404);
-
-            // cek wilayah user
-            [$rwUser, $rtUser] = $this->parseWilayah($user['wilayah_tugas'] ?? '');
-            if (!empty($rwUser) && $rwUser !== $art['rw']) {
-                return $this->response->setJSON(['success' => false, 'message' => 'Akses wilayah tidak diperbolehkan.'])->setStatusCode(403);
-            }
-
-            // validasi minimal
-            if ($newNama === '') {
-                return $this->response->setJSON(['success' => false, 'message' => 'Nama wajib diisi.']);
-            }
-
-            // jika NIK diubah, wajib alasan
-            if ($newNik !== '' && $newNik !== ($art['nik'] ?? '')) {
-                if ($reasonNik === '') {
-                    return $this->response->setJSON(['success' => false, 'message' => 'Perubahan NIK harus disertai alasan.']);
-                }
-                // cek unik NIK
-                $exists = $this->db->table('dtsen_art')->where('nik', $newNik)->where('id_art !=', $id_art)->countAllResults();
-                if ($exists > 0) {
-                    return $this->response->setJSON(['success' => false, 'message' => 'NIK sudah terdaftar pada ART lain.']);
-                }
-                // simpan log perubahan NIK ke tabel audit (opsional) -> contoh sederhana
-                $this->db->table('dtsen_audit')->insert([
-                    'entity' => 'dtsen_art',
-                    'entity_id' => $id_art,
-                    'field' => 'nik',
-                    'old_value' => $art['nik'],
-                    'new_value' => $newNik,
-                    'reason' => $reasonNik,
-                    'changed_by' => $user['nik'] ?? ($user['username'] ?? 'system'),
-                    'changed_at' => date('Y-m-d H:i:s')
-                ]);
-            }
-
-            // disallow edit foto via modal (keputusan)
-            // jika client mengirim field foto => abaikan
-
-            // lakukan update
-            $update = [
-                'nik' => $newNik !== '' ? $newNik : $art['nik'],
-                'nama' => $newNama,
-                'shdk' => !empty($newShdk) ? $newShdk : $art['shdk'],
-                'jenis_kelamin' => $newJk,
-                'tanggal_lahir' => $newTgl ?: null,
-                'pendidikan_terakhir' => $newPendidikan,
-                'pekerjaan' => $newPekerjaan,
-                'disabilitas' => $newDisabilitas,
-                'status_hamil' => $newStatusHamil,
-                'ibu_kandung' => $newIbu,
-                'updated_at' => date('Y-m-d H:i:s'),
-                'updated_by' => $user['nik'] ?? ($user['username'] ?? 'system'),
-            ];
-
-            $this->db->table('dtsen_art')->where('id_art', (int)$id_art)->update($update);
-
-            return $this->response->setJSON(['success' => true, 'message' => 'Data ART berhasil diperbarui.']);
-        } catch (\Throwable $e) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+    protected function lookup(string $table, string $idColumn, string $labelColumn)
+    {
+        if (!$this->AuthModel->getUserId()) {
+            return $this->jsonError('Akses ditolak.', 403);
         }
+        $rows = $this->db->table($table)
+            ->select("{$idColumn} AS id, {$labelColumn} AS label")
+            ->orderBy($idColumn, 'ASC')
+            ->get()
+            ->getResultArray();
+        return $this->response->setJSON(['success' => true, 'data' => $rows]);
     }
 
-    public function ajaxDeleteKK($id_kk)
+    protected function jsonError(string $message, int $status)
     {
-        $user = $this->AuthModel->getUserId();
-        if (!$user) return $this->response->setJSON(['success' => false, 'message' => 'Akses ditolak'])->setStatusCode(403);
-
-        $id = (int)$id_kk;
-        $exists = $this->db->table('dtsen_kk')->where('id_kk', $id)->countAllResults();
-        if (!$exists) return $this->response->setJSON(['success' => false, 'message' => 'Data tidak ditemukan'])->setStatusCode(404);
-
-        $this->db->table('dtsen_kk')->where('id_kk', $id)->update(['deleted_at' => date('Y-m-d H:i:s'), 'delete_reason' => 'Dihapus via pemeriksaan']);
-        return $this->response->setJSON(['success' => true, 'message' => 'KK berhasil dihapus (soft)']);
+        return $this->response->setJSON(['success' => false, 'message' => $message])->setStatusCode($status);
     }
 
-    public function ajaxDeleteART($id_art)
+    protected function dataTableError(string $message, int $status)
     {
-        $user = $this->AuthModel->getUserId();
-        if (!$user) return $this->response->setJSON(['success' => false, 'message' => 'Akses ditolak'])->setStatusCode(403);
-
-        $id = (int)$id_art;
-        $exists = $this->db->table('dtsen_art')->where('id_art', $id)->countAllResults();
-        if (!$exists) return $this->response->setJSON(['success' => false, 'message' => 'Data tidak ditemukan'])->setStatusCode(404);
-
-        $this->db->table('dtsen_art')->where('id_art', $id)->update(['deleted_at' => date('Y-m-d H:i:s'), 'delete_reason' => 'Dihapus via pemeriksaan']);
-        return $this->response->setJSON(['success' => true, 'message' => 'ART berhasil dihapus (soft)']);
+        return $this->response->setJSON([
+            'draw' => (int) ($this->request->getPost('draw') ?? 1),
+            'recordsTotal' => 0,
+            'recordsFiltered' => 0,
+            'data' => [],
+            'success' => false,
+            'message' => $message,
+        ])->setStatusCode($status);
     }
 }

@@ -366,9 +366,21 @@ $routes->group('dtsen', ['namespace' => 'App\Controllers\Dtsen', 'filter' => ['a
 
 	// Pemeriksaan Data
 	$routes->get('pemeriksaan', 'Pemeriksaan::index');
-	$routes->post('pemeriksaan/listKK', 'Pemeriksaan::listKK');
-	$routes->post('pemeriksaan/listART', 'Pemeriksaan::listART');
+	$routes->match(['get', 'post'], 'pemeriksaan/listKK', 'Pemeriksaan::listKK');
+	$routes->match(['get', 'post'], 'pemeriksaan/listART', 'Pemeriksaan::listART');
 	$routes->get('pemeriksaan/export', 'Pemeriksaan::export');
+
+	// 🚀 UNIFIED WORKSPACE API
+	$routes->get('pemeriksaan/workspaceStats', 'Pemeriksaan::workspaceStats');
+	$routes->get('pemeriksaan/quickSearch', 'Pemeriksaan::quickSearch');
+	$routes->post('pemeriksaan/bulk-archive/kk', 'Pemeriksaan::bulkArchiveKK');
+	$routes->post('pemeriksaan/bulk-archive/art', 'Pemeriksaan::bulkArchiveART');
+
+	// 📋 LOOKUP DROPDOWNS (untuk modal edit ART)
+	$routes->get('pemeriksaan/lookups/shdk', 'Pemeriksaan::lookupShdk');
+	$routes->get('pemeriksaan/lookups/pendidikan', 'Pemeriksaan::lookupPendidikan');
+	$routes->get('pemeriksaan/lookups/pekerjaan', 'Pemeriksaan::lookupPekerjaan');
+	$routes->get('pemeriksaan/lookups/disabilitas', 'Pemeriksaan::lookupDisabilitas');
 
 	// DETAIL
 	$routes->get('kk/detail/(:num)', 'Pemeriksaan::detailKK/$1');
@@ -381,10 +393,12 @@ $routes->group('dtsen', ['namespace' => 'App\Controllers\Dtsen', 'filter' => ['a
 	// UPDATE
 	$routes->post('kk/update/(:num)', 'Pemeriksaan::ajaxUpdateKK/$1');
 	$routes->post('art/update/(:num)', 'Pemeriksaan::ajaxUpdateART/$1');
+	$routes->post('kk/archive/(:num)', 'Pemeriksaan::archiveKK/$1');
+	$routes->post('art/archive/(:num)', 'Pemeriksaan::archiveART/$1');
 
-	// DELETE
-	$routes->post('kk/delete/(:num)', 'Pemeriksaan::ajaxDeleteKK/$1');
-	$routes->post('art/delete/(:num)', 'Pemeriksaan::ajaxDeleteART/$1');
+	// Legacy delete URLs now use the same recoverable soft-archive flow.
+	$routes->post('kk/delete/(:num)', 'Pemeriksaan::archiveKK/$1');
+	$routes->post('art/delete/(:num)', 'Pemeriksaan::archiveART/$1');
 });
 
 // PENENTUAN KEMISKINAN
