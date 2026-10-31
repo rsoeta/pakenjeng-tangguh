@@ -12,12 +12,14 @@
     .stat-card-widget {
         border-radius: 12px;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
-        border: 1px solid rgba(0,0,0,0.06);
+        border: 1px solid rgba(0, 0, 0, 0.06);
     }
+
     .stat-card-widget:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08) !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
     }
+
     .stat-icon-circle {
         width: 46px;
         height: 46px;
@@ -28,16 +30,19 @@
         font-size: 1.2rem;
         flex-shrink: 0;
     }
+
     .filter-label {
         font-size: 0.78rem;
         font-weight: 700;
         color: #495057;
         margin-bottom: 0.25rem;
     }
+
     .badge-purple {
         background-color: #6f42c1;
         color: #ffffff;
     }
+
     .card-header::after {
         display: none !important;
     }
@@ -50,6 +55,7 @@
         z-index: 1;
         background-color: #1a232c;
     }
+
     @media (max-width: 768px) {
         #mapBansos {
             height: 480px;
@@ -64,13 +70,15 @@
         display: flex;
         align-items: flex-start;
         justify-content: center;
-        filter: drop-shadow(0 3px 5px rgba(0,0,0,0.45));
+        filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.45));
         transition: transform 0.15s ease;
     }
+
     .custom-map-pin:hover {
         transform: scale(1.15) translateY(-3px);
         z-index: 999 !important;
     }
+
     .pin-Tear {
         width: 32px;
         height: 32px;
@@ -80,13 +88,15 @@
         align-items: center;
         justify-content: center;
         border: 2.5px solid #ffffff;
-        box-shadow: inset 0 0 4px rgba(0,0,0,0.2);
+        box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.2);
     }
+
     .pin-Tear i {
         transform: rotate(45deg);
         color: #ffffff;
         font-size: 13px;
     }
+
     .pin-source-dot {
         position: absolute;
         top: -2px;
@@ -110,18 +120,21 @@
         background-color: rgba(255, 255, 255, 0.85) !important;
         box-shadow: 0 3px 12px rgba(0, 0, 0, 0.45);
     }
+
     .marker-cluster-small div {
         background-color: #007bff !important;
         color: #fff !important;
         font-weight: 800;
         font-size: 13px;
     }
+
     .marker-cluster-medium div {
         background-color: #6f42c1 !important;
         color: #fff !important;
         font-weight: 800;
         font-size: 13px;
     }
+
     .marker-cluster-large div {
         background-color: #dc3545 !important;
         color: #fff !important;
@@ -134,12 +147,14 @@
         border-radius: 12px !important;
         padding: 0 !important;
         overflow: hidden;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
     }
+
     .leaflet-popup-content {
         margin: 0 !important;
         width: 290px !important;
     }
+
     .popup-kpm-header {
         padding: 10px 14px;
         color: #fff;
@@ -149,11 +164,13 @@
         justify-content: space-between;
         align-items: center;
     }
+
     .popup-kpm-body {
         padding: 12px 14px;
         background: #fff;
         font-size: 0.8rem;
     }
+
     .popup-thumb-34 {
         width: 72px;
         aspect-ratio: 3 / 4;
@@ -174,11 +191,12 @@
         backdrop-filter: blur(4px);
         border-radius: 10px;
         padding: 10px 14px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.25);
-        border: 1px solid rgba(0,0,0,0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        border: 1px solid rgba(0, 0, 0, 0.1);
         font-size: 0.78rem;
         max-width: 240px;
     }
+
     .legend-dot {
         width: 12px;
         height: 12px;
@@ -186,21 +204,20 @@
         display: inline-block;
         margin-right: 7px;
         border: 1.5px solid #fff;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     }
+
     .legend-boundary-line {
         width: 24px;
         height: 5px;
         border-radius: 3px;
         display: inline-block;
         margin-right: 7px;
-        background: repeating-linear-gradient(
-            90deg,
-            #ea4335 0px,
-            #ea4335 4px,
-            #ffffff 4px,
-            #ffffff 8px
-        );
+        background: repeating-linear-gradient(90deg,
+                #ea4335 0px,
+                #ea4335 4px,
+                #ffffff 4px,
+                #ffffff 8px);
         border: 1px solid #ea4335;
         box-shadow: 0 1px 3px rgba(234, 67, 53, 0.45);
     }
@@ -219,10 +236,11 @@
         display: block;
         margin: 0 auto;
     }
+
     .preview-foto-modal:hover {
         opacity: 0.95;
         transform: scale(1.02);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 </style>
 
@@ -571,7 +589,7 @@
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title fs-6 fw-bold" id="modalDetailBnbaLabel">
-                    <i class="fas fa-id-card mr-2"></i> Detail Penerima Bantuan Sosial (BNBA)
+                    <i class="fas fa-id-card mr-2"></i> Detail Penerima Bantuan Sosial
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -699,6 +717,16 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="card border shadow-none mt-3 mb-0">
+                            <div class="card-header bg-light py-2">
+                                <span class="small fw-bold text-muted">Foto Rumah Tampak Depan</span>
+                            </div>
+                            <div class="card-body p-2 text-center">
+                                <a id="linkFotoRumahDepan" href="<?= base_url('data/usulan/foto_rumah/noimage.png'); ?>" target="_blank" rel="noopener" title="Klik untuk memperbesar">
+                                    <img id="imgFotoRumahDepan" src="<?= base_url('data/usulan/foto_rumah/noimage.png'); ?>" alt="Foto rumah tampak depan" class="img-fluid rounded border" style="max-height: 320px; object-fit: contain;" onerror="this.onerror=null;this.src='<?= base_url('assets/img/no-image.svg'); ?>';">
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -718,194 +746,216 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <script>
-$(document).ready(function() {
+    $(document).ready(function() {
 
-    // =======================================================
-    // 1️⃣ INISIALISASI PETA SATELIT LEAFLET & LAYER SWITCHER
-    // =======================================================
-    const defaultLat = -7.4560;
-    const defaultLng = 107.6450;
+        // =======================================================
+        // 1️⃣ INISIALISASI PETA SATELIT LEAFLET & LAYER SWITCHER
+        // =======================================================
+        const defaultLat = -7.4560;
+        const defaultLng = 107.6450;
 
-    // Layer 1: Esri World Imagery + Label Jalan CartoDB (Anti-Blank s/d Zoom 20)
-    const esriSatTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 20,
-        maxNativeZoom: 17,
-        attribution: 'Tiles &copy; Esri'
-    });
-    const cartoLabels = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
-        maxZoom: 20,
-        maxNativeZoom: 18,
-        attribution: '&copy; CARTO'
-    });
-    const layerSatelitLabel = L.layerGroup([esriSatTiles, cartoLabels]);
+        // Layer 1: Esri World Imagery + Label Jalan CartoDB (Anti-Blank s/d Zoom 20)
+        const esriSatTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 20,
+            maxNativeZoom: 17,
+            attribution: 'Tiles &copy; Esri'
+        });
+        const cartoLabels = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
+            maxZoom: 20,
+            maxNativeZoom: 18,
+            attribution: '&copy; CARTO'
+        });
+        const layerSatelitLabel = L.layerGroup([esriSatTiles, cartoLabels]);
 
-    // Layer 2: Google Hybrid Satellite
-    const layerGoogleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-        maxZoom: 20,
-        maxNativeZoom: 19,
-        attribution: '&copy; Google Maps'
-    });
+        // Layer 2: Google Hybrid Satellite
+        const layerGoogleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            maxNativeZoom: 19,
+            attribution: '&copy; Google Maps'
+        });
 
-    // Layer 3: Satelit Esri Murni (Tanpa Label)
-    const layerSatelitMurni = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 20,
-        maxNativeZoom: 17,
-        attribution: 'Tiles &copy; Esri'
-    });
+        // Layer 3: Satelit Esri Murni (Tanpa Label)
+        const layerSatelitMurni = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 20,
+            maxNativeZoom: 17,
+            attribution: 'Tiles &copy; Esri'
+        });
 
-    // Layer 4: Peta Jalan OpenStreetMap
-    const layerStreetOsm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 20,
-        maxNativeZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-    });
+        // Layer 4: Peta Jalan OpenStreetMap
+        const layerStreetOsm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 20,
+            maxNativeZoom: 19,
+            attribution: '&copy; OpenStreetMap'
+        });
 
-    const map = L.map('mapBansos', {
-        center: [defaultLat, defaultLng],
-        zoom: 14,
-        layers: [layerSatelitLabel]
-    });
+        const map = L.map('mapBansos', {
+            center: [defaultLat, defaultLng],
+            zoom: 14,
+            layers: [layerSatelitLabel]
+        });
 
-    // Layer Group Batas Desa (Gaya Google Maps: Garis Merah + Putus-putus Putih)
-    const layerBatasDesa = L.featureGroup().addTo(map);
-    let batasDesaBounds = null;
-    let isBatasDesaVisible = true;
-    const activeKodeDesa = "<?= esc($kode_desa ?? '32.05.33.2006'); ?>";
-    const activeNamaDesa = "<?= esc($nama_desa ?? 'PASIRLANGU'); ?>";
+        // Layer Group Batas Desa (Gaya Google Maps: Garis Merah + Putus-putus Putih)
+        const layerBatasDesa = L.featureGroup().addTo(map);
+        let batasDesaBounds = null;
+        let isBatasDesaVisible = true;
+        const activeKodeDesa = "<?= esc($kode_desa ?? '32.05.33.2006'); ?>";
+        const activeNamaDesa = "<?= esc($nama_desa ?? 'PASIRLANGU'); ?>";
 
-    const baseMaps = {
-        "🛰️ Satelit + Nama Jalan (Esri)": layerSatelitLabel,
-        "🌍 Satelit Resolusi Tinggi (Google Hybrid)": layerGoogleHybrid,
-        "🗺️ Satelit Murni (Tanpa Label)": layerSatelitMurni,
-        "🛣️ Peta Jalan (OpenStreetMap)": layerStreetOsm
-    };
-    const overlayMaps = {
-        "🔴 Batas Wilayah Desa": layerBatasDesa
-    };
-    L.control.layers(baseMaps, overlayMaps, { position: 'topright' }).addTo(map);
+        const baseMaps = {
+            "🛰️ Satelit + Nama Jalan (Esri)": layerSatelitLabel,
+            "🌍 Satelit Resolusi Tinggi (Google Hybrid)": layerGoogleHybrid,
+            "🗺️ Satelit Murni (Tanpa Label)": layerSatelitMurni,
+            "🛣️ Peta Jalan (OpenStreetMap)": layerStreetOsm
+        };
+        const overlayMaps = {
+            "🔴 Batas Wilayah Desa": layerBatasDesa
+        };
+        L.control.layers(baseMaps, overlayMaps, {
+            position: 'topright'
+        }).addTo(map);
 
-    // Muat GeoJSON Batas Wilayah Desa
-    $.getJSON("<?= base_url('assets/geojson/batas_desa_pakenjeng.json'); ?>", function(allVillages) {
-        const vilData = allVillages[activeKodeDesa] || allVillages['32.05.33.2006'];
-        if (vilData && vilData.geojson) {
-            layerBatasDesa.clearLayers();
+        // Muat GeoJSON Batas Wilayah Desa
+        $.getJSON("<?= base_url('assets/geojson/batas_desa_pakenjeng.json'); ?>", function(allVillages) {
+            const vilData = allVillages[activeKodeDesa] || allVillages['32.05.33.2006'];
+            if (vilData && vilData.geojson) {
+                layerBatasDesa.clearLayers();
 
-            // 1. Lapisan Luar (Outer Red Glow / Casing khas Google Maps)
-            const outerRedLayer = L.geoJSON(vilData.geojson, {
-                style: {
-                    color: '#ea4335',
-                    weight: 5.5,
-                    opacity: 0.92,
-                    fillColor: '#ea4335',
-                    fillOpacity: 0.04,
-                    lineJoin: 'round',
-                    lineCap: 'round'
-                },
-                interactive: false
-            });
+                // 1. Lapisan Luar (Outer Red Glow / Casing khas Google Maps)
+                const outerRedLayer = L.geoJSON(vilData.geojson, {
+                    style: {
+                        color: '#ea4335',
+                        weight: 5.5,
+                        opacity: 0.92,
+                        fillColor: '#ea4335',
+                        fillOpacity: 0.04,
+                        lineJoin: 'round',
+                        lineCap: 'round'
+                    },
+                    interactive: false
+                });
 
-            // 2. Lapisan Dalam (Inner White-Red Dashed Line khas Google Maps)
-            const innerDashLayer = L.geoJSON(vilData.geojson, {
-                style: {
-                    color: '#ffffff',
-                    weight: 2.2,
-                    opacity: 0.95,
-                    dashArray: '4, 6',
-                    fillOpacity: 0,
-                    lineJoin: 'round',
-                    lineCap: 'butt'
-                },
-                interactive: false
-            });
+                // 2. Lapisan Dalam (Inner White-Red Dashed Line khas Google Maps)
+                const innerDashLayer = L.geoJSON(vilData.geojson, {
+                    style: {
+                        color: '#ffffff',
+                        weight: 2.2,
+                        opacity: 0.95,
+                        dashArray: '4, 6',
+                        fillOpacity: 0,
+                        lineJoin: 'round',
+                        lineCap: 'butt'
+                    },
+                    interactive: false
+                });
 
-            layerBatasDesa.addLayer(outerRedLayer);
-            layerBatasDesa.addLayer(innerDashLayer);
+                layerBatasDesa.addLayer(outerRedLayer);
+                layerBatasDesa.addLayer(innerDashLayer);
 
-            batasDesaBounds = outerRedLayer.getBounds();
-            if (batasDesaBounds && batasDesaBounds.isValid()) {
-                map.fitBounds(batasDesaBounds, { padding: [25, 25] });
+                batasDesaBounds = outerRedLayer.getBounds();
+                if (batasDesaBounds && batasDesaBounds.isValid()) {
+                    map.fitBounds(batasDesaBounds, {
+                        padding: [25, 25]
+                    });
+                }
             }
-        }
-    });
+        });
 
-    // Saklar Tombol Batas Desa ON/OFF
-    $('#btnToggleBatasDesa').on('click', function() {
-        if (map.hasLayer(layerBatasDesa)) {
-            map.removeLayer(layerBatasDesa);
-            isBatasDesaVisible = false;
-            $(this).removeClass('btn-danger').addClass('btn-outline-danger')
-                   .html('<i class="fas fa-draw-polygon mr-1"></i> Batas Desa: OFF');
-        } else {
-            map.addLayer(layerBatasDesa);
-            isBatasDesaVisible = true;
-            $(this).removeClass('btn-outline-danger').addClass('btn-danger')
-                   .html('<i class="fas fa-draw-polygon mr-1"></i> Batas Desa: ON');
-        }
-    });
-
-    // Sinkronisasi jika di-toggle dari kontrol layer kanan atas Leaflet
-    map.on('overlayadd', function(e) {
-        if (e.layer === layerBatasDesa) {
-            isBatasDesaVisible = true;
-            $('#btnToggleBatasDesa').removeClass('btn-outline-danger').addClass('btn-danger')
-                .html('<i class="fas fa-draw-polygon mr-1"></i> Batas Desa: ON');
-        }
-    });
-    map.on('overlayremove', function(e) {
-        if (e.layer === layerBatasDesa) {
-            isBatasDesaVisible = false;
-            $('#btnToggleBatasDesa').removeClass('btn-danger').addClass('btn-outline-danger')
-                .html('<i class="fas fa-draw-polygon mr-1"></i> Batas Desa: OFF');
-        }
-    });
-
-    // Marker Cluster Group (mengelompok menjadi angka saat zoom out & menyebar saat zoom in)
-    const markerCluster = L.markerClusterGroup({
-        spiderfyOnMaxZoom: true,
-        showCoverageOnHover: false,
-        zoomToBoundsOnClick: true,
-        maxClusterRadius: 42,
-        disableClusteringAtZoom: 19
-    });
-    map.addLayer(markerCluster);
-
-    // State Global Peta
-    let currentMarkersData = [];
-    let markerObjectsMap = {}; // Simpan referensi marker berdasarkan id untuk fitur Fly-To
-    let currentColorMode = 'jenis'; // 'jenis' | 'status'
-    let tableUnmappedDT = null;
-
-    // =======================================================
-    // 2️⃣ GENERATOR CUSTOM PIN MARKER & POPUP HTML
-    // =======================================================
-    function getPinConfig(item, mode) {
-        if (mode === 'status') {
-            if (item.status_summary === 'sukses') {
-                return { color: '#28a745', icon: 'fa-check' };
-            } else if (item.status_summary === 'gagal') {
-                return { color: '#dc3545', icon: 'fa-times' };
+        // Saklar Tombol Batas Desa ON/OFF
+        $('#btnToggleBatasDesa').on('click', function() {
+            if (map.hasLayer(layerBatasDesa)) {
+                map.removeLayer(layerBatasDesa);
+                isBatasDesaVisible = false;
+                $(this).removeClass('btn-danger').addClass('btn-outline-danger')
+                    .html('<i class="fas fa-draw-polygon mr-1"></i> Batas Desa: OFF');
             } else {
-                return { color: '#ffc107', icon: 'fa-clock' };
+                map.addLayer(layerBatasDesa);
+                isBatasDesaVisible = true;
+                $(this).removeClass('btn-outline-danger').addClass('btn-danger')
+                    .html('<i class="fas fa-draw-polygon mr-1"></i> Batas Desa: ON');
             }
-        } else {
-            // Default: Berdasarkan Jenis Bansos
-            if (item.jenis_bansos === 'PKH + SEMBAKO') {
-                return { color: '#6f42c1', icon: 'fa-layer-group' };
-            } else if (item.jenis_bansos === 'PKH') {
-                return { color: '#007bff', icon: 'fa-hand-holding-heart' };
+        });
+
+        // Sinkronisasi jika di-toggle dari kontrol layer kanan atas Leaflet
+        map.on('overlayadd', function(e) {
+            if (e.layer === layerBatasDesa) {
+                isBatasDesaVisible = true;
+                $('#btnToggleBatasDesa').removeClass('btn-outline-danger').addClass('btn-danger')
+                    .html('<i class="fas fa-draw-polygon mr-1"></i> Batas Desa: ON');
+            }
+        });
+        map.on('overlayremove', function(e) {
+            if (e.layer === layerBatasDesa) {
+                isBatasDesaVisible = false;
+                $('#btnToggleBatasDesa').removeClass('btn-danger').addClass('btn-outline-danger')
+                    .html('<i class="fas fa-draw-polygon mr-1"></i> Batas Desa: OFF');
+            }
+        });
+
+        // Marker Cluster Group (mengelompok menjadi angka saat zoom out & menyebar saat zoom in)
+        const markerCluster = L.markerClusterGroup({
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true,
+            maxClusterRadius: 42,
+            disableClusteringAtZoom: 19
+        });
+        map.addLayer(markerCluster);
+
+        // State Global Peta
+        let currentMarkersData = [];
+        let markerObjectsMap = {}; // Simpan referensi marker berdasarkan id untuk fitur Fly-To
+        let currentColorMode = 'jenis'; // 'jenis' | 'status'
+        let tableUnmappedDT = null;
+
+        // =======================================================
+        // 2️⃣ GENERATOR CUSTOM PIN MARKER & POPUP HTML
+        // =======================================================
+        function getPinConfig(item, mode) {
+            if (mode === 'status') {
+                if (item.status_summary === 'sukses') {
+                    return {
+                        color: '#28a745',
+                        icon: 'fa-check'
+                    };
+                } else if (item.status_summary === 'gagal') {
+                    return {
+                        color: '#dc3545',
+                        icon: 'fa-times'
+                    };
+                } else {
+                    return {
+                        color: '#ffc107',
+                        icon: 'fa-clock'
+                    };
+                }
             } else {
-                return { color: '#20c997', icon: 'fa-box-open' };
+                // Default: Berdasarkan Jenis Bansos
+                if (item.jenis_bansos === 'PKH + SEMBAKO') {
+                    return {
+                        color: '#6f42c1',
+                        icon: 'fa-layer-group'
+                    };
+                } else if (item.jenis_bansos === 'PKH') {
+                    return {
+                        color: '#007bff',
+                        icon: 'fa-hand-holding-heart'
+                    };
+                } else {
+                    return {
+                        color: '#20c997',
+                        icon: 'fa-box-open'
+                    };
+                }
             }
         }
-    }
 
-    function createCustomMarkerIcon(item, mode) {
-        const cfg = getPinConfig(item, mode);
-        const isRumah = (item.coord_source === 'rumah_kk');
-        const sourceIcon = isRumah ? 'fa-home' : 'fa-camera';
-        const sourceBg = isRumah ? '#0d6efd' : '#17a2b8';
+        function createCustomMarkerIcon(item, mode) {
+            const cfg = getPinConfig(item, mode);
+            const isRumah = (item.coord_source === 'rumah_kk');
+            const sourceIcon = isRumah ? 'fa-home' : 'fa-camera';
+            const sourceBg = isRumah ? '#0d6efd' : '#17a2b8';
 
-        const html = `
+            const html = `
             <div class="custom-map-pin">
                 <div class="pin-Tear" style="background-color: ${cfg.color};">
                     <i class="fas ${cfg.icon}"></i>
@@ -916,47 +966,47 @@ $(document).ready(function() {
             </div>
         `;
 
-        return L.divIcon({
-            html: html,
-            className: '',
-            iconSize: [34, 42],
-            iconAnchor: [17, 40],
-            popupAnchor: [0, -36]
-        });
-    }
-
-    function buildPopupHtml(item) {
-        const cfg = getPinConfig(item, currentColorMode);
-
-        // Badge Jenis Bansos
-        let badgeJenis = '';
-        if (item.jenis_bansos === 'PKH + SEMBAKO') {
-            badgeJenis = '<span class="badge px-2 py-1" style="background-color:#6f42c1; color:#fff;"><i class="fas fa-layer-group mr-1"></i> PKH + SEMBAKO</span>';
-        } else if (item.jenis_bansos === 'PKH') {
-            badgeJenis = '<span class="badge badge-primary px-2 py-1"><i class="fas fa-hand-holding-heart mr-1"></i> PKH</span>';
-        } else {
-            badgeJenis = '<span class="badge px-2 py-1" style="background-color:#20c997; color:#fff;"><i class="fas fa-box-open mr-1"></i> SEMBAKO</span>';
+            return L.divIcon({
+                html: html,
+                className: '',
+                iconSize: [34, 42],
+                iconAnchor: [17, 40],
+                popupAnchor: [0, -36]
+            });
         }
 
-        // Badge Status Salur
-        let badgeStatus = '';
-        if (item.status_summary === 'sukses') {
-            badgeStatus = '<span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> Sukses Salur</span>';
-        } else if (item.status_summary === 'gagal') {
-            badgeStatus = `<span class="badge badge-danger px-2 py-1"><i class="fas fa-times-circle mr-1"></i> ${item.status_label}</span>`;
-        } else {
-            badgeStatus = '<span class="badge badge-warning text-dark px-2 py-1"><i class="fas fa-clock mr-1"></i> Belum Transaksi</span>';
-        }
+        function buildPopupHtml(item) {
+            const cfg = getPinConfig(item, currentColorMode);
 
-        // Badge Sumber Koordinat
-        const badgeCoordSource = (item.coord_source === 'rumah_kk')
-            ? '<span class="badge badge-light border text-primary" style="font-size:0.68rem;"><i class="fas fa-home mr-1"></i> Titik Lokasi Rumah Warga</span>'
-            : '<span class="badge badge-light border text-info" style="font-size:0.68rem;"><i class="fas fa-camera mr-1"></i> Titik Lokasi Dokumentasi Salur</span>';
+            // Badge Jenis Bansos
+            let badgeJenis = '';
+            if (item.jenis_bansos === 'PKH + SEMBAKO') {
+                badgeJenis = '<span class="badge px-2 py-1" style="background-color:#6f42c1; color:#fff;"><i class="fas fa-layer-group mr-1"></i> PKH + SEMBAKO</span>';
+            } else if (item.jenis_bansos === 'PKH') {
+                badgeJenis = '<span class="badge badge-primary px-2 py-1"><i class="fas fa-hand-holding-heart mr-1"></i> PKH</span>';
+            } else {
+                badgeJenis = '<span class="badge px-2 py-1" style="background-color:#20c997; color:#fff;"><i class="fas fa-box-open mr-1"></i> SEMBAKO</span>';
+            }
 
-        const thumbSrc = item.foto_kpm_url ? item.foto_kpm_url : "<?= base_url('assets/img/no-image.svg'); ?>";
-        const gmapsUrl = `https://www.google.com/maps?q=${item.latitude},${item.longitude}`;
+            // Badge Status Salur
+            let badgeStatus = '';
+            if (item.status_summary === 'sukses') {
+                badgeStatus = '<span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> Sukses Salur</span>';
+            } else if (item.status_summary === 'gagal') {
+                badgeStatus = `<span class="badge badge-danger px-2 py-1"><i class="fas fa-times-circle mr-1"></i> ${item.status_label}</span>`;
+            } else {
+                badgeStatus = '<span class="badge badge-warning text-dark px-2 py-1"><i class="fas fa-clock mr-1"></i> Belum Transaksi</span>';
+            }
 
-        return `
+            // Badge Sumber Koordinat
+            const badgeCoordSource = (item.coord_source === 'rumah_kk') ?
+                '<span class="badge badge-light border text-primary" style="font-size:0.68rem;"><i class="fas fa-home mr-1"></i> Titik Lokasi Rumah Warga</span>' :
+                '<span class="badge badge-light border text-info" style="font-size:0.68rem;"><i class="fas fa-camera mr-1"></i> Titik Lokasi Dokumentasi Salur</span>';
+
+            const thumbSrc = item.foto_kpm_url ? item.foto_kpm_url : "<?= base_url('assets/img/no-image.svg'); ?>";
+            const gmapsUrl = `https://www.google.com/maps?q=${item.latitude},${item.longitude}`;
+
+            return `
             <div>
                 <div class="popup-kpm-header" style="background-color: ${cfg.color};">
                     <span class="text-truncate" style="max-width: 210px;" title="${item.nama_kpm}">
@@ -1001,50 +1051,64 @@ $(document).ready(function() {
                 </div>
             </div>
         `;
-    }
+        }
 
-    // =======================================================
-    // 3️⃣ RENDER MARKERS KE ATAS PETA SATELIT
-    // =======================================================
-    function renderMarkersOnMap(fitBounds = true) {
-        markerCluster.clearLayers();
-        markerObjectsMap = {};
+        // =======================================================
+        // 3️⃣ RENDER MARKERS KE ATAS PETA SATELIT
+        // =======================================================
+        function renderMarkersOnMap(fitBounds = true) {
+            markerCluster.clearLayers();
+            markerObjectsMap = {};
 
-        const bounds = [];
+            const bounds = [];
 
-        currentMarkersData.forEach(function(item) {
-            const lat = parseFloat(item.latitude);
-            const lng = parseFloat(item.longitude);
-            if (isNaN(lat) || isNaN(lng)) return;
+            currentMarkersData.forEach(function(item) {
+                const lat = parseFloat(item.latitude);
+                const lng = parseFloat(item.longitude);
+                if (isNaN(lat) || isNaN(lng)) return;
 
-            const icon = createCustomMarkerIcon(item, currentColorMode);
-            const marker = L.marker([lat, lng], { icon: icon });
-            marker.bindPopup(buildPopupHtml(item), { maxWidth: 300 });
+                const icon = createCustomMarkerIcon(item, currentColorMode);
+                const marker = L.marker([lat, lng], {
+                    icon: icon
+                });
+                marker.bindPopup(buildPopupHtml(item), {
+                    maxWidth: 300
+                });
 
-            markerCluster.addLayer(marker);
-            markerObjectsMap[item.id] = { marker: marker, data: item };
-            bounds.push([lat, lng]);
-        });
+                markerCluster.addLayer(marker);
+                markerObjectsMap[item.id] = {
+                    marker: marker,
+                    data: item
+                };
+                bounds.push([lat, lng]);
+            });
 
-        if (fitBounds) {
-            const hasSubWilayahFilter = ($('#filter_rw').val() !== '' || $('#filter_rt').val() !== '');
-            if (!hasSubWilayahFilter && batasDesaBounds && batasDesaBounds.isValid()) {
-                map.fitBounds(batasDesaBounds, { padding: [25, 25] });
-            } else if (bounds.length > 0) {
-                map.fitBounds(bounds, { padding: [45, 45], maxZoom: 18 });
-            } else if (batasDesaBounds && batasDesaBounds.isValid()) {
-                map.fitBounds(batasDesaBounds, { padding: [25, 25] });
+            if (fitBounds) {
+                const hasSubWilayahFilter = ($('#filter_rw').val() !== '' || $('#filter_rt').val() !== '');
+                if (!hasSubWilayahFilter && batasDesaBounds && batasDesaBounds.isValid()) {
+                    map.fitBounds(batasDesaBounds, {
+                        padding: [25, 25]
+                    });
+                } else if (bounds.length > 0) {
+                    map.fitBounds(bounds, {
+                        padding: [45, 45],
+                        maxZoom: 18
+                    });
+                } else if (batasDesaBounds && batasDesaBounds.isValid()) {
+                    map.fitBounds(batasDesaBounds, {
+                        padding: [25, 25]
+                    });
+                }
             }
         }
-    }
 
-    // =======================================================
-    // 4️⃣ UPDATE LEGENDA BERDASARKAN MODE WARNA PIN
-    // =======================================================
-    function updateLegendUI() {
-        if (currentColorMode === 'status') {
-            $('#legendTitle').html('<i class="fas fa-check-double text-primary mr-1"></i> Legenda Status Salur');
-            $('#legendContent').html(`
+        // =======================================================
+        // 4️⃣ UPDATE LEGENDA BERDASARKAN MODE WARNA PIN
+        // =======================================================
+        function updateLegendUI() {
+            if (currentColorMode === 'status') {
+                $('#legendTitle').html('<i class="fas fa-check-double text-primary mr-1"></i> Legenda Status Salur');
+                $('#legendContent').html(`
                 <div class="d-flex align-items-center mb-1">
                     <span class="legend-dot" style="background-color: #28a745;"></span>
                     <span><b>Sukses Salur</b></span>
@@ -1058,9 +1122,9 @@ $(document).ready(function() {
                     <span><b>Gagal Salur / Kendala</b></span>
                 </div>
             `);
-        } else {
-            $('#legendTitle').html('<i class="fas fa-info-circle text-primary mr-1"></i> Legenda Jenis Bansos');
-            $('#legendContent').html(`
+            } else {
+                $('#legendTitle').html('<i class="fas fa-info-circle text-primary mr-1"></i> Legenda Jenis Bansos');
+                $('#legendContent').html(`
                 <div class="d-flex align-items-center mb-1">
                     <span class="legend-dot" style="background-color: #007bff;"></span>
                     <span><b>PKH</b> (Program Keluarga Harapan)</span>
@@ -1074,123 +1138,123 @@ $(document).ready(function() {
                     <span><b>PKH + SEMBAKO</b> (2 Bantuan)</span>
                 </div>
             `);
-        }
-    }
-
-    // Event klik saklar mode warna pin
-    $('.mode-color-btn').on('click', function() {
-        $('.mode-color-btn').removeClass('btn-primary active').addClass('btn-outline-primary');
-        $(this).removeClass('btn-outline-primary').addClass('btn-primary active');
-        currentColorMode = $(this).data('mode');
-        updateLegendUI();
-        renderMarkersOnMap(false);
-    });
-
-    // =======================================================
-    // 5️⃣ LOAD DATA SEBARAN DARI SERVER (AJAX POST)
-    // =======================================================
-    function loadMappingData(fitBounds = true) {
-        const pPetugas = $('#filter_petugas').val();
-        const pRw      = $('#filter_rw').val();
-        const pRt      = $('#filter_rt').val();
-        const pTahap   = $('#filter_tahap').val();
-        const pJenis   = $('#filter_jenis').val();
-        const pStatus  = $('#filter_status').val();
-
-        let labelFilter = pJenis ? pJenis : 'Semua Bansos';
-        if (pTahap) labelFilter += ' (' + pTahap + ')';
-        if (pRw) labelFilter += ' - RW ' + pRw;
-        $('#labelActiveFilter').text(labelFilter);
-
-        $.ajax({
-            url: "<?= base_url('bansos/mapping-data'); ?>",
-            type: "POST",
-            data: {
-                filter_petugas: pPetugas,
-                filter_rw: pRw,
-                filter_rt: pRt,
-                filter_tahap: pTahap,
-                filter_jenis: pJenis,
-                filter_status: pStatus,
-                '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
-            },
-            dataType: "JSON",
-            success: function(res) {
-                if (res.status) {
-                    const s = res.summary || {};
-
-                    // Update KPI Cards
-                    $('#map_kpi_total').text(Number(s.total_kpm || 0).toLocaleString('id-ID'));
-                    $('#map_kpi_mapped').text(Number(s.total_mapped || 0).toLocaleString('id-ID'));
-                    $('#map_kpi_persen_mapped').text('(' + (s.persen_mapped || 0) + '%)');
-                    $('#map_kpi_src_rumah').text(Number(s.source_rumah_kk || 0).toLocaleString('id-ID'));
-                    $('#map_kpi_src_bansos').text(Number(s.source_bansos_kks || 0).toLocaleString('id-ID'));
-                    $('#map_kpi_unmapped').text(Number(s.total_unmapped || 0).toLocaleString('id-ID'));
-                    $('#badgeCountUnmapped').text(Number(s.total_unmapped || 0).toLocaleString('id-ID'));
-
-                    $('#map_kpi_pkh').text(Number(s.count_pkh || 0).toLocaleString('id-ID'));
-                    $('#map_kpi_sembako').text(Number(s.count_sembako || 0).toLocaleString('id-ID'));
-                    $('#map_kpi_kombo').text(Number(s.count_pkh_sembako || 0).toLocaleString('id-ID'));
-
-                    // Simpan data marker & render ke peta
-                    currentMarkersData = res.markers || [];
-                    renderMarkersOnMap(fitBounds);
-
-                    // Isi Datalist Pencarian Cepat KPM di Peta
-                    const datalist = $('#datalistKpmMapped');
-                    datalist.empty();
-                    currentMarkersData.forEach(function(m) {
-                        datalist.append(`<option value="${m.nama_kpm} (${m.nik_kpm})" data-id="${m.id}">RT ${m.rt}/RW ${m.rw} - ${m.jenis_bansos}</option>`);
-                    });
-
-                    // Render Tabel KPM Belum Memiliki Koordinat
-                    renderUnmappedTable(res.unmapped || []);
-                }
-            },
-            error: function() {
-                console.error("Gagal memuat data mapping bansos.");
             }
+        }
+
+        // Event klik saklar mode warna pin
+        $('.mode-color-btn').on('click', function() {
+            $('.mode-color-btn').removeClass('btn-primary active').addClass('btn-outline-primary');
+            $(this).removeClass('btn-outline-primary').addClass('btn-primary active');
+            currentColorMode = $(this).data('mode');
+            updateLegendUI();
+            renderMarkersOnMap(false);
         });
-    }
 
-    // =======================================================
-    // 6️⃣ RENDER TABEL KPM BELUM MEMILIKI KOORDINAT
-    // =======================================================
-    function renderUnmappedTable(unmappedList) {
-        if (tableUnmappedDT) {
-            tableUnmappedDT.destroy();
+        // =======================================================
+        // 5️⃣ LOAD DATA SEBARAN DARI SERVER (AJAX POST)
+        // =======================================================
+        function loadMappingData(fitBounds = true) {
+            const pPetugas = $('#filter_petugas').val();
+            const pRw = $('#filter_rw').val();
+            const pRt = $('#filter_rt').val();
+            const pTahap = $('#filter_tahap').val();
+            const pJenis = $('#filter_jenis').val();
+            const pStatus = $('#filter_status').val();
+
+            let labelFilter = pJenis ? pJenis : 'Semua Bansos';
+            if (pTahap) labelFilter += ' (' + pTahap + ')';
+            if (pRw) labelFilter += ' - RW ' + pRw;
+            $('#labelActiveFilter').text(labelFilter);
+
+            $.ajax({
+                url: "<?= base_url('bansos/mapping-data'); ?>",
+                type: "POST",
+                data: {
+                    filter_petugas: pPetugas,
+                    filter_rw: pRw,
+                    filter_rt: pRt,
+                    filter_tahap: pTahap,
+                    filter_jenis: pJenis,
+                    filter_status: pStatus,
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                },
+                dataType: "JSON",
+                success: function(res) {
+                    if (res.status) {
+                        const s = res.summary || {};
+
+                        // Update KPI Cards
+                        $('#map_kpi_total').text(Number(s.total_kpm || 0).toLocaleString('id-ID'));
+                        $('#map_kpi_mapped').text(Number(s.total_mapped || 0).toLocaleString('id-ID'));
+                        $('#map_kpi_persen_mapped').text('(' + (s.persen_mapped || 0) + '%)');
+                        $('#map_kpi_src_rumah').text(Number(s.source_rumah_kk || 0).toLocaleString('id-ID'));
+                        $('#map_kpi_src_bansos').text(Number(s.source_bansos_kks || 0).toLocaleString('id-ID'));
+                        $('#map_kpi_unmapped').text(Number(s.total_unmapped || 0).toLocaleString('id-ID'));
+                        $('#badgeCountUnmapped').text(Number(s.total_unmapped || 0).toLocaleString('id-ID'));
+
+                        $('#map_kpi_pkh').text(Number(s.count_pkh || 0).toLocaleString('id-ID'));
+                        $('#map_kpi_sembako').text(Number(s.count_sembako || 0).toLocaleString('id-ID'));
+                        $('#map_kpi_kombo').text(Number(s.count_pkh_sembako || 0).toLocaleString('id-ID'));
+
+                        // Simpan data marker & render ke peta
+                        currentMarkersData = res.markers || [];
+                        renderMarkersOnMap(fitBounds);
+
+                        // Isi Datalist Pencarian Cepat KPM di Peta
+                        const datalist = $('#datalistKpmMapped');
+                        datalist.empty();
+                        currentMarkersData.forEach(function(m) {
+                            datalist.append(`<option value="${m.nama_kpm} (${m.nik_kpm})" data-id="${m.id}">RT ${m.rt}/RW ${m.rw} - ${m.jenis_bansos}</option>`);
+                        });
+
+                        // Render Tabel KPM Belum Memiliki Koordinat
+                        renderUnmappedTable(res.unmapped || []);
+                    }
+                },
+                error: function() {
+                    console.error("Gagal memuat data mapping bansos.");
+                }
+            });
         }
 
-        const tbody = $('#tbodyUnmappedKpm');
-        tbody.empty();
-
-        unmappedList.forEach(function(item, idx) {
-            let badgeJenis = '';
-            if (item.jenis_bansos === 'PKH + SEMBAKO') {
-                badgeJenis = '<span class="badge px-2 py-1" style="background-color:#6f42c1; color:#fff;"><i class="fas fa-layer-group mr-1"></i> PKH + SEMBAKO</span>';
-            } else if (item.jenis_bansos === 'PKH') {
-                badgeJenis = '<span class="badge badge-primary px-2 py-1"><i class="fas fa-hand-holding-heart mr-1"></i> PKH</span>';
-            } else {
-                badgeJenis = '<span class="badge px-2 py-1" style="background-color:#20c997; color:#fff;"><i class="fas fa-box-open mr-1"></i> SEMBAKO</span>';
+        // =======================================================
+        // 6️⃣ RENDER TABEL KPM BELUM MEMILIKI KOORDINAT
+        // =======================================================
+        function renderUnmappedTable(unmappedList) {
+            if (tableUnmappedDT) {
+                tableUnmappedDT.destroy();
             }
 
-            let badgeStatus = '';
-            if (item.status_summary === 'sukses') {
-                badgeStatus = '<span class="badge badge-success px-2 py-1">Sukses Salur</span>';
-            } else if (item.status_summary === 'gagal') {
-                badgeStatus = `<span class="badge badge-danger px-2 py-1">${item.status_label}</span>`;
-            } else {
-                badgeStatus = '<span class="badge badge-warning text-dark px-2 py-1">Belum Transaksi</span>';
-            }
+            const tbody = $('#tbodyUnmappedKpm');
+            tbody.empty();
 
-            let btnKkHtml = '';
-            if (item.id_kk_token) {
-                btnKkHtml = `<a href="<?= base_url('pembaruan-keluarga/detail'); ?>/${item.id_kk_token}" target="_blank" class="btn btn-xs btn-outline-primary rounded-pill px-2 mr-1" title="Petakan Koordinat Rumah di Pembaruan Keluarga">
+            unmappedList.forEach(function(item, idx) {
+                let badgeJenis = '';
+                if (item.jenis_bansos === 'PKH + SEMBAKO') {
+                    badgeJenis = '<span class="badge px-2 py-1" style="background-color:#6f42c1; color:#fff;"><i class="fas fa-layer-group mr-1"></i> PKH + SEMBAKO</span>';
+                } else if (item.jenis_bansos === 'PKH') {
+                    badgeJenis = '<span class="badge badge-primary px-2 py-1"><i class="fas fa-hand-holding-heart mr-1"></i> PKH</span>';
+                } else {
+                    badgeJenis = '<span class="badge px-2 py-1" style="background-color:#20c997; color:#fff;"><i class="fas fa-box-open mr-1"></i> SEMBAKO</span>';
+                }
+
+                let badgeStatus = '';
+                if (item.status_summary === 'sukses') {
+                    badgeStatus = '<span class="badge badge-success px-2 py-1">Sukses Salur</span>';
+                } else if (item.status_summary === 'gagal') {
+                    badgeStatus = `<span class="badge badge-danger px-2 py-1">${item.status_label}</span>`;
+                } else {
+                    badgeStatus = '<span class="badge badge-warning text-dark px-2 py-1">Belum Transaksi</span>';
+                }
+
+                let btnKkHtml = '';
+                if (item.id_kk_token) {
+                    btnKkHtml = `<a href="<?= base_url('pembaruan-keluarga/detail'); ?>/${item.id_kk_token}" target="_blank" class="btn btn-xs btn-outline-primary rounded-pill px-2 mr-1" title="Petakan Koordinat Rumah di Pembaruan Keluarga">
                     <i class="fas fa-home"></i> KK
                 </a>`;
-            }
+                }
 
-            const tr = `
+                const tr = `
                 <tr>
                     <td class="text-center">${idx + 1}</td>
                     <td class="font-monospace small fw-bold text-primary">${item.nik_masked}</td>
@@ -1212,283 +1276,299 @@ $(document).ready(function() {
                     </td>
                 </tr>
             `;
-            tbody.append(tr);
-        });
-
-        tableUnmappedDT = $('#tableUnmappedKpm').DataTable({
-            responsive: true,
-            autoWidth: false,
-            pageLength: 10,
-            language: {
-                search: "Cari KPM:",
-                lengthMenu: "Tampilkan _MENU_ data",
-                info: "Menampilkan _START_ s/d _END_ dari _TOTAL_ KPM belum terpetakan",
-                infoEmpty: "Semua KPM pada filter ini sudah memiliki titik koordinat!",
-                zeroRecords: "Tidak ada KPM yang belum terpetakan pada filter ini",
-                paginate: { first: "Awal", last: "Akhir", next: "»", previous: "«" }
-            }
-        });
-    }
-
-    // Klik kartu "Belum Ada Koordinat" -> scroll ke tabel di bawah
-    $('#cardScrollUnmapped').on('click', function() {
-        $('html, body').animate({
-            scrollTop: $('#sectionUnmappedKpm').offset().top - 70
-        }, 400);
-    });
-
-    // =======================================================
-    // 7️⃣ FITUR CARI & TERBANG (FLY-TO) KE TITIK RUMAH KPM
-    // =======================================================
-    function flyToSearchedKpm() {
-        const query = ($('#inputCariKpmPeta').val() || '').trim().toLowerCase();
-        if (!query) return;
-
-        let foundObj = null;
-        for (const id in markerObjectsMap) {
-            const item = markerObjectsMap[id].data;
-            const matchStr = `${item.nama_kpm} (${item.nik_kpm})`.toLowerCase();
-            if (matchStr === query || item.nama_kpm.toLowerCase().includes(query) || item.nik_kpm.toLowerCase().includes(query)) {
-                foundObj = markerObjectsMap[id];
-                break;
-            }
-        }
-
-        if (foundObj) {
-            markerCluster.zoomToShowLayer(foundObj.marker, function() {
-                map.setView(foundObj.marker.getLatLng(), 19, { animate: true });
-                foundObj.marker.openPopup();
+                tbody.append(tr);
             });
-        } else {
-            Swal.fire({
-                icon: 'info',
-                title: 'Titik Tidak Ditemukan',
-                text: 'KPM tersebut tidak ditemukan pada peta atau belum memiliki titik koordinat.',
-                timer: 2500,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
-        }
-    }
 
-    $('#btnFlyToKpm').on('click', flyToSearchedKpm);
-    $('#inputCariKpmPeta').on('change keyup', function(e) {
-        if (e.type === 'change' || e.key === 'Enter') {
-            flyToSearchedKpm();
-        }
-    });
-
-    // Tombol Fokus Sebaran Desa (Fit Bounds ke Batas Desa / Titik Sebaran)
-    $('#btn_fit_bounds').on('click', function() {
-        if (batasDesaBounds && batasDesaBounds.isValid()) {
-            map.fitBounds(batasDesaBounds, { padding: [25, 25] });
-            return;
-        }
-        const bounds = currentMarkersData.map(m => [parseFloat(m.latitude), parseFloat(m.longitude)]).filter(c => !isNaN(c[0]) && !isNaN(c[1]));
-        if (bounds.length > 0) {
-            map.fitBounds(bounds, { padding: [45, 45], maxZoom: 18 });
-        }
-    });
-
-    // =======================================================
-    // 8️⃣ CASCADING DROPDOWN RW -> RT & EVENT FILTER
-    // =======================================================
-    $.ajax({
-        url: "<?= base_url('bansos/get-rw'); ?>",
-        type: "GET",
-        dataType: "JSON",
-        success: function(data) {
-            $('#filter_rw').empty().append('<option value="">Semua RW</option>');
-            $.each(data, function(idx, val) {
-                $('#filter_rw').append('<option value="' + val + '">RW ' + val + '</option>');
-            });
-        }
-    });
-
-    $('#filter_rw').on('change', function() {
-        const rwSelected = $(this).val();
-        $('#filter_rt').empty().append('<option value="">Semua RT</option>');
-
-        if (rwSelected !== '') {
-            $.ajax({
-                url: "<?= base_url('bansos/get-rt'); ?>",
-                type: "GET",
-                data: { rw: rwSelected },
-                dataType: "JSON",
-                success: function(data) {
-                    $.each(data, function(idx, val) {
-                        $('#filter_rt').append('<option value="' + val + '">RT ' + val + '</option>');
-                    });
+            tableUnmappedDT = $('#tableUnmappedKpm').DataTable({
+                responsive: true,
+                autoWidth: false,
+                pageLength: 10,
+                language: {
+                    search: "Cari KPM:",
+                    lengthMenu: "Tampilkan _MENU_ data",
+                    info: "Menampilkan _START_ s/d _END_ dari _TOTAL_ KPM belum terpetakan",
+                    infoEmpty: "Semua KPM pada filter ini sudah memiliki titik koordinat!",
+                    zeroRecords: "Tidak ada KPM yang belum terpetakan pada filter ini",
+                    paginate: {
+                        first: "Awal",
+                        last: "Akhir",
+                        next: "»",
+                        previous: "«"
+                    }
                 }
             });
         }
-    });
 
-    $('#btn_filter').on('click', function() {
-        loadMappingData(true);
-    });
+        // Klik kartu "Belum Ada Koordinat" -> scroll ke tabel di bawah
+        $('#cardScrollUnmapped').on('click', function() {
+            $('html, body').animate({
+                scrollTop: $('#sectionUnmappedKpm').offset().top - 70
+            }, 400);
+        });
 
-    $('#filter_petugas, #filter_rw, #filter_rt, #filter_tahap, #filter_jenis, #filter_status').on('change', function() {
-        loadMappingData(true);
-    });
+        // =======================================================
+        // 7️⃣ FITUR CARI & TERBANG (FLY-TO) KE TITIK RUMAH KPM
+        // =======================================================
+        function flyToSearchedKpm() {
+            const query = ($('#inputCariKpmPeta').val() || '').trim().toLowerCase();
+            if (!query) return;
 
-    $('#btn_reset').on('click', function() {
-        if (!$('#filter_petugas').prop('disabled')) {
-            $('#filter_petugas').val('');
+            let foundObj = null;
+            for (const id in markerObjectsMap) {
+                const item = markerObjectsMap[id].data;
+                const matchStr = `${item.nama_kpm} (${item.nik_kpm})`.toLowerCase();
+                if (matchStr === query || item.nama_kpm.toLowerCase().includes(query) || item.nik_kpm.toLowerCase().includes(query)) {
+                    foundObj = markerObjectsMap[id];
+                    break;
+                }
+            }
+
+            if (foundObj) {
+                markerCluster.zoomToShowLayer(foundObj.marker, function() {
+                    map.setView(foundObj.marker.getLatLng(), 19, {
+                        animate: true
+                    });
+                    foundObj.marker.openPopup();
+                });
+            } else {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Titik Tidak Ditemukan',
+                    text: 'KPM tersebut tidak ditemukan pada peta atau belum memiliki titik koordinat.',
+                    timer: 2500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            }
         }
-        $('#filter_rw').val('');
-        $('#filter_rt').empty().append('<option value="">Semua RT</option>');
-        $('#filter_tahap').val('');
-        $('#filter_jenis').val('');
-        $('#filter_status').val('');
-        $('#inputCariKpmPeta').val('');
 
-        loadMappingData(true);
-    });
-
-    // =======================================================
-    // 9️⃣ MODAL DETAIL BNBA (MENDUKUNG 1 KPM 2 BANSOS & PORTRAIT 3:4)
-    // =======================================================
-    $(document).on('click', '.btn-detail-bnba', function() {
-        const id = $(this).data('id');
-
-        Swal.fire({
-            title: 'Memuat Detail...',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
+        $('#btnFlyToKpm').on('click', flyToSearchedKpm);
+        $('#inputCariKpmPeta').on('change keyup', function(e) {
+            if (e.type === 'change' || e.key === 'Enter') {
+                flyToSearchedKpm();
             }
         });
 
+        // Tombol Fokus Sebaran Desa (Fit Bounds ke Batas Desa / Titik Sebaran)
+        $('#btn_fit_bounds').on('click', function() {
+            if (batasDesaBounds && batasDesaBounds.isValid()) {
+                map.fitBounds(batasDesaBounds, {
+                    padding: [25, 25]
+                });
+                return;
+            }
+            const bounds = currentMarkersData.map(m => [parseFloat(m.latitude), parseFloat(m.longitude)]).filter(c => !isNaN(c[0]) && !isNaN(c[1]));
+            if (bounds.length > 0) {
+                map.fitBounds(bounds, {
+                    padding: [45, 45],
+                    maxZoom: 18
+                });
+            }
+        });
+
+        // =======================================================
+        // 8️⃣ CASCADING DROPDOWN RW -> RT & EVENT FILTER
+        // =======================================================
         $.ajax({
-            url: "<?= base_url('bansos/detail-bnba'); ?>/" + id,
+            url: "<?= base_url('bansos/get-rw'); ?>",
             type: "GET",
             dataType: "JSON",
-            success: function(res) {
-                Swal.close();
-                if (res.status && res.data) {
-                    const d = res.data;
-                    const items = d.items || [];
-
-                    $('#detail_nama_kpm').text(d.nama_kpm ? d.nama_kpm.toUpperCase() : '-');
-                    $('#detail_nik_kpm').text(d.nik_kpm || '-');
-                    $('#detail_no_kk').text(d.no_kk || '-');
-                    $('#detail_kepala_keluarga').text(d.kepala_keluarga || '-');
-                    $('#detail_alamat').text(d.alamat || '-');
-                    $('#detail_rt_rw').text('RT ' + (d.rt_formatted || '-') + ' / RW ' + (d.rw_formatted || '-'));
-                    $('#detail_no_kks').text(d.nomor_kks || '-');
-                    $('#detail_tahap_salur').text(d.tahap_salur || '-');
-                    $('#detail_nominal_cair').text(d.total_nominal_formatted || d.nominal_formatted || 'Rp 0');
-                    $('#detail_petugas').text(d.petugas_nama || 'Admin / Sistem');
-                    $('#detail_created_at').text(d.created_at || d.updated_at || '-');
-
-                    // Jenis Bansos Badge Modal
-                    let badgeJenisHtml = '';
-                    const katJenis = d.jenis_bansos_kategori || d.jenis_bansos || '';
-                    if (katJenis === 'PKH + SEMBAKO') {
-                        badgeJenisHtml = '<span class="badge badge-purple px-2 py-1" style="background-color: #6f42c1; color: white;"><i class="fas fa-layer-group mr-1"></i> PKH + SEMBAKO</span>';
-                    } else if (katJenis === 'PKH') {
-                        badgeJenisHtml = '<span class="badge badge-primary px-2 py-1"><i class="fas fa-hand-holding-heart mr-1"></i> PKH</span>';
-                    } else {
-                        badgeJenisHtml = '<span class="badge badge-info px-2 py-1" style="background-color: #20c997; color: white;"><i class="fas fa-box-open mr-1"></i> SEMBAKO</span>';
-                    }
-                    $('#detail_jenis_bansos').html(badgeJenisHtml);
-
-                    function renderItemDetail(item) {
-                        $('#labelFotoKpm').text('Foto KPM & KKS (' + item.jenis_bansos + ')');
-                        $('#labelFotoStruk').text('Foto Struk (' + item.jenis_bansos + ')');
-
-                        $('#imgFotoKpm').attr('src', item.foto_kpm_url);
-                        $('#linkFotoKpm').attr('href', item.foto_kpm_url);
-
-                        $('#imgFotoStruk').attr('src', item.foto_struk_url);
-                        $('#linkFotoStruk').attr('href', item.foto_struk_url);
-
-                        // Geotagging
-                        if (item.maps_url && item.latitude && item.longitude) {
-                            $('#boxLokasi').show();
-                            $('#labelSumberKoordinatModal').text(item.coord_source_label || 'Geotagging Lokasi');
-                            $('#txtKoordinat').text(item.latitude + ', ' + item.longitude);
-                            $('#btnBukaMaps').attr('href', item.maps_url);
-                        } else {
-                            $('#boxLokasi').hide();
-                        }
-
-                        const statusLower = (item.status_salur || '').toLowerCase();
-                        let badgeStatus = '<span class="badge badge-warning text-dark">Belum Transaksi</span>';
-                        if (statusLower === 'sukses salur') {
-                            badgeStatus = '<span class="badge badge-success"><i class="fas fa-check-circle mr-1"></i> Sukses Salur</span>';
-                        } else if (item.status_salur) {
-                            badgeStatus = '<span class="badge badge-danger"><i class="fas fa-times-circle mr-1"></i> ' + item.status_salur + '</span>';
-                        }
-                        $('#detail_status_salur').html(badgeStatus);
-                    }
-
-                    if (items.length > 1) {
-                        $('#containerProgramSelector').show();
-                        $('#btnGroupProgram').empty();
-                        $('#boxRincianKomponen').show();
-                        $('#tbodyRincianKomponen').empty();
-
-                        items.forEach(function(it, idx) {
-                            const activeClass = (idx === 0) ? 'btn-primary active text-white' : 'btn-outline-primary';
-                            const btn = $('<button type="button" class="btn btn-sm btn-program-tab ' + activeClass + ' py-1 px-3 fw-bold"></button>')
-                                .html('<i class="fas fa-layer-group mr-1"></i> ' + it.jenis_bansos)
-                                .data('item-index', idx);
-                            $('#btnGroupProgram').append(btn);
-
-                            const itStLow = (it.status_salur || '').toLowerCase();
-                            let itStBadge = '<span class="badge badge-warning text-dark">Belum Transaksi</span>';
-                            if (itStLow === 'sukses salur') {
-                                itStBadge = '<span class="badge badge-success">Sukses Salur</span>';
-                            } else if (it.status_salur) {
-                                itStBadge = '<span class="badge badge-danger">' + it.status_salur + '</span>';
-                            }
-
-                            const tr = '<tr>' +
-                                '<td class="py-1 fw-bold">' + it.jenis_bansos + '</td>' +
-                                '<td class="py-1 text-end text-success fw-bold">' + it.nominal_formatted + '</td>' +
-                                '<td class="py-1 text-center">' + itStBadge + '</td>' +
-                            '</tr>';
-                            $('#tbodyRincianKomponen').append(tr);
-                        });
-
-                        renderItemDetail(items[0]);
-
-                        $('.btn-program-tab').off('click').on('click', function() {
-                            $('.btn-program-tab').removeClass('btn-primary active text-white').addClass('btn-outline-primary');
-                            $(this).removeClass('btn-outline-primary').addClass('btn-primary active text-white');
-                            const selIdx = $(this).data('item-index');
-                            renderItemDetail(items[selIdx]);
-                        });
-                    } else if (items.length === 1) {
-                        $('#containerProgramSelector').hide();
-                        $('#boxRincianKomponen').hide();
-                        renderItemDetail(items[0]);
-                    } else {
-                        $('#containerProgramSelector').hide();
-                        $('#boxRincianKomponen').hide();
-                        $('#detail_status_salur').html('<span class="badge badge-warning text-dark">Belum Transaksi</span>');
-                    }
-
-                    $('#modalDetailBnba').modal('show');
-                } else {
-                    Swal.fire('Error', res.message || 'Gagal mengambil data detail.', 'error');
-                }
-            },
-            error: function() {
-                Swal.fire('Error', 'Terjadi kesalahan sistem saat mengambil data detail.', 'error');
+            success: function(data) {
+                $('#filter_rw').empty().append('<option value="">Semua RW</option>');
+                $.each(data, function(idx, val) {
+                    $('#filter_rw').append('<option value="' + val + '">RW ' + val + '</option>');
+                });
             }
         });
-    });
 
-    // =======================================================
-    // 🚀 INITIAL LOAD
-    // =======================================================
-    loadMappingData(true);
-});
+        $('#filter_rw').on('change', function() {
+            const rwSelected = $(this).val();
+            $('#filter_rt').empty().append('<option value="">Semua RT</option>');
+
+            if (rwSelected !== '') {
+                $.ajax({
+                    url: "<?= base_url('bansos/get-rt'); ?>",
+                    type: "GET",
+                    data: {
+                        rw: rwSelected
+                    },
+                    dataType: "JSON",
+                    success: function(data) {
+                        $.each(data, function(idx, val) {
+                            $('#filter_rt').append('<option value="' + val + '">RT ' + val + '</option>');
+                        });
+                    }
+                });
+            }
+        });
+
+        $('#btn_filter').on('click', function() {
+            loadMappingData(true);
+        });
+
+        $('#filter_petugas, #filter_rw, #filter_rt, #filter_tahap, #filter_jenis, #filter_status').on('change', function() {
+            loadMappingData(true);
+        });
+
+        $('#btn_reset').on('click', function() {
+            if (!$('#filter_petugas').prop('disabled')) {
+                $('#filter_petugas').val('');
+            }
+            $('#filter_rw').val('');
+            $('#filter_rt').empty().append('<option value="">Semua RT</option>');
+            $('#filter_tahap').val('');
+            $('#filter_jenis').val('');
+            $('#filter_status').val('');
+            $('#inputCariKpmPeta').val('');
+
+            loadMappingData(true);
+        });
+
+        // =======================================================
+        // 9️⃣ MODAL DETAIL BNBA (MENDUKUNG 1 KPM 2 BANSOS & PORTRAIT 3:4)
+        // =======================================================
+        $(document).on('click', '.btn-detail-bnba', function() {
+            const id = $(this).data('id');
+
+            Swal.fire({
+                title: 'Memuat Detail...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: "<?= base_url('bansos/detail-bnba'); ?>/" + id,
+                type: "GET",
+                dataType: "JSON",
+                success: function(res) {
+                    Swal.close();
+                    if (res.status && res.data) {
+                        const d = res.data;
+                        const items = d.items || [];
+
+                        $('#detail_nama_kpm').text(d.nama_kpm ? d.nama_kpm.toUpperCase() : '-');
+                        $('#detail_nik_kpm').text(d.nik_kpm || '-');
+                        $('#detail_no_kk').text(d.no_kk || '-');
+                        $('#detail_kepala_keluarga').text(d.kepala_keluarga || '-');
+                        $('#detail_alamat').text(d.alamat || '-');
+                        $('#detail_rt_rw').text('RT ' + (d.rt_formatted || '-') + ' / RW ' + (d.rw_formatted || '-'));
+                        $('#detail_no_kks').text(d.nomor_kks || '-');
+                        $('#detail_tahap_salur').text(d.tahap_salur || '-');
+                        $('#detail_nominal_cair').text(d.total_nominal_formatted || d.nominal_formatted || 'Rp 0');
+                        $('#detail_petugas').text(d.petugas_nama || 'Admin / Sistem');
+                        $('#detail_created_at').text(d.created_at || d.updated_at || '-');
+                        const fotoRumahDepanUrl = d.foto_depan_url || "<?= base_url('data/usulan/foto_rumah/noimage.png'); ?>";
+                        $('#imgFotoRumahDepan').attr('src', fotoRumahDepanUrl);
+                        $('#linkFotoRumahDepan').attr('href', fotoRumahDepanUrl);
+
+                        // Jenis Bansos Badge Modal
+                        let badgeJenisHtml = '';
+                        const katJenis = d.jenis_bansos_kategori || d.jenis_bansos || '';
+                        if (katJenis === 'PKH + SEMBAKO') {
+                            badgeJenisHtml = '<span class="badge badge-purple px-2 py-1" style="background-color: #6f42c1; color: white;"><i class="fas fa-layer-group mr-1"></i> PKH + SEMBAKO</span>';
+                        } else if (katJenis === 'PKH') {
+                            badgeJenisHtml = '<span class="badge badge-primary px-2 py-1"><i class="fas fa-hand-holding-heart mr-1"></i> PKH</span>';
+                        } else {
+                            badgeJenisHtml = '<span class="badge badge-info px-2 py-1" style="background-color: #20c997; color: white;"><i class="fas fa-box-open mr-1"></i> SEMBAKO</span>';
+                        }
+                        $('#detail_jenis_bansos').html(badgeJenisHtml);
+
+                        function renderItemDetail(item) {
+                            $('#labelFotoKpm').text('Foto KPM & KKS (' + item.jenis_bansos + ')');
+                            $('#labelFotoStruk').text('Foto Struk (' + item.jenis_bansos + ')');
+
+                            $('#imgFotoKpm').attr('src', item.foto_kpm_url);
+                            $('#linkFotoKpm').attr('href', item.foto_kpm_url);
+
+                            $('#imgFotoStruk').attr('src', item.foto_struk_url);
+                            $('#linkFotoStruk').attr('href', item.foto_struk_url);
+
+                            // Geotagging
+                            if (item.maps_url && item.latitude && item.longitude) {
+                                $('#boxLokasi').show();
+                                $('#labelSumberKoordinatModal').text(item.coord_source_label || 'Geotagging Lokasi');
+                                $('#txtKoordinat').text(item.latitude + ', ' + item.longitude);
+                                $('#btnBukaMaps').attr('href', item.maps_url);
+                            } else {
+                                $('#boxLokasi').hide();
+                            }
+
+                            const statusLower = (item.status_salur || '').toLowerCase();
+                            let badgeStatus = '<span class="badge badge-warning text-dark">Belum Transaksi</span>';
+                            if (statusLower === 'sukses salur') {
+                                badgeStatus = '<span class="badge badge-success"><i class="fas fa-check-circle mr-1"></i> Sukses Salur</span>';
+                            } else if (item.status_salur) {
+                                badgeStatus = '<span class="badge badge-danger"><i class="fas fa-times-circle mr-1"></i> ' + item.status_salur + '</span>';
+                            }
+                            $('#detail_status_salur').html(badgeStatus);
+                        }
+
+                        if (items.length > 1) {
+                            $('#containerProgramSelector').show();
+                            $('#btnGroupProgram').empty();
+                            $('#boxRincianKomponen').show();
+                            $('#tbodyRincianKomponen').empty();
+
+                            items.forEach(function(it, idx) {
+                                const activeClass = (idx === 0) ? 'btn-primary active text-white' : 'btn-outline-primary';
+                                const btn = $('<button type="button" class="btn btn-sm btn-program-tab ' + activeClass + ' py-1 px-3 fw-bold"></button>')
+                                    .html('<i class="fas fa-layer-group mr-1"></i> ' + it.jenis_bansos)
+                                    .data('item-index', idx);
+                                $('#btnGroupProgram').append(btn);
+
+                                const itStLow = (it.status_salur || '').toLowerCase();
+                                let itStBadge = '<span class="badge badge-warning text-dark">Belum Transaksi</span>';
+                                if (itStLow === 'sukses salur') {
+                                    itStBadge = '<span class="badge badge-success">Sukses Salur</span>';
+                                } else if (it.status_salur) {
+                                    itStBadge = '<span class="badge badge-danger">' + it.status_salur + '</span>';
+                                }
+
+                                const tr = '<tr>' +
+                                    '<td class="py-1 fw-bold">' + it.jenis_bansos + '</td>' +
+                                    '<td class="py-1 text-end text-success fw-bold">' + it.nominal_formatted + '</td>' +
+                                    '<td class="py-1 text-center">' + itStBadge + '</td>' +
+                                    '</tr>';
+                                $('#tbodyRincianKomponen').append(tr);
+                            });
+
+                            renderItemDetail(items[0]);
+
+                            $('.btn-program-tab').off('click').on('click', function() {
+                                $('.btn-program-tab').removeClass('btn-primary active text-white').addClass('btn-outline-primary');
+                                $(this).removeClass('btn-outline-primary').addClass('btn-primary active text-white');
+                                const selIdx = $(this).data('item-index');
+                                renderItemDetail(items[selIdx]);
+                            });
+                        } else if (items.length === 1) {
+                            $('#containerProgramSelector').hide();
+                            $('#boxRincianKomponen').hide();
+                            renderItemDetail(items[0]);
+                        } else {
+                            $('#containerProgramSelector').hide();
+                            $('#boxRincianKomponen').hide();
+                            $('#detail_status_salur').html('<span class="badge badge-warning text-dark">Belum Transaksi</span>');
+                        }
+
+                        $('#modalDetailBnba').modal('show');
+                    } else {
+                        Swal.fire('Error', res.message || 'Gagal mengambil data detail.', 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error', 'Terjadi kesalahan sistem saat mengambil data detail.', 'error');
+                }
+            });
+        });
+
+        // =======================================================
+        // 🚀 INITIAL LOAD
+        // =======================================================
+        loadMappingData(true);
+    });
 </script>
 
 <?= $this->endSection(); ?>
-

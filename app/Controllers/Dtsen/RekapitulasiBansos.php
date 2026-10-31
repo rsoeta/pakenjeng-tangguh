@@ -980,6 +980,7 @@ class RekapitulasiBansos extends BaseController
                           COALESCE(NULLIF(m.rt, \'\'), rt.rt, \'-\') as rt,
                           m.no_wa, m.status_kks,
                           k.id_kk, k.no_kk, k.kepala_keluarga,
+                          k.foto_rumah as kk_foto_depan, rt.foto_rumah as rt_foto_depan,
                           rt.latitude as rt_lat, rt.longitude as rt_lng,
                           u.fullname as petugas_nama', false)
                 ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
@@ -996,6 +997,8 @@ class RekapitulasiBansos extends BaseController
 
             $nik = $baseRow['nik_kpm'];
             $tahap = $baseRow['tahap_salur'];
+            $fotoDepanUsulan = null;
+            $fotoDepanMaster = $baseRow['kk_foto_depan'] ?: ($baseRow['rt_foto_depan'] ?? null);
 
             // Cari koordinat rumah dari dtsen_kk / dtsen_usulan (Prioritas 1)
             $idKk = !empty($baseRow['id_kk']) ? (int)$baseRow['id_kk'] : null;
@@ -1004,7 +1007,7 @@ class RekapitulasiBansos extends BaseController
 
             if (!$idKk && !empty($nik)) {
                 $uaRow = $this->db->table('dtsen_usulan_art ua')
-                    ->select("u.dtsen_kk_id, u.no_kk_target, k.no_kk, k.kepala_keluarga, rt.latitude as rt_lat, rt.longitude as rt_lng, JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.geo.lat')) as u_lat, JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.geo.lng')) as u_lng", false)
+                    ->select("u.dtsen_kk_id, u.no_kk_target, k.no_kk, k.kepala_keluarga, k.foto_rumah as kk_foto_depan, rt.foto_rumah as rt_foto_depan, rt.latitude as rt_lat, rt.longitude as rt_lng, JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.foto.depan')) as u_foto_depan, JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.geo.lat')) as u_lat, JSON_UNQUOTE(JSON_EXTRACT(u.payload, '$.geo.lng')) as u_lng", false)
                     ->join('dtsen_usulan u', 'u.id = ua.dtsen_usulan_id', 'inner')
                     ->join('dtsen_kk k', 'k.id_kk = u.dtsen_kk_id AND k.deleted_at IS NULL', 'left')
                     ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left')
@@ -1015,6 +1018,8 @@ class RekapitulasiBansos extends BaseController
                     ->get()->getRowArray();
                 if ($uaRow) {
                     $idKk = !empty($uaRow['dtsen_kk_id']) ? (int)$uaRow['dtsen_kk_id'] : null;
+                    $fotoDepanUsulan = $uaRow['u_foto_depan'] ?? null;
+                    $fotoDepanMaster = $uaRow['kk_foto_depan'] ?: ($uaRow['rt_foto_depan'] ?? $fotoDepanMaster);
                     if (empty($baseRow['no_kk'])) {
                         $baseRow['no_kk'] = $uaRow['no_kk'] ?: $uaRow['no_kk_target'];
                     }
@@ -1028,19 +1033,29 @@ class RekapitulasiBansos extends BaseController
 
             if ($idKk) {
                 $ugRow = $this->db->table('dtsen_usulan')
-                    ->select("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.geo.lat')) as u_lat, JSON_UNQUOTE(JSON_EXTRACT(payload, '$.geo.lng')) as u_lng", false)
+                    ->select("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.foto.depan')) as u_foto_depan, JSON_UNQUOTE(JSON_EXTRACT(payload, '$.geo.lat')) as u_lat, JSON_UNQUOTE(JSON_EXTRACT(payload, '$.geo.lng')) as u_lng", false)
                     ->where('dtsen_kk_id', $idKk)
                     ->whereIn('status', ['draft', 'submitted', 'verified', 'diverifikasi'])
                     ->orderBy('id', 'DESC')
                     ->get()->getResultArray();
+                $usulanCoordFound = false;
                 foreach ($ugRow as $ug) {
-                    if ($this->isValidCoord($ug['u_lat'] ?? null, $ug['u_lng'] ?? null)) {
+                    if (empty($fotoDepanUsulan) && !empty($ug['u_foto_depan'])) {
+                        $fotoDepanUsulan = $ug['u_foto_depan'];
+                    }
+                    if (!$usulanCoordFound && $this->isValidCoord($ug['u_lat'] ?? null, $ug['u_lng'] ?? null)) {
                         $rumahLat = $ug['u_lat'];
                         $rumahLng = $ug['u_lng'];
-                        break;
+                        $usulanCoordFound = true;
                     }
+                    if (!empty($fotoDepanUsulan) && $usulanCoordFound) break;
                 }
             }
+
+            $fotoDepan = $fotoDepanUsulan ?: $fotoDepanMaster;
+            $baseRow['foto_depan_url'] = !empty($fotoDepan)
+                ? base_url($fotoDepan)
+                : base_url('data/usulan/foto_rumah/noimage.png');
 
             // Ambil seluruh bantuan KPM ini pada tahap salur terkait (bisa 1 bansos atau 2 bansos PKH + SEMBAKO)
             $allEntries = $this->db->table('dtsen_bansos_kks b')
