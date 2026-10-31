@@ -62,6 +62,12 @@
         }
     }
 
+    @media (min-width: 769px) {
+        #containerBoxLokasi {
+            margin-top: -0.5rem;
+        }
+    }
+
     /* 📍 Custom Pin Marker (DivIcon) */
     .custom-map-pin {
         position: relative;
@@ -576,7 +582,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </section>
 </div>
@@ -631,16 +636,6 @@
                             </div>
                         </div>
 
-                        <!-- Geotagging Peta -->
-                        <div id="boxLokasi" class="card border shadow-none mb-0">
-                            <div class="card-body p-3 text-center">
-                                <span class="small fw-bold text-muted d-block mb-1" id="labelSumberKoordinatModal">Geotagging Lokasi</span>
-                                <p class="small font-monospace mb-2" id="txtKoordinat">-</p>
-                                <a id="btnBukaMaps" href="#" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-none w-100">
-                                    <i class="fas fa-map-marked-alt mr-1"></i> Buka Google Maps
-                                </a>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Sisi Kanan: Detail Informasi -->
@@ -724,6 +719,19 @@
                             <div class="card-body p-2 text-center">
                                 <a id="linkFotoRumahDepan" href="<?= base_url('data/usulan/foto_rumah/noimage.png'); ?>" target="_blank" rel="noopener" title="Klik untuk memperbesar">
                                     <img id="imgFotoRumahDepan" src="<?= base_url('data/usulan/foto_rumah/noimage.png'); ?>" alt="Foto rumah tampak depan" class="img-fluid rounded border" style="max-height: 320px; object-fit: contain;" onerror="this.onerror=null;this.src='<?= base_url('assets/img/no-image.svg'); ?>';">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="containerBoxLokasi" class="col-12 d-flex justify-content-center" style="display: none;">
+                        <!-- Geotagging Peta -->
+                        <div id="boxLokasi" class="card border shadow-none mb-0 w-100">
+                            <div class="card-body p-3 text-center">
+                                <span class="small fw-bold text-muted d-block mb-1" id="labelSumberKoordinatModal">Geotagging Lokasi</span>
+                                <p class="small font-monospace mb-2" id="txtKoordinat">-</p>
+                                <a id="btnBukaMaps" href="#" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3 shadow-none w-100">
+                                    <i class="fas fa-map-marked-alt mr-1"></i> Buka Google Maps
                                 </a>
                             </div>
                         </div>
@@ -1488,12 +1496,12 @@
 
                             // Geotagging
                             if (item.maps_url && item.latitude && item.longitude) {
-                                $('#boxLokasi').show();
+                                $('#containerBoxLokasi').show();
                                 $('#labelSumberKoordinatModal').text(item.coord_source_label || 'Geotagging Lokasi');
                                 $('#txtKoordinat').text(item.latitude + ', ' + item.longitude);
                                 $('#btnBukaMaps').attr('href', item.maps_url);
                             } else {
-                                $('#boxLokasi').hide();
+                                $('#containerBoxLokasi').hide();
                             }
 
                             const statusLower = (item.status_salur || '').toLowerCase();
