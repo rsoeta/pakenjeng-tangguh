@@ -308,9 +308,20 @@
     .workspace-art-table td { vertical-align: middle; padding: 11px 10px; }
     .workspace-art-name { display: block; color: #243b5a; font-weight: 600; }
     .workspace-art-sub { display: block; color: #78869a; font-size: .75rem; }
+    .pemeriksaan-swal-popup { width: 92vw !important; max-width: 32rem; padding: 1.25rem !important; font-size: 1rem; }
+    .pemeriksaan-swal-popup .swal2-title { font-size: 1.4rem; }
+    .pemeriksaan-swal-popup .swal2-html-container { font-size: 1rem; line-height: 1.5; }
+    .pemeriksaan-swal-popup .swal2-styled { min-height: 44px; padding: .625rem 1rem; font-size: .95rem; }
     @media (max-width: 991.98px) {
         .workspace-sidebar { min-height: 420px; border-right: 0; border-bottom: 1px solid #e8edf4; }
         .workspace-main { min-height: 450px; }
+    }
+    @media (max-width: 575.98px) {
+        .pemeriksaan-swal-popup { padding: 1rem !important; }
+        .pemeriksaan-swal-popup .swal2-title { font-size: 1.25rem; }
+        .pemeriksaan-swal-popup .swal2-html-container { font-size: .95rem; }
+        .pemeriksaan-swal-popup .swal2-actions { width: 100%; }
+        .pemeriksaan-swal-popup .swal2-styled { flex: 1; margin: .25rem; }
     }
 </style>
 
@@ -319,6 +330,6 @@
     window.csrfName = "<?= csrf_token() ?>";
     window.csrfHash = "<?= csrf_hash() ?>";
 </script>
-<script src="<?= base_url('assets/js/pemeriksaan.js?v=3.0.1') ?>"></script>
+<script src="<?= base_url('assets/js/pemeriksaan.js?v=3.0.2') ?>"></script>
 
 <?= $this->endSection() ?>

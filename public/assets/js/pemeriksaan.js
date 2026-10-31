@@ -19,6 +19,12 @@
     };
     const kkPageSize = 5;
     const artPageSize = 25;
+    const workspaceSwal = window.Swal.mixin({
+        customClass: {
+            popup: 'pemeriksaan-swal-popup'
+        },
+        buttonsStyling: true
+    });
 
     const el = (id) => document.getElementById(id);
     const escapeHtml = (value) => String(value == null ? '' : value)
@@ -28,12 +34,45 @@
     const endpoint = (path) => `${baseUrl}/dtsen/pemeriksaan/${path}`;
     const entityEndpoint = (entity, path) => `${baseUrl}/dtsen/${entity}/${path}`;
 
+    function showSuccess(message) {
+        return workspaceSwal.fire({
+            icon: 'success',
+            title: 'Berhasil',
+            text: message,
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+    }
+
     function showMessage(message, type) {
-        if (window.toastr && typeof window.toastr[type || 'info'] === 'function') {
-            window.toastr[type || 'info'](message);
-        } else {
-            window.alert(message);
-        }
+        if (type === 'success') return showSuccess(message);
+
+        const icons = {
+            error: 'error',
+            warning: 'warning',
+            info: 'info',
+            question: 'question'
+        };
+        return workspaceSwal.fire({
+            icon: icons[type] || 'info',
+            text: message,
+            confirmButtonText: 'Tutup'
+        });
+    }
+
+    async function confirmArchive(message) {
+        const result = await workspaceSwal.fire({
+            icon: 'question',
+            title: 'Konfirmasi pengarsipan',
+            text: message,
+            showCancelButton: true,
+            confirmButtonText: 'Ya, arsipkan',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            focusCancel: true
+        });
+        return result.isConfirmed;
     }
 
     async function readJson(response) {
@@ -368,7 +407,7 @@
         const selected = entity === 'kk' ? state.selectedKks : state.selectedArts;
         if (!selected.size) return;
         const action = state.status === 'archive' ? 'restore' : 'archive';
-        if (action === 'archive' && !window.confirm(`Arsipkan ${selected.size} data terpilih? Data dapat dipulihkan.`)) return;
+        if (action === 'archive' && !await confirmArchive(`Arsipkan ${selected.size} data terpilih? Data dapat dipulihkan.`)) return;
 
         const formData = new FormData();
         formData.append('action', action);
@@ -486,7 +525,7 @@
     }
 
     async function archiveItem(entity, id, action) {
-        if (action === 'archive' && !window.confirm('Arsipkan data ini? Data tidak dihapus permanen dan dapat dipulihkan.')) return;
+        if (action === 'archive' && !await confirmArchive('Arsipkan data ini? Data tidak dihapus permanen dan dapat dipulihkan.')) return;
         try {
             const result = await postAction(entityEndpoint(entity, `archive/${id}`), { action });
             showMessage(result.message, 'success');
