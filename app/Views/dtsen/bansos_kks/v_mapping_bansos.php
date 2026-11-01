@@ -582,6 +582,45 @@
                     </div>
                 </div>
             </div>
+            <div class="card shadow-sm border mb-4 rounded-3" id="sectionOutsideVillageKpm">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <div>
+                            <h6 class="m-0 fw-bold text-dark d-flex align-items-center mb-0">
+                                <i class="fas fa-map-marker-alt text-danger mr-2"></i> Daftar KPM Memiliki Titik Lokasi di Luar Wilayah Desa (<span id="badgeCountOutsideVillage">0</span> KPM)
+                            </h6>
+                            <small class="text-muted">Daftar keluarga penerima manfaat yang titik lokasinya berada di luar batas wilayah desa aktif</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 ms-auto ml-auto" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOutsideVillageTable" aria-expanded="true" style="margin-left: auto !important;">
+                            <i class="fas fa-chevron-down mr-1"></i> Tampilkan / Sembunyikan
+                        </button>
+                    </div>
+                </div>
+                <div id="collapseOutsideVillageTable" class="collapse show">
+                    <div class="card-body p-3">
+                        <div class="table-responsive">
+                            <table id="tableOutsideVillageKpm" class="table table-sm table-hover table-bordered table-striped w-100 mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="text-center" style="width: 45px;">No</th>
+                                        <th>NIK KPM</th>
+                                        <th>Nama KPM</th>
+                                        <th>No. KK</th>
+                                        <th>Wilayah RT / RW</th>
+                                        <th class="text-center">Jenis Bansos</th>
+                                        <th class="text-center">Tahap</th>
+                                        <th class="text-end">Nominal</th>
+                                        <th class="text-center">Status Salur</th>
+                                        <th class="text-center">Titik Lokasi</th>
+                                        <th class="text-center" style="width: 140px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyOutsideVillageKpm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 </div>
@@ -826,6 +865,7 @@
         $.getJSON("<?= base_url('assets/geojson/batas_desa_pakenjeng.json'); ?>", function(allVillages) {
             const vilData = allVillages[activeKodeDesa] || allVillages['32.05.33.2006'];
             if (vilData && vilData.geojson) {
+                activeVillageGeoJson = vilData.geojson;
                 layerBatasDesa.clearLayers();
 
                 // 1. Lapisan Luar (Outer Red Glow / Casing khas Google Maps)
@@ -865,7 +905,10 @@
                         padding: [25, 25]
                     });
                 }
+                renderOutsideVillageTable();
             }
+        }).fail(function() {
+            console.error("Gagal memuat GeoJSON batas wilayah desa.");
         });
 
         // Saklar Tombol Batas Desa ON/OFF
@@ -914,6 +957,8 @@
         let markerObjectsMap = {}; // Simpan referensi marker berdasarkan id untuk fitur Fly-To
         let currentColorMode = 'jenis'; // 'jenis' | 'status'
         let tableUnmappedDT = null;
+        let tableOutsideVillageDT = null;
+        let activeVillageGeoJson = null;
 
         // =======================================================
         // 2️⃣ GENERATOR CUSTOM PIN MARKER & POPUP HTML
@@ -1207,6 +1252,7 @@
                         // Simpan data marker & render ke peta
                         currentMarkersData = res.markers || [];
                         renderMarkersOnMap(fitBounds);
+                        renderOutsideVillageTable();
 
                         // Isi Datalist Pencarian Cepat KPM di Peta
                         const datalist = $('#datalistKpmMapped');
@@ -1297,6 +1343,140 @@
                     info: "Menampilkan _START_ s/d _END_ dari _TOTAL_ KPM belum terpetakan",
                     infoEmpty: "Semua KPM pada filter ini sudah memiliki titik koordinat!",
                     zeroRecords: "Tidak ada KPM yang belum terpetakan pada filter ini",
+                    paginate: {
+                        first: "Awal",
+                        last: "Akhir",
+                        next: "»",
+                        previous: "«"
+                    }
+                }
+            });
+        }
+
+        function isPointOnSegment(point, start, end) {
+            const cross = (point[1] - start[1]) * (end[0] - start[0]) -
+                (point[0] - start[0]) * (end[1] - start[1]);
+            if (Math.abs(cross) > 1e-10) return false;
+
+            return point[0] >= Math.min(start[0], end[0]) - 1e-10 &&
+                point[0] <= Math.max(start[0], end[0]) + 1e-10 &&
+                point[1] >= Math.min(start[1], end[1]) - 1e-10 &&
+                point[1] <= Math.max(start[1], end[1]) + 1e-10;
+        }
+
+        function isPointInRing(point, ring) {
+            let isInside = false;
+            for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+                const start = ring[j];
+                const end = ring[i];
+                if (isPointOnSegment(point, start, end)) return true;
+
+                const crossesLatitude = (start[1] > point[1]) !== (end[1] > point[1]);
+                if (crossesLatitude &&
+                    point[0] < ((end[0] - start[0]) * (point[1] - start[1])) /
+                    (end[1] - start[1]) + start[0]) {
+                    isInside = !isInside;
+                }
+            }
+            return isInside;
+        }
+
+        function isPointInVillage(point, geojson) {
+            if (!geojson || !Array.isArray(geojson.coordinates)) return false;
+
+            const polygons = geojson.type === 'Polygon' ?
+                [geojson.coordinates] :
+                (geojson.type === 'MultiPolygon' ? geojson.coordinates : []);
+
+            return polygons.some(function(rings) {
+                if (!rings.length || !isPointInRing(point, rings[0])) return false;
+                return !rings.slice(1).some(function(hole) {
+                    return isPointInRing(point, hole);
+                });
+            });
+        }
+
+        function escapeTableValue(value) {
+            return $('<div>').text(value == null ? '' : String(value)).html();
+        }
+
+        function renderOutsideVillageTable() {
+            if (!activeVillageGeoJson) return;
+
+            const outsideList = currentMarkersData.filter(function(item) {
+                const latitude = parseFloat(item.latitude);
+                const longitude = parseFloat(item.longitude);
+                return !isNaN(latitude) && !isNaN(longitude) &&
+                    !isPointInVillage([longitude, latitude], activeVillageGeoJson);
+            });
+
+            $('#badgeCountOutsideVillage').text(outsideList.length.toLocaleString('id-ID'));
+            if (tableOutsideVillageDT) {
+                tableOutsideVillageDT.destroy();
+            }
+
+            const tbody = $('#tbodyOutsideVillageKpm');
+            tbody.empty();
+
+            outsideList.forEach(function(item, idx) {
+                let badgeJenis = '';
+                if (item.jenis_bansos === 'PKH + SEMBAKO') {
+                    badgeJenis = '<span class="badge px-2 py-1" style="background-color:#6f42c1; color:#fff;"><i class="fas fa-layer-group mr-1"></i> PKH + SEMBAKO</span>';
+                } else if (item.jenis_bansos === 'PKH') {
+                    badgeJenis = '<span class="badge badge-primary px-2 py-1"><i class="fas fa-hand-holding-heart mr-1"></i> PKH</span>';
+                } else {
+                    badgeJenis = '<span class="badge px-2 py-1" style="background-color:#20c997; color:#fff;"><i class="fas fa-box-open mr-1"></i> SEMBAKO</span>';
+                }
+
+                let badgeStatus = '';
+                if (item.status_summary === 'sukses') {
+                    badgeStatus = '<span class="badge badge-success px-2 py-1">Sukses Salur</span>';
+                } else if (item.status_summary === 'gagal') {
+                    badgeStatus = `<span class="badge badge-danger px-2 py-1">${escapeTableValue(item.status_label)}</span>`;
+                } else {
+                    badgeStatus = '<span class="badge badge-warning text-dark px-2 py-1">Belum Transaksi</span>';
+                }
+
+                const latitude = parseFloat(item.latitude);
+                const longitude = parseFloat(item.longitude);
+                const mapUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+                const btnKkHtml = item.id_kk_token ?
+                    `<a href="<?= base_url('pembaruan-keluarga/detail'); ?>/${escapeTableValue(item.id_kk_token)}" target="_blank" class="btn btn-xs btn-outline-primary rounded-pill px-2 mr-1" title="Petakan Koordinat Rumah di Pembaruan Keluarga"><i class="fas fa-home"></i> KK</a>` :
+                    '';
+                const tr = `
+                    <tr>
+                        <td class="text-center">${idx + 1}</td>
+                        <td class="font-monospace small fw-bold text-primary">${escapeTableValue(item.nik_masked)}</td>
+                        <td class="fw-bold text-dark">${escapeTableValue(item.nama_kpm)}</td>
+                        <td class="font-monospace small">${escapeTableValue(item.no_kk_masked)}</td>
+                        <td>
+                            <span class="small">${escapeTableValue(item.alamat)}</span><br>
+                            <span class="badge badge-light border text-muted">RT ${escapeTableValue(item.rt)} / RW ${escapeTableValue(item.rw)}</span>
+                        </td>
+                        <td class="text-center">${badgeJenis}</td>
+                        <td class="text-center"><span class="badge badge-secondary">${escapeTableValue(item.tahap_salur)}</span></td>
+                        <td class="text-end fw-bold text-success">${escapeTableValue(item.nominal_formatted)}</td>
+                        <td class="text-center">${badgeStatus}</td>
+                        <td class="text-center"><a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-outline-danger rounded-pill px-2"><i class="fas fa-map-marker-alt mr-1"></i> Peta</a></td>
+                        <td class="text-center">
+                            ${btnKkHtml}
+                            <button type="button" class="btn btn-xs btn-info btn-detail-bnba rounded-pill px-2" data-id="${Number(item.id)}" title="Lihat Detail BNBA"><i class="fas fa-eye"></i> Detail</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.append(tr);
+            });
+
+            tableOutsideVillageDT = $('#tableOutsideVillageKpm').DataTable({
+                responsive: true,
+                autoWidth: false,
+                pageLength: 10,
+                language: {
+                    search: "Cari KPM:",
+                    lengthMenu: "Tampilkan _MENU_ data",
+                    info: "Menampilkan _START_ s/d _END_ dari _TOTAL_ KPM di luar wilayah desa",
+                    infoEmpty: "Tidak ada KPM dengan titik lokasi di luar wilayah desa",
+                    zeroRecords: "Tidak ada KPM dengan titik lokasi di luar wilayah desa pada filter ini",
                     paginate: {
                         first: "Awal",
                         last: "Akhir",
