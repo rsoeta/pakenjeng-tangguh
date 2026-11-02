@@ -76,7 +76,7 @@ class LansiaModel extends Model
 			->select('duplicate_art.id_art')
 			->join('dtsen_kk duplicate_kk', 'duplicate_kk.id_kk = duplicate_art.id_kk')
 			->join('dtsen_rt duplicate_rt', 'duplicate_rt.id_rt = duplicate_kk.id_rt', 'left')
-			->where('TRIM(duplicate_art.nik) = TRIM(art.nik)', null, false)
+			->where('duplicate_art.nik = art.nik', null, false)
 			->where('duplicate_art.id_art < art.id_art', null, false);
 
 		$this->applyLansiaBaseConditions($duplicateBuilder, 'duplicate_art', 'duplicate_kk');
