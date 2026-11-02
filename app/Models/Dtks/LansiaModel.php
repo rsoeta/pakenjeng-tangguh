@@ -63,6 +63,32 @@ class LansiaModel extends Model
 		}
 	}
 
+	private function applyLansiaBaseConditions($builder, string $artAlias, string $kkAlias): void
+	{
+		$builder->where("$artAlias.deleted_at", null);
+		$builder->where("$kkAlias.deleted_at", null);
+		$builder->where("TIMESTAMPDIFF(YEAR, $artAlias.tanggal_lahir, CURDATE()) >", 60);
+	}
+
+	private function applyUniqueNikCondition($builder, array $filter, int $roleId): void
+	{
+		$duplicateBuilder = $this->db->table('dtsen_art duplicate_art')
+			->select('duplicate_art.id_art')
+			->join('dtsen_kk duplicate_kk', 'duplicate_kk.id_kk = duplicate_art.id_kk')
+			->join('dtsen_rt duplicate_rt', 'duplicate_rt.id_rt = duplicate_kk.id_rt', 'left')
+			->where('TRIM(duplicate_art.nik) = TRIM(art.nik)', null, false)
+			->where('duplicate_art.id_art < art.id_art', null, false);
+
+		$this->applyLansiaBaseConditions($duplicateBuilder, 'duplicate_art', 'duplicate_kk');
+		$this->applyWilayahFilter($duplicateBuilder, $filter, $roleId);
+
+		$builder->groupStart()
+			->where('art.nik IS NULL', null, false)
+			->orWhere("TRIM(art.nik) IN ('', '-')", null, false)
+			->orWhere('NOT EXISTS (' . $duplicateBuilder->getCompiledSelect() . ')', null, false)
+			->groupEnd();
+	}
+
 	private function _get_datatables_query(array $filter, int $roleId = 1)
 	{
 		$hasLansiaTable       = $this->db->tableExists('dtsen_lansia');
@@ -142,10 +168,9 @@ class LansiaModel extends Model
 			$builder->join('dtsen_lansia ls', 'ls.id_art = art.id_art', 'left');
 		}
 
-		// Hanya lansia (usia > 60 tahun) dan tidak terhapus
-		$builder->where('art.deleted_at IS NULL');
-		$builder->where('kk.deleted_at IS NULL');
-		$builder->where('TIMESTAMPDIFF(YEAR, art.tanggal_lahir, CURDATE()) >', 60);
+		// Hanya lansia aktif; pilih satu record aktif untuk setiap NIK di wilayah akses.
+		$this->applyLansiaBaseConditions($builder, 'art', 'kk');
+		$this->applyUniqueNikCondition($builder, $filter, $roleId);
 
 		// 🔐 Terapkan WilayahFilterTrait (Karantina Kode Desa, RW, RT, dan Wilayah Tugas Petugas)
 		$this->applyWilayahFilter($builder, $filter, $roleId);
@@ -257,16 +282,15 @@ class LansiaModel extends Model
 		$builder->join('dtsen_kk kk', 'kk.id_kk = art.id_kk');
 		$builder->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left');
 
-		$builder->where('art.deleted_at IS NULL');
-		$builder->where('kk.deleted_at IS NULL');
-		$builder->where('TIMESTAMPDIFF(YEAR, art.tanggal_lahir, CURDATE()) >', 60);
-
 		// Karantina wilayah dasar (kode_desa, wilayah_tugas, level) sesuai hak akses user
 		$filterWilayah = [
 			'kode_desa'     => $filter['kode_desa'] ?? '',
 			'wilayah_tugas' => $filter['wilayah_tugas'] ?? '',
 			'level'         => $filter['level'] ?? ''
 		];
+
+		$this->applyLansiaBaseConditions($builder, 'art', 'kk');
+		$this->applyUniqueNikCondition($builder, $filterWilayah, $roleId);
 		$this->applyWilayahFilter($builder, $filterWilayah, $roleId);
 
 		return (object)['jml' => $builder->countAllResults()];
