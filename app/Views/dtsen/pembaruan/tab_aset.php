@@ -138,7 +138,7 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                                         <?php if (!$disabled): ?>
                                             <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#nilai_rumah_lain" title="Salin Nilai Rumah"><i class="fas fa-copy"></i></button>
                                         <?php endif; ?>
-                                        <div class="invalid-feedback">Wajib diisi karena unit > 0</div>
+                                        <div id="err_nilai_rumah_lain" class="invalid-feedback">Wajib diisi karena unit > 0</div>
                                     </div>
                                 </div>
                             </div>
@@ -304,6 +304,27 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
         // 🚀 LOGIKA DINAMIS & VALIDASI BPS: ASET LAHAN
         // 1 Titik = Minimal Rp 6.000.000
         // ====================================================
+        function validateAkhiranNilaiAset00($input, $feedback) {
+            const rawValue = $input.val().replace(/[^0-9]/g, '');
+            if (!rawValue || rawValue.endsWith('00')) {
+                $input.removeClass('is-invalid');
+                return true;
+            }
+
+            $input.addClass('is-invalid');
+            $feedback.text('Total Nilai Aset harus diakhiri dengan 00');
+            return false;
+        }
+
+        function validateNilaiRumah() {
+            const $input = $('#nilai_rumah_lain');
+            const $feedback = $('#err_nilai_rumah_lain');
+            if (!$input.val().trim()) {
+                $feedback.text('Wajib diisi karena unit > 0');
+            }
+            return validateAkhiranNilaiAset00($input, $feedback);
+        }
+
         function cekStandarSawahBPS() {
             let jmlSawah = parseInt($('#luas_sawah').val()) || 0;
             let rawNilai = $('#nilai_sawah').val().replace(/[^0-9]/g, '');
@@ -319,7 +340,9 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
                 // Hitung nilai minimal (Jumlah Titik x Rp 6.000.000)
                 let minNilaiBPS = jmlSawah * 6000000;
 
-                if (nilaiSawah < minNilaiBPS) {
+                if (!validateAkhiranNilaiAset00($('#nilai_sawah'), $('#err_nilai_sawah'))) {
+                    $('#nilai_sawah').removeClass('border-primary');
+                } else if (nilaiSawah < minNilaiBPS) {
                     let formatMin = new Intl.NumberFormat('id-ID').format(minNilaiBPS);
                     $('#nilai_sawah').addClass('is-invalid').removeClass('border-primary');
                     $('#err_nilai_sawah').text('Total Nilai Aset minimal bernilai Rp ' + formatMin);
@@ -343,9 +366,10 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
             if (val > 0) {
                 $('#div_nilai_rumah').slideDown();
                 $('#nilai_rumah_lain').prop('required', true);
+                validateNilaiRumah();
             } else {
                 $('#div_nilai_rumah').slideUp();
-                $('#nilai_rumah_lain').prop('required', false).val('');
+                $('#nilai_rumah_lain').prop('required', false).val('').removeClass('is-invalid');
             }
         }
 
@@ -374,6 +398,7 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
         // 🎯 EVENT LISTENER (Jalankan saat diketik)
         $('#luas_sawah, #nilai_sawah').on('input change', cekStandarSawahBPS);
         $('#rumah_lain').on('input change', toggleNilaiRumah);
+        $('#nilai_rumah_lain').on('input change', validateNilaiRumah);
         $('#sepeda_motor').on('input change', toggleNilaiMotor);
         $('#mobil').on('input change', toggleNilaiMobil);
 
@@ -389,8 +414,18 @@ $isComplete = !empty($aset) && !in_array(null, $aset, true);
         $(document).on('click', '#btnSimpanAset', function(e) {
             e.preventDefault();
 
+            const jmlRumahLain = parseInt($('#rumah_lain').val()) || 0;
+            const jmlSawah = parseInt($('#luas_sawah').val()) || 0;
+            const nilaiRumahValid = jmlRumahLain === 0 || validateNilaiRumah();
+            const nilaiSawahValid = jmlSawah === 0 || validateAkhiranNilaiAset00($('#nilai_sawah'), $('#err_nilai_sawah'));
+
+            if (!nilaiRumahValid || !nilaiSawahValid) {
+                const $invalidInput = !nilaiRumahValid ? $('#nilai_rumah_lain') : $('#nilai_sawah');
+                $invalidInput.focus();
+                return;
+            }
+
             // 1️⃣ GATEKEEPER 1: Cek Standar Nilai Lahan BPS
-            let jmlSawah = parseInt($('#luas_sawah').val()) || 0;
             let rawNilai = $('#nilai_sawah').val().replace(/[^0-9]/g, '');
             let nilaiSawah = parseInt(rawNilai) || 0;
             let minNilaiBPS = jmlSawah * 6000000;
