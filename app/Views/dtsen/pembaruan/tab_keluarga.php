@@ -34,6 +34,36 @@ if (empty($wil['provinsi']) && !empty($rtData['kode_desa'])) {
         border-width: 2px;
     }
 
+    .geotag-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .village-boundary-toggle {
+        padding-left: 2px;
+    }
+
+    .village-boundary-toggle .form-check-input {
+        margin-left: 0 !important;
+    }
+
+    .village-boundary-toggle .form-check-label {
+        margin-left: 2.5rem;
+    }
+
+    @media (max-width: 575.98px) {
+        .geotag-actions {
+            gap: 0.3rem;
+        }
+
+        .geotag-actions .btn {
+            padding-right: 0.55rem;
+            padding-left: 0.55rem;
+        }
+    }
+
     #map {
         border: 2px solid #ddd;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -221,18 +251,27 @@ if (empty($wil['provinsi']) && !empty($rtData['kode_desa'])) {
                         </div>
                     </div>
                 </div>
-                <div class="mb-3 d-flex gap-2">
+                <div class="mb-3 geotag-actions">
                     <?php if ($editable): ?>
-                        <button type="button" class="btn btn-sm btn-primary shadow-sm" id="btnGetLocation">
+                        <button type="button" class="btn btn-sm btn-primary shadow-sm" id="btnGetLocation" title="Ambil Lokasi Saat Ini" aria-label="Ambil Lokasi Saat Ini">
                             <i class="fas fa-map-marker-alt"></i> Ambil Lokasi Saat Ini
                         </button>
                     <?php endif; ?>
-                    <button type="button" class="btn btn-sm btn-info shadow-sm" id="btnCopyFull" title="Salin Latitude & Longitude">
+                    <button type="button" class="btn btn-sm btn-info shadow-sm" id="btnCopyFull" title="Salin Latitude & Longitude" aria-label="Salin Koordinat">
                         <i class="fas fa-copy"></i> Salin Koordinat
                     </button>
                 </div>
                 <div class="mb-4">
                     <div id="map" style="height: 300px; border-radius: 10px;"></div>
+                </div>
+                <div class="d-flex justify-content-start mb-3">
+                    <div class="form-check form-switch village-boundary-toggle d-flex align-items-center gap-2 mb-0" title="Tampilkan / sembunyikan batas desa">
+                        <input class="form-check-input cursor-pointer mt-0" type="checkbox" id="toggleVillageBoundary" checked aria-label="Tampilkan batas desa" title="Tampilkan / sembunyikan batas desa">
+                        <label class="form-check-label small fw-semibold text-nowrap d-flex align-items-center gap-1 mb-0" for="toggleVillageBoundary">
+                            <i class="fas fa-draw-polygon" aria-hidden="true"></i>
+                            <span id="villageBoundaryToggleLabel">Batas Desa: ON</span>
+                        </label>
+                    </div>
                 </div>
 
                 <!-- TOMBOL SUBMIT KELUARGA -->
@@ -351,6 +390,64 @@ if (empty($wil['provinsi']) && !empty($rtData['kode_desa'])) {
         let lng = lngInput.value ? parseFloat(lngInput.value) : 107.634;
 
         const map = L.map('map').setView([lat, lng], 17); // Default kita turunkan sedikit ke 17 agar aman
+        const boundaryToggle = document.getElementById('toggleVillageBoundary');
+        const boundaryToggleLabel = document.getElementById('villageBoundaryToggleLabel');
+        const sessionVillageCode = <?= json_encode((string)(session()->get('kode_desa') ?? ''), JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP); ?>;
+        let villageBoundaryLayer = null;
+
+        function updateBoundaryToggleLabel(text) {
+            boundaryToggleLabel.textContent = text;
+            boundaryToggle.setAttribute('aria-label', text);
+        }
+
+        boundaryToggle.addEventListener('change', function() {
+            updateBoundaryToggleLabel(`Batas Desa: ${boundaryToggle.checked ? 'ON' : 'OFF'}`);
+            if (!villageBoundaryLayer) return;
+
+            if (boundaryToggle.checked) {
+                villageBoundaryLayer.addTo(map);
+            } else {
+                map.removeLayer(villageBoundaryLayer);
+            }
+        });
+
+        if (sessionVillageCode) {
+            $.getJSON("<?= base_url('assets/geojson/batas_desa_pakenjeng.json'); ?>", function(villages) {
+                const village = villages[sessionVillageCode];
+                if (!village || !village.geojson) {
+                    console.error(`GeoJSON batas desa tidak ditemukan untuk kode desa ${sessionVillageCode}.`);
+                    boundaryToggle.checked = false;
+                    boundaryToggle.disabled = true;
+                    updateBoundaryToggleLabel('Batas Desa Tidak Tersedia');
+                    return;
+                }
+
+                villageBoundaryLayer = L.geoJSON(village.geojson, {
+                    style: {
+                        color: '#ea4335',
+                        weight: 3,
+                        opacity: 0.9,
+                        fillColor: '#ea4335',
+                        fillOpacity: 0.04
+                    },
+                    interactive: false
+                });
+
+                if (boundaryToggle.checked) {
+                    villageBoundaryLayer.addTo(map);
+                }
+            }).fail(function() {
+                console.error('Gagal memuat GeoJSON batas wilayah desa.');
+                boundaryToggle.checked = false;
+                boundaryToggle.disabled = true;
+                updateBoundaryToggleLabel('Batas Desa Tidak Tersedia');
+            });
+        } else {
+            console.error('Kode desa pada sesi login tidak tersedia.');
+            boundaryToggle.checked = false;
+            boundaryToggle.disabled = true;
+            updateBoundaryToggleLabel('Batas Desa Tidak Tersedia');
+        }
 
         // 🚀 MENGGUNAKAN SATELIT ESRI WORLD IMAGERY DENGAN ANTI-BLANK
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
