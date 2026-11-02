@@ -136,6 +136,7 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                             <input type="number" min="1" name="jumlah_orang_dalam_rumah" id="jumlah_orang_dalam_rumah" class="form-control border-primary" value="<?= esc($perumahan['kondisi']['jumlah_orang_dalam_rumah'] ?? '') ?>" <?= $readonly ?> placeholder="Misal: 4">
                             <button class="btn btn-outline-primary btn-copy-input" type="button" data-target="#jumlah_orang_dalam_rumah" title="Salin Jml Orang"><i class="fas fa-copy"></i></button>
                         </div>
+                        <div id="feedback_jumlah_orang_dalam_rumah" class="invalid-feedback small fw-bold"></div>
                         <small class="text-muted" style="font-size: 0.7rem;">*Total seluruh penghuni atap</small>
                     </div>
 
@@ -640,6 +641,7 @@ $se   = $payload['sosial_ekonomi'] ?? [];
 
         // Inisialisasi awal saat halaman diload
         toggleJumlahKK();
+        validateJumlahOrangRumah();
 
         // Panggil fungsi render tiap kali angka jumlah KK diubah
         $('#jumlah_kk_dalam_rumah').on('input change', renderKKLainnya);
@@ -669,6 +671,7 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                 $(this).removeClass('is-invalid border-danger');
             }
 
+            validateJumlahOrangRumah();
             checkKelengkapanRumah(); // Lapor ke Satpam Kelengkapan
         });
 
@@ -842,6 +845,29 @@ $se   = $payload['sosial_ekonomi'] ?? [];
             let val = $(selector).val() || '0';
             return parseInt(val.replace(/\D/g, '')) || 0;
         };
+
+        function validateJumlahOrangRumah() {
+            const adaKKLain = $('input[name="is_tinggal_bersama"]:checked').val() === 'Ya' &&
+                (parseInt($('#jumlah_kk_dalam_rumah').val(), 10) || 0) > 0 &&
+                $('.input-kk-lainnya').toArray().some(input => input.value.trim() !== '');
+            const jumlahAnggota = parseInt($('#auto_jumlah_anggota').val(), 10) || 0;
+            const jumlahOrang = parseInt($('#jumlah_orang_dalam_rumah').val(), 10) || 0;
+            const $input = $('#jumlah_orang_dalam_rumah');
+            const $feedback = $('#feedback_jumlah_orang_dalam_rumah');
+
+            if (adaKKLain && jumlahAnggota > 0 && jumlahOrang === jumlahAnggota) {
+                $input.addClass('is-invalid border-danger');
+                $feedback.text('Jumlah orang dalam rumah harus lebih banyak dari jumlah anggota pada Tab Anggota karena terdapat KK lain.').show();
+                return false;
+            }
+
+            $input.removeClass('is-invalid border-danger');
+            $feedback.text('').hide();
+            return true;
+        }
+
+        $('#jumlah_orang_dalam_rumah, #jumlah_kk_dalam_rumah').on('input change', validateJumlahOrangRumah);
+        $('input[name="is_tinggal_bersama"]').on('change', validateJumlahOrangRumah);
 
         // ==========================================
         // 🚀 VALIDASI REAL-TIME: PERKIRAAN HARGA SEWA
@@ -1175,6 +1201,11 @@ $se   = $payload['sosial_ekonomi'] ?? [];
             validateNonMakanBulanan();
             validateNonMakanTahunan();
 
+            if (!validateJumlahOrangRumah()) {
+                $('#jumlah_orang_dalam_rumah').focus();
+                return;
+            }
+
             const missing = checkKelengkapanRumah();
             if (missing.length) {
                 Swal.fire({
@@ -1233,6 +1264,9 @@ $se   = $payload['sosial_ekonomi'] ?? [];
                             window.pindahTabSelanjutnya('#tabRumah');
                         }
                     }, 1200);
+                } else if (res.field === 'jumlah_orang_dalam_rumah') {
+                    $('#jumlah_orang_dalam_rumah').addClass('is-invalid border-danger').focus();
+                    $('#feedback_jumlah_orang_dalam_rumah').text(res.message).show();
                 } else {
                     Swal.fire('Gagal', res.message, 'error');
                 }

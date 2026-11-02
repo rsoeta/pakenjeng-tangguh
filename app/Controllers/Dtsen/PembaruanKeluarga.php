@@ -592,6 +592,45 @@ class PembaruanKeluarga extends BaseController
             $usulanRow = $this->db->table('dtsen_usulan')->select('id, payload, status, dtsen_kk_id')->where('id', $usulanId)->get()->getRowArray();
             if (!$usulanRow) throw new \Exception('Data usulan tidak ditemukan.');
 
+            $noKkLainnya = $post['no_kk_lainnya'] ?? [];
+            $adaKKLain = ($post['is_tinggal_bersama'] ?? '') === 'Ya'
+                && (int)($post['jumlah_kk_dalam_rumah'] ?? 0) > 0
+                && is_array($noKkLainnya)
+                && count(array_filter($noKkLainnya, static fn($noKk) => trim((string)$noKk) !== '')) > 0;
+
+            if ($adaKKLain) {
+                $anggotaNik = [];
+                $anggotaUtama = $this->db->table('dtsen_art')
+                    ->select('nik')
+                    ->where('id_kk', $usulanRow['dtsen_kk_id'])
+                    ->where('deleted_at', null)
+                    ->get()
+                    ->getResultArray();
+                $anggotaUsulan = $this->db->table('dtsen_usulan_art')
+                    ->select('nik')
+                    ->where('dtsen_usulan_id', $usulanRow['id'])
+                    ->where('deleted_at', null)
+                    ->get()
+                    ->getResultArray();
+
+                foreach (array_merge($anggotaUtama, $anggotaUsulan) as $anggota) {
+                    if (!empty($anggota['nik'])) {
+                        $anggotaNik[$anggota['nik']] = true;
+                    }
+                }
+
+                $jumlahAnggota = count($anggotaNik);
+                $jumlahOrang = (int)($post['jumlah_orang_dalam_rumah'] ?? 0);
+                if ($jumlahAnggota > 0 && $jumlahOrang === $jumlahAnggota) {
+                    $this->db->transRollback();
+                    return $this->response->setJSON([
+                        'status' => 'error',
+                        'field' => 'jumlah_orang_dalam_rumah',
+                        'message' => 'Jumlah orang dalam rumah harus lebih banyak dari jumlah anggota pada Tab Anggota karena terdapat KK lain.'
+                    ]);
+                }
+            }
+
             $payloadLama = json_decode($usulanRow['payload'] ?? '{}', true);
             if (!is_array($payloadLama)) $payloadLama = [];
             $gabungan = $payloadLama['perumahan'] ?? [];
