@@ -253,48 +253,71 @@ class DtsenSe extends Controller
             // 5️⃣ AMBIL DATA
             $dataKeluarga = $this->kkModel->getFilteredData($filter);
 
-            // 6️⃣ AMBIL MAPPING BANSOS AKTIF TAHAP TERAKHIR DARI DOKUMENTASI BANSOS (dtsen_bansos_kks)
+            // 6️⃣ Ambil Bansos aktif pada tahap terbaru yang tercatat di desa untuk tiap program.
             $bansosMap = [];
             $idKkList  = array_column($dataKeluarga, 'id_kk');
 
             if (!empty($idKkList)) {
-                $chunks = array_chunk($idKkList, 1000);
-                foreach ($chunks as $chunk) {
-                    $bansosQuery = $this->db->table('dtsen_bansos_kks b')
-                        ->select('a.id_kk, b.jenis_bansos, b.tahap_salur, b.status_salur')
-                        ->join('dtsen_art a', 'a.nik = b.nik_kpm AND a.deleted_at IS NULL', 'inner')
-                        ->whereIn('a.id_kk', $chunk)
-                        ->groupStart()
-                            ->where('b.status_salur IS NULL')
-                            ->orWhere('b.status_salur', '')
-                            ->orGroupStart()
-                                ->notLike('b.status_salur', 'Tidak Transaksi', 'after')
-                                ->notLike('b.status_salur', 'Gagal', 'after')
-                            ->groupEnd()
-                        ->groupEnd()
-                        ->get()->getResultArray();
+                $currentKkSet = array_fill_keys($idKkList, true);
+                $bansosQuery = $this->db->table('dtsen_bansos_kks b')
+                    ->select('a.id_kk, b.jenis_bansos, b.tahap_salur, b.status_salur, b.status_kelengkapan, b.foto_kpm_kks')
+                    ->join('dtsen_art a', 'a.nik = b.nik_kpm AND a.deleted_at IS NULL', 'inner')
+                    ->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'inner')
+                    ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'inner')
+                    ->where('rt.kode_desa', $kodeDesa)
+                    ->groupStart()
+                        ->where('kk.deleted_at', null)
+                        ->orWhere('kk.deleted_at', '0000-00-00 00:00:00')
+                    ->groupEnd()
+                    ->get()->getResultArray();
 
-                    foreach ($bansosQuery as $bq) {
-                        $kk = $bq['id_kk'];
-                        $score = $this->getTahapScore($bq['tahap_salur']);
-                        if (!isset($bansosMap[$kk])) {
-                            $bansosMap[$kk] = [
-                                'score' => $score,
-                                'tahap' => $bq['tahap_salur'],
-                                'jenis' => [$bq['jenis_bansos']]
-                            ];
-                        } else {
-                            if ($score > $bansosMap[$kk]['score']) {
-                                $bansosMap[$kk] = [
-                                    'score' => $score,
-                                    'tahap' => $bq['tahap_salur'],
-                                    'jenis' => [$bq['jenis_bansos']]
-                                ];
-                            } elseif ($score === $bansosMap[$kk]['score']) {
-                                $bansosMap[$kk]['jenis'][] = $bq['jenis_bansos'];
-                            }
+                $latestTahapByJenis = [];
+                foreach ($bansosQuery as $bq) {
+                    $jenis = strtoupper(trim((string) $bq['jenis_bansos']));
+                    $programList = ($jenis === 'PKH + SEMBAKO')
+                        ? ['PKH', 'SEMBAKO']
+                        : [$jenis];
+                    $score = $this->getTahapScore($bq['tahap_salur']);
+
+                    foreach ($programList as $program) {
+                        if (!isset($latestTahapByJenis[$program]) || $score > $latestTahapByJenis[$program]) {
+                            $latestTahapByJenis[$program] = $score;
                         }
                     }
+                }
+
+                foreach ($bansosQuery as $bq) {
+                    $statusSalur = strtoupper(trim((string) $bq['status_salur']));
+                    $isDraftMenungguFoto = $statusSalur === ''
+                        && (int) ($bq['status_kelengkapan'] ?? 0) === 0
+                        && empty($bq['foto_kpm_kks']);
+
+                    if ($statusSalur !== 'SUKSES SALUR' && !$isDraftMenungguFoto) {
+                        continue;
+                    }
+
+                    $jenis = strtoupper(trim((string) $bq['jenis_bansos']));
+                    $programList = ($jenis === 'PKH + SEMBAKO')
+                        ? ['PKH', 'SEMBAKO']
+                        : [$jenis];
+                    $score = $this->getTahapScore($bq['tahap_salur']);
+                    foreach ($programList as $program) {
+                        if ($score !== ($latestTahapByJenis[$program] ?? null)) {
+                            continue 2;
+                        }
+                    }
+
+                    $kk = $bq['id_kk'];
+                    if (!isset($currentKkSet[$kk])) {
+                        continue;
+                    }
+
+                    if (!isset($bansosMap[$kk])) {
+                        $bansosMap[$kk] = ['jenis' => [], 'tahap' => []];
+                    }
+
+                    $bansosMap[$kk]['jenis'][] = $bq['jenis_bansos'];
+                    $bansosMap[$kk]['tahap'][] = $bq['tahap_salur'];
                 }
             }
 
@@ -324,7 +347,7 @@ class DtsenSe extends Controller
                 // Status Perlinsos
                 $row['perlinsos_status'] = $perlinsosMap[$row['id_kk']] ?? null;
 
-                // Status Bansos Aktif Tahap Terakhir
+                // Tahap terakhir mencakup penyaluran sukses dan draft yang masih menunggu foto.
                 if (isset($bansosMap[$row['id_kk']])) {
                     $jenisList = array_unique($bansosMap[$row['id_kk']]['jenis']);
                     if (in_array('PKH', $jenisList) && in_array('SEMBAKO', $jenisList)) {
@@ -334,7 +357,7 @@ class DtsenSe extends Controller
                     } else {
                         $row['bansos'] = implode(', ', $jenisList);
                     }
-                    $row['bansos_tahap'] = $bansosMap[$row['id_kk']]['tahap'];
+                    $row['bansos_tahap'] = implode(', ', array_unique($bansosMap[$row['id_kk']]['tahap']));
                 } else {
                     $row['bansos'] = '-';
                     $row['bansos_tahap'] = null;
