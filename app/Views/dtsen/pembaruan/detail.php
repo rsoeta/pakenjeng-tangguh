@@ -12,7 +12,7 @@ $isEditableUser = ($roleId <= 4);
 // Amankan semua variabel yang dibutuhkan oleh Offcanvas
 $safeIdKk = $id_kk ?? $payload['id_kk'] ?? $usulan['id_kk'] ?? '';
 $safeNoKk = $kkData['no_kk'] ?? $payload['perumahan']['no_kk'] ?? $perumahan['no_kk'] ?? '';
-$safeNama = $kkData['kepala_keluarga'] ?? $payload['perumahan']['kepala_keluarga'] ?? $perumahan['kepala_keluarga'] ?? '';
+$safeNama = $perumahan['kepala_keluarga'] ?? '';
 $safeAlamat = $kkData['alamat'] ?? $payload['perumahan']['alamat'] ?? $perumahan['alamat'] ?? '';
 $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
 ?>
