@@ -229,7 +229,7 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
                     <?= esc($safeNoKk) ?>
                 </strong>
             </div>
-            <div><i class="fas fa-user-circle me-2 text-warning"></i> Kepala Keluarga: <strong class="text-black"><?= esc($safeNama) ?></strong></div>
+            <div><i class="fas fa-user-circle me-2 text-warning"></i> Kepala Keluarga: <strong id="offcanvasNamaKepalaKeluarga" class="text-black"><?= esc($safeNama) ?></strong></div>
         </div>
     </div>
 
@@ -496,6 +496,11 @@ $safeDesil = $kategori_desil ?? $payload['kategori_desil'] ?? '';
 
     // 🚀 Render grafik saat Offcanvas terbuka
     document.getElementById('offcanvasChartDesil').addEventListener('shown.bs.offcanvas', function() {
+        const namaInput = document.getElementById('kepala_keluarga');
+        const namaDisplay = document.getElementById('offcanvasNamaKepalaKeluarga');
+        if (namaInput && namaDisplay) {
+            namaDisplay.textContent = namaInput.value.trim();
+        }
         loadDesilChart();
     });
 
