@@ -80,11 +80,11 @@ self.addEventListener('fetch', (event) => {
                             <meta name="viewport" content="width=device-width, initial-scale=1">
                             <title>Offline — SINDEN</title>
                             <style>
-                                body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 40px 20px; background: #f4f6f9; color: #333; }
+                                body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 40px 20px; background: #2EC4B6; color: #333; }
                                 .card { max-width: 400px; margin: 60px auto; background: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-                                h2 { color: #1e8449; margin-top: 0; }
+                                h2 { color: #2EC4B6; margin-top: 0; }
                                 p { color: #666; font-size: 14px; line-height: 1.6; }
-                                .btn { display: inline-block; padding: 10px 24px; background: #2ecc71; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 15px; }
+                                .btn { display: inline-block; padding: 10px 24px; background: #2EC4B6; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 15px; }
                             </style>
                         </head>
                         <body>
@@ -127,4 +127,3 @@ self.addEventListener('fetch', (event) => {
         );
     }
 });
-

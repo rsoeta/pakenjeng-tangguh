@@ -166,7 +166,7 @@ class DtsenSe extends Controller
     // 🏠 Halaman 1: Daftar Keluarga Utama
     public function index()
     {
-        $data = $this->getBaseData('Data Keluarga', 'daftar');
+        $data = $this->getBaseData('Daftar Keluarga', 'daftar');
         return view('dtsen/se/v_daftar', $data);
     }
 
@@ -180,7 +180,7 @@ class DtsenSe extends Controller
     // 🟢 Halaman 3: Submitted
     public function submitted()
     {
-        $data = $this->getBaseData('Data Submitted', 'submitted');
+        $data = $this->getBaseData('Daftar Submitted', 'submitted');
         return view('dtsen/se/v_submitted', $data);
     }
 
@@ -266,8 +266,8 @@ class DtsenSe extends Controller
                     ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'inner')
                     ->where('rt.kode_desa', $kodeDesa)
                     ->groupStart()
-                        ->where('kk.deleted_at', null)
-                        ->orWhere('kk.deleted_at', '0000-00-00 00:00:00')
+                    ->where('kk.deleted_at', null)
+                    ->orWhere('kk.deleted_at', '0000-00-00 00:00:00')
                     ->groupEnd()
                     ->get()->getResultArray();
 

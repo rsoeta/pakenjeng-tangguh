@@ -5,9 +5,9 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#f4f6f9",
-  "theme_color": "#2ecc71",
+  "orientation": "any",
+  "background_color": "#2EC4B6",
+  "theme_color": "#2EC4B6",
   "lang": "id",
   "categories": ["government", "productivity"],
   "icons": [
@@ -37,4 +37,3 @@
     }
   ]
 }
-
