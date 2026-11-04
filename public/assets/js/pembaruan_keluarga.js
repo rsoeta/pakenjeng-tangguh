@@ -395,7 +395,7 @@ $(document).ready(function () {
             "Anggota DPD", "Anggota DPR RI/MPR RI", "Anggota DPRD Provinsi/ Anggota DPRD Kabupaten/Kota",
             "Bupati", "Gubernur", "Wali Kota", "Wakil Bupati", "Wakil Gubernur", "Wakil Walikota",
             "Camat", "Kepala Desa", "Lurah", "Menteri/Kepala Badan (setingkat Menteri)/Wakil Menteri/Wakil Kepala Badan",
-            "Presiden", "Wakil Presiden", "Polisi", "Tentara Nasional Indonesia (TNI)", "Pilot", "Pramugara/i", "Masinis", "Perangkat Desa"
+            "Presiden", "Wakil Presiden", "Polisi", "Tentara Nasional Indonesia (TNI)", "Pilot", "Pramugara/i", "Masinis", "Perangkat Desa", "Teknisi"
         ];
 
         if (profesiMenengah.includes(profesi) && levelIjazah < 2) {
