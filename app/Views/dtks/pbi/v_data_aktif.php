@@ -75,6 +75,7 @@
                             <tr>
                                 <th width="5%">No</th>
                                 <th width="20%">Nama & NIK</th>
+                                <th width="10%">Tanggal Lahir</th>
                                 <th width="15%">No. KK</th>
                                 <th width="15%">No. KIS</th>
                                 <th width="15%">Faskes Tk. 1</th>
@@ -157,7 +158,7 @@
                 className: 'd-none btn-excel-hidden',
                 title: 'Master Data PBI-JKN Aktif',
                 exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5],
+                    columns: [0, 1, 2, 3, 4, 5, 6],
                     format: {
                         body: function(data, row, column, node) {
                             if (typeof data === 'string') {
@@ -174,15 +175,15 @@
             }],
             "columnDefs": [{
                     "className": "text-center align-middle",
-                    "targets": [0, 6]
+                        "targets": [0, 7]
                 },
                 {
                     "className": "align-middle",
-                    "targets": [1, 2, 3, 4, 5]
+                        "targets": [1, 2, 3, 4, 5, 6]
                 },
                 {
                     "orderable": false,
-                    "targets": [6]
+                        "targets": [7]
                 }
             ]
         });

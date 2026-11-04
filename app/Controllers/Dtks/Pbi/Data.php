@@ -44,7 +44,10 @@ class Data extends BaseController
         $length = (int) ($post['length'] ?? 10);
         $search = $post['search']['value'] ?? '';
 
-        $builder = $this->pbiModel->builder()->where('status_kepesertaan', 'Aktif');
+        $builder = $this->pbiModel->builder()
+            ->select('pbi_master_data.*, art.tanggal_lahir')
+            ->join('dtsen_art art', 'art.nik = pbi_master_data.nik AND art.deleted_at IS NULL', 'left')
+            ->where('pbi_master_data.status_kepesertaan', 'Aktif');
 
         if (!empty($kodeDesa)) {
             $builder->where('kode_desa', $kodeDesa);
@@ -87,9 +90,9 @@ class Data extends BaseController
         // 🔍 Pencarian
         if (!empty($search)) {
             $builder->groupStart()
-                ->like('nama', $search)
-                ->orLike('nik', $search)
-                ->orLike('no_kk', $search)
+                ->like('pbi_master_data.nama', $search)
+                ->orLike('pbi_master_data.nik', $search)
+                ->orLike('pbi_master_data.no_kk', $search)
                 ->groupEnd();
         }
 
@@ -149,6 +152,9 @@ class Data extends BaseController
             }
 
             $alamat = ($row['kampung'] ?? '-') . '<br><small class="text-muted">RT ' . str_pad($row['rt'] ?? '0', 3, '0', STR_PAD_LEFT) . ' / RW ' . str_pad($row['rw'] ?? '0', 3, '0', STR_PAD_LEFT) . '</small>';
+            $tanggalLahir = !empty($row['tanggal_lahir']) && $row['tanggal_lahir'] !== '0000-00-00'
+                ? date('d-m-Y', strtotime($row['tanggal_lahir']))
+                : '-';
 
             $jenisKepesertaan = strtoupper(trim($row['jenis_kepesertaan'] ?? ''));
             $badgeClass = 'bg-secondary';
@@ -166,6 +172,7 @@ class Data extends BaseController
             $data[] = [
                 $no++,
                 '<b>' . esc($row['nama']) . '</b><br><small class="text-muted">NIK: ' . $row['nik'] . ' <a href="javascript:void(0)" onclick="copyText(\'' . $row['nik'] . '\')" class="text-primary ms-1"><i class="far fa-copy"></i></a></small>',
+                esc($tanggalLahir),
                 $row['no_kk'] ? $row['no_kk'] . ' <a href="javascript:void(0)" onclick="copyText(\'' . $row['no_kk'] . '\')" class="text-primary ms-1"><i class="far fa-copy"></i></a>' : '-',
                 '<span class="badge bg-info text-dark shadow-sm"><i class="fas fa-id-card"></i> ' . esc($row['no_kis'] ?? '-') . '</span>' . $badgeHTML,
                 esc($row['faskes_tk1'] ?? '-'),
