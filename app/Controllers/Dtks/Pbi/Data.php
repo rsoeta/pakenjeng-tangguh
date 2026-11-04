@@ -44,10 +44,7 @@ class Data extends BaseController
         $length = (int) ($post['length'] ?? 10);
         $search = $post['search']['value'] ?? '';
 
-        $builder = $this->pbiModel->builder()
-            ->select('pbi_master_data.*, art.tanggal_lahir')
-            ->join('dtsen_art art', 'art.nik = pbi_master_data.nik AND art.deleted_at IS NULL', 'left')
-            ->where('pbi_master_data.status_kepesertaan', 'Aktif');
+        $builder = $this->pbiModel->builder()->where('status_kepesertaan', 'Aktif');
 
         if (!empty($kodeDesa)) {
             $builder->where('kode_desa', $kodeDesa);
@@ -101,6 +98,20 @@ class Data extends BaseController
         if ($length != -1) $builder->limit($length, $start);
 
         $results = $builder->orderBy('rw', 'ASC')->orderBy('rt', 'ASC')->get()->getResultArray();
+        $tanggalLahirByArt = [];
+        $idArtList = array_values(array_unique(array_filter(array_column($results, 'id_art'))));
+        if ($idArtList) {
+            $tanggalLahirByArt = array_column(
+                \Config\Database::connect()->table('dtsen_art')
+                    ->select('id_art, tanggal_lahir')
+                    ->whereIn('id_art', $idArtList)
+                    ->where('deleted_at', null)
+                    ->get()
+                    ->getResultArray(),
+                'tanggal_lahir',
+                'id_art'
+            );
+        }
 
         // 3️⃣ 🔐 HITUNG TOTAL DATA MURNI (Beserta Gembok Wilayah Tugas)
         $totalBuilder = $this->pbiModel->builder()->where('status_kepesertaan', 'Aktif');
@@ -152,8 +163,9 @@ class Data extends BaseController
             }
 
             $alamat = ($row['kampung'] ?? '-') . '<br><small class="text-muted">RT ' . str_pad($row['rt'] ?? '0', 3, '0', STR_PAD_LEFT) . ' / RW ' . str_pad($row['rw'] ?? '0', 3, '0', STR_PAD_LEFT) . '</small>';
-            $tanggalLahir = !empty($row['tanggal_lahir']) && $row['tanggal_lahir'] !== '0000-00-00'
-                ? date('d-m-Y', strtotime($row['tanggal_lahir']))
+            $tanggalLahirRaw = $tanggalLahirByArt[$row['id_art'] ?? ''] ?? null;
+            $tanggalLahir = !empty($tanggalLahirRaw) && $tanggalLahirRaw !== '0000-00-00'
+                ? date('d-m-Y', strtotime($tanggalLahirRaw))
                 : '-';
 
             $jenisKepesertaan = strtoupper(trim($row['jenis_kepesertaan'] ?? ''));
