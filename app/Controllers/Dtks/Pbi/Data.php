@@ -98,18 +98,18 @@ class Data extends BaseController
         if ($length != -1) $builder->limit($length, $start);
 
         $results = $builder->orderBy('rw', 'ASC')->orderBy('rt', 'ASC')->get()->getResultArray();
-        $tanggalLahirByArt = [];
-        $idArtList = array_values(array_unique(array_filter(array_column($results, 'id_art'))));
-        if ($idArtList) {
-            $tanggalLahirByArt = array_column(
+        $tanggalLahirByNik = [];
+        $nikList = array_values(array_unique(array_filter(array_column($results, 'nik'))));
+        if ($nikList) {
+            $tanggalLahirByNik = array_column(
                 \Config\Database::connect()->table('dtsen_art')
-                    ->select('id_art, tanggal_lahir')
-                    ->whereIn('id_art', $idArtList)
+                    ->select('nik, tanggal_lahir')
+                    ->whereIn('nik', $nikList)
                     ->where('deleted_at', null)
                     ->get()
                     ->getResultArray(),
                 'tanggal_lahir',
-                'id_art'
+                'nik'
             );
         }
 
@@ -163,7 +163,7 @@ class Data extends BaseController
             }
 
             $alamat = ($row['kampung'] ?? '-') . '<br><small class="text-muted">RT ' . str_pad($row['rt'] ?? '0', 3, '0', STR_PAD_LEFT) . ' / RW ' . str_pad($row['rw'] ?? '0', 3, '0', STR_PAD_LEFT) . '</small>';
-            $tanggalLahirRaw = $tanggalLahirByArt[$row['id_art'] ?? ''] ?? null;
+            $tanggalLahirRaw = $tanggalLahirByNik[$row['nik']] ?? null;
             $tanggalLahir = !empty($tanggalLahirRaw) && $tanggalLahirRaw !== '0000-00-00'
                 ? date('d-m-Y', strtotime($tanggalLahirRaw))
                 : '-';
