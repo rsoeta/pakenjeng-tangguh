@@ -71,7 +71,7 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
             <th>No</th>
             <th>Nama</th>
             <th>NIK</th>
-            <th>Tanggal Lahir</th>
+            <th>Usia</th>
             <th>Hubungan Keluarga</th>
             <th>Pekerjaan</th>
             <th>Aksi</th>
@@ -1626,13 +1626,12 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         }
                     },
                     {
-                        data: 'tanggal_lahir',
+                        data: 'usia',
                         className: 'text-nowrap text-start',
-                        render: d => d ? new Date(d).toLocaleDateString('id-ID', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric'
-                        }) : '-'
+                        render: function(data, type) {
+                            if (data === null || data === undefined || data === '') return '-';
+                            return type === 'display' ? `${data} tahun` : data;
+                        }
                     },
                     {
                         data: null,

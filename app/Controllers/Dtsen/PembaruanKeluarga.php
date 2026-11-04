@@ -1891,6 +1891,11 @@ class PembaruanKeluarga extends BaseController
 
             $anggotaFinal = array_values($gabungan);
 
+            foreach ($anggotaFinal as &$row) {
+                $row['usia'] = $this->calculateAge($row['tanggal_lahir'] ?? null);
+            }
+            unset($row);
+
             // =====================================================
             // 🚀 SMART SORTING: Urutkan Silsilah (SHDK) lalu Usia
             // =====================================================
@@ -1935,6 +1940,39 @@ class PembaruanKeluarga extends BaseController
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ]);
         }
+    }
+
+    private function calculateAge($birthDate): ?int
+    {
+        $birthDate = trim((string) $birthDate);
+        if ($birthDate === '') {
+            return null;
+        }
+
+        $dateValue = substr($birthDate, 0, 10);
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateValue)) {
+            $format = '!Y-m-d';
+        } elseif (preg_match('/^\d{2}-\d{2}-\d{4}$/', $dateValue)) {
+            $format = '!d-m-Y';
+        } else {
+            return null;
+        }
+
+        $date = \DateTimeImmutable::createFromFormat($format, $dateValue);
+        $errors = \DateTimeImmutable::getLastErrors();
+        if (
+            $date === false ||
+            ($errors !== false && ($errors['warning_count'] > 0 || $errors['error_count'] > 0))
+        ) {
+            return null;
+        }
+
+        $today = new \DateTimeImmutable('today');
+        if ($date > $today) {
+            return null;
+        }
+
+        return $date->diff($today)->y;
     }
 
     /**
