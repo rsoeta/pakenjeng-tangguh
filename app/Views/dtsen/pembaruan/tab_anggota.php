@@ -316,7 +316,10 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                         "#tab-kesehatan": "#badgeKesehatan"
                     };
                     if (badgeMap[tabId]) {
-                        $(badgeMap[tabId]).text("🟢");
+                        const hasChronicComplaint = $tab.find('.kronis-check:checked').length > 0;
+                        $(badgeMap[tabId]).text(
+                            tabId === "#tab-kesehatan" && !hasChronicComplaint ? "⚠️" : "🟢"
+                        );
                     }
                     return;
                 }
@@ -390,6 +393,11 @@ $editable = ($roleId <= 4); // Operator & Pendata bisa edit
                             $lain.removeClass('is-invalid');
                         }
                     }
+                }
+
+                // Keluhan kronis wajib memiliki pilihan, termasuk "Tidak Ada".
+                if (tabId === "#tab-kesehatan" && !$tab.find('.kronis-check:checked').length) {
+                    valid = false;
                 }
 
                 // 3. Cek Error Pintar (Hanya hitung elemen yang aktif / tidak dikunci)
