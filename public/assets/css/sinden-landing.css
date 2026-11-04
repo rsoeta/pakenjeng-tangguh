@@ -5,8 +5,28 @@
   --bg: #f9fafa;
 }
 
+@font-face {
+  font-family: Ubuntu;
+  src: url("../fonts/Ubuntu-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Ubuntu;
+  src: url("../fonts/Ubuntu-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  font-family: Ubuntu, sans-serif;
+}
+
 body {
-  font-family: 'Open Sans', sans-serif;
+  font-family: Ubuntu, sans-serif;
   background: var(--bg);
   color: #333;
   margin: 0;
@@ -58,13 +78,16 @@ nav a:hover {
 
 .hero {
   position: relative;
-  height: 420px;
+  min-height: calc(100vh - 65px);
+  min-height: calc(100svh - 65px);
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  box-sizing: border-box;
+  padding: 24px 5%;
 }
 .hero .overlay {
   position: absolute;
@@ -190,7 +213,7 @@ body.dark-mode footer {
 
 /* BASE LAYOUT */
 body {
-    font-family: "Source Sans Pro", sans-serif;
+    font-family: Ubuntu, sans-serif;
     background: #fafafa;
     margin: 0;
     padding: 0;
@@ -266,9 +289,11 @@ header .logo span {
 /* ARTICLE DETAIL CONTENT */
 .article-detail {
     max-width: 850px;
+    width: calc(100% - 32px);
+    box-sizing: border-box;
     margin: 40px auto;
     background: #fff;
-    padding: 25px 30px;
+    padding: clamp(18px, 4vw, 30px);
     border-radius: 12px;
     box-shadow: 0 4px 18px rgba(0,0,0,0.06);
 }

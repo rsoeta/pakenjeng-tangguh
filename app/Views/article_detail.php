@@ -39,8 +39,8 @@
     <meta name="apple-mobile-web-app-title" content="<?= nameApp(); ?>">
     <link rel="apple-touch-icon" href="<?= base_url('assets/logo/apple-touch-icon.png'); ?>">
 
-    <link rel="stylesheet" href="<?= base_url('assets/css/sinden-landing.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/dist/css/authstyle.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/sinden-landing.css'); ?>">
     <link rel="icon" href="<?= base_url('assets/logo/icon-192.png'); ?>" type="image/png">
     <link rel="shortcut icon" href="<?= base_url('assets/logo/icon-192.png'); ?>" type="image/png">
 </head>

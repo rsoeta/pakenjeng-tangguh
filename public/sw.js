@@ -3,7 +3,7 @@
  * Version: 1.0.0
  */
 
-const CACHE_NAME = 'sinden-cache-v1.0.0';
+const CACHE_NAME = 'sinden-cache-v1.0.1';
 
 // Aset statis inti yang dicache saat instalasi
 const CORE_ASSETS = [
@@ -11,7 +11,9 @@ const CORE_ASSETS = [
     '/assets/logo/icon-192.png',
     '/assets/logo/icon-512.png',
     '/assets/logo/apple-touch-icon.png',
-    '/assets/logo/sinden-og.png'
+    '/assets/logo/sinden-og.png',
+    '/assets/fonts/Ubuntu-Regular.ttf',
+    '/assets/fonts/Ubuntu-Bold.ttf'
 ];
 
 // 1. Install Event: Cache Core Assets
@@ -80,8 +82,11 @@ self.addEventListener('fetch', (event) => {
                             <meta name="viewport" content="width=device-width, initial-scale=1">
                             <title>Offline — SINDEN</title>
                             <style>
-                                body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 40px 20px; background: #2EC4B6; color: #333; }
-                                .card { max-width: 400px; margin: 60px auto; background: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+                                @font-face { font-family: Ubuntu; src: url("/assets/fonts/Ubuntu-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+                                @font-face { font-family: Ubuntu; src: url("/assets/fonts/Ubuntu-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; font-display: swap; }
+                                * { box-sizing: border-box; }
+                                body { display: grid; place-items: center; min-height: 100vh; min-height: 100dvh; margin: 0; padding: 24px; font-family: Ubuntu, sans-serif; text-align: center; background: #2EC4B6; color: #333; }
+                                .card { width: min(100%, 400px); margin: 0; background: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
                                 h2 { color: #2EC4B6; margin-top: 0; }
                                 p { color: #666; font-size: 14px; line-height: 1.6; }
                                 .btn { display: inline-block; padding: 10px 24px; background: #2EC4B6; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 15px; }

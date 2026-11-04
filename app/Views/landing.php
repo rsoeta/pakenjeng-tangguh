@@ -49,9 +49,8 @@
   <link rel="icon" href="<?= base_url('assets/logo/icon-192.png'); ?>" type="image/png">
   <link rel="shortcut icon" href="<?= base_url('assets/logo/icon-192.png'); ?>" type="image/png">
 
-  <link rel="stylesheet" href="<?= base_url('assets/css/sinden-landing.css'); ?>">
   <link rel="stylesheet" href="<?= base_url('assets/dist/css/authstyle.css'); ?>">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <link rel="stylesheet" href="<?= base_url('assets/css/sinden-landing.css'); ?>">
 
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
