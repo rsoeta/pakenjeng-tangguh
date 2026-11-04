@@ -377,7 +377,7 @@ $(document).ready(function () {
         const profesiTinggi = [
             "Akuntan", "Analis Keuangan", "Apoteker", "Arsitek", 
             "Dokter Gigi", "Dokter Hewan", "Dokter Spesialis", "Dokter Umum", 
-            "Dosen", "Hakim", "Hakim Agung", "Jaksa", "Jaksa Agung", 
+            "Dosen", "Guru", "Hakim", "Hakim Agung", "Jaksa", "Jaksa Agung", 
             "Konsultan", "Kurator", "Notaris", "Peneliti", "Pengacara", 
             "Psikiater", "Psikolog", "Perawat"
         ];
