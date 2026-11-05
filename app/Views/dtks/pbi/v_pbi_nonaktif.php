@@ -121,6 +121,7 @@ $canRollback = ($userRole < 4);
                                 <?php endif; ?>
                                 <th width="5%">No</th>
                                 <th width="20%">Nama & NIK</th>
+                                <th width="12%">Tanggal Lahir</th>
                                 <th width="30%">Alasan Non-Aktif</th>
                                 <th width="15%">Tanggal</th>
                                 <th width="20%">Alamat</th>
@@ -203,7 +204,7 @@ $canRollback = ($userRole < 4);
                 className: 'd-none btn-excel-hidden',
                 title: 'Arsip PBI-JKN Non-Aktif',
                 exportOptions: {
-                    columns: canRollback ? [1, 2, 3, 4, 5] : [0, 1, 2, 3, 4], // Tanpa checkbox dan tanpa kolom aksi
+                    columns: canRollback ? [1, 2, 3, 4, 5, 6] : [0, 1, 2, 3, 4, 5], // Tanpa checkbox dan tanpa kolom aksi
                     format: {
                         body: function(data, row, column, node) {
                             if (typeof data === 'string') {
@@ -222,23 +223,27 @@ $canRollback = ($userRole < 4);
                     "orderable": false,
                     "searchable": false,
                     "className": "text-center align-middle",
-                    "targets": [0, 6] // Checkbox dan Aksi
+                    "targets": [0, 7] // Checkbox dan Aksi
                 },
                 {
                     "className": "text-center align-middle",
-                    "targets": [1, 4] // No dan Tanggal
+                    "targets": [1, 5] // No dan Tanggal Non-Aktif
                 },
                 {
                     "className": "align-middle",
-                    "targets": [2, 3, 5] // Nama & NIK, Alasan, Alamat
+                    "targets": [2, 3, 4, 6] // Nama & NIK, Tanggal Lahir, Alasan, Alamat
                 }
             ] : [{
                     "orderable": false,
-                    "targets": [5] // Aksi
+                    "targets": [6] // Aksi
+                },
+                {
+                    "className": "text-center align-middle",
+                    "targets": [0, 2, 4] // No, Tanggal Lahir, Tanggal Non-Aktif
                 },
                 {
                     "className": "align-middle",
-                    "targets": [1, 2, 4] // Nama & NIK, Alasan, Alamat
+                    "targets": [1, 3, 5] // Nama & NIK, Alasan, Alamat
                 }
             ],
             "drawCallback": function(settings) {

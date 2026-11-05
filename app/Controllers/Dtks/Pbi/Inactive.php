@@ -117,6 +117,21 @@ class Inactive extends BaseController
         if ($length != -1) $builder->limit($length, $start);
         $results = $builder->orderBy('tanggal_nonaktif', 'DESC')->get()->getResultArray();
 
+        $tanggalLahirByNik = [];
+        $nikList = array_values(array_unique(array_filter(array_column($results, 'nik'))));
+        if ($nikList) {
+            $tanggalLahirByNik = array_column(
+                \Config\Database::connect()->table('dtsen_art')
+                    ->select('nik, tanggal_lahir')
+                    ->whereIn('nik', $nikList)
+                    ->where('deleted_at', null)
+                    ->get()
+                    ->getResultArray(),
+                'tanggal_lahir',
+                'nik'
+            );
+        }
+
         // 4️⃣ Hitung Total Data Murni
         $totalBuilder = $this->pbiModel->builder()->where('status_kepesertaan', 'Non-Aktif');
         if (!empty($kodeDesa)) $totalBuilder->where('kode_desa', $kodeDesa);
@@ -164,6 +179,10 @@ class Inactive extends BaseController
 
             $alamat = ($row['kampung'] ?? '-') . ' RT ' . str_pad($row['rt'] ?? '0', 3, '0', STR_PAD_LEFT) . '/' . str_pad($row['rw'] ?? '0', 3, '0', STR_PAD_LEFT);
             $tglNonAktif = $row['tanggal_nonaktif'] ? date('d-m-Y', strtotime($row['tanggal_nonaktif'])) : '-';
+            $tanggalLahirRaw = $tanggalLahirByNik[$row['nik']] ?? null;
+            $tanggalLahir = !empty($tanggalLahirRaw) && $tanggalLahirRaw !== '0000-00-00'
+                ? date('d-m-Y', strtotime($tanggalLahirRaw))
+                : '-';
 
             // 🚀 MODIFIKASI: Menambahkan tombol salin (copyText) untuk NIK
             $namaDanNik = '<b>' . esc($row['nama']) . '</b><br><small class="text-muted">NIK: ' . $row['nik'] . ' <a href="javascript:void(0)" onclick="copyText(\'' . $row['nik'] . '\')" class="text-primary ms-1" title="Salin NIK"><i class="far fa-copy"></i></a></small>';
@@ -174,6 +193,7 @@ class Inactive extends BaseController
             }
             $rowData[] = $no++;
             $rowData[] = $namaDanNik;
+            $rowData[] = esc($tanggalLahir);
             $rowData[] = esc($row['alasan_nonaktif'] ?? '-');
             $rowData[] = '<span class="badge bg-danger"><i class="fas fa-calendar-times"></i> ' . $tglNonAktif . '</span>';
             $rowData[] = $alamat;
