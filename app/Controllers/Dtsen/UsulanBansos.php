@@ -577,6 +577,7 @@ class UsulanBansos extends Controller
             dtsen_rt.rt,          
             dtsen_rt.rw,          
             dtsen_art.nama,
+            dtsen_art.tanggal_lahir,
             dbj.dbj_nama_bansos,
             u1.fullname AS created_by_name,
             u1.nope    AS created_by_nope,

@@ -16,7 +16,7 @@
             <div class="card shadow-sm border-top-success mb-4">
                 <div class="card-body p-3">
                     <div class="row g-2">
-                        <div class="col-6 col-md-3">
+                        <div class="col-6 col-md-2">
                             <label class="small fw-bold text-muted">Filter RW</label>
                             <select id="filter_rw" class="form-control form-control-sm select2">
                                 <option value="">-- Semua RW --</option>
@@ -25,7 +25,7 @@
                                 <?php endfor; ?>
                             </select>
                         </div>
-                        <div class="col-6 col-md-3">
+                        <div class="col-6 col-md-2">
                             <label class="small fw-bold text-muted">Filter RT</label>
                             <select id="filter_rt" class="form-control form-control-sm select2">
                                 <option value="">-- Semua RT --</option>
@@ -34,9 +34,27 @@
                                 <?php endfor; ?>
                             </select>
                         </div>
+                        <div class="col-6 col-md-2">
+                            <label class="small fw-bold text-muted">Filter Jenis Kepesertaan</label>
+                            <select id="filter_jenis_kepesertaan" class="form-control form-control-sm select2">
+                                <option value="">-- Semua Jenis --</option>
+                                <?php foreach ($listJenisKepesertaan as $jenis): ?>
+                                    <option value="<?= esc($jenis) ?>"><?= esc($jenis) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-2">
+                            <label class="small fw-bold text-muted">Filter Faskes Tk. 1</label>
+                            <select id="filter_faskes_tk1" class="form-control form-control-sm select2">
+                                <option value="">-- Semua Faskes --</option>
+                                <?php foreach ($listFaskes as $faskes): ?>
+                                    <option value="<?= esc($faskes) ?>"><?= esc($faskes) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
 
                         <!-- 🛠️ TEMPAT KUMPULAN TOMBOL AKSI -->
-                        <div class="col-12 col-md-6 d-flex align-items-end justify-content-md-end mt-2 mt-md-0 flex-wrap gap-2">
+                        <div class="col-12 col-md-4 d-flex align-items-end justify-content-md-end mt-2 mt-md-0 flex-wrap gap-2">
                             <?php if (session()->get('role_id') < 4): ?>
 
                                 <!-- Tombol Tambah Manual -->
@@ -94,13 +112,15 @@
 </div>
 
 <style>
-    .swal2-popup #edit_faskes + .select2-container .select2-selection--single {
+    .swal2-popup #edit_faskes + .select2-container .select2-selection--single,
+    .swal2-popup #faskes_manual + .select2-container .select2-selection--single {
         height: calc(1.5em + 0.5rem + 2px) !important;
         border: 1px solid #ced4da;
         border-radius: 0.2rem;
     }
 
-    .swal2-popup #edit_faskes + .select2-container .select2-selection__rendered {
+    .swal2-popup #edit_faskes + .select2-container .select2-selection__rendered,
+    .swal2-popup #faskes_manual + .select2-container .select2-selection__rendered {
         padding-left: 0.5rem;
         font-size: 0.875rem;
         line-height: calc(1.5em + 0.5rem) !important;
@@ -170,6 +190,8 @@
                 "data": function(d) {
                     d.rw = $('#filter_rw').val();
                     d.rt = $('#filter_rt').val();
+                    d.jenis_kepesertaan = $('#filter_jenis_kepesertaan').val();
+                    d.faskes_tk1 = $('#filter_faskes_tk1').val();
                 }
             },
             "dom": '<"row align-items-center"<"col-md-6"l><"col-md-6"f>>rt<"row"<"col-md-6"i><"col-md-6"p>>',
@@ -209,7 +231,7 @@
         });
 
         // Event listener untuk filter dropdown
-        $('#filter_rw, #filter_rt').on('change', function() {
+        $('#filter_rw, #filter_rt, #filter_jenis_kepesertaan, #filter_faskes_tk1').on('change', function() {
             table.ajax.reload(null, false);
         });
     });
@@ -431,6 +453,12 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 let w = result.value;
+                const faskesOptions = [...new Set(listFaskes.filter(value => value != null && value !== ''))]
+                    .map(value => {
+                        const safeValue = escapeHtml(value);
+                        return `<option value="${safeValue}">${safeValue}</option>`;
+                    })
+                    .join('');
 
                 Swal.fire({
                     title: 'Lengkapi Data BPJS',
@@ -441,7 +469,7 @@
                             Alamat: ${w.kampung} RT ${w.rt} / RW ${w.rw}
                         </div>
                         
-                        <label class="small text-muted float-start fw-bold">Jenis Kepesertaan <span class="text-danger">*</span></label>
+                        <label class="small text-muted fw-bold d-block text-start">Jenis Kepesertaan <span class="text-danger">*</span></label>
                         <select id="jenis_kepesertaan_manual" class="form-select form-select-sm mb-2 shadow-sm border-primary">
                             <option value="PBI APBN">PBI APBN (Pusat)</option>
                             <option value="PBI APBD">PBI APBD (Daerah)</option>
@@ -449,17 +477,41 @@
                             <option value="LAINNYA">LAINNYA</option>
                         </select>
 
-                        <label class="small text-muted float-start fw-bold">Nomor KIS (Opsional)</label>
+                        <label class="small text-muted fw-bold d-block text-start">Nomor KIS (Opsional)</label>
                         <input type="text" id="kis_manual" class="form-control form-control-sm mb-2" placeholder="000xxxxxx">
                         
-                        <label class="small text-muted float-start fw-bold">Faskes Tk. 1 (Opsional)</label>
-                        <input type="text" id="faskes_manual" class="form-control form-control-sm mb-2" placeholder="Cth: Puskesmas Pakenjeng">
+                        <label class="small text-muted fw-bold d-block text-start">Faskes Tk. 1 (Opsional)</label>
+                        <select id="faskes_manual" class="form-select form-select-sm mb-2" style="width: 100%;">
+                            <option value="" selected>-- Pilih Faskes --</option>
+                            ${faskesOptions}
+                        </select>
                     `,
                     showCancelButton: true,
                     cancelButtonText: 'Batal',
                     confirmButtonText: '<i class="fas fa-save"></i> Simpan',
                     customClass: {
                         popup: 'swal-sm'
+                    },
+                    didOpen: () => {
+                        $('#faskes_manual').select2({
+                            dropdownParent: $('.swal2-popup'),
+                            width: '100%',
+                            placeholder: 'Cari atau pilih Faskes',
+                            allowClear: true,
+                            tags: true,
+                            createTag: params => {
+                                const term = $.trim(params.term);
+                                if (!term || listFaskes.some(faskes => faskes.toLowerCase() === term.toLowerCase())) {
+                                    return null;
+                                }
+                                return {
+                                    id: term,
+                                    text: term,
+                                    newTag: true
+                                };
+                            },
+                            minimumResultsForSearch: 0
+                        });
                     },
                     preConfirm: () => {
                         return {

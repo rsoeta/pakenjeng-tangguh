@@ -41,6 +41,13 @@ $(document).ready(function () {
         return num;
     }
 
+    function formatTanggalLahir(value) {
+        const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+        return match && match[0] !== '0000-00-00'
+            ? `${match[3]}-${match[2]}-${match[1]}`
+            : '-';
+    }
+
     function renderCreatorWithWA(row) {
         const name = row.created_by_name || '-';
         const raw = row.created_by_nope || row.nope || '';
@@ -452,9 +459,8 @@ $(document).ready(function () {
 
     function initDataTable() {
 
-        // 🚀 PERBAIKAN LABEL MOBILE: Sesuaikan dengan kolom baru (total 6 kolom)
-        const labelsDraft = ['No', 'NIK / No. KK', 'Nama', 'Program', 'Alamat Lengkap', 'Aksi'];
-        const labelsVerified = ['No', 'NIK / No. KK', 'Nama', 'Program', 'Alamat Lengkap', 'Aksi'];
+        const labelsDraft = ['No', 'NIK / No. KK', 'Nama', 'Tanggal Lahir', 'Program', 'Alamat Lengkap', 'Aksi'];
+        const labelsVerified = ['No', 'NIK / No. KK', 'Nama', 'Tanggal Lahir', 'Program', 'Alamat Lengkap', 'Aksi'];
 
         /* ============================================================
         📊 DATATABLE — DRAFT
@@ -524,6 +530,14 @@ $(document).ready(function () {
                             </button>
                         </div>
                     `
+                },
+                {
+                    data: 'tanggal_lahir',
+                    title: 'Tanggal Lahir',
+                    className: 'text-center align-middle',
+                    render: function (tanggalLahir, type) {
+                        return type === 'display' ? formatTanggalLahir(tanggalLahir) : (tanggalLahir || '');
+                    }
                 },
                 {
                     data: 'dbj_nama_bansos',
@@ -658,6 +672,14 @@ $(document).ready(function () {
                             </button>
                         </div>
                     `
+                },
+                {
+                    data: 'tanggal_lahir',
+                    title: 'Tanggal Lahir',
+                    className: 'text-center align-middle',
+                    render: function (tanggalLahir, type) {
+                        return type === 'display' ? formatTanggalLahir(tanggalLahir) : (tanggalLahir || '');
+                    }
                 },
                 {
                     data: 'dbj_nama_bansos',

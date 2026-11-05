@@ -109,7 +109,7 @@ class Inactive extends BaseController
 
         if (!empty($search)) {
             $builder->groupStart()
-                ->like('nama', $search)->orLike('nik', $search)->orLike('no_kk', $search)
+                ->like('nama', $search)->orLike('nik', $search)->orLike('no_kk', $search)->orLike('no_kis', $search)
                 ->groupEnd();
         }
 

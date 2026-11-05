@@ -19,8 +19,19 @@ class Data extends BaseController
 
     public function index()
     {
+        $listJenisKepesertaan = $this->pbiModel->builder()
+            ->select('jenis_kepesertaan')
+            ->where('status_kepesertaan', 'Aktif')
+            ->where('jenis_kepesertaan IS NOT NULL')
+            ->where('jenis_kepesertaan !=', '')
+            ->groupBy('jenis_kepesertaan')
+            ->orderBy('jenis_kepesertaan', 'ASC')
+            ->get()
+            ->getResultArray();
+
         $listFaskes = $this->pbiModel->builder()
             ->select('faskes_tk1')
+            ->where('status_kepesertaan', 'Aktif')
             ->where('faskes_tk1 IS NOT NULL')
             ->where('faskes_tk1 !=', '')
             ->groupBy('faskes_tk1')
@@ -29,8 +40,9 @@ class Data extends BaseController
             ->getResultArray();
 
         $data = [
-            'title'      => 'Master Data PBI-JKN (Aktif)',
-            'listFaskes' => array_column($listFaskes, 'faskes_tk1'),
+            'title'                => 'Master Data PBI-JKN (Aktif)',
+            'listJenisKepesertaan' => array_column($listJenisKepesertaan, 'jenis_kepesertaan'),
+            'listFaskes'           => array_column($listFaskes, 'faskes_tk1'),
         ];
         return view('dtks/pbi/v_data_aktif', $data);
     }
@@ -93,6 +105,12 @@ class Data extends BaseController
         if (!empty($post['rt'])) {
             $builder->where("CAST(rt AS UNSIGNED) =", (int) $post['rt']);
         }
+        if (!empty($post['jenis_kepesertaan'])) {
+            $builder->where('jenis_kepesertaan', $post['jenis_kepesertaan']);
+        }
+        if (!empty($post['faskes_tk1'])) {
+            $builder->where('faskes_tk1', $post['faskes_tk1']);
+        }
 
         // 🔍 Pencarian
         if (!empty($search)) {
@@ -100,6 +118,7 @@ class Data extends BaseController
                 ->like('pbi_master_data.nama', $search)
                 ->orLike('pbi_master_data.nik', $search)
                 ->orLike('pbi_master_data.no_kk', $search)
+                ->orLike('pbi_master_data.no_kis', $search)
                 ->groupEnd();
         }
 
