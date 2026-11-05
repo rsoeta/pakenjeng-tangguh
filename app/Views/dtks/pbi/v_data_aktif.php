@@ -93,8 +93,28 @@
     </div>
 </div>
 
+<style>
+    .swal2-popup #edit_faskes + .select2-container .select2-selection--single {
+        height: calc(1.5em + 0.5rem + 2px) !important;
+        border: 1px solid #ced4da;
+        border-radius: 0.2rem;
+    }
+
+    .swal2-popup #edit_faskes + .select2-container .select2-selection__rendered {
+        padding-left: 0.5rem;
+        font-size: 0.875rem;
+        line-height: calc(1.5em + 0.5rem) !important;
+    }
+
+    .swal2-popup .select2-search__field,
+    .swal2-popup .select2-results__option {
+        font-size: 0.875rem;
+    }
+</style>
+
 <script>
     var table;
+    const listFaskes = <?= json_encode($listFaskes, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
 
     // =========================================================================
     // 🚀 KONFIGURASI MODULAR SWEETALERT2 (RESPONSIVE & AUTO-CLOSE)
@@ -499,6 +519,12 @@
     function editPbi(id, nik, id_art, no_kk, nama, kampung, rt, rw, no_kis, jenis_kepesertaan, faskes_tk1) {
 
         let isLainnya = (jenis_kepesertaan !== 'PBI APBN' && jenis_kepesertaan !== 'PBI APBD' && jenis_kepesertaan !== 'PBPU / MANDIRI' && jenis_kepesertaan !== '');
+        const faskesOptions = [...new Set([...listFaskes, faskes_tk1].filter(value => value != null && value !== ''))]
+            .map(value => {
+                const safeValue = escapeHtml(value);
+                return `<option value="${safeValue}" ${value === faskes_tk1 ? 'selected' : ''}>${safeValue}</option>`;
+            })
+            .join('');
 
         Swal.fire({
             title: 'Edit Data BPJS',
@@ -511,7 +537,7 @@
                     <span class="text-muted" style="font-size: 0.75rem;"><em>*Identitas pribadi otomatis disinkronkan dari database kependudukan.</em></span>
                 </div>
                 
-                <label class="small text-muted float-start fw-bold">Jenis Kepesertaan <span class="text-danger">*</span></label>
+                <label class="small text-muted fw-bold d-block text-start">Jenis Kepesertaan <span class="text-danger">*</span></label>
                 <select id="edit_jenis_kepesertaan" class="form-select form-select-sm mb-2 shadow-sm border-primary">
                     <option value="PBI APBN" ${jenis_kepesertaan === 'PBI APBN' ? 'selected' : ''}>PBI APBN (Pusat)</option>
                     <option value="PBI APBD" ${jenis_kepesertaan === 'PBI APBD' ? 'selected' : ''}>PBI APBD (Daerah)</option>
@@ -519,17 +545,41 @@
                     <option value="${isLainnya ? jenis_kepesertaan : 'LAINNYA'}" ${isLainnya ? 'selected' : ''}>${isLainnya ? jenis_kepesertaan : 'LAINNYA'}</option>
                 </select>
 
-                <label class="small text-muted float-start fw-bold">Nomor KIS (Opsional)</label>
+                <label class="small text-muted fw-bold d-block text-start">Nomor KIS (Opsional)</label>
                 <input type="text" id="edit_kis" class="form-control form-control-sm mb-2" value="${no_kis}" placeholder="000xxxxxx">
                 
-                <label class="small text-muted float-start fw-bold">Faskes Tk. 1 (Opsional)</label>
-                <input type="text" id="edit_faskes" class="form-control form-control-sm mb-2" value="${faskes_tk1}" placeholder="Cth: Puskesmas Pakenjeng">
+                <label class="small text-muted fw-bold d-block text-start">Faskes Tk. 1 (Opsional)</label>
+                <select id="edit_faskes" class="form-select form-select-sm mb-2" style="width: 100%;">
+                    <option value="" ${faskes_tk1 ? '' : 'selected'}>-- Pilih Faskes --</option>
+                    ${faskesOptions}
+                </select>
             `,
             showCancelButton: true,
             confirmButtonText: '<i class="fas fa-save"></i> Simpan Perubahan',
             cancelButtonText: 'Batal',
             customClass: {
                 popup: 'swal-sm'
+            },
+            didOpen: () => {
+                $('#edit_faskes').select2({
+                    dropdownParent: $('.swal2-popup'),
+                    width: '100%',
+                    placeholder: 'Cari atau pilih Faskes',
+                    allowClear: true,
+                    tags: true,
+                    createTag: params => {
+                        const term = $.trim(params.term);
+                        if (!term || listFaskes.some(faskes => faskes.toLowerCase() === term.toLowerCase())) {
+                            return null;
+                        }
+                        return {
+                            id: term,
+                            text: term,
+                            newTag: true
+                        };
+                    },
+                    minimumResultsForSearch: 0
+                });
             },
             preConfirm: () => {
                 return {
@@ -581,6 +631,16 @@
                 });
             }
         });
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, char => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        })[char]);
     }
 </script>
 <?= $this->endSection() ?>

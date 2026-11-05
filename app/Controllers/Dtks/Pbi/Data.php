@@ -19,8 +19,18 @@ class Data extends BaseController
 
     public function index()
     {
+        $listFaskes = $this->pbiModel->builder()
+            ->select('faskes_tk1')
+            ->where('faskes_tk1 IS NOT NULL')
+            ->where('faskes_tk1 !=', '')
+            ->groupBy('faskes_tk1')
+            ->orderBy('faskes_tk1', 'ASC')
+            ->get()
+            ->getResultArray();
+
         $data = [
-            'title' => 'Master Data PBI-JKN (Aktif)',
+            'title'      => 'Master Data PBI-JKN (Aktif)',
+            'listFaskes' => array_column($listFaskes, 'faskes_tk1'),
         ];
         return view('dtks/pbi/v_data_aktif', $data);
     }
