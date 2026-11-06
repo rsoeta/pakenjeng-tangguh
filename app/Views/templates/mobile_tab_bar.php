@@ -390,8 +390,8 @@ if (!empty($artikelItem)) {
     height: calc(64px + env(safe-area-inset-bottom, 0px));
     padding: 6px 12px calc(6px + env(safe-area-inset-bottom, 0px)) 12px;
     background: #ffffff;
-    border-top: 1px solid rgba(0, 0, 0, 0.07);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    border-top: 1px solid #e5e7eb;
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.03);
     display: flex;
     align-items: center;
     justify-content: space-around;
@@ -473,7 +473,7 @@ if (!empty($artikelItem)) {
 body.dark-mode .mobile-tab-bar {
     background: #142320;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 -4px 22px rgba(0, 0, 0, 0.45);
+    box-shadow: none;
 }
 
 body.dark-mode .mobile-tab-item .mobile-tab-icon {
@@ -503,12 +503,14 @@ body.dark-mode .mobile-tab-item.active .mobile-tab-label {
     -webkit-backdrop-filter: blur(4px);
     z-index: 1055;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
 .mobile-sheet-backdrop.active {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
 }
 
@@ -522,16 +524,21 @@ body.dark-mode .mobile-tab-item.active .mobile-tab-label {
     background: #ffffff;
     border-radius: 24px 24px 0 0;
     z-index: 1060;
-    transform: translateY(100%);
+    transform: translateY(105%);
+    visibility: hidden;
+    pointer-events: none;
+    box-shadow: none;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
-    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, visibility 0.32s;
     overflow: hidden;
 }
 
 .mobile-bottom-sheet.open {
     transform: translateY(0);
+    visibility: visible;
+    pointer-events: auto;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15);
 }
 
 /* Handle Bar Area */
@@ -758,7 +765,10 @@ body.dark-mode .mobile-bottom-sheet {
     background: #182824;
     color: #f8f9fa;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .mobile-bottom-sheet.open {
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.5);
 }
 
 body.dark-mode .mobile-sheet-handle {
