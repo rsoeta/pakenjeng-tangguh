@@ -155,10 +155,15 @@ class Landing extends BaseController
 	{
 		helper('text');
 
-		$article = $this->articleModel
-			->where('slug', $slug)
-			->where('status', 'publish')
-			->first();
+		$query = $this->articleModel->where('slug', $slug);
+
+		// Pengunjung umum hanya bisa melihat artikel publish, admin yang login dapat mempratinjau draft
+		$isLoggedIn = session()->get('id') || session()->get('id_user') || session()->get('role_id') || session()->get('logged_in');
+		if (!$isLoggedIn) {
+			$query->where('status', 'publish');
+		}
+
+		$article = $query->first();
 
 		if (!$article) {
 			throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Artikel tidak ditemukan.");

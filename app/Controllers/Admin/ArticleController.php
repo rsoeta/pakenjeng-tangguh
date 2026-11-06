@@ -40,6 +40,8 @@ class ArticleController extends BaseController
                 ? base_url('uploads/articles/' . $a['image'])
                 : base_url('assets/images/image_not_available.jpg');
 
+            $articleUrl = base_url('article/' . $a['slug']);
+
             $rows[] = [
                 'no'         => $no,
                 'image'      => '<img src="' . $thumb . '" class="article-thumb">',
@@ -49,12 +51,17 @@ class ArticleController extends BaseController
                     : '<span class="badge bg-secondary">Draft</span>',
                 'created_at' => date('d M Y H:i', strtotime($a['created_at'])),
                 'actions'    => '
-                    <button class="btn btn-sm btn-primary btnEditArticle" data-id="' . $a['id'] . '">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger btnDeleteArticle ms-1" data-id="' . $a['id'] . '">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
+                    <div class="d-inline-flex text-nowrap">
+                        <a href="' . $articleUrl . '" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-info text-white" title="Lihat Artikel">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        <button class="btn btn-sm btn-primary btnEditArticle ms-1" data-id="' . $a['id'] . '" title="Ubah Artikel">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger btnDeleteArticle ms-1" data-id="' . $a['id'] . '" title="Hapus Artikel">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
                 '
             ];
         }

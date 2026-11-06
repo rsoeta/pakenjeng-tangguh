@@ -13,7 +13,7 @@ $(function () {
             { data: 'title' },
             { data: 'status', width: '120px' },
             { data: 'created_at', width: '130px' },
-            { data: 'actions', width: '120px', orderable:false }
+            { data: 'actions', width: '135px', orderable:false }
         ],
         responsive: true,
         processing: true
