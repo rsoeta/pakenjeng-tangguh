@@ -1107,6 +1107,18 @@ class UsulanBansos extends Controller
         $tahun = $post['tahun_data'];
         $kodeDesa = session()->get('kode_desa');
         $db = \Config\Database::connect();
+        $nomorSurat = trim($post['nomor_surat'] ?? '');
+        $baIdentity = [
+            'nomor_surat' => $nomorSurat,
+            'bulan_data'  => $bulan,
+            'tahun_data'  => $tahun,
+            'kode_desa'   => (string) ($kodeDesa ?? ''),
+        ];
+        $baRecord = $db->table('dtsen_berita_acara')
+            ->where($baIdentity)
+            ->get()
+            ->getRowArray();
+        $baId = $baRecord['id'] ?? null;
 
         /* ---------------------------------------------------------
            1. AMBIL DATA USULAN BANSOS (HANYA YANG DIVERIFIKASI)
@@ -1153,10 +1165,22 @@ class UsulanBansos extends Controller
            2. AMBIL DATA PEMBARUAN SOSIAL EKONOMI (REMINDER LOG)
            --------------------------------------------------------- */
         $builderPmb = $db->table('dtsen_kk_reminder_log log')
-            ->select('log.id as log_id, k.no_kk, k.kepala_keluarga as nama, k.alamat, r.rt, r.rw')
+            ->select('log.id as log_id, log.ba_id, k.no_kk, k.kepala_keluarga as nama, k.alamat, r.rt, r.rw')
             ->join('dtsen_kk k', 'k.id_kk = log.kk_id', 'left')
-            ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
-            ->where('log.is_ba_printed', 0); // Ambil yang belum pernah dicetak
+            ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left');
+
+        if ($baId !== null) {
+            $builderPmb->groupStart()
+                ->where('log.ba_id', $baId)
+                ->orGroupStart()
+                ->where('log.ba_id', null)
+                ->where('log.is_ba_printed', 0)
+                ->groupEnd()
+                ->groupEnd();
+        } else {
+            $builderPmb->where('log.ba_id', null)
+                ->where('log.is_ba_printed', 0);
+        }
 
         if (!empty($kodeDesa)) {
             $builderPmb->where('r.kode_desa', $kodeDesa);
@@ -1173,7 +1197,9 @@ class UsulanBansos extends Controller
                 'no_kk'  => htmlspecialchars($row['no_kk'] ?? '-'),
                 'alamat' => htmlspecialchars($alamatLengkap)
             ];
-            $logIdsToUpdate[] = $row['log_id'];
+            if ($row['ba_id'] === null) {
+                $logIdsToUpdate[] = $row['log_id'];
+            }
         }
 
         /* ---------------------------------------------------------
@@ -1197,7 +1223,7 @@ class UsulanBansos extends Controller
         /* ---------------------------------------------------------
            4. PERSIAPAN VARIABEL TANGGAL & TEXT
            --------------------------------------------------------- */
-        $tglMusdes = $post['tanggal_musyawarah'];
+        $tglMusdes = $baRecord['tanggal_musyawarah'] ?? $post['tanggal_musyawarah'];
         $timestamp = strtotime($tglMusdes);
 
         $hariIndo = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
@@ -1223,14 +1249,14 @@ class UsulanBansos extends Controller
 
         // A. Set Variabel Teks Header & Rekap
         $template->setValues([
-            'nomor_surat'      => htmlspecialchars($post['nomor_surat']),
+            'nomor_surat'      => htmlspecialchars($nomorSurat),
             'bln_kop'          => $blnKop,
             'thn_kop'          => $tahun,
             'hari_musdes'      => $hariText,
             'tgl_musdes_huruf' => ucwords($tglText),
             'bln_musdes_kata'  => $blnText,
             'thn_musdes_kata'  => $thnText,
-            'tgl_ttd'          => htmlspecialchars($post['tanggal_ttd']),
+            'tgl_ttd'          => htmlspecialchars($baRecord['tanggal_ttd'] ?? $post['tanggal_ttd']),
         ]);
 
         foreach ($rekap as $key => $val) {
@@ -1263,16 +1289,55 @@ class UsulanBansos extends Controller
         /* ---------------------------------------------------------
            6. FINISHING (UPDATE DB & DOWNLOAD FILE)
            --------------------------------------------------------- */
-        // Tandai dtsen_kk_reminder_log bahwa data ini sudah dicetak ke BA
-        if (!empty($logIdsToUpdate)) {
-            $db->table('dtsen_kk_reminder_log')
-                ->whereIn('id', $logIdsToUpdate)
-                ->update(['is_ba_printed' => 1]);
-        }
-
         $namaFileMata = "BA_DTSEN_{$blnKop}_{$tahun}.docx";
         $tempFile = tempnam(sys_get_temp_dir(), 'PHPWord');
         $template->saveAs($tempFile);
+
+        if ($baId === null || !empty($logIdsToUpdate)) {
+            $db->transBegin();
+
+            try {
+                if ($baId === null) {
+                    $inserted = $db->table('dtsen_berita_acara')->insert([
+                        ...$baIdentity,
+                        'tanggal_musyawarah' => $post['tanggal_musyawarah'],
+                        'tanggal_ttd'        => $post['tanggal_ttd'],
+                        'created_at'         => date('Y-m-d H:i:s'),
+                    ]);
+
+                    if (!$inserted || !$db->transStatus()) {
+                        $db->transRollback();
+                        log_message('error', 'Gagal menyimpan berita acara DTSEN: ' . $db->error()['message']);
+                        return redirect()->back()->with('error', 'Gagal menyimpan identitas berita acara.');
+                    }
+
+                    $baId = $db->insertID();
+                }
+
+                if (!empty($logIdsToUpdate)) {
+                    $updated = $db->table('dtsen_kk_reminder_log')
+                        ->whereIn('id', $logIdsToUpdate)
+                        ->where('ba_id', null)
+                        ->where('is_ba_printed', 0)
+                        ->update([
+                            'ba_id'         => $baId,
+                            'is_ba_printed' => 1,
+                        ]);
+
+                    if (!$updated || !$db->transStatus()) {
+                        $db->transRollback();
+                        log_message('error', 'Gagal menghubungkan reminder ke berita acara DTSEN ID ' . $baId);
+                        return redirect()->back()->with('error', 'Gagal menghubungkan data reminder ke berita acara.');
+                    }
+                }
+
+                $db->transCommit();
+            } catch (\Throwable $e) {
+                $db->transRollback();
+                log_message('error', 'Gagal menyimpan berita acara DTSEN: ' . $e->getMessage());
+                return redirect()->back()->with('error', 'Gagal menyimpan data berita acara.');
+            }
+        }
 
         return $this->response->download($tempFile, null)->setFileName($namaFileMata);
     }
