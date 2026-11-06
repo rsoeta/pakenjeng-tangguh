@@ -317,7 +317,11 @@
         if (!token) return;
 
         window.CSRF.value = token;
-        document.querySelector('meta[name="csrf-token-value"]').setAttribute("content", token);
+        const metaVal = document.querySelector('meta[name="csrf-token-value"]');
+        if (metaVal) {
+            metaVal.setAttribute("content", token);
+            metaVal.content = token;
+        }
         document.querySelectorAll(`input[name="${window.CSRF.name}"]`).forEach(function(input) {
             input.value = token;
         });

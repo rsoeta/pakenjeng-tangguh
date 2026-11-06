@@ -82,7 +82,6 @@ class Filters extends BaseConfig
 				'admin/articles/store',
 				'admin/articles/update/*',
 				'admin/articles/delete/*',
-				'admin/articles/upload-image',
 				'pengaturan_wa/save_api',
 				'pengaturan_wa/save_template',
 				'pengaturan_wa/save_fonnte',

@@ -16,19 +16,13 @@ class AttachCsrfHeader implements FilterInterface
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
         try {
-            $security = \Config\Services::security();
+            if (function_exists('csrf_hash')) {
+                $token = csrf_hash();
 
-            // Pastikan CSRF service aktif
-            if (method_exists($security, 'isCSRFEnabled') && $security->isCSRFEnabled()) {
-
-                // Pastikan fungsi csrf_hash() tersedia
-                if (function_exists('csrf_hash')) {
-                    $token = csrf_hash();
-
-                    if (!empty($token)) {
-                        // Kirim token baru ke AJAX via header
-                        $response->setHeader('X-CSRF-TOKEN', $token);
-                    }
+                if (!empty($token)) {
+                    // Kirim token baru ke AJAX via header
+                    $response->setHeader('X-CSRF-TOKEN', $token);
+                    $response->setHeader('Access-Control-Expose-Headers', 'X-CSRF-TOKEN');
                 }
             }
         } catch (\Throwable $e) {

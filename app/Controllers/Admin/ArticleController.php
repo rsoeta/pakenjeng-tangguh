@@ -117,6 +117,21 @@ class ArticleController extends BaseController
             'created_at'  => date('Y-m-d H:i:s')
         ]);
 
+        if ($this->request->isAJAX()) {
+            return $this->response
+                ->setHeader('X-CSRF-TOKEN', csrf_hash())
+                ->setJSON([
+                    'success'   => true,
+                    'message'   => 'Artikel berhasil dibuat.',
+                    'csrf_name' => csrf_token(),
+                    'csrf_hash' => csrf_hash(),
+                    'csrf'      => [
+                        'name'  => csrf_token(),
+                        'value' => csrf_hash()
+                    ]
+                ]);
+        }
+
         return redirect()->to('/admin/articles')->with('message', 'Artikel berhasil dibuat.');
     }
 
@@ -170,45 +185,131 @@ class ArticleController extends BaseController
             'updated_at'  => date('Y-m-d H:i:s')
         ]);
 
+        $newHash = csrf_hash();
+
         return $this->response
-            ->setHeader('X-CSRF-TOKEN', csrf_hash())
-            ->setJSON(['success' => true, 'message' => 'Artikel berhasil diperbarui.']);
+            ->setHeader('X-CSRF-TOKEN', $newHash)
+            ->setJSON([
+                'success'   => true,
+                'message'   => 'Artikel berhasil diperbarui.',
+                'csrf_name' => csrf_token(),
+                'csrf_hash' => $newHash,
+            ]);
     }
 
     public function delete($id)
     {
         $this->articleModel->delete($id);
 
+        $newHash = csrf_hash();
+
         return $this->response
-            ->setHeader('X-CSRF-TOKEN', csrf_hash())
+            ->setHeader('X-CSRF-TOKEN', $newHash)
             ->setJSON([
-                'success' => true,
-                'message' => 'Artikel berhasil dihapus.'
+                'success'   => true,
+                'message'   => 'Artikel berhasil dihapus.',
+                'csrf_name' => csrf_token(),
+                'csrf_hash' => $newHash,
             ]);
     }
 
     /**
-     * Upload image khusus TinyMCE dengan kompresi otomatis
+     * Upload image khusus TinyMCE dengan kompresi otomatis & fallback aman
      */
     public function uploadImage()
     {
         $file = $this->request->getFile('file');
 
         if (!$file || !$file->isValid()) {
-            return $this->response->setJSON(['error' => 'File tidak valid.']);
+            $errorMsg = $file ? $file->getErrorString() : 'File gambar tidak ditemukan.';
+            return $this->response
+                ->setStatusCode(400)
+                ->setHeader('X-CSRF-TOKEN', csrf_hash())
+                ->setJSON([
+                    'error'     => 'Upload gambar gagal: ' . $errorMsg,
+                    'message'   => 'Upload gambar gagal: ' . $errorMsg,
+                    'csrf_name' => csrf_token(),
+                    'csrf_hash' => csrf_hash(),
+                ]);
         }
 
+        // Validasi ekstensi & mime type gambar yang aman
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+        $mime = $file->getMimeType();
+        if (!in_array($mime, $allowedMimes, true)) {
+            return $this->response
+                ->setStatusCode(400)
+                ->setHeader('X-CSRF-TOKEN', csrf_hash())
+                ->setJSON([
+                    'error'     => 'Format file tidak didukung. Harap unggah JPG, PNG, GIF, WebP, atau SVG.',
+                    'message'   => 'Format file tidak didukung. Harap unggah JPG, PNG, GIF, WebP, atau SVG.',
+                    'csrf_name' => csrf_token(),
+                    'csrf_hash' => csrf_hash(),
+                ]);
+        }
+
+        $uploadDir = FCPATH . 'uploads/articles/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $ext = $file->guessExtension() ?: $file->getClientExtension() ?: 'jpg';
         $newName = $file->getRandomName();
-        $target = FCPATH . "uploads/articles/" . $newName;
 
-        // Resize + compress (max width 1280px, quality 70%)
-        \Config\Services::image()
-            ->withFile($file)
-            ->resize(1280, 1280, true, 'auto')
-            ->save($target, 70);
+        if (!pathinfo($newName, PATHINFO_EXTENSION)) {
+            $newName .= '.' . $ext;
+        }
 
-        return $this->response->setJSON([
-            'location' => base_url("uploads/articles/" . $newName)
+        $target = $uploadDir . $newName;
+
+        if ($mime === 'image/svg+xml') {
+            $file->move($uploadDir, $newName);
+        } else {
+            $resized = false;
+            try {
+                // Resize + kompresi (maksimal 1280px, quality 75%)
+                \Config\Services::image()
+                    ->withFile($file->getTempName())
+                    ->resize(1280, 1280, true, 'auto')
+                    ->save($target, 75);
+                $resized = true;
+            } catch (\Throwable $e) {
+                log_message('warning', '[TinyMCE Upload] Resize GD gagal (' . $e->getMessage() . '), fallback memindahkan file asli.');
+            }
+
+            if (!$resized || !file_exists($target)) {
+                if (!$file->hasMoved()) {
+                    $file->move($uploadDir, $newName);
+                }
+            }
+        }
+
+        $newHash = csrf_hash();
+
+        return $this->response
+            ->setHeader('X-CSRF-TOKEN', $newHash)
+            ->setJSON([
+                'location'  => base_url('uploads/articles/' . $newName),
+                'csrf_name' => csrf_token(),
+                'csrf_hash' => $newHash,
+            ]);
+    }
+
+    public function create()
+    {
+        return redirect()->to('/admin/articles');
+    }
+
+    public function edit($id)
+    {
+        $article = $this->articleModel->find($id);
+        if (!$article) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Artikel tidak ditemukan.");
+        }
+
+        return view('admin/articles/edit', [
+            'title'   => 'Ubah Artikel',
+            'article' => $article
         ]);
     }
 

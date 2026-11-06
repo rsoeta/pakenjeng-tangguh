@@ -24,29 +24,6 @@ $(function () {
         table.ajax.reload(null,false);
     });
 
-    // open edit form
-    $(document).on('click', '.btnEditArticle', function () {
-        const id = $(this).data('id');
-
-        $.getJSON('/admin/articles/get/' + id)
-            .done(res => {
-                if (!res.success) {
-                    Swal.fire('Error', res.message, 'error');
-                    return;
-                }
-
-                const a = res.data;
-
-                $('#edit_id').val(a.id);
-                $('#edit_title').val(a.title);
-                $('#edit_status').val(a.status);
-                tinymce.get('articleEditEditor').setContent(a.description || '');
-
-                $('#tab-edit').removeClass('d-none');
-                $('a[href="#pane-edit"]').tab('show');
-            });
-    });
-
     // delete
     $(document).on("click", ".btnDeleteArticle", function () {
         const id = $(this).data("id");
@@ -61,8 +38,12 @@ $(function () {
         }).then((result) => {
             if (!result.isConfirmed) return;
 
-            const csrfName  = $('meta[name="csrf-token-name"]').attr("content");
-            const csrfValue = $('meta[name="csrf-token-value"]').attr("content");
+            const csrfName = (window.CSRF && window.CSRF.name) 
+                ? window.CSRF.name 
+                : ($('meta[name="csrf-token-name"]').attr("content") || 'csrf_test_name');
+            const csrfValue = (window.CSRF && window.CSRF.value) 
+                ? window.CSRF.value 
+                : ($('meta[name="csrf-token-value"]').attr("content") || '');
 
             let payload = {};
             payload[csrfName] = csrfValue;
@@ -74,9 +55,9 @@ $(function () {
                 success: function (res, status, xhr) {
 
                     // refresh token baru
-                    let newToken = xhr.getResponseHeader("X-CSRF-TOKEN");
-                    if (newToken) {
-                        $('meta[name="csrf-token-value"]').attr("content", newToken);
+                    let newToken = xhr.getResponseHeader("X-CSRF-TOKEN") || (res && res.csrf_hash);
+                    if (newToken && typeof window.updateCsrfToken === "function") {
+                        window.updateCsrfToken(newToken);
                     }
 
                     if (res.success) {
@@ -88,6 +69,10 @@ $(function () {
                 },
                 error: function (xhr) {
                     console.error("Delete error:", xhr);
+                    let newToken = xhr.getResponseHeader("X-CSRF-TOKEN");
+                    if (newToken && typeof window.updateCsrfToken === "function") {
+                        window.updateCsrfToken(newToken);
+                    }
                     Swal.fire("Error", "Gagal menghapus artikel.", "error");
                 }
             });

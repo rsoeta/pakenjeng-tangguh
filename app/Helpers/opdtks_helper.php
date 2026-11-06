@@ -39,6 +39,27 @@ function versionApp()
     return $data->tv_version;
 }
 
+function footerText(): string
+{
+    try {
+        $settingsModel = new \App\Models\SettingsModel();
+        $footerText = $settingsModel->getSetting('footer_text');
+        if (!empty($footerText)) {
+            return $footerText;
+        }
+
+        $namaDesa      = $settingsModel->getSetting('nama_desa') ?? 'Pasirlangu';
+        $namaKecamatan = $settingsModel->getSetting('nama_kecamatan') ?? 'Pakenjeng';
+        $namaKabupaten = $settingsModel->getSetting('nama_kabupaten') ?? 'Garut';
+
+        return "Powered by Pemerintah Desa {$namaDesa}, Kec. {$namaKecamatan}, Kab. {$namaKabupaten}. " .
+            "Mendukung implementasi Data Tunggal Sosial dan Ekonomi Nasional (DTSEN).";
+    } catch (\Throwable $e) {
+        return "Powered by Pemerintah Desa Pasirlangu, Kec. Pakenjeng, Kab. Garut. " .
+            "Mendukung implementasi Data Tunggal Sosial dan Ekonomi Nasional (DTSEN).";
+    }
+}
+
 function Profil_Admin()
 {
     $db = \Config\Database::connect();

@@ -89,7 +89,7 @@
                                 <h5>Tulis Artikel Baru</h5>
                                 <hr>
 
-                                <form method="post" action="<?= base_url('/admin/articles/store') ?>" enctype="multipart/form-data">
+                                <form id="createArticleForm" method="post" action="<?= base_url('/admin/articles/store') ?>" enctype="multipart/form-data">
                                     <?= csrf_field() ?>
 
                                     <!-- Judul -->
@@ -109,9 +109,14 @@
 
                                     <!-- Gambar -->
                                     <div class="mb-3">
-                                        <label class="form-label">Gambar Utama Artikel</label>
-                                        <input type="file" class="form-control" name="image" accept="image/*">
-                                        <small class="text-muted">Opsional. Jika disertakan akan muncul sebagai thumbnail.</small>
+                                        <label class="form-label">Gambar Utama Artikel (opsional)</label>
+                                        <div class="mb-2" id="create_preview_wrapper" style="display: none;">
+                                            <img id="create_image_preview" src="" alt="Preview Gambar Baru"
+                                                style="width: 140px; height: 140px; object-fit: cover; border-radius: 8px; border: 1px solid #ced4da; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+                                            <div class="small text-muted mt-1"><i class="fas fa-eye me-1"></i> Preview gambar terpilih</div>
+                                        </div>
+                                        <input type="file" class="form-control" id="create_image" name="image" accept="image/*">
+                                        <small class="text-muted">Opsional. Jika disertakan akan muncul sebagai thumbnail utama artikel.</small>
                                     </div>
 
                                     <!-- Konten -->
@@ -159,14 +164,17 @@
                                     <!-- 🖼 PREVIEW GAMBAR + INPUT  -->
                                     <!-- ========================== -->
                                     <div class="mb-3">
-                                        <label class="form-label">Preview Gambar</label><br>
-                                        <img id="edit_image_preview" src="/assets/images/image_not_available.jpg"
-                                            style="width:120px;border-radius:6px;border:1px solid #ccc;">
+                                        <label class="form-label">Preview Gambar Artikel</label><br>
+                                        <img id="edit_image_preview" src="<?= base_url('assets/images/image_not_available.jpg') ?>"
+                                            alt="Preview Gambar Artikel"
+                                            style="width: 140px; height: 140px; object-fit: cover; border-radius: 8px; border: 1px solid #ced4da; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+                                        <div id="edit_preview_note" class="small text-muted mt-1"><i class="fas fa-image me-1"></i> Gambar saat ini</div>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label">Gambar Artikel (opsional)</label>
+                                        <label class="form-label">Ganti Gambar Artikel (opsional)</label>
                                         <input type="file" class="form-control" id="edit_image" name="image" accept="image/*">
+                                        <small class="text-muted">Biarkan kosong jika tidak ingin mengubah gambar.</small>
                                     </div>
 
                                     <div class="mb-3">
@@ -213,6 +221,7 @@
             console.error("TinyMCE belum terload!");
             return;
         }
+
         tinymce.init({
             selector: selector,
             plugins: 'image link lists table code',
@@ -222,36 +231,74 @@
             automatic_uploads: true,
             relative_urls: false,
             remove_script_host: false,
-            images_upload_handler: async function(blobInfo, progress) {
-                const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
-                const csrfValue = document.querySelector('meta[name="csrf-token-value"]').content;
-                const formData = new FormData();
-                formData.append('file', blobInfo.blob(), blobInfo.filename());
-                formData.set(csrfName, csrfValue);
+            image_title: true,
+            file_picker_types: 'image',
+            setup: function(editor) {
+                editor.on('change keyup NodeChange', function() {
+                    editor.save();
+                });
+            },
+            images_upload_handler: function(blobInfo, progress) {
+                return new Promise(function(resolve, reject) {
+                    const csrfName = (window.CSRF && window.CSRF.name)
+                        ? window.CSRF.name
+                        : (document.querySelector('meta[name="csrf-token-name"]')?.content || 'csrf_test_name');
 
-                const response = await fetch('<?= base_url("admin/articles/upload-image") ?>', {
-                        method: 'POST',
-                        body: formData
-                    });
-                window.updateCsrfToken(response.headers.get('X-CSRF-TOKEN'));
-                const json = await response.json();
+                    const csrfValue = (window.CSRF && window.CSRF.value)
+                        ? window.CSRF.value
+                        : (document.querySelector('meta[name="csrf-token-value"]')?.content || '');
 
-                if (!response.ok || !json.location) {
-                    throw new Error(json.error || 'Upload gambar gagal.');
-                }
+                    const formData = new FormData();
+                    formData.append('file', blobInfo.blob(), blobInfo.filename());
+                    if (csrfName && csrfValue) {
+                        formData.set(csrfName, csrfValue);
+                    }
 
-                return json.location;
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '<?= base_url("admin/articles/upload-image") ?>');
+                    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+                    xhr.upload.onprogress = function(e) {
+                        if (e.lengthComputable && typeof progress === 'function') {
+                            progress(Math.round((e.loaded / e.total) * 100));
+                        }
+                    };
+
+                    xhr.onload = function() {
+                        let json = null;
+                        try {
+                            json = JSON.parse(xhr.responseText);
+                        } catch (err) {
+                            console.error('TinyMCE upload parse error:', xhr.responseText);
+                        }
+
+                        // Perbarui CSRF token dari header atau response JSON
+                        const newToken = xhr.getResponseHeader('X-CSRF-TOKEN') || (json && (json.csrf_hash || json.csrfToken));
+                        if (newToken && typeof window.updateCsrfToken === 'function') {
+                            window.updateCsrfToken(newToken);
+                        }
+
+                        if (xhr.status >= 200 && xhr.status < 300 && json && json.location) {
+                            resolve(json.location);
+                        } else {
+                            const errorMsg = (json && (json.error || json.message))
+                                || ('Upload gambar gagal (HTTP ' + xhr.status + ').');
+                            reject(errorMsg);
+                        }
+                    };
+
+                    xhr.onerror = function() {
+                        reject('Terjadi kesalahan jaringan saat mengunggah gambar.');
+                    };
+
+                    xhr.send(formData);
+                });
             }
-
         });
     }
 
     initTiny('#articleCreateEditor');
     initTiny('#articleEditEditor');
-
-    render: img => img ?
-        `<img src="${img}" class="article-thumb">` :
-        '<span class="text-muted">Tidak ada</span>'
 
     function escapeHtml(str) {
         if (!str) return '';

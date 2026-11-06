@@ -179,10 +179,10 @@ class Landing extends BaseController
 
 
 		return view('article_detail', [
-			'article' => $article,
-			'titleApp' => titleApp(),
-			'version' => versionApp(),
-			'footerText' => 'footerText()',
+			'article'    => $article,
+			'titleApp'   => titleApp(),
+			'version'    => versionApp(),
+			'footerText' => footerText(),
 		]);
 	}
 }

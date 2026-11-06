@@ -313,7 +313,7 @@
 				<table>
 					<tr>
 						<td style="width: 15em">Response Status</td>
-						<td><?= esc($response->getStatusCode() . ' - ' . $response->getReason()) ?></td>
+						<td><?= esc($response->getStatusCode() . ' - ' . (method_exists($response, 'getReasonPhrase') ? $response->getReasonPhrase() : (method_exists($response, 'getReason') ? $response->getReason() : ''))) ?></td>
 					</tr>
 				</table>
 
