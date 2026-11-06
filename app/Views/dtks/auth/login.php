@@ -85,6 +85,46 @@
         outline: none;
     }
 
+    .login-box .form-floating > .form-control {
+        height: 56px;
+        padding: 1.25rem 0.75rem 0.35rem;
+    }
+
+    .login-box .form-floating > label {
+        padding: 1rem 0.75rem;
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    .login-box .form-floating > .form-control:focus ~ label,
+    .login-box .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        top: 0;
+        height: auto;
+        padding: 0 0.35rem;
+        transform: translate(0.15rem, -50%) scale(0.85);
+        opacity: 0.85;
+        background-color: #fff;
+    }
+
+    .login-box .password-field > .form-control {
+        padding-right: 2.5rem;
+    }
+
+    .login-box .password-field > label {
+        padding-right: 2.5rem;
+    }
+
+    .login-box .password-toggle {
+        position: absolute;
+        top: 50%;
+        right: 14px;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #aaa;
+        font-size: 12px;
+        z-index: 5;
+    }
+
     .btn-primary {
         background: var(--green) !important;
         border: none !important;
@@ -129,12 +169,13 @@
         max-width: 100% !important;
         display: flex;
         justify-content: center;
-        overflow: hidden;
     }
 
+    .cf-turnstile > div,
+    .cf-turnstile > div > div,
     .cf-turnstile iframe {
         width: 100% !important;
-        min-width: 100% !important;
+        min-width: 0 !important;
         max-width: 100% !important;
     }
 
@@ -200,6 +241,24 @@
             border-radius: 7px;
         }
 
+        .login-box .form-floating > .form-control {
+            height: 54px;
+            padding: 1.2rem 0.65rem 0.3rem;
+        }
+
+        .login-box .form-floating > label {
+            padding: 0.95rem 0.65rem;
+            font-size: 12.5px;
+        }
+
+        .login-box .password-field > .form-control {
+            padding-right: 2.35rem;
+        }
+
+        .login-box .password-field > label {
+            padding-right: 2.35rem;
+        }
+
         .btn-primary {
             padding: 8px 10px;
             font-size: 13px;
@@ -236,6 +295,11 @@
         background: #2b2b2b !important;
         color: #eee !important;
         border-color: #444 !important;
+    }
+
+    body.dark-mode .login-box .form-floating > .form-control:focus ~ label,
+    body.dark-mode .login-box .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        background-color: #2b2b2b;
     }
 
     body.dark-mode .form-control:focus {
@@ -287,12 +351,14 @@
 
     <form action="/login" method="post">
         <?= csrf_field() ?>
-        <div class="mb-2">
-            <input type="email" class="form-control" placeholder="Email" id="email" name="email" value="<?= set_value('email'); ?>" required>
+        <div class="form-floating mb-2">
+            <input type="email" class="form-control" placeholder=" " id="email" name="email" value="<?= set_value('email'); ?>" required>
+            <label for="email">Email</label>
         </div>
-        <div class="mb-2 position-relative">
-            <input type="password" class="form-control" placeholder="Password" id="password" name="password" required>
-            <i class="fas fa-eye" id="togglePassword" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); cursor:pointer; color:#aaa; font-size:12px;"></i>
+        <div class="form-floating mb-2 position-relative password-field">
+            <input type="password" class="form-control" placeholder=" " id="password" name="password" required>
+            <label for="password">Password</label>
+            <i class="fas fa-eye password-toggle" id="togglePassword"></i>
         </div>
 
         <!-- <div class="g-recaptcha" data-sitekey="6LctvBomAAAAAGjg0x7rNMuW9c5BOZfP-ev4E6b5"></div> -->

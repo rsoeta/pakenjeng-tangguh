@@ -82,6 +82,27 @@
         outline: none;
     }
 
+    .login-box .form-floating > .form-control {
+        height: 56px;
+        padding: 1.25rem 0.75rem 0.35rem;
+    }
+
+    .login-box .form-floating > label {
+        padding: 1rem 0.75rem;
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    .login-box .form-floating > .form-control:focus ~ label,
+    .login-box .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        top: 0;
+        height: auto;
+        padding: 0 0.35rem;
+        transform: translate(0.15rem, -50%) scale(0.85);
+        opacity: 0.85;
+        background-color: #fff;
+    }
+
     .btn-primary {
         background: var(--green) !important;
         border: none !important;
@@ -113,12 +134,13 @@
         max-width: 100% !important;
         display: flex;
         justify-content: center;
-        overflow: hidden;
     }
 
+    .cf-turnstile > div,
+    .cf-turnstile > div > div,
     .cf-turnstile iframe {
         width: 100% !important;
-        min-width: 100% !important;
+        min-width: 0 !important;
         max-width: 100% !important;
     }
 
@@ -139,6 +161,11 @@
         background: #2b2b2b !important;
         color: #eee !important;
         border-color: #444 !important;
+    }
+
+    body.dark-mode .login-box .form-floating > .form-control:focus ~ label,
+    body.dark-mode .login-box .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        background-color: #2b2b2b;
     }
 
     body.dark-mode .form-control:focus {
@@ -226,6 +253,16 @@
             border-radius: 7px;
         }
 
+        .login-box .form-floating > .form-control {
+            height: 54px;
+            padding: 1.2rem 0.65rem 0.3rem;
+        }
+
+        .login-box .form-floating > label {
+            padding: 0.95rem 0.65rem;
+            font-size: 12px;
+        }
+
         .mb-compact {
             margin-bottom: 8px !important;
         }
@@ -273,20 +310,24 @@
     <form action="/requestReset" method="POST">
         <?= csrf_field(); ?>
 
-        <div class="mb-2 mb-compact">
-            <input type="text" class="form-control" name="fullname" placeholder="Masukan Nama Lengkap" value="<?= set_value('fullname'); ?>" required>
+        <div class="form-floating mb-2 mb-compact">
+            <input type="text" class="form-control" id="fullname" name="fullname" placeholder=" " value="<?= set_value('fullname'); ?>" required>
+            <label for="fullname">Masukan Nama Lengkap</label>
         </div>
 
-        <div class="mb-2 mb-compact">
-            <input type="text" class="form-control" name="nik" placeholder="Masukan No. KTP/NIK" value="<?= set_value('nik'); ?>" required>
+        <div class="form-floating mb-2 mb-compact">
+            <input type="text" class="form-control" id="nik" name="nik" placeholder=" " value="<?= set_value('nik'); ?>" required>
+            <label for="nik">Masukan No. KTP/NIK</label>
         </div>
 
-        <div class="mb-2 mb-compact">
-            <input type="text" class="form-control" name="nope" placeholder="Masukan No. Handphone" value="<?= set_value('nope'); ?>" required>
+        <div class="form-floating mb-2 mb-compact">
+            <input type="text" class="form-control" id="nope" name="nope" placeholder=" " value="<?= set_value('nope'); ?>" required>
+            <label for="nope">Masukan No. Handphone</label>
         </div>
 
-        <div class="mb-2 mb-compact">
-            <input type="email" class="form-control" name="email" placeholder="Masukan Email" value="<?= set_value('email'); ?>" required>
+        <div class="form-floating mb-2 mb-compact">
+            <input type="email" class="form-control" id="email" name="email" placeholder=" " value="<?= set_value('email'); ?>" required>
+            <label for="email">Masukan Email</label>
         </div>
 
         <div class="mb-2 mb-compact">

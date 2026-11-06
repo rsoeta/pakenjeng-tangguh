@@ -80,6 +80,46 @@
         outline: none;
     }
 
+    .login-box .form-floating > .form-control {
+        height: 52px;
+        padding: 1.2rem 0.7rem 0.3rem;
+    }
+
+    .login-box .form-floating > label {
+        padding: 0.9rem 0.7rem;
+        color: var(--muted);
+        font-size: 12.5px;
+    }
+
+    .login-box .form-floating > .form-control:focus ~ label,
+    .login-box .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        top: 0;
+        height: auto;
+        padding: 0 0.35rem;
+        transform: translate(0.15rem, -50%) scale(0.85);
+        opacity: 0.85;
+        background-color: #fff;
+    }
+
+    .login-box .password-field > .form-control {
+        padding-right: 2.35rem;
+    }
+
+    .login-box .password-field > label {
+        padding-right: 2.35rem;
+    }
+
+    .login-box .password-toggle {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #aaa;
+        font-size: 12px;
+        z-index: 5;
+    }
+
     .btn-primary {
         background: var(--green) !important;
         border: none !important;
@@ -119,12 +159,13 @@
         max-width: 100% !important;
         display: flex;
         justify-content: center;
-        overflow: hidden;
     }
 
+    .cf-turnstile > div,
+    .cf-turnstile > div > div,
     .cf-turnstile iframe {
         width: 100% !important;
-        min-width: 100% !important;
+        min-width: 0 !important;
         max-width: 100% !important;
     }
 
@@ -155,6 +196,11 @@
         background: #2b2b2b !important;
         color: #eee !important;
         border-color: #444 !important;
+    }
+
+    body.dark-mode .login-box .form-floating > .form-control:focus ~ label,
+    body.dark-mode .login-box .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        background-color: #2b2b2b;
     }
 
     body.dark-mode .form-control:focus {
@@ -227,6 +273,21 @@
             border-radius: 6px;
         }
 
+        .login-box .form-floating > .form-control {
+            height: 50px;
+            padding: 1.15rem 0.6rem 0.25rem;
+        }
+
+        .login-box .form-floating > label {
+            padding: 0.85rem 0.6rem;
+            font-size: 11.5px;
+        }
+
+        .login-box .password-field > .form-control,
+        .login-box .password-field > label {
+            padding-right: 2.25rem;
+        }
+
         .mb-compact {
             margin-bottom: 6px !important;
         }
@@ -286,20 +347,24 @@
     <form action="/register" method="post">
         <?= csrf_field(); ?>
 
-        <div class="mb-2 mb-compact">
-            <input type="text" class="form-control form-control-sm" name="fullname" placeholder="Nama Lengkap" value="<?= set_value('fullname'); ?>" required>
+        <div class="form-floating mb-2 mb-compact">
+            <input type="text" class="form-control form-control-sm" id="fullname" name="fullname" placeholder=" " value="<?= set_value('fullname'); ?>" required>
+            <label for="fullname">Nama Lengkap</label>
         </div>
 
-        <div class="mb-2 mb-compact">
-            <input type="number" class="form-control form-control-sm" name="nik" placeholder="Nomor KTP/NIK" value="<?= set_value('nik'); ?>" required>
+        <div class="form-floating mb-2 mb-compact">
+            <input type="number" class="form-control form-control-sm" id="nik" name="nik" placeholder=" " value="<?= set_value('nik'); ?>" required>
+            <label for="nik">Nomor KTP/NIK</label>
         </div>
 
-        <div class="mb-2 mb-compact">
-            <input type="number" class="form-control form-control-sm" name="nope" placeholder="Nomor Handphone" value="<?= set_value('nope'); ?>" required>
+        <div class="form-floating mb-2 mb-compact">
+            <input type="number" class="form-control form-control-sm" id="nope" name="nope" placeholder=" " value="<?= set_value('nope'); ?>" required>
+            <label for="nope">Nomor Handphone</label>
         </div>
 
-        <div class="mb-2 mb-compact">
-            <input type="email" class="form-control form-control-sm" name="email" placeholder="Alamat Email" value="<?= set_value('email'); ?>" required>
+        <div class="form-floating mb-2 mb-compact">
+            <input type="email" class="form-control form-control-sm" id="email" name="email" placeholder=" " value="<?= set_value('email'); ?>" required>
+            <label for="email">Alamat Email</label>
         </div>
 
         <div class="mb-2 mb-compact">
@@ -320,14 +385,16 @@
             </select>
         </div>
 
-        <div class="mb-2 mb-compact position-relative">
-            <input type="password" class="form-control form-control-sm" placeholder="Password" id="password" name="password" required>
-            <i class="fas fa-eye" id="togglePassword" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:#aaa; font-size:12px;"></i>
+        <div class="form-floating mb-2 mb-compact position-relative password-field">
+            <input type="password" class="form-control form-control-sm" placeholder=" " id="password" name="password" required>
+            <label for="password">Password</label>
+            <i class="fas fa-eye password-toggle" id="togglePassword"></i>
         </div>
 
-        <div class="mb-2 mb-compact position-relative">
-            <input type="password" class="form-control form-control-sm" placeholder="Ulangi Password" id="password_confirm" name="password_confirm" required>
-            <i class="fas fa-eye" id="togglePassword2" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:#aaa; font-size:12px;"></i>
+        <div class="form-floating mb-2 mb-compact position-relative password-field">
+            <input type="password" class="form-control form-control-sm" placeholder=" " id="password_confirm" name="password_confirm" required>
+            <label for="password_confirm">Ulangi Password</label>
+            <i class="fas fa-eye password-toggle" id="togglePassword2"></i>
         </div>
 
         <div class="mb-2 mb-compact">
