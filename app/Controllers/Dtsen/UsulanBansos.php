@@ -1113,7 +1113,7 @@ class UsulanBansos extends Controller
            --------------------------------------------------------- */
         $builderBansos = $db->table('dtsen_usulan_bansos u')
             ->select('u.program_bansos, dbj.dbj_nama_bansos, a.nama, a.nik, k.no_kk, k.alamat, r.rt, r.rw')
-            ->join('dtsen_art a', 'a.nik = u.nik', 'left')
+            ->join('dtsen_art a', 'a.nik = u.nik AND a.deleted_at IS NULL', 'inner')
             ->join('dtsen_kk k', 'k.id_kk = u.id_kk', 'left')
             ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
             ->join('dtks_bansos_jenis dbj', 'dbj.dbj_id = u.program_bansos', 'left')

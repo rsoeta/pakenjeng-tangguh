@@ -78,7 +78,18 @@
                             <div id="kkListEmpty" class="workspace-empty d-none">
                                 <i class="far fa-folder-open"></i><span>Tidak ada keluarga pada filter ini.</span>
                             </div>
-                            <div id="kkList" class="workspace-kk-list" role="list"></div>
+                            <div class="table-responsive">
+                                <table id="kkTable" class="table table-sm table-hover mb-0 workspace-kk-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">No.</th>
+                                            <th>Keluarga</th>
+                                            <th class="text-right">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="kkList"></tbody>
+                                </table>
+                            </div>
                         </div>
                         <div class="workspace-sidebar-footer">
                             <div class="w-100">
@@ -88,9 +99,6 @@
                                         <i class="fas fa-archive mr-1"></i><span>Arsipkan pilihan</span>
                                     </button>
                                 </div>
-                                <nav aria-label="Pagination daftar keluarga">
-                                    <ul class="pagination pagination-sm justify-content-center mb-0" id="kkPagination"></ul>
-                                </nav>
                             </div>
                         </div>
                     </aside>
@@ -295,12 +303,21 @@
     .workspace-panel-heading { padding: 18px; border-bottom: 1px solid #e8edf4; background: #fff; }
     .workspace-list-wrap, .workspace-art-wrap { position: relative; flex: 1; min-height: 250px; overflow: auto; }
     .workspace-sidebar-footer, .workspace-main-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-top: 1px solid #e8edf4; background: #fff; }
-    .workspace-kk-item { display: block; width: 100%; padding: 14px 16px; border: 0; border-bottom: 1px solid #edf1f6; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+    .workspace-kk-table { min-width: 360px; }
+    .workspace-kk-table thead th { padding: 9px 6px; border-top: 0; background: #f8fafc; color: #66758a; font-size: .7rem; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+    .workspace-kk-table td { padding: 9px 6px; vertical-align: middle; }
+    .workspace-kk-item { cursor: pointer; }
     .workspace-kk-item:hover, .workspace-kk-item.is-selected { background: #eef5ff; }
-    .workspace-kk-item.is-selected { box-shadow: inset 3px 0 #2878d0; }
-    .workspace-kk-title { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; color: #243b5a; }
-    .workspace-kk-meta { display: block; margin-top: 4px; color: #6b778c; font-size: .78rem; }
-    .workspace-kk-actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; }
+    .workspace-kk-title { display: block; font-weight: 600; color: #243b5a; }
+    .workspace-kk-meta { display: block; margin-top: 3px; color: #6b778c; font-size: .72rem; }
+    .workspace-kk-number { display: inline-flex; align-items: center; gap: 4px; }
+    .workspace-kk-number .js-copy-no-kk { color: #6b778c; line-height: 1; }
+    .workspace-kk-number .js-copy-no-kk:hover { color: #2878d0; }
+    .workspace-kk-actions { display: flex; justify-content: flex-end; align-items: center; gap: 7px; }
+    .workspace-list-wrap .dataTables_wrapper { padding: 0 8px 8px; }
+    .workspace-list-wrap .dataTables_info { padding-top: .5rem; color: #6b778c; font-size: .75rem; }
+    .workspace-list-wrap .pagination { margin: .35rem 0 0; }
+    .workspace-list-wrap .pagination .page-link { padding: .2rem .45rem; font-size: .75rem; }
     .workspace-empty { display: flex; min-height: 180px; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: #77849a; text-align: center; }
     .workspace-empty i { font-size: 1.4rem; color: #a7b2c2; }
     .workspace-art-table { min-width: 720px; }
@@ -330,6 +347,6 @@
     window.csrfName = "<?= csrf_token() ?>";
     window.csrfHash = "<?= csrf_hash() ?>";
 </script>
-<script src="<?= base_url('assets/js/pemeriksaan.js?v=3.0.2') ?>"></script>
+<script src="<?= base_url('assets/js/pemeriksaan.js?v=3.0.3') ?>"></script>
 
 <?= $this->endSection() ?>

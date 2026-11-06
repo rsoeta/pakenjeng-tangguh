@@ -5,8 +5,6 @@
     const state = {
         status: 'active',
         selectedKk: null,
-        kkPage: 1,
-        kkOffset: 0,
         artOffset: 0,
         kkTotal: 0,
         artTotal: 0,
@@ -19,6 +17,7 @@
     };
     const kkPageSize = 5;
     const artPageSize = 25;
+    let kkTable;
     const workspaceSwal = window.Swal.mixin({
         customClass: {
             popup: 'pemeriksaan-swal-popup'
@@ -159,108 +158,151 @@
 
     function renderKkItem(row) {
         const isArchived = Boolean(row.deleted_at);
-        const isSelected = state.selectedKk && Number(state.selectedKk.id_kk) === Number(row.id_kk);
         const cannotRestore = state.status === 'archive' && !isArchived;
         const artCount = state.status === 'archive'
             ? Number(isArchived ? row.art_count : row.archived_art_count)
             : Number(row.active_art_count);
+        const noKk = row.no_kk || '';
         const photoBadge = row.foto_kk
             ? '<span class="badge badge-light text-success"><i class="fas fa-image"></i> Foto</span>'
             : '<span class="badge badge-light text-warning"><i class="far fa-image"></i> Tanpa foto</span>';
         const statusBadge = isArchived
             ? '<span class="badge badge-warning">KK diarsipkan</span>'
             : (state.status === 'archive' ? '<span class="badge badge-info">ART diarsipkan</span>' : '<span class="badge badge-success">Aktif</span>');
-        const action = isArchived
-            ? `<button type="button" class="btn btn-link btn-sm p-0 text-primary js-kk-archive" data-id="${Number(row.id_kk)}" data-action="restore"><i class="fas fa-undo mr-1"></i>Pulihkan KK</button>`
-            : `<button type="button" class="btn btn-link btn-sm p-0 text-danger js-kk-archive" data-id="${Number(row.id_kk)}" data-action="archive"><i class="fas fa-archive mr-1"></i>Arsipkan KK</button>`;
-
-        return `<div class="workspace-kk-item${isSelected ? ' is-selected' : ''}" role="listitem" tabindex="0" data-id="${Number(row.id_kk)}" data-kk-archived="${isArchived ? '1' : '0'}">
-            <div class="workspace-kk-title"><span>${escapeHtml(row.kepala_keluarga || 'Tanpa nama')}</span>${statusBadge}</div>
-            <span class="workspace-kk-meta">${escapeHtml(row.no_kk || 'No. KK tidak tersedia')} · ${artCount} ART</span>
+        return `<span class="workspace-kk-title">${escapeHtml(row.kepala_keluarga || 'Tanpa nama')}</span>
+            <span class="workspace-kk-meta"><span class="workspace-kk-number">${escapeHtml(noKk || 'No. KK tidak tersedia')}${noKk ? ` <button type="button" class="btn btn-link btn-sm p-0 js-copy-no-kk" data-no-kk="${escapeHtml(noKk)}" title="Salin nomor KK" aria-label="Salin nomor KK ${escapeHtml(noKk)}"><i class="far fa-copy"></i></button>` : ''}</span> · ${artCount} ART</span>
             <span class="workspace-kk-meta">${escapeHtml(row.alamat || 'Alamat belum diisi')}</span>
-            <div class="workspace-kk-actions">
-                <label class="mb-0 mr-auto" title="${cannotRestore ? 'Pilih KK yang diarsipkan untuk pemulihan massal' : 'Pilih untuk aksi massal'}">
-                    <input type="checkbox" class="js-select-kk" data-id="${Number(row.id_kk)}" ${state.selectedKks.has(Number(row.id_kk)) ? 'checked' : ''} ${cannotRestore ? 'disabled' : ''} aria-label="Pilih KK ${escapeHtml(row.no_kk)}">
-                </label>${photoBadge}${action}
-            </div>
-        </div>`;
+            <span class="workspace-kk-meta">${statusBadge} ${photoBadge}</span>`;
     }
 
-    function renderKkPagination() {
-        const pagination = el('kkPagination');
-        const pageCount = Math.ceil(state.kkTotal / kkPageSize);
-        if (!pageCount) {
-            pagination.innerHTML = '';
+    async function copyNoKk(value) {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(value);
             return;
         }
 
-        const startPage = Math.max(1, Math.min(state.kkPage - 2, pageCount - 4));
-        const endPage = Math.min(pageCount, startPage + 4);
-        const pages = [];
-        pages.push(`<li class="page-item${state.kkPage === 1 ? ' disabled' : ''}">
-            <button type="button" class="page-link" data-page="${state.kkPage - 1}" aria-label="Halaman sebelumnya">&laquo;</button>
-        </li>`);
-        for (let page = startPage; page <= endPage; page++) {
-            pages.push(`<li class="page-item${page === state.kkPage ? ' active' : ''}">
-                <button type="button" class="page-link" data-page="${page}"${page === state.kkPage ? ' aria-current="page"' : ''}>${page}</button>
-            </li>`);
+        const input = document.createElement('textarea');
+        input.value = value;
+        input.setAttribute('readonly', '');
+        input.style.position = 'fixed';
+        input.style.opacity = '0';
+        document.body.appendChild(input);
+        let copied = false;
+        try {
+            input.select();
+            copied = document.execCommand('copy');
+        } finally {
+            input.remove();
         }
-        pages.push(`<li class="page-item${state.kkPage === pageCount ? ' disabled' : ''}">
-            <button type="button" class="page-link" data-page="${state.kkPage + 1}" aria-label="Halaman berikutnya">&raquo;</button>
-        </li>`);
-        pagination.innerHTML = pages.join('');
+        if (!copied) throw new Error('Nomor KK tidak dapat disalin.');
     }
 
-    async function loadKK(reset, clearSelection) {
-        if (reset) {
-            state.kkOffset = (state.kkPage - 1) * kkPageSize;
-            if (clearSelection) state.selectedKks.clear();
-            el('kkList').innerHTML = '';
+    function renderKkActions(row) {
+        const isArchived = Boolean(row.deleted_at);
+        const cannotRestore = state.status === 'archive' && !isArchived;
+        const action = isArchived
+            ? `<button type="button" class="btn btn-link btn-sm p-0 text-primary js-kk-archive" data-id="${Number(row.id_kk)}" data-action="restore" title="Pulihkan KK"><i class="fas fa-undo"></i></button>`
+            : `<button type="button" class="btn btn-link btn-sm p-0 text-danger js-kk-archive" data-id="${Number(row.id_kk)}" data-action="archive" title="Arsipkan KK"><i class="fas fa-archive"></i></button>`;
+        return `<div class="workspace-kk-actions">
+                <input type="checkbox" class="js-select-kk" data-id="${Number(row.id_kk)}" ${state.selectedKks.has(Number(row.id_kk)) ? 'checked' : ''} ${cannotRestore ? 'disabled' : ''} aria-label="Pilih KK ${escapeHtml(row.no_kk)}">
+                ${!isArchived ? `<button type="button" class="btn btn-link btn-sm p-0 text-primary js-edit-kk" data-id="${Number(row.id_kk)}" title="Edit KK"><i class="fas fa-pen"></i></button>` : ''}${action}
+            </div>`;
+    }
+
+    function initKKTable() {
+        kkTable = $('#kkTable').DataTable({
+            processing: true,
+            serverSide: true,
+            responsive: false,
+            pageLength: kkPageSize,
+            lengthChange: false,
+            searching: true,
+            order: [[1, 'asc']],
+            dom: 't<"d-flex justify-content-center mt-2"p>',
+            language: {
+                processing: 'Memuat keluarga...',
+                emptyTable: '',
+                zeroRecords: 'Tidak ada keluarga pada filter ini.',
+                paginate: {
+                    previous: '<i class="fas fa-angle-left"></i>',
+                    next: '<i class="fas fa-angle-right"></i>'
+                }
+            },
+            ajax: {
+                url: endpoint('listKK'),
+                data: (request) => {
+                    request.status = state.status;
+                    if (state.missingPhoto && state.status === 'active') request.missing_photo = '1';
+                },
+                dataSrc: (result) => {
+                    const rows = result.data || [];
+                    state.kkTotal = Number(result.recordsFiltered || 0);
+                    el('kkListEmpty').classList.toggle('d-none', rows.length > 0);
+                    if (rows.length === 0) {
+                        el('kkListEmpty').innerHTML = '<i class="far fa-folder-open"></i><span>Tidak ada keluarga pada filter ini.</span>';
+                    }
+                    return rows;
+                },
+                beforeSend: () => {
+                    setLoading('kk', true);
+                    el('kkListEmpty').classList.add('d-none');
+                },
+                complete: () => setLoading('kk', false),
+                error: (xhr) => {
+                    const message = xhr.responseJSON && xhr.responseJSON.message
+                        ? xhr.responseJSON.message
+                        : 'Daftar keluarga gagal dimuat.';
+                    el('kkListEmpty').innerHTML = `<i class="fas fa-exclamation-circle text-danger"></i><span>${escapeHtml(message)}</span>`;
+                    el('kkListEmpty').classList.remove('d-none');
+                    showMessage(message, 'error');
+                }
+            },
+            columns: [
+                {
+                    data: null,
+                    className: 'text-center',
+                    orderable: false,
+                    searchable: false,
+                    render: (data, type, row, meta) => meta.row + meta.settings._iDisplayStart + 1
+                },
+                {
+                    data: null,
+                    render: (data, type, row) => renderKkItem(row)
+                },
+                {
+                    data: null,
+                    className: 'text-right',
+                    orderable: false,
+                    searchable: false,
+                    render: (data, type, row) => renderKkActions(row)
+                }
+            ],
+            createdRow: (row, data) => {
+                row.classList.add('workspace-kk-item');
+                row.tabIndex = 0;
+                row.dataset.id = Number(data.id_kk);
+                row.dataset.noKk = data.no_kk || '';
+                row.dataset.kkArchived = data.deleted_at ? '1' : '0';
+                if (state.selectedKk && Number(state.selectedKk.id_kk) === Number(data.id_kk)) {
+                    row.classList.add('is-selected');
+                }
+            },
+            drawCallback: function () {
+                const info = this.api().page.info();
+                const firstRow = info.recordsDisplay ? info.start + 1 : 0;
+                el('kkListSummary').textContent = `${firstRow}–${info.end} dari ${info.recordsDisplay.toLocaleString('id-ID')} keluarga`;
+            }
+        });
+    }
+
+    function loadKK(reset, clearSelection) {
+        if (clearSelection) {
+            state.selectedKks.clear();
             updateBulkToolbar('kk');
         }
-        setLoading('kk', true);
-        el('kkListEmpty').classList.add('d-none');
-        const params = new URLSearchParams({
-            status: state.status,
-            start: String(state.kkOffset),
-            length: String(kkPageSize),
-            'search[value]': state.kkSearch
-        });
-        if (state.missingPhoto && state.status === 'active') {
-            params.set('missing_photo', '1');
-        }
-
-        try {
-            const result = await getJson(`${endpoint('listKK')}?${params.toString()}`);
-            const rows = result.data || [];
-            state.kkTotal = Number(result.recordsFiltered || 0);
-            const pageCount = Math.ceil(state.kkTotal / kkPageSize);
-            if (pageCount > 0 && state.kkPage > pageCount) {
-                state.kkPage = pageCount;
-                state.kkOffset = (state.kkPage - 1) * kkPageSize;
-                return loadKK(true);
-            }
-            if (reset && state.selectedKk && state.status === 'active') {
-                const stillVisible = rows.some((row) => Number(row.id_kk) === Number(state.selectedKk.id_kk));
-                if (!stillVisible) clearSelectedKk();
-            }
-            el('kkList').insertAdjacentHTML('beforeend', rows.map(renderKkItem).join(''));
-            if (reset && rows.length === 0) {
-                el('kkListEmpty').classList.remove('d-none');
-            }
-            state.kkOffset += rows.length;
-            attachKkEditButtons();
-            const firstRow = state.kkTotal ? state.kkOffset - rows.length + 1 : 0;
-            const lastRow = state.kkOffset;
-            el('kkListSummary').textContent = `${firstRow}–${lastRow} dari ${state.kkTotal.toLocaleString('id-ID')} keluarga`;
-            renderKkPagination();
-        } catch (error) {
-            if (reset) el('kkList').innerHTML = '';
-            el('kkListEmpty').classList.remove('d-none');
-            el('kkListEmpty').innerHTML = `<i class="fas fa-exclamation-circle text-danger"></i><span>${escapeHtml(error.message)}</span>`;
-            showMessage(error.message, 'error');
-        } finally {
-            setLoading('kk', false);
+        if (kkTable) {
+            kkTable.search(state.kkSearch);
+            kkTable.ajax.reload(null, reset !== false);
         }
     }
 
@@ -363,10 +405,9 @@
         document.querySelectorAll('.workspace-kk-item').forEach((item) => item.classList.remove('is-selected'));
         row.classList.add('is-selected');
         const isArchived = row.dataset.kkArchived === '1';
-        const noKk = row.querySelector('.workspace-kk-meta');
         state.selectedKk = {
             id_kk: Number(id),
-            no_kk: noKk ? noKk.textContent.split(' · ')[0] : '',
+            no_kk: row.dataset.noKk || '',
             deleted_at: isArchived ? 'archived' : null
         };
         el('panelARTTitle').textContent = `Anggota keluarga ${state.selectedKk.no_kk}`;
@@ -554,11 +595,19 @@
     function bindEvents() {
         document.addEventListener('click', (event) => {
             if (event.target.closest('.js-select-kk, .js-select-art')) return;
+            const copyButton = event.target.closest('.js-copy-no-kk');
+            if (copyButton) {
+                event.preventDefault();
+                event.stopPropagation();
+                copyNoKk(copyButton.dataset.noKk)
+                    .then(() => showSuccess('Nomor KK berhasil disalin.'))
+                    .catch((error) => showMessage(error.message || 'Nomor KK tidak dapat disalin.', 'error'));
+                return;
+            }
             const statusButton = event.target.closest('.js-kk-status');
             if (statusButton) {
                 state.status = statusButton.dataset.status;
                 state.missingPhoto = false;
-                state.kkPage = 1;
                 el('btnKKNoFoto').classList.remove('active');
                 document.querySelectorAll('.js-kk-status').forEach((button) => {
                     const active = button === statusButton;
@@ -581,6 +630,12 @@
             const editButton = event.target.closest('.js-edit-art');
             if (editButton) {
                 editArt(editButton.dataset.id);
+                return;
+            }
+
+            const editKkButton = event.target.closest('.js-edit-kk');
+            if (editKkButton) {
+                editKk(editKkButton.dataset.id);
                 return;
             }
 
@@ -652,7 +707,6 @@
 
         el('workspaceKKSearch').addEventListener('input', debounce(() => {
             state.kkSearch = el('workspaceKKSearch').value.trim();
-            state.kkPage = 1;
             clearSelectedKk();
             loadKK(true, true);
         }, 300));
@@ -663,7 +717,6 @@
         el('btnKKSearchClear').addEventListener('click', () => {
             el('workspaceKKSearch').value = '';
             state.kkSearch = '';
-            state.kkPage = 1;
             clearSelectedKk();
             loadKK(true, true);
         });
@@ -678,19 +731,9 @@
                 return;
             }
             state.missingPhoto = !state.missingPhoto;
-            state.kkPage = 1;
             el('btnKKNoFoto').classList.toggle('active', state.missingPhoto);
             clearSelectedKk();
             loadKK(true, true);
-        });
-        el('kkPagination').addEventListener('click', (event) => {
-            const pageButton = event.target.closest('button[data-page]');
-            if (!pageButton || !pageButton.closest('.page-item') || pageButton.closest('.page-item').classList.contains('disabled')) return;
-            const page = Number(pageButton.dataset.page);
-            const pageCount = Math.ceil(state.kkTotal / kkPageSize);
-            if (!Number.isInteger(page) || page < 1 || page > pageCount || page === state.kkPage) return;
-            state.kkPage = page;
-            loadKK(true);
         });
         el('btnLoadMoreART').addEventListener('click', () => loadART(false));
         el('btnBulkKK').addEventListener('click', () => bulkArchive('kk'));
@@ -698,7 +741,6 @@
         el('btnRefreshWorkspace').addEventListener('click', async () => {
             try {
                 await loadStats();
-                state.kkPage = 1;
                 await loadKK(true, true);
                 if (state.selectedKk) loadART(true);
             } catch (error) {
@@ -740,30 +782,13 @@
             const original = el('formEditARTWorkspace').dataset.originalNik || '';
             el('reasonNikGroup').classList.toggle('d-none', el('editNIK').value === original);
         });
-        document.addEventListener('click', (event) => {
-            const editButton = event.target.closest('.js-edit-kk');
-            if (editButton) editKk(editButton.dataset.id);
-        });
-    }
-
-    function attachKkEditButtons() {
-        document.querySelectorAll('.workspace-kk-item').forEach((item) => {
-            const action = item.querySelector('.js-kk-archive');
-            if (!action || action.dataset.action !== 'archive' || item.querySelector('.js-edit-kk')) return;
-            const edit = document.createElement('button');
-            edit.type = 'button';
-            edit.className = 'btn btn-link btn-sm p-0 text-primary js-edit-kk';
-            edit.dataset.id = item.dataset.id;
-            edit.innerHTML = '<i class="fas fa-pen mr-1"></i>Edit KK';
-            action.parentElement.insertBefore(edit, action);
-        });
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
         bindEvents();
         try {
             await loadStats();
-            await loadKK(true);
+            initKKTable();
         } catch (error) {
             showMessage(error.message, 'error');
         }

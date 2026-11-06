@@ -507,7 +507,7 @@
                 <h5 class="modal-title fw-bold"><i class="fas fa-file-word me-2"></i>Cetak Berita Acara (Musdes)</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="formCetakBA" action="<?= base_url('usulan-bansos/cetak-ba') ?>" method="POST" enctype="multipart/form-data">
+            <form id="formCetakBA" action="<?= base_url('usulan-bansos/cetak-ba') ?>" method="POST">
                 <div class="modal-body p-4 bg-light">
 
                     <div class="row g-3">
@@ -546,19 +546,6 @@
                             <!-- 🚀 Tambahkan id="tgl_ttd" -->
                             <input type="text" id="tgl_ttd" name="tanggal_ttd" class="form-control" placeholder="Contoh: 6 Oktober 2026" required>
                         </div>
-
-                        <!-- Dokumentasi Foto -->
-                        <div class="col-12 mt-4">
-                            <h6 class="fw-bold text-dark border-bottom pb-2">Dokumentasi (Lampiran III)</h6>
-                            <div class="alert alert-info small py-2"><i class="fas fa-info-circle me-1"></i> Lampirkan 4 foto kegiatan (JPG/PNG).</div>
-                        </div>
-
-                        <?php for ($i = 1; $i <= 4; $i++): ?>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-secondary small">Foto Kegiatan <?= $i ?> <span class="text-danger">*</span></label>
-                                <input type="file" name="foto_kegiatan[]" class="form-control form-control-sm" accept="image/jpeg, image/png">
-                            </div>
-                        <?php endfor; ?>
 
                     </div>
                 </div>
