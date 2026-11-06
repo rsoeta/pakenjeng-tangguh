@@ -633,20 +633,42 @@ class UsulanBansos extends Controller
             $data = $builder->get()->getResultArray();
             $programCounts = [];
             $uniqueRecipients = [];
+            $uniqueHouseholds = [];
             foreach ($data as $row) {
                 $programName = trim((string) ($row['dbj_nama_bansos'] ?? '')) ?: 'Program tidak diketahui';
-                $programCounts[$programName] = ($programCounts[$programName] ?? 0) + 1;
+                if (!isset($programCounts[$programName])) {
+                    $programCounts[$programName] = [
+                        'count' => 0,
+                        'jiwa' => [],
+                        'kk' => [],
+                    ];
+                }
+                $programCounts[$programName]['count']++;
+
                 $nikPenerima = trim((string) ($row['nik'] ?? ''));
                 if ($nikPenerima !== '') {
                     $uniqueRecipients[$nikPenerima] = true;
+                    $programCounts[$programName]['jiwa'][$nikPenerima] = true;
+                }
+
+                $noKk = trim((string) ($row['no_kk'] ?? ''));
+                if ($noKk !== '') {
+                    $uniqueHouseholds[$noKk] = true;
+                    $programCounts[$programName]['kk'][$noKk] = true;
                 }
             }
             ksort($programCounts, SORT_NATURAL | SORT_FLAG_CASE);
             $summary = [
                 'total' => count($data),
-                'unique_recipients' => count($uniqueRecipients),
+                'jiwa' => count($uniqueRecipients),
+                'kk' => count($uniqueHouseholds),
                 'programs' => array_map(
-                    static fn ($name, $count) => ['name' => $name, 'count' => $count],
+                    static fn ($name, $counts) => [
+                        'name' => $name,
+                        'count' => $counts['count'],
+                        'jiwa' => count($counts['jiwa']),
+                        'kk' => count($counts['kk']),
+                    ],
                     array_keys($programCounts),
                     array_values($programCounts)
                 ),

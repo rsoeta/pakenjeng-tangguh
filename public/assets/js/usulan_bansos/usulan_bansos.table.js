@@ -184,6 +184,9 @@ $(document).ready(function () {
         const numberFormat = new Intl.NumberFormat('id-ID');
         const total = Number(summary?.total || 0);
         $('#summaryVerifiedTotal').text(numberFormat.format(total));
+        $('#summaryVerifiedDetail').text(
+            `${numberFormat.format(Number(summary.jiwa || 0))} Jiwa · ${numberFormat.format(Number(summary.kk || 0))} KK`
+        );
 
         const programCards = (summary?.programs || []).map((program, index) => `
             <div class="col-12 col-sm-6 col-xl-3 verified-program-card">
@@ -193,6 +196,7 @@ $(document).ready(function () {
                         <div class="min-w-0">
                             <div class="summary-label text-truncate" title="${escapeHtml(program.name)}">${escapeHtml(program.name)}</div>
                             <div class="summary-value">${numberFormat.format(Number(program.count || 0))}</div>
+                            <div class="summary-detail">${numberFormat.format(Number(program.jiwa || 0))} Jiwa · ${numberFormat.format(Number(program.kk || 0))} KK</div>
                         </div>
                     </div>
                 </div>

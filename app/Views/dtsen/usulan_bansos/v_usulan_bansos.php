@@ -217,6 +217,13 @@
         font-weight: 600;
     }
 
+    .verified-summary-card .summary-detail {
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
     .verified-summary-total {
         background: linear-gradient(135deg, #146c43, #20a36a);
     }
@@ -471,6 +478,7 @@
                                             <div>
                                                 <div class="summary-label">Total Usulan</div>
                                                 <div class="summary-value" id="summaryVerifiedTotal">0</div>
+                                                <div class="summary-detail" id="summaryVerifiedDetail">0 Jiwa · 0 KK</div>
                                             </div>
                                         </div>
                                     </div>
