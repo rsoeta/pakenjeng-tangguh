@@ -11,12 +11,49 @@ $allMenus = menu();
 // Helper untuk filter akses dan status menu
 $filterAccess = function ($items) use ($userRole) {
     return array_values(array_filter($items, function ($item) use ($userRole) {
-        return ($item['tm_status'] == 1 && $item['tm_grup_akses'] >= $userRole && $item['tm_url'] !== 'pembaruan-keluarga/pemulihan');
+        return ((int)$item['tm_status'] === 1 && (int)$item['tm_grup_akses'] >= (int)$userRole && $item['tm_url'] !== 'pembaruan-keluarga/pemulihan');
     }));
 };
 
-// 1. DATA SUBMENU DTSEN (Parent ID: 3) & KEMISKINAN (Parent ID: 41)
-$dtsenDirect = $filterAccess(menu_child(3));
+// Helper mencari parent_id secara dinamis (fleksibel lintas database lokal / server online)
+$findParentId = function ($keywords) use ($allMenus) {
+    if (!is_array($keywords)) $keywords = [$keywords];
+    foreach ($allMenus as $m) {
+        if ((int)$m['tm_parent_id'] === 0) {
+            foreach ($keywords as $kw) {
+                if (stripos($m['tm_nama'], $kw) !== false || stripos($m['tm_url'], $kw) !== false) {
+                    return (int)$m['tm_id'];
+                }
+            }
+        }
+    }
+    return null;
+};
+
+// Helper mencari menu individual secara dinamis
+$findMenuItem = function ($keywords) use ($allMenus, $userRole) {
+    if (!is_array($keywords)) $keywords = [$keywords];
+    foreach ($allMenus as $m) {
+        if ((int)$m['tm_status'] !== 1 || (int)$m['tm_grup_akses'] < (int)$userRole) continue;
+        foreach ($keywords as $kw) {
+            if (stripos($m['tm_url'], $kw) !== false || stripos($m['tm_nama'], $kw) !== false) {
+                return $m;
+            }
+        }
+    }
+    return null;
+};
+
+// Dapatkan ID parent secara dinamis (dengan fallback angka lokal)
+$dtsenId       = $findParentId(['dtsen']) ?? 3;
+$kemiskinanId  = $findParentId(['kemiskinan']) ?? 41;
+$bansosId      = $findParentId(['bansos', 'bantuan']) ?? 82;
+$vervalId      = $findParentId(['verval', 'verivali']) ?? 11;
+$pbiId         = $findParentId(['pbi']) ?? 7;
+$settingsId    = $findParentId(['setting', 'pengaturan']) ?? 22;
+
+// 1. DATA SUBMENU DTSEN & KEMISKINAN
+$dtsenDirect = $filterAccess(menu_child($dtsenId));
 $dtsenUtama = [];
 $banpangItems = [];
 $monitoringItems = [];
@@ -33,21 +70,19 @@ foreach ($dtsenDirect as $dItem) {
         $dtsenUtama[] = $dItem;
     }
 }
-$kemiskinanItems = $filterAccess(menu_child(41));
+$kemiskinanItems = $filterAccess(menu_child($kemiskinanId));
 
-// 2. DATA SUBMENU BANSOS (Parent ID: 82), VERVAL (Parent ID: 11), & ASSESSMENT (ID: 80)
-$bansosItems = $filterAccess(menu_child(82));
+// 2. DATA SUBMENU BANSOS, VERVAL, & ASSESSMENT
+$bansosItems = $filterAccess(menu_child($bansosId));
 
-// Assessment (ID 80)
-$assessmentItem = array_values(array_filter($allMenus, function ($m) use ($userRole) {
-    return ($m['tm_id'] == 80 && $m['tm_status'] == 1 && $m['tm_grup_akses'] >= $userRole);
-}));
-if (!empty($assessmentItem)) {
-    $bansosItems[] = $assessmentItem[0];
+// Assessment
+$assessmentItem = $findMenuItem(['assessment']);
+if ($assessmentItem && !in_array($assessmentItem['tm_id'], array_column($bansosItems, 'tm_id'))) {
+    $bansosItems[] = $assessmentItem;
 }
 
-// VERVAL Items (Parent ID: 11)
-$vervalDirect = $filterAccess(menu_child(11));
+// VERVAL Items
+$vervalDirect = $filterAccess(menu_child($vervalId));
 $vervalItems = [];
 foreach ($vervalDirect as $vItem) {
     if ($vItem['tm_url'] === '#' || empty($vItem['tm_url'])) {
@@ -67,11 +102,11 @@ foreach ($vervalDirect as $vItem) {
     }
 }
 
-// 3. DATA SUBMENU PBI-JKN (Parent ID: 7)
-$pbiItems = $filterAccess(menu_child(7));
+// 3. DATA SUBMENU PBI-JKN
+$pbiItems = $filterAccess(menu_child($pbiId));
 
 // 4. DATA MENU & AKUN
-$settingsChildren = $filterAccess(menu_child(22));
+$settingsChildren = $filterAccess(menu_child($settingsId));
 $adminItems = [];
 $profilItem = null;
 
@@ -106,7 +141,7 @@ $renderCard = function ($item) {
     </a>';
 };
 
-// Tambahan: Timeline (ID: 51) & Artikel (ID: 39)
+// Tambahan: Timeline & Artikel
 $infoItems = [];
 if ($profilItem) {
     $infoItems[] = $profilItem;
@@ -118,16 +153,15 @@ if ($profilItem) {
     ];
 }
 
-$timelineItem = array_values(array_filter($allMenus, function ($m) use ($userRole) {
-    return ($m['tm_id'] == 51 && $m['tm_status'] == 1 && $m['tm_grup_akses'] >= $userRole);
-}));
+$timelineItem = $findMenuItem(['timeline', 'dokumentasi/timeline']);
 if (!empty($timelineItem)) {
-    $infoItems[] = $timelineItem[0];
+    $infoItems[] = $timelineItem;
 }
 
-$artikelItem = array_values(array_filter($allMenus, function ($m) use ($userRole) {
-    return ($m['tm_id'] == 39 && $m['tm_status'] == 1 && $m['tm_grup_akses'] >= $userRole);
-}));
+$artikelItem = $findMenuItem(['articles', 'artikel']);
+if (!empty($artikelItem)) {
+    $infoItems[] = $artikelItem;
+}
 if (!empty($artikelItem)) {
     $infoItems[] = $artikelItem[0];
 }

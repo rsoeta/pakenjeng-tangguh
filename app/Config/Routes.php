@@ -47,6 +47,29 @@ $routes->setAutoRoute(false);
 // ========================================================
 $routes->match(['get', 'post'], 'deploy-sinden-rahasia', 'Webhook::deploy');
 
+// ========================================================
+// 📱 PWA ROUTES (Manifest & Service Worker)
+// ========================================================
+$routes->get('manifest.json', function () {
+    $file = file_exists(FCPATH . 'manifest.json') ? FCPATH . 'manifest.json' : (file_exists(ROOTPATH . 'public/manifest.json') ? ROOTPATH . 'public/manifest.json' : ROOTPATH . 'manifest.json');
+    if (file_exists($file)) {
+        return service('response')
+            ->setHeader('Content-Type', 'application/manifest+json; charset=utf-8')
+            ->setBody(file_get_contents($file));
+    }
+    throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+});
+
+$routes->get('sw.js', function () {
+    $file = file_exists(FCPATH . 'sw.js') ? FCPATH . 'sw.js' : (file_exists(ROOTPATH . 'public/sw.js') ? ROOTPATH . 'public/sw.js' : ROOTPATH . 'sw.js');
+    if (file_exists($file)) {
+        return service('response')
+            ->setHeader('Content-Type', 'application/javascript; charset=utf-8')
+            ->setBody(file_get_contents($file));
+    }
+    throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+});
+
 // AUTH
 // $routes->match(['GET', 'POST'], 'lockscreen', 'Lockscreen::index', ['filter' => 'authfilterdtks']);
 $routes->match(['GET', 'POST'], 'login', 'Auth\Auth::login', ['filter' => 'noauthfilterdtks']);
