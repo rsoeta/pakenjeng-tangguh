@@ -177,6 +177,10 @@ $(document).ready(function () {
     }
 
     function renderVerifiedSummary(summary) {
+        if (!summary || !Number.isFinite(Number(summary.total))) {
+            return;
+        }
+
         const numberFormat = new Intl.NumberFormat('id-ID');
         const total = Number(summary?.total || 0);
         $('#summaryVerifiedTotal').text(numberFormat.format(total));
@@ -198,6 +202,12 @@ $(document).ready(function () {
         $('#verifiedSummary').children('.verified-program-card').remove();
         $('#verifiedSummary').append(programCards);
     }
+
+    window.refreshVerifiedSummary = function () {
+        if (tableVerified) {
+            tableVerified.ajax.reload(null, false);
+        }
+    };
 
     // ==========================================
     // 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF (JS)
@@ -640,7 +650,7 @@ $(document).ready(function () {
                     return Object.assign(d, getFilterParams('diverifikasi'));
                 },
                 dataSrc: function (json) {
-                    renderVerifiedSummary(json.summary || {});
+                    renderVerifiedSummary(json.summary);
                     return json.data || [];
                 }
             },

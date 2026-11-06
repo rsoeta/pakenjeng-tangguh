@@ -69,6 +69,13 @@ window.startHeaderCountdown = function (endTimeString) {
 
         if (diff <= 0) {
             clearInterval(timer);
+            animateDigit("cdDays", 0);
+            animateDigit("cdHours", "00");
+            animateDigit("cdMinutes", "00");
+            animateDigit("cdSeconds", "00");
+            if (typeof window.refreshVerifiedSummary === 'function') {
+                window.refreshVerifiedSummary();
+            }
             window.updateButtonState(); // <= NOW SAFE
             return;
         }
