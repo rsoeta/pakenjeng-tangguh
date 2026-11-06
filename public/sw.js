@@ -3,7 +3,7 @@
  * Version: 1.0.0
  */
 
-const CACHE_NAME = 'sinden-cache-v1.0.1';
+const CACHE_NAME = 'sinden-cache-v1.0.2';
 
 // Aset statis inti yang dicache saat instalasi
 const CORE_ASSETS = [
@@ -52,6 +52,11 @@ self.addEventListener('fetch', (event) => {
     }
 
     const url = new URL(request.url);
+
+    // Leave cross-origin resources to the browser; they may reject due to CORS.
+    if (url.origin !== self.location.origin) {
+        return;
+    }
 
     // Jangan cache endpoint dynamic API / AJAX / debugbar
     if (
@@ -125,7 +130,10 @@ self.addEventListener('fetch', (event) => {
                         });
                     }
                     return networkResponse;
-                }).catch(() => cachedResponse);
+                }).catch((error) => {
+                    if (cachedResponse) return cachedResponse;
+                    throw error;
+                });
 
                 return cachedResponse || fetchPromise;
             })

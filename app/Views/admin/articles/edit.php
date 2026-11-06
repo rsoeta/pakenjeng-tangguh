@@ -14,6 +14,7 @@
             <div class="card-body">
 
                 <form method="post" action="<?= base_url('/admin/articles/update/' . $article['id']) ?>" enctype="multipart/form-data">
+                    <?= csrf_field() ?>
 
                     <input type="hidden" name="id" value="<?= $article['id'] ?>">
 
@@ -82,17 +83,25 @@
         relative_urls: false,
         remove_script_host: false,
 
-        images_upload_handler: function(blobInfo, success, failure) {
-            let formData = new FormData();
+        images_upload_handler: async function(blobInfo, progress) {
+            const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
+            const csrfValue = document.querySelector('meta[name="csrf-token-value"]').content;
+            const formData = new FormData();
             formData.append('file', blobInfo.blob(), blobInfo.filename());
+            formData.set(csrfName, csrfValue);
 
-            fetch('<?= base_url("admin/articles/upload-image") ?>', {
+            const response = await fetch('<?= base_url("admin/articles/upload-image") ?>', {
                     method: 'POST',
                     body: formData
-                })
-                .then(r => r.json())
-                .then(json => json.location ? success(json.location) : failure("Upload gagal"))
-                .catch(err => failure("Upload error: " + err));
+                });
+            window.updateCsrfToken(response.headers.get('X-CSRF-TOKEN'));
+            const json = await response.json();
+
+            if (!response.ok || !json.location) {
+                throw new Error(json.error || 'Upload gambar gagal.');
+            }
+
+            return json.location;
         }
     });
 </script>

@@ -50,9 +50,9 @@
   <link rel="shortcut icon" href="<?= base_url('assets/logo/icon-192.png'); ?>" type="image/png">
 
   <link rel="stylesheet" href="<?= base_url('assets/dist/css/authstyle.css'); ?>">
-  <link rel="stylesheet" href="<?= base_url('assets/css/sinden-landing.css'); ?>">
+  <link rel="stylesheet" href="<?= base_url('assets/css/sinden-landing.css'); ?>?v=<?= @filemtime(FCPATH . 'assets/css/sinden-landing.css') ?: '1'; ?>">
 
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="<?= base_url('assets/fontawesome-free/css/all.min.css'); ?>">
 </head>
 
 <body>
@@ -62,20 +62,15 @@
         <img src="<?= base_url('assets/logo/SINDEN-logo.png'); ?>" alt="Logo SINDEN">
         <span>SINDEN</span>
       </div>
+      <a href="<?= base_url('login'); ?>" class="home-login" aria-label="Masuk ke SINDEN" title="Masuk">
+        <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+      </a>
     </div>
   </header>
 
-  <section id="home" class="hero">
-    <div class="overlay"></div>
-    <div class="hero-content">
-      <h1>SINDEN</h1>
-      <p><?php echo titleApp() ?></p>
-      <a href="<?= base_url('login'); ?>" class="btn-primary">Login</a>
-    </div>
-  </section>
-
   <section id="articles" class="cards">
     <h2>Berita & Artikel</h2>
+    <p class="cards-intro">Informasi, kegiatan, dan kabar terbaru dari Desa Pasirlangu.</p>
     <div class="card-grid">
 
       <?php if (count($articles) > 0): ?>
@@ -111,18 +106,23 @@
     const toggleBtn = document.getElementById("toggleTheme");
     if (localStorage.getItem("theme") === "dark") {
       body.classList.add("dark-mode");
-      toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
     }
-    toggleBtn.addEventListener("click", () => {
-      body.classList.toggle("dark-mode");
+    if (toggleBtn) {
       if (body.classList.contains("dark-mode")) {
-        localStorage.setItem("theme", "dark");
         toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
-      } else {
-        localStorage.setItem("theme", "light");
-        toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
       }
-    });
+
+      toggleBtn.addEventListener("click", () => {
+        body.classList.toggle("dark-mode");
+        if (body.classList.contains("dark-mode")) {
+          localStorage.setItem("theme", "dark");
+          toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+        } else {
+          localStorage.setItem("theme", "light");
+          toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+        }
+      });
+    }
   </script>
 
   <!-- PWA Service Worker Registration -->

@@ -145,6 +145,15 @@ nav a:hover {
   font-weight: 600;
   text-decoration: none;
 }
+
+@media (min-width: 1200px) {
+  .card img {
+    height: clamp(280px, 26vw, 380px);
+    object-fit: contain;
+    background: #f3f6f5;
+  }
+}
+
 footer {
   background: #111;
   color: #ccc;
@@ -164,6 +173,17 @@ body.dark-mode header {
 body.dark-mode .card {
   background: #1e1e1e;
   color: #ddd;
+}
+body.dark-mode .cards h2 {
+    color: #f0f3f3;
+}
+body.dark-mode .home-login {
+    color: #83e0d7;
+    border-color: #83e0d7;
+}
+body.dark-mode .home-login:hover {
+    color: #121212;
+    background: #83e0d7;
 }
 body.dark-mode footer {
   background: #000;
@@ -265,6 +285,47 @@ header .logo span {
     font-size: 20px;
     font-weight: 700;
     color: #2EC4B6;
+}
+
+.home-login {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--green);
+    border-radius: 50%;
+    color: #168f84;
+    font-size: 17px;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.home-login:hover {
+    background: var(--green);
+    color: #fff;
+}
+
+.cards {
+    min-height: calc(100vh - 180px);
+    padding: clamp(36px, 5vw, 64px) 5%;
+}
+
+.cards h2 {
+    margin: 0;
+    color: #263b3a;
+    font-size: clamp(26px, 3vw, 36px);
+    font-weight: 700;
+}
+
+.cards-intro {
+    margin: 10px 0 28px;
+    color: var(--muted);
+    font-size: 16px;
+}
+
+.card-grid {
+    margin-top: 0;
 }
 
 /* TOMBOL KEMBALI LEBIH KECIL & TEPAT DI SEBELAH KANAN */

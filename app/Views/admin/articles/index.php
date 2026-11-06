@@ -222,28 +222,25 @@
             automatic_uploads: true,
             relative_urls: false,
             remove_script_host: false,
-            images_upload_handler: function(blobInfo, success, failure) {
-
+            images_upload_handler: async function(blobInfo, progress) {
                 const csrfName = document.querySelector('meta[name="csrf-token-name"]').content;
                 const csrfValue = document.querySelector('meta[name="csrf-token-value"]').content;
-
-                let formData = new FormData();
+                const formData = new FormData();
                 formData.append('file', blobInfo.blob(), blobInfo.filename());
-                formData.append(csrfName, csrfValue); // TOKEN HARUS DIKIRIM
+                formData.set(csrfName, csrfValue);
 
-                fetch('/admin/articles/upload-image', {
+                const response = await fetch('<?= base_url("admin/articles/upload-image") ?>', {
                         method: 'POST',
                         body: formData
-                    })
-                    .then(r => r.json())
-                    .then(json => {
-                        if (json.location) {
-                            success(json.location);
-                        } else {
-                            failure("Upload gagal");
-                        }
-                    })
-                    .catch(err => failure("Upload error: " + err));
+                    });
+                window.updateCsrfToken(response.headers.get('X-CSRF-TOKEN'));
+                const json = await response.json();
+
+                if (!response.ok || !json.location) {
+                    throw new Error(json.error || 'Upload gambar gagal.');
+                }
+
+                return json.location;
             }
 
         });

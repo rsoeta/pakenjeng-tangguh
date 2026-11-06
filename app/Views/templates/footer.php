@@ -313,6 +313,23 @@
         value: csrfValue
     };
 
+    window.updateCsrfToken = function(token) {
+        if (!token) return;
+
+        window.CSRF.value = token;
+        document.querySelector('meta[name="csrf-token-value"]').setAttribute("content", token);
+        document.querySelectorAll(`input[name="${window.CSRF.name}"]`).forEach(function(input) {
+            input.value = token;
+        });
+    };
+
+    document.addEventListener("submit", function(event) {
+        if (event.target.method.toLowerCase() !== "post") return;
+
+        const tokenInput = event.target.querySelector(`input[name="${window.CSRF.name}"]`);
+        if (tokenInput) tokenInput.value = window.CSRF.value;
+    }, true);
+
     // ------------------------------
     // Inject token ke setiap request AJAX (jQuery)
     // ------------------------------
@@ -333,8 +350,7 @@
             try {
                 let token = xhr.getResponseHeader("X-CSRF-TOKEN");
                 if (token) {
-                    window.CSRF.value = token;
-                    document.querySelector('meta[name="csrf-token-value"]').setAttribute("content", token);
+                    window.updateCsrfToken(token);
                 }
             } catch (e) {
                 console.warn("Tidak bisa update CSRF token:", e);
@@ -367,8 +383,7 @@
         // Ambil token baru dari header response
         let newToken = response.headers.get("X-CSRF-TOKEN");
         if (newToken) {
-            window.CSRF.value = newToken;
-            document.querySelector('meta[name="csrf-token-value"]').setAttribute("content", newToken);
+            window.updateCsrfToken(newToken);
         }
 
         return response;
