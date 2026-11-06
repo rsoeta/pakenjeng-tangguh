@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Dtsen;
 
+use App\Libraries\FastTemplateProcessor;
 use App\Models\Dtks\AuthModel;
 use App\Models\Dtsen\DtsenArtModel;
 use App\Models\Dtsen\DtsenSeModel;
@@ -1284,7 +1285,7 @@ class UsulanBansos extends Controller
             return redirect()->back()->with('error', 'File Template Word tidak ditemukan di folder public/uploads/templates!');
         }
 
-        $template = new \PhpOffice\PhpWord\TemplateProcessor($templatePath);
+        $template = new FastTemplateProcessor($templatePath);
 
         // A. Set Variabel Teks Header & Rekap
         $template->setValues([
