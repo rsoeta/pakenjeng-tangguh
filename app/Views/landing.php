@@ -49,10 +49,39 @@
   <link rel="icon" href="<?= base_url('assets/logo/icon-192.png'); ?>" type="image/png">
   <link rel="shortcut icon" href="<?= base_url('assets/logo/icon-192.png'); ?>" type="image/png">
 
+  <!-- Google Fonts: Open Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="<?= base_url('assets/dist/css/authstyle.css'); ?>">
   <link rel="stylesheet" href="<?= base_url('assets/css/sinden-landing.css'); ?>?v=<?= @filemtime(FCPATH . 'assets/css/sinden-landing.css') ?: '1'; ?>">
 
   <link rel="stylesheet" href="<?= base_url('assets/fontawesome-free/css/all.min.css'); ?>">
+
+  <style>
+    body {
+      font-family: 'Open Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .cards-intro {
+      font-size: 13.5px;
+    }
+
+    .card h3 {
+      font-size: 16px;
+    }
+
+    .card p {
+      font-size: 13px;
+    }
+
+    .read-more {
+      font-size: 13px;
+    }
+  </style>
 </head>
 
 <body>

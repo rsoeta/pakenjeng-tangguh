@@ -98,6 +98,11 @@
     <meta name="apple-mobile-web-app-title" content="<?= nameApp(); ?>">
     <link rel="apple-touch-icon" href="<?= base_url('assets/logo/apple-touch-icon.png'); ?>">
 
+    <!-- Google Fonts: Open Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
     <!-- Stylesheets & Icons -->
     <link rel="stylesheet" href="<?= base_url('assets/fontawesome-free/css/all.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/dist/css/authstyle.css'); ?>">
@@ -106,6 +111,12 @@
     <link rel="shortcut icon" href="<?= base_url('assets/logo/icon-192.png'); ?>" type="image/png">
 
     <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
         .article-detail {
             max-width: 820px;
             width: calc(100% - 32px);
@@ -118,7 +129,7 @@
         }
 
         .article-title {
-            font-size: clamp(20px, 2.4vw, 25px);
+            font-size: clamp(18px, 2.2vw, 22px);
             font-weight: 700;
             color: #1e293b;
             margin-top: 8px;
@@ -128,7 +139,7 @@
 
         .article-meta {
             color: #64748b;
-            font-size: 13px;
+            font-size: 12.5px;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
@@ -153,22 +164,22 @@
         }
 
         .article-content {
-            font-size: 15px;
+            font-size: 13.5px;
             color: #334155;
-            line-height: 1.8;
+            line-height: 1.75;
             word-wrap: break-word;
         }
 
         .article-content p {
-            font-size: 15px;
-            line-height: 1.8;
+            font-size: 13.5px;
+            line-height: 1.75;
             margin-bottom: 1.15rem;
         }
 
-        .article-content h1 { font-size: 22px; font-weight: 700; margin: 1.5rem 0 0.8rem; color: #1e293b; }
-        .article-content h2 { font-size: 19px; font-weight: 700; margin: 1.3rem 0 0.7rem; color: #1e293b; }
-        .article-content h3 { font-size: 17px; font-weight: 600; margin: 1.1rem 0 0.6rem; color: #1e293b; }
-        .article-content h4 { font-size: 15px; font-weight: 600; margin: 1rem 0 0.5rem; color: #1e293b; }
+        .article-content h1 { font-size: 19px; font-weight: 700; margin: 1.4rem 0 0.7rem; color: #1e293b; }
+        .article-content h2 { font-size: 17px; font-weight: 700; margin: 1.2rem 0 0.6rem; color: #1e293b; }
+        .article-content h3 { font-size: 15px; font-weight: 600; margin: 1rem 0 0.5rem; color: #1e293b; }
+        .article-content h4 { font-size: 13.5px; font-weight: 600; margin: 0.9rem 0 0.4rem; color: #1e293b; }
 
         .article-content ul, .article-content ol {
             padding-left: 1.4rem;
