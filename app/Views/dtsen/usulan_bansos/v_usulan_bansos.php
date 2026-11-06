@@ -12,11 +12,25 @@
         border-radius: 50%;
         width: 60px;
         height: 60px;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         font-size: 24px;
         cursor: pointer;
-        z-index: 999;
+        z-index: 1045;
         transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Penyesuaian responsif khusus mobile agar tidak tertutup Tab Bar */
+    @media (max-width: 767.98px) {
+        .fab-btn {
+            bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+            right: 18px !important;
+            width: 52px;
+            height: 52px;
+            font-size: 20px;
+        }
     }
 
     .fab-btn:hover {

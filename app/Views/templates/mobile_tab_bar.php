@@ -407,8 +407,9 @@ if (!empty($artikelItem)) {
 
     /* Angkat floating button agar tidak menimpa Tab Bar di mobile */
     .btn-floating,
-    .btn-floating-camera {
-        bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+    .btn-floating-camera,
+    .fab-btn {
+        bottom: calc(82px + env(safe-area-inset-bottom, 0px)) !important;
     }
 }
 
