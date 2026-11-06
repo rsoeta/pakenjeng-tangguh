@@ -162,9 +162,6 @@ $artikelItem = $findMenuItem(['articles', 'artikel']);
 if (!empty($artikelItem)) {
     $infoItems[] = $artikelItem;
 }
-if (!empty($artikelItem)) {
-    $infoItems[] = $artikelItem[0];
-}
 ?>
 
 <!-- ========================================== -->
