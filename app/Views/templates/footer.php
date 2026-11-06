@@ -10,6 +10,9 @@
 <!-- /.control-sidebar -->
 </div>
 
+<!-- Mobile Bottom Navigation & Sheets -->
+<?= view('templates/mobile_tab_bar'); ?>
+
 <div class="modal fade" id="modalDokumentasi" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">

@@ -127,3 +127,50 @@ function menu_is_open(array $children)
     }
     return false;
 }
+
+function mobile_active_tab(): string
+{
+    $request = \Config\Services::request();
+    $seg1 = strtolower($request->getUri()->getSegment(1) ?? '');
+    $seg2 = $request->getUri()->getTotalSegments() > 1 ? strtolower($request->getUri()->getSegment(2) ?? '') : '';
+
+    // 1. Beranda
+    if ($seg1 === '' || $seg1 === 'dashboard' || $seg1 === 'pages') {
+        return 'beranda';
+    }
+
+    // 2. PBI-JKN
+    if ($seg1 === 'pbi' || $seg1 === 'verivalipbi') {
+        return 'pbi';
+    }
+
+    // 3. DTSEN & Kemiskinan
+    $dtsenKeywords = [
+        'dtsen', 'dtsen-se', 'perlinsos', 'master-kks', 'banpang',
+        'reminder-monitor', 'pemeriksaan', 'lansia-jompo', 'exclude', 'analisis-desil',
+        'keadaan-rumah', 'kemiskinan'
+    ];
+    if (in_array($seg1, $dtsenKeywords) || in_array($seg2, $dtsenKeywords)) {
+        return 'dtsen';
+    }
+
+    // 4. Bansos & VERVAL & Assessment
+    $bansosKeywords = [
+        'bansos', 'usulan-bansos', 'bansos-kks', 'verivalibnba', 'pdtt',
+        'verval', 'bpjstk', 'ppks-pas', 'monev', 'assessment', 'rekapitulasi', 'mapping'
+    ];
+    if (in_array($seg1, $bansosKeywords) || in_array($seg2, $bansosKeywords)) {
+        return 'bansos';
+    }
+
+    // 5. Menu & Akun
+    $akunKeywords = [
+        'profil_user', 'users', 'settings', 'articles', 'dokumentasi', 'profil', 'admin'
+    ];
+    if (in_array($seg1, $akunKeywords) || in_array($seg2, $akunKeywords)) {
+        return 'akun';
+    }
+
+    return '';
+}
+
