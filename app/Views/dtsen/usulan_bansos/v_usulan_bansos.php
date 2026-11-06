@@ -363,19 +363,25 @@
                 </div>
 
                 <?php if (($user_login['role_id'] ?? session()->get('role_id') ?? 99) <= 3): ?>
-                    <button type="button"
-                        class="btn btn-light btn-sm text-primary shadow-sm ms-2 btn-touch-target px-3"
-                        data-bs-toggle="offcanvas"
-                        data-bs-target="#offcanvasGeneralAkses"
-                        aria-controls="offcanvasGeneralAkses"
-                        title="Pengaturan Jadwal & Batas Waktu Akses">
-                        <i class="fas fa-cog"></i>
-                        <span class="d-none d-sm-inline">Pengaturan Akses</span>
+                    <div class="d-flex flex-wrap gap-2 ms-auto">
+                        <button type="button"
+                            class="btn btn-light btn-sm text-primary shadow-sm btn-touch-target px-3"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasGeneralAkses"
+                            aria-controls="offcanvasGeneralAkses"
+                            title="Pengaturan Jadwal & Batas Waktu Akses">
+                            <i class="fas fa-cog"></i>
+                            <span class="d-none d-sm-inline">Pengaturan Akses</span>
+                        </button>
                         <button type="button" class="btn btn-success btn-sm shadow-sm ms-2 btn-touch-target px-3 fw-bold text-white" data-bs-toggle="modal" data-bs-target="#modalCetakBA">
                             <i class="fas fa-print"></i>
                             <span class="d-none d-sm-inline">Cetak BA</span>
                         </button>
-                    </button>
+                        <button type="button" class="btn btn-outline-light btn-sm shadow-sm btn-touch-target px-3" data-bs-toggle="modal" data-bs-target="#modalRiwayatBA">
+                            <i class="fas fa-history"></i>
+                            <span class="d-none d-sm-inline">Riwayat BA</span>
+                        </button>
+                    </div>
                 <?php endif; ?>
 
             </div>
@@ -496,6 +502,55 @@
             </div>
         </div>
     </section>
+</div>
+
+<!-- 📚 RIWAYAT BERITA ACARA -->
+<div class="modal fade" id="modalRiwayatBA" tabindex="-1" aria-labelledby="modalRiwayatBALabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content rounded-4 shadow">
+            <div class="modal-header bg-primary text-white border-0">
+                <h5 class="modal-title fw-bold" id="modalRiwayatBALabel"><i class="fas fa-history me-2"></i>Riwayat Berita Acara</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <?php if (empty($riwayat_ba)): ?>
+                    <div class="alert alert-info mb-0">Belum ada berita acara yang tersimpan.</div>
+                <?php else: ?>
+                    <?php $namaBulanBa = ['01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April', '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus', '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember']; ?>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Periode Usulan</th>
+                                    <th>Nomor Surat</th>
+                                    <th>Tanggal Musyawarah</th>
+                                    <th class="text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($riwayat_ba as $ba): ?>
+                                    <tr>
+                                        <td><?= esc(($namaBulanBa[$ba['bulan_data']] ?? $ba['bulan_data']) . ' ' . $ba['tahun_data']) ?></td>
+                                        <td><?= esc($ba['nomor_surat']) ?></td>
+                                        <td><?= esc($ba['tanggal_musyawarah']) ?></td>
+                                        <td class="text-center">
+                                            <form action="<?= base_url('usulan-bansos/cetak-ba') ?>" method="POST" class="d-inline">
+                                                <?= csrf_field() ?>
+                                                <input type="hidden" name="ba_id" value="<?= esc($ba['id']) ?>">
+                                                <button type="submit" class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-print me-1"></i>Cetak Ulang
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
 </div>
 
 <?= $this->include('dtsen/usulan_bansos/form_usulan_bansos'); ?>

@@ -57,6 +57,14 @@ class UsulanBansos extends Controller
             ->orderBy('dbj_id', 'ASC')
             ->findAll();
 
+        $riwayatBa = $this->db->table('dtsen_berita_acara')
+            ->where('kode_desa', (string) ($session->get('kode_desa') ?? ''))
+            ->orderBy('tahun_data', 'DESC')
+            ->orderBy('bulan_data', 'DESC')
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+
         // dd($bansos);
 
         // 🔹 Parsing wilayah_tugas → multi RW–RT (FINAL)
@@ -99,6 +107,7 @@ class UsulanBansos extends Controller
             'title'           => 'Usulan Bansos',
             'namaApp'         => nameApp(),
             'bansos'          => $bansos,
+            'riwayat_ba'      => $riwayatBa,
             'user_login'      => $userData,
             'wilayah_aktif'   => $wilayahAktif, // ✅ GANTI INI
             'statusRole'      => $this->GenModel->getStatusRole(),
@@ -1103,21 +1112,49 @@ class UsulanBansos extends Controller
     public function cetakBa()
     {
         $post = $this->request->getPost();
-        $bulan = str_pad($post['bulan_data'], 2, '0', STR_PAD_LEFT);
-        $tahun = $post['tahun_data'];
         $kodeDesa = session()->get('kode_desa');
         $db = \Config\Database::connect();
-        $nomorSurat = trim($post['nomor_surat'] ?? '');
-        $baIdentity = [
-            'nomor_surat' => $nomorSurat,
-            'bulan_data'  => $bulan,
-            'tahun_data'  => $tahun,
-            'kode_desa'   => (string) ($kodeDesa ?? ''),
-        ];
-        $baRecord = $db->table('dtsen_berita_acara')
-            ->where($baIdentity)
-            ->get()
-            ->getRowArray();
+        $historicalBaId = filter_var($post['ba_id'] ?? null, FILTER_VALIDATE_INT);
+        $isHistoricalReprint = $historicalBaId !== false && $historicalBaId !== null;
+
+        if ($isHistoricalReprint) {
+            $baRecord = $db->table('dtsen_berita_acara')
+                ->where('id', $historicalBaId)
+                ->where('kode_desa', (string) ($kodeDesa ?? ''))
+                ->get()
+                ->getRowArray();
+
+            if ($baRecord === null) {
+                return redirect()->back()->with('error', 'Riwayat berita acara tidak ditemukan.');
+            }
+
+            $bulan = str_pad($baRecord['bulan_data'], 2, '0', STR_PAD_LEFT);
+            $tahun = $baRecord['tahun_data'];
+            $nomorSurat = $baRecord['nomor_surat'];
+            $post['tanggal_musyawarah'] = $baRecord['tanggal_musyawarah'];
+            $post['tanggal_ttd'] = $baRecord['tanggal_ttd'];
+            $baIdentity = [
+                'nomor_surat' => $nomorSurat,
+                'bulan_data'  => $bulan,
+                'tahun_data'  => $tahun,
+                'kode_desa'   => (string) ($kodeDesa ?? ''),
+            ];
+        } else {
+            $bulan = str_pad($post['bulan_data'], 2, '0', STR_PAD_LEFT);
+            $tahun = $post['tahun_data'];
+            $nomorSurat = trim($post['nomor_surat'] ?? '');
+            $baIdentity = [
+                'nomor_surat' => $nomorSurat,
+                'bulan_data'  => $bulan,
+                'tahun_data'  => $tahun,
+                'kode_desa'   => (string) ($kodeDesa ?? ''),
+            ];
+            $baRecord = $db->table('dtsen_berita_acara')
+                ->where($baIdentity)
+                ->get()
+                ->getRowArray();
+        }
+
         $baId = $baRecord['id'] ?? null;
 
         /* ---------------------------------------------------------
@@ -1169,7 +1206,9 @@ class UsulanBansos extends Controller
             ->join('dtsen_kk k', 'k.id_kk = log.kk_id', 'left')
             ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left');
 
-        if ($baId !== null) {
+        if ($isHistoricalReprint) {
+            $builderPmb->where('log.ba_id', $baId);
+        } elseif ($baId !== null) {
             $builderPmb->groupStart()
                 ->where('log.ba_id', $baId)
                 ->orGroupStart()
@@ -1293,7 +1332,7 @@ class UsulanBansos extends Controller
         $tempFile = tempnam(sys_get_temp_dir(), 'PHPWord');
         $template->saveAs($tempFile);
 
-        if ($baId === null || !empty($logIdsToUpdate)) {
+        if (!$isHistoricalReprint && ($baId === null || !empty($logIdsToUpdate))) {
             $db->transBegin();
 
             try {
