@@ -388,16 +388,26 @@ if (!empty($artikelItem)) {
 
 /* Khusus Mobile (< 768px) */
 @media (max-width: 767.98px) {
-    /* Kompensasi padding bawah halaman agar konten tidak tertutup Tab Bar */
+    /* Reset padding body agar tidak terjadi penumpukan jarak kosong */
     body {
-        padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+        padding-bottom: 0 !important;
     }
     .layout-navbar-fixed .wrapper .content-wrapper,
     .content-wrapper {
-        padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+        padding-bottom: 12px !important;
     }
     .main-footer {
-        margin-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+        margin-bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
+        padding: 10px 15px !important;
+        text-align: center !important;
+        font-size: 0.78rem !important;
+        background: transparent !important;
+        border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+    }
+
+    body.dark-mode .main-footer {
+        color: #94a3b8 !important;
+        border-top-color: rgba(255, 255, 255, 0.06) !important;
     }
 
     /* Kunci scroll saat Bottom Sheet terbuka */
