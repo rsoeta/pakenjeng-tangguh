@@ -360,7 +360,10 @@
                 </a>
 
                 <!-- Salin Link -->
-                <button type="button" class="btn-share btn-share-copy" id="btnCopyLink" title="Salin Tautan Artikel">
+                <button type="button" class="btn-share btn-share-copy" id="btnCopyLink" 
+                    data-title="<?= esc($article['title']); ?>" 
+                    data-url="<?= $currentUrl; ?>" 
+                    title="Salin Judul dan Link Artikel">
                     <i class="fas fa-link" id="copyIcon"></i>
                     <span id="copyText">Salin Link</span>
                 </button>
@@ -374,7 +377,7 @@
     <!-- TOAST NOTIFICATION -->
     <div id="toastCopy" class="toast-copy">
         <i class="fas fa-check-circle" style="color: #10b981;"></i>
-        <span>Tautan artikel berhasil disalin ke clipboard!</span>
+        <span>Judul dan link artikel berhasil disalin ke clipboard!</span>
     </div>
 
     <footer>
@@ -384,19 +387,21 @@
 
     <!-- Copy Link & PWA Script -->
     <script>
-        // Fitur Salin Link
+        // Fitur Salin Link (Menyalin Judul + Newline + URL)
         const btnCopy = document.getElementById('btnCopyLink');
         const toast = document.getElementById('toastCopy');
         let toastTimeout = null;
 
         if (btnCopy) {
             btnCopy.addEventListener('click', async function () {
-                const url = window.location.href;
+                const title = btnCopy.getAttribute('data-title') || document.querySelector('.article-title')?.innerText?.trim() || '';
+                const url = btnCopy.getAttribute('data-url') || window.location.href;
+                const textToCopy = title ? `${title}\n\n${url}` : url;
                 let success = false;
 
                 if (navigator.clipboard && window.isSecureContext) {
                     try {
-                        await navigator.clipboard.writeText(url);
+                        await navigator.clipboard.writeText(textToCopy);
                         success = true;
                     } catch (err) {
                         success = false;
@@ -405,7 +410,7 @@
 
                 if (!success) {
                     const tempInput = document.createElement('textarea');
-                    tempInput.value = url;
+                    tempInput.value = textToCopy;
                     tempInput.style.position = 'fixed';
                     tempInput.style.left = '-9999px';
                     tempInput.style.top = '-9999px';
