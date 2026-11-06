@@ -176,6 +176,29 @@ $(document).ready(function () {
         };
     }
 
+    function renderVerifiedSummary(summary) {
+        const numberFormat = new Intl.NumberFormat('id-ID');
+        const total = Number(summary?.total || 0);
+        $('#summaryVerifiedTotal').text(numberFormat.format(total));
+
+        const programCards = (summary?.programs || []).map((program, index) => `
+            <div class="col-12 col-sm-6 col-xl-3 verified-program-card">
+                <div class="card verified-summary-card verified-summary-program" style="--program-hue: ${(index * 137.508) % 360}">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <span class="summary-icon"><i class="fas fa-hand-holding-heart"></i></span>
+                        <div class="min-w-0">
+                            <div class="summary-label text-truncate" title="${escapeHtml(program.name)}">${escapeHtml(program.name)}</div>
+                            <div class="summary-value">${numberFormat.format(Number(program.count || 0))}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        $('#verifiedSummary').children('.verified-program-card').remove();
+        $('#verifiedSummary').append(programCards);
+    }
+
     // ==========================================
     // 🛡️ FUNGSI BANTUAN: SENSOR DATA SENSITIF (JS)
     // ==========================================
@@ -616,7 +639,10 @@ $(document).ready(function () {
                 data: function (d) {
                     return Object.assign(d, getFilterParams('diverifikasi'));
                 },
-                dataSrc: json => json.data || []
+                dataSrc: function (json) {
+                    renderVerifiedSummary(json.summary || {});
+                    return json.data || [];
+                }
             },
             pageLength: 10,
             responsive: false,

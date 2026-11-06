@@ -185,6 +185,50 @@
         vertical-align: middle !important;
     }
 
+    .verified-summary-card {
+        min-height: 132px;
+        overflow: hidden;
+        border: 0;
+        border-radius: 1rem;
+        color: #fff;
+        box-shadow: 0 0.5rem 1.25rem rgba(31, 45, 61, 0.12);
+    }
+
+    .verified-summary-card .summary-icon {
+        width: 44px;
+        height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.85rem;
+        background: rgba(255, 255, 255, 0.2);
+        font-size: 1.15rem;
+    }
+
+    .verified-summary-card .summary-value {
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .verified-summary-card .summary-label {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .verified-summary-total {
+        background: linear-gradient(135deg, #146c43, #20a36a);
+    }
+
+    .verified-summary-program {
+        background: linear-gradient(
+            135deg,
+            hsl(var(--program-hue) 48% 30%),
+            hsl(var(--program-hue) 58% 48%)
+        );
+    }
+
     @media (max-width: 767.98px) {
 
         /* Sembunyikan header tabel */
@@ -412,6 +456,27 @@
 
                     <!-- ✅ Diverifikasi -->
                     <div class="tab-pane fade" id="tabVerified" role="tabpanel">
+                        <div class="mb-3">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                                <div>
+                                    <h6 class="mb-0 fw-bold text-dark">Rekap Usulan Terverifikasi</h6>
+                                    <small class="text-muted">Ringkasan mengikuti periode dan filter tabel.</small>
+                                </div>
+                            </div>
+                            <div id="verifiedSummary" class="row g-3" aria-live="polite">
+                                <div class="col-12 col-sm-6 col-xl-3">
+                                    <div class="card verified-summary-card verified-summary-total">
+                                        <div class="card-body d-flex align-items-center gap-3">
+                                            <span class="summary-icon"><i class="fas fa-clipboard-check"></i></span>
+                                            <div>
+                                                <div class="summary-label">Total Usulan</div>
+                                                <div class="summary-value" id="summaryVerifiedTotal">0</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="d-flex justify-content-end mb-2">
                             <button id="btnReloadVerified" class="btn btn-outline-success btn-sm">
                                 <i class="fas fa-sync-alt"></i> Reload

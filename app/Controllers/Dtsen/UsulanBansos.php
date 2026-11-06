@@ -557,7 +557,6 @@ class UsulanBansos extends Controller
     {
         $session = session();
         $roleId = (int) $session->get('role_id');
-        $nik = $session->get('nik');
 
         $bulan  = $this->request->getVar('bulan');
         $tahun  = $this->request->getVar('tahun');
@@ -567,15 +566,16 @@ class UsulanBansos extends Controller
         $createdBy  = $this->request->getVar('created_by');
         $rw         = $this->request->getVar('rw');
         $rt         = $this->request->getVar('rt');
+        $userInfo   = $this->AuthModel->getUserId();
+        $userInfo   = is_array($userInfo) ? $userInfo : [];
 
-        // 🔧 INIT BUILDER DULU (WAJIB DI ATAS)
-        $builder = $this->DtsenUsulanBansosModel
+        $builder = $this->db->table('dtsen_usulan_bansos')
             ->select("
             dtsen_usulan_bansos.*,
             dtsen_kk.no_kk, 
             dtsen_kk.alamat,      
-            dtsen_rt.rt,          
-            dtsen_rt.rw,          
+            rt.rt,
+            rt.rw,
             dtsen_art.nama,
             dtsen_art.tanggal_lahir,
             dbj.dbj_nama_bansos,
@@ -585,7 +585,7 @@ class UsulanBansos extends Controller
         ")
             // 🚀 BUG FIX: Filter soft-delete langsung di dalam JOIN
             ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_usulan_bansos.id_kk AND dtsen_kk.deleted_at IS NULL', 'left')
-            ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
+            ->join('dtsen_rt rt', 'rt.id_rt = dtsen_kk.id_rt', 'left')
             ->join('dtsen_art', 'dtsen_art.nik = dtsen_usulan_bansos.nik AND dtsen_art.deleted_at IS NULL', 'left')
             ->join('dtks_bansos_jenis dbj', 'dbj.dbj_id = dtsen_usulan_bansos.program_bansos', 'left')
             ->join('dtks_users u1', 'u1.nik = dtsen_usulan_bansos.created_by', 'left')
@@ -621,32 +621,55 @@ class UsulanBansos extends Controller
             $builder->where('dtsen_usulan_bansos.created_by', $createdBy);
         }
 
-        if (!empty($rw)) {
-            $builder->where('dtsen_rt.rw', $rw);
-        }
-
-        if (!empty($rt)) {
-            $builder->where('dtsen_rt.rt', $rt);
-        }
-
-        // 👉 ROLE FILTER
-        if ($roleId > 4) {
-            log_message('info', "[getDataBulanIni] role_id={$roleId} tidak diizinkan melihat data.");
-            return $this->response->setJSON(['data' => []]);
-        } elseif ($roleId === 4) {
-            $builder->where('dtsen_usulan_bansos.created_by', $nik);
-        }
+        $this->DtsenUsulanBansosModel->filterUsulanByWilayah(
+            $builder,
+            $this->getUsulanWilayahFilter($userInfo, $roleId, $rw, $rt),
+            $roleId
+        );
 
         $builder->orderBy('dtsen_usulan_bansos.created_at', 'ASC');
 
         try {
-            $data = $builder->findAll();
+            $data = $builder->get()->getResultArray();
+            $programCounts = [];
+            $uniqueRecipients = [];
+            foreach ($data as $row) {
+                $programName = trim((string) ($row['dbj_nama_bansos'] ?? '')) ?: 'Program tidak diketahui';
+                $programCounts[$programName] = ($programCounts[$programName] ?? 0) + 1;
+                $nikPenerima = trim((string) ($row['nik'] ?? ''));
+                if ($nikPenerima !== '') {
+                    $uniqueRecipients[$nikPenerima] = true;
+                }
+            }
+            ksort($programCounts, SORT_NATURAL | SORT_FLAG_CASE);
+            $summary = [
+                'total' => count($data),
+                'unique_recipients' => count($uniqueRecipients),
+                'programs' => array_map(
+                    static fn ($name, $count) => ['name' => $name, 'count' => $count],
+                    array_keys($programCounts),
+                    array_values($programCounts)
+                ),
+            ];
             log_message('info', "✅ getDataBulanIni() memuat " . count($data) . " data untuk role={$roleId}, status={$status}, bulan={$bulan}, tahun={$tahun}");
-            return $this->response->setJSON(['data' => $data]);
+            return $this->response->setJSON(['data' => $data, 'summary' => $summary]);
         } catch (\Throwable $e) {
             log_message('error', "❌ getDataBulanIni() error: " . $e->getMessage());
             return $this->response->setJSON(['data' => [], 'error' => $e->getMessage()]);
         }
+    }
+
+    private function getUsulanWilayahFilter(array $userInfo, int $roleId, $rw = null, $rt = null): array
+    {
+        return [
+            'kode_desa' => $roleId >= 3
+                ? ($userInfo['kode_desa'] ?? session()->get('kode_desa'))
+                : null,
+            'rw' => $rw,
+            'rt' => $rt,
+            'wilayah_tugas' => $userInfo['wilayah_tugas'] ?? session()->get('wilayah_tugas'),
+            'level' => $userInfo['level'] ?? session()->get('level'),
+        ];
     }
 
     /**
@@ -823,7 +846,10 @@ class UsulanBansos extends Controller
 
             $bulan     = date('m');
             $tahun     = date('Y');
-            $kodeDesa  = session()->get('kode_desa');
+            $roleId    = (int) session()->get('role_id');
+            $userInfo  = $this->AuthModel->getUserId();
+            $userInfo  = is_array($userInfo) ? $userInfo : [];
+            $wilayahFilter = $this->getUsulanWilayahFilter($userInfo, $roleId);
 
             /* ==============================
            1️⃣ PROGRAM BANSOS
@@ -838,45 +864,43 @@ class UsulanBansos extends Controller
             /* ==============================
            2️⃣ PENGUSUL (CREATED BY)
         ============================== */
-            $createdBy = $this->db->table('dtsen_usulan_bansos')
+            $createdByBuilder = $this->db->table('dtsen_usulan_bansos')
                 ->select('dtsen_usulan_bansos.created_by, dtks_users.fullname')
                 ->join('dtks_users', 'dtks_users.nik = dtsen_usulan_bansos.created_by', 'left')
                 ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_usulan_bansos.id_kk', 'left')
-                ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
+                ->join('dtsen_rt rt', 'rt.id_rt = dtsen_kk.id_rt', 'left')
                 ->where('MONTH(dtsen_usulan_bansos.created_at)', $bulan)
                 ->where('YEAR(dtsen_usulan_bansos.created_at)', $tahun)
-                ->where('dtsen_rt.kode_desa', $kodeDesa)
                 ->where('dtsen_usulan_bansos.created_by IS NOT NULL')
                 ->groupBy('dtsen_usulan_bansos.created_by')
-                ->orderBy('dtks_users.fullname', 'ASC')
-                ->get()
+                ->orderBy('dtks_users.fullname', 'ASC');
+            $this->DtsenUsulanBansosModel->filterUsulanByWilayah($createdByBuilder, $wilayahFilter, $roleId);
+            $createdBy = $createdByBuilder->get()
                 ->getResult();
 
 
             /* ==============================
            3️⃣ RW (UNIQUE, by desa)
         ============================== */
-            $rw = $this->db->table('dtsen_rt')
-                ->select('rw')
-                ->where('kode_desa', $kodeDesa)
-                ->where('rw IS NOT NULL')
-                ->groupBy('rw')
-                ->orderBy('rw', 'ASC')
-                ->get()
-                ->getResult();
+            $rwBuilder = $this->db->table('dtsen_rt rt')
+                ->select('rt.rw')
+                ->where('rt.rw IS NOT NULL')
+                ->groupBy('rt.rw')
+                ->orderBy('rt.rw', 'ASC');
+            $this->DtsenUsulanBansosModel->filterUsulanByWilayah($rwBuilder, $wilayahFilter, $roleId);
+            $rw = $rwBuilder->get()->getResult();
 
 
             /* ==============================
            4️⃣ RT (UNIQUE, by desa)
         ============================== */
-            $rt = $this->db->table('dtsen_rt')
-                ->select('rt')
-                ->where('kode_desa', $kodeDesa)
-                ->where('rt IS NOT NULL')
-                ->groupBy('rt')
-                ->orderBy('rt', 'ASC')
-                ->get()
-                ->getResult();
+            $rtBuilder = $this->db->table('dtsen_rt rt')
+                ->select('rt.rt')
+                ->where('rt.rt IS NOT NULL')
+                ->groupBy('rt.rt')
+                ->orderBy('rt.rt', 'ASC');
+            $this->DtsenUsulanBansosModel->filterUsulanByWilayah($rtBuilder, $wilayahFilter, $roleId);
+            $rt = $rtBuilder->get()->getResult();
 
 
             return $this->response->setJSON([
@@ -898,10 +922,20 @@ class UsulanBansos extends Controller
     public function getRTByRW($rw)
     {
         try {
-
-            $kodeDesa = session()->get('kode_desa');
-
-            $rtList = $this->GenModel->getRTByDesaRW($kodeDesa, $rw);
+            $roleId = (int) session()->get('role_id');
+            $userInfo = $this->AuthModel->getUserId();
+            $userInfo = is_array($userInfo) ? $userInfo : [];
+            $builder = $this->db->table('dtsen_rt rt')
+                ->select('rt.rt')
+                ->where('rt.rt IS NOT NULL')
+                ->groupBy('rt.rt')
+                ->orderBy('rt.rt', 'ASC');
+            $this->DtsenUsulanBansosModel->filterUsulanByWilayah(
+                $builder,
+                $this->getUsulanWilayahFilter($userInfo, $roleId, $rw),
+                $roleId
+            );
+            $rtList = $builder->get()->getResult();
 
             return $this->response->setJSON([
                 'rt' => $rtList

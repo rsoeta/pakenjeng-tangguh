@@ -24,6 +24,11 @@ class DtsenUsulanBansosModel extends Model
     ];
     protected $useTimestamps    = false;
 
+    public function filterUsulanByWilayah(\CodeIgniter\Database\BaseBuilder $builder, array $filter, int $userRole): \CodeIgniter\Database\BaseBuilder
+    {
+        return $this->applyWilayahFilter($builder, $filter, $userRole);
+    }
+
     /**
      * Hitung total usulan bansos bulan ini
      * sesuai filter wilayah dan role pengguna.
