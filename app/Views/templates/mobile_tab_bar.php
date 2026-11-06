@@ -388,26 +388,19 @@ if (!empty($artikelItem)) {
 
 /* Khusus Mobile (< 768px) */
 @media (max-width: 767.98px) {
-    /* Reset padding body agar tidak terjadi penumpukan jarak kosong */
+    /* Sembunyikan footer di mode mobile agar bersih dan tidak bertumpuk dengan Tab Bar */
+    .main-footer {
+        display: none !important;
+    }
+
     body {
         padding-bottom: 0 !important;
     }
+
+    /* Berikan ruang bernapas di bawah konten kartu/tabel agar tidak tertutup Tab Bar */
     .layout-navbar-fixed .wrapper .content-wrapper,
     .content-wrapper {
-        padding-bottom: 12px !important;
-    }
-    .main-footer {
-        margin-bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
-        padding: 10px 15px !important;
-        text-align: center !important;
-        font-size: 0.78rem !important;
-        background: transparent !important;
-        border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
-    }
-
-    body.dark-mode .main-footer {
-        color: #94a3b8 !important;
-        border-top-color: rgba(255, 255, 255, 0.06) !important;
+        padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
     }
 
     /* Kunci scroll saat Bottom Sheet terbuka */
