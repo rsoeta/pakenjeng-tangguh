@@ -673,7 +673,7 @@ class UsulanBansos extends Controller
                 'jiwa' => count($uniqueRecipients),
                 'kk' => count($uniqueHouseholds),
                 'programs' => array_map(
-                    static fn ($name, $counts) => [
+                    static fn($name, $counts) => [
                         'name' => $name,
                         'count' => $counts['count'],
                         'jiwa' => count($counts['jiwa']),
@@ -1109,7 +1109,6 @@ class UsulanBansos extends Controller
     // =========================================================================
     // 🖨️ FITUR CETAK BERITA ACARA (PHPWORD)
     // =========================================================================
-
     public function cetakBa()
     {
         $post = $this->request->getPost();
@@ -1163,13 +1162,17 @@ class UsulanBansos extends Controller
            --------------------------------------------------------- */
         $builderBansos = $db->table('dtsen_usulan_bansos u')
             ->select('u.program_bansos, dbj.dbj_nama_bansos, a.nama, a.nik, k.no_kk, k.alamat, r.rt, r.rw')
-            ->join('dtsen_art a', 'a.nik = u.nik AND a.deleted_at IS NULL', 'inner')
-            ->join('dtsen_kk k', 'k.id_kk = u.id_kk', 'left')
-            ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
+            ->join('dtsen_art a', 'a.nik = u.nik AND a.id_kk = u.id_kk AND a.deleted_at IS NULL', 'inner')
+            ->join('dtsen_kk k', 'k.id_kk = u.id_kk AND k.deleted_at IS NULL', 'inner')
+            ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'inner')
             ->join('dtks_bansos_jenis dbj', 'dbj.dbj_id = u.program_bansos', 'left')
             ->where('u.status', 'diverifikasi')
+            ->where('u.nik IS NOT NULL', null, false)
+            ->where('u.nik !=', '')
             ->where('MONTH(u.created_at)', $bulan)
-            ->where('YEAR(u.created_at)', $tahun);
+            ->where('YEAR(u.created_at)', $tahun)
+            ->orderBy('a.id_art', 'DESC')
+            ->orderBy('u.id', 'ASC');
 
         if (!empty($kodeDesa)) {
             $builderBansos->where('r.kode_desa', $kodeDesa);
@@ -1180,21 +1183,42 @@ class UsulanBansos extends Controller
         $dataPkh = [];
         $dataSmb = [];
         $dataPbi = [];
+        $seenNiks = [
+            'pkh' => [],
+            'sembako' => [],
+            'pbi' => [],
+        ];
         foreach ($dataBansos as $row) {
             $prog = strtoupper(trim($row['dbj_nama_bansos'] ?? ''));
+            if (strpos($prog, 'PKH') !== false) {
+                $kategori = 'pkh';
+            } elseif (strpos($prog, 'SEMBAKO') !== false || strpos($prog, 'BPNT') !== false) {
+                $kategori = 'sembako';
+            } elseif (strpos($prog, 'PBI') !== false) {
+                $kategori = 'pbi';
+            } else {
+                continue;
+            }
+
+            $nik = preg_replace('/\D+/', '', trim((string) ($row['nik'] ?? '')));
+            if ($nik === '' || isset($seenNiks[$kategori][$nik])) {
+                continue;
+            }
+            $seenNiks[$kategori][$nik] = true;
+
             $alamatLengkap = ($row['alamat'] ?? '-') . ' RT ' . str_pad($row['rt'] ?? '0', 3, '0', STR_PAD_LEFT) . ' RW ' . str_pad($row['rw'] ?? '0', 3, '0', STR_PAD_LEFT);
             $item = [
                 'nama'   => htmlspecialchars(strtoupper($row['nama'] ?? '-')),
-                'nik'    => htmlspecialchars($row['nik'] ?? '-'),
+                'nik'    => htmlspecialchars($nik),
                 'no_kk'  => htmlspecialchars($row['no_kk'] ?? '-'),
                 'alamat' => htmlspecialchars($alamatLengkap)
             ];
 
-            if (strpos($prog, 'PKH') !== false) {
+            if ($kategori === 'pkh') {
                 $dataPkh[] = $item;
-            } elseif (strpos($prog, 'SEMBAKO') !== false || strpos($prog, 'BPNT') !== false) {
+            } elseif ($kategori === 'sembako') {
                 $dataSmb[] = $item;
-            } elseif (strpos($prog, 'PBI') !== false) {
+            } elseif ($kategori === 'pbi') {
                 $dataPbi[] = $item;
             }
         }
