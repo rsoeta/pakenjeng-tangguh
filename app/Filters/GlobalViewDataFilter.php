@@ -14,9 +14,22 @@ class GlobalViewDataFilter implements FilterInterface
         $genModel = new GenModel();
         $statusRole = $genModel->getStatusRole();
 
+        // Cari nama role berdasarkan session role_id
+        $roleId = session()->get('role_id');
+        $roleName = 'Guest';
+        if ($roleId) {
+            foreach ($statusRole as $r) {
+                if ((int)$r['id_role'] === (int)$roleId) {
+                    $roleName = $r['nm_role'];
+                    break;
+                }
+            }
+        }
+
         // 🧱 Data global yang ingin disebarkan ke semua view
         $globals = [
             'statusRole' => $statusRole,
+            'roleName'   => $roleName,
             'user_login' => session()->get(),
             'namaApp'    => 'SINDEN-DTSEN'
         ];

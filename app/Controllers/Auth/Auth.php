@@ -473,6 +473,11 @@ class Auth extends BaseController
 
     private function setUserSession($user)
     {
+        // 🚀 Ambil nm_role via query tabel tb_roles
+        $db = \Config\Database::connect();
+        $roleRow = $db->table('tb_roles')->select('nm_role')->where('id_role', $user['role_id'])->get()->getRowArray();
+        $nmRole = $roleRow['nm_role'] ?? 'Pengguna';
+
         // $previousPage = previous_url();
         $data = [
             'id'              => $user['id'],
@@ -482,6 +487,7 @@ class Auth extends BaseController
             'level'           => $user['level'],
             'nope'            => $user['nope'],
             'role_id'         => $user['role_id'],
+            'nm_role'         => $nmRole,
             'status'          => $user['status'],
             'kode_desa'       => $user['kode_desa'] ?? '32.05.33.2006', // Opsional: Beri default jika null
             'kode_kec'        => $user['kode_kec'] ?? '32.05.33',       // Opsional: Beri default jika null

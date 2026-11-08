@@ -1,5 +1,6 @@
 <?php
 $userRole = session()->get('role_id') ?? 99;
+$userRoleName = function_exists('user_role_name') ? user_role_name() : ($roleName ?? (session()->get('nm_role') ?? 'Pengguna'));
 $userImage = session()->get('user_image') ?? 'default.png';
 $userName = session()->get('fullname') ?? (session()->get('username') ?? 'Pengguna SINDEN');
 $avatarUrl = function_exists('Foto_Profil') ? Foto_Profil($userImage, 'profil') : base_url('assets/dist/img/' . $userImage);
@@ -309,7 +310,7 @@ if (!empty($artikelItem)) {
             <div class="mobile-user-info">
                 <h6 class="mb-0 fw-bold text-truncate"><?= esc(ucwords(strtolower($userName))); ?></h6>
                 <span class="badge bg-sinden-subtle text-sinden mt-1">
-                    Role ID: <?= esc($userRole); ?>
+                    <?= esc($userRoleName); ?>
                 </span>
             </div>
             <a href="<?= base_url('profil_user'); ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3">

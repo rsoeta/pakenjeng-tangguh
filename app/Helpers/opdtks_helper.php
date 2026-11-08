@@ -466,4 +466,67 @@ function nope($nohp)
     }
     return $hp;
 }
+
+/**
+ * Mendapatkan nama role pengguna (nm_role) dengan join tabel dtks_users dan tb_roles.
+ * Aturan backend terpusat untuk menampilkan role pengguna.
+ */
+function user_role_name($userId = null, $roleId = null): string
+{
+    static $roleCache = [];
+
+    // Prioritas 1: Jika sudah tersimpan di session
+    if ($userId === null && $roleId === null && ($sessionRole = session()->get('nm_role'))) {
+        return $sessionRole;
+    }
+
+    $userId = $userId ?? session()->get('id');
+    $roleId = $roleId ?? session()->get('role_id');
+
+    if (!$userId && !$roleId) {
+        return 'Guest';
+    }
+
+    $cacheKey = ($userId ? 'u_' . $userId : '') . ($roleId ? '_r_' . $roleId : '');
+    if (isset($roleCache[$cacheKey])) {
+        return $roleCache[$cacheKey];
+    }
+
+    try {
+        $db = \Config\Database::connect();
+
+        // 1. Join dtks_users dengan tb_roles berdasarkan user id
+        if ($userId) {
+            $userWithRole = $db->table('dtks_users')
+                ->select('tb_roles.nm_role')
+                ->join('tb_roles', 'tb_roles.id_role = dtks_users.role_id', 'left')
+                ->where('dtks_users.id', $userId)
+                ->get()
+                ->getRowArray();
+
+            if (!empty($userWithRole['nm_role'])) {
+                $roleCache[$cacheKey] = $userWithRole['nm_role'];
+                return $userWithRole['nm_role'];
+            }
+        }
+
+        // 2. Fallback pencarian langsung ke tb_roles via role_id
+        if ($roleId) {
+            $roleRow = $db->table('tb_roles')
+                ->select('nm_role')
+                ->where('id_role', (int)$roleId)
+                ->get()
+                ->getRowArray();
+
+            if (!empty($roleRow['nm_role'])) {
+                $roleCache[$cacheKey] = $roleRow['nm_role'];
+                return $roleRow['nm_role'];
+            }
+        }
+    } catch (\Throwable $e) {
+        log_message('error', 'user_role_name() error: ' . $e->getMessage());
+    }
+
+    return 'Pengguna';
+}
 // hp($nohp);
