@@ -746,6 +746,7 @@ $routes->group('perlinsos', ['filter' => ['authfilterdtks', 'globalview', 'menuf
 	$routes->post('verify-data/(:num)', 'Dtsen\Perlinsos::verifyData/$1');
 	$routes->get('search-art', 'Dtsen\Perlinsos::searchArt'); // Pencarian Select2
 	$routes->get('chart-capaian', 'Dtsen\Perlinsos::getChartCapaian'); // 🚀 API untuk Grafik Pentri
+	$routes->get('summary-capaian', 'Dtsen\Perlinsos::getSummaryCapaian'); // 🚀 API untuk Rekapitulasi Realtime Diagram
 	$routes->get('filter-options', 'Dtsen\Perlinsos::getFilterOptions'); //dan 
 	$routes->get('rt-by-rw/(:any)', 'Dtsen\Perlinsos::getRTByRW/$1');
 

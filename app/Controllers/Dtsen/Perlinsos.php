@@ -315,6 +315,194 @@ class Perlinsos extends Controller
     }
 
     // ========================================================
+    // 🚀 3B. REKAPITULASI CAPAIAN SECARA REALTIME (DIAGRAM)
+    // ========================================================
+    public function getSummaryCapaian()
+    {
+        $kodeDesa = session()->get('kode_desa');
+
+        // 1. Ambil Pentri aktif (Role 4) untuk menghitung target berbasis wilayah tugas
+        $users = $this->db->table('dtks_users')
+            ->select('nik, fullname, wilayah_tugas')
+            ->where('role_id', 4)
+            ->where('status', 1)
+            ->get()->getResultArray();
+
+        $totalTargetPentri = 0;
+        $totalCapaianPentri = 0;
+        $totalTerverifikasiPentri = 0;
+        $totalBelumVerifikasiPentri = 0;
+
+        foreach ($users as $u) {
+            $nikPetugas = $u['nik'];
+
+            $capaian = $this->db->table('dtsen_perlinsos')->where('created_by', $nikPetugas)->countAllResults();
+            $terverifikasi = $this->db->table('dtsen_perlinsos')
+                ->where('created_by', $nikPetugas)
+                ->where('status', 'tersinkron')
+                ->countAllResults();
+            $belumVerifikasi = max(0, $capaian - $terverifikasi);
+
+            $target = 0;
+            $wilayahTugas = trim($u['wilayah_tugas'] ?? '');
+
+            if (!empty($wilayahTugas)) {
+                $b_kk = $this->db->table('dtsen_kk kk')
+                    ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
+                    ->where('kk.deleted_at IS NULL')
+                    ->where('rt.kode_desa', $kodeDesa);
+
+                $wilayahPairs = [];
+                foreach (explode('|', $wilayahTugas) as $block) {
+                    [$rw, $rtList] = array_pad(explode(':', $block), 2, '');
+                    foreach (explode(',', $rtList) as $rt) {
+                        if (trim($rw) !== '' && trim($rt) !== '') {
+                            $wilayahPairs[] = ['rw' => trim($rw), 'rt' => trim($rt)];
+                        }
+                    }
+                }
+
+                if (!empty($wilayahPairs)) {
+                    $b_kk->groupStart();
+                    foreach ($wilayahPairs as $pair) {
+                        $b_kk->orGroupStart()
+                            ->where('rt.rw', $pair['rw'])
+                            ->where('rt.rt', $pair['rt'])
+                            ->groupEnd();
+                    }
+                    $b_kk->groupEnd();
+                    $target = $b_kk->countAllResults();
+                }
+            }
+
+            $totalTargetPentri += $target;
+            $totalCapaianPentri += $capaian;
+            $totalTerverifikasiPentri += $terverifikasi;
+            $totalBelumVerifikasiPentri += $belumVerifikasi;
+        }
+
+        // Tentukan Total Target & Capaian (Gunakan data Pentri jika ada, fallback ke total desa)
+        if ($totalTargetPentri > 0) {
+            $totalTarget = $totalTargetPentri;
+            $totalTerverifikasi = $totalTerverifikasiPentri;
+            $totalBelumVerifikasi = $totalBelumVerifikasiPentri;
+            $totalCapaian = $totalBelumVerifikasi + $totalTerverifikasi;
+            $totalBelumTercapai = max(0, $totalTarget - $totalCapaian);
+        } else {
+            $totalTarget = $this->db->table('dtsen_kk kk')
+                ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
+                ->where('kk.deleted_at IS NULL')
+                ->where('rt.kode_desa', $kodeDesa)
+                ->countAllResults();
+
+            $totalTerverifikasi = $this->db->table('dtsen_perlinsos p')
+                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'left')
+                ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
+                ->where('r.kode_desa', $kodeDesa)
+                ->where('p.status', 'tersinkron')
+                ->countAllResults();
+
+            $totalCapaianRaw = $this->db->table('dtsen_perlinsos p')
+                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'left')
+                ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
+                ->where('r.kode_desa', $kodeDesa)
+                ->countAllResults();
+
+            $totalBelumVerifikasi = max(0, $totalCapaianRaw - $totalTerverifikasi);
+            $totalCapaian = $totalBelumVerifikasi + $totalTerverifikasi;
+            $totalBelumTercapai = max(0, $totalTarget - $totalCapaian);
+        }
+
+        $persenCapaian = ($totalTarget > 0) ? round(($totalCapaian / $totalTarget) * 100, 1) : 0;
+
+        // 2. Breakdown per RW (untuk Diagram Komparasi Wilayah)
+        $rwList = $this->db->table('dtsen_rt')
+            ->select('rw')
+            ->where('kode_desa', $kodeDesa)
+            ->where('rw IS NOT NULL')
+            ->groupBy('rw')
+            ->orderBy('rw', 'ASC')
+            ->get()->getResultArray();
+
+        $rwCategories = [];
+        $rwSeriesBelumTercapai = [];
+        $rwSeriesBelumVerifikasi = [];
+        $rwSeriesTerverifikasi = [];
+        $rwDetails = [];
+
+        foreach ($rwList as $rowRw) {
+            $rwVal = $rowRw['rw'];
+            $rwLabel = 'RW ' . $rwVal;
+
+            $targetRw = $this->db->table('dtsen_kk kk')
+                ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
+                ->where('kk.deleted_at IS NULL')
+                ->where('rt.kode_desa', $kodeDesa)
+                ->where('rt.rw', $rwVal)
+                ->countAllResults();
+
+            $terverifikasiRw = $this->db->table('dtsen_perlinsos p')
+                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'left')
+                ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
+                ->where('r.kode_desa', $kodeDesa)
+                ->where('r.rw', $rwVal)
+                ->where('p.status', 'tersinkron')
+                ->countAllResults();
+
+            $capaianRw = $this->db->table('dtsen_perlinsos p')
+                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'left')
+                ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
+                ->where('r.kode_desa', $kodeDesa)
+                ->where('r.rw', $rwVal)
+                ->countAllResults();
+
+            $belumVerifikasiRw = max(0, $capaianRw - $terverifikasiRw);
+            $belumTercapaiRw = max(0, $targetRw - $capaianRw);
+            $persenRw = ($targetRw > 0) ? round(($capaianRw / $targetRw) * 100, 1) : 0;
+
+            if ($targetRw > 0 || $capaianRw > 0) {
+                $rwCategories[] = $rwLabel;
+                $rwSeriesBelumTercapai[] = $belumTercapaiRw;
+                $rwSeriesBelumVerifikasi[] = $belumVerifikasiRw;
+                $rwSeriesTerverifikasi[] = $terverifikasiRw;
+
+                $rwDetails[] = [
+                    'rw'               => $rwLabel,
+                    'target'           => $targetRw,
+                    'capaian'          => $capaianRw,
+                    'terverifikasi'    => $terverifikasiRw,
+                    'belum_verifikasi' => $belumVerifikasiRw,
+                    'belum_tercapai'   => $belumTercapaiRw,
+                    'persen'           => $persenRw
+                ];
+            }
+        }
+
+        return $this->response->setJSON([
+            'total_target'           => $totalTarget,
+            'total_belum_tercapai'   => $totalBelumTercapai,
+            'total_belum_verifikasi' => $totalBelumVerifikasi,
+            'total_terverifikasi'    => $totalTerverifikasi,
+            'total_capaian'          => $totalCapaian,
+            'persen_capaian'         => $persenCapaian,
+            'donut'                  => [
+                'series' => [$totalBelumTercapai, $totalBelumVerifikasi, $totalTerverifikasi],
+                'labels' => ['Belum Tercapai', 'Belum Verifikasi', 'Terverifikasi']
+            ],
+            'rw_chart'               => [
+                'categories' => $rwCategories,
+                'series'     => [
+                    ['name' => 'Belum Tercapai', 'data' => $rwSeriesBelumTercapai],
+                    ['name' => 'Belum Verifikasi', 'data' => $rwSeriesBelumVerifikasi],
+                    ['name' => 'Terverifikasi', 'data' => $rwSeriesTerverifikasi],
+                ]
+            ],
+            'rw_details'             => $rwDetails,
+            'timestamp'              => date('H:i:s')
+        ]);
+    }
+
+    // ========================================================
     // 🚀 FILTER OPSI RT (ANTI GANDA)
     // ========================================================
     public function getRTByRW($rw)
