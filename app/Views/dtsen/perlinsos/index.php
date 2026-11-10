@@ -70,6 +70,23 @@
             box-shadow: 0 0 0 0 rgba(25, 135, 84, 0);
         }
     }
+
+    /* Soft Background Accents untuk KPI Cards */
+    .bg-soft-primary {
+        background-color: rgba(13, 110, 253, 0.12) !important;
+    }
+    .bg-soft-success {
+        background-color: rgba(25, 135, 84, 0.12) !important;
+    }
+    .bg-soft-warning {
+        background-color: rgba(255, 193, 7, 0.18) !important;
+    }
+    .bg-soft-danger {
+        background-color: rgba(220, 53, 69, 0.12) !important;
+    }
+    .bg-soft-secondary {
+        background-color: rgba(108, 117, 125, 0.12) !important;
+    }
 </style>
 
 <?php
@@ -292,7 +309,7 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                         <!-- HEADER BAR & STATUS REALTIME -->
                         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 p-3 bg-white rounded-3 shadow-sm border">
                             <div class="d-flex align-items-center gap-2 mb-2 mb-md-0">
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2 d-flex align-items-center gap-2">
+                                <span class="badge bg-soft-success text-success border border-success rounded-pill px-3 py-2 d-flex align-items-center gap-2">
                                     <span class="pulse-dot"></span>
                                     <span class="fw-bold">Sinkronisasi Realtime</span>
                                 </span>
@@ -309,11 +326,11 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                         <div class="row g-3 mb-4">
                             <!-- 1. TOTAL TARGET -->
                             <div class="col-xl col-md-4 col-sm-6">
-                                <div class="card card-custom h-100 border-start border-4 border-secondary shadow-sm">
+                                <div class="card card-custom h-100 border-start border-4 border-secondary shadow-sm bg-white">
                                     <div class="card-body p-3">
                                         <div class="d-flex align-items-center justify-content-between mb-1">
                                             <span class="text-muted small fw-bold text-uppercase">Total Target</span>
-                                            <div class="rounded-circle bg-secondary bg-opacity-10 p-2 text-secondary">
+                                            <div class="rounded-circle bg-soft-secondary p-2 text-secondary d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
                                                 <i class="fas fa-bullseye fa-sm"></i>
                                             </div>
                                         </div>
@@ -325,11 +342,11 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
 
                             <!-- 2. TOTAL BELUM TERCAPAI -->
                             <div class="col-xl col-md-4 col-sm-6">
-                                <div class="card card-custom h-100 border-start border-4 border-danger shadow-sm">
+                                <div class="card card-custom h-100 border-start border-4 border-danger shadow-sm bg-white">
                                     <div class="card-body p-3">
                                         <div class="d-flex align-items-center justify-content-between mb-1">
                                             <span class="text-danger small fw-bold text-uppercase">Belum Tercapai</span>
-                                            <div class="rounded-circle bg-danger bg-opacity-10 p-2 text-danger">
+                                            <div class="rounded-circle bg-soft-danger p-2 text-danger d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
                                                 <i class="fas fa-times-circle fa-sm"></i>
                                             </div>
                                         </div>
@@ -341,27 +358,27 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
 
                             <!-- 3. TOTAL CAPAIAN -->
                             <div class="col-xl col-md-4 col-sm-6">
-                                <div class="card card-custom h-100 border-start border-4 border-primary shadow-sm bg-primary bg-opacity-10">
+                                <div class="card card-custom h-100 border-start border-4 border-primary shadow-sm bg-white">
                                     <div class="card-body p-3">
                                         <div class="d-flex align-items-center justify-content-between mb-1">
                                             <span class="text-primary small fw-bold text-uppercase">Total Capaian</span>
-                                            <div class="rounded-circle bg-primary bg-opacity-25 p-2 text-primary">
+                                            <div class="rounded-circle bg-soft-primary p-2 text-primary d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
                                                 <i class="fas fa-chart-line fa-sm"></i>
                                             </div>
                                         </div>
                                         <h3 class="fw-bold text-primary mb-0" id="cardTotalCapaian">0</h3>
-                                        <small class="text-primary fw-bold" id="cardPersenCapaian">0% tercapai</small>
+                                        <small class="text-muted fw-bold" id="cardPersenCapaian">0% tercapai</small>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- 4. TOTAL BELUM VERIFIKASI -->
                             <div class="col-xl col-md-6 col-sm-6">
-                                <div class="card card-custom h-100 border-start border-4 border-warning shadow-sm">
+                                <div class="card card-custom h-100 border-start border-4 border-warning shadow-sm bg-white">
                                     <div class="card-body p-3">
                                         <div class="d-flex align-items-center justify-content-between mb-1">
                                             <span class="text-warning small fw-bold text-uppercase">Belum Verifikasi</span>
-                                            <div class="rounded-circle bg-warning bg-opacity-10 p-2 text-warning">
+                                            <div class="rounded-circle bg-soft-warning p-2 text-warning d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
                                                 <i class="fas fa-clock fa-sm"></i>
                                             </div>
                                         </div>
@@ -373,11 +390,11 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
 
                             <!-- 5. TOTAL TERVERIFIKASI -->
                             <div class="col-xl col-md-6 col-sm-6">
-                                <div class="card card-custom h-100 border-start border-4 border-success shadow-sm">
+                                <div class="card card-custom h-100 border-start border-4 border-success shadow-sm bg-white">
                                     <div class="card-body p-3">
                                         <div class="d-flex align-items-center justify-content-between mb-1">
                                             <span class="text-success small fw-bold text-uppercase">Terverifikasi</span>
-                                            <div class="rounded-circle bg-success bg-opacity-10 p-2 text-success">
+                                            <div class="rounded-circle bg-soft-success p-2 text-success d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
                                                 <i class="fas fa-check-double fa-sm"></i>
                                             </div>
                                         </div>
