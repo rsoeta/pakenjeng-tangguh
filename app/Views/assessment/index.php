@@ -2,6 +2,24 @@
 
 <?= $this->section('content') ?>
 
+<style>
+    .copy-identitas {
+        cursor: pointer;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+        border-radius: 3px;
+        padding: 1px 3px;
+        display: inline-block;
+    }
+    .copy-identitas:hover {
+        color: #007bff !important;
+        background-color: rgba(0, 123, 255, 0.08);
+        text-decoration: underline;
+    }
+    .copy-identitas:hover i {
+        color: #007bff !important;
+    }
+</style>
+
 <div class="content-wrapper">
     <!-- Content Header -->
     <div class="content-header">
@@ -166,6 +184,53 @@ $(document).ready(function() {
         table.ajax.reload(null, false);
     });
 
+    // Handler Klik Salin No. KK & NIK
+    $(document).on('click', '.copy-identitas', function(e) {
+        e.stopPropagation();
+        var el = $(this);
+        var textToCopy = String(el.data('copy') || '').trim();
+        var label = el.data('label') || 'Nomor';
+        if (!textToCopy) return;
+
+        var doFeedback = function() {
+            var icon = el.find('i');
+            if (icon.length) {
+                icon.removeClass('far fa-copy text-muted').addClass('fas fa-check text-success');
+                setTimeout(function() {
+                    icon.removeClass('fas fa-check text-success').addClass('far fa-copy text-muted');
+                }, 1500);
+            }
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: label + ' disalin: ' + textToCopy,
+                showConfirmButton: false,
+                timer: 1800,
+                timerProgressBar: true
+            });
+        };
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(textToCopy).then(doFeedback).catch(function() {
+                fallbackCopy(textToCopy, doFeedback);
+            });
+        } else {
+            fallbackCopy(textToCopy, doFeedback);
+        }
+    });
+
+    function fallbackCopy(text, callback) {
+        var temp = $('<textarea>');
+        $('body').append(temp);
+        temp.val(text).select();
+        try {
+            document.execCommand('copy');
+            if (typeof callback === 'function') callback();
+        } catch (err) {}
+        temp.remove();
+    }
+
     // Detail Button Handler
     $(document).on('click', '.btn-detail', function() {
         var id = $(this).data('id');
@@ -185,10 +250,10 @@ $(document).ready(function() {
                     html += '<div class="row">';
                     html += '<div class="col-md-6 mb-2"><strong>No. Asesmen:</strong> ' + d.nomor_asesmen + '</div>';
                     html += '<div class="col-md-6 mb-2"><strong>Tanggal:</strong> ' + d.tanggal_asesmen + '</div>';
-                    html += '<div class="col-md-6 mb-2"><strong>No. KK:</strong> ' + d.no_kk + '</div>';
+                    html += '<div class="col-md-6 mb-2"><strong>No. KK:</strong> <span class="copy-identitas font-weight-bold" data-copy="' + d.no_kk + '" data-label="No. KK" title="Klik untuk menyalin No. KK">' + d.no_kk + ' <i class="far fa-copy text-xs text-muted ml-1"></i></span></div>';
                     html += '<div class="col-md-6 mb-2"><strong>Kepala Keluarga:</strong> ' + (d.kepala_desa_nama ? d.nama_sasaran : '-') + '</div>';
-                    html += '<div class="col-md-6 mb-2"><strong>Sasaran Pasien:</strong> <span class="badge badge-primary text-sm">' + d.nama_sasaran + '</span> (NIK: ' + d.nik_sasaran + ')</div>';
-                    html += '<div class="col-md-6 mb-2"><strong>Pembuat Pernyataan:</strong> ' + d.nama_pembuat_pernyataan + ' (NIK: ' + d.nik_pembuat_pernyataan + ')</div>';
+                    html += '<div class="col-md-6 mb-2"><strong>Sasaran Pasien:</strong> <span class="badge badge-primary text-sm">' + d.nama_sasaran + '</span> (NIK: <span class="copy-identitas font-weight-bold" data-copy="' + d.nik_sasaran + '" data-label="NIK" title="Klik untuk menyalin NIK">' + d.nik_sasaran + ' <i class="far fa-copy text-xs text-muted ml-1"></i></span>)</div>';
+                    html += '<div class="col-md-6 mb-2"><strong>Pembuat Pernyataan:</strong> ' + d.nama_pembuat_pernyataan + ' (NIK: <span class="copy-identitas font-weight-bold" data-copy="' + d.nik_pembuat_pernyataan + '" data-label="NIK" title="Klik untuk menyalin NIK">' + d.nik_pembuat_pernyataan + ' <i class="far fa-copy text-xs text-muted ml-1"></i></span>)</div>';
                     html += '<div class="col-12 mb-2"><strong>Permasalahan:</strong><div class="alert alert-warning p-2 mt-1 mb-0">' + (d.riwayat_penyakit || '-') + '<br>' + (d.permasalahan_tambahan || '') + '</div></div>';
                     html += '<div class="col-12 mb-2"><strong>Permohonan Bantuan:</strong><div class="alert alert-info p-2 mt-1 mb-0">' + (d.permohonan_bantuan || '-') + '</div></div>';
                     html += '<div class="col-md-6 mb-2"><strong>Fasilitator:</strong> ' + d.fasilitator_nama + '</div>';

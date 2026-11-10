@@ -1269,117 +1269,216 @@ class PembaruanKeluarga extends BaseController
             $sanitasi = $rumah['sanitasi'] ?? [];
             $wilayah  = $rumah['wilayah'] ?? [];
 
+            $toNullIfEmpty = static fn($v) => ($v === '' || $v === null) ? null : $v;
+            $toIntOrNull   = static fn($v) => ($v !== '' && $v !== null && is_numeric($v)) ? (int)$v : null;
+            $toFloatOrNull = static fn($v) => ($v !== '' && $v !== null && is_numeric($v)) ? (float)$v : null;
+            $mapKepemilikanRt = static function ($val, $fallback = 'Milik Sendiri') {
+                $v = trim((string)$val);
+                if ($v === 'Milik Sendiri') return 'Milik Sendiri';
+                if ($v === 'Kontrak' || $v === 'Kontrak/Sewa') return 'Kontrak';
+                if ($v === 'Menumpang' || $v === 'Bebas Sewa') return 'Menumpang';
+                if ($v !== '') return 'Lainnya';
+                return in_array($fallback, ['Milik Sendiri', 'Kontrak', 'Menumpang', 'Lainnya'], true) ? $fallback : 'Milik Sendiri';
+            };
+
             $idRtSekarang = $this->db->table('dtsen_kk')->select('id_rt')->where('id_kk', $idKk)->get()->getRow('id_rt');
             if ($idRtSekarang) {
-                $rtLama = $this->db->table('dtsen_rt')->where('id_rt', $idRtSekarang)->get()->getRowArray();
-                $rtUpdate = [
-                    'kode_desa'                => $wilayah['desa'] ?? $rtLama['kode_desa'],
-                    'rt'                       => $rumah['rt'] ?? $rtLama['rt'],
-                    'rw'                       => $rumah['rw'] ?? $rtLama['rw'],
-                    'alamat'                   => $rumah['alamat'] ?? $rtLama['alamat'],
-                    'kepemilikan_rumah'        => $kondisi['status_kepemilikan'] ?? $rtLama['kepemilikan_rumah'],
-                    'bukti_kepemilikan'        => $kondisi['bukti_kepemilikan'] ?? $rtLama['bukti_kepemilikan'] ?? null,
-                    'jenis_bangunan'           => $kondisi['jenis_bangunan'] ?? $rtLama['jenis_bangunan'] ?? null,
-                    'is_tinggal_bersama'       => $kondisi['is_tinggal_bersama'] ?? $rtLama['is_tinggal_bersama'] ?? null,
-                    'jumlah_kk_dalam_rumah'    => $kondisi['jumlah_kk_dalam_rumah'] ?? $rtLama['jumlah_kk_dalam_rumah'] ?? null,
-                    'no_kk_lainnya'            => $kondisi['no_kk_lainnya'] ?? $rtLama['no_kk_lainnya'] ?? null,
-                    'jumlah_orang_dalam_rumah' => $kondisi['jumlah_orang_dalam_rumah'] ?? $rtLama['jumlah_orang_dalam_rumah'] ?? null,
-                    'perkiraan_harga_sewa'     => $kondisi['perkiraan_harga_sewa'] ?? $rtLama['perkiraan_harga_sewa'] ?? null,
-                    'luas_lantai'              => $kondisi['luas_lantai'] ?? $rtLama['luas_lantai'],
-                    'jenis_lantai'             => $kondisi['jenis_lantai'] ?? $rtLama['jenis_lantai'],
-                    'kondisi_lantai'           => $kondisi['kondisi_lantai'] ?? $rtLama['kondisi_lantai'] ?? null,
-                    'jenis_dinding'            => $kondisi['jenis_dinding'] ?? $rtLama['jenis_dinding'],
-                    'kondisi_dinding'          => $kondisi['kondisi_dinding'] ?? $rtLama['kondisi_dinding'] ?? null,
-                    'jenis_atap'               => $kondisi['jenis_atap'] ?? $rtLama['jenis_atap'] ?? null,
-                    'kondisi_atap'             => $kondisi['kondisi_atap'] ?? $rtLama['kondisi_atap'] ?? null,
-                    'bahan_bakar'              => $kondisi['bahan_bakar'] ?? $rtLama['bahan_bakar'],
-                    'sumber_air'               => $kondisi['sumber_air'] ?? $rtLama['sumber_air'],
-                    'sumber_listrik'           => $kondisi['sumber_listrik'] ?? $rtLama['sumber_listrik'],
-                    'jumlah_meteran_listrik'   => $kondisi['jumlah_meteran_listrik'] ?? $rtLama['jumlah_meteran_listrik'] ?? null,
-                    'nomor_pelanggan'          => $kondisi['nomor_pelanggan'] ?? $rtLama['nomor_pelanggan'] ?? null,
-                    'nomor_meter'              => $kondisi['nomor_meter'] ?? $rtLama['nomor_meter'] ?? null,
-                    'daya_listrik'             => $kondisi['daya_listrik'] ?? $rtLama['daya_listrik'] ?? null,
-                    'sanitasi'                 => $sanitasi['pembuangan_tinja'] ?? $rtLama['sanitasi'],
-                    'foto_rumah'               => $foto['depan'] ?? $rtLama['foto_rumah'],
-                    'foto_rumah_dalam'         => $foto['dalam'] ?? $rtLama['foto_rumah_dalam'],
-                    'foto_kamar_mandi'         => $foto['kamar_mandi'] ?? $rtLama['foto_kamar_mandi'] ?? null,
-                    'latitude'                 => $geo['lat'] ?? $rtLama['latitude'],
-                    'longitude'                => $geo['lng'] ?? $rtLama['longitude'],
+                $rtLama = $this->db->table('dtsen_rt')->where('id_rt', $idRtSekarang)->get()->getRowArray() ?? [];
+                $rtFields = array_flip($this->db->getFieldNames('dtsen_rt'));
+                $rawKepemilikan = $kondisi['status_kepemilikan'] ?? ($rumah['status_kepemilikan'] ?? '');
+                $isTinggalBersama = $kondisi['is_tinggal_bersama'] ?? ($rtLama['is_tinggal_bersama'] ?? null);
+                if (!in_array($isTinggalBersama, ['Ya', 'Tidak'], true)) {
+                    $isTinggalBersama = null;
+                }
+
+                $rtUpdate = array_intersect_key([
+                    'kode_desa'                => $toNullIfEmpty($wilayah['desa'] ?? ($rtLama['kode_desa'] ?? null)),
+                    'rt'                       => $toNullIfEmpty($rumah['rt'] ?? ($rtLama['rt'] ?? null)),
+                    'rw'                       => $toNullIfEmpty($rumah['rw'] ?? ($rtLama['rw'] ?? null)),
+                    'alamat'                   => $toNullIfEmpty($rumah['alamat'] ?? ($rtLama['alamat'] ?? null)),
+                    'kepemilikan_rumah'        => $mapKepemilikanRt($rawKepemilikan, $rtLama['kepemilikan_rumah'] ?? 'Milik Sendiri'),
+                    'bukti_kepemilikan'        => $toNullIfEmpty($kondisi['bukti_kepemilikan'] ?? ($rtLama['bukti_kepemilikan'] ?? null)),
+                    'jenis_bangunan'           => $toNullIfEmpty($kondisi['jenis_bangunan'] ?? ($rtLama['jenis_bangunan'] ?? null)),
+                    'is_tinggal_bersama'       => $isTinggalBersama,
+                    'jumlah_kk_dalam_rumah'    => $toIntOrNull($kondisi['jumlah_kk_dalam_rumah'] ?? ($rtLama['jumlah_kk_dalam_rumah'] ?? null)),
+                    'no_kk_lainnya'            => $toNullIfEmpty($kondisi['no_kk_lainnya'] ?? ($rtLama['no_kk_lainnya'] ?? null)),
+                    'jumlah_orang_dalam_rumah' => $toIntOrNull($kondisi['jumlah_orang_dalam_rumah'] ?? ($rtLama['jumlah_orang_dalam_rumah'] ?? null)),
+                    'perkiraan_harga_sewa'     => $toFloatOrNull($kondisi['perkiraan_harga_sewa'] ?? ($rtLama['perkiraan_harga_sewa'] ?? null)),
+                    'luas_lantai'              => $toFloatOrNull($kondisi['luas_lantai'] ?? ($rtLama['luas_lantai'] ?? null)),
+                    'jenis_lantai'             => $toNullIfEmpty($kondisi['jenis_lantai'] ?? ($rtLama['jenis_lantai'] ?? null)),
+                    'kondisi_lantai'           => $toNullIfEmpty($kondisi['kondisi_lantai'] ?? ($rtLama['kondisi_lantai'] ?? null)),
+                    'jenis_dinding'            => $toNullIfEmpty($kondisi['jenis_dinding'] ?? ($rtLama['jenis_dinding'] ?? null)),
+                    'kondisi_dinding'          => $toNullIfEmpty($kondisi['kondisi_dinding'] ?? ($rtLama['kondisi_dinding'] ?? null)),
+                    'jenis_atap'               => $toNullIfEmpty($kondisi['jenis_atap'] ?? ($rtLama['jenis_atap'] ?? null)),
+                    'kondisi_atap'             => $toNullIfEmpty($kondisi['kondisi_atap'] ?? ($rtLama['kondisi_atap'] ?? null)),
+                    'bahan_bakar'              => $toNullIfEmpty($kondisi['bahan_bakar'] ?? ($rtLama['bahan_bakar'] ?? null)),
+                    'sumber_air'               => $toNullIfEmpty($kondisi['sumber_air'] ?? ($rtLama['sumber_air'] ?? null)),
+                    'sumber_listrik'           => $toNullIfEmpty($kondisi['sumber_listrik'] ?? ($rtLama['sumber_listrik'] ?? null)),
+                    'jumlah_meteran_listrik'   => $toIntOrNull($kondisi['jumlah_meteran_listrik'] ?? ($rtLama['jumlah_meteran_listrik'] ?? null)),
+                    'nomor_pelanggan'          => $toNullIfEmpty($kondisi['nomor_pelanggan'] ?? ($rtLama['nomor_pelanggan'] ?? null)),
+                    'nomor_meter'              => $toNullIfEmpty($kondisi['nomor_meter'] ?? ($rtLama['nomor_meter'] ?? null)),
+                    'daya_listrik'             => $toNullIfEmpty($kondisi['daya_listrik'] ?? ($rtLama['daya_listrik'] ?? null)),
+                    'sanitasi'                 => $toNullIfEmpty($sanitasi['pembuangan_tinja'] ?? ($rtLama['sanitasi'] ?? null)),
+                    'foto_rumah'               => !empty($foto['depan']) ? $foto['depan'] : ($rtLama['foto_rumah'] ?? null),
+                    'foto_rumah_dalam'         => !empty($foto['dalam']) ? $foto['dalam'] : ($rtLama['foto_rumah_dalam'] ?? null),
+                    'foto_kamar_mandi'         => !empty($foto['kamar_mandi']) ? $foto['kamar_mandi'] : (!empty($foto['mck']) ? $foto['mck'] : ($rtLama['foto_kamar_mandi'] ?? null)),
+                    'latitude'                 => !empty($geo['lat']) ? $geo['lat'] : ($rtLama['latitude'] ?? null),
+                    'longitude'                => !empty($geo['lng']) ? $geo['lng'] : ($rtLama['longitude'] ?? null),
                     'updated_at'               => date('Y-m-d H:i:s')
-                ];
+                ], $rtFields);
                 $this->db->table('dtsen_rt')->where('id_rt', $idRtSekarang)->update($rtUpdate);
             }
 
             // 👪 2. Update dtsen_kk
-            $kkLama = $this->db->table('dtsen_kk')->where('id_kk', $idKk)->get()->getRowArray();
-            $kkUpdate = [
+            $kkLama = $this->db->table('dtsen_kk')->where('id_kk', $idKk)->get()->getRowArray() ?? [];
+            $kkFields = array_flip($this->db->getFieldNames('dtsen_kk'));
+            $isAlamatSesuai = $rumah['is_alamat_sesuai_kk'] ?? ($kkLama['is_alamat_sesuai_kk'] ?? 'Ya');
+            if (!in_array($isAlamatSesuai, ['Ya', 'Tidak'], true)) {
+                $isAlamatSesuai = 'Ya';
+            }
+            $kategoriAdat = $rumah['kategori_adat'] ?? ($kkLama['kategori_adat'] ?? 'Tidak');
+            if (!in_array($kategoriAdat, ['Ya', 'Tidak'], true)) {
+                $kategoriAdat = 'Tidak';
+            }
+
+            $kkUpdate = array_intersect_key([
                 'is_recovery_needed'       => 0,
-                'no_kk'                    => $rumah['no_kk'] ?? $kkLama['no_kk'],
-                'kepala_keluarga'          => $rumah['kepala_keluarga'] ?? $kkLama['kepala_keluarga'],
-                'nik_kepala_keluarga'      => $rumah['nik_kepala_keluarga'] ?? null,
-                'jumlah_anggota'           => $rumah['jumlah_anggota'] ?? null,
-                'alamat'                   => $rumah['alamat'] ?? $kkLama['alamat'],
-                'nama_jalan'               => $rumah['nama_jalan'] ?? null,
-                'nomor_rumah'              => $rumah['nomor_rumah'] ?? null,
-                'dusun'                    => $rumah['dusun'] ?? null,
-                'kode_pos'                 => $rumah['kode_pos'] ?? null,
-                'is_alamat_sesuai_kk'      => $rumah['is_alamat_sesuai_kk'] ?? null,
-                'status_kepemilikan_rumah' => $rumah['status_kepemilikan'] ?? $kkLama['status_kepemilikan_rumah'],
-                'kategori_adat'            => $rumah['kategori_adat'] ?? $kkLama['kategori_adat'],
-                'nama_suku'                => $rumah['nama_suku'] ?? $kkLama['nama_suku'],
-                'foto_kk'                  => $foto['ktp_kk'] ?? $kkLama['foto_kk'],
-                'foto_rumah'               => $foto['depan'] ?? $kkLama['foto_rumah'],
-                'foto_rumah_dalam'         => $foto['dalam'] ?? $kkLama['foto_rumah_dalam'],
+                'no_kk'                    => $rumah['no_kk'] ?? ($kkLama['no_kk'] ?? null),
+                'kepala_keluarga'          => $rumah['kepala_keluarga'] ?? ($kkLama['kepala_keluarga'] ?? null),
+                'nik_kepala_keluarga'      => $toNullIfEmpty($rumah['nik_kepala_keluarga'] ?? ($kkLama['nik_kepala_keluarga'] ?? null)),
+                'jumlah_anggota'           => $toIntOrNull($rumah['jumlah_anggota'] ?? ($kkLama['jumlah_anggota'] ?? null)),
+                'alamat'                   => $toNullIfEmpty($rumah['alamat'] ?? ($kkLama['alamat'] ?? null)),
+                'nama_jalan'               => $toNullIfEmpty($rumah['nama_jalan'] ?? ($kkLama['nama_jalan'] ?? null)),
+                'nomor_rumah'              => $toNullIfEmpty($rumah['nomor_rumah'] ?? ($kkLama['nomor_rumah'] ?? null)),
+                'dusun'                    => $toNullIfEmpty($rumah['dusun'] ?? ($kkLama['dusun'] ?? null)),
+                'kode_pos'                 => $toNullIfEmpty($rumah['kode_pos'] ?? ($kkLama['kode_pos'] ?? null)),
+                'is_alamat_sesuai_kk'      => $isAlamatSesuai,
+                'status_kepemilikan_rumah' => $toNullIfEmpty($rumah['status_kepemilikan'] ?? ($kondisi['status_kepemilikan'] ?? ($kkLama['status_kepemilikan_rumah'] ?? null))),
+                'kategori_adat'            => $kategoriAdat,
+                'nama_suku'                => $toNullIfEmpty($rumah['nama_suku'] ?? ($kkLama['nama_suku'] ?? null)),
+                'foto_kk'                  => !empty($foto['ktp_kk']) ? $foto['ktp_kk'] : ($kkLama['foto_kk'] ?? null),
+                'foto_rumah'               => !empty($foto['depan']) ? $foto['depan'] : ($kkLama['foto_rumah'] ?? null),
+                'foto_rumah_dalam'         => !empty($foto['dalam']) ? $foto['dalam'] : ($kkLama['foto_rumah_dalam'] ?? null),
+                'foto_kamar_mandi'         => !empty($foto['kamar_mandi']) ? $foto['kamar_mandi'] : (!empty($foto['mck']) ? $foto['mck'] : ($kkLama['foto_kamar_mandi'] ?? null)),
                 'updated_at'               => date('Y-m-d H:i:s')
-            ];
+            ], $kkFields);
             $this->db->table('dtsen_kk')->where('id_kk', $idKk)->update($kkUpdate);
 
             // 👤 3. Sinkronisasi dtsen_art
-            $anggotaUsulan = $this->db->table('dtsen_usulan_art')->where('dtsen_usulan_id', $usulan_id)->get()->getResultArray();
+            $anggotaUsulan = $this->db->table('dtsen_usulan_art')
+                ->where('dtsen_usulan_id', $usulan_id)
+                ->where('deleted_at', null)
+                ->orderBy('id', 'ASC')
+                ->get()
+                ->getResultArray();
             if (!empty($anggotaUsulan)) {
-                $this->db->table('dtsen_art')->where('id_kk', $idKk)->where('deleted_at', null)->update(['deleted_at' => date('Y-m-d H:i:s'), 'delete_reason' => 'Ditimpa usulan pembaruan ID ' . $usulan_id]);
+                $existingArtRows = $this->db->table('dtsen_art')
+                    ->where('id_kk', $idKk)
+                    ->orderBy('id_art', 'ASC')
+                    ->get()
+                    ->getResultArray();
+                $oldArtByNik = [];
+                foreach ($existingArtRows as $ea) {
+                    if (!empty($ea['nik'])) {
+                        $oldArtByNik[$ea['nik']] = $ea;
+                    }
+                }
+
+                $this->db->table('dtsen_art')
+                    ->where('id_kk', $idKk)
+                    ->where('deleted_at', null)
+                    ->update([
+                        'deleted_at'    => date('Y-m-d H:i:s'),
+                        'delete_reason' => 'Ditimpa usulan pembaruan ID ' . $usulan_id
+                    ]);
+
+                $artFields = array_flip($this->db->getFieldNames('dtsen_art'));
+                $dedupAnggota = [];
                 foreach ($anggotaUsulan as $art) {
+                    $pm = json_decode($art['payload_member'] ?? '{}', true);
+                    $nikKey = trim((string)($pm['identitas']['nik'] ?? $art['nik'] ?? ''));
+                    if ($nikKey !== '') {
+                        $dedupAnggota[$nikKey] = $art;
+                    } else {
+                        $dedupAnggota['id_' . $art['id']] = $art;
+                    }
+                }
+
+                foreach ($dedupAnggota as $art) {
                     $payloadMember = json_decode($art['payload_member'] ?? '{}', true);
                     $identitas     = $payloadMember['identitas'] ?? [];
                     $tenagaKerja   = $payloadMember['tenaga_kerja'] ?? [];
+                    $kesehatan     = $payloadMember['kesehatan'] ?? [];
+                    $nikVal        = $toNullIfEmpty($identitas['nik'] ?? $art['nik'] ?? null);
+                    $oldArt        = ($nikVal && isset($oldArtByNik[$nikVal])) ? $oldArtByNik[$nikVal] : [];
 
-                    $this->db->table('dtsen_art')->insert([
+                    $disabilitasVal = $kesehatan['disabilitas'] ?? ($oldArt['disabilitas'] ?? null);
+                    if (is_array($disabilitasVal)) {
+                        $disabilitasVal = implode(', ', array_filter($disabilitasVal));
+                    }
+                    $disabilitasVal = $toNullIfEmpty($disabilitasVal);
+
+                    $jkVal = $identitas['jenis_kelamin'] ?? ($oldArt['jenis_kelamin'] ?? null);
+                    if (!in_array($jkVal, ['L', 'P'], true)) {
+                        $jkVal = null;
+                    }
+
+                    $tglLahir = $identitas['tanggal_lahir'] ?? ($oldArt['tanggal_lahir'] ?? null);
+                    if (empty($tglLahir) || $tglLahir === '0000-00-00') {
+                        $tglLahir = null;
+                    }
+
+                    $statusHamil = (($kesehatan['status_hamil'] ?? ($oldArt['status_hamil'] ?? 'Tidak')) === 'Ya') ? 'Ya' : 'Tidak';
+                    $usulanStatus = in_array($oldArt['usulan_status'] ?? '', ['draft', 'dikirim', 'diverifikasi', 'ditolak'], true) ? $oldArt['usulan_status'] : 'draft';
+
+                    $artInsert = array_intersect_key([
                         'id_kk'               => $idKk,
-                        'nik'                 => $identitas['nik'] ?? $art['nik'] ?? null,
-                        'nama'                => $identitas['nama'] ?? $art['nama'] ?? null,
-                        'no_hp'               => $identitas['no_hp'] ?? null,
-                        'rekening_aktif'      => $tenagaKerja['rekening_aktif'] ?? null,
-                        'hubungan_keluarga'   => $identitas['hubungan'] ?? null,
-                        'jenis_kelamin'       => $identitas['jenis_kelamin'] ?? null,
-                        'tanggal_lahir'       => $identitas['tanggal_lahir'] ?? null,
-                        'tempat_lahir'        => $identitas['tempat_lahir'] ?? null,
-                        'pendidikan_terakhir' => $identitas['pendidikan_terakhir'] ?? $identitas['pendidikan'] ?? null,
-                        'pekerjaan'           => $identitas['pekerjaan'] ?? null,
-                        'status_kawin'        => $identitas['status_kawin'] ?? null,
-                        'foto_identitas'      => $payloadMember['foto'] ?? null,
+                        'nik'                 => $nikVal,
+                        'shdk'                => $toIntOrNull($oldArt['shdk'] ?? null),
+                        'nama'                => $identitas['nama'] ?? $art['nama'] ?? '-',
+                        'no_hp'               => $toNullIfEmpty($identitas['no_hp'] ?? null),
+                        'rekening_aktif'      => $toNullIfEmpty($tenagaKerja['rekening_aktif'] ?? null),
+                        'hubungan_keluarga'   => $toNullIfEmpty($identitas['hubungan'] ?? $art['hubungan'] ?? ($oldArt['hubungan_keluarga'] ?? null)),
+                        'jenis_kelamin'       => $jkVal,
+                        'tanggal_lahir'       => $tglLahir,
+                        'tempat_lahir'        => $toNullIfEmpty($identitas['tempat_lahir'] ?? ($oldArt['tempat_lahir'] ?? null)),
+                        'pendidikan_terakhir' => $toNullIfEmpty($identitas['pendidikan_terakhir'] ?? $identitas['pendidikan'] ?? ($oldArt['pendidikan_terakhir'] ?? null)),
+                        'pekerjaan'           => $toNullIfEmpty($identitas['pekerjaan'] ?? ($oldArt['pekerjaan'] ?? null)),
+                        'status_kawin'        => $toNullIfEmpty($identitas['status_kawin'] ?? ($oldArt['status_kawin'] ?? null)),
+                        'disabilitas'         => $disabilitasVal,
+                        'status_hamil'        => $statusHamil,
+                        'ibu_kandung'         => $toNullIfEmpty($identitas['ibu_kandung'] ?? ($oldArt['ibu_kandung'] ?? null)),
+                        'foto_identitas'      => $toNullIfEmpty($payloadMember['foto'] ?? ($oldArt['foto_identitas'] ?? null)),
+                        'program_bansos'      => $toNullIfEmpty($oldArt['program_bansos'] ?? null),
+                        'is_usulan_bansos'    => (int)($oldArt['is_usulan_bansos'] ?? 0),
+                        'usulan_status'       => $usulanStatus,
                         'source_name'         => 'apply_usulan_' . $usulan_id,
-                        'created_at'          => date('Y-m-d H:i:s')
-                    ]);
+                        'created_at'          => date('Y-m-d H:i:s'),
+                        'created_by'          => is_numeric($userId) ? $userId : $toNullIfEmpty($oldArt['created_by'] ?? null),
+                    ], $artFields);
+
+                    $this->db->table('dtsen_art')->insert($artInsert);
                 }
             }
 
             // 💰 4. Upsert dtsen_se (Finansial & Aset)
             $seData = $payload['sosial_ekonomi'] ?? [];
-            $updateSE = [
+            $seFields = array_flip($this->db->getFieldNames('dtsen_se'));
+            $updateSE = array_intersect_key([
                 'kepemilikan_aset'              => json_encode($payload['aset'] ?? [], JSON_UNESCAPED_UNICODE),
-                'pengeluaran_listrik'           => $seData['pengeluaran_listrik'] ?? null,
-                'pengeluaran_pulsa'             => $seData['pengeluaran_pulsa'] ?? null,
-                'pengeluaran_internet'          => $seData['pengeluaran_internet'] ?? null,
-                'pengeluaran_makan_mingguan'    => $seData['pengeluaran_makan_mingguan'] ?? null,
-                'pengeluaran_non_makan_bulanan' => $seData['pengeluaran_non_makan_bulanan'] ?? null,
-                'pengeluaran_non_makan_tahunan' => $seData['pengeluaran_non_makan_tahunan'] ?? null,
-                'pendapatan_gaji'               => $seData['pendapatan_gaji'] ?? null,
-                'pendapatan_usaha'              => $seData['pendapatan_usaha'] ?? null,
-                'pendapatan_lainnya'            => $seData['pendapatan_lainnya'] ?? null,
-                'latitude'                      => $geo['lat'] ?? null,
-                'longitude'                     => $geo['lng'] ?? null,
+                'pengeluaran_listrik'           => $toFloatOrNull($seData['pengeluaran_listrik'] ?? null),
+                'pengeluaran_pulsa'             => $toFloatOrNull($seData['pengeluaran_pulsa'] ?? null),
+                'pengeluaran_internet'          => $toFloatOrNull($seData['pengeluaran_internet'] ?? null),
+                'pengeluaran_makan_mingguan'    => $toFloatOrNull($seData['pengeluaran_makan_mingguan'] ?? null),
+                'pengeluaran_non_makan_bulanan' => $toFloatOrNull($seData['pengeluaran_non_makan_bulanan'] ?? null),
+                'pengeluaran_non_makan_tahunan' => $toFloatOrNull($seData['pengeluaran_non_makan_tahunan'] ?? null),
+                'pendapatan_gaji'               => $toFloatOrNull($seData['pendapatan_gaji'] ?? null),
+                'pendapatan_usaha'              => $toFloatOrNull($seData['pendapatan_usaha'] ?? null),
+                'pendapatan_lainnya'            => $toFloatOrNull($seData['pendapatan_lainnya'] ?? null),
+                'latitude'                      => $toNullIfEmpty($geo['lat'] ?? null),
+                'longitude'                     => $toNullIfEmpty($geo['lng'] ?? null),
                 'updated_at'                    => date('Y-m-d H:i:s')
-            ];
+            ], $seFields);
 
             if ($this->db->table('dtsen_se')->where('id_kk', $idKk)->get()->getRowArray()) {
                 $this->db->table('dtsen_se')->where('id_kk', $idKk)->update($updateSE);

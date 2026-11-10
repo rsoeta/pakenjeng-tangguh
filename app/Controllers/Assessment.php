@@ -109,11 +109,14 @@ class Assessment extends BaseController
 
             $tglAsesmen = !empty($row['tanggal_asesmen']) ? date('d-m-Y', strtotime($row['tanggal_asesmen'])) : '-';
 
+            $noKkEsc = esc($row['no_kk']);
+            $nikEsc  = esc($row['nik_sasaran']);
+
             $data[] = [
                 'no'             => $no++,
                 'nomor_asesmen'  => '<strong>' . esc($row['nomor_asesmen']) . '</strong><br><small class="text-muted"><i class="far fa-calendar-alt"></i> ' . $tglAsesmen . '</small>',
-                'kk_info'        => '<strong>' . esc($row['no_kk']) . '</strong><br><small>' . esc($row['alamat']) . ' RT ' . str_pad($row['rt'] ?? '0', 3, '0', STR_PAD_LEFT) . ' RW ' . str_pad($row['rw'] ?? '0', 3, '0', STR_PAD_LEFT) . '</small>',
-                'sasaran'        => '<strong>' . esc($row['nama_sasaran']) . '</strong><br><small class="text-secondary">NIK: ' . esc($row['nik_sasaran']) . '</small>',
+                'kk_info'        => '<strong class="copy-identitas" data-copy="' . $noKkEsc . '" data-label="No. KK" title="Klik untuk menyalin No. KK" style="cursor: pointer;">' . $noKkEsc . ' <i class="far fa-copy text-xs text-muted ml-1"></i></strong><br><small>' . esc($row['alamat']) . ' RT ' . str_pad($row['rt'] ?? '0', 3, '0', STR_PAD_LEFT) . ' RW ' . str_pad($row['rw'] ?? '0', 3, '0', STR_PAD_LEFT) . '</small>',
+                'sasaran'        => '<strong>' . esc($row['nama_sasaran']) . '</strong><br><small class="text-secondary">NIK: <span class="copy-identitas font-weight-bold text-dark" data-copy="' . $nikEsc . '" data-label="NIK" title="Klik untuk menyalin NIK" style="cursor: pointer;">' . $nikEsc . ' <i class="far fa-copy text-xs text-muted ml-1"></i></span></small>',
                 'permasalahan'   => '<span class="badge badge-warning text-wrap text-left">' . esc($row['riwayat_penyakit'] ?: 'Permasalahan Sosial/Kesehatan') . '</span><br><small class="text-info font-weight-bold">' . esc($row['permohonan_bantuan'] ?: 'Rekomendasi Lapad Ruhama') . '</small>',
                 'petugas'        => esc($row['fasilitator_nama']),
                 'status'         => '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Berkas Siap</span>',
@@ -247,6 +250,9 @@ class Assessment extends BaseController
                 rt.rw,
                 rt.latitude,
                 rt.longitude,
+                rt.foto_rumah AS rt_foto_rumah,
+                rt.foto_rumah_dalam AS rt_foto_rumah_dalam,
+                rt.foto_kamar_mandi AS rt_foto_kamar_mandi,
                 rt.foto_kamar_mandi,
                 v.name AS nama_desa,
                 d.name AS nama_kecamatan,
@@ -269,6 +275,92 @@ class Assessment extends BaseController
 
         if (!$kk) {
             return $this->response->setJSON(['status' => false, 'message' => 'Data KK tidak ditemukan']);
+        }
+
+        // 🚀 SMART MERGE FOTO & GEOTAG DARI dtsen_usulan (Prioritaskan data pembaruan milik KK ini)
+        $usulans = $this->db->table('dtsen_usulan')
+            ->select('id, status, payload')
+            ->where('dtsen_kk_id', $id_kk)
+            ->whereIn('status', ['diverifikasi', 'verified', 'submitted', 'draft'])
+            ->orderBy('id', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        $cleanPhotoPath = static function ($path): ?string {
+            $p = ltrim(trim((string) ($path ?? '')), '/');
+            if ($p === '' || str_contains(strtolower($p), 'noimage.png')) {
+                return null;
+            }
+            return $p;
+        };
+
+        $isRtPhotoOwnedByKk = static function (?string $path, string $noKk): bool {
+            if (empty($path)) return false;
+            if (preg_match('/sinden_(\d{16})_/', $path, $m)) {
+                return $m[1] === $noKk;
+            }
+            if (str_contains($path, 'usulan_')) {
+                return false;
+            }
+            return true;
+        };
+
+        $usulanDepan = null;
+        $usulanDalam = null;
+        $usulanMck   = null;
+        $usulanLat   = null;
+        $usulanLng   = null;
+        $fasilitasBab = '';
+        $latestUsulanId = null;
+
+        foreach ($usulans as $uRow) {
+            if ($latestUsulanId === null) {
+                $latestUsulanId = (int) $uRow['id'];
+            }
+            $uPayload = json_decode($uRow['payload'] ?? '{}', true);
+            if (!is_array($uPayload)) continue;
+
+            $uFoto = $uPayload['foto'] ?? ($uPayload['foto_geotag']['foto'] ?? []);
+            $uGeo  = $uPayload['geo'] ?? ($uPayload['foto_geotag']['geotag'] ?? []);
+
+            if ($usulanDepan === null) {
+                $usulanDepan = $cleanPhotoPath($uFoto['depan'] ?? null);
+            }
+            if ($usulanDalam === null) {
+                $usulanDalam = $cleanPhotoPath($uFoto['dalam'] ?? null);
+            }
+            if ($usulanMck === null) {
+                $usulanMck = $cleanPhotoPath($uFoto['kamar_mandi'] ?? ($uFoto['mck'] ?? null));
+            }
+            if ($usulanLat === null && !empty($uGeo['lat'])) {
+                $usulanLat = $uGeo['lat'];
+            }
+            if ($usulanLng === null && !empty($uGeo['lng'])) {
+                $usulanLng = $uGeo['lng'];
+            }
+            if ($fasilitasBab === '' && !empty($uPayload['perumahan']['sanitasi']['fasilitas_bab'])) {
+                $fasilitasBab = trim((string) $uPayload['perumahan']['sanitasi']['fasilitas_bab']);
+            }
+        }
+
+        $noKkStr = (string) ($kk['no_kk'] ?? '');
+        $rtDepanValid = $isRtPhotoOwnedByKk($kk['rt_foto_rumah'] ?? null, $noKkStr) ? $cleanPhotoPath($kk['rt_foto_rumah'] ?? null) : null;
+        $rtDalamValid = $isRtPhotoOwnedByKk($kk['rt_foto_rumah_dalam'] ?? null, $noKkStr) ? $cleanPhotoPath($kk['rt_foto_rumah_dalam'] ?? null) : null;
+        $rtMckValid   = $isRtPhotoOwnedByKk($kk['rt_foto_kamar_mandi'] ?? null, $noKkStr) ? $cleanPhotoPath($kk['rt_foto_kamar_mandi'] ?? null) : null;
+
+        $kk['foto_rumah']       = $usulanDepan ?? $cleanPhotoPath($kk['foto_rumah'] ?? null) ?? $rtDepanValid;
+        $kk['foto_rumah_dalam'] = $usulanDalam ?? $cleanPhotoPath($kk['foto_rumah_dalam'] ?? null) ?? $rtDalamValid;
+        $kk['foto_kamar_mandi'] = $usulanMck   ?? $cleanPhotoPath($kk['foto_kamar_mandi'] ?? null) ?? $rtMckValid;
+
+        if (empty($kk['foto_kamar_mandi']) && $fasilitasBab === 'Tidak ada fasilitas') {
+            $kk['foto_kamar_mandi'] = 'assets/images/image_not_available.jpg';
+        }
+
+        if (!empty($usulanLat)) {
+            $kk['latitude'] = $usulanLat;
+        }
+        if (!empty($usulanLng)) {
+            $kk['longitude'] = $usulanLng;
         }
 
         // Ambil Anggota Rumah Tangga (ART)
@@ -297,6 +389,45 @@ class Assessment extends BaseController
             ->orderBy('art.tanggal_lahir', 'ASC')
             ->get()
             ->getResultArray();
+
+        // Fallback ke dtsen_usulan_art jika dtsen_art kosong
+        if (empty($artList) && $latestUsulanId) {
+            $usulanArtRows = $this->db->table('dtsen_usulan_art ua')
+                ->where('ua.dtsen_usulan_id', $latestUsulanId)
+                ->where('ua.deleted_at IS NULL')
+                ->orderBy('ua.hubungan', 'ASC')
+                ->orderBy('ua.id', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            $mapSk = array_column($this->db->table('tb_status_kawin')->get()->getResultArray(), 'StatusKawin', 'idStatus');
+            $mapPk = array_column($this->db->table('tb_penduduk_pekerjaan')->get()->getResultArray(), 'pk_nama', 'pk_id');
+            $mapShdk = array_column($this->db->table('tb_shdk')->get()->getResultArray(), 'jenis_shdk', 'id');
+
+            foreach ($usulanArtRows as $ua) {
+                $pm = json_decode($ua['payload_member'] ?? '{}', true);
+                $ident = $pm['identitas'] ?? [];
+                $hub = $ident['hubungan'] ?? $ua['hubungan'] ?? null;
+                $skId = $ident['status_kawin'] ?? null;
+                $pkId = $ident['pekerjaan'] ?? null;
+
+                $artList[] = [
+                    'id_art'            => $ua['id'],
+                    'nik'               => $ident['nik'] ?? $ua['nik'] ?? '',
+                    'nama'              => $ident['nama'] ?? $ua['nama'] ?? '',
+                    'hubungan_keluarga' => $hub,
+                    'jenis_kelamin'     => $ident['jenis_kelamin'] ?? '',
+                    'tempat_lahir'      => $ident['tempat_lahir'] ?? '',
+                    'tanggal_lahir'     => $ident['tanggal_lahir'] ?? '',
+                    'status_kawin'      => $skId,
+                    'pekerjaan'         => $pkId,
+                    'program_bansos'    => '',
+                    'nama_status_kawin' => $mapSk[$skId] ?? '-',
+                    'nama_pekerjaan'    => $mapPk[$pkId] ?? 'Belum/Tidak Bekerja',
+                    'nama_shdk'         => $mapShdk[$hub] ?? '-',
+                ];
+            }
+        }
 
         // Hitung umur masing-masing ART
         foreach ($artList as &$a) {
@@ -349,10 +480,72 @@ class Assessment extends BaseController
         $kodeDesa = $user['kode_desa'] ?? session()->get('kode_desa') ?? '3205332006';
         $nomorAsesmen = $this->assessmentModel->generateNomorAsesmen($kodeDesa);
 
-        // Snapshot RT & Geotagging untuk Watermark
+        // Snapshot RT, Usulan DTSEN & Geotagging untuk Watermark
         $rt = $this->rtModel->find($kk['id_rt']);
-        $lat = !empty($rt['latitude']) ? $rt['latitude'] : '-7.451975';
-        $lng = !empty($rt['longitude']) ? $rt['longitude'] : '107.643160';
+
+        $usulans = $this->db->table('dtsen_usulan')
+            ->select('id, status, payload')
+            ->where('dtsen_kk_id', $id_kk)
+            ->whereIn('status', ['diverifikasi', 'verified', 'submitted', 'draft'])
+            ->orderBy('id', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        $cleanPhotoPath = static function ($path): ?string {
+            $p = ltrim(trim((string) ($path ?? '')), '/');
+            if ($p === '' || str_contains(strtolower($p), 'noimage.png')) {
+                return null;
+            }
+            return $p;
+        };
+
+        $isRtPhotoOwnedByKk = static function (?string $path, string $noKk): bool {
+            if (empty($path)) return false;
+            if (preg_match('/sinden_(\d{16})_/', $path, $m)) {
+                return $m[1] === $noKk;
+            }
+            if (str_contains($path, 'usulan_')) {
+                return false;
+            }
+            return true;
+        };
+
+        $usulanDepan = null;
+        $usulanDalam = null;
+        $usulanMck   = null;
+        $usulanLat   = null;
+        $usulanLng   = null;
+        $fasilitasBab = '';
+
+        foreach ($usulans as $uRow) {
+            $uPayload = json_decode($uRow['payload'] ?? '{}', true);
+            if (!is_array($uPayload)) continue;
+
+            $uFoto = $uPayload['foto'] ?? ($uPayload['foto_geotag']['foto'] ?? []);
+            $uGeo  = $uPayload['geo'] ?? ($uPayload['foto_geotag']['geotag'] ?? []);
+
+            if ($usulanDepan === null) {
+                $usulanDepan = $cleanPhotoPath($uFoto['depan'] ?? null);
+            }
+            if ($usulanDalam === null) {
+                $usulanDalam = $cleanPhotoPath($uFoto['dalam'] ?? null);
+            }
+            if ($usulanMck === null) {
+                $usulanMck = $cleanPhotoPath($uFoto['kamar_mandi'] ?? ($uFoto['mck'] ?? null));
+            }
+            if ($usulanLat === null && !empty($uGeo['lat'])) {
+                $usulanLat = $uGeo['lat'];
+            }
+            if ($usulanLng === null && !empty($uGeo['lng'])) {
+                $usulanLng = $uGeo['lng'];
+            }
+            if ($fasilitasBab === '' && !empty($uPayload['perumahan']['sanitasi']['fasilitas_bab'])) {
+                $fasilitasBab = trim((string) $uPayload['perumahan']['sanitasi']['fasilitas_bab']);
+            }
+        }
+
+        $lat = !empty($usulanLat) ? $usulanLat : (!empty($rt['latitude']) ? $rt['latitude'] : '-7.451975');
+        $lng = !empty($usulanLng) ? $usulanLng : (!empty($rt['longitude']) ? $rt['longitude'] : '107.643160');
 
         // Nama Wilayah untuk Watermark
         $desaRow = $this->wilayahModel
@@ -408,20 +601,28 @@ class Assessment extends BaseController
             return null;
         };
 
+        $noKkStr = (string) ($kk['no_kk'] ?? '');
+        $rtDepanValid = $isRtPhotoOwnedByKk($rt['foto_rumah'] ?? null, $noKkStr) ? $cleanPhotoPath($rt['foto_rumah'] ?? null) : null;
+        $rtDalamValid = $isRtPhotoOwnedByKk($rt['foto_rumah_dalam'] ?? null, $noKkStr) ? $cleanPhotoPath($rt['foto_rumah_dalam'] ?? null) : null;
+        $rtMckValid   = $isRtPhotoOwnedByKk($rt['foto_kamar_mandi'] ?? null, $noKkStr) ? $cleanPhotoPath($rt['foto_kamar_mandi'] ?? null) : null;
+
         // 1. Upload Foto Pasien (Wajib)
         $pathFotoPasien = $processUploadFoto('foto_pasien', 'pasien_' . preg_replace('/\s+/', '', $post['nik_sasaran']));
 
         // 2. Upload Foto Rumah Depan (Jika ada upload baru, gunakan itu; jika tidak, gunakan data DTSEN)
         $uploadedDepan = $processUploadFoto('foto_depan', 'depan_' . $kk['no_kk']);
-        $pathFotoDepan = $uploadedDepan ?: ($kk['foto_rumah'] ?? null);
+        $pathFotoDepan = $uploadedDepan ?: ($usulanDepan ?? $cleanPhotoPath($kk['foto_rumah'] ?? null) ?? $rtDepanValid);
 
         // 3. Upload Foto Rumah Dalam (Jika ada upload baru, gunakan itu; jika tidak, gunakan data DTSEN)
         $uploadedDalam = $processUploadFoto('foto_dalam', 'dalam_' . $kk['no_kk']);
-        $pathFotoDalam = $uploadedDalam ?: ($kk['foto_rumah_dalam'] ?? null);
+        $pathFotoDalam = $uploadedDalam ?: ($usulanDalam ?? $cleanPhotoPath($kk['foto_rumah_dalam'] ?? null) ?? $rtDalamValid);
 
         // 4. Upload Foto Kamar Mandi / MCK (Jika ada upload baru, gunakan itu; jika tidak, gunakan data DTSEN)
         $uploadedMck = $processUploadFoto('foto_kamar_mandi', 'mck_' . $kk['no_kk']);
-        $pathFotoMck = $uploadedMck ?: ($rt['foto_kamar_mandi'] ?? $kk['foto_kamar_mandi'] ?? null);
+        $pathFotoMck = $uploadedMck ?: ($usulanMck ?? $cleanPhotoPath($kk['foto_kamar_mandi'] ?? null) ?? $rtMckValid);
+        if (empty($pathFotoMck) && $fasilitasBab === 'Tidak ada fasilitas') {
+            $pathFotoMck = 'assets/images/image_not_available.jpg';
+        }
 
         // Ambil Data Pejabat dari Profil Lembaga
         $profilLembaga = $this->db->table('lembaga_profil lp')
@@ -598,6 +799,57 @@ class Assessment extends BaseController
             // Helper escape XML khusus template Word
             $esc = static fn($val) => htmlspecialchars((string) ($val ?? ''), ENT_QUOTES, 'UTF-8');
 
+            // Pecah & bersihkan baris input Permasalahan (IV) dan Permohonan (V) sesuai pilihan aktual petugas
+            $splitCleanLines = static function (?string $rawText): array {
+                if ($rawText === null || trim($rawText) === '') {
+                    return [];
+                }
+                $lines = preg_split('/\r\n|\r|\n/', trim($rawText));
+                $result = [];
+                $seen = [];
+                foreach ($lines as $line) {
+                    $clean = trim(preg_replace('/^[\-\*\•\d\.\)\s]+/u', '', trim($line)));
+                    if ($clean !== '' && $clean !== '-') {
+                        $formatted = toTitleCase($clean);
+                        $key = strtolower($formatted);
+                        if (!isset($seen[$key])) {
+                            $seen[$key] = true;
+                            $result[] = $formatted;
+                        }
+                    }
+                }
+                return $result;
+            };
+
+            $riwayatLines  = $splitCleanLines($asesmen['riwayat_penyakit'] ?? '');
+            $tambahanLines = $splitCleanLines($asesmen['permasalahan_tambahan'] ?? '');
+
+            $allPermasalahan = [];
+            $seenMasalah = [];
+            foreach (array_merge($riwayatLines, $tambahanLines) as $item) {
+                $k = strtolower($item);
+                if (!isset($seenMasalah[$k])) {
+                    $seenMasalah[$k] = true;
+                    $allPermasalahan[] = $item;
+                }
+            }
+            if (empty($allPermasalahan)) {
+                $allPermasalahan[] = '-';
+            }
+
+            $permohonanLines = $splitCleanLines($asesmen['permohonan_bantuan'] ?? '');
+            if (empty($permohonanLines)) {
+                $permohonanLines[] = toTitleCase('Mendapatkan Pelayanan BPJS KIS PBI');
+            }
+
+            $valMasalah1 = $esc($allPermasalahan[0]);
+            $valMasalah2 = isset($allPermasalahan[1]) ? $esc($allPermasalahan[1]) : '__REMOVE_PARA__';
+            $valMasalah3 = isset($allPermasalahan[2])
+                ? ($esc($allPermasalahan[2]) . (count($allPermasalahan) > 3 ? '__EXTRA_MASALAH__' : ''))
+                : '__REMOVE_PARA__';
+
+            $valPermohonan1 = $esc($permohonanLines[0]) . (count($permohonanLines) > 1 ? '__EXTRA_PERMOHONAN__' : '');
+
             // Set Semua Nilai Placeholder Variabel Tunggal (Capitalize Each Word)
             $tp->setValues([
                 'alamat'                => $esc($alamatLengkap),
@@ -611,10 +863,10 @@ class Assessment extends BaseController
                 'pekerjaan'             => $esc(toTitleCase($asesmen['sasaran']['nama_pekerjaan'] ?? 'Belum Bekerja')),
                 'jml_art'               => $esc(count($asesmen['anggota_keluarga'])),
                 'bansos'                => $esc($programBansos),
-                'riwayat_penyakit'      => $esc(toTitleCase(!empty($asesmen['riwayat_penyakit']) ? $asesmen['riwayat_penyakit'] : '-')),
-                'permasalahan_tambahan' => $esc(toTitleCase(!empty($asesmen['permasalahan_tambahan']) ? $asesmen['permasalahan_tambahan'] : 'Keluarga Miskin/Tidak Mampu')),
-                'status_kks_ket'        => $esc(toTitleCase(($asesmen['status_kks'] === 'Ya') ? 'Memiliki BPJS/KKS' : 'Tidak Memiliki BPJS APBN KIS')),
-                'permohonan'            => $esc(toTitleCase(!empty($asesmen['permohonan_bantuan']) ? $asesmen['permohonan_bantuan'] : 'Mendapatkan Pelayanan BPJS KIS PBI')),
+                'riwayat_penyakit'      => $valMasalah1,
+                'permasalahan_tambahan' => $valMasalah2,
+                'status_kks_ket'        => $valMasalah3,
+                'permohonan'            => $valPermohonan1,
                 'tgl_asesmen'           => $esc($tanggalIndo),
                 'fasilitator_nama'      => $esc(toTitleCase($asesmen['fasilitator_nama'])),
                 'puskesos_nama'         => $esc($puskesosNama),
@@ -708,6 +960,42 @@ class Assessment extends BaseController
                             $docXml = substr_replace($docXml, 'r:embed="rId14"', $secondRid10, strlen('r:embed="rId10"'));
                             $modifiedDoc = true;
                         }
+                    }
+
+                    // Bersihkan paragraf bernomor yang tidak digunakan pada Bagian IV (Permasalahan)
+                    if (strpos($docXml, '__REMOVE_PARA__') !== false) {
+                        $docXml = preg_replace('/<w:p\b[^>]*>(?:(?!<\/w:p>).)*?__REMOVE_PARA__(?:(?!<\/w:p>).)*?<\/w:p>/s', '', $docXml);
+                        $modifiedDoc = true;
+                    }
+
+                    // Tambahkan baris bernomor ekstra pada Bagian IV jika item permasalahan > 3
+                    if (strpos($docXml, '__EXTRA_MASALAH__') !== false) {
+                        $extraMasalahXml = '';
+                        for ($i = 3; $i < count($allPermasalahan); $i++) {
+                            $extraMasalahXml .= '<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="2"/></w:numPr><w:rPr><w:rFonts w:ascii="Bookman Old Style" w:hAnsi="Bookman Old Style"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Bookman Old Style" w:hAnsi="Bookman Old Style"/></w:rPr><w:t>' . $esc($allPermasalahan[$i]) . '</w:t></w:r></w:p>';
+                        }
+                        $docXml = preg_replace(
+                            '/__EXTRA_MASALAH__(.*?<\/w:p>)/s',
+                            '$1' . $extraMasalahXml,
+                            $docXml,
+                            1
+                        );
+                        $modifiedDoc = true;
+                    }
+
+                    // Tambahkan baris bernomor ekstra pada Bagian V jika item permohonan > 1
+                    if (strpos($docXml, '__EXTRA_PERMOHONAN__') !== false) {
+                        $extraPermohonanXml = '';
+                        for ($i = 1; $i < count($permohonanLines); $i++) {
+                            $extraPermohonanXml .= '<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="3"/></w:numPr><w:rPr><w:rFonts w:ascii="Bookman Old Style" w:hAnsi="Bookman Old Style"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Bookman Old Style" w:hAnsi="Bookman Old Style"/></w:rPr><w:t>' . $esc($permohonanLines[$i]) . '</w:t></w:r></w:p>';
+                        }
+                        $docXml = preg_replace(
+                            '/__EXTRA_PERMOHONAN__(.*?<\/w:p>)/s',
+                            '$1' . $extraPermohonanXml,
+                            $docXml,
+                            1
+                        );
+                        $modifiedDoc = true;
                     }
                 }
 

@@ -395,6 +395,40 @@
 
         <!-- IV. PERMASALAHAN -->
         <table class="table-instrumen" style="margin-top: -9px;">
+            <!-- IV. PERMASALAHAN -->
+            <?php
+            $splitCetakLines = static function (?string $rawText): array {
+                if ($rawText === null || trim($rawText) === '') {
+                    return [];
+                }
+                $lines = preg_split('/\r\n|\r|\n/', trim($rawText));
+                $res = [];
+                $seen = [];
+                foreach ($lines as $line) {
+                    $clean = trim(preg_replace('/^[\-\*\•\d\.\)\s]+/u', '', trim($line)));
+                    if ($clean !== '' && $clean !== '-') {
+                        $fmt = toTitleCase($clean);
+                        $k = strtolower($fmt);
+                        if (!isset($seen[$k])) {
+                            $seen[$k] = true;
+                            $res[] = $fmt;
+                        }
+                    }
+                }
+                return $res;
+            };
+            $cetakMasalah = array_values(array_unique(array_merge(
+                $splitCetakLines($riwayat_penyakit ?? ''),
+                $splitCetakLines($permasalahan_tambahan ?? '')
+            )));
+            if (empty($cetakMasalah)) {
+                $cetakMasalah[] = '-';
+            }
+            $cetakPermohonan = $splitCetakLines($permohonan_bantuan ?? '');
+            if (empty($cetakPermohonan)) {
+                $cetakPermohonan[] = toTitleCase('Mendapatkan Pelayanan BPJS KIS PBI');
+            }
+            ?>
             <tr class="section-header">
                 <td style="width: 5%; text-align: center; font-weight: bold;">IV.</td>
                 <td style="font-weight: bold;">PERMASALAHAN</td>
@@ -402,15 +436,9 @@
             <tr>
                 <td></td>
                 <td style="padding: 6px 8px; line-height: 1.4;">
-                    <?php if (!empty($riwayat_penyakit)) : ?>
-                        <div>&bull; <?= esc($riwayat_penyakit); ?></div>
-                    <?php endif; ?>
-                    <?php if (!empty($permasalahan_tambahan)) : ?>
-                        <div>&bull; <?= nl2br(esc($permasalahan_tambahan)); ?></div>
-                    <?php else : ?>
-                        <div>&bull; Keluarga Miskin/Tidak Mampu</div>
-                        <div>&bull; Tidak memiliki BPJS APBN KIS</div>
-                    <?php endif; ?>
+                    <?php foreach ($cetakMasalah as $idx => $itemMasalah) : ?>
+                        <div><?= ($idx + 1) . '. ' . esc($itemMasalah); ?></div>
+                    <?php endforeach; ?>
                 </td>
             </tr>
 
@@ -422,7 +450,9 @@
             <tr>
                 <td></td>
                 <td style="padding: 6px 8px; line-height: 1.4; font-weight: bold;">
-                    &bull; <?= nl2br(esc($permohonan_bantuan ?: 'Mendapatkan Pelayanan BPJS KIS PBI')); ?>
+                    <?php foreach ($cetakPermohonan as $idx => $itemPermohonan) : ?>
+                        <div><?= ($idx + 1) . '. ' . esc($itemPermohonan); ?></div>
+                    <?php endforeach; ?>
                 </td>
             </tr>
         </table>

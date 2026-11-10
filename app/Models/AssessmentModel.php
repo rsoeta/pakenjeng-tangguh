@@ -191,6 +191,61 @@ class AssessmentModel extends Model
             return null;
         }
 
+        // 🚀 SMART MERGE FOTO DARI dtsen_usulan (Pastikan Foto MCK / Rumah terisi dari Pembaruan Keluarga)
+        if (!empty($asesmen['id_kk'])) {
+            $usulans = $this->db->table('dtsen_usulan')
+                ->select('id, status, payload')
+                ->where('dtsen_kk_id', (int) $asesmen['id_kk'])
+                ->whereIn('status', ['diverifikasi', 'verified', 'submitted', 'draft'])
+                ->orderBy('id', 'DESC')
+                ->get()
+                ->getResultArray();
+
+            $cleanPhoto = static function ($path): ?string {
+                $p = ltrim(trim((string) ($path ?? '')), '/');
+                if ($p === '' || str_contains(strtolower($p), 'noimage.png')) {
+                    return null;
+                }
+                return $p;
+            };
+
+            $uDepan = null;
+            $uDalam = null;
+            $uMck   = null;
+            $fasilitasBab = '';
+
+            foreach ($usulans as $uRow) {
+                $uPayload = json_decode($uRow['payload'] ?? '{}', true);
+                if (!is_array($uPayload)) continue;
+                $uFoto = $uPayload['foto'] ?? ($uPayload['foto_geotag']['foto'] ?? []);
+
+                if ($uDepan === null) $uDepan = $cleanPhoto($uFoto['depan'] ?? null);
+                if ($uDalam === null) $uDalam = $cleanPhoto($uFoto['dalam'] ?? null);
+                if ($uMck === null)   $uMck   = $cleanPhoto($uFoto['kamar_mandi'] ?? ($uFoto['mck'] ?? null));
+                if ($fasilitasBab === '' && !empty($uPayload['perumahan']['sanitasi']['fasilitas_bab'])) {
+                    $fasilitasBab = trim((string) $uPayload['perumahan']['sanitasi']['fasilitas_bab']);
+                }
+            }
+
+            $asesmen['kk_foto_depan'] = $uDepan ?? $cleanPhoto($asesmen['kk_foto_depan'] ?? null);
+            $asesmen['kk_foto_dalam'] = $uDalam ?? $cleanPhoto($asesmen['kk_foto_dalam'] ?? null);
+            $asesmen['rt_foto_mck']   = $uMck   ?? $cleanPhoto($asesmen['rt_foto_mck'] ?? null);
+
+            if (empty($asesmen['rt_foto_mck']) && $fasilitasBab === 'Tidak ada fasilitas') {
+                $asesmen['rt_foto_mck'] = 'assets/images/image_not_available.jpg';
+            }
+
+            if (empty($asesmen['foto_depan'])) {
+                $asesmen['foto_depan'] = $asesmen['kk_foto_depan'];
+            }
+            if (empty($asesmen['foto_dalam'])) {
+                $asesmen['foto_dalam'] = $asesmen['kk_foto_dalam'];
+            }
+            if (empty($asesmen['foto_kamar_mandi'])) {
+                $asesmen['foto_kamar_mandi'] = $asesmen['rt_foto_mck'];
+            }
+        }
+
         // 1. Data Sasaran PMKS / Pasien (Detail ART)
         $asesmen['sasaran'] = $this->db->table('dtsen_art art')
             ->select('

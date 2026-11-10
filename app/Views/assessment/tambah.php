@@ -574,8 +574,13 @@
                         $('#tbodyArt').html(tbodyHtml);
 
                         // 3. Tampilkan Foto Rumah & MCK dari DTSEN
-                        if (kk.foto_rumah) {
-                            $('#imgFotoDepan').attr('src', '<?= base_url(); ?>/' + kk.foto_rumah).removeClass('d-none');
+                        var baseUrlClean = '<?= rtrim(base_url(), '/'); ?>/';
+                        var fotoDepanPath = kk.foto_rumah ? String(kk.foto_rumah).replace(/^\/+/, '') : '';
+                        var fotoDalamPath = kk.foto_rumah_dalam ? String(kk.foto_rumah_dalam).replace(/^\/+/, '') : '';
+                        var fotoMckPath   = kk.foto_kamar_mandi ? String(kk.foto_kamar_mandi).replace(/^\/+/, '') : '';
+
+                        if (fotoDepanPath) {
+                            $('#imgFotoDepan').attr('src', baseUrlClean + fotoDepanPath).removeClass('d-none');
                             $('#noFotoDepan').addClass('d-none');
                             $('#badgeFotoDepan').removeClass('badge-light border badge-warning badge-primary').addClass('badge-success').html('<i class="fas fa-check"></i> Siap Cetak (DTSEN)');
                             $('#foto_depan').next('.custom-file-label').html('Ganti foto dari galeri...');
@@ -586,8 +591,8 @@
                             $('#foto_depan').next('.custom-file-label').html('Pilih foto dari galeri...');
                         }
 
-                        if (kk.foto_rumah_dalam) {
-                            $('#imgFotoDalam').attr('src', '<?= base_url(); ?>/' + kk.foto_rumah_dalam).removeClass('d-none');
+                        if (fotoDalamPath) {
+                            $('#imgFotoDalam').attr('src', baseUrlClean + fotoDalamPath).removeClass('d-none');
                             $('#noFotoDalam').addClass('d-none');
                             $('#badgeFotoDalam').removeClass('badge-light border badge-warning badge-primary').addClass('badge-success').html('<i class="fas fa-check"></i> Siap Cetak (DTSEN)');
                             $('#foto_dalam').next('.custom-file-label').html('Ganti foto dari galeri...');
@@ -598,8 +603,8 @@
                             $('#foto_dalam').next('.custom-file-label').html('Pilih foto dari galeri...');
                         }
 
-                        if (kk.foto_kamar_mandi) {
-                            $('#imgFotoMck').attr('src', '<?= base_url(); ?>/' + kk.foto_kamar_mandi).removeClass('d-none');
+                        if (fotoMckPath) {
+                            $('#imgFotoMck').attr('src', baseUrlClean + fotoMckPath).removeClass('d-none');
                             $('#noFotoMck').addClass('d-none');
                             $('#badgeFotoMck').removeClass('badge-light border badge-warning badge-primary').addClass('badge-success').html('<i class="fas fa-check"></i> Siap Cetak (DTSEN)');
                             $('#foto_kamar_mandi').next('.custom-file-label').html('Ganti foto dari galeri...');
@@ -687,19 +692,29 @@
         bindImagePreview('foto_dalam', 'imgFotoDalam', 'noFotoDalam', 'badgeFotoDalam');
         bindImagePreview('foto_kamar_mandi', 'imgFotoMck', 'noFotoMck', 'badgeFotoMck');
 
-        // Checkbox Preset Masalah & Permohonan
+        // Checkbox Preset Masalah & Permohonan (Tambah saat dicentang, hapus saat centang dilepas)
         $('.chk-preset').on('change', function() {
             var targetId = $(this).data('target');
             var val = $(this).val();
-            var currentText = $('#' + targetId).val().trim();
+            var rawLines = $('#' + targetId).val().split(/\r?\n/).map(function(s) {
+                return s.trim();
+            }).filter(function(s) {
+                return s.length > 0;
+            });
 
             if ($(this).is(':checked')) {
-                if (currentText.length > 0) {
-                    $('#' + targetId).val(currentText + '\n' + val);
-                } else {
-                    $('#' + targetId).val(val);
+                var exists = rawLines.some(function(s) {
+                    return s.toLowerCase() === val.toLowerCase();
+                });
+                if (!exists) {
+                    rawLines.push(val);
                 }
+            } else {
+                rawLines = rawLines.filter(function(s) {
+                    return s.toLowerCase() !== val.toLowerCase();
+                });
             }
+            $('#' + targetId).val(rawLines.join('\n'));
         });
 
         // Submit Form via AJAX
