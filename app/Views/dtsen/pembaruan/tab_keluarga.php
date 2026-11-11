@@ -65,8 +65,22 @@ if (empty($wil['provinsi']) && !empty($rtData['kode_desa'])) {
     }
 
     #map {
+        height: 300px;
+        border-radius: 10px;
         border: 2px solid #ddd;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    @media (min-width: 768px) {
+        #map {
+            height: 460px;
+        }
+    }
+
+    @media (min-width: 1200px) {
+        #map {
+            height: 540px;
+        }
     }
 </style>
 
@@ -262,7 +276,7 @@ if (empty($wil['provinsi']) && !empty($rtData['kode_desa'])) {
                     </button>
                 </div>
                 <div class="mb-4">
-                    <div id="map" style="height: 300px; border-radius: 10px;"></div>
+                    <div id="map"></div>
                 </div>
                 <div class="d-flex justify-content-start mb-3">
                     <div class="form-check form-switch village-boundary-toggle d-flex align-items-center gap-2 mb-0" title="Tampilkan / sembunyikan batas desa">
