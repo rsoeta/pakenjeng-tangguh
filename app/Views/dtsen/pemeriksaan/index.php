@@ -347,6 +347,6 @@
     window.csrfName = "<?= csrf_token() ?>";
     window.csrfHash = "<?= csrf_hash() ?>";
 </script>
-<script src="<?= base_url('assets/js/pemeriksaan.js?v=3.0.3') ?>"></script>
+<script src="<?= base_url('assets/js/pemeriksaan.js') ?>?v=<?= @filemtime(FCPATH . 'assets/js/pemeriksaan.js') ?: '3.0.4' ?>"></script>
 
 <?= $this->endSection() ?>

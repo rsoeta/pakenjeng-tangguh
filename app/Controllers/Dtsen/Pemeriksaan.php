@@ -264,12 +264,62 @@ class Pemeriksaan extends BaseController
         if (!$action) {
             return $this->jsonError('Aksi arsip tidak valid.', 400);
         }
-        $now = date('Y-m-d H:i:s');
-        $update = $action === 'archive'
-            ? ['deleted_at' => $now, 'delete_reason' => $this->archiveReason('KK')]
-            : ['deleted_at' => null, 'delete_reason' => null];
 
-        $this->db->table('dtsen_kk')->where('id_kk', (int) $id_kk)->update($update);
+        $idKk = (int) $id_kk;
+        $isArchived = !empty($kk['deleted_at']);
+        if ($action === 'archive' && $isArchived) {
+            return $this->jsonError('KK ini sudah berada di arsip. Muat ulang daftar untuk melihat status terbaru.', 409);
+        }
+        if ($action === 'restore' && !$isArchived) {
+            return $this->jsonError('KK ini sudah aktif. Muat ulang daftar untuk melihat status terbaru.', 409);
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $actor = $this->actorName($user);
+        $reason = $action === 'archive' ? $this->archiveReason('KK') : null;
+        $update = [
+            'deleted_at' => $action === 'archive' ? $now : null,
+            'delete_reason' => $reason,
+            'updated_by' => $actor,
+        ];
+
+        $this->db->transBegin();
+        try {
+            $builder = $this->db->table('dtsen_kk')->where('id_kk', $idKk);
+            if ($action === 'archive') {
+                $builder->where('deleted_at', null);
+            } else {
+                $builder->where('deleted_at IS NOT NULL', null, false);
+            }
+            $builder->update($update);
+
+            if ($this->db->affectedRows() !== 1) {
+                $this->db->transRollback();
+                return $this->jsonError('Status KK baru saja berubah oleh proses lain. Muat ulang daftar lalu coba lagi.', 409);
+            }
+
+            $this->writeAudit(
+                'dtsen_kk',
+                $idKk,
+                'deleted_at',
+                $kk['deleted_at'] ?? null,
+                $action === 'archive' ? $now : null,
+                $action === 'archive'
+                    ? 'Arsip: ' . $reason
+                    : 'Dipulihkan via Workspace Pemeriksaan (alasan arsip sebelumnya: ' . ($kk['delete_reason'] ?? '-') . ')',
+                $actor,
+                $now
+            );
+
+            if (!$this->db->transStatus()) {
+                throw new \RuntimeException('Transaksi arsip KK gagal.');
+            }
+            $this->db->transCommit();
+        } catch (\Throwable $e) {
+            $this->db->transRollback();
+            log_message('error', '[Pemeriksaan::archiveKK] ' . $e->getMessage());
+            return $this->jsonError('Perubahan arsip KK gagal disimpan; tidak ada data yang berubah.', 500);
+        }
 
         return $this->response->setJSON([
             'success' => true,
@@ -296,11 +346,80 @@ class Pemeriksaan extends BaseController
         if (!$action) {
             return $this->jsonError('Aksi arsip tidak valid.', 400);
         }
-        $update = $action === 'archive'
-            ? ['deleted_at' => date('Y-m-d H:i:s'), 'delete_reason' => $this->archiveReason('ART')]
-            : ['deleted_at' => null, 'delete_reason' => null];
 
-        $this->db->table('dtsen_art')->where('id_art', (int) $id_art)->update($update);
+        // Tolak aksi yang tidak sesuai status terkini agar riwayat arsip (deleted_at/alasan asli)
+        // tidak tertimpa oleh klik ganda atau tampilan yang belum dimuat ulang.
+        $idArt = (int) $id_art;
+        $isArchived = !empty($art['deleted_at']);
+        if ($action === 'archive' && $isArchived) {
+            return $this->jsonError('ART ini sudah berada di arsip. Muat ulang daftar untuk melihat status terbaru.', 409);
+        }
+        if ($action === 'restore' && !$isArchived) {
+            return $this->jsonError('ART ini sudah aktif. Muat ulang daftar untuk melihat status terbaru.', 409);
+        }
+
+        // Pemulihan tidak boleh menghasilkan NIK aktif ganda.
+        $nik = trim((string) ($art['nik'] ?? ''));
+        if ($action === 'restore' && $nik !== '') {
+            $conflict = $this->db->table('dtsen_art a')
+                ->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'left')
+                ->where('a.nik', $nik)
+                ->where('a.id_art !=', $idArt)
+                ->where('a.deleted_at', null)
+                ->where('kk.deleted_at', null)
+                ->countAllResults();
+            if ($conflict > 0) {
+                return $this->jsonError("ART tidak dapat dipulihkan karena NIK {$nik} sudah aktif pada data ART lain. Periksa kemungkinan data ganda terlebih dahulu.", 409);
+            }
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $actor = $this->actorName($user);
+        $reason = $action === 'archive' ? $this->archiveReason('ART') : null;
+        $update = [
+            'deleted_at' => $action === 'archive' ? $now : null,
+            'delete_reason' => $reason,
+            'updated_by' => $actor,
+        ];
+
+        $this->db->transBegin();
+        try {
+            $builder = $this->db->table('dtsen_art')->where('id_art', $idArt);
+            // Guard optimistis: hanya ubah bila status di database masih sama dengan yang divalidasi.
+            if ($action === 'archive') {
+                $builder->where('deleted_at', null);
+            } else {
+                $builder->where('deleted_at IS NOT NULL', null, false);
+            }
+            $builder->update($update);
+
+            if ($this->db->affectedRows() !== 1) {
+                $this->db->transRollback();
+                return $this->jsonError('Status ART baru saja berubah oleh proses lain. Muat ulang daftar lalu coba lagi.', 409);
+            }
+
+            $this->writeAudit(
+                'dtsen_art',
+                $idArt,
+                'deleted_at',
+                $art['deleted_at'] ?? null,
+                $action === 'archive' ? $now : null,
+                $action === 'archive'
+                    ? 'Arsip: ' . $reason
+                    : 'Dipulihkan via Workspace Pemeriksaan (alasan arsip sebelumnya: ' . ($art['delete_reason'] ?? '-') . ')',
+                $actor,
+                $now
+            );
+
+            if (!$this->db->transStatus()) {
+                throw new \RuntimeException('Transaksi arsip ART gagal.');
+            }
+            $this->db->transCommit();
+        } catch (\Throwable $e) {
+            $this->db->transRollback();
+            log_message('error', '[Pemeriksaan::archiveART] ' . $e->getMessage());
+            return $this->jsonError('Perubahan arsip ART gagal disimpan; tidak ada data yang berubah.', 500);
+        }
 
         return $this->response->setJSON([
             'success' => true,
@@ -712,7 +831,53 @@ class Pemeriksaan extends BaseController
     protected function archiveReason(string $entity): string
     {
         $reason = trim((string) ($this->request->getPost('reason') ?? ''));
+        // Kolom delete_reason ber-charset utf8mb3: buang karakter 4-byte (emoji) agar UPDATE tidak gagal.
+        $reason = trim((string) preg_replace('/[\x{10000}-\x{10FFFF}]/u', '', $reason));
         return $reason !== '' ? mb_substr($reason, 0, 1000) : "Diarsipkan melalui Workspace Pemeriksaan {$entity}.";
+    }
+
+    protected function actorName(array $user): string
+    {
+        $actor = trim((string) ($user['nik'] ?? ''));
+        if ($actor === '') {
+            $actor = trim((string) ($user['fullname'] ?? ($user['username'] ?? 'system')));
+        }
+        return mb_substr($actor !== '' ? $actor : 'system', 0, 50);
+    }
+
+    /**
+     * Catat jejak perubahan ke dtsen_audit (bila tabel tersedia). Dipanggil di dalam transaksi pemanggil.
+     */
+    protected function writeAudit(string $entity, int $entityId, string $field, $oldValue, $newValue, string $reason, string $actor, string $changedAt): void
+    {
+        static $auditAvailable = null;
+        if ($auditAvailable === null) {
+            $auditAvailable = $this->db->tableExists('dtsen_audit');
+        }
+        if (!$auditAvailable) {
+            return;
+        }
+
+        // dtsen_audit memakai charset latin1: konversi aman agar karakter non-latin tidak menggagalkan transaksi.
+        $toLatin = static function ($value): ?string {
+            if ($value === null) {
+                return null;
+            }
+            $converted = @iconv('UTF-8', 'Windows-1252//TRANSLIT//IGNORE', (string) $value);
+            $converted = $converted === false ? '' : (string) @iconv('Windows-1252', 'UTF-8//IGNORE', $converted);
+            return mb_substr($converted, 0, 1000);
+        };
+
+        $this->db->table('dtsen_audit')->insert([
+            'entity' => $entity,
+            'entity_id' => $entityId,
+            'field' => $field,
+            'old_value' => $toLatin($oldValue),
+            'new_value' => $toLatin($newValue),
+            'reason' => $toLatin($reason),
+            'changed_by' => $toLatin($actor),
+            'changed_at' => $changedAt,
+        ]);
     }
 
     protected function bulkArchive(string $entity)
@@ -732,7 +897,7 @@ class Pemeriksaan extends BaseController
         }
 
         if ($entity === 'kk') {
-            $builder = $this->kkQuery($user)->whereIn('kk.id_kk', $ids)->select('kk.id_kk');
+            $builder = $this->kkQuery($user)->whereIn('kk.id_kk', $ids)->select('kk.id_kk, kk.deleted_at, kk.delete_reason');
             if ($action === 'archive') {
                 $builder->where('kk.deleted_at', null);
             } else {
@@ -741,7 +906,7 @@ class Pemeriksaan extends BaseController
             $table = 'dtsen_kk';
             $key = 'id_kk';
         } else {
-            $builder = $this->artQuery($user)->whereIn('a.id_art', $ids)->select('a.id_art');
+            $builder = $this->artQuery($user)->whereIn('a.id_art', $ids)->select('a.id_art, a.nik, a.deleted_at, a.delete_reason');
             $builder->where('kk.deleted_at', null);
             if ($action === 'archive') {
                 $builder->where('a.deleted_at', null);
@@ -751,19 +916,95 @@ class Pemeriksaan extends BaseController
             $table = 'dtsen_art';
             $key = 'id_art';
         }
-        $allowedIds = array_map('intval', array_column($builder->get()->getResultArray(), $key));
-        if (!$allowedIds) {
+        $rows = $builder->get()->getResultArray();
+        if (!$rows) {
             return $this->jsonError('Tidak ada data yang dapat diproses dalam wilayah tugas.', 403);
         }
 
-        $update = $action === 'archive'
-            ? ['deleted_at' => date('Y-m-d H:i:s'), 'delete_reason' => $this->archiveReason(strtoupper($entity))]
-            : ['deleted_at' => null, 'delete_reason' => null];
-        $this->db->table($table)->whereIn($key, $allowedIds)->update($update);
+        // Pada pemulihan massal ART, cegah pemulihan NIK yang sudah aktif.
+        $skippedDuplicateNik = 0;
+        if ($entity === 'art' && $action === 'restore') {
+            $niks = array_values(array_unique(array_filter(array_map(
+                static fn($r) => trim((string) ($r['nik'] ?? '')),
+                $rows
+            ))));
+            $activeNiks = [];
+            if ($niks) {
+                $activeRows = $this->db->table('dtsen_art a')
+                    ->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'left')
+                    ->select('a.nik')
+                    ->whereIn('a.nik', $niks)
+                    ->where('a.deleted_at', null)
+                    ->where('kk.deleted_at', null)
+                    ->get()
+                    ->getResultArray();
+                foreach ($activeRows as $ar) {
+                    $activeNiks[trim((string) $ar['nik'])] = true;
+                }
+            }
+            $filteredRows = [];
+            foreach ($rows as $r) {
+                $nik = trim((string) ($r['nik'] ?? ''));
+                if ($nik !== '' && isset($activeNiks[$nik])) {
+                    $skippedDuplicateNik++;
+                    continue;
+                }
+                if ($nik !== '') {
+                    $activeNiks[$nik] = true;
+                }
+                $filteredRows[] = $r;
+            }
+            $rows = $filteredRows;
+            if (!$rows) {
+                return $this->jsonError('ART terpilih tidak dapat dipulihkan karena NIK sudah aktif pada data ART lain.', 409);
+            }
+        }
+
+        $allowedIds = array_map(static fn($r) => (int) $r[$key], $rows);
+        $now = date('Y-m-d H:i:s');
+        $actor = $this->actorName($user);
+        $reason = $action === 'archive' ? $this->archiveReason(strtoupper($entity)) : null;
+        $update = [
+            'deleted_at' => $action === 'archive' ? $now : null,
+            'delete_reason' => $reason,
+            'updated_by' => $actor,
+        ];
+
+        $this->db->transBegin();
+        try {
+            $this->db->table($table)->whereIn($key, $allowedIds)->update($update);
+            foreach ($rows as $r) {
+                $this->writeAudit(
+                    $table,
+                    (int) $r[$key],
+                    'deleted_at',
+                    $r['deleted_at'] ?? null,
+                    $action === 'archive' ? $now : null,
+                    $action === 'archive'
+                        ? 'Arsip massal: ' . $reason
+                        : 'Dipulihkan massal via Workspace Pemeriksaan (alasan arsip sebelumnya: ' . ($r['delete_reason'] ?? '-') . ')',
+                    $actor,
+                    $now
+                );
+            }
+            if (!$this->db->transStatus()) {
+                throw new \RuntimeException('Transaksi bulk arsip gagal.');
+            }
+            $this->db->transCommit();
+        } catch (\Throwable $e) {
+            $this->db->transRollback();
+            log_message('error', '[Pemeriksaan::bulkArchive] ' . $e->getMessage());
+            return $this->jsonError('Perubahan arsip massal gagal disimpan; tidak ada data yang berubah.', 500);
+        }
+
+        $msg = count($allowedIds) . ' data berhasil ' . ($action === 'archive' ? 'diarsipkan.' : 'dipulihkan.');
+        if ($skippedDuplicateNik > 0) {
+            $msg .= " ({$skippedDuplicateNik} dilewati karena NIK sudah aktif.)";
+        }
 
         return $this->response->setJSON([
             'success' => true,
-            'message' => count($allowedIds) . ' data berhasil ' . ($action === 'archive' ? 'diarsipkan.' : 'dipulihkan.'),
+            'message' => $msg,
             'data' => ['success' => count($allowedIds), 'failed' => count($ids) - count($allowedIds)],
         ]);
     }

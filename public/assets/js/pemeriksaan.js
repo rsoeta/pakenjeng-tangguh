@@ -300,10 +300,13 @@
             state.selectedKks.clear();
             updateBulkToolbar('kk');
         }
-        if (kkTable) {
-            kkTable.search(state.kkSearch);
-            kkTable.ajax.reload(null, reset !== false);
+        if (!kkTable) {
+            return Promise.resolve();
         }
+        kkTable.search(state.kkSearch);
+        return new Promise((resolve) => {
+            kkTable.ajax.reload(() => resolve(), reset !== false);
+        });
     }
 
     function clearSelectedKk() {
@@ -435,8 +438,7 @@
         button.classList.toggle('btn-outline-primary', restore);
         const icon = button.querySelector('i, svg');
         if (icon) {
-            icon.classList.toggle('fa-undo', restore);
-            icon.classList.toggle('fa-archive', !restore);
+            icon.outerHTML = `<i class="fas ${restore ? 'fa-undo' : 'fa-archive'} mr-1"></i>`;
         }
         const label = button.querySelector('span');
         if (label) label.textContent = restore
@@ -457,8 +459,18 @@
             const result = await postForm(endpoint(`bulk-archive/${entity}`), formData);
             showMessage(result.message, 'success');
             selected.clear();
-            await Promise.all([loadStats(), loadKK(true)]);
-            if (state.selectedKk) loadART(true);
+            updateBulkToolbar(entity);
+            await Promise.all([loadStats(), loadKK(false)]);
+            if (state.selectedKk) {
+                const selectedRow = document.querySelector(`.workspace-kk-item[data-id="${state.selectedKk.id_kk}"]`);
+                if (selectedRow) {
+                    selectKk(state.selectedKk.id_kk);
+                } else if (entity === 'kk' || state.status === 'archive') {
+                    clearSelectedKk();
+                } else {
+                    await loadART(true);
+                }
+            }
         } catch (error) {
             showMessage(error.message, 'error');
         }
@@ -565,22 +577,38 @@
         window.location.assign(`${endpoint('export')}?${params.toString()}`);
     }
 
-    async function archiveItem(entity, id, action) {
+    async function archiveItem(entity, id, action, triggerButton) {
+        if (triggerButton && triggerButton.disabled) return;
         if (action === 'archive' && !await confirmArchive('Arsipkan data ini? Data tidak dihapus permanen dan dapat dipulihkan.')) return;
+        if (triggerButton) triggerButton.disabled = true;
         try {
             const result = await postAction(entityEndpoint(entity, `archive/${id}`), { action });
+            const numericId = Number(id);
+            if (entity === 'art') {
+                state.selectedArts.delete(numericId);
+                updateBulkToolbar('art');
+            } else {
+                state.selectedKks.delete(numericId);
+                updateBulkToolbar('kk');
+            }
             showMessage(result.message, 'success');
-            await Promise.all([loadStats(), loadKK(true)]);
+            await Promise.all([loadStats(), loadKK(false)]);
             if (state.selectedKk) {
                 const selectedRow = document.querySelector(`.workspace-kk-item[data-id="${state.selectedKk.id_kk}"]`);
-                if (!selectedRow) {
+                if (selectedRow) {
+                    selectKk(state.selectedKk.id_kk);
+                } else if (entity === 'kk' || state.status === 'archive') {
                     clearSelectedKk();
                 } else {
-                    selectKk(state.selectedKk.id_kk);
+                    await loadART(true);
                 }
             }
         } catch (error) {
             showMessage(error.message, 'error');
+        } finally {
+            if (triggerButton && document.body.contains(triggerButton)) {
+                triggerButton.disabled = false;
+            }
         }
     }
 
@@ -623,7 +651,7 @@
             if (archiveButton) {
                 event.stopPropagation();
                 const entity = archiveButton.classList.contains('js-kk-archive') ? 'kk' : 'art';
-                archiveItem(entity, archiveButton.dataset.id, archiveButton.dataset.action);
+                archiveItem(entity, archiveButton.dataset.id, archiveButton.dataset.action, archiveButton);
                 return;
             }
 
@@ -740,9 +768,12 @@
         el('btnBulkART').addEventListener('click', () => bulkArchive('art'));
         el('btnRefreshWorkspace').addEventListener('click', async () => {
             try {
-                await loadStats();
-                await loadKK(true, true);
-                if (state.selectedKk) loadART(true);
+                await Promise.all([loadStats(), loadKK(false, true)]);
+                if (state.selectedKk) {
+                    const selectedRow = document.querySelector(`.workspace-kk-item[data-id="${state.selectedKk.id_kk}"]`);
+                    if (selectedRow) selectKk(state.selectedKk.id_kk);
+                    else await loadART(true);
+                }
             } catch (error) {
                 showMessage(error.message, 'error');
             }
@@ -758,7 +789,7 @@
                 const result = await postForm(entityEndpoint('kk', `update/${id}`), new FormData(form));
                 hideModal('modalEditKK');
                 showMessage(result.message, 'success');
-                await Promise.all([loadStats(), loadKK(true, true)]);
+                await Promise.all([loadStats(), loadKK(false, true)]);
                 if (state.selectedKk) selectKk(state.selectedKk.id_kk);
             } catch (error) {
                 showMessage(error.message, 'error');
@@ -772,8 +803,8 @@
                 const result = await postForm(entityEndpoint('art', `update/${id}`), new FormData(form));
                 hideModal('modalEditART');
                 showMessage(result.message, 'success');
-                await loadStats();
-                loadART(true);
+                await Promise.all([loadStats(), loadKK(false)]);
+                await loadART(true);
             } catch (error) {
                 showMessage(error.message, 'error');
             }
