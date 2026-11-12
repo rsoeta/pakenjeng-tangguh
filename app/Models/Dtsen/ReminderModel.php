@@ -13,7 +13,8 @@ class ReminderModel extends Model
         'admin_id',
         'due_date',
         'status',
-        'sent_at'
+        'sent_at',
+        'created_at'
     ];
 
     // Ambil semua reminder yang sudah jatuh tempo

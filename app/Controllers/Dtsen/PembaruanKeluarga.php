@@ -1504,16 +1504,18 @@ class PembaruanKeluarga extends BaseController
 
             if (!$existingReminder) {
                 // 🚀 KOREKSI: Buat jadwal baru (3 bulan dari sekarang)
-                $dueDate = date('Y-m-d H:i:s', strtotime('+3 months'));
+                $createdAt = date('Y-m-d H:i:s');
+                $dueDate   = date('Y-m-d H:i:s', strtotime('+3 months', strtotime($createdAt)));
 
                 // Pastikan admin_id valid (jika string 'system', kita ganti jadi 0)
                 $adminId = is_numeric($userId) ? $userId : 0;
 
                 $this->db->table('dtsen_kk_reminder_log')->insert([
-                    'kk_id'    => $idKk,
-                    'admin_id' => $adminId,
-                    'due_date' => $dueDate,
-                    'status'   => 'pending'
+                    'kk_id'      => $idKk,
+                    'admin_id'   => $adminId,
+                    'due_date'   => $dueDate,
+                    'status'     => 'pending',
+                    'created_at' => $createdAt
                 ]);
             }
 

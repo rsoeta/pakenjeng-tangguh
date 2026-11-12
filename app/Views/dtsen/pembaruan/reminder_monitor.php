@@ -69,11 +69,11 @@
                     <div class="row mb-3 g-2">
                         <div class="col-6 col-md-2">
                             <label class="small fw-bold">Mulai Tgl</label>
-                            <input type="date" id="filterStartDate" class="form-control form-control-sm">
+                            <input type="text" id="filterStartDate" class="form-control form-control-sm bg-white" placeholder="Pilih Tanggal..." autocomplete="off">
                         </div>
                         <div class="col-6 col-md-2">
                             <label class="small fw-bold">Sampai Tgl</label>
-                            <input type="date" id="filterEndDate" class="form-control form-control-sm">
+                            <input type="text" id="filterEndDate" class="form-control form-control-sm bg-white" placeholder="Pilih Tanggal..." autocomplete="off">
                         </div>
                         <div class="col-6 col-md-2">
                             <label class="small fw-bold">Status</label>
@@ -101,8 +101,9 @@
                                 <th>Status</th>
                                 <th>Admin Desa</th>
                                 <th>No. HP</th>
-                                <th>Due Date</th>
-                                <th>Sent At</th>
+                                <th>Waktu Dibuat</th>
+                                <th>Jatuh Tempo</th>
+                                <th>Waktu Terkirim</th>
                                 <th>#</th>
                             </tr>
                         </thead>
@@ -116,6 +117,35 @@
 
 <script>
     const baseUrl = "<?= base_url() ?>";
+
+    function formatTanggalHumanis(dateStr, type) {
+        if (!dateStr || dateStr === '0000-00-00 00:00:00') {
+            return (type === 'sort' || type === 'type') ? '' : '-';
+        }
+        if (type === 'sort' || type === 'type') {
+            return dateStr;
+        }
+
+        const parsed = new Date(String(dateStr).replace(' ', 'T'));
+        if (isNaN(parsed.getTime())) {
+            return dateStr;
+        }
+
+        const hariIndo = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const bulanIndo = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+
+        const namaHari = hariIndo[parsed.getDay()];
+        const tgl = String(parsed.getDate()).padStart(2, '0');
+        const namaBulan = bulanIndo[parsed.getMonth()];
+        const thn = parsed.getFullYear();
+        const jam = String(parsed.getHours()).padStart(2, '0');
+        const menit = String(parsed.getMinutes()).padStart(2, '0');
+
+        return `${namaHari}, ${tgl} ${namaBulan} ${thn}, pukul ${jam}:${menit}`;
+    }
 
     function loadSummary() {
         $.get(baseUrl + '/dtsen/reminder-monitor/summary', {
@@ -201,10 +231,22 @@
                     data: 'nope'
                 },
                 {
-                    data: 'due_date'
+                    data: 'created_at',
+                    render: function(data, type) {
+                        return formatTanggalHumanis(data, type);
+                    }
                 },
                 {
-                    data: 'sent_at'
+                    data: 'due_date',
+                    render: function(data, type) {
+                        return formatTanggalHumanis(data, type);
+                    }
+                },
+                {
+                    data: 'sent_at',
+                    render: function(data, type) {
+                        return formatTanggalHumanis(data, type);
+                    }
                 },
                 {
                     data: null,
@@ -217,6 +259,27 @@
                 }
             ]
         });
+
+        // Inisialisasi Flatpickr pada Mulai Tgl & Sampai Tgl
+        if (typeof flatpickr !== 'undefined') {
+            flatpickr('#filterStartDate, #filterEndDate', {
+                locale: 'id',
+                altInput: true,
+                altFormat: 'j F Y',
+                altInputClass: 'form-control form-control-sm bg-white',
+                dateFormat: 'Y-m-d',
+                allowInput: true,
+                onChange: function() {
+                    table.ajax.reload();
+                    loadSummary();
+                },
+                onClose: function(selectedDates, dateStr, instance) {
+                    if (instance.altInput && instance.altInput.value.trim() === '') {
+                        instance.clear();
+                    }
+                }
+            });
+        }
 
         // Filter & Refresh
         $('#filterStatus, #filterQ, #filterStartDate, #filterEndDate').on('change keyup', function() {

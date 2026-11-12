@@ -43,7 +43,7 @@ class ReminderMonitor extends BaseController
 
         // basic query
         $builder = $this->db->table('dtsen_kk_reminder_log r')
-            ->select('r.id, r.kk_id, r.admin_id, r.due_date, r.status, r.sent_at, kk.no_kk, kk.kepala_keluarga, u.fullname as admin_name, u.nope')
+            ->select('r.id, r.kk_id, r.admin_id, r.created_at, r.due_date, r.status, r.sent_at, kk.no_kk, kk.kepala_keluarga, u.fullname as admin_name, u.nope')
             ->join('dtsen_kk kk', 'kk.id_kk = r.kk_id', 'left')
             ->join('dtks_users u', 'u.id = r.admin_id', 'left');
 
@@ -79,6 +79,7 @@ class ReminderMonitor extends BaseController
                 'nama_kk' => $r['kepala_keluarga'],
                 'admin' => $r['admin_name'],
                 'nope' => $r['nope'],
+                'created_at' => $r['created_at'],
                 'due_date' => $r['due_date'],
                 'status' => $r['status'],
                 'sent_at' => $r['sent_at']
