@@ -80,8 +80,8 @@ class Perlinsos extends Controller
             dtsen_rt.rw,
             dtsen_rt.rt
         ")
-            // 🚀 PERBAIKAN 1: Pastikan KK yang ditarik adalah KK yang masih aktif
-            ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk AND dtsen_kk.deleted_at IS NULL', 'left')
+            // 🚀 PERBAIKAN 1: Pastikan KK yang ditarik adalah KK yang masih aktif (INNER JOIN)
+            ->join('dtsen_kk', 'dtsen_kk.id_kk = dtsen_art.id_kk AND dtsen_kk.deleted_at IS NULL', 'inner')
             ->join('dtsen_rt', 'dtsen_rt.id_rt = dtsen_kk.id_rt', 'left')
 
             // 🚀 PERBAIKAN 2: Gunakan sintaks string statis agar Query Builder mutlak membaca IS NULL
@@ -97,8 +97,9 @@ class Perlinsos extends Controller
             $builder->where('dtsen_rt.kode_desa', $kodeDesa);
         }
 
-        // 🚀 PERBAIKAN 3: Kunci mutlak NIK agar tidak ada nama yang sama muncul dua kali
-        $builder->groupBy('dtsen_art.nik')
+        // 🚀 PERBAIKAN 3: Kunci mutlak NIK & prioritaskan id_art terbesar (data terbaru)
+        $builder->orderBy('dtsen_art.id_art', 'DESC')
+            ->groupBy('dtsen_art.nik')
             ->limit(15);
 
         /* =====================================================
@@ -164,24 +165,45 @@ class Perlinsos extends Controller
         ]);
     }
 
-    // 🚀 SIMPAN NIK SEDERHANA (DENGAN PROTEKSI GANDA)
+    // 🚀 SIMPAN NIK SEDERHANA (DENGAN PROTEKSI GANDA & CERDAS TERHADAP PEMBARUAN KK)
     public function save()
     {
         $nik   = $this->request->getPost('nik_peserta');
         $id_kk = $this->request->getPost('id_kk');
         $user  = session()->get('nik');
 
-        // 1. Cek duplikasi NIK (Mencegah orang yang sama diinput 2x)
-        $cekNik = $this->db->table('dtsen_perlinsos')->where('nik', $nik)->countAllResults();
-        if ($cekNik > 0) {
+        // 1. Cek apakah NIK sudah pernah direkap
+        $existing = $this->db->table('dtsen_perlinsos')->where('nik', $nik)->get()->getRowArray();
+        if ($existing) {
+            // Cek apakah KK lama pada rekapan ini sudah terhapus (soft delete) atau berbeda
+            $oldKk = $this->db->table('dtsen_kk')->where('id_kk', $existing['id_kk'])->get()->getRowArray();
+            $isOldKkDeleted = empty($oldKk) || !empty($oldKk['deleted_at']);
+
+            // Jika KK lama sudah terhapus dan rekapan belum disinkronkan permanen, perbarui id_kk ke KK terbaru
+            if ($isOldKkDeleted && ($existing['status'] ?? '') !== 'tersinkron') {
+                $this->db->table('dtsen_perlinsos')->where('id', $existing['id'])->update([
+                    'id_kk'      => $id_kk,
+                    'created_by' => $user,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Data rekapitulasi berhasil diperbarui ke Kartu Keluarga (KK) terbaru!'
+                ]);
+            }
+
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'NIK ini sudah direkapitulasi sebelumnya!'
             ]);
         }
 
-        // 2. 🚀 Cek duplikasi ID KK (Mencegah anggota keluarga lain dalam 1 KK diinput lagi)
-        $cekKk = $this->db->table('dtsen_perlinsos')->where('id_kk', $id_kk)->countAllResults();
+        // 2. 🚀 Cek duplikasi ID KK aktif (Mencegah anggota keluarga lain dalam 1 KK aktif diinput lagi)
+        $cekKk = $this->db->table('dtsen_perlinsos p')
+            ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
+            ->where('p.id_kk', $id_kk)
+            ->where('k.deleted_at IS NULL')
+            ->countAllResults();
         if ($cekKk > 0) {
             return $this->response->setJSON([
                 'success' => false,
@@ -252,7 +274,7 @@ class Perlinsos extends Controller
             // 1. Total capaian KPM yang diinput oleh petugas (abaikan soft-delete)
             $capaian = $this->db->table('dtsen_perlinsos p')
                 ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
-                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'inner')
                 ->where('p.created_by', $nikPetugas)
                 ->where('a.deleted_at IS NULL')
                 ->where('k.deleted_at IS NULL')
@@ -261,7 +283,7 @@ class Perlinsos extends Controller
             // 2. Data yang sudah berhasil diverifikasi (tersinkron) dan aktif
             $terverifikasi = $this->db->table('dtsen_perlinsos p')
                 ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
-                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'inner')
                 ->where('p.created_by', $nikPetugas)
                 ->where('p.status', 'tersinkron')
                 ->where('a.deleted_at IS NULL')
@@ -348,7 +370,7 @@ class Perlinsos extends Controller
 
             $capaian = $this->db->table('dtsen_perlinsos p')
                 ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
-                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'inner')
                 ->where('p.created_by', $nikPetugas)
                 ->where('a.deleted_at IS NULL')
                 ->where('k.deleted_at IS NULL')
@@ -356,7 +378,7 @@ class Perlinsos extends Controller
 
             $terverifikasi = $this->db->table('dtsen_perlinsos p')
                 ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
-                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'inner')
                 ->where('p.created_by', $nikPetugas)
                 ->where('p.status', 'tersinkron')
                 ->where('a.deleted_at IS NULL')
@@ -418,7 +440,7 @@ class Perlinsos extends Controller
 
             $totalTerverifikasi = $this->db->table('dtsen_perlinsos p')
                 ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
-                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'inner')
                 ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
                 ->where('r.kode_desa', $kodeDesa)
                 ->where('p.status', 'tersinkron')
@@ -428,7 +450,7 @@ class Perlinsos extends Controller
 
             $totalCapaianRaw = $this->db->table('dtsen_perlinsos p')
                 ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
-                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'inner')
                 ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
                 ->where('r.kode_desa', $kodeDesa)
                 ->where('a.deleted_at IS NULL')
@@ -470,7 +492,7 @@ class Perlinsos extends Controller
 
             $terverifikasiRw = $this->db->table('dtsen_perlinsos p')
                 ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
-                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'inner')
                 ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
                 ->where('r.kode_desa', $kodeDesa)
                 ->where('r.rw', $rwVal)
@@ -481,7 +503,7 @@ class Perlinsos extends Controller
 
             $capaianRw = $this->db->table('dtsen_perlinsos p')
                 ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
-                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'inner')
                 ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
                 ->where('r.kode_desa', $kodeDesa)
                 ->where('r.rw', $rwVal)
@@ -577,10 +599,10 @@ class Perlinsos extends Controller
                 k.alamat, r.rt, r.rw,
                 se.kategori_desil
             ') // 🚀 Pastikan p.status ikut di-select
-            // 🛡️ Filter Mutlak Soft Delete: Wajib INNER JOIN dan singkirkan ART/KK yang telah di-soft-delete
+            // 🛡️ Filter Mutlak Soft Delete & Dinamis KK Terbaru: Wajib INNER JOIN ke ART aktif dan KK aktifnya
             ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
-            ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
-            ->join('dtsen_se se', 'se.id_kk = p.id_kk', 'left')
+            ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'inner')
+            ->join('dtsen_se se', 'se.id_kk = k.id_kk', 'left')
             ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
             ->join('dtks_users u', 'u.nik = p.created_by', 'left')
             ->where('a.deleted_at IS NULL')

@@ -545,14 +545,45 @@ class DtsenSe extends Controller
                 return $this->response->setJSON(['status' => false, 'message' => 'Alasan wajib diisi']);
             }
 
-            // simpan alasan sebelum soft delete
+            $deletedAt = date('Y-m-d H:i:s');
+            $db = \Config\Database::connect();
+            $db->transBegin();
+
+            // 1. Soft delete data Kartu Keluarga (KK)
             $this->kkModel->update($id, [
                 'delete_reason' => $alasan,
-                'deleted_at'    => date('Y-m-d H:i:s'),
+                'deleted_at'    => $deletedAt,
             ]);
 
-            return $this->response->setJSON(['status' => true, 'message' => 'Keluarga berhasil dihapus']);
+            // 2. 🛡️ CASCADE SOFT-DELETE: Hapus seluruh anggota keluarga (dtsen_art) yang masih aktif pada KK ini
+            $db->table('dtsen_art')
+                ->where('id_kk', $id)
+                ->where('deleted_at IS NULL')
+                ->update([
+                    'delete_reason' => $alasan,
+                    'deleted_at'    => $deletedAt,
+                ]);
+
+            // 3. Cascade ke dtsen_usulan_art jika ada usulan terikat KK ini
+            $usulanRows = $db->table('dtsen_usulan')->select('id')->where('dtsen_kk_id', $id)->get()->getResultArray();
+            if (!empty($usulanRows)) {
+                $usulanIds = array_column($usulanRows, 'id');
+                $db->table('dtsen_usulan_art')
+                    ->whereIn('dtsen_usulan_id', $usulanIds)
+                    ->where('deleted_at IS NULL')
+                    ->update([
+                        'delete_reason' => $alasan,
+                        'deleted_at'    => $deletedAt,
+                    ]);
+            }
+
+            $db->transCommit();
+
+            return $this->response->setJSON(['status' => true, 'message' => 'Keluarga dan seluruh anggotanya berhasil dihapus']);
         } catch (\Throwable $e) {
+            if (isset($db)) {
+                $db->transRollback();
+            }
             return $this->response->setJSON([
                 'status'  => false,
                 'message' => $e->getMessage(),
