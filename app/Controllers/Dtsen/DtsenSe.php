@@ -326,13 +326,29 @@ class DtsenSe extends Controller
             if (!empty($idKkList)) {
                 $chunks = array_chunk($idKkList, 1000);
                 foreach ($chunks as $chunk) {
-                    $perlinsosRows = $this->db->table('dtsen_perlinsos')
-                        ->select('id_kk, status')
-                        ->whereIn('id_kk', $chunk)
+                    $perlinsosRows = $this->db->table('dtsen_perlinsos p')
+                        ->select('p.id_kk as direct_id_kk, a.id_kk as art_id_kk, p.status')
+                        ->join('dtsen_art a', 'a.nik = p.nik AND a.deleted_at IS NULL', 'left')
+                        ->groupStart()
+                            ->whereIn('p.id_kk', $chunk)
+                            ->orWhereIn('a.id_kk', $chunk)
+                        ->groupEnd()
                         ->get()->getResultArray();
 
                     foreach ($perlinsosRows as $pr) {
-                        $perlinsosMap[$pr['id_kk']] = $pr['status'] ?? 'draft';
+                        $status = !empty($pr['status']) ? $pr['status'] : 'draft';
+                        if (!empty($pr['art_id_kk'])) {
+                            $artKk = $pr['art_id_kk'];
+                            if (!isset($perlinsosMap[$artKk]) || $status === 'tersinkron') {
+                                $perlinsosMap[$artKk] = $status;
+                            }
+                        }
+                        if (!empty($pr['direct_id_kk'])) {
+                            $dirKk = $pr['direct_id_kk'];
+                            if (!isset($perlinsosMap[$dirKk]) || $status === 'tersinkron') {
+                                $perlinsosMap[$dirKk] = $status;
+                            }
+                        }
                     }
                 }
             }
