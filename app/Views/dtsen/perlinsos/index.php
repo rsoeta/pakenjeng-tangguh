@@ -279,15 +279,16 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                                     <table id="tablePerlinsos" class="table table-striped table-hover nowrap w-100">
                                         <thead class="bg-light text-center">
                                             <tr>
-                                                <th>No</th>
-                                                <th>Kepala Keluarga</th>
+                                                <th class="text-center" style="width: 45px;">No.</th>
                                                 <th>No. KK</th>
+                                                <th>Kepala Keluarga</th>
                                                 <th>NIK KPM</th>
                                                 <th>Nama KPM</th>
                                                 <th>Alamat Lengkap</th>
                                                 <?php if (!$isPentri): ?>
                                                     <th>Petugas</th>
                                                 <?php endif; ?>
+                                                <th>Kategori Desil</th>
                                                 <th>Waktu Rekap</th>
                                                 <th>Status</th>
                                                 <th>Aksi</th>
@@ -781,7 +782,14 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                     dataSrc: 'data'
                 },
                 responsive: true,
+                autoWidth: false,
                 pageLength: 10,
+                order: [], // 🚀 Pertahankan urutan data dari server (created_at DESC)
+
+                columnDefs: [{
+                    targets: '_all',
+                    defaultContent: '-'
+                }],
 
                 // 🚀 PERBAIKAN 2A: Gunakan drawCallback agar nomor selalu dihitung ulang dari 1 sesuai halaman aktif
                 drawCallback: function(settings) {
@@ -796,19 +804,18 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                 },
 
                 columns: [
-                    // 🚀 PERBAIKAN 2B: Matikan fungsi render m.row dan orderable
+                    // 🚀 0. Nomor Urut
                     {
                         data: null,
+                        className: 'text-center align-middle',
                         orderable: false,
                         searchable: false,
-                        render: function() {
-                            return ''; // Biarkan kosong, akan diisi otomatis oleh drawCallback di atas
+                        render: function(data, type, row, meta) {
+                            let no = meta.row + meta.settings._iDisplayStart + 1;
+                            return '<span class="fw-bold text-secondary">' + no + '</span>';
                         }
                     },
-                    {
-                        data: 'kepala_keluarga',
-                        className: 'text-start text-capitalize'
-                    },
+                    // 🚀 1. No. KK (Dipindahkan sebelum Kepala Keluarga)
                     {
                         data: 'no_kk',
                         className: 'text-nowrap',
@@ -822,7 +829,12 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                         </div>`;
                         }
                     },
-
+                    // 🚀 2. Kepala Keluarga
+                    {
+                        data: 'kepala_keluarga',
+                        className: 'text-start text-capitalize'
+                    },
+                    // 🚀 3. NIK KPM
                     {
                         data: 'nik',
                         className: 'text-nowrap',
@@ -837,10 +849,12 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                         </div>`;
                         }
                     },
+                    // 🚀 4. Nama KPM
                     {
                         data: 'nama_kpm',
                         className: 'text-start text-capitalize'
                     },
+                    // 🚀 5. Alamat Lengkap
                     {
                         data: null,
                         className: 'text-start',
@@ -851,17 +865,35 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                             return (alamat + rt + rw) || '-';
                         }
                     },
-                    // 🚀 PERBAIKAN: Pindahkan kolom Petugas ke atas Waktu Rekap
+                    // 🚀 6. Petugas (Hanya Admin / Operator)
                     ...(roleId <= 3 ? [{
                         data: 'petugas',
                         className: 'text-start text-uppercase',
                         render: d => d ? d.toUpperCase() : '-'
                     }] : []),
-                    // 🚀 Waktu Rekap digeser ke bawahnya
+                    // 🚀 7. Kategori Desil (Disimpan sebelum Waktu Rekap)
+                    {
+                        data: 'kategori_desil',
+                        className: 'text-center align-middle',
+                        render: function(data) {
+                            if (!data || data === '0' || data === 0 || data === '') {
+                                return '<span class="badge bg-secondary px-2 py-1">-</span>';
+                            }
+                            let val = parseInt(data);
+                            let bgClass = 'bg-danger';
+                            if (val <= 3) bgClass = 'bg-success';
+                            else if (val <= 5) bgClass = 'bg-warning text-dark';
+
+                            return `<span class="badge ${bgClass} px-2 py-1">Desil ${val}</span>`;
+                        }
+                    },
+                    // 🚀 8. Waktu Rekap
                     {
                         data: 'created_at',
+                        className: 'text-center',
                         render: d => d ? d.substring(0, 16) : '-'
                     },
+                    // 🚀 9. Status
                     {
                         data: 'status',
                         className: 'text-center',
@@ -872,9 +904,11 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                             return '<span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Belum Verifikasi</span>';
                         }
                     },
+                    // 🚀 10. Aksi
                     {
                         data: 'id',
                         orderable: false,
+                        className: 'text-center',
                         render: function(id, type, row) {
                             let status = row.status || 'draft'; // Anggap 'draft' jika kosong
 
@@ -896,9 +930,6 @@ $bolehAkses = (!$isPentri || $statusAkses === 'approved');
                             return btn;
                         }
                     }
-                ],
-                order: [
-                    [1, 'desc']
                 ],
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'

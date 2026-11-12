@@ -540,10 +540,12 @@ class Perlinsos extends Controller
                 a.nama as nama_kpm,
                 u.fullname as petugas, 
                 k.no_kk, k.kepala_keluarga,
-                k.alamat, r.rt, r.rw
+                k.alamat, r.rt, r.rw,
+                se.kategori_desil
             ') // 🚀 Pastikan p.status ikut di-select
             ->join('dtsen_art a', 'a.nik = p.nik AND a.deleted_at IS NULL', 'left')
             ->join('dtsen_kk k', 'k.id_kk = p.id_kk AND k.deleted_at IS NULL', 'left')
+            ->join('dtsen_se se', 'se.id_kk = p.id_kk', 'left')
             ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
             ->join('dtks_users u', 'u.nik = p.created_by', 'left')
             ->groupBy('p.id')
@@ -580,13 +582,6 @@ class Perlinsos extends Controller
 
         return $this->response->setJSON(['data' => $data]);
     }
-
-    // // 🚀 HAPUS DATA
-    // public function delete($id)
-    // {
-    //     $this->db->table('dtsen_perlinsos')->where('id', $id)->delete();
-    //     return $this->response->setJSON(['success' => true, 'message' => 'Rekapitulasi dibatalkan.']);
-    // }
 
     // 🚀 VALIDASI DATA OLEH OPERATOR (KUNCI SINKRONISASI)
     public function verifyData($id)
