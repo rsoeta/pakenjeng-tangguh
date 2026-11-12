@@ -249,13 +249,23 @@ class Perlinsos extends Controller
             $nikPetugas = $u['nik'];
             $namaPendek = $this->formatNamaPetugas($u['fullname']);
 
-            // 1. Total capaian KPM yang diinput oleh petugas
-            $capaian = $this->db->table('dtsen_perlinsos')->where('created_by', $nikPetugas)->countAllResults();
+            // 1. Total capaian KPM yang diinput oleh petugas (abaikan soft-delete)
+            $capaian = $this->db->table('dtsen_perlinsos p')
+                ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
+                ->where('p.created_by', $nikPetugas)
+                ->where('a.deleted_at IS NULL')
+                ->where('k.deleted_at IS NULL')
+                ->countAllResults();
 
-            // 2. Data yang sudah berhasil diverifikasi (tersinkron)
-            $terverifikasi = $this->db->table('dtsen_perlinsos')
-                ->where('created_by', $nikPetugas)
-                ->where('status', 'tersinkron')
+            // 2. Data yang sudah berhasil diverifikasi (tersinkron) dan aktif
+            $terverifikasi = $this->db->table('dtsen_perlinsos p')
+                ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
+                ->where('p.created_by', $nikPetugas)
+                ->where('p.status', 'tersinkron')
+                ->where('a.deleted_at IS NULL')
+                ->where('k.deleted_at IS NULL')
                 ->countAllResults();
 
             // 3. Data yang berhasil direkap tapi belum diverifikasi
@@ -336,10 +346,21 @@ class Perlinsos extends Controller
         foreach ($users as $u) {
             $nikPetugas = $u['nik'];
 
-            $capaian = $this->db->table('dtsen_perlinsos')->where('created_by', $nikPetugas)->countAllResults();
-            $terverifikasi = $this->db->table('dtsen_perlinsos')
-                ->where('created_by', $nikPetugas)
-                ->where('status', 'tersinkron')
+            $capaian = $this->db->table('dtsen_perlinsos p')
+                ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
+                ->where('p.created_by', $nikPetugas)
+                ->where('a.deleted_at IS NULL')
+                ->where('k.deleted_at IS NULL')
+                ->countAllResults();
+
+            $terverifikasi = $this->db->table('dtsen_perlinsos p')
+                ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
+                ->where('p.created_by', $nikPetugas)
+                ->where('p.status', 'tersinkron')
+                ->where('a.deleted_at IS NULL')
+                ->where('k.deleted_at IS NULL')
                 ->countAllResults();
             $belumVerifikasi = max(0, $capaian - $terverifikasi);
 
@@ -396,16 +417,22 @@ class Perlinsos extends Controller
                 ->countAllResults();
 
             $totalTerverifikasi = $this->db->table('dtsen_perlinsos p')
-                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'left')
+                ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
                 ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
                 ->where('r.kode_desa', $kodeDesa)
                 ->where('p.status', 'tersinkron')
+                ->where('a.deleted_at IS NULL')
+                ->where('k.deleted_at IS NULL')
                 ->countAllResults();
 
             $totalCapaianRaw = $this->db->table('dtsen_perlinsos p')
-                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'left')
+                ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
                 ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
                 ->where('r.kode_desa', $kodeDesa)
+                ->where('a.deleted_at IS NULL')
+                ->where('k.deleted_at IS NULL')
                 ->countAllResults();
 
             $totalBelumVerifikasi = max(0, $totalCapaianRaw - $totalTerverifikasi);
@@ -442,18 +469,24 @@ class Perlinsos extends Controller
                 ->countAllResults();
 
             $terverifikasiRw = $this->db->table('dtsen_perlinsos p')
-                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'left')
+                ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
                 ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
                 ->where('r.kode_desa', $kodeDesa)
                 ->where('r.rw', $rwVal)
                 ->where('p.status', 'tersinkron')
+                ->where('a.deleted_at IS NULL')
+                ->where('k.deleted_at IS NULL')
                 ->countAllResults();
 
             $capaianRw = $this->db->table('dtsen_perlinsos p')
-                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'left')
+                ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
+                ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
                 ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
                 ->where('r.kode_desa', $kodeDesa)
                 ->where('r.rw', $rwVal)
+                ->where('a.deleted_at IS NULL')
+                ->where('k.deleted_at IS NULL')
                 ->countAllResults();
 
             $belumVerifikasiRw = max(0, $capaianRw - $terverifikasiRw);
@@ -525,8 +558,9 @@ class Perlinsos extends Controller
     // ========================================================
     public function getData()
     {
-        $roleId = (int) session()->get('role_id');
-        $userNik = session()->get('nik');
+        $roleId   = (int) session()->get('role_id');
+        $userNik  = session()->get('nik');
+        $kodeDesa = session()->get('kode_desa');
 
         // Tangkap Filter
         $f_petugas = $this->request->getPost('petugas');
@@ -543,19 +577,27 @@ class Perlinsos extends Controller
                 k.alamat, r.rt, r.rw,
                 se.kategori_desil
             ') // 🚀 Pastikan p.status ikut di-select
-            ->join('dtsen_art a', 'a.nik = p.nik AND a.deleted_at IS NULL', 'left')
-            ->join('dtsen_kk k', 'k.id_kk = p.id_kk AND k.deleted_at IS NULL', 'left')
+            // 🛡️ Filter Mutlak Soft Delete: Wajib INNER JOIN dan singkirkan ART/KK yang telah di-soft-delete
+            ->join('dtsen_art a', 'a.nik = p.nik', 'inner')
+            ->join('dtsen_kk k', 'k.id_kk = p.id_kk', 'inner')
             ->join('dtsen_se se', 'se.id_kk = p.id_kk', 'left')
             ->join('dtsen_rt r', 'r.id_rt = k.id_rt', 'left')
             ->join('dtks_users u', 'u.nik = p.created_by', 'left')
+            ->where('a.deleted_at IS NULL')
+            ->where('k.deleted_at IS NULL')
             ->groupBy('p.id')
             ->orderBy('p.created_at', 'DESC');
 
         // 🔐 Terapkan Filter
         if ($roleId === 4) {
             $builder->where('p.created_by', $userNik);
-        } else if (!empty($f_petugas)) {
-            $builder->where('p.created_by', $f_petugas);
+        } else {
+            if (!empty($f_petugas)) {
+                $builder->where('p.created_by', $f_petugas);
+            }
+            if (!empty($kodeDesa)) {
+                $builder->where('r.kode_desa', $kodeDesa);
+            }
         }
 
         if (!empty($f_rw)) $builder->where('r.rw', $f_rw);
