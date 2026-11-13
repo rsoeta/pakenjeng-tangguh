@@ -2703,27 +2703,14 @@ class PembaruanKeluarga extends BaseController
         $db = \Config\Database::connect();
 
         try {
-
-            // Subquery ambil snapshot terakhir per TW
-            $subQuery = "
-            SELECT id_kk, tahun, triwulan, MAX(created_at) as max_date
-            FROM dtsen_desil_history
-            WHERE id_kk = ?
-            GROUP BY tahun, triwulan
-        ";
-
-            $query = $db->query("
-            SELECT h.id_kk, h.desil, h.tahun, h.triwulan, h.periode_label, h.created_at
-            FROM dtsen_desil_history h
-            INNER JOIN ($subQuery) last
-                ON h.id_kk = last.id_kk
-                AND h.tahun = last.tahun
-                AND h.triwulan = last.triwulan
-                AND h.created_at = last.max_date
-            ORDER BY h.tahun ASC, h.triwulan ASC
-        ", [$id_kk]);
-
-            $results = $query->getResultArray();
+            // Query langsung menggunakan composite unique index uniq_kk_periode (id_kk, tahun, triwulan)
+            $results = $db->table('dtsen_desil_history')
+                ->select('id_kk, desil, tahun, triwulan, periode_label, created_at')
+                ->where('id_kk', $id_kk)
+                ->orderBy('tahun', 'ASC')
+                ->orderBy('triwulan', 'ASC')
+                ->get()
+                ->getResultArray();
 
             if (empty($results)) {
                 return $this->response->setJSON([

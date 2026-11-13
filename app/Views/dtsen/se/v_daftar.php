@@ -281,6 +281,7 @@ $isEditableUser = ($roleId <= 4);
         // =========================
         // 🔎 FILTER STATE (GLOBAL)
         // =========================
+        const desilHistoryCache = {};
         const filterKeluarga = {
             petugas: $('#filterPetugas').val() || '',
             rw: '',
@@ -340,7 +341,15 @@ $isEditableUser = ($roleId <= 4);
 
                     console.log('📤 Minta Data (POST) dengan Filter:', d.filter);
                 },
-                dataSrc: 'data'
+                dataSrc: function(json) {
+                    const rows = (json && json.data) ? json.data : [];
+                    rows.forEach(function(r) {
+                        if (r.id_kk !== undefined) {
+                            desilHistoryCache[String(r.id_kk)] = Array.isArray(r.desil_history) ? r.desil_history : [];
+                        }
+                    });
+                    return rows;
+                }
             },
 
             responsive: true,
@@ -704,97 +713,118 @@ $isEditableUser = ($roleId <= 4);
         });
 
         // ==============================================================
-        // 🚀 STATE & GRAFIK RIWAYAT DESIL (OFFCANVAS CHART DESIL)
+        // 🚀 STATE & GRAFIK RIWAYAT DESIL (INSTAN DARI PRELOAD CACHE)
         // ==============================================================
         let currentOffcanvasKkId = null;
         let desilChartInstance = null;
 
-        function loadDesilChart(idKK) {
-            const targetId = idKK || currentOffcanvasKkId;
+        function renderDesilChartFromData(data) {
+            const chartEl = document.querySelector("#desilChart");
+            if (!chartEl) return;
+
+            if (desilChartInstance !== null) {
+                desilChartInstance.destroy();
+                desilChartInstance = null;
+            }
+
+            if (!Array.isArray(data) || data.length === 0) {
+                chartEl.innerHTML = '<div class="text-center text-muted py-5">Belum ada histori desil.</div>';
+                return;
+            }
+
+            chartEl.innerHTML = '';
+            const categories = data.map(d => d.periode);
+            const values = data.map(d => Number(d.desil));
+
+            const options = {
+                chart: {
+                    type: 'line',
+                    height: 320,
+                    animations: {
+                        enabled: true,
+                        speed: 250
+                    },
+                    toolbar: {
+                        show: false
+                    },
+                    zoom: {
+                        enabled: false
+                    }
+                },
+                series: [{
+                    name: 'Desil',
+                    data: values
+                }],
+                xaxis: {
+                    categories: categories
+                },
+                yaxis: {
+                    min: 0,
+                    max: 10,
+                    tickAmount: 10
+                },
+                stroke: {
+                    curve: 'smooth',
+                    width: 3
+                },
+                markers: {
+                    size: 6,
+                    hover: {
+                        size: 8
+                    }
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            return "Desil " + val;
+                        }
+                    }
+                },
+                colors: ['#0d6efd'],
+                grid: {
+                    borderColor: '#e9ecef'
+                }
+            };
+
+            desilChartInstance = new ApexCharts(chartEl, options);
+            desilChartInstance.render();
+        }
+
+        function loadDesilChart(idKK, forceNetwork = false) {
+            const targetId = String(idKK || currentOffcanvasKkId || '');
             const chartEl = document.querySelector("#desilChart");
             if (!chartEl || !targetId) return;
 
-            if (desilChartInstance !== null) return;
+            // 🚀 INSTAN: Gunakan data yang sudah di-preload bersama tabel jika tersedia dan tidak dipaksa tarik ulang
+            if (!forceNetwork && Object.prototype.hasOwnProperty.call(desilHistoryCache, targetId)) {
+                renderDesilChartFromData(desilHistoryCache[targetId]);
+                return;
+            }
 
             chartEl.innerHTML = '<div class="text-center text-muted py-5"><i class="fas fa-spinner fa-spin me-2"></i>Memuat riwayat desil...</div>';
 
             fetch("<?= base_url($roleId == 6 ? 'sensus-ekonomi/desil-history' : 'pembaruan-keluarga/desil-history') ?>/" + targetId)
                 .then(res => res.json())
                 .then(res => {
-                    if (res.status !== 'success' || !res.data || res.data.length === 0) {
-                        chartEl.innerHTML = '<div class="text-center text-muted py-5">Belum ada histori desil.</div>';
-                        return;
-                    }
-
-                    chartEl.innerHTML = '';
-                    const data = res.data;
-                    const categories = data.map(d => d.periode);
-                    const values = data.map(d => d.desil);
-
-                    const options = {
-                        chart: {
-                            type: 'line',
-                            height: 320,
-                            toolbar: {
-                                show: false
-                            },
-                            zoom: {
-                                enabled: false
-                            }
-                        },
-                        series: [{
-                            name: 'Desil',
-                            data: values
-                        }],
-                        xaxis: {
-                            categories: categories
-                        },
-                        yaxis: {
-                            min: 0,
-                            max: 10,
-                            tickAmount: 10
-                        },
-                        stroke: {
-                            curve: 'smooth',
-                            width: 3
-                        },
-                        markers: {
-                            size: 6,
-                            hover: {
-                                size: 8
-                            }
-                        },
-                        tooltip: {
-                            y: {
-                                formatter: function(val) {
-                                    return "Desil " + val;
-                                }
-                            }
-                        },
-                        colors: ['#0d6efd'],
-                        grid: {
-                            borderColor: '#e9ecef'
-                        }
-                    };
-
-                    desilChartInstance = new ApexCharts(chartEl, options);
-                    desilChartInstance.render();
+                    const list = (res.status === 'success' && Array.isArray(res.data)) ? res.data : [];
+                    desilHistoryCache[targetId] = list;
+                    renderDesilChartFromData(list);
                 })
                 .catch(() => {
                     chartEl.innerHTML = '<div class="text-center text-danger py-5">Gagal memuat histori desil.</div>';
                 });
         }
 
-        window.reloadDesilChart = function() {
-            if (desilChartInstance !== null) {
-                desilChartInstance.destroy();
-                desilChartInstance = null;
-            }
-            loadDesilChart(currentOffcanvasKkId);
+        window.reloadDesilChart = function(forceNetwork = true) {
+            loadDesilChart(currentOffcanvasKkId, forceNetwork);
         };
 
         document.getElementById('offcanvasChartDesil')?.addEventListener('shown.bs.offcanvas', function() {
-            reloadDesilChart();
+            if (desilChartInstance !== null) {
+                window.dispatchEvent(new Event('resize'));
+            } else if (currentOffcanvasKkId) {
+                loadDesilChart(currentOffcanvasKkId, false);
+            }
         });
 
         // ==============================================================
@@ -823,11 +853,8 @@ $isEditableUser = ($roleId <= 4);
             });
             $('#historical_id_kk').val(id);
 
-            // Jika Offcanvas sudah terbuka atau dipicu manual
-            const offcanvasEl = document.getElementById('offcanvasChartDesil');
-            if (offcanvasEl && offcanvasEl.classList.contains('show')) {
-                reloadDesilChart();
-            }
+            // 🚀 Langsung render grafik dari cache memori (0ms, tanpa tunggu animasi selesai)
+            loadDesilChart(id, false);
         });
 
         // ==============================================================

@@ -353,12 +353,34 @@ class DtsenSe extends Controller
                 }
             }
 
+            // 6.6️⃣ AMBIL RIWAYAT DESIL SECARA BATCH (UNTUK OFFCANVAS INSTAN TANPA LOADING)
+            $desilHistoryMap = [];
+            if (!empty($idKkList)) {
+                $chunks = array_chunk($idKkList, 1000);
+                foreach ($chunks as $chunk) {
+                    $histRows = $this->db->table('dtsen_desil_history')
+                        ->select('id_kk, desil, periode_label')
+                        ->whereIn('id_kk', $chunk)
+                        ->orderBy('tahun', 'ASC')
+                        ->orderBy('triwulan', 'ASC')
+                        ->get()->getResultArray();
+
+                    foreach ($histRows as $hr) {
+                        $desilHistoryMap[$hr['id_kk']][] = [
+                            'periode' => $hr['periode_label'],
+                            'desil'   => (int) $hr['desil'],
+                        ];
+                    }
+                }
+            }
+
             // 7️⃣ TAMBAHKAN FLAG AKSES, DATA BANSOS & PERLINSOS
             $canInputDesil = ($roleId <= 3);
 
             foreach ($dataKeluarga as &$row) {
                 $row['id_kk_encoded']   = encode_id($row['id_kk']);
                 $row['can_input_desil'] = $canInputDesil;
+                $row['desil_history']   = $desilHistoryMap[$row['id_kk']] ?? [];
 
                 // Status Perlinsos
                 $row['perlinsos_status'] = $perlinsosMap[$row['id_kk']] ?? null;
