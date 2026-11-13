@@ -144,7 +144,7 @@
                         </div>
                     </div>
 
-                    <table id="tableKeluarga" class="table table-striped table-hover nowrap w-100">
+                    <table id="tableKeluarga" class="table table-hover nowrap w-100">
                         <thead class="text-light bg-primary text-center">
                             <tr>
                                 <th></th>
