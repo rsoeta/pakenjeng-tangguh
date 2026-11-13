@@ -353,6 +353,10 @@ $isEditableUser = ($roleId <= 4);
             },
 
             deferRender: true,
+            fixedHeader: {
+                header: true,
+                headerOffset: 0
+            },
             responsive: true,
             pageLength: 10,
             autoWidth: false,

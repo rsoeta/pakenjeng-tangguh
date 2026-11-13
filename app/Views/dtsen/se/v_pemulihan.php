@@ -133,6 +133,10 @@
                         d.<?= csrf_token() ?> = '<?= csrf_hash() ?>';
                     }
                 },
+                fixedHeader: {
+                    header: true,
+                    headerOffset: 0
+                },
                 responsive: true,
                 pageLength: 10,
                 autoWidth: false,

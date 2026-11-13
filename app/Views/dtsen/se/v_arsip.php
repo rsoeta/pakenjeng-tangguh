@@ -77,7 +77,7 @@
     /* Sticky Bulk Action Bar */
     #bulkActionBar {
         position: sticky;
-        top: 64px;
+        top: 0;
         z-index: 1020;
         border-radius: 12px;
         background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%);
@@ -520,6 +520,13 @@
         // =========================================================================
         const dtArsip = $('#tableArsipTerpadu').DataTable({
             data: [],
+            fixedHeader: {
+                header: true,
+                headerOffset: function() {
+                    const bulkEl = document.getElementById('bulkActionBar');
+                    return (bulkEl && !bulkEl.classList.contains('d-none')) ? bulkEl.offsetHeight : 0;
+                }
+            },
             responsive: false,
             pageLength: 15,
             lengthMenu: [
@@ -1004,6 +1011,13 @@
                 $('#bulkActionBar').removeClass('d-none');
             } else {
                 $('#bulkActionBar').addClass('d-none');
+            }
+
+            if (dtArsip && dtArsip.fixedHeader) {
+                const bulkEl = document.getElementById('bulkActionBar');
+                const bulkH = (bulkEl && !bulkEl.classList.contains('d-none')) ? bulkEl.offsetHeight : 0;
+                dtArsip.fixedHeader.headerOffset(bulkH);
+                dtArsip.fixedHeader.adjust();
             }
 
             syncHeaderCheckbox();

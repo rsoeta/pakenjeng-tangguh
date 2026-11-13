@@ -14,7 +14,7 @@
                 </div>
 
                 <table id="tableSubmitted" class="table table-striped table-hover nowrap w-100">
-                    <thead class="text-center">
+                    <thead class="text-center bg-info text-dark">
                         <tr>
                             <th></th>
                             <th>No.</th>
@@ -62,6 +62,10 @@
                 type: 'GET',
                 dataType: 'json',
                 dataSrc: json => json.data || []
+            },
+            fixedHeader: {
+                header: true,
+                headerOffset: 0
             },
             order: [], // 🚀 Jangan paksa sort di kolom No
             // 🚀 KUNCI NOMOR URUT AGAR TIDAK TERPENGARUH SORTING KOLOM LAIN

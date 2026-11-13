@@ -68,6 +68,7 @@
     <!-- Datatables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.bootstrap5.min.css">
 
     <!-- Select2 -->
     <link rel="stylesheet" href="<?= base_url('assets/plugins/select2/css/select2.min.css'); ?>">
@@ -170,6 +171,62 @@
             margin-bottom: 4px;
             display: block;
         }
+
+        /* 📌 STICKY HEADER UNTUK TABEL UTAMA DTSEN */
+        #tableKeluarga:not(.fixedHeader-floating) thead th,
+        #tableDraftKeluarga:not(.fixedHeader-floating) thead th,
+        #tableSubmitted:not(.fixedHeader-floating) thead th,
+        #tableArsipTerpadu:not(.fixedHeader-floating) thead th,
+        #tablePemulihan:not(.fixedHeader-floating) thead th,
+        #tableKeadaanRumah:not(.fixedHeader-floating) thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1015;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        #tableKeluarga thead th {
+            background-color: #0d6efd !important;
+            color: #ffffff !important;
+        }
+
+        #tableDraftKeluarga thead th {
+            background-color: #ffc107 !important;
+            color: #212529 !important;
+        }
+
+        #tableSubmitted thead th {
+            background-color: #0dcaf0 !important;
+            color: #212529 !important;
+        }
+
+        #tablePemulihan thead th {
+            background-color: #dc3545 !important;
+            color: #ffffff !important;
+        }
+
+        #tableArsipTerpadu thead th {
+            background-color: #212529 !important;
+            color: #ffffff !important;
+        }
+
+        #tableKeadaanRumah thead th {
+            background-color: #f8f9fa !important;
+            color: #212529 !important;
+        }
+
+        div.dtfh-floatingparent {
+            z-index: 1018 !important;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+        }
+
+        @media (min-width: 992px) {
+
+            .table-responsive:has(#tableArsipTerpadu),
+            .table-responsive:has(#tableKeadaanRumah) {
+                overflow: visible;
+            }
+        }
     </style>
 
 
@@ -193,6 +250,7 @@
     <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
 
     <!-- Datatables Buttons -->
     <script src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>

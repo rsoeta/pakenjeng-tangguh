@@ -472,6 +472,10 @@ $init_rt       = $init_rt ?? (request()->getGet('rt') ?? '');
             processing: true,
             serverSide: true,
             ordering: true,
+            fixedHeader: {
+                header: true,
+                headerOffset: 0
+            },
             pageLength: 10,
             lengthMenu: [
                 [10, 25, 50, 100],
