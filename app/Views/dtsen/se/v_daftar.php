@@ -166,8 +166,114 @@
     </section>
 </div>
 
+<!-- ============================================================== -->
+<!-- 🚀 ZONA MERDEKA: OFFCANVAS RIWAYAT DESIL & MODAL -->
+<!-- ============================================================== -->
+<?php
+$roleId = (int) ($role_id ?? session()->get('role_id') ?? 0);
+$isEditableUser = ($roleId <= 4);
+?>
+<div class="offcanvas offcanvas-end shadow-lg" id="offcanvasChartDesil" aria-labelledby="offcanvasChartDesilLabel" style="width: 800px; max-width: 100vw;">
+
+    <!-- 🚀 1. HEADER: Logo, Judul, & Identitas KK -->
+    <div class="offcanvas-header bg-primary text-white d-flex flex-column align-items-start pb-3" style="border-bottom: 3px solid #ffc107;">
+        <div class="d-flex justify-content-between w-100 align-items-center mb-2">
+            <div class="d-flex align-items-center">
+                <img src="<?= function_exists('logoApp') ? logoApp() : base_url('assets/img/logo.png') ?>" alt="Logo" class="p-1 me-2" style="width: 45px; height: 45px; object-fit: contain;" onerror="this.outerHTML='<i class=\'fas fa-chart-pie fa-2x me-2 text-warning\'></i>'">
+                <div>
+                    <h5 class="offcanvas-title fw-bold mb-0" id="offcanvasChartDesilLabel" style="line-height: 1.2;">Riwayat Desil Keluarga</h5>
+                    <small class="text-white-50" style="font-size: 0.75rem;"><?= function_exists('titleApp') ? titleApp() : 'SINDEN' ?></small>
+                </div>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="mt-2 small w-100 bg-white bg-opacity-10 p-2 rounded">
+            <div class="mb-1">
+                <i class="fas fa-id-card me-2 text-warning"></i> No. KK:
+                <strong id="offcanvasNoKk" class="text-black copy-text-direct" style="cursor: pointer;" title="Klik untuk menyalin" data-value="">
+                    -
+                </strong>
+            </div>
+            <div><i class="fas fa-user-circle me-2 text-warning"></i> Kepala Keluarga: <strong id="offcanvasNamaKepalaKeluarga" class="text-black">-</strong></div>
+        </div>
+    </div>
+
+    <!-- 🚀 2. BODY: Tombol Aksi & Render Grafik -->
+    <div class="offcanvas-body p-4 flex-grow-1">
+        <div class="d-flex justify-content-end align-items-center gap-2 mb-3 pb-3 border-bottom">
+            <?php if ($isEditableUser && $roleId <= 3): ?>
+                <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-3 fw-bold btnHistoricalDesil"><i class="fas fa-history me-1"></i> Tambah Snapshot</button>
+                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold btnUpdateDesil" data-id="" data-nokk="" data-nama="" data-alamat="" data-desil=""><i class="fas fa-hand-holding-heart me-1"></i> Update Desil</button>
+                <button type="button" id="btnSyncDesil" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold"><i class="fas fa-sync-alt me-1"></i> Sync</button>
+            <?php endif; ?>
+        </div>
+        <div id="desilChart" style="min-height:350px;"></div>
+        <div id="desilTrendInfo" class="mt-3 small text-muted"></div>
+    </div>
+
+    <!-- 🚀 3. FOOTER: Informasi Hak Cipta & Modul -->
+    <div class="offcanvas-footer mt-auto bg-light border-top p-3 text-center">
+        <h6 class="fw-bold text-primary mb-1" style="font-size: 0.9rem;">
+            <i class="fas fa-shield-alt me-1"></i> <?= nameApp(); ?> - <?= titleApp(); ?>
+        </h6>
+        <div class="text-muted" style="font-size: 0.75rem;">
+            &copy; <?= date('Y') ?> Pemerintah Desa Pasirlangu / Badan Pusat Statistik. Hak Cipta Dilindungi.<br>
+            <span class="fst-italic">Modul Analisis Desil & Kesejahteraan Sosial</span>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalHistoricalDesil" data-bs-focus="false">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Snapshot Historis</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formHistoricalDesil">
+                    <input type="hidden" name="id_kk" id="historical_id_kk" value="">
+                    <!-- Tahun -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tahun</label>
+                        <select name="tahun" class="form-select" required>
+                            <?php $currentYear = date('Y');
+                            for ($year = $currentYear; $year >= 2025; $year--): ?>
+                                <option value="<?= $year ?>" <?= $year == date('Y') ? 'selected' : '' ?>><?= $year ?></option>
+                            <?php endfor; ?>
+                        </select>
+                    </div>
+                    <!-- Triwulan -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Periode Triwulan</label>
+                        <div class="input-group">
+                            <span class="input-group-text fw-bold text-primary">TW</span>
+                            <input type="number" class="form-control" name="triwulan" id="inputTriwulan" step="0.1" min="1" max="4.9" value="<?= ceil(date('n') / 3) ?>" placeholder="Contoh: 3 atau 3.1" required>
+                        </div>
+                        <small class="text-muted fst-italic">Digunakan untuk penandaan pada grafik (misal: 1, 2, atau 3.1).</small>
+                    </div>
+                    <!-- Desil -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Desil</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <?php for ($i = 0; $i <= 10; $i++): ?>
+                                <?php $warna = ($i == 0) ? 'secondary' : (($i <= 3) ? 'success' : (($i <= 5) ? 'warning' : 'danger')); ?>
+                                <input type="radio" class="btn-check" name="desil" id="desil<?= $i ?>" value="<?= $i ?>" required>
+                                <label class="btn btn-outline-<?= $warna ?> rounded-pill px-3" for="desil<?= $i ?>">Desil <?= $i ?></label>
+                            <?php endfor; ?>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer"><button type="button" id="btnSaveHistorical" class="btn btn-primary">Simpan</button></div>
+        </div>
+    </div>
+</div>
+
 <!-- 🚀 KUNCI SAKTI: Panggil modal dari file terpisah agar dirender ke halaman ini -->
 <?= $this->include('dtsen/se/modal_input_desil') ?>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <script>
     $(document).ready(function() {
@@ -449,13 +555,15 @@
 
                         if (row.can_input_desil) {
                             btnInputDesil = `
-                                <button class="btn btn-outline-primary btn-sm btnInputDesil me-1"
+                                <button type="button" class="btn btn-outline-primary btn-sm btnInputDesil me-1"
+                                    data-bs-toggle="offcanvas"
+                                    data-bs-target="#offcanvasChartDesil"
                                     data-id="${row.id_kk}"
                                     data-nama="${row.kepala_keluarga}"
                                     data-nokk="${row.no_kk}"
                                     data-alamat="${row.alamat}"
                                     data-desil="${row.kategori_desil ?? ''}"
-                                    title="Update Desil">
+                                    title="Riwayat & Update Desil">
                                     <i class="fas fa-balance-scale"></i>
                                 </button>
                             `;
@@ -596,34 +704,157 @@
         });
 
         // ==============================================================
-        // 🚀 EVENT: BUKA MODAL UPDATE DESIL DARI TABEL DAFTAR KELUARGA
+        // 🚀 STATE & GRAFIK RIWAYAT DESIL (OFFCANVAS CHART DESIL)
         // ==============================================================
-        $(document).on('click', '.btnInputDesil', function(e) {
-            e.preventDefault(); // Mencegah aksi bawaan tombol
+        let currentOffcanvasKkId = null;
+        let desilChartInstance = null;
 
-            // Ambil data dari atribut tombol
+        function loadDesilChart(idKK) {
+            const targetId = idKK || currentOffcanvasKkId;
+            const chartEl = document.querySelector("#desilChart");
+            if (!chartEl || !targetId) return;
+
+            if (desilChartInstance !== null) return;
+
+            chartEl.innerHTML = '<div class="text-center text-muted py-5"><i class="fas fa-spinner fa-spin me-2"></i>Memuat riwayat desil...</div>';
+
+            fetch("<?= base_url($roleId == 6 ? 'sensus-ekonomi/desil-history' : 'pembaruan-keluarga/desil-history') ?>/" + targetId)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status !== 'success' || !res.data || res.data.length === 0) {
+                        chartEl.innerHTML = '<div class="text-center text-muted py-5">Belum ada histori desil.</div>';
+                        return;
+                    }
+
+                    chartEl.innerHTML = '';
+                    const data = res.data;
+                    const categories = data.map(d => d.periode);
+                    const values = data.map(d => d.desil);
+
+                    const options = {
+                        chart: {
+                            type: 'line',
+                            height: 320,
+                            toolbar: {
+                                show: false
+                            },
+                            zoom: {
+                                enabled: false
+                            }
+                        },
+                        series: [{
+                            name: 'Desil',
+                            data: values
+                        }],
+                        xaxis: {
+                            categories: categories
+                        },
+                        yaxis: {
+                            min: 0,
+                            max: 10,
+                            tickAmount: 10
+                        },
+                        stroke: {
+                            curve: 'smooth',
+                            width: 3
+                        },
+                        markers: {
+                            size: 6,
+                            hover: {
+                                size: 8
+                            }
+                        },
+                        tooltip: {
+                            y: {
+                                formatter: function(val) {
+                                    return "Desil " + val;
+                                }
+                            }
+                        },
+                        colors: ['#0d6efd'],
+                        grid: {
+                            borderColor: '#e9ecef'
+                        }
+                    };
+
+                    desilChartInstance = new ApexCharts(chartEl, options);
+                    desilChartInstance.render();
+                })
+                .catch(() => {
+                    chartEl.innerHTML = '<div class="text-center text-danger py-5">Gagal memuat histori desil.</div>';
+                });
+        }
+
+        window.reloadDesilChart = function() {
+            if (desilChartInstance !== null) {
+                desilChartInstance.destroy();
+                desilChartInstance = null;
+            }
+            loadDesilChart(currentOffcanvasKkId);
+        };
+
+        document.getElementById('offcanvasChartDesil')?.addEventListener('shown.bs.offcanvas', function() {
+            reloadDesilChart();
+        });
+
+        // ==============================================================
+        // 🚀 EVENT: BUKA OFFCANVAS DESIL DARI TABEL DAFTAR KELUARGA
+        // ==============================================================
+        $(document).on('click', '.btnInputDesil', function() {
             const id = $(this).attr('data-id');
-            const nama = $(this).attr('data-nama');
-            const nokk = $(this).attr('data-nokk');
-            const alamat = $(this).attr('data-alamat');
-            const desil = $(this).attr('data-desil');
+            const nama = $(this).attr('data-nama') || '-';
+            const nokk = $(this).attr('data-nokk') || '-';
+            const alamat = $(this).attr('data-alamat') || '-';
+            const desil = $(this).attr('data-desil') ?? '';
 
-            // Temukan modal
+            currentOffcanvasKkId = id;
+
+            // Suntikkan identitas ke header Offcanvas
+            $('#offcanvasNoKk').text(nokk).attr('data-value', nokk);
+            $('#offcanvasNamaKepalaKeluarga').text(nama);
+
+            // Suntikkan data ke tombol Update Desil & Form Historical di dalam Offcanvas
+            $('.btnUpdateDesil').attr({
+                'data-id': id,
+                'data-nokk': nokk,
+                'data-nama': nama,
+                'data-alamat': alamat,
+                'data-desil': desil
+            });
+            $('#historical_id_kk').val(id);
+
+            // Jika Offcanvas sudah terbuka atau dipicu manual
+            const offcanvasEl = document.getElementById('offcanvasChartDesil');
+            if (offcanvasEl && offcanvasEl.classList.contains('show')) {
+                reloadDesilChart();
+            }
+        });
+
+        // ==============================================================
+        // 🚀 EVENT: BUKA MODAL UPDATE DESIL DARI DALAM OFFCANVAS
+        // ==============================================================
+        $(document).on('click', '.btnUpdateDesil', function(e) {
+            e.preventDefault();
+
+            const btn = $(this);
+            const id = btn.attr('data-id');
+            const nama = btn.attr('data-nama');
+            const nokk = btn.attr('data-nokk');
+            const alamat = btn.attr('data-alamat');
+            const desil = btn.attr('data-desil');
+
             const modal = $('#modalInputDesil');
 
-            // Suntikkan data ke dalam form modal
             modal.find('#modal_id_kk').val(id);
             modal.find('#modal_no_kk').val(nokk);
             modal.find('#modal_kepala_keluarga').val(nama);
             modal.find('#modal_alamat').val(alamat);
 
-            // 🚀 PERBAIKAN: Logika Pengisian Radio Button (Pills)
-            modal.find('input[name="kategori_desil"]').prop('checked', false); // Bersihkan semua pil
-            if (desil && desil.trim() !== '') {
-                modal.find('input[name="kategori_desil"][value="' + desil.trim() + '"]').prop('checked', true);
+            modal.find('input[name="kategori_desil"]').prop('checked', false);
+            if (desil !== undefined && desil !== null && String(desil).trim() !== '') {
+                modal.find('input[name="kategori_desil"][value="' + String(desil).trim() + '"]').prop('checked', true);
             }
 
-            // 🚀 Otomatis set form Periode ke Triwulan Berjalan saat modal dibuka
             const d = new Date();
             const currentYear = d.getFullYear();
             const currentMonth = d.getMonth() + 1;
@@ -632,8 +863,109 @@
             modal.find('#tahun_berlaku').val(currentYear);
             modal.find('#triwulan_berlaku').val(currentTw);
 
-            // Tampilkan modal ke layar menggunakan method Bootstrap 5 via jQuery
             modal.modal('show');
+        });
+
+        // ==============================================================
+        // 🚀 EVENT: BUKA & SIMPAN MODAL SNAPSHOT HISTORIS DESIL
+        // ==============================================================
+        $(document).on('click', '.btnHistoricalDesil', function(e) {
+            e.preventDefault();
+            $('#historical_id_kk').val(currentOffcanvasKkId);
+            $('#modalHistoricalDesil').modal('show');
+        });
+
+        $('#btnSaveHistorical').on('click', function() {
+            const form = $('#formHistoricalDesil');
+            const btn = $(this);
+            const originalText = btn.html();
+
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...');
+
+            $.ajax({
+                url: '/pembaruan-keluarga/add-historical-desil',
+                type: 'POST',
+                data: form.serialize(),
+                dataType: 'json',
+                success: function(res) {
+                    btn.prop('disabled', false).html(originalText);
+                    if (res.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: res.message,
+                            timer: 1200,
+                            showConfirmButton: false
+                        });
+                        $('#modalHistoricalDesil').modal('hide');
+                        $('#formHistoricalDesil')[0].reset();
+                        $('#historical_id_kk').val(currentOffcanvasKkId);
+
+                        reloadDesilChart();
+                        tableKeluarga.ajax.reload(null, false);
+                    } else {
+                        Swal.fire('Gagal', res.message || 'Gagal menyimpan snapshot historis.', 'error');
+                    }
+                },
+                error: function() {
+                    btn.prop('disabled', false).html(originalText);
+                    Swal.fire('Error', 'Gagal terhubung ke server.', 'error');
+                }
+            });
+        });
+
+        // ==============================================================
+        // 🚀 EVENT: SYNC DESIL PER KK DARI DALAM OFFCANVAS
+        // ==============================================================
+        $('#btnSyncDesil').on('click', function() {
+            if (!currentOffcanvasKkId) return;
+
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Sync...';
+
+            fetch("<?= base_url('pembaruan-keluarga/sync-desil') ?>/" + currentOffcanvasKkId, {
+                    method: "POST",
+                    credentials: "same-origin"
+                })
+                .then(res => res.json())
+                .then(res => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Sync';
+
+                    if (res.status === 'changed') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Desil Berubah',
+                            html: `Dari <b>${res.from ?? '-'}</b> menjadi <b>${res.to}</b><br><small>${res.periode ?? ''}</small>`,
+                            timer: 1800,
+                            showConfirmButton: false
+                        });
+
+                        $('.btnUpdateDesil').attr('data-desil', res.to ?? '');
+                        reloadDesilChart();
+                        tableKeluarga.ajax.reload(null, false);
+                    } else if (res.status === 'unchanged') {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Tetap',
+                            text: 'Desil tidak berubah.',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: res.message || 'Terjadi kesalahan.'
+                        });
+                    }
+                })
+                .catch(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Sync';
+                    Swal.fire('Error', 'Gagal melakukan sinkronisasi.', 'error');
+                });
         });
 
         // ==============================================================
@@ -645,6 +977,7 @@
             const form = $(this);
             const btnSubmit = form.find('button[type="submit"]');
             const originalText = btnSubmit.html();
+            const selectedDesil = form.find('input[name="kategori_desil"]:checked').val();
 
             // Ubah tombol jadi status loading agar tidak diklik dua kali
             btnSubmit.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Menyimpan...');
@@ -668,10 +1001,16 @@
                             showConfirmButton: false
                         });
 
+                        // Perbarui atribut data-desil pada tombol di dalam Offcanvas
+                        if (selectedDesil !== undefined) {
+                            $('.btnUpdateDesil').attr('data-desil', selectedDesil);
+                        }
+
                         // Sembunyikan modal
                         $('#modalInputDesil').modal('hide');
 
-                        // 🚀 REFRESH TABEL TANPA RELOAD HALAMAN
+                        // 🚀 REFRESH GRAFIK OFFCANVAS & TABEL TANPA RELOAD HALAMAN
+                        reloadDesilChart();
                         tableKeluarga.ajax.reload(null, false);
                     } else {
                         // Jika ada validasi error dari server
@@ -692,6 +1031,38 @@
                     });
                 }
             });
+        });
+
+        // 📋 Salin No. KK dari header Offcanvas
+        $(document).on('click', '.copy-text-direct', function() {
+            const textToCopy = $(this).attr('data-value');
+            if (textToCopy && textToCopy.trim() !== '') {
+                navigator.clipboard.writeText(textToCopy.trim()).then(() => {
+                    Swal.fire({
+                        toast: true,
+                        position: 'bottom-end',
+                        icon: 'success',
+                        title: 'No. KK disalin!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                });
+            }
+        });
+
+        // 🚀 Sabuk Pengaman: Perbaiki scrolling & validasi triwulan desimal
+        document.addEventListener('hidden.bs.modal', function() {
+            if (document.querySelectorAll('.modal.show').length > 0) {
+                document.body.classList.add('modal-open');
+            }
+        });
+
+        $('#triwulan_berlaku').on('input', function() {
+            this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');
+            let val = parseFloat(this.value);
+            if (val > 4.9) {
+                this.value = '4.9';
+            }
         });
 
         // ... (Kode selanjutnya) ...
