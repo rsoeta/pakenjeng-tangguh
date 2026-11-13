@@ -2497,11 +2497,25 @@ class PembaruanKeluarga extends BaseController
                 }
 
 
+                $histRows = $db->table('dtsen_desil_history')
+                    ->select('periode_label as periode, desil')
+                    ->where('id_kk', $id_kk)
+                    ->orderBy('tahun', 'ASC')
+                    ->orderBy('triwulan', 'ASC')
+                    ->get()
+                    ->getResultArray();
+
+                $history = array_map(static fn($r) => [
+                    'periode' => $r['periode'],
+                    'desil'   => (int) $r['desil'],
+                ], $histRows);
+
                 return $this->response->setJSON([
-                    'status' => 'changed',
-                    'from'   => $lastDesil,
-                    'to'     => $desilNasional,
-                    'periode' => $periode['label']
+                    'status'  => 'changed',
+                    'from'    => $lastDesil,
+                    'to'      => $desilNasional,
+                    'periode' => $periode['label'],
+                    'history' => $history,
                 ]);
             }
 
@@ -2904,9 +2918,24 @@ class PembaruanKeluarga extends BaseController
                 'created_by'    => $userId
             ]);
 
+            $histRows = $this->db->table('dtsen_desil_history')
+                ->select('periode_label as periode, desil')
+                ->where('id_kk', $idKk)
+                ->orderBy('tahun', 'ASC')
+                ->orderBy('triwulan', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            $history = array_map(static fn($r) => [
+                'periode' => $r['periode'],
+                'desil'   => (int) $r['desil'],
+            ], $histRows);
+
             return $this->response->setJSON([
-                'status' => 'success',
-                'message' => 'Snapshot historis berhasil ditambahkan.'
+                'status'  => 'success',
+                'message' => 'Snapshot historis berhasil ditambahkan.',
+                'id_kk'   => $idKk,
+                'history' => $history,
             ]);
         } catch (\Throwable $e) {
             return $this->response->setJSON([

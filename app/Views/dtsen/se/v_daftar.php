@@ -815,9 +815,49 @@ $isEditableUser = ($roleId <= 4);
                 });
         }
 
-        window.reloadDesilChart = function(forceNetwork = true) {
+        window.reloadDesilChart = function(forceNetwork = false) {
             loadDesilChart(currentOffcanvasKkId, forceNetwork);
         };
+
+        // 🚀 UPDATE INSTAN (0ms): Perbarui Grafik & Baris DataTables Tanpa Request Ulang Seluruh Tabel
+        function applyInstantDesilUpdate(idKk, newDesil, newHistory) {
+            const targetId = String(idKk || currentOffcanvasKkId || '');
+            if (!targetId) return;
+
+            if (Array.isArray(newHistory)) {
+                desilHistoryCache[targetId] = newHistory;
+                if (String(currentOffcanvasKkId) === targetId) {
+                    renderDesilChartFromData(newHistory);
+                }
+            } else {
+                loadDesilChart(targetId, true);
+            }
+
+            if (newDesil !== undefined && newDesil !== null && String(newDesil).trim() !== '') {
+                $('.btnUpdateDesil').attr('data-desil', String(newDesil).trim());
+            }
+
+            // Update hanya baris KK terkait di DataTables secara in-place (tanpa reload 3.000+ baris dari server)
+            let rowUpdated = false;
+            tableKeluarga.rows().every(function() {
+                const rowData = this.data();
+                if (rowData && String(rowData.id_kk) === targetId) {
+                    if (newDesil !== undefined && newDesil !== null && String(newDesil).trim() !== '') {
+                        rowData.kategori_desil = String(newDesil).trim();
+                    }
+                    if (Array.isArray(newHistory)) {
+                        rowData.desil_history = newHistory;
+                    }
+                    this.data(rowData);
+                    rowUpdated = true;
+                    return false;
+                }
+            });
+
+            if (rowUpdated) {
+                tableKeluarga.draw(false);
+            }
+        }
 
         document.getElementById('offcanvasChartDesil')?.addEventListener('shown.bs.offcanvas', function() {
             if (desilChartInstance !== null) {
@@ -928,8 +968,7 @@ $isEditableUser = ($roleId <= 4);
                         $('#formHistoricalDesil')[0].reset();
                         $('#historical_id_kk').val(currentOffcanvasKkId);
 
-                        reloadDesilChart();
-                        tableKeluarga.ajax.reload(null, false);
+                        applyInstantDesilUpdate(currentOffcanvasKkId, null, res.history);
                     } else {
                         Swal.fire('Gagal', res.message || 'Gagal menyimpan snapshot historis.', 'error');
                     }
@@ -969,9 +1008,7 @@ $isEditableUser = ($roleId <= 4);
                             showConfirmButton: false
                         });
 
-                        $('.btnUpdateDesil').attr('data-desil', res.to ?? '');
-                        reloadDesilChart();
-                        tableKeluarga.ajax.reload(null, false);
+                        applyInstantDesilUpdate(currentOffcanvasKkId, res.to, res.history);
                     } else if (res.status === 'unchanged') {
                         Swal.fire({
                             icon: 'info',
@@ -1028,17 +1065,12 @@ $isEditableUser = ($roleId <= 4);
                             showConfirmButton: false
                         });
 
-                        // Perbarui atribut data-desil pada tombol di dalam Offcanvas
-                        if (selectedDesil !== undefined) {
-                            $('.btnUpdateDesil').attr('data-desil', selectedDesil);
-                        }
-
                         // Sembunyikan modal
                         $('#modalInputDesil').modal('hide');
 
-                        // 🚀 REFRESH GRAFIK OFFCANVAS & TABEL TANPA RELOAD HALAMAN
-                        reloadDesilChart();
-                        tableKeluarga.ajax.reload(null, false);
+                        // 🚀 INSTAN (0ms): Langsung perbarui grafik & baris tabel di memori tanpa reload AJAX tabel
+                        const updatedDesil = (res.kategori_desil !== undefined) ? res.kategori_desil : selectedDesil;
+                        applyInstantDesilUpdate(res.id_kk || currentOffcanvasKkId, updatedDesil, res.history);
                     } else {
                         // Jika ada validasi error dari server
                         Swal.fire({

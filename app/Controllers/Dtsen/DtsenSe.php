@@ -555,8 +555,24 @@ class DtsenSe extends Controller
 
             $db->transCommit();
 
+            $histRows = $db->table('dtsen_desil_history')
+                ->select('periode_label as periode, desil')
+                ->where('id_kk', $idKk)
+                ->orderBy('tahun', 'ASC')
+                ->orderBy('triwulan', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            $history = array_map(static fn($r) => [
+                'periode' => $r['periode'],
+                'desil'   => (int) $r['desil'],
+            ], $histRows);
+
             return $this->response->setJSON([
-                'status' => 'success'
+                'status'         => 'success',
+                'id_kk'          => $idKk,
+                'kategori_desil' => $kategoriDesil,
+                'history'        => $history,
             ]);
         } catch (\Throwable $e) {
 
