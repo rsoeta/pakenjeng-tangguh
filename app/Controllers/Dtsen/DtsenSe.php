@@ -234,6 +234,9 @@ class DtsenSe extends Controller
             // 3️⃣ LINGKUP WILAYAH (WilayahFilterTrait + mode penyamaran Petugas Entri)
             $scope = $this->resolveWilayahScope($filterClient['petugas'] ?? null);
 
+            // 🚀 Lepaskan file lock session lebih awal agar request AJAX paralel tidak saling tunggu
+            session_write_close();
+
             // 4️⃣ FILTER AKSES (ROLE)
             // RW/RT dropdown tetap murni filter manual UI; karantina wilayah petugas
             // ditangani oleh wilayah_tugas / level + role_id di model (tidak lagi menimpa filter RW).
@@ -259,17 +262,21 @@ class DtsenSe extends Controller
 
             if (!empty($idKkList)) {
                 $currentKkSet = array_fill_keys($idKkList, true);
-                $bansosQuery = $this->db->table('dtsen_bansos_kks b')
+                $bansosBuilder = $this->db->table('dtsen_bansos_kks b')
                     ->select('a.id_kk, b.jenis_bansos, b.tahap_salur, b.status_salur, b.status_kelengkapan, b.foto_kpm_kks')
-                    ->join('dtsen_art a', 'a.nik = b.nik_kpm AND a.deleted_at IS NULL', 'inner')
+                    ->join('dtsen_art a', 'a.nik = CONVERT(b.nik_kpm USING utf8mb3) AND a.deleted_at IS NULL', 'inner', false)
                     ->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'inner')
                     ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'inner')
-                    ->where('rt.kode_desa', $kodeDesa)
                     ->groupStart()
                     ->where('kk.deleted_at', null)
                     ->orWhere('kk.deleted_at', '0000-00-00 00:00:00')
-                    ->groupEnd()
-                    ->get()->getResultArray();
+                    ->groupEnd();
+
+                if (!empty($kodeDesa)) {
+                    $bansosBuilder->where('rt.kode_desa', $kodeDesa);
+                }
+
+                $bansosQuery = $bansosBuilder->get()->getResultArray();
 
                 $latestTahapByJenis = [];
                 foreach ($bansosQuery as $bq) {
@@ -321,52 +328,50 @@ class DtsenSe extends Controller
                 }
             }
 
-            // 6.5️⃣ AMBIL DATA STATUS PERLINSOS (dtsen_perlinsos)
+            // 6.5️⃣ AMBIL DATA STATUS PERLINSOS (1x QUERY CEPAT DENGAN PENYESUAIAN CHARSET INDEX)
             $perlinsosMap = [];
             if (!empty($idKkList)) {
-                $chunks = array_chunk($idKkList, 1000);
-                foreach ($chunks as $chunk) {
-                    $perlinsosRows = $this->db->table('dtsen_perlinsos p')
-                        ->select('p.id_kk as direct_id_kk, a.id_kk as art_id_kk, p.status')
-                        ->join('dtsen_art a', 'a.nik = p.nik AND a.deleted_at IS NULL', 'left')
-                        ->groupStart()
-                            ->whereIn('p.id_kk', $chunk)
-                            ->orWhereIn('a.id_kk', $chunk)
-                        ->groupEnd()
-                        ->get()->getResultArray();
+                $perlinsosRows = $this->db->table('dtsen_perlinsos p')
+                    ->select('p.id_kk as direct_id_kk, a.id_kk as art_id_kk, p.status')
+                    ->join('dtsen_art a', 'a.nik = CONVERT(p.nik USING utf8mb3) AND a.deleted_at IS NULL', 'left', false)
+                    ->get()->getResultArray();
 
-                    foreach ($perlinsosRows as $pr) {
-                        $status = !empty($pr['status']) ? $pr['status'] : 'draft';
-                        if (!empty($pr['art_id_kk'])) {
-                            $artKk = $pr['art_id_kk'];
-                            if (!isset($perlinsosMap[$artKk]) || $status === 'tersinkron') {
-                                $perlinsosMap[$artKk] = $status;
-                            }
+                foreach ($perlinsosRows as $pr) {
+                    $status = !empty($pr['status']) ? $pr['status'] : 'draft';
+                    if (!empty($pr['art_id_kk'])) {
+                        $artKk = $pr['art_id_kk'];
+                        if (!isset($perlinsosMap[$artKk]) || $status === 'tersinkron') {
+                            $perlinsosMap[$artKk] = $status;
                         }
-                        if (!empty($pr['direct_id_kk'])) {
-                            $dirKk = $pr['direct_id_kk'];
-                            if (!isset($perlinsosMap[$dirKk]) || $status === 'tersinkron') {
-                                $perlinsosMap[$dirKk] = $status;
-                            }
+                    }
+                    if (!empty($pr['direct_id_kk'])) {
+                        $dirKk = $pr['direct_id_kk'];
+                        if (!isset($perlinsosMap[$dirKk]) || $status === 'tersinkron') {
+                            $perlinsosMap[$dirKk] = $status;
                         }
                     }
                 }
             }
 
-            // 6.6️⃣ AMBIL RIWAYAT DESIL SECARA BATCH (UNTUK OFFCANVAS INSTAN TANPA LOADING)
+            // 6.6️⃣ AMBIL RIWAYAT DESIL SECARA BATCH (1x QUERY CEPAT)
             $desilHistoryMap = [];
             if (!empty($idKkList)) {
-                $chunks = array_chunk($idKkList, 1000);
-                foreach ($chunks as $chunk) {
-                    $histRows = $this->db->table('dtsen_desil_history')
-                        ->select('id_kk, desil, periode_label')
-                        ->whereIn('id_kk', $chunk)
-                        ->orderBy('tahun', 'ASC')
-                        ->orderBy('triwulan', 'ASC')
-                        ->get()->getResultArray();
+                $currentKkSet = array_fill_keys($idKkList, true);
+                $histBuilder = $this->db->table('dtsen_desil_history')
+                    ->select('id_kk, desil, periode_label')
+                    ->orderBy('tahun', 'ASC')
+                    ->orderBy('triwulan', 'ASC');
 
-                    foreach ($histRows as $hr) {
-                        $desilHistoryMap[$hr['id_kk']][] = [
+                if (count($idKkList) <= 500) {
+                    $histBuilder->whereIn('id_kk', $idKkList);
+                }
+
+                $histRows = $histBuilder->get()->getResultArray();
+
+                foreach ($histRows as $hr) {
+                    $kkId = $hr['id_kk'];
+                    if (isset($currentKkSet[$kkId])) {
+                        $desilHistoryMap[$kkId][] = [
                             'periode' => $hr['periode_label'],
                             'desil'   => (int) $hr['desil'],
                         ];
@@ -1884,6 +1889,7 @@ class DtsenSe extends Controller
         $kodeDesa = $session->get('kode_desa');
 
         $scope = $this->resolveWilayahScope($this->request->getGet('petugas'));
+        session_write_close();
 
         if ($scope['role_id'] >= 4) {
             $allowedRw = self::getAllowedRwList($scope['wilayah_tugas'], $scope['level']);
@@ -1914,6 +1920,7 @@ class DtsenSe extends Controller
         $kodeDesa = $session->get('kode_desa');
 
         $scope = $this->resolveWilayahScope($this->request->getGet('petugas'));
+        session_write_close();
 
         if ($scope['role_id'] >= 4) {
             // RW harus termasuk wilayah tugas

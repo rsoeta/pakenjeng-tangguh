@@ -197,9 +197,13 @@ if (!function_exists('encode_id')) {
         if (!is_numeric($id) || (int)$id <= 0) {
             return '';
         }
-        $secret = 'SINDEN_SECRET_SALT_2026';
-        $iv  = substr(hash('sha256', $secret . 'IV'), 0, 16);
-        $key = substr(hash('sha256', $secret . 'KEY'), 0, 16);
+        static $iv = null;
+        static $key = null;
+        if ($iv === null) {
+            $secret = 'SINDEN_SECRET_SALT_2026';
+            $iv  = substr(hash('sha256', $secret . 'IV'), 0, 16);
+            $key = substr(hash('sha256', $secret . 'KEY'), 0, 16);
+        }
         $encrypted = openssl_encrypt((string)(int)$id, 'AES-128-CBC', $key, OPENSSL_RAW_DATA, $iv);
         return rtrim(strtr(base64_encode($encrypted), '+/', '-_'), '=');
     }

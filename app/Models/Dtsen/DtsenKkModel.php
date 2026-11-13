@@ -139,11 +139,10 @@ class DtsenKkModel extends Model
 
         /**
          * ======================================================
-         * 1️⃣ AMBIL DATA KK DASAR (AMAN & STABIL + SUBQUERY)
+         * 1️⃣ AMBIL DATA KK DASAR (TANPA CORRELATED SUBQUERY LAMBAT)
          * ======================================================
          */
         $builder = $db->table('dtsen_kk kk')
-            // 🚀 PENTING: Tambahkan 'false' di akhir select agar subquery tidak dirusak CI4
             ->select('
                 kk.id_kk,
                 kk.no_kk,
@@ -151,11 +150,8 @@ class DtsenKkModel extends Model
                 kk.alamat,
                 rt.rw,
                 rt.rt,
-                se.kategori_desil,
-                (SELECT GROUP_CONCAT(CONCAT_WS(" ", nik, nama) SEPARATOR " | ") 
-                 FROM dtsen_art 
-                 WHERE id_kk = kk.id_kk AND deleted_at IS NULL) as anggota_search
-            ', false)
+                se.kategori_desil
+            ')
             ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'left')
             ->join('dtsen_se se', 'se.id_kk = kk.id_kk', 'left')
             // 🚀 PENTING: Penulisan baku CI4 untuk ngecek NULL (tanpa string IS NULL)
@@ -220,24 +216,28 @@ class DtsenKkModel extends Model
 
         /**
          * ======================================================
-         * 2️⃣ AMBIL USULAN TERBARU (1x QUERY)
+         * 2️⃣ AMBIL USULAN TERBARU (1x QUERY CEPAT)
          * ======================================================
          */
         $ids = array_column($keluarga, 'id_kk');
+        $idSet = array_fill_keys($ids, true);
 
-        $usulanRows = $db->table('dtsen_usulan')
+        $usulanBuilder = $db->table('dtsen_usulan')
             ->select('id, dtsen_kk_id, status, payload')
-            ->whereIn('dtsen_kk_id', $ids)
             ->whereIn('status', ['draft', 'submitted', 'verified', 'diverifikasi'])
-            // ->where('deleted_at IS NULL') // 🚀 FILTER DRAFT/USULAN HANTU
-            ->orderBy('id', 'DESC')
-            ->get()
-            ->getResultArray();
+            ->orderBy('id', 'DESC');
+
+        if (count($ids) <= 500) {
+            $usulanBuilder->whereIn('dtsen_kk_id', $ids);
+        }
+
+        $usulanRows = $usulanBuilder->get()->getResultArray();
 
         $usulanMap = [];
         foreach ($usulanRows as $u) {
-            if (!isset($usulanMap[$u['dtsen_kk_id']])) {
-                $usulanMap[$u['dtsen_kk_id']] = $u;
+            $kkId = $u['dtsen_kk_id'];
+            if (isset($idSet[$kkId]) && !isset($usulanMap[$kkId])) {
+                $usulanMap[$kkId] = $u;
             }
         }
 
@@ -257,29 +257,27 @@ class DtsenKkModel extends Model
             // 🚀 KUNCI SAKTI: Paksa semua status dari DB jadi huruf kecil
             // agar PHP in_array() tidak kebingungan!
             $dbStatus = strtolower(trim($u['status']));
+            $payload = json_decode($u['payload'], true) ?? [];
+            $p = $payload['perumahan'] ?? [];
 
-            if ($u) {
-                $payload = json_decode($u['payload'], true);
-                $p = $payload['perumahan'] ?? [];
+            // 🔥 OVERRIDE RW/RT (Normalkan ke format standar 3 digit jika numerik)
+            if (!empty($p['rw'])) {
+                $row['rw'] = is_numeric($p['rw']) ? str_pad($p['rw'], 3, '0', STR_PAD_LEFT) : $p['rw'];
+            }
+            if (!empty($p['rt'])) {
+                $row['rt'] = is_numeric($p['rt']) ? str_pad($p['rt'], 3, '0', STR_PAD_LEFT) : $p['rt'];
+            }
 
-                // 🔥 OVERRIDE RW/RT (Normalkan ke format standar 3 digit jika numerik)
-                if (!empty($p['rw'])) {
-                    $row['rw'] = is_numeric($p['rw']) ? str_pad($p['rw'], 3, '0', STR_PAD_LEFT) : $p['rw'];
-                }
-                if (!empty($p['rt'])) {
-                    $row['rt'] = is_numeric($p['rt']) ? str_pad($p['rt'], 3, '0', STR_PAD_LEFT) : $p['rt'];
-                }
-
-                // 🔥 TAMBAHKAN INI (FIX ALAMAT)
-                if (!empty($p['alamat'])) $row['alamat'] = $p['alamat'] ?? $row['alamat'];
+            // 🔥 TAMBAHKAN INI (FIX ALAMAT)
+            if (!empty($p['alamat'])) {
+                $row['alamat'] = $p['alamat'];
             }
 
             // Simpan status yang sudah dinormalkan ke array row
             $row['usulan_status'] = $dbStatus;
 
             // 🚀 PERBAIKAN: Evaluasi kelengkapan payload menggunakan status yang sudah dinormalkan
-            if (in_array($dbStatus, ['draft', 'submitted'])) {
-                $payload = json_decode($u['payload'], true) ?? [];
+            if (in_array($dbStatus, ['draft', 'submitted'], true)) {
                 if ($this->isPayloadLengkap($payload)) {
                     $row['is_submitted_ready'] = 1;
                 }
@@ -388,6 +386,55 @@ class DtsenKkModel extends Model
 
                 return true;
             }));
+        }
+
+        /**
+         * ======================================================
+         * 5️⃣ ISI ANGGOTA_SEARCH SECARA BATCH HANYA UNTUK KK HASIL FILTER
+         * ======================================================
+         */
+        if (!empty($keluarga)) {
+            $filteredIds = array_column($keluarga, 'id_kk');
+            $filteredSet = array_fill_keys($filteredIds, true);
+            $artSearchMap = [];
+
+            if (count($filteredIds) <= 800) {
+                $artRows = $db->table('dtsen_art')
+                    ->select('id_kk, nik, nama')
+                    ->whereIn('id_kk', $filteredIds)
+                    ->where('deleted_at', null)
+                    ->get()
+                    ->getResultArray();
+            } elseif (!empty($filter['kode_desa'])) {
+                $artRows = $db->table('dtsen_art a')
+                    ->select('a.id_kk, a.nik, a.nama')
+                    ->join('dtsen_kk kk', 'kk.id_kk = a.id_kk', 'inner')
+                    ->join('dtsen_rt rt', 'rt.id_rt = kk.id_rt', 'inner')
+                    ->where('a.deleted_at', null)
+                    ->where('rt.kode_desa', $filter['kode_desa'])
+                    ->get()
+                    ->getResultArray();
+            } else {
+                $artRows = $db->table('dtsen_art')
+                    ->select('id_kk, nik, nama')
+                    ->where('deleted_at', null)
+                    ->get()
+                    ->getResultArray();
+            }
+
+            foreach ($artRows as $ar) {
+                $kkId = $ar['id_kk'];
+                if (isset($filteredSet[$kkId])) {
+                    $artSearchMap[$kkId][] = ($ar['nik'] ?? '') . ' ' . ($ar['nama'] ?? '');
+                }
+            }
+
+            foreach ($keluarga as &$row) {
+                $row['anggota_search'] = isset($artSearchMap[$row['id_kk']])
+                    ? implode(' | ', $artSearchMap[$row['id_kk']])
+                    : null;
+            }
+            unset($row);
         }
 
         return $keluarga;
