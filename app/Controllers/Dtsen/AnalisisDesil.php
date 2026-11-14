@@ -3,6 +3,7 @@
 namespace App\Controllers\Dtsen;
 
 use App\Controllers\BaseController;
+use App\Models\Dtsen\DtsenKkModel;
 use App\Traits\WilayahFilterTrait; // 🚀 Panggil Trait di atas sini
 
 class AnalisisDesil extends BaseController
@@ -143,6 +144,31 @@ class AnalisisDesil extends BaseController
                 }
             }
 
+            // 🚀 STEP 2.5: MAPPING STATUS PEMBARUAN (dtsen_usulan) VIA PHP
+            $usulanMap = [];
+            $kkModel   = new DtsenKkModel();
+
+            if (!empty($idKkList)) {
+                $idSet = array_fill_keys($idKkList, true);
+                $usulanBuilder = $this->db->table('dtsen_usulan')
+                    ->select('id, dtsen_kk_id, status, payload')
+                    ->whereIn('status', ['draft', 'submitted', 'verified', 'diverifikasi'])
+                    ->orderBy('id', 'DESC');
+
+                if (count($idKkList) <= 500) {
+                    $usulanBuilder->whereIn('dtsen_kk_id', $idKkList);
+                }
+
+                $usulanRows = $usulanBuilder->get()->getResultArray();
+
+                foreach ($usulanRows as $u) {
+                    $kkId = $u['dtsen_kk_id'];
+                    if (isset($idSet[$kkId]) && !isset($usulanMap[$kkId])) {
+                        $usulanMap[$kkId] = $u;
+                    }
+                }
+            }
+
             // 🚀 STEP 3: OLAH DATA & LOGIKA POTENSI CORET
             $data = [];
             $no = 1;
@@ -157,6 +183,34 @@ class AnalisisDesil extends BaseController
                 $bansosAktif = '';
                 if (isset($bansosMap[$row['id_kk']])) {
                     $bansosAktif = implode(', ', array_unique($bansosMap[$row['id_kk']]));
+                }
+
+                // 🚀 LOGIKA STATUS PEMBARUAN (Sesuai Daftar Keluarga / v_daftar.php)
+                $usulanStatus     = null;
+                $isSubmittedReady = 0;
+
+                if (isset($usulanMap[$row['id_kk']])) {
+                    $u        = $usulanMap[$row['id_kk']];
+                    $dbStatus = strtolower(trim((string) $u['status']));
+                    $payload  = json_decode($u['payload'], true) ?? [];
+
+                    $usulanStatus = $dbStatus;
+                    if (in_array($dbStatus, ['draft', 'submitted'], true)) {
+                        if ($kkModel->isPayloadLengkap($payload)) {
+                            $isSubmittedReady = 1;
+                        }
+                    }
+                }
+
+                $pembaruanBadge = '<span class="badge bg-secondary">Belum Ada Pembaruan</span>';
+                if ($usulanStatus === 'draft' || $usulanStatus === 'submitted') {
+                    if ($isSubmittedReady == 1) {
+                        $pembaruanBadge = '<span class="badge bg-info text-dark">Submitted</span>';
+                    } else {
+                        $pembaruanBadge = '<span class="badge bg-warning text-dark">Draft</span>';
+                    }
+                } elseif ($usulanStatus === 'verified' || $usulanStatus === 'diverifikasi') {
+                    $pembaruanBadge = '<span class="badge bg-primary">Verified</span>';
                 }
 
                 $desilAwalVal = ($row['desil_awal'] !== null && $row['desil_awal'] !== '') ? (int)$row['desil_awal'] : 99;
@@ -202,6 +256,7 @@ class AnalisisDesil extends BaseController
                     $statusBadge,
                     ($bansosAktif !== '') ? '<span class="badge bg-info text-dark">' . $bansosAktif . '</span>' : '-',
                     $prediksiNasib,
+                    $pembaruanBadge,
                     $btnAksi // 🚀 TAMBAHKAN TOMBOL DI BARIS TERAKHIR SINI
                 ];
             }

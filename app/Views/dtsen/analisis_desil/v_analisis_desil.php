@@ -4,11 +4,24 @@
 <style>
     .card-metric {
         border-radius: 12px;
-        transition: transform 0.2s;
+        transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+        cursor: pointer;
+        user-select: none;
     }
 
     .card-metric:hover {
         transform: translateY(-5px);
+    }
+
+    .card-metric.active-card {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.35) !important;
+        outline: 3px solid rgba(255, 255, 255, 0.9);
+        outline-offset: -3px;
+    }
+
+    .pivot-filtered .card-metric:not(.active-card) {
+        opacity: 0.65;
     }
 
     .pulse-danger {
@@ -111,9 +124,9 @@
             </div>
 
             <!-- 🃏 CARD SUMMARY PIVOT -->
-            <div class="row mb-2">
+            <div class="row mb-2" id="summaryPivotRow">
                 <div class="col-md-3 col-6 mb-3">
-                    <div class="card card-metric bg-primary text-white shadow">
+                    <div class="card card-metric bg-primary text-white shadow active-card" data-filter="all" data-label="Semua KK" title="Klik untuk menampilkan seluruh KK">
                         <div class="card-body p-3">
                             <h6 class="fw-bold mb-1"><i class="fas fa-users mr-1"></i> Total KK</h6>
                             <h3 class="font-weight-bold mb-0" id="sum-total">0</h3>
@@ -122,7 +135,7 @@
                     </div>
                 </div>
                 <div class="col-md-2 col-6 mb-3">
-                    <div class="card card-metric bg-danger text-white shadow">
+                    <div class="card card-metric bg-danger text-white shadow" data-filter="naik" data-label="Naik Desil" title="Klik untuk memfilter KK yang Naik Desil">
                         <div class="card-body p-3">
                             <h6 class="fw-bold mb-1"><i class="fas fa-arrow-up mr-1"></i> Naik Desil</h6>
                             <h3 class="font-weight-bold mb-0"><span id="sum-naik">0</span> <span class="fs-6 fw-normal" id="pct-naik">(0%)</span></h3>
@@ -131,7 +144,7 @@
                     </div>
                 </div>
                 <div class="col-md-2 col-6 mb-3">
-                    <div class="card card-metric bg-success text-white shadow">
+                    <div class="card card-metric bg-success text-white shadow" data-filter="turun" data-label="Turun Desil" title="Klik untuk memfilter KK yang Turun Desil">
                         <div class="card-body p-3">
                             <h6 class="fw-bold mb-1"><i class="fas fa-arrow-down mr-1"></i> Turun Desil</h6>
                             <h3 class="font-weight-bold mb-0"><span id="sum-turun">0</span> <span class="fs-6 fw-normal" id="pct-turun">(0%)</span></h3>
@@ -140,7 +153,7 @@
                     </div>
                 </div>
                 <div class="col-md-2 col-6 mb-3">
-                    <div class="card card-metric bg-secondary text-white shadow">
+                    <div class="card card-metric bg-secondary text-white shadow" data-filter="tetap" data-label="Desil Tetap" title="Klik untuk memfilter KK yang Desilnya Tetap">
                         <div class="card-body p-3">
                             <h6 class="fw-bold mb-1"><i class="fas fa-equals mr-1"></i> Tetap</h6>
                             <h3 class="font-weight-bold mb-0"><span id="sum-tetap">0</span> <span class="fs-6 fw-normal" id="pct-tetap">(0%)</span></h3>
@@ -149,7 +162,7 @@
                     </div>
                 </div>
                 <div class="col-md-3 col-12 mb-3">
-                    <div class="card card-metric bg-dark text-white shadow border border-danger">
+                    <div class="card card-metric bg-dark text-white shadow border border-danger" data-filter="coret" data-label="Potensi Coret" title="Klik untuk memfilter KK Potensi Coret">
                         <div class="card-body p-3">
                             <h6 class="fw-bold mb-1 text-danger"><i class="fas fa-radiation-alt mr-1"></i> POTENSI CORET</h6>
                             <h3 class="font-weight-bold mb-0 text-danger" id="sum-coret">0 <small class="fs-6 text-white">KK</small></h3>
@@ -164,6 +177,7 @@
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h3 class="card-title fw-bold mt-1" style="font-size: 1rem;">
                         <i class="fas fa-table text-primary mr-1"></i> Detail BNBA Perubahan Desil
+                        <span id="activeFilterBadge" class="badge bg-primary ms-2 d-none" style="cursor: pointer;" title="Klik untuk mereset filter kartu"></span>
                     </h3>
                 </div>
                 <div class="card-body p-3">
@@ -179,6 +193,7 @@
                                     <th>Status</th>
                                     <th>Bansos Aktif</th>
                                     <th>Prediksi</th>
+                                    <th>Status Pembaruan</th>
                                     <!-- 🚀 TAMBAHKAN KOLOM AKSI DI SINI -->
                                     <th width="10%">Aksi</th>
                                 </tr>
@@ -283,13 +298,81 @@
                     "targets": 0
                 },
                 {
-                    "className": "text-center",
-                    "targets": [0, 3, 4]
+                    "className": "text-center text-nowrap",
+                    "targets": [0, 3, 4, 8]
                 }
             ]
         });
 
         // ... (penutup dari var table = $('#tableDesil').DataTable({...}); )
+
+        // 🚀 FILTER INTERAKTIF CARD SUMMARY PIVOT
+        var activeCardFilter = 'all';
+
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            if (settings.nTable.id !== 'tableDesil') {
+                return true;
+            }
+
+            if (!activeCardFilter || activeCardFilter === 'all') {
+                return true;
+            }
+
+            var statusCol = (data[5] || '').toLowerCase();
+            var prediksiCol = (data[7] || '').toLowerCase();
+
+            if (activeCardFilter === 'naik') {
+                return statusCol.indexOf('naik') !== -1;
+            }
+            if (activeCardFilter === 'turun') {
+                return statusCol.indexOf('turun') !== -1;
+            }
+            if (activeCardFilter === 'tetap') {
+                return statusCol.indexOf('tetap') !== -1;
+            }
+            if (activeCardFilter === 'coret') {
+                return prediksiCol.indexOf('rawan coret') !== -1;
+            }
+
+            return true;
+        });
+
+        function applyCardPivotFilter(filterType, filterLabel) {
+            activeCardFilter = filterType || 'all';
+
+            var $row = $('#summaryPivotRow');
+            var $cards = $row.find('.card-metric');
+            $cards.removeClass('active-card');
+            $row.find('.card-metric[data-filter="' + activeCardFilter + '"]').addClass('active-card');
+
+            if (activeCardFilter === 'all') {
+                $row.removeClass('pivot-filtered');
+                $('#activeFilterBadge').addClass('d-none').empty();
+            } else {
+                $row.addClass('pivot-filtered');
+                $('#activeFilterBadge')
+                    .removeClass('d-none')
+                    .html('<i class="fas fa-filter me-1"></i> ' + filterLabel + ' <i class="fas fa-times ms-1"></i>');
+            }
+
+            table.draw();
+        }
+
+        $('#summaryPivotRow').on('click', '.card-metric[data-filter]', function() {
+            var clickedFilter = $(this).data('filter');
+            var clickedLabel = $(this).data('label') || '';
+
+            // Jika klik kartu yang sedang aktif (selain 'all'), kembalikan ke 'all'
+            if (clickedFilter !== 'all' && activeCardFilter === clickedFilter) {
+                applyCardPivotFilter('all', '');
+            } else {
+                applyCardPivotFilter(clickedFilter, clickedLabel);
+            }
+        });
+
+        $('#activeFilterBadge').on('click', function() {
+            applyCardPivotFilter('all', '');
+        });
 
         // 🚀 KUNCI NOMOR URUT AGAR TETAP BERURUTAN DINAMIS
         table.on('order.dt search.dt', function() {
