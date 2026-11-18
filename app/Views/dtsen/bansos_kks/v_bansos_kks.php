@@ -645,15 +645,15 @@
 
         // 🚀 FUNGSI EXPORT EXCEL MENGIKUTI FILTER
         $('#btn_export_excel').click(function() {
-            var petugas = $('#filter_petugas').val();
-            var rw = $('#filter_rw').val();
-            var rt = $('#filter_rt').val();
-            var tahap = $('#filter_tahap').val();
-            var locked = $('#filter_locked').val();
-            var jenis = $('#filter_jenis').val();
+            var petugas = $('#filter_petugas').val() || '';
+            var rw = $('#filter_rw').val() || '';
+            var rt = $('#filter_rt').val() || '';
+            var tahap = $('#filter_tahap').val() || '';
+            var locked = $('#filter_locked').val() || '';
+            var jenis = $('#filter_jenis').val() || '';
 
-            // Redirect ke function Controller dengan query parameter
-            var exportUrl = "<?= base_url('bansos-kks/exportExcel') ?>?petugas=" + petugas + "&rw=" + rw + "&rt=" + rt + "&tahap=" + tahap + "&locked=" + locked + "&jenis=" + jenis;
+            // Redirect ke function Controller dengan query parameter terenkode aman
+            var exportUrl = "<?= base_url('bansos-kks/exportExcel') ?>?petugas=" + encodeURIComponent(petugas) + "&rw=" + encodeURIComponent(rw) + "&rt=" + encodeURIComponent(rt) + "&tahap=" + encodeURIComponent(tahap) + "&locked=" + encodeURIComponent(locked) + "&jenis=" + encodeURIComponent(jenis);
             window.open(exportUrl, '_blank');
         });
 

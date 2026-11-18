@@ -57,7 +57,7 @@ class BansosKKS extends BaseController
         $filterJenis = $this->request->getPost('filter_jenis');
 
         $builder = $this->db->table('dtsen_bansos_kks b')
-            ->select('b.*, m.alamat, m.rt, m.rw')
+            ->select('b.*, MAX(m.alamat) as alamat, MAX(m.rt) as rt, MAX(m.rw) as rw', false)
             ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
             ->join('dtsen_art a', 'a.nik = b.nik_kpm', 'left')
             ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left')
@@ -1038,162 +1038,214 @@ class BansosKKS extends BaseController
     // ========================================================
     public function exportExcel()
     {
-        // 1. Tangkap Request GET dari URL
-        $filterRw = $this->request->getGet('rw');
-        $filterRt = $this->request->getGet('rt');
-        $filterTahap = $this->request->getGet('tahap');
-        $filterLocked = $this->request->getGet('locked');
-        $filterJenis = $this->request->getGet('jenis');
+        try {
+            // 1. Tangkap Request GET dari URL
+            $filterPetugas = $this->request->getGet('petugas');
+            $filterRw      = $this->request->getGet('rw');
+            $filterRt      = $this->request->getGet('rt');
+            $filterTahap   = $this->request->getGet('tahap');
+            $filterLocked  = $this->request->getGet('locked');
+            $filterJenis   = $this->request->getGet('jenis');
 
-        $user = $this->authModel->getUserId();
-        $roleId = session()->get('role_id') ?? 4;
-        $kodeDesa = session()->get('kode_desa') ?? ($user['kode_desa'] ?? '');
+            $user = $this->authModel->getUserId();
+            $roleId = session()->get('role_id') ?? 4;
+            $kodeDesa = session()->get('kode_desa') ?? ($user['kode_desa'] ?? '');
 
-        // 2. Build Query (Persis seperti Datatable agar akurat)
-        $builder = $this->db->table('dtsen_bansos_kks b')
-            ->select('b.*, m.alamat, m.rt, m.rw, k.no_kk, k.kepala_keluarga, a.tempat_lahir, a.tanggal_lahir, a.jenis_kelamin')
-            ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
-            ->join('dtsen_art a', 'a.nik = b.nik_kpm AND a.deleted_at IS NULL', 'left')
-            ->join('dtsen_kk k', 'k.id_kk = a.id_kk AND k.deleted_at IS NULL', 'left')
-            ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left'); // Alias 'rt' untuk Trait
+            // 2. Build Query (Kompatibel penuh dengan MySQL ONLY_FULL_GROUP_BY di server produksi)
+            $builder = $this->db->table('dtsen_bansos_kks b')
+                ->select('b.*, 
+                          COALESCE(NULLIF(MAX(m.alamat), \'\'), MAX(rt.alamat), MAX(k.alamat), \'-\') as alamat, 
+                          COALESCE(NULLIF(MAX(m.rt), \'\'), MAX(rt.rt), \'\') as rt, 
+                          COALESCE(NULLIF(MAX(m.rw), \'\'), MAX(rt.rw), \'\') as rw, 
+                          MAX(k.no_kk) as no_kk, 
+                          MAX(k.kepala_keluarga) as kepala_keluarga, 
+                          MAX(a.tempat_lahir) as tempat_lahir, 
+                          MAX(a.tanggal_lahir) as tanggal_lahir, 
+                          MAX(a.jenis_kelamin) as jenis_kelamin', false)
+                ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
+                ->join('dtsen_art a', 'a.nik = b.nik_kpm AND a.deleted_at IS NULL', 'left')
+                ->join('dtsen_kk k', 'k.id_kk = a.id_kk AND k.deleted_at IS NULL', 'left')
+                ->join('dtsen_rt rt', 'rt.id_rt = k.id_rt', 'left'); // Alias 'rt' untuk Trait
 
-        // 3. 🔐 Filter Wilayah (Trait)
-        $filterData = [
-            'kode_desa'     => $kodeDesa,
-            'wilayah_tugas' => trim($user['wilayah_tugas'] ?? '')
-        ];
-        $this->applyWilayahFilter($builder, $filterData, $roleId);
+            // 3. 🔐 Filter Wilayah (Trait + Mode Penyamaran Petugas untuk Admin)
+            $wilayahTugas = trim($user['wilayah_tugas'] ?? '');
+            $roleTarget = $roleId;
 
-        // 4. Terapkan Dinamis Filter
-        if (!empty($filterRw)) $builder->where('m.rw', str_pad($filterRw, 3, '0', STR_PAD_LEFT));
-        if (!empty($filterRt)) $builder->where('m.rt', str_pad($filterRt, 3, '0', STR_PAD_LEFT));
-        if (!empty($filterTahap)) $builder->where('b.tahap_salur', $filterTahap);
-        if ($filterLocked !== '' && $filterLocked !== null) $builder->where('b.is_locked', (int)$filterLocked);
-        // 🚀 Terapkan Filter Jenis Bansos (Logika Inklusi MIX)
-        if (!empty($filterJenis)) {
-            if ($filterJenis === 'PKH') {
-                $builder->whereIn('b.jenis_bansos', ['PKH', 'PKH + SEMBAKO']);
-            } elseif ($filterJenis === 'SEMBAKO') {
-                $builder->whereIn('b.jenis_bansos', ['SEMBAKO', 'PKH + SEMBAKO']);
-            } else {
-                $builder->where('b.jenis_bansos', $filterJenis);
-            }
-        }
-
-        // Eksekusi Query
-        $builder->groupBy('b.id')->orderBy('m.rw', 'ASC')->orderBy('m.rt', 'ASC')->orderBy('b.nama_kpm', 'ASC');
-        $query = $builder->get()->getResultArray();
-
-        // ==========================================
-        // 🛠️ MULAI PROSES SPREADSHEET
-        // ==========================================
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        // 🚀 FITUR BARU: NAMA SHEET MENGIKUTI FILTER JENIS BANSOS
-        $namaSheet = !empty($filterJenis) ? $filterJenis : 'Semua Bansos';
-
-        // Amankan nama sheet dari karakter ilegal Excel dan batasi maksimal 31 karakter
-        $namaSheetAman = substr(str_replace(['*', ':', '/', '\\', '?', '[', ']'], '', $namaSheet), 0, 31);
-        $sheet->setTitle($namaSheetAman);
-
-        // --- MERGE & SETUP HEADER SEPERTI GAMBAR ---
-        $sheet->setCellValue('A1', 'NO');
-        // ... (lanjutan kode merge dan setCellValue di bawahnya tetap sama)
-        $sheet->mergeCells('A1:A2');
-
-        $sheet->setCellValue('B1', 'NO KK');
-        $sheet->mergeCells('B1:B2');
-
-        $sheet->setCellValue('C1', 'KEPALA KELUARGA');
-        $sheet->mergeCells('C1:C2');
-
-        $sheet->setCellValue('D1', 'IDENTITAS DI KARTU PESERTA');
-        $sheet->mergeCells('D1:I1'); // Membentang dari D ke I
-
-        // Baris ke-2 di bawah "IDENTITAS DI KARTU PESERTA"
-        $sheet->setCellValue('D2', 'NIK');
-        $sheet->setCellValue('E2', 'NAMA');
-        $sheet->setCellValue('F2', 'TEMPAT LAHIR');
-        $sheet->setCellValue('G2', 'TANGGAL LAHIR');
-        $sheet->setCellValue('H2', 'JENIS KELAMIN');
-        $sheet->setCellValue('I2', 'ALAMAT');
-
-        // --- STYLING HEADER ---
-        $headerStyle = [
-            'font' => ['bold' => true],
-            'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-            ],
-            'borders' => [
-                'allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],
-            ],
-            'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['argb' => 'F2F2F2'], // Warna abu-abu muda elegan
-            ],
-        ];
-        $sheet->getStyle('A1:I2')->applyFromArray($headerStyle);
-
-        // --- MENGISI DATA ---
-        $rowNum = 3;
-        $no = 1;
-        foreach ($query as $row) {
-            // Merakit alamat lengkap
-            $alamat = $row['alamat'] ?? '-';
-            if (!empty($row['rt']) && !empty($row['rw'])) {
-                $alamat .= ' RT. ' . ltrim($row['rt'], '0') . ' / RW. ' . ltrim($row['rw'], '0');
+            if ($roleId <= 3 && !empty($filterPetugas)) {
+                $petugas = $this->db->table('dtks_users')->select('wilayah_tugas')->where('id', $filterPetugas)->get()->getRowArray();
+                if ($petugas) {
+                    $wilayahTugas = trim($petugas['wilayah_tugas'] ?? '');
+                    $roleTarget = 4;
+                }
             }
 
-            // Merakit Tanggal Lahir
-            $tglLahir = !empty($row['tanggal_lahir']) ? date('d-m-Y', strtotime($row['tanggal_lahir'])) : '-';
+            $filterData = [
+                'kode_desa'     => $kodeDesa,
+                'wilayah_tugas' => $wilayahTugas
+            ];
+            $this->applyWilayahFilter($builder, $filterData, $roleTarget);
 
-            $sheet->setCellValue('A' . $rowNum, $no++);
-            $sheet->setCellValueExplicit('B' . $rowNum, $row['no_kk'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $sheet->setCellValue('C' . $rowNum, $row['kepala_keluarga']);
-            $sheet->setCellValueExplicit('D' . $rowNum, $row['nik_kpm'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $sheet->setCellValue('E' . $rowNum, $row['nama_kpm']);
-            $sheet->setCellValue('F' . $rowNum, $row['tempat_lahir']);
-            $sheet->setCellValueExplicit('G' . $rowNum, $tglLahir, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $sheet->setCellValue('H' . $rowNum, $row['jenis_kelamin']);
-            $sheet->setCellValue('I' . $rowNum, $alamat);
+            // 4. Terapkan Dinamis Filter
+            if (!empty($filterRw)) $builder->where('m.rw', str_pad($filterRw, 3, '0', STR_PAD_LEFT));
+            if (!empty($filterRt)) $builder->where('m.rt', str_pad($filterRt, 3, '0', STR_PAD_LEFT));
+            if (!empty($filterTahap)) $builder->where('b.tahap_salur', $filterTahap);
 
-            $rowNum++;
+            // 🚀 Terapkan Filter Kunci & Status Kelengkapan (Sinkron dengan Datatable & Chart)
+            if ($filterLocked !== '' && $filterLocked !== null) {
+                if ($filterLocked === 'divalidasi' || $filterLocked === '1') {
+                    $builder->where('b.is_locked', 1);
+                } elseif ($filterLocked === 'terbuka' || $filterLocked === '0') {
+                    $builder->where('b.is_locked', 0);
+                } elseif ($filterLocked === 'menunggu') {
+                    $builder->where('b.is_locked', 0);
+                    $builder->where('b.status_kelengkapan', 1);
+                } elseif ($filterLocked === 'pr') {
+                    $builder->where('b.is_locked', 0);
+                    $builder->where('b.status_kelengkapan', 0);
+                }
+            }
+
+            // 🚀 Terapkan Filter Jenis Bansos (Logika Inklusi MIX)
+            if (!empty($filterJenis)) {
+                if ($filterJenis === 'PKH') {
+                    $builder->whereIn('b.jenis_bansos', ['PKH', 'PKH + SEMBAKO']);
+                } elseif ($filterJenis === 'SEMBAKO') {
+                    $builder->whereIn('b.jenis_bansos', ['SEMBAKO', 'PKH + SEMBAKO']);
+                } else {
+                    $builder->where('b.jenis_bansos', $filterJenis);
+                }
+            }
+
+            // Eksekusi Query dengan aman
+            $builder->groupBy('b.id')
+                ->orderBy('rw', 'ASC')
+                ->orderBy('rt', 'ASC')
+                ->orderBy('b.nama_kpm', 'ASC');
+
+            $resQuery = $builder->get();
+            $query = ($resQuery !== false) ? $resQuery->getResultArray() : [];
+
+            // ==========================================
+            // 🛠️ MULAI PROSES SPREADSHEET
+            // ==========================================
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // 🚀 FITUR BARU: NAMA SHEET MENGIKUTI FILTER JENIS BANSOS
+            $namaSheet = !empty($filterJenis) ? $filterJenis : 'Semua Bansos';
+
+            // Amankan nama sheet dari karakter ilegal Excel dan batasi maksimal 31 karakter
+            $namaSheetAman = substr(str_replace(['*', ':', '/', '\\', '?', '[', ']'], '', $namaSheet), 0, 31);
+            $sheet->setTitle($namaSheetAman ?: 'Data Bansos');
+
+            // --- MERGE & SETUP HEADER SEPERTI GAMBAR ---
+            $sheet->setCellValue('A1', 'NO');
+            $sheet->mergeCells('A1:A2');
+
+            $sheet->setCellValue('B1', 'NO KK');
+            $sheet->mergeCells('B1:B2');
+
+            $sheet->setCellValue('C1', 'KEPALA KELUARGA');
+            $sheet->mergeCells('C1:C2');
+
+            $sheet->setCellValue('D1', 'IDENTITAS DI KARTU PESERTA');
+            $sheet->mergeCells('D1:I1'); // Membentang dari D ke I
+
+            // Baris ke-2 di bawah "IDENTITAS DI KARTU PESERTA"
+            $sheet->setCellValue('D2', 'NIK');
+            $sheet->setCellValue('E2', 'NAMA');
+            $sheet->setCellValue('F2', 'TEMPAT LAHIR');
+            $sheet->setCellValue('G2', 'TANGGAL LAHIR');
+            $sheet->setCellValue('H2', 'JENIS KELAMIN');
+            $sheet->setCellValue('I2', 'ALAMAT');
+
+            // --- STYLING HEADER ---
+            $headerStyle = [
+                'font' => ['bold' => true],
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                ],
+                'borders' => [
+                    'allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],
+                ],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['argb' => 'FFF2F2F2'], // Warna abu-abu muda elegan (8-char ARGB)
+                ],
+            ];
+            $sheet->getStyle('A1:I2')->applyFromArray($headerStyle);
+
+            // --- MENGISI DATA ---
+            $rowNum = 3;
+            $no = 1;
+            foreach ($query as $row) {
+                // Merakit alamat lengkap
+                $alamat = $row['alamat'] ?? '-';
+                if (!empty($row['rt']) && !empty($row['rw'])) {
+                    $alamat .= ' RT. ' . ltrim((string)$row['rt'], '0') . ' / RW. ' . ltrim((string)$row['rw'], '0');
+                }
+
+                // Merakit Tanggal Lahir
+                $tglLahir = (!empty($row['tanggal_lahir']) && $row['tanggal_lahir'] !== '0000-00-00')
+                    ? date('d-m-Y', strtotime($row['tanggal_lahir']))
+                    : '-';
+
+                $sheet->setCellValue('A' . $rowNum, $no++);
+                $sheet->setCellValueExplicit('B' . $rowNum, (string)($row['no_kk'] ?? '-'), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                $sheet->setCellValue('C' . $rowNum, $row['kepala_keluarga'] ?? '-');
+                $sheet->setCellValueExplicit('D' . $rowNum, (string)($row['nik_kpm'] ?? '-'), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                $sheet->setCellValue('E' . $rowNum, $row['nama_kpm'] ?? '-');
+                $sheet->setCellValue('F' . $rowNum, $row['tempat_lahir'] ?? '-');
+                $sheet->setCellValueExplicit('G' . $rowNum, $tglLahir, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                $sheet->setCellValue('H' . $rowNum, $row['jenis_kelamin'] ?? '-');
+                $sheet->setCellValue('I' . $rowNum, $alamat);
+
+                $rowNum++;
+            }
+
+            // --- STYLING BORDER DATA ---
+            $dataStyle = [
+                'borders' => [
+                    'allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],
+                ],
+                'alignment' => [
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                ]
+            ];
+            // Hanya beri border jika ada data
+            if ($rowNum > 3) {
+                $sheet->getStyle('A3:I' . ($rowNum - 1))->applyFromArray($dataStyle);
+
+                // Tengah-tengahkan kolom tertentu (Nomor, Tanggal Lahir, Jenis Kelamin)
+                $sheet->getStyle('A3:A' . ($rowNum - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('G3:H' . ($rowNum - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            }
+
+            // --- AUTO-SIZE COLUMN ---
+            foreach (range('A', 'I') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            // Bersihkan seluruh output buffer sebelum mengirim binary stream Excel
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+
+            // --- HEADER OUTPUT BROWSER (DOWNLOAD) ---
+            $filename = 'Laporan_Bansos_KKS_' . date('Ymd_His') . '.xlsx';
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+            header('Pragma: public');
+
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $writer->save('php://output');
+            exit;
+        } catch (\Throwable $e) {
+            log_message('error', '[BansosKKS::exportExcel] ' . $e->getMessage());
+            return redirect()->to('/bansos-kks')->with('error', 'Gagal mengekspor Excel: ' . $e->getMessage());
         }
-
-        // --- STYLING BORDER DATA ---
-        $dataStyle = [
-            'borders' => [
-                'allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],
-            ],
-            'alignment' => [
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-            ]
-        ];
-        // Hanya beri border jika ada data
-        if ($rowNum > 3) {
-            $sheet->getStyle('A3:I' . ($rowNum - 1))->applyFromArray($dataStyle);
-
-            // Tengah-tengahkan kolom tertentu (Nomor, Tanggal Lahir, Jenis Kelamin)
-            $sheet->getStyle('A3:A' . ($rowNum - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('G3:H' . ($rowNum - 1))->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        }
-
-        // --- AUTO-SIZE COLUMN ---
-        foreach (range('A', 'I') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        // --- HEADER OUTPUT BROWSER (DOWNLOAD) ---
-        $filename = 'Laporan_Bansos_KKS_' . date('Ymd_His') . '.xlsx';
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $writer->save('php://output');
-        exit;
     }
 
     // ========================================================
@@ -1232,9 +1284,9 @@ class BansosKKS extends BaseController
                 });
             }
 
-            // 🚀 PERBAIKAN: Masukkan b.status_kelengkapan dalam SELECT
+            // 🚀 PERBAIKAN: Masukkan b.status_kelengkapan dalam SELECT (Kompatibel ONLY_FULL_GROUP_BY)
             $builder = $this->db->table('dtsen_bansos_kks b')
-                ->select('b.id, b.is_locked, b.status_kelengkapan, m.rw as m_rw, m.rt as m_rt, rt.rw as rt_rw, rt.rt as rt_rt')
+                ->select('b.id, b.is_locked, b.status_kelengkapan, MAX(m.rw) as m_rw, MAX(m.rt) as m_rt, MAX(rt.rw) as rt_rw, MAX(rt.rt) as rt_rt', false)
                 ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
                 ->join('dtsen_art a', 'a.nik = b.nik_kpm', 'left')
                 ->join('dtsen_kk k', 'k.id_kk = a.id_kk', 'left')

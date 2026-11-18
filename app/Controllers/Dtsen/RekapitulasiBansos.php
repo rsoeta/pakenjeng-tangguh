@@ -170,16 +170,16 @@ class RekapitulasiBansos extends BaseController
 
         $builder = $this->db->table('dtsen_bansos_kks b')
             ->select('b.id, b.nik_kpm, 
-                      COALESCE(NULLIF(b.nama_kpm, \'\'), NULLIF(m.nama_penerima, \'\'), a.nama, \'-\') as nama_kpm,
+                      COALESCE(NULLIF(b.nama_kpm, \'\'), NULLIF(MAX(m.nama_penerima), \'\'), MAX(a.nama), \'-\') as nama_kpm,
                       b.jenis_bansos, b.nomor_kks, b.tahap_salur, b.nominal_cair, 
                       b.status_salur, b.status_kelengkapan, b.foto_kpm_kks, b.foto_bukti_transaksi, b.latitude, b.longitude, 
                       b.created_by, b.created_at, b.updated_at,
                       MAX(k.id_kk) as id_kk, MAX(k.no_kk) as no_kk, MAX(k.kepala_keluarga) as kepala_keluarga,
                       MAX(rt.latitude) as rt_lat, MAX(rt.longitude) as rt_lng,
-                      COALESCE(NULLIF(m.alamat, \'\'), MAX(rt.alamat), MAX(k.alamat), \'-\') as alamat,
-                      COALESCE(NULLIF(m.rw, \'\'), MAX(rt.rw), \'-\') as rw,
-                      COALESCE(NULLIF(m.rt, \'\'), MAX(rt.rt), \'-\') as rt,
-                      u.fullname as petugas_nama', false)
+                      COALESCE(NULLIF(MAX(m.alamat), \'\'), MAX(rt.alamat), MAX(k.alamat), \'-\') as alamat,
+                      COALESCE(NULLIF(MAX(m.rw), \'\'), MAX(rt.rw), \'-\') as rw,
+                      COALESCE(NULLIF(MAX(m.rt), \'\'), MAX(rt.rt), \'-\') as rt,
+                      MAX(u.fullname) as petugas_nama', false)
             ->join('dtsen_master_kks m', 'm.nik = b.nik_kpm', 'left')
             ->join('dtsen_art a', 'a.nik = b.nik_kpm AND a.deleted_at IS NULL', 'left')
             ->join('dtsen_kk k', 'k.id_kk = a.id_kk AND k.deleted_at IS NULL', 'left')
@@ -1349,10 +1349,15 @@ class RekapitulasiBansos extends BaseController
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
         $filename = 'BNBA_Bansos_' . date('Ymd_His') . '.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Cache-Control: max-age=0');
+        header('Pragma: public');
 
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
