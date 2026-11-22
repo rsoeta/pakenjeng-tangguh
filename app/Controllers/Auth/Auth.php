@@ -14,6 +14,7 @@ use PHPMailer\PHPMailer\Exception;
 
 use App\Controllers\BaseController;
 
+use App\Libraries\GoogleOAuthService;
 use App\Libraries\MailgunService;
 
 class Auth extends BaseController
@@ -21,12 +22,14 @@ class Auth extends BaseController
     protected $AuthModel;
     protected $WilayahModel;
     protected $UsersLoginModel;
+    protected GoogleOAuthService $googleOAuth;
 
     public function __construct()
     {
         $this->AuthModel = new AuthModel();
         $this->WilayahModel = new WilayahModel();
         $this->UsersLoginModel = new UsersLoginModel();
+        $this->googleOAuth = new GoogleOAuthService();
     }
 
     public function login()
@@ -54,6 +57,7 @@ class Auth extends BaseController
                 return view('dtks/auth/login', [
                     "validation" => $this->validator,
                     "title" => 'Login',
+                    'googleOAuthEnabled' => $this->googleOAuth->isConfigured(),
                 ]);
             }
 
@@ -95,54 +99,7 @@ class Auth extends BaseController
 
             // === 🧩 Jika Turnstile valid (atau dilewati di dev) ===
             if ($captchaVerified) {
-
-                // 🚀 1. BUAT TOKEN ACAK SEBAGAI KUNCI SESI
-                $sessionToken = bin2hex(random_bytes(32));
-
-                // Buat session login user bawaan
-                $this->setUserSession($user);
-
-                // 🚀 2. INJEKSI TOKEN KE DALAM SESSION AKTIF BROWSER INI
-                session()->set('session_token', $sessionToken);
-
-                $UsersLogin = new UsersLoginModel();
-
-                // 🚀 3. TAMBAHKAN TOKEN DAN IP ADDRESS KE DATABASE
-                $data_login = [
-                    'dul_du_id'         => $user['id'],
-                    'dul_last_activity' => date('Y-m-d H:i:s'),
-                    'dul_ip_address'    => $this->request->getIPAddress(), // Rekam IP agar lebih aman
-                    'dul_token'         => $sessionToken // Simpan kunci untuk dicek oleh Satpam (Filter)
-                ];
-
-                $last_login_record = $UsersLogin->where('dul_du_id', $user['id'])->first();
-
-                // Logika existing: Jika sudah ada, update record yang lama
-                if (!empty($last_login_record)) {
-                    $pkName = $UsersLogin->primaryKey;
-                    $data_login[$pkName] = $last_login_record[$pkName];
-                }
-
-                $UsersLogin->save($data_login);
-
-                // Cek status aktif
-                if ($user['status'] !== 1) {
-                    session()->setFlashdata('message', [
-                        'type' => 'error',
-                        'text' => 'User Non-Aktif, Silakan hubungi Admin!'
-                    ]);
-                    return redirect()->to('/login');
-                }
-
-                // Cek redirect URL sebelumnya
-                $redirectUrl = session()->get('redirectUrl');
-                if ($redirectUrl) {
-                    session()->remove('redirectUrl');
-                    return redirect()->to(base_url($redirectUrl));
-                }
-
-                // Default redirect ke dashboard
-                return redirect()->to('/dashboard');
+                return $this->completeUserLogin($user);
             } else {
                 // === Turnstile gagal diverifikasi ===
                 session()->setFlashdata('message', [
@@ -153,8 +110,212 @@ class Auth extends BaseController
             }
         }
 
-        $data = ['title' => 'Sign In'];
+        $data = [
+            'title' => 'Sign In',
+            'googleOAuthEnabled' => $this->googleOAuth->isConfigured(),
+        ];
         return view('dtks/auth/login', $data);
+    }
+
+    public function googleRedirect()
+    {
+        if (!$this->googleOAuth->isConfigured()) {
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => ENVIRONMENT === 'development'
+                    ? 'Login Google belum dikonfigurasi. Lengkapi GOOGLE_CLIENT_ID dan GOOGLE_CLIENT_SECRET di file .env.'
+                    : 'Login Google belum dikonfigurasi oleh Admin.',
+            ]);
+
+            return redirect()->to('/login');
+        }
+
+        $state = $this->googleOAuth->generateState();
+        $pkce  = $this->googleOAuth->generatePkcePair();
+
+        session()->set([
+            'google_oauth_state'         => $state,
+            'google_oauth_code_verifier' => $pkce['verifier'],
+            'google_oauth_created_at'    => time(),
+        ]);
+
+        return redirect()->to($this->googleOAuth->buildAuthorizationUrl($state, $pkce['challenge']));
+    }
+
+    public function googleCallback()
+    {
+        if (!$this->googleOAuth->isConfigured()) {
+            $this->clearGoogleOAuthSession();
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => 'Login Google belum dikonfigurasi oleh Admin.',
+            ]);
+
+            return redirect()->to('/login');
+        }
+
+        $error = $this->request->getGet('error');
+        if (is_string($error) && $error !== '') {
+            $this->clearGoogleOAuthSession();
+            $sanitizedError = preg_replace('/[^a-zA-Z0-9_.-]/', '', $error);
+            log_message('warning', 'Google OAuth callback error: ' . $sanitizedError);
+
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => $error === 'access_denied'
+                    ? 'Login dengan Google dibatalkan.'
+                    : 'Autentikasi Google gagal. Silakan coba lagi.',
+            ]);
+
+            return redirect()->to('/login');
+        }
+
+        $code          = (string) ($this->request->getGet('code') ?? '');
+        $returnedState = (string) ($this->request->getGet('state') ?? '');
+
+        $expectedState = (string) (session()->get('google_oauth_state') ?? '');
+        $codeVerifier  = (string) (session()->get('google_oauth_code_verifier') ?? '');
+        $createdAt     = (int) (session()->get('google_oauth_created_at') ?? 0);
+
+        $this->clearGoogleOAuthSession();
+
+        if (
+            $code === ''
+            || $returnedState === ''
+            || $expectedState === ''
+            || $codeVerifier === ''
+            || $createdAt <= 0
+            || (time() - $createdAt) > 600
+            || !hash_equals($expectedState, $returnedState)
+        ) {
+            log_message('warning', 'Google OAuth callback rejected due to invalid or expired state/PKCE.');
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => 'Sesi login Google tidak valid atau telah kedaluwarsa. Silakan coba lagi.',
+            ]);
+
+            return redirect()->to('/login');
+        }
+
+        try {
+            $googleUser = $this->googleOAuth->authenticateCallback($code, $codeVerifier);
+        } catch (\Throwable $e) {
+            log_message('error', 'Google OAuth callback verification error: ' . $e->getMessage());
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => 'Gagal memverifikasi akun Google. Silakan coba lagi.',
+            ]);
+
+            return redirect()->to('/login');
+        }
+
+        $email = strtolower(trim((string) ($googleUser['email'] ?? '')));
+        if ($email === '' || ($googleUser['email_verified'] ?? false) !== true) {
+            log_message('warning', 'Google OAuth rejected unverified or empty email.');
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => 'Email akun Google Anda belum terverifikasi.',
+            ]);
+
+            return redirect()->to('/login');
+        }
+
+        $user = $this->AuthModel->findByWhitelistedEmail($email);
+        if (!$user) {
+            log_message('warning', 'Google OAuth rejected non-whitelisted email: ' . $email);
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => "Email {$email} tidak terdaftar dalam whitelist akun SINDEN. Silakan hubungi Admin.",
+            ]);
+
+            return redirect()->to('/login');
+        }
+
+        return $this->completeUserLogin($user);
+    }
+
+    private function clearGoogleOAuthSession(): void
+    {
+        session()->remove([
+            'google_oauth_state',
+            'google_oauth_code_verifier',
+            'google_oauth_created_at',
+        ]);
+    }
+
+    private function completeUserLogin(array $user)
+    {
+        if ((int) ($user['status'] ?? 0) !== 1) {
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => 'User Non-Aktif, Silakan hubungi Admin!',
+            ]);
+
+            return redirect()->to('/login');
+        }
+
+        if (empty($user['role_id'])) {
+            session()->setFlashdata('message', [
+                'type' => 'error',
+                'text' => 'Akun belum memiliki role akses. Silakan hubungi Admin!',
+            ]);
+
+            return redirect()->to('/login');
+        }
+
+        $redirectUrl = session()->get('redirectUrl');
+
+        session()->regenerate(true);
+
+        // 🚀 1. BUAT TOKEN ACAK SEBAGAI KUNCI SESI
+        $sessionToken = bin2hex(random_bytes(32));
+
+        // Buat session login user bawaan
+        $this->setUserSession($user);
+
+        // 🚀 2. INJEKSI TOKEN KE DALAM SESSION AKTIF BROWSER INI
+        session()->set('session_token', $sessionToken);
+
+        $UsersLogin = new UsersLoginModel();
+
+        // 🚀 3. TAMBAHKAN TOKEN DAN IP ADDRESS KE DATABASE
+        $data_login = [
+            'dul_du_id'         => $user['id'],
+            'dul_last_activity' => date('Y-m-d H:i:s'),
+            'dul_ip_address'    => $this->request->getIPAddress(),
+            'dul_token'         => $sessionToken,
+        ];
+
+        $last_login_record = $UsersLogin->where('dul_du_id', $user['id'])->first();
+
+        if (!empty($last_login_record)) {
+            $pkName = $UsersLogin->primaryKey;
+            $data_login[$pkName] = $last_login_record[$pkName];
+        }
+
+        $UsersLogin->save($data_login);
+
+        // Cek redirect URL sebelumnya secara aman
+        if (is_string($redirectUrl) && $redirectUrl !== '') {
+            session()->remove('redirectUrl');
+            $trimmedRedirect = trim($redirectUrl);
+            $baseUrl         = rtrim(base_url(), '/') . '/';
+
+            if (str_starts_with($trimmedRedirect, $baseUrl)) {
+                return redirect()->to($trimmedRedirect);
+            }
+
+            if (
+                !str_contains($trimmedRedirect, '://')
+                && !str_starts_with($trimmedRedirect, '//')
+                && !str_starts_with($trimmedRedirect, '\\')
+                && !preg_match('/^[a-z][a-z0-9+.-]*:/i', $trimmedRedirect)
+            ) {
+                return redirect()->to(base_url(ltrim($trimmedRedirect, '/')));
+            }
+        }
+
+        return redirect()->to('/dashboard');
     }
 
     public function register()

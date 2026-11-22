@@ -135,6 +135,24 @@ class AuthModel extends Model
         return $data ?: false;
     }
 
+    public function findByWhitelistedEmail(string $email): ?array
+    {
+        $normalizedEmail = strtolower(trim($email));
+        if ($normalizedEmail === '' || !filter_var($normalizedEmail, FILTER_VALIDATE_EMAIL)) {
+            return null;
+        }
+
+        $user = $this->db
+            ->table($this->table)
+            ->where('LOWER(TRIM(email)) =', $normalizedEmail)
+            ->orderBy('status', 'DESC')
+            ->orderBy('id', 'ASC')
+            ->get(1)
+            ->getRowArray();
+
+        return is_array($user) ? $user : null;
+    }
+
     public function updatePersonalData($id_user, $personalData)
     {
         return $this->db

@@ -123,3 +123,12 @@
 #--------------------------------------------------------------------
 
 # logger.threshold = 4
+
+#--------------------------------------------------------------------
+# GOOGLE OAUTH
+#--------------------------------------------------------------------
+
+# GOOGLE_CLIENT_ID = ''
+# GOOGLE_CLIENT_SECRET = ''
+# GOOGLE_REDIRECT_URI = 'http://localhost:8080/auth/google/callback'
+# GOOGLE_HOSTED_DOMAIN = ''

@@ -3,7 +3,7 @@
  * Version: 1.0.0
  */
 
-const CACHE_NAME = 'sinden-cache-v1.0.2';
+const CACHE_NAME = 'sinden-cache-v1.0.3';
 
 // Aset statis inti yang dicache saat instalasi
 const CORE_ASSETS = [
@@ -58,8 +58,9 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Jangan cache endpoint dynamic API / AJAX / debugbar
+    // Jangan cache endpoint dynamic API / AJAX / debugbar / OAuth redirects
     if (
+        url.pathname.startsWith('/auth/') ||
         url.pathname.includes('data') ||
         url.pathname.includes('save') ||
         url.pathname.includes('update') ||

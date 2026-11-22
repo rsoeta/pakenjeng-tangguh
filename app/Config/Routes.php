@@ -73,6 +73,8 @@ $routes->get('sw.js', function () {
 // AUTH
 // $routes->match(['GET', 'POST'], 'lockscreen', 'Lockscreen::index', ['filter' => 'authfilterdtks']);
 $routes->match(['GET', 'POST'], 'login', 'Auth\Auth::login', ['filter' => 'noauthfilterdtks']);
+$routes->get('auth/google', 'Auth\Auth::googleRedirect', ['filter' => 'noauthfilterdtks']);
+$routes->get('auth/google/callback', 'Auth\Auth::googleCallback', ['filter' => 'noauthfilterdtks']);
 $routes->match(['GET', 'POST'], 'register', 'Auth\Auth::register', ['filter' => 'noauthfilterdtks']);
 // $routes->match(['GET', 'POST'], 'register', 'Auth\Auth::regOpSek', ['filter' => 'noauthfilterdtks']);
 $routes->match(['GET', 'POST'], 'lupa-password', 'Auth\Auth::lupaPassword', ['filter' => 'noauthfilterdtks']);

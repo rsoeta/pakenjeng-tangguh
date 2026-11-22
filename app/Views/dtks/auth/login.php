@@ -164,6 +164,63 @@
         text-decoration: underline;
     }
 
+    .auth-divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 14px 0 12px;
+        color: var(--muted);
+        font-size: 12px;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+        content: "";
+        flex: 1;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .auth-divider span {
+        padding: 0 10px;
+    }
+
+    .btn-google {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: #ffffff;
+        color: #1f2937;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 13.5px;
+        font-weight: 600;
+        text-decoration: none !important;
+        transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-google:hover,
+    .btn-google:focus {
+        background: #f9fafb;
+        color: #111827;
+        border-color: #9ca3af;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+    }
+
+    .google-icon {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+    }
+
+    .google-whitelist-note {
+        text-align: center;
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 6px;
+    }
+
     .cf-turnstile {
         width: 100% !important;
         max-width: 100% !important;
@@ -264,6 +321,21 @@
             font-size: 13px;
         }
 
+        .auth-divider {
+            margin: 10px 0 9px;
+            font-size: 11px;
+        }
+
+        .btn-google {
+            padding: 8px 10px;
+            font-size: 12.5px;
+            gap: 8px;
+        }
+
+        .google-whitelist-note {
+            font-size: 10.5px;
+        }
+
         #toggleTheme {
             top: 8px;
             right: 10px;
@@ -319,6 +391,32 @@
         color: #FFBE0B;
         border-color: #444;
     }
+
+    body.dark-mode .auth-divider {
+        color: #9ca3af;
+    }
+
+    body.dark-mode .auth-divider::before,
+    body.dark-mode .auth-divider::after {
+        border-color: #374151;
+    }
+
+    body.dark-mode .btn-google {
+        background: #2b2b2b;
+        color: #f3f4f6;
+        border-color: #444;
+    }
+
+    body.dark-mode .btn-google:hover,
+    body.dark-mode .btn-google:focus {
+        background: #333;
+        color: #ffffff;
+        border-color: #6b7280;
+    }
+
+    body.dark-mode .google-whitelist-note {
+        color: #9ca3af;
+    }
 </style>
 
 
@@ -343,9 +441,17 @@
             <?= session()->get('success'); ?>
         </div>
     <?php endif; ?>
-    <?php if (session()->getFlashdata('message') && is_array(session()->getFlashdata('message'))): ?>
-        <div class="alert alert-warning text-center py-2 small" role="alert">
-            <?= session()->getFlashdata('message')['text']; ?>
+    <?php $flashMessage = session()->getFlashdata('message'); ?>
+    <?php if (is_array($flashMessage) && !empty($flashMessage['text'])): ?>
+        <?php
+        $alertClass = match ($flashMessage['type'] ?? 'warning') {
+            'success' => 'alert-success',
+            'error'   => 'alert-danger',
+            default   => 'alert-warning',
+        };
+        ?>
+        <div class="alert <?= $alertClass; ?> text-center py-2 small" role="alert">
+            <?= esc($flashMessage['text']); ?>
         </div>
     <?php endif; ?>
 
@@ -369,6 +475,19 @@
         <button type="submit" class="btn btn-primary w-100">Masuk</button>
         <a href="lupa-password" class="btn btn-sm btn-danger w-100 mt-2">Lupa Password</a>
     </form>
+
+    <div class="auth-divider"><span>atau</span></div>
+
+    <a href="<?= base_url('auth/google'); ?>" class="btn btn-google w-100" id="btnGoogleLogin">
+        <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.25-.96 2.31-2.04 3.02l3.3 2.56c1.92-1.77 3.04-4.38 3.04-7.48 0-.72-.06-1.41-.19-2.08H12z"/>
+            <path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.42l-3.3-2.56c-.91.61-2.08.98-3.32.98-2.55 0-4.71-1.72-5.48-4.04l-3.41 2.63C4.76 19.86 8.12 22 12 22z"/>
+            <path fill="#4A90E2" d="M6.52 13.96A5.98 5.98 0 0 1 6.2 12c0-.68.12-1.34.32-1.96L3.11 7.41A10 10 0 0 0 2 12c0 1.61.39 3.13 1.11 4.59l3.41-2.63z"/>
+            <path fill="#FBBC05" d="M12 6c1.47 0 2.79.51 3.83 1.5l2.87-2.87C16.95 3 14.7 2 12 2 8.12 2 4.76 4.14 3.11 7.41l3.41 2.63C7.29 7.72 9.45 6 12 6z"/>
+        </svg>
+        <span>Masuk dengan Google</span>
+    </a>
+    <div class="google-whitelist-note">Khusus email terdaftar pada akun SINDEN</div>
 
     <p class="mt-2 mb-0 text-center">
         <a href="/register" class="text-center small">Register a new membership</a>
@@ -395,7 +514,7 @@
             el.style.opacity = "0";
             setTimeout(() => el.remove(), 500);
         });
-    }, 3000);
+    }, 5000);
 </script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
