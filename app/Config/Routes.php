@@ -389,6 +389,16 @@ $routes->group('dtsen', ['namespace' => 'App\Controllers\Dtsen', 'filter' => ['a
 	// SUMMARY
 	$routes->get('reminder-monitor/summary', 'ReminderMonitor::summary');
 
+	// ⚡ Laporan Klasifikasi Sumber Penerangan Utama (role_id < 4)
+	$routes->group('laporan-penerangan', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
+		$routes->get('/', 'LaporanPenerangan::index');
+		$routes->post('datatable', 'LaporanPenerangan::datatable');
+		$routes->get('rw-by-desa', 'LaporanPenerangan::getRwByDesa');
+		$routes->get('rt-by-rw/(:any)', 'LaporanPenerangan::getRtByRw/$1');
+		$routes->get('export-excel', 'LaporanPenerangan::exportExcel');
+		$routes->get('cetak', 'LaporanPenerangan::cetak');
+	});
+
 	// Pemeriksaan Data
 	$routes->get('pemeriksaan', 'Pemeriksaan::index');
 	$routes->match(['get', 'post'], 'pemeriksaan/listKK', 'Pemeriksaan::listKK');
