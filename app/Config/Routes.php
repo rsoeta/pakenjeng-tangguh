@@ -531,8 +531,10 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => ['a
 
 $routes->group('admin', ['filter' => ['authfilterdtks', 'globalview', 'menufilterdtks']], function ($routes) {
 
-	// Migration Tool (Admin Only)
-	$routes->get('migrate', 'Admin\MigrationTool::index');
+	// Migration Tool (Super Admin & Admin Only: role_id < 3)
+	$routes->match(['get', 'post'], 'migrate', 'Admin\MigrationTool::index');
+	$routes->get('migrate/status', 'Admin\MigrationTool::status');
+	$routes->match(['get', 'post'], 'migration/run', 'Admin\MigrationTool::index');
 	$routes->get('download-db', 'Admin\MigrationTool::downloadDb');
 
 	// Article Management

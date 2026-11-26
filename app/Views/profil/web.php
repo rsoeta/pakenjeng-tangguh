@@ -112,6 +112,11 @@
                                 <li class="nav-item">
                                     <a class="nav-link" id="custom-tabs-three-shield-tab" data-toggle="pill" href="#custom-tabs-three-shield" role="tab" aria-controls="custom-tabs-three-shield" aria-selected="true"><strong><i class="fas fa-shield-alt mr-1"></i> Ubah Password</strong></a>
                                 </li>
+                                <?php if ((int) ($user_login['role_id'] ?? 99) <= 2): ?>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="custom-tabs-three-migrate-tab" data-toggle="pill" href="#custom-tabs-three-migrate" role="tab" aria-controls="custom-tabs-three-migrate" aria-selected="false"><strong><i class="fas fa-database mr-1"></i> Migration Tool</strong></a>
+                                    </li>
+                                <?php endif; ?>
                             </ul>
                         </div>
                         <div class="card-body">
@@ -367,6 +372,11 @@
                                         </form>
                                     </div>
                                 </div>
+                                <?php if ((int) ($user_login['role_id'] ?? 99) <= 2): ?>
+                                    <div class="tab-pane fade" id="custom-tabs-three-migrate" role="tabpanel" aria-labelledby="custom-tabs-three-migrate-tab">
+                                        <?= $this->include('profil/migration_tool'); ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

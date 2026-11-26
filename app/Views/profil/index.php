@@ -119,13 +119,15 @@
                                             <strong><i class="fab fa-whatsapp"></i> WhatsApp</strong>
                                         </a>
                                     </li>
-                                    <!-- Migration Tool (Admin) -->
-                                    <li class="nav-item">
-                                        <a class="nav-link" id="custom-tabs-three-migrate-tool" data-toggle="pill"
-                                            href="#custom-tabs-three-migrate" role="tab" aria-controls="custom-tabs-three-migrate" aria-selected="false">
-                                            <strong><i class="fas fa-database"></i> Migration Tool</strong>
-                                        </a>
-                                    </li>
+                                    <?php if ((int) ($user_login['role_id'] ?? 99) < 3): ?>
+                                        <!-- Migration Tool (Khusus Super Admin & Admin: role_id < 3) -->
+                                        <li class="nav-item">
+                                            <a class="nav-link" id="custom-tabs-three-migrate-tool" data-toggle="pill"
+                                                href="#custom-tabs-three-migrate" role="tab" aria-controls="custom-tabs-three-migrate" aria-selected="false">
+                                                <strong><i class="fas fa-database"></i> Migration Tool</strong>
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
 
                                 <?php endif; ?>
                             </ul>
@@ -300,10 +302,12 @@
                                     <div class="tab-pane fade" id="custom-tabs-three-wa" role="tabpanel">
                                         <?= $this->include('profil/wa_settings'); ?>
                                     </div>
-                                    <!-- Migration Tool (Admin) -->
-                                    <div class="tab-pane fade" id="custom-tabs-three-migrate" role="tabpanel">
-                                        <?= $this->include('profil/migration_tool'); ?>
-                                    </div>
+                                    <?php if ((int) ($user_login['role_id'] ?? 99) < 3): ?>
+                                        <!-- Migration Tool (Khusus role_id < 3) -->
+                                        <div class="tab-pane fade" id="custom-tabs-three-migrate" role="tabpanel">
+                                            <?= $this->include('profil/migration_tool'); ?>
+                                        </div>
+                                    <?php endif; ?>
 
                                 <?php endif; ?>
                             </div>
