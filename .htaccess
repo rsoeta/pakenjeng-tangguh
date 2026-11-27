@@ -27,6 +27,12 @@ Options -Indexes
     RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
     RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
 
+    # Mark HTTPS requests (native TLS or reverse proxy/Cloudflare) for conditional HSTS
+    RewriteCond %{HTTPS} on [OR]
+    RewriteCond %{HTTP:X-Forwarded-Proto} =https [OR]
+    RewriteCond %{HTTP:CF-Visitor} "scheme":"https"
+    RewriteRule ^ - [E=IS_HTTPS:1]
+
     # Send all non-existing requests to index.php
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
@@ -45,7 +51,7 @@ RewriteRule .* - [E=noconntimeout:1]
 # --- PHP runtime settings (cPanel recommended minimal block) ---
 
 <IfModule lsapi_module>
-   php_flag display_errors On
+   php_flag display_errors Off
    php_value max_execution_time 300
    php_value memory_limit 512M
    php_value upload_max_filesize 2G
@@ -60,6 +66,22 @@ RewriteRule .* - [E=noconntimeout:1]
 </IfModule>
 
 <IfModule mod_headers.c>
+  # Hide PHP server version signature
+  Header always unset X-Powered-By
+  Header unset X-Powered-By
+
+  # Security Headers (HTTP Observatory & OWASP hardening; dynamic CSP managed by CI4 SecurityHeaders filter)
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Cross-Origin-Opener-Policy "same-origin-allow-popups"
+  Header always set Permissions-Policy "geolocation=(self), camera=(self), microphone=(), payment=(), usb=()"
+
+  # HSTS strictly on HTTPS connections only (never over plain HTTP/localhost)
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=IS_HTTPS
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=REDIRECT_IS_HTTPS
+
   <FilesMatch "\.(ttf|otf|woff|woff2)$">
     Header set Access-Control-Allow-Origin "*"
   </FilesMatch>

@@ -106,212 +106,12 @@
     <!-- Stylesheets & Icons -->
     <link rel="stylesheet" href="<?= base_url('assets/fontawesome-free/css/all.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/dist/css/authstyle.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/css/sinden-landing.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/sinden-landing.css'); ?>?v=<?= @filemtime(FCPATH . 'assets/css/sinden-landing.css') ?: '1'; ?>">
     <link rel="icon" href="<?= base_url('assets/logo/icon-192.png'); ?>" type="image/png">
     <link rel="shortcut icon" href="<?= base_url('assets/logo/icon-192.png'); ?>" type="image/png">
-
-    <style>
-        body {
-            font-family: 'Open Sans', sans-serif;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .article-detail {
-            max-width: 820px;
-            width: calc(100% - 32px);
-            margin: 30px auto;
-            background: #fff;
-            padding: clamp(20px, 4vw, 36px);
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            box-sizing: border-box;
-        }
-
-        .article-title {
-            font-size: clamp(18px, 2.2vw, 22px);
-            font-weight: 700;
-            color: #1e293b;
-            margin-top: 8px;
-            margin-bottom: 12px;
-            line-height: 1.38;
-        }
-
-        .article-meta {
-            color: #64748b;
-            font-size: 12.5px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .article-meta span {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .article-main-image {
-            width: 100%;
-            max-height: 420px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-bottom: 24px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-        }
-
-        .article-content {
-            font-size: 13.5px;
-            color: #334155;
-            line-height: 1.75;
-            word-wrap: break-word;
-        }
-
-        .article-content p {
-            font-size: 13.5px;
-            line-height: 1.75;
-            margin-bottom: 1.15rem;
-        }
-
-        .article-content h1 { font-size: 19px; font-weight: 700; margin: 1.4rem 0 0.7rem; color: #1e293b; }
-        .article-content h2 { font-size: 17px; font-weight: 700; margin: 1.2rem 0 0.6rem; color: #1e293b; }
-        .article-content h3 { font-size: 15px; font-weight: 600; margin: 1rem 0 0.5rem; color: #1e293b; }
-        .article-content h4 { font-size: 13.5px; font-weight: 600; margin: 0.9rem 0 0.4rem; color: #1e293b; }
-
-        .article-content ul, .article-content ol {
-            padding-left: 1.4rem;
-            margin-bottom: 1.15rem;
-        }
-
-        .article-content li {
-            margin-bottom: 0.35rem;
-        }
-
-        .article-content img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin: 16px 0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        }
-
-        .article-content blockquote {
-            border-left: 4px solid #2ecc71;
-            padding: 10px 16px;
-            margin: 16px 0;
-            background: #f8fafc;
-            color: #475569;
-            font-style: italic;
-            border-radius: 0 8px 8px 0;
-        }
-
-        /* TOMBOL BERBAGI */
-        .article-share-bar {
-            margin: 32px 0 20px;
-            padding: 14px 18px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .share-label {
-            font-size: 13.5px;
-            font-weight: 600;
-            color: #475569;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .share-actions {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .btn-share {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            padding: 8px 16px;
-            font-size: 13px;
-            font-weight: 600;
-            border-radius: 7px;
-            text-decoration: none;
-            cursor: pointer;
-            border: 1px solid transparent;
-            transition: all 0.2s ease-in-out;
-            user-select: none;
-        }
-
-        .btn-share-wa {
-            background-color: #25D366;
-            color: #ffffff !important;
-            border-color: #1ebd5b;
-        }
-
-        .btn-share-wa:hover {
-            background-color: #1da851;
-            color: #ffffff !important;
-            box-shadow: 0 3px 10px rgba(37, 211, 102, 0.35);
-        }
-
-        .btn-share-copy {
-            background-color: #ffffff;
-            color: #334155;
-            border: 1px solid #cbd5e1;
-        }
-
-        .btn-share-copy:hover {
-            background-color: #f1f5f9;
-            color: #0f172a;
-            border-color: #94a3b8;
-        }
-
-        .btn-share-copy.copied {
-            background-color: #10b981;
-            color: #ffffff;
-            border-color: #059669;
-        }
-
-        /* TOAST NOTIFIKASI */
-        .toast-copy {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background: #1e293b;
-            color: #fff;
-            padding: 10px 18px;
-            border-radius: 8px;
-            font-size: 13.5px;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            opacity: 0;
-            transform: translateY(14px);
-            transition: opacity 0.25s ease, transform 0.25s ease;
-            pointer-events: none;
-            z-index: 9999;
-        }
-
-        .toast-copy.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    </style>
 </head>
 
-<body>
+<body data-sw-url="<?= esc(base_url('sw.js'), 'attr'); ?>">
 
     <!-- HEADER -->
     <header>
@@ -327,10 +127,10 @@
     <!-- MAIN ARTICLE -->
     <section class="article-detail">
 
-        <div class="breadcrumb" style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">
-            <a href="<?= base_url('/'); ?>" style="color: #64748b; text-decoration: none;">Beranda</a>
-            <span style="margin: 0 4px;">›</span>
-            <span style="color: #0f172a;">Artikel</span>
+        <div class="breadcrumb article-breadcrumb">
+            <a href="<?= base_url('/'); ?>" class="article-breadcrumb-link">Beranda</a>
+            <span class="article-breadcrumb-sep">›</span>
+            <span class="article-breadcrumb-current">Artikel</span>
         </div>
 
         <h1 class="article-title"><?= esc($article['title']); ?></h1>
@@ -387,7 +187,7 @@
 
     <!-- TOAST NOTIFICATION -->
     <div id="toastCopy" class="toast-copy">
-        <i class="fas fa-check-circle" style="color: #10b981;"></i>
+        <i class="fas fa-check-circle toast-copy-icon"></i>
         <span>Judul dan link artikel berhasil disalin ke clipboard!</span>
     </div>
 
@@ -397,79 +197,7 @@
     </footer>
 
     <!-- Copy Link & PWA Script -->
-    <script>
-        // Fitur Salin Link (Menyalin Judul + Newline + URL)
-        const btnCopy = document.getElementById('btnCopyLink');
-        const toast = document.getElementById('toastCopy');
-        let toastTimeout = null;
-
-        if (btnCopy) {
-            btnCopy.addEventListener('click', async function () {
-                const title = btnCopy.getAttribute('data-title') || document.querySelector('.article-title')?.innerText?.trim() || '';
-                const url = btnCopy.getAttribute('data-url') || window.location.href;
-                const textToCopy = title ? `${title}\n\n${url}` : url;
-                let success = false;
-
-                if (navigator.clipboard && window.isSecureContext) {
-                    try {
-                        await navigator.clipboard.writeText(textToCopy);
-                        success = true;
-                    } catch (err) {
-                        success = false;
-                    }
-                }
-
-                if (!success) {
-                    const tempInput = document.createElement('textarea');
-                    tempInput.value = textToCopy;
-                    tempInput.style.position = 'fixed';
-                    tempInput.style.left = '-9999px';
-                    tempInput.style.top = '-9999px';
-                    document.body.appendChild(tempInput);
-                    tempInput.focus();
-                    tempInput.select();
-                    try {
-                        success = document.execCommand('copy');
-                    } catch (err) {
-                        success = false;
-                    }
-                    document.body.removeChild(tempInput);
-                }
-
-                const copyIcon = document.getElementById('copyIcon');
-                const copyText = document.getElementById('copyText');
-                if (copyIcon && copyText) {
-                    copyIcon.className = 'fas fa-check';
-                    copyText.textContent = 'Link Disalin!';
-                    btnCopy.classList.add('copied');
-
-                    if (toast) {
-                        toast.classList.add('show');
-                        if (toastTimeout) clearTimeout(toastTimeout);
-                        toastTimeout = setTimeout(() => {
-                            toast.classList.remove('show');
-                        }, 2800);
-                    }
-
-                    setTimeout(() => {
-                        copyIcon.className = 'fas fa-link';
-                        copyText.textContent = 'Salin Link';
-                        btnCopy.classList.remove('copied');
-                    }, 2500);
-                }
-            });
-        }
-
-        // Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('<?= base_url('sw.js'); ?>')
-                    .catch(function(err) {
-                        console.warn('[PWA] SW registration warning:', err);
-                    });
-            });
-        }
-    </script>
+    <script src="<?= base_url('assets/js/landing-public.js'); ?>?v=<?= @filemtime(FCPATH . 'assets/js/landing-public.js') ?: '1'; ?>" defer></script>
 </body>
 
 </html>

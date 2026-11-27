@@ -60,6 +60,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
     <link rel="stylesheet" href="<?= base_url('assets/dist/css/authstyle.css'); ?>">
+    <link href="<?= base_url('assets/font/Poppins/poppins.css'); ?>" rel="stylesheet">
+    <link rel="stylesheet" href="<?= base_url('assets/css/auth-pages.css'); ?>?v=<?= @filemtime(FCPATH . 'assets/css/auth-pages.css') ?: '1'; ?>">
 
     <link rel="shortcut icon" type="image/png" href="<?= base_url('assets/logo/icon-192.png'); ?>">
     <link rel="icon" type="image/png" href="<?= base_url('assets/logo/icon-192.png'); ?>">
@@ -81,22 +83,12 @@
 
 </head>
 
-<body class="hold-transition login-page">
+<body class="hold-transition login-page" data-sw-url="<?= esc(base_url('sw.js'), 'attr'); ?>">
 
     <?= $this->renderSection('content'); ?>
 
 
-    <!-- PWA Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('<?= base_url('sw.js'); ?>')
-                    .catch(function(err) {
-                        console.warn('[PWA] SW registration warning:', err);
-                    });
-            });
-        }
-    </script>
+    <script src="<?= base_url('assets/js/auth-pages.js'); ?>?v=<?= @filemtime(FCPATH . 'assets/js/auth-pages.js') ?: '1'; ?>" defer></script>
 </body>
 
 </html>

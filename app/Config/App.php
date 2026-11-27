@@ -11,9 +11,16 @@ class App extends BaseConfig
 	{
 		parent::__construct();
 
+		$isHttps = (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off')
+			|| ((int) ($_SERVER['SERVER_PORT'] ?? 0) === 443)
+			|| strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https'
+			|| str_contains(strtolower((string) ($_SERVER['HTTP_CF_VISITOR'] ?? '')), '"scheme":"https"');
+
+		$this->cookieSecure = $isHttps;
+
 		// Deteksi baseURL otomatis berdasarkan host
 		if (empty($this->baseURL) || $this->baseURL === 'http://localhost:8080/') {
-			$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+			$scheme = $isHttps ? 'https' : 'http';
 			$host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
 			$this->baseURL = "{$scheme}://{$host}/";
 		}

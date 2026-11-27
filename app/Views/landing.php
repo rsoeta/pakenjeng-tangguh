@@ -58,33 +58,9 @@
   <link rel="stylesheet" href="<?= base_url('assets/css/sinden-landing.css'); ?>?v=<?= @filemtime(FCPATH . 'assets/css/sinden-landing.css') ?: '1'; ?>">
 
   <link rel="stylesheet" href="<?= base_url('assets/fontawesome-free/css/all.min.css'); ?>">
-
-  <style>
-    body {
-      font-family: 'Open Sans', sans-serif;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .cards-intro {
-      font-size: 13.5px;
-    }
-
-    .card h3 {
-      font-size: 16px;
-    }
-
-    .card p {
-      font-size: 13px;
-    }
-
-    .read-more {
-      font-size: 13px;
-    }
-  </style>
 </head>
 
-<body>
+<body data-sw-url="<?= esc(base_url('sw.js'), 'attr'); ?>">
   <header>
     <div class="container">
       <div class="logo">
@@ -129,42 +105,7 @@
     <p><?= esc($footerText); ?></p>
   </footer>
 
-  <script>
-    // dark-mode toggle
-    const body = document.body;
-    const toggleBtn = document.getElementById("toggleTheme");
-    if (localStorage.getItem("theme") === "dark") {
-      body.classList.add("dark-mode");
-    }
-    if (toggleBtn) {
-      if (body.classList.contains("dark-mode")) {
-        toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
-      }
-
-      toggleBtn.addEventListener("click", () => {
-        body.classList.toggle("dark-mode");
-        if (body.classList.contains("dark-mode")) {
-          localStorage.setItem("theme", "dark");
-          toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
-        } else {
-          localStorage.setItem("theme", "light");
-          toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
-        }
-      });
-    }
-  </script>
-
-  <!-- PWA Service Worker Registration -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('<?= base_url('sw.js'); ?>')
-          .catch(function(err) {
-            console.warn('[PWA] SW registration warning:', err);
-          });
-      });
-    }
-  </script>
+  <script src="<?= base_url('assets/js/landing-public.js'); ?>?v=<?= @filemtime(FCPATH . 'assets/js/landing-public.js') ?: '1'; ?>" defer></script>
 </body>
 
 </html>

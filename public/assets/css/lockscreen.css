@@ -1,0 +1,31 @@
+body {
+  background: #f4f6f9 !important;
+  font-family: 'Ubuntu', sans-serif !important;
+}
+
+.lockscreen-wrapper {
+  width: 90%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding-top: 10%;
+}
+
+.glass-card {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border-top: 5px solid #007bff;
+}
+
+.lock-icon {
+  font-size: 3rem;
+  color: #007bff;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 576px) {
+  .glass-card {
+    padding: 2.5rem;
+  }
+}

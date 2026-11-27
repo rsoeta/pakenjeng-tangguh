@@ -14,6 +14,7 @@ use App\Filters\TimeFilter;
 use App\Filters\MenuFilterDtks;
 use App\Filters\CsrfAudit;
 use App\Filters\AttachCsrfHeader;
+use App\Filters\SecurityHeaders;
 
 class Filters extends BaseConfig
 {
@@ -31,6 +32,7 @@ class Filters extends BaseConfig
 		'globalview'      => \App\Filters\GlobalViewDataFilter::class,
 		'csrf_audit'      => CsrfAudit::class,
 		'attach_csrf_hdr' => AttachCsrfHeader::class,
+		'security_headers' => SecurityHeaders::class,
 	];
 
 	public $globals = [
@@ -41,7 +43,8 @@ class Filters extends BaseConfig
 		],
 		'after'  => [
 			// attach CSRF header to every response (if CSRF enabled)
-			'attach_csrf_hdr'
+			'attach_csrf_hdr',
+			'security_headers',
 		],
 	];
 
